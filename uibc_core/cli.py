@@ -174,6 +174,38 @@ def cmd_submit(args):
     print(msg)
 
 
+def cmd_cert_issue(args):
+    from .certificate import issue_certificate
+    pkg = os.path.abspath(args.path)
+    key = _load_key(args.key)
+    identity = _read(os.path.join(pkg, "identity.json"))
+    manifest = _read(os.path.join(pkg, "manifest.json"))
+    expires_at = None
+    if args.expires_days:
+        import datetime
+        expires_at = (datetime.datetime.now(datetime.timezone.utc)
+                      + datetime.timedelta(days=args.expires_days))\
+            .strftime("%Y-%m-%dT%H:%M:%SZ")
+    cert = issue_certificate(key, identity, manifest, expires_at=expires_at)
+    out = os.path.abspath(args.out) if args.out else pkg + ".cert.json"
+    if os.path.exists(out):
+        sys.exit(f"error: {out} already exists (refusing to overwrite a certificate)")
+    _write(out, cert)
+    print(f"certificate issued: {cert['certificate_id']} "
+          f"subject={cert['subject_agent']} root={cert['evidence_root'][:16]}...")
+    print(f"written to {out}")
+
+
+def cmd_cert_verify(args):
+    from .certificate import verify_certificate
+    key = _load_key(args.key)
+    cert = _read(os.path.abspath(args.cert))
+    pkg = os.path.abspath(args.package) if args.package else None
+    report = verify_certificate(key, cert, package_dir=pkg)
+    print(json.dumps(report, ensure_ascii=False, indent=2))
+    sys.exit(0 if report["result"] == "PASS" else 1)
+
+
 def cmd_gate(args):
     from .gate import gate
     pkg = os.path.abspath(args.path)
@@ -245,6 +277,20 @@ def main():
     p = sub.add_parser("keygen", help="generate a 256-bit seal key (hex file)")
     p.add_argument("--out", required=True, metavar="KEYFILE")
     p.set_defaults(func=cmd_keygen)
+
+    p = sub.add_parser("cert-issue", help="issue a certificate for a verified package")
+    p.add_argument("path")
+    p.add_argument("--key", required=True, metavar="KEYFILE")
+    p.add_argument("--out", default=None, metavar="FILE")
+    p.add_argument("--expires-days", type=int, default=None, metavar="N")
+    p.set_defaults(func=cmd_cert_issue)
+
+    p = sub.add_parser("cert-verify", help="verify a certificate (exit 0 = PASS)")
+    p.add_argument("cert", metavar="CERTFILE")
+    p.add_argument("--key", required=True, metavar="KEYFILE")
+    p.add_argument("--package", default=None, metavar="PKG",
+                   help="also check the certificate is bound to this package")
+    p.set_defaults(func=cmd_cert_verify)
 
     p = sub.add_parser("gate", help="governed decision: ALLOW(0)/DENY(2)/HOLD(3)")
     p.add_argument("path")

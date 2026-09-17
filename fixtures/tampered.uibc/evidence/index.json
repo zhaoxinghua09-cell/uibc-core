@@ -1,0 +1,22 @@
+{
+  "entries": [
+    {
+      "evidence_id": "a240f44e-49f1-4af4-b104-7a72035ba3e6",
+      "type": "ACTION",
+      "path": "files/action-log.txt",
+      "content_hash": "e3db8b96438754db83daca4b671a3b1cabb86e4c1216dd9f48437781ab1ad916",
+      "created_at": "2026-09-17T13:55:28Z",
+      "media_type": "text/plain",
+      "note": "action log"
+    },
+    {
+      "evidence_id": "a025994e-f2e9-417f-a85b-eaf352c4f800",
+      "type": "OUTPUT",
+      "path": "files/run-summary.txt",
+      "content_hash": "cfdec0459f8eac6cedcb3c2e81df2e1fb7c292b0130daf3f56898e53f5e3c9bd",
+      "created_at": "2026-09-17T13:55:28Z",
+      "media_type": "text/plain",
+      "note": "run summary"
+    }
+  ]
+}

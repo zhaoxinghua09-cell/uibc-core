@@ -1,0 +1,1 @@
+run summary: 2 evidence items, lifecycle REGISTER->ACTIVATE->UPDATE

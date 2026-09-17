@@ -57,3 +57,24 @@ v0.1 明确不查：密码学签名、外部时间戳锚定、行为评估、记
 - 《XLGD/LGD/UIBC 历史讨论总档案 v0.1.0》§9-§26
 - 《UIBC 工程实现摘录 v0.1.0》
 - SPEC 提案：`docs/SPEC-PROPOSAL-v0.1.md`
+
+## Golden Fixtures (archive SS30)
+
+Benchmark as executable evidence — seven mutation categories, each a runnable
+submission.uibc package:
+
+```text
+fixtures/
+├── clean.uibc        PASS            baseline
+├── tampered.uibc     FAIL  (S4)      evidence content rewritten
+├── deleted.uibc      FAIL  (S4)      evidence file removed
+├── duplicated.uibc   FAIL  (S5)      index entry duplicated, seal stale
+├── reordered.uibc    FAIL  (S3)      lifecycle chain broken
+├── migrated.uibc     FAIL  (S5)      partial migration, manifest not re-sealed
+└── malicious.uibc    PASS*           full self-consistent forgery — UNDETECTED
+                                     by v0.1 (no signatures yet); the standing
+                                     motivating case for v0.2 Ed25519
+```
+
+Regenerate + re-verify: `python fixtures/generate_fixtures.py` (writes
+`fixtures/EXPECTED.md` with expected-vs-observed per archive SS31 fields).

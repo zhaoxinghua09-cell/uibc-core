@@ -1,0 +1,9 @@
+{
+  "schema": "uibc-core/0.1.0-proposal",
+  "agent_id": "fx-agent-001",
+  "agent_type": "software-agent",
+  "owner": "fixture-owner",
+  "created_at": "2026-09-17T13:55:30Z",
+  "status": "REGISTERED",
+  "version": "0.1.0"
+}

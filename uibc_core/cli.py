@@ -174,6 +174,18 @@ def cmd_submit(args):
     print(msg)
 
 
+def cmd_gate(args):
+    from .gate import gate
+    pkg = os.path.abspath(args.path)
+    if not os.path.isdir(pkg):
+        sys.exit(f"error: package dir not found: {pkg}")
+    key = _load_key(args.key) if args.key else None
+    report = gate(pkg, key=key,
+                  revocation_path=args.revocation, dispute_path=args.dispute)
+    print(json.dumps(report, ensure_ascii=False, indent=2))
+    sys.exit(report["exit_code"])
+
+
 def cmd_verify(args):
     pkg = os.path.abspath(args.path)
     if not os.path.isdir(pkg):
@@ -233,6 +245,16 @@ def main():
     p = sub.add_parser("keygen", help="generate a 256-bit seal key (hex file)")
     p.add_argument("--out", required=True, metavar="KEYFILE")
     p.set_defaults(func=cmd_keygen)
+
+    p = sub.add_parser("gate", help="governed decision: ALLOW(0)/DENY(2)/HOLD(3)")
+    p.add_argument("path")
+    p.add_argument("--key", default=None, metavar="KEYFILE",
+                   help="hex owner key: strict verify + revocation signature check")
+    p.add_argument("--revocation", default=None, metavar="FILE",
+                   help="revocation.json overlay (governance.md section 3)")
+    p.add_argument("--dispute", default=None, metavar="FILE",
+                   help="dispute.json overlay (governance.md section 1)")
+    p.set_defaults(func=cmd_gate)
 
     p = sub.add_parser("inspect", help="human-readable package summary")
     p.add_argument("path"); p.set_defaults(func=cmd_inspect)

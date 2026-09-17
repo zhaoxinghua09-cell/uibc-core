@@ -1,0 +1,13 @@
+{
+  "entries": [
+    {
+      "evidence_id": "b502a2a9-6199-48a5-87f1-63b050bcb416",
+      "type": "ACTION",
+      "path": "files/action-log.txt",
+      "content_hash": "7b5464a3db77f3ae350489d54f628d037bfe384efe29a8b72d4ba210b94e682b",
+      "created_at": "2026-09-17T13:31:08Z",
+      "media_type": "text/plain",
+      "note": "action log reviewed by owner"
+    }
+  ]
+}

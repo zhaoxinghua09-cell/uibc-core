@@ -1,0 +1,35 @@
+{
+  "name": "uibc-verifier",
+  "description": "UIBC Core verification agent: verifies sealed evidence packages (S1-S6), issues gate decisions (ALLOW/DENY/HOLD), and checks certificates. Read-only per docs/api-scope.md v1.0.",
+  "url": "http://localhost:0/uibc-a2a/",
+  "version": "0.1.0-proposal",
+  "capabilities": {
+    "streaming": false,
+    "pushNotifications": false
+  },
+  "skills": [
+    {
+      "id": "verify_package",
+      "name": "Verify UIBC package",
+      "description": "Run S1-S6 verification on a .uibc package directory. Strict mode requires the owner key (key_hex). Returns PASS/FAIL with per-check detail.",
+      "tags": ["verification", "evidence", "audit"]
+    },
+    {
+      "id": "gate_check",
+      "name": "Gate decision",
+      "description": "Return a governed decision ALLOW/DENY/HOLD (exit 0/2/3 semantics) for a package, honoring signed revocations. Disputes annotate, never silently block.",
+      "tags": ["governance", "gate"]
+    },
+    {
+      "id": "cert_verify",
+      "name": "Verify certificate",
+      "description": "Check a UIBC certificate (C1-C7) and optionally its binding to a package.",
+      "tags": ["certificate"]
+    }
+  ],
+  "provider": {
+    "organization": "uibc-core project",
+    "url": "https://github.com/zhaoxinghua09-cell/uibc-core"
+  },
+  "note": "skeleton: url is a placeholder; no A2A server is running. Do not integrate against this card yet."
+}

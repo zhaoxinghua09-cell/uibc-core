@@ -1,0 +1,45 @@
+{
+  "name": "uibc-core",
+  "version": "0.2.1-roadmap",
+  "status": "PROPOSAL",
+  "description": "Verifiable evidence packages for autonomous AI agents (LGD: Registry / Evidence / Gates)",
+  "canonical_repo": "https://github.com/zhaoxinghua09-cell/uibc-core",
+  "entry_points": {
+    "ai_index": "/ai/index.md",
+    "concepts": "/ai/concepts.md",
+    "vocabulary": "/ai/vocabulary.md",
+    "lineage": "/ai/lineage.md",
+    "specifications": "/ai/specifications.md",
+    "research": "/ai/research.md",
+    "benchmarks": "/ai/benchmarks.md",
+    "verification": "/ai/verification.md",
+    "certificates": "/ai/certificates.md",
+    "faq": "/ai/faq.md",
+    "sources": "/ai/sources.md",
+    "llms": "/llms.txt"
+  },
+  "specs": [
+    "docs/SPEC-PROPOSAL-v0.1.md",
+    "docs/governance.md",
+    "docs/api-scope.md",
+    "docs/adoption-guide.md"
+  ],
+  "registries": [
+    "registry/certificates.jsonl",
+    "registry/revocations.jsonl",
+    "registry/disputes.jsonl"
+  ],
+  "verification": {
+    "unit_tests": 71,
+    "stress_scenarios": 7,
+    "independent_cross_check": "70/70 agreement",
+    "reproduce": "python -m unittest discover tests && python independent_verifier/cross_check.py"
+  },
+  "season_theme": "迁移的判定与问责",
+  "content_type": "decision_support_documentation",
+  "aigc_mark": {
+    "standard": "GB45438-2025",
+    "is_generated": true,
+    "note": "documentation partially AI-assisted, human-reviewed by repository owner"
+  }
+}

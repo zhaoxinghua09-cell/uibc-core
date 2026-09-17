@@ -1,9 +1,9 @@
 # uibc-core 压力测试报告
 
-- 执行时间：2026-09-17 14:11 (UTC+8)，总运行 35.5s
+- 执行时间：2026-09-17 14:11 (UTC+8)，总运行 35.5s；**2026-09-17 晚间复跑并新增场景 g（v0.2 签名路径压测），7/7 通过（43.0s）**
 - Python：3.13.12（C:/Users/Administrator/.workbuddy/binaries/python/versions/3.13.12/python.exe）
 - 环境：Windows 11 Pro / Intel i5-13400 / 32GB RAM
-- 运行方式：项目根目录 `python -m unittest tests.stress_test -v`，6/6 通过
+- 运行方式：项目根目录 `python -m unittest tests.stress_test -v`，7/7 通过（v0.2 起含场景 g）
 - 测试文件：`tests/stress_test.py`（未修改 uibc_core 源码与现有单元测试）
 - 临时大文件（10MB/50MB）测毕即删，无残留
 
@@ -22,6 +22,9 @@
 | d) verify() 500 证据条目 FAIL（篡改 1 个文件） | 500 entries | 0.4165s | FAIL 路径与 PASS 同量级，无异常放大 | 可支撑生产负载 |
 | e) CLI 全链路（subprocess） | init→register→50×evidence→submit→verify | 29.3376s | 单次进程启动约 0.55s（54 次调用），主要是 Python 解释器冷启动开销 | 存在隐患需优化（进程模型，非算法） |
 | f) tracemalloc 内存 | 100,000 事件链验证 | 0.1130s | 峰值增量 6.3 MB，净增量 ≈0 MB，O(1) 附加内存 | 可支撑生产负载 |
+| g) seal_sign（v0.2 签名） | 10,000 ops | 0.0804s | ~124,400 ops/s | 可支撑生产负载 |
+| g) seal_verify（v0.2 验签） | 10,000 ops | 0.0754s | ~132,600 ops/s | 可支撑生产负载 |
+| g) verify 严格模式（S6）500 条目 PASS | 500 evidence | 0.4056s | 与开放模式 verify（0.43s）同量级，签名核验无额外放大 | 可支撑生产负载 |
 
 ## 分析
 

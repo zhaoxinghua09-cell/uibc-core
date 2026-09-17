@@ -200,6 +200,65 @@ class StressTest(unittest.TestCase):
                 f"peak {peak / 1e6:.1f} MB, net {current / 1e6:+.2f} MB")
 
 
+    # g) v0.2 signing path: seal sign/verify throughput + strict S6 verify --
+    def test_g_seal_signing_and_strict_verify(self):
+        from uibc_core.signing import generate_key, seal_sign, seal_verify
+
+        key = generate_key()
+        identity = {"agent_id": "sig-stress", "owner": "stress",
+                    "agent_type": "software-agent", "version": "1",
+                    "registered_at": "2026-01-01T00:00:00Z"}
+        manifest = {"evidence_count": 500, "evidence_root": "a" * 64,
+                    "status": "SUBMITTED",
+                    "submitted_at": "2026-01-01T00:00:00Z"}
+
+        n = 10000
+        t0 = time.perf_counter()
+        sigs = [seal_sign(key, identity, manifest) for _ in range(n)]
+        dt_sign = time.perf_counter() - t0
+        self.assertEqual(len(set(sigs)), 1)  # same payload -> same sig, deterministic
+
+        t0 = time.perf_counter()
+        ok = sum(seal_verify(key, identity, manifest, s) for s in sigs)
+        dt_verify = time.perf_counter() - t0
+        self.assertEqual(ok, n)
+        _record("g) seal_sign", f"{n:,} ops", dt_sign, f"{n / dt_sign:,.0f} ops/s")
+        _record("g) seal_verify", f"{n:,} ops", dt_verify, f"{n / dt_verify:,.0f} ops/s")
+
+        # strict-mode (owner key) verify on a 500-entry signed package
+        tmp = tempfile.mkdtemp()
+        try:
+            pkg = os.path.join(tmp, "signed.uibc")
+            ucli.cmd_init(type("A", (), {"path": pkg})())
+            ucli.cmd_register(type("A", (), {
+                "path": pkg, "agent_id": "s6-stress", "owner": "stress",
+                "agent_type": "software-agent", "version": "1"})())
+            src = os.path.join(tmp, "ev.txt")
+            with open(src, "w", encoding="utf-8") as f:
+                f.write("s6 stress evidence\n")
+            t0 = time.perf_counter()
+            for i in range(500):
+                ucli.cmd_evidence(type("A", (), {
+                    "path": pkg, "type": "ACTION", "file": src,
+                    "media_type": "text/plain", "note": f"n{i}"})())
+            key_file = os.path.join(tmp, "owner.key")
+            with open(key_file, "w", encoding="ascii") as f:
+                f.write(key.hex())
+            ucli.cmd_submit(type("A", (), {"path": pkg, "key": key_file})())
+            build_time = time.perf_counter() - t0
+
+            t0 = time.perf_counter()
+            report = verify(pkg, key=key)
+            strict_time = time.perf_counter() - t0
+            self.assertEqual(report["result"], "PASS")
+            checks = {c["id"]: c["result"] for c in report["checks"]}
+            self.assertEqual(checks["S6"], "PASS")
+            _record("g) verify strict (S6) 500 entries PASS", "500 evidence",
+                    strict_time, f"package build {build_time:.2f}s")
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+
 def tearDownModule():
     if RESULTS:
         print("\n=== STRESS RESULTS ===")

@@ -1,0 +1,19 @@
+#!/bin/sh
+# uibc-core pre-push gate (poka-yoke Rung 1: Control)
+# Full test suite must pass before any push. Non-zero exit = push blocked.
+# Self-test: UIBC_HOOK_SELFTEST=1 simulates failure and must exit 1.
+PY="C:/Users/Administrator/.workbuddy/binaries/python/versions/3.13.12/python.exe"
+echo "[uibc-gate] pre-push: running full test suite..."
+if [ -n "$UIBC_HOOK_SELFTEST" ]; then
+  echo "[uibc-gate] BLOCKED (selftest): simulated failure" >&2
+  exit 1
+fi
+cd "$(git rev-parse --show-toplevel)" || exit 1
+out=$("$PY" -m unittest tests.test_uibc_core 2>&1); rc=$?
+echo "$out" | tail -3
+if [ "$rc" -ne 0 ]; then
+  echo "[uibc-gate] BLOCKED: tests failed (rc=$rc). Fix before pushing." >&2
+  exit 1
+fi
+echo "[uibc-gate] tests PASS - push allowed"
+exit 0

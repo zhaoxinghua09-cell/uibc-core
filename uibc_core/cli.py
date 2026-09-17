@@ -177,6 +177,49 @@ def cmd_submit(args):
     print(msg)
 
 
+def cmd_demo(args):
+    """One-command end-to-end demo: build -> seal -> verify -> tamper -> catch."""
+    import tempfile
+    from .verify import verify as _verify
+
+    base = tempfile.mkdtemp(prefix="uibc-demo-")
+    pkg = os.path.join(base, "demo")
+    key_file = os.path.join(base, "owner.key")
+
+    def _step(n, text):
+        print(f"[{n}/7] {text}")
+
+    _step(1, "init package")
+    cmd_init(type("A", (), {"path": pkg})())
+    _step(2, "register agent (Registry)")
+    cmd_register(type("A", (), {"path": pkg, "agent_id": "demo-agent",
+                                "owner": "alice", "agent_type": "software-agent",
+                                "version": "0.1.0"})())
+    ev = os.path.join(base, "report.txt")
+    with open(ev, "w", encoding="utf-8") as f:
+        f.write("demo evidence: agent action log\n")
+    _step(3, "add evidence (Evidence)")
+    cmd_evidence(type("A", (), {"path": pkg, "type": "ACTION", "file": ev,
+                                "media_type": "text/plain", "note": ""})())
+    _step(4, "generate owner key + seal the package (Gates)")
+    cmd_keygen(type("A", (), {"out": key_file})())
+    cmd_submit(type("A", (), {"path": pkg, "key": key_file})())
+    _step(5, "strict verify with owner key")
+    r = _verify(pkg, key=_load_key(key_file))
+    print(f"     -> result: {r['result']} (expected PASS)")
+    _step(6, "tamper with the evidence behind the owner's back")
+    with open(ev, "a", encoding="utf-8") as f:
+        f.write("forged line added by attacker\n")
+    cmd_evidence(type("A", (), {"path": pkg, "type": "ACTION", "file": ev,
+                                "media_type": "text/plain", "note": ""})())
+    r = _verify(pkg, key=_load_key(key_file))
+    print(f"     -> result: {r['result']} (expected FAIL: tampered content)")
+    _step(7, "done - the demo package is kept for inspection at:")
+    print(f"     {pkg}")
+    print("Try it yourself: python -m uibc_core.cli verify "
+          + pkg + " --key " + key_file)
+
+
 def cmd_cert_issue(args):
     from .certificate import issue_certificate
     pkg = os.path.abspath(args.path)
@@ -304,6 +347,9 @@ def main():
     p.add_argument("--dispute", default=None, metavar="FILE",
                    help="dispute.json overlay (governance.md section 1)")
     p.set_defaults(func=cmd_gate)
+
+    p = sub.add_parser("demo", help="one-command end-to-end demo (build/seal/verify/tamper/catch)")
+    p.set_defaults(func=cmd_demo)
 
     p = sub.add_parser("inspect", help="human-readable package summary")
     p.add_argument("path"); p.set_defaults(func=cmd_inspect)

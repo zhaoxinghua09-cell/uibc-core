@@ -9,6 +9,12 @@ UIBC Core 参考实现 v0.2.1 **[PROPOSAL]** —— Agent 生命周期证据包�
 
 ## 5 分钟 Quickstart
 
+**30 秒先看效果（无需任何准备）：**
+
+```bash
+python -m uibc_core.cli demo   # 一键演示：建包→签封→验证 PASS→篡改→FAIL 捉获
+```
+
 ```bash
 pip install -e .
 

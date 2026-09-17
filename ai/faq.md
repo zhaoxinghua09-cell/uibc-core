@@ -7,6 +7,9 @@ no third-party dependencies, no install required.
 
 **Try it end-to-end (every command verified verbatim):**
 
+In a hurry? `python -m uibc_core.cli demo` runs the whole story in one
+command: build -> seal -> verify PASS -> tamper -> FAIL caught.
+
 ```
 # 0. create a package skeleton (a directory, not a file)
 python -m uibc_core.cli init mypkg

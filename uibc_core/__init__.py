@@ -1,4 +1,4 @@
-"""uibc-core: UIBC Core reference implementation v0.2.0 [PROPOSAL].
+"""uibc-core: UIBC Core reference implementation v0.2.1 [PROPOSAL].
 
 Implements the minimal object model from the XLGD/LGD/UIBC master archive (v0.1.0, SS9-SS22):
 Agent, Identity, Event, Evidence, Run/Manifest, Evidence Root, Verification, Seal Signature.
@@ -11,6 +11,6 @@ Status: PROPOSAL. Not a ratified standard. Verification results are scoped proof
 a PASS means "no violation detected within the observed evidence boundary".
 """
 
-__version__ = "0.2.0"
-SPEC_VERSION = "uibc-core/0.2.0-proposal"
+__version__ = "0.2.1"
+SPEC_VERSION = "uibc-core/0.2.1-proposal"
 VERIFIER_ID = "uibc-core-verifier"

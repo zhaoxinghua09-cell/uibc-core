@@ -12,7 +12,7 @@ evidence root + optional HMAC seal), then verified offline by anyone:
 `uibc verify pkg.uibc --key owner.key` exits 0 on PASS, 1 on FAIL.
 
 Run the full suite from a clean clone (no install needed):
-- python -m unittest discover tests           # 71 unit tests
+- python -m unittest discover tests           # 82 unit tests (incl. 11 MCP)
 - python -m unittest tests.stress_test        # 7 stress scenarios
 - python independent_verifier/cross_check.py  # cross-implementation check
 
@@ -36,7 +36,7 @@ Key files:
 - docs/api-scope.md - what is public (read-only) vs local (writes)
 - docs/adoption-guide.md - minimal adoption path for a small team
 - fixtures/EXPECTED.md - attack fixtures with expected-vs-observed
-- tests/ - 71 unit tests + 7 stress scenarios (run: python -m unittest discover tests)
+- tests/ - 82 unit tests + 7 stress scenarios (run: python -m unittest discover tests)
 - independent_verifier/ - second, spec-derived implementation + cross-check
 - registry/ - append-only certificate/revocation/dispute registries (skeleton)
 - mcp_server/ - read-only MCP server exposing verify/gate/identity (PROPOSAL)

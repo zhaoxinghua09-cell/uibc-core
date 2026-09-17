@@ -43,8 +43,9 @@ All commands are also available as `uibc <subcommand>` after
 **Can I trust a package someone sent me?**
 Run `verify`. Use `gate` for a decision with exit codes
 (0=ALLOW, 2=DENY, 3=HOLD). Never skip strict mode when you hold the key.
-Open mode on a signed package reports S6 INCONCLUSIVE — that is honesty,
-not failure: you have no key to check the seal with.
+Open mode on a *signed* package reports S6 INCONCLUSIVE, on an *unsigned*
+package S6 SKIP — both mean honesty, not failure: you have no key to
+check the seal with.
 
 **Can two implementations agree?**
 Yes — that is the point. `independent_verifier/cross_check.py` compares
@@ -53,7 +54,7 @@ the reference verifier with a from-spec second implementation: 70/70.
 **How do I run the full test suite?**
 
 ```
-python -m unittest discover tests           # 71 tests
+python -m unittest discover tests           # 82 tests (incl. 11 MCP)
 python -m unittest tests.stress_test        # 7 stress scenarios
 python independent_verifier/cross_check.py  # 70 checks, 0 mismatches
 python fixtures/generate_fixtures.py        # regenerate + re-verify fixtures

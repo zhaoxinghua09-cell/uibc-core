@@ -208,10 +208,10 @@ def cmd_demo(args):
     r = _verify(pkg, key=_load_key(key_file))
     print(f"     -> result: {r['result']} (expected PASS)")
     _step(6, "tamper with the evidence behind the owner's back")
-    with open(ev, "a", encoding="utf-8") as f:
+    ev_files = os.path.join(pkg, "evidence", "files")
+    with open(os.path.join(ev_files, os.listdir(ev_files)[0]), "a",
+              encoding="utf-8") as f:
         f.write("forged line added by attacker\n")
-    cmd_evidence(type("A", (), {"path": pkg, "type": "ACTION", "file": ev,
-                                "media_type": "text/plain", "note": ""})())
     r = _verify(pkg, key=_load_key(key_file))
     print(f"     -> result: {r['result']} (expected FAIL: tampered content)")
     _step(7, "done - the demo package is kept for inspection at:")

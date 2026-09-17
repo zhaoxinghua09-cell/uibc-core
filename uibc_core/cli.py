@@ -141,6 +141,9 @@ def cmd_keygen(args):
 def cmd_submit(args):
     pkg = os.path.abspath(args.path)
     identity = _read(os.path.join(pkg, "identity.json"))
+    if "_note" in identity and identity.get("agent_id") is None:
+        sys.exit("error: package not registered yet. run: "
+                 f"uibc register {args.path} --agent-id <id> --owner <owner>")
     idx = _read(os.path.join(pkg, "evidence", "index.json"))
     hashes = []
     for e in idx["entries"]:

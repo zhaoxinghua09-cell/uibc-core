@@ -7,14 +7,19 @@
 > absolute trust claims.
 
 Core idea: every AI agent action can be sealed into a submission.uibc
-package (identity + lifecycle events + content-hashed evidence + Merkle
+package (identity + lifecycle events + content-hashed evidence +
 evidence root + optional HMAC seal), then verified offline by anyone:
 `uibc verify pkg.uibc --key owner.key` exits 0 on PASS, 1 on FAIL.
+
+Run the full suite from a clean clone (no install needed):
+- python -m unittest discover tests           # 71 unit tests
+- python -m unittest tests.stress_test        # 7 stress scenarios
+- python independent_verifier/cross_check.py  # cross-implementation check
 
 What is verifiable today:
 - Package structure, identity consistency (S1/S2)
 - Lifecycle state machine L1-L7 with hash-chained events (S3)
-- Evidence content hashes and Merkle root (S4/S5)
+- Evidence content hashes and evidence root (S4/S5)
 - Owner seal signature, strict/open modes (S6; HMAC-SHA256 v0.2, Ed25519 v0.3 target)
 - Gate decisions ALLOW(0)/DENY(2)/HOLD(3) with revocation/dispute overlays
 - Certificates binding a verified package (cert-issue / cert-verify)
@@ -23,13 +28,18 @@ What is verifiable today:
   independent implementations (70 checks, 0 disagreements)
 
 Key files:
-- README.md - 5-minute quickstart, CLI reference
+- README.md - 5-minute quickstart, test commands, CLI reference
+- ai/index.md - AI discovery layer (concepts, vocabulary, verification, faq)
+- ai/manifest.json - machine manifest of all entry points
 - docs/SPEC-PROPOSAL-v0.1.md - the spec (PROPOSAL)
 - docs/governance.md - Dispute/Correction/Revocation/Accountability/Continuity/Provenance
 - docs/api-scope.md - what is public (read-only) vs local (writes)
 - docs/adoption-guide.md - minimal adoption path for a small team
 - fixtures/EXPECTED.md - attack fixtures with expected-vs-observed
+- tests/ - 71 unit tests + 7 stress scenarios (run: python -m unittest discover tests)
 - independent_verifier/ - second, spec-derived implementation + cross-check
+- registry/ - append-only certificate/revocation/dispute registries (skeleton)
+- mcp_server/ - read-only MCP server exposing verify/gate/identity (PROPOSAL)
 
 Known boundaries (recorded, not hidden):
 - HMAC is symmetric: third-party verification needs Ed25519 (v0.3)

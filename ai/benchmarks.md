@@ -5,14 +5,18 @@ provoke a specific verdict.
 
 | Fixture | Class | Expected (open mode) | Expected (strict mode + key) |
 |---|---|---|---|
-| clean.uibc | baseline | PASS | PASS |
-| tampered.uibc | content edit | FAIL (S4) | FAIL (S4) |
-| deleted.uibc | evidence removed | FAIL (S4) | FAIL (S4) |
-| duplicated.uibc | duplicate entry | FAIL (S4) | FAIL (S4) |
-| reordered.uibc | entry order shuffle | PASS (order-independent root) | PASS |
-| migrated.uibc | version migration | PASS + migration note | PASS |
-| malicious.uibc | self-consistent forgery | UNDETECTED by design surface | **FAIL (S6)** |
-| malicious-keyswap.uibc | key substitution | INCONCLUSIVE | **FAIL (S6)** |
+| clean.uibc | baseline | PASS (S6 INCONCLUSIVE — seal present, no key) | PASS (S6 PASS) |
+| tampered.uibc | content edit | FAIL (S4 hash mismatch) | FAIL (S4 + S6) |
+| deleted.uibc | evidence removed | FAIL (S4 missing file) | FAIL (S4 + S6) |
+| duplicated.uibc | duplicate index entry | FAIL (S5 root mismatch) | FAIL (S5 + S6) |
+| reordered.uibc | lifecycle events shuffled | FAIL (S3 lifecycle violation) | FAIL (S3 + S6) |
+| migrated.uibc | partial migration, not re-sealed | FAIL (S5 root mismatch) | FAIL (S5 + S6) |
+| malicious.uibc | self-consistent forgery | PASS by design surface (S6 INCONCLUSIVE) | **FAIL (S6)** |
+| malicious-keyswap.uibc | key substitution | PASS (UNDETECTABLE without owner key) | **FAIL (S6)** |
+
+Canonical source of truth: `fixtures/EXPECTED.md` (machine-generated,
+includes expected-vs-observed per fixture). If this page and EXPECTED.md
+ever disagree, EXPECTED.md wins.
 
 Regenerate: `python fixtures/generate_fixtures.py`.
 Stress suite: 7 scenarios including signing throughput (~120k ops/s) and

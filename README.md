@@ -1,6 +1,6 @@
 # uibc-core
 
-UIBC Core 参考实现 v0.2.0 **[PROPOSAL]** —— Agent 生命周期证据包与验证器。
+UIBC Core 参考实现 v0.2.1 **[PROPOSAL]** —— Agent 生命周期证据包与验证器。
 
 理念（LGD）：**有籍 · 有证 · 有门禁** → Registry（身份注册）/ Evidence（内容哈希证据 + 封签）/ Gates（生命周期状态机 + 验证门禁）。
 
@@ -34,6 +34,16 @@ uibc submit demo.uibc --key owner.key
 uibc verify demo.uibc --key owner.key   # 严格模式：伪造/换钥包在 S6 被拦
 uibc verify demo.uibc                   # 开放模式：仅完整性检查
 ```
+
+## 运行测试（外人复现三件套）
+
+```bash
+python -m unittest discover tests           # 全量 71 用例
+python -m unittest tests.stress_test        # 压力 7 场景
+python independent_verifier/cross_check.py  # 独立第二实现交叉核验（70 项，0 分歧）
+```
+
+零第三方依赖，`pip install -e .` 可选（只为获得 `uibc` 短命令）。
 
 ## 验证什么（v0.2 检查项）
 
@@ -78,7 +88,7 @@ owner-signed submission.uibc package:
 
 ```text
 fixtures/              open 模式        strict(--key) 模式
-├── clean.uibc         PASS (S6 SKIP)   PASS (S6 PASS)   基线
+├── clean.uibc         PASS (S6 INCONCLUSIVE)   PASS (S6 PASS)   基线
 ├── tampered.uibc      FAIL (S4)        FAIL (S4+S6)     证据内容改写
 ├── deleted.uibc       FAIL (S4)        FAIL (S4+S6)     证据文件删除
 ├── duplicated.uibc    FAIL (S5)        FAIL (S5+S6)     索引条目重复

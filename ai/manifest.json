@@ -33,7 +33,7 @@
     "unit_tests": 71,
     "stress_scenarios": 7,
     "independent_cross_check": "70/70 agreement",
-    "reproduce": "python -m unittest discover tests && python independent_verifier/cross_check.py"
+    "reproduce": "python -m unittest discover tests && python -m unittest tests.stress_test && python independent_verifier/cross_check.py"
   },
   "season_theme": "迁移的判定与问责",
   "content_type": "decision_support_documentation",

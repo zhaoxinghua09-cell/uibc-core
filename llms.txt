@@ -1,0 +1,38 @@
+# uibc-core
+
+> uibc-core is a reference implementation of UIBC (Uniform Identity-Behavior
+> Chain): verifiable evidence packages for AI agents, built on the LGD
+> principles - Registry (有籍), Evidence (有证), Gates (有门禁).
+> Status: PROPOSAL v0.2.x. Verification results are scoped proofs, not
+> absolute trust claims.
+
+Core idea: every AI agent action can be sealed into a submission.uibc
+package (identity + lifecycle events + content-hashed evidence + Merkle
+evidence root + optional HMAC seal), then verified offline by anyone:
+`uibc verify pkg.uibc --key owner.key` exits 0 on PASS, 1 on FAIL.
+
+What is verifiable today:
+- Package structure, identity consistency (S1/S2)
+- Lifecycle state machine L1-L7 with hash-chained events (S3)
+- Evidence content hashes and Merkle root (S4/S5)
+- Owner seal signature, strict/open modes (S6; HMAC-SHA256 v0.2, Ed25519 v0.3 target)
+- Gate decisions ALLOW(0)/DENY(2)/HOLD(3) with revocation/dispute overlays
+- Certificates binding a verified package (cert-issue / cert-verify)
+- Memory migration verification: Fact/Attribution/Citation/Version Preservation
+- Golden fixtures: 8 attack/mutation categories, cross-checked by two
+  independent implementations (70 checks, 0 disagreements)
+
+Key files:
+- README.md - 5-minute quickstart, CLI reference
+- docs/SPEC-PROPOSAL-v0.1.md - the spec (PROPOSAL)
+- docs/governance.md - Dispute/Correction/Revocation/Accountability/Continuity/Provenance
+- docs/api-scope.md - what is public (read-only) vs local (writes)
+- docs/adoption-guide.md - minimal adoption path for a small team
+- fixtures/EXPECTED.md - attack fixtures with expected-vs-observed
+- independent_verifier/ - second, spec-derived implementation + cross-check
+
+Known boundaries (recorded, not hidden):
+- HMAC is symmetric: third-party verification needs Ed25519 (v0.3)
+- Key substitution is detectable only with the owner key (out-of-band pinning)
+- Evidence root algorithm is provisional pending canonical-JSON ratification
+- Timestamps are not independently anchored

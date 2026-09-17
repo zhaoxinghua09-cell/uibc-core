@@ -1,0 +1,67 @@
+% ---------------------------------------------------------------------------
+% UIBC / uibc-core — citation kit (BibTeX)
+% Maintained alongside the repository. Cite the specific artefact you used.
+% Last updated: 2026-09-18
+% ---------------------------------------------------------------------------
+
+% --- 1. The software / specification implementation (most common) ----------
+@software{uibc_core_2026,
+  title        = {uibc-core: Verifiable Evidence Packages for Autonomous AI Agents},
+  author       = {Zhao, Xinghua},
+  year         = {2026},
+  version      = {0.2.1},
+  month        = sep,
+  url          = {https://github.com/zhaoxinghua09-cell/uibc-core},
+  note         = {Reference implementation of UIBC (Uniform Identity-Behavior Chain).
+                  Status: PROPOSAL. Verification results are scoped proofs, not
+                  absolute trust claims. ORCID 0009-0001-0512-1237}
+}
+
+% --- 2. The competition itself ---------------------------------------------
+@misc{uibc_competition_2026,
+  title        = {{UIBC}: International Challenge for Governable Autonomy},
+  author       = {Zhao, Xinghua},
+  year         = {2026},
+  howpublished = {\url{https://medxpert.cn/uibc/}},
+  note         = {Open competition on post-migration judgment and accountability of
+                  autonomous agents. Season 1 (S1) started 2026-09-21. Theory support:
+                  LGD (Lifecycle Governance Doctrine). Not a registered corporate entity.}
+}
+
+% --- 3. If you used a specific result / leaderboard snapshot ---------------
+@misc{uibc_s1_leaderboard_2026,
+  title        = {{UIBC} Season 1 — Leaderboard Snapshot},
+  author       = {Zhao, Xinghua},
+  year         = {2026},
+  howpublished = {\url{https://medxpert.cn/uibc/live/}},
+  note         = {SNAPSHOT_DATE and PACKAGE_VERSION must be filled in by the citer.
+                  Each row carries tokens, USD and cost-per-point. Versioned
+                  evaluation contract: changing data/harness/rubric bumps the version.
+                  Cite as: UIBC S1 leaderboard, snapshot <date>, contract <version>.}
+}
+
+% --- 4. Neighbour work you should cite alongside us (prior art) ------------
+@article{pai_bench_2026,
+  title        = {PAI-Bench: Persistent Identity Contract Fidelity for Deployed AI Agents},
+  author       = {Zhao, Zhenyu and Zhao, Roy},
+  year         = {2026},
+  eprint       = {2609.13637},
+  archivePrefix= {arXiv},
+  note         = {Nearest neighbour benchmark; evaluates lasting identity-contract
+                  fidelity of deployed agents across seven dimensions.}
+}
+
+@misc{aml_2026,
+  title        = {Agent Memory Leaderboard ({AML})},
+  author       = {{AML-memory contributors}},
+  year         = {2026},
+  howpublished = {\url{https://github.com/AML-memory/agent-memory-leaderboard}},
+  note         = {The de-facto unified memory-evaluation leaderboard; 20+ universities.}
+}
+
+% ---------------------------------------------------------------------------
+% Preferred short form for in-text citation:
+%   \cite{uibc_core_2026}  -> the tooling and specification
+%   \cite{uibc_competition_2026} -> the competition itself
+%   \cite{uibc_s1_leaderboard_2026} -> a specific result
+% ---------------------------------------------------------------------------

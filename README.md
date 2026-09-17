@@ -44,7 +44,7 @@ uibc verify demo.uibc                   # 开放模式：仅完整性检查
 ## 运行测试（外人复现三件套）
 
 ```bash
-python -m unittest discover tests           # 全量 82 用例（含 11 条 MCP 测试
+python -m unittest discover tests           # 全量 115 用例（含 11 MCP＋9 Registry＋15 A2A＋9 runtime
 python -m unittest tests.stress_test        # 压力 7 场景
 python independent_verifier/cross_check.py  # 独立第二实现交叉核验（70 项，0 分歧）
 ```
@@ -80,6 +80,20 @@ v0.2 明确不查：非对称/第三方签名（Ed25519，v0.3 目标）、生�
 - **换钥攻击只能靠链外钉扎检测**：攻击者可用自己的密钥重新签署整个包——用业主密钥 `--key` 验证即 FAIL（key mismatch），不持业主密钥则无法察觉。这是 v0.3（Ed25519 + 公钥注册表）的常设动机案例（见 fixtures/malicious-keyswap）
 - Evidence Root 算法为临时版（sorted hashes 的 SHA-256），待 canonical serialization 定稿后升级为 Merkle 树
 - 时间戳未做外部锚定（生产用 OTS/Rekor，见行动计划）
+
+## 生态组件（Ecosystem）
+
+| 组件 | 位置 | 说明 |
+|------|------|------|
+| MCP server（只读） | `mcp_server/` | 7 个工具，stdio JSON-RPC |
+| Registry 服务（只读） | `registry_server/` | 三大登记处 HTTP 查询；静态查询页 `registry/index.html` |
+| A2A 适配器 | `adapters/a2a/` | JSON-RPC 2.0 over HTTP：`card` / `uibc/verify` / `uibc/gate` / `uibc/inspect` |
+| 示范应用（完整生命周期） | `examples/showcase.py` | 一个 agent 的可验证生命周期；实录 `examples/SHOWCASE.md` |
+| 失败语料 | `failure_corpus/` | 真实失败 F-001~F-006（根因/教训） |
+| 赛事包 | `contest/` | 章程/赛题/评审/提交规范/内测实录 |
+| AI 发现 | `llms.txt` + `ai/` | 机器可读入口 |
+| Runtime hooks | `uibc_core/runtime.py` | 一行式 `record_action` / `seal` / `event` / `snapshot` |
+| 英文文档 | `README.en.md` | English documentation |
 
 ## 对应规范
 

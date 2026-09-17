@@ -12,7 +12,7 @@ evidence root + optional HMAC seal), then verified offline by anyone:
 `uibc verify pkg.uibc --key owner.key` exits 0 on PASS, 1 on FAIL.
 
 Run the full suite from a clean clone (no install needed):
-- python -m unittest discover tests           # 82 unit tests (incl. 11 MCP)
+- python -m unittest discover tests           # 115 unit tests (incl. 11 MCP / 9 registry / 15 A2A / 9 runtime)
 - python -m unittest tests.stress_test        # 7 stress scenarios
 - python independent_verifier/cross_check.py  # cross-implementation check
 
@@ -29,6 +29,8 @@ What is verifiable today:
 
 Key files:
 - README.md - 5-minute quickstart, test commands, CLI reference
+- CITATION.cff / CITATION.bib - how to cite this software, the competition, and a result
+- docs/citation-kit.md - citation positions, author/ORCID conventions, reproduction badges
 - ai/index.md - AI discovery layer (concepts, vocabulary, verification, faq)
 - ai/manifest.json - machine manifest of all entry points
 - docs/SPEC-PROPOSAL-v0.1.md - the spec (PROPOSAL)
@@ -36,10 +38,15 @@ Key files:
 - docs/api-scope.md - what is public (read-only) vs local (writes)
 - docs/adoption-guide.md - minimal adoption path for a small team
 - fixtures/EXPECTED.md - attack fixtures with expected-vs-observed
-- tests/ - 82 unit tests + 7 stress scenarios (run: python -m unittest discover tests)
+- tests/ - 115 unit tests + 7 stress scenarios (run: python -m unittest discover tests)
 - independent_verifier/ - second, spec-derived implementation + cross-check
-- registry/ - append-only certificate/revocation/dispute registries (skeleton)
+- registry/ - append-only certificate/revocation/dispute registries + static query page (registry/index.html)
+- registry_server/ - read-only HTTP access to the three registries (zero deps)
 - mcp_server/ - read-only MCP server exposing verify/gate/identity (PROPOSAL)
+- adapters/a2a/ - JSON-RPC 2.0 HTTP adapter: card / uibc/verify / uibc/gate / uibc/inspect
+- examples/showcase.py - one agent, one full verifiable lifecycle (transcript: examples/SHOWCASE.md)
+- uibc_core/runtime.py - one-line runtime hooks: record_action / seal / event / snapshot
+- README.en.md - English documentation
 
 Known boundaries (recorded, not hidden):
 - HMAC is symmetric: third-party verification needs Ed25519 (v0.3)

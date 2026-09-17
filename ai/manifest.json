@@ -30,7 +30,7 @@
     "registry/disputes.jsonl"
   ],
   "verification": {
-    "unit_tests": 82,
+    "unit_tests": 115,
     "stress_scenarios": 7,
     "independent_cross_check": "70/70 agreement",
     "reproduce": "python -m unittest discover tests && python -m unittest tests.stress_test && python independent_verifier/cross_check.py"

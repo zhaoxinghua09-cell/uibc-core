@@ -54,7 +54,7 @@ the reference verifier with a from-spec second implementation: 70/70.
 **How do I run the full test suite?**
 
 ```
-python -m unittest discover tests           # 82 tests (incl. 11 MCP)
+python -m unittest discover tests           # 115 tests (incl. 11 MCP / 9 registry / 15 A2A / 9 runtime)
 python -m unittest tests.stress_test        # 7 stress scenarios
 python independent_verifier/cross_check.py  # 70 checks, 0 mismatches
 python fixtures/generate_fixtures.py        # regenerate + re-verify fixtures

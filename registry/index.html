@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>uibc-core Registries — Certificates / Revocations / Disputes</title>
+<style>
+  :root { --ink:#1a1d24; --mut:#5b6472; --line:#e3e6ec; --bg:#fafbfc; --card:#fff; --accent:#2563eb; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.6 -apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif; color:var(--ink); background:var(--bg); }
+  header { padding:32px 20px 20px; max-width:960px; margin:0 auto; }
+  h1 { font-size:22px; margin:0 0 6px; }
+  .sub { color:var(--mut); font-size:14px; }
+  main { max-width:960px; margin:0 auto; padding:0 20px 48px; }
+  .tabs { display:flex; gap:8px; margin:18px 0 14px; flex-wrap:wrap; }
+  .tabs button { border:1px solid var(--line); background:var(--card); padding:7px 16px; border-radius:8px; cursor:pointer; font-size:14px; color:var(--ink); }
+  .tabs button.active { border-color:var(--accent); color:var(--accent); font-weight:600; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px 18px; margin-bottom:12px; }
+  .empty { color:var(--mut); font-style:italic; }
+  pre { margin:8px 0 0; font-size:12.5px; white-space:pre-wrap; word-break:break-all; background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:10px; }
+  .note { color:var(--mut); font-size:13px; margin-top:8px; }
+  code { background:var(--bg); border:1px solid var(--line); border-radius:4px; padding:1px 5px; font-size:13px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>uibc-core Registries</h1>
+  <div class="sub">Certificates · Revocations · Disputes — append-only, content-addressed. Spec: <code>uibc-core/0.2.1-proposal</code></div>
+</header>
+<main>
+  <div class="tabs" id="tabs"></div>
+  <div id="content"></div>
+  <p class="note">Data source: the registry JSONL files in this repository (fetched relatively, so this page works both on GitHub Pages and served locally). Append-only: corrections are new entries, never rewrites. This page is read-only by design (<code>docs/api-scope.md</code>).</p>
+</main>
+<script>
+const NAMES = ["certificates","revocations","disputes"];
+let active = "certificates";
+const tabs = document.getElementById("tabs"), content = document.getElementById("content");
+NAMES.forEach(n => {
+  const b = document.createElement("button");
+  b.textContent = n; b.id = "tab-"+n;
+  b.onclick = () => { active = n; render(); };
+  tabs.appendChild(b);
+});
+async function load(name){
+  try {
+    const r = await fetch("registry/"+name+".jsonl", {cache:"no-store"});
+    if (r.status === 404) return [];
+    if (!r.ok) throw new Error("HTTP "+r.status);
+    const txt = (await r.text()).trim();
+    return txt ? txt.split("\n").map(l => JSON.parse(l)) : [];
+  } catch(e) { return {error: String(e)}; }
+}
+async function render(){
+  NAMES.forEach(n => document.getElementById("tab-"+n).classList.toggle("active", n===active));
+  const data = await load(active);
+  content.innerHTML = "";
+  if (data && data.error) {
+    content.innerHTML = '<div class="card">Failed to load: '+data.error+'</div>'; return;
+  }
+  if (!data.length) {
+    content.innerHTML = '<div class="card empty">Registry "'+active+'" is currently empty — entries appear here as they are appended.</div>'; return;
+  }
+  data.forEach(e => {
+    const d = document.createElement("div"); d.className = "card";
+    const h = document.createElement("div");
+    const title = e.certificate_id || e.revocation_id || e.dispute_id || e.id || "(entry)";
+    h.innerHTML = "<strong>"+String(title)+"</strong>";
+    const p = document.createElement("pre"); p.textContent = JSON.stringify(e, null, 2);
+    d.appendChild(h); d.appendChild(p); content.appendChild(d);
+  });
+}
+render();
+</script>
+</body>
+</html>

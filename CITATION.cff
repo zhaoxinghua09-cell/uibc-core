@@ -1,0 +1,54 @@
+cff-version: 1.2.0
+message: "If you use uibc-core or UIBC in academic work, please cite it as below."
+type: software
+title: "uibc-core: Verifiable Evidence Packages for Autonomous AI Agents"
+abstract: >-
+  uibc-core is a reference implementation of UIBC (Uniform Identity-Behavior Chain):
+  verifiable evidence packages for autonomous AI agents, built on the LGD principles
+  of Registry, Evidence and Gates. Every agent action can be sealed into a
+  submission.uibc package (identity + lifecycle events + content-hashed evidence +
+  evidence root + optional seal), then verified offline.
+version: "0.2.1"
+date-released: "2026-09-17"
+license: "No license file yet — see docs/citation-kit.md §6. Do not redistribute until a LICENSE is added."
+repository-code: "https://github.com/zhaoxinghua09-cell/uibc-core"
+url: "https://medxpert.cn/uibc/"
+keywords:
+  - autonomous agents
+  - verifiable evidence
+  - agent governance
+  - lifecycle governance
+  - memory migration
+  - accountability
+  - reproducibility
+authors:
+  - family-names: "Zhao"
+    given-names: "Xinghua"
+    alias: "Steven Zhao"
+    orcid: "https://orcid.org/0009-0001-0512-1237"
+    affiliation: "Independent researcher — personal regulatory-knowledge and agent-governance project"
+preferred-citation:
+  type: conference-paper
+  title: "UIBC: an open competition for post-migration judgment and accountability of autonomous agents"
+  authors:
+    - family-names: "Zhao"
+      given-names: "Xinghua"
+      orcid: "https://orcid.org/0009-0001-0512-1237"
+  year: 2026
+  notes: "Competition / benchmark description paper (in preparation). Cite the entry above until this is published."
+references:
+  - type: article
+    title: "PAI-Bench: Persistent Identity Contract Fidelity for Deployed AI Agents"
+    authors:
+      - family-names: "Zhao"
+        given-names: "Zhenyu"
+      - family-names: "Zhao"
+        given-names: "Roy"
+    year: 2026
+    notes: "arXiv:2609.13637 — neighbour benchmark; the closest prior art to our problem statement. Cite alongside us."
+  - type: article
+    title: "Agent Memory Leaderboard (AML)"
+    authors:
+      - name: "AML-memory contributors"
+    year: 2026
+    notes: "https://github.com/AML-memory/agent-memory-leaderboard — the de-facto memory evaluation leaderboard."

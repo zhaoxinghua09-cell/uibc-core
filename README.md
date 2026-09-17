@@ -1,8 +1,8 @@
 # uibc-core
 
-UIBC Core 参考实现 v0.1.0 **[PROPOSAL]** —— Agent 生命周期证据包与验证器。
+UIBC Core 参考实现 v0.2.0 **[PROPOSAL]** —— Agent 生命周期证据包与验证器。
 
-理念（LGD）：**有籍 · 有证 · 有门禁** → Registry（身份注册）/ Evidence（内容哈希证据）/ Gates（生命周期状态机 + 验证门禁）。
+理念（LGD）：**有籍 · 有证 · 有门禁** → Registry（身份注册）/ Evidence（内容哈希证据 + 封签）/ Gates（生命周期状态机 + 验证门禁）。
 
 > ⚠️ 状态：PROPOSAL，非正式标准。验证结果是**限定范围的证明**（scoped proof）：
 > PASS 仅表示"在观测到的证据边界内未发现违规"，不声称绝对可信。
@@ -11,6 +11,9 @@ UIBC Core 参考实现 v0.1.0 **[PROPOSAL]** —— Agent 生命周期证据包�
 
 ```bash
 pip install -e .
+
+# 0. 生成封签密钥（可选，v0.2 推荐）
+uibc keygen --out owner.key        # 密钥自己保管，绝不放进包里
 
 # 1. 建包
 uibc init demo.uibc
@@ -24,14 +27,15 @@ uibc event demo.uibc --type ACTIVATE
 # 4. 附加证据（有证：自动记录 SHA-256）
 uibc evidence demo.uibc --type ACTION --file report.txt --note "agent action log"
 
-# 5. 封包（计算 Evidence Root 写入 manifest）
-uibc submit demo.uibc
+# 5. 封包 + 签署（计算 Evidence Root 并写 HMAC 封签）
+uibc submit demo.uibc --key owner.key
 
 # 6. 验证（门禁）：exit 0 = PASS
-uibc verify demo.uibc
+uibc verify demo.uibc --key owner.key   # 严格模式：伪造/换钥包在 S6 被拦
+uibc verify demo.uibc                   # 开放模式：仅完整性检查
 ```
 
-## 验证什么（v0.1 检查项）
+## 验证什么（v0.2 检查项）
 
 | 检查 | 内容 |
 |------|------|
@@ -40,15 +44,24 @@ uibc verify demo.uibc
 | S3 | 生命周期状态机（REGISTER 开头、previous_event 链、REVOKE/RETIRE 终态、非法转移报 lifecycle state violation） |
 | S4 | 证据文件 SHA-256 逐一重算比对（防篡改核心） |
 | S5 | Evidence Root 重算比对 manifest |
+| S6 | **封签签名**（v0.2 新增）：`--key` 严格模式下，未签/伪造/换钥的包 FAIL；开放模式下已签包报 INCONCLUSIVE、未签包 SKIP |
+
+## 两种验证模式
+
+| 模式 | 命令 | 语义 |
+|------|------|------|
+| 开放 | `uibc verify pkg` | v0.1 兼容：只查完整性（S1-S5），封签存在但无法核对 → INCONCLUSIVE |
+| 严格 | `uibc verify pkg --key owner.key` | 业主持钥：封签必须存在且有效，伪造与换钥在 S6 被拦 |
 
 ## 报告纪律（总档案 §16/§17）
 
 每份验证报告必须包含：`scope`（范围）、`limitations`（局限）、`checked`（查了什么）、`not_checked`（没查什么）。
-v0.1 明确不查：密码学签名、外部时间戳锚定、行为评估、记忆忠实性/连续性。
+v0.2 明确不查：非对称/第三方签名（Ed25519，v0.3 目标）、生命周期事件签名、外部时间戳锚定、行为评估、记忆忠实性/连续性。
 
 ## 已知边界（诚实清单）
 
-- 签名字段存在但 v0.1 未实现签名验证（规范未定稿前不强制算法）
+- **封签为对称 HMAC-SHA256（v0.2 临时方案，纯标准库零依赖）**：验证需持有密钥；第三方可验证需 Ed25519（v0.3 目标，待 `cryptography` 依赖决策）
+- **换钥攻击只能靠链外钉扎检测**：攻击者可用自己的密钥重新签署整个包——用业主密钥 `--key` 验证即 FAIL（key mismatch），不持业主密钥则无法察觉。这是 v0.3（Ed25519 + 公钥注册表）的常设动机案例（见 fixtures/malicious-keyswap）
 - Evidence Root 算法为临时版（sorted hashes 的 SHA-256），待 canonical serialization 定稿后升级为 Merkle 树
 - 时间戳未做外部锚定（生产用 OTS/Rekor，见行动计划）
 
@@ -56,25 +69,27 @@ v0.1 明确不查：密码学签名、外部时间戳锚定、行为评估、记
 
 - 《XLGD/LGD/UIBC 历史讨论总档案 v0.1.0》§9-§26
 - 《UIBC 工程实现摘录 v0.1.0》
-- SPEC 提案：`docs/SPEC-PROPOSAL-v0.1.md`
+- SPEC 提案：`docs/SPEC-PROPOSAL-v0.1.md`（v0.2 增补见文末）
 
 ## Golden Fixtures (archive SS30)
 
-Benchmark as executable evidence — seven mutation categories, each a runnable
-submission.uibc package:
+Benchmark as executable evidence — eight mutation categories, each a runnable,
+owner-signed submission.uibc package:
 
 ```text
-fixtures/
-├── clean.uibc        PASS            baseline
-├── tampered.uibc     FAIL  (S4)      evidence content rewritten
-├── deleted.uibc      FAIL  (S4)      evidence file removed
-├── duplicated.uibc   FAIL  (S5)      index entry duplicated, seal stale
-├── reordered.uibc    FAIL  (S3)      lifecycle chain broken
-├── migrated.uibc     FAIL  (S5)      partial migration, manifest not re-sealed
-└── malicious.uibc    PASS*           full self-consistent forgery — UNDETECTED
-                                     by v0.1 (no signatures yet); the standing
-                                     motivating case for v0.2 Ed25519
+fixtures/              open 模式        strict(--key) 模式
+├── clean.uibc         PASS (S6 SKIP)   PASS (S6 PASS)   基线
+├── tampered.uibc      FAIL (S4)        FAIL (S4+S6)     证据内容改写
+├── deleted.uibc       FAIL (S4)        FAIL (S4+S6)     证据文件删除
+├── duplicated.uibc    FAIL (S5)        FAIL (S5+S6)     索引条目重复
+├── reordered.uibc     FAIL (S3)        FAIL (S3+S6)     生命周期换序
+├── migrated.uibc      FAIL (S5)        FAIL (S5+S6)     部分迁移未重封
+├── malicious.uibc     PASS (S6 不定)   FAIL (S6)        全自洽伪造——v0.1 盲区，
+│                                                        v0.2 严格模式已拦截
+└── malicious-keyswap  PASS (S6 不定)   FAIL (S6)        换钥重签——仅业主密钥
+                                                         可检（v0.3 动机案例）
 ```
 
 Regenerate + re-verify: `python fixtures/generate_fixtures.py` (writes
-`fixtures/EXPECTED.md` with expected-vs-observed per archive SS31 fields).
+`fixtures/EXPECTED.md` with expected-vs-observed per archive SS31 fields,
+both modes + attacker-key column).

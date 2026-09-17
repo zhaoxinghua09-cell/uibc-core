@@ -9,6 +9,7 @@ import uuid
 from datetime import datetime, timezone
 
 from .canonical import hash_file
+from .signing import ALGORITHM, generate_key, key_id, seal_sign
 from .verify import verify
 from . import SPEC_VERSION, __version__
 
@@ -113,6 +114,30 @@ def cmd_evidence(args):
     print(f"evidence added: {args.type} {rel} (hash recorded)")
 
 
+def _load_key(path):
+    """Load a seal key from a hex text file (owner secret, never in package)."""
+    if not os.path.isfile(path):
+        sys.exit(f"error: key file not found: {path}")
+    with open(path, "r", encoding="ascii") as f:
+        raw = f.read().strip()
+    try:
+        return bytes.fromhex(raw)
+    except ValueError:
+        sys.exit(f"error: key file is not 64-char hex: {path}")
+
+
+def cmd_keygen(args):
+    out = os.path.abspath(args.out)
+    if os.path.exists(out):
+        sys.exit(f"error: {out} already exists (refusing to overwrite a key)")
+    key = generate_key()
+    with open(out, "w", encoding="ascii") as f:
+        f.write(key.hex())
+    print(f"seal key written to {out}")
+    print(f"key_id (public, safe to share): {key_id(key)}")
+    print("keep this file secret - anyone holding it can sign packages as you")
+
+
 def cmd_submit(args):
     pkg = os.path.abspath(args.path)
     identity = _read(os.path.join(pkg, "identity.json"))
@@ -132,14 +157,29 @@ def cmd_submit(args):
         "status": "SUBMITTED",
     }
     _write(os.path.join(pkg, "manifest.json"), manifest)
-    print(f"submission sealed: agent={identity['agent_id']} evidence={len(idx['entries'])} root={root}")
+    msg = f"submission sealed: agent={identity['agent_id']} evidence={len(idx['entries'])} root={root}"
+    if getattr(args, "key", None):
+        key = _load_key(args.key)
+        sig_dir = os.path.join(pkg, "signatures")
+        os.makedirs(sig_dir, exist_ok=True)
+        _write(os.path.join(sig_dir, "seal.json"), {
+            "schema": SPEC_VERSION,
+            "algorithm": ALGORITHM,
+            "key_id": key_id(key),
+            "signed": "identity+manifest",
+            "signature": seal_sign(key, identity, manifest),
+            "created_at": _now(),
+        })
+        msg += " | seal signed (key_id %s...)" % key_id(key)[:16]
+    print(msg)
 
 
 def cmd_verify(args):
     pkg = os.path.abspath(args.path)
     if not os.path.isdir(pkg):
         sys.exit(f"error: package dir not found: {pkg}")
-    report = verify(pkg)
+    key = _load_key(args.key) if args.key else None
+    report = verify(pkg, key=key)
     print(json.dumps(report, ensure_ascii=False, indent=2))
     sys.exit(0 if report["result"] == "PASS" else 1)
 
@@ -179,10 +219,20 @@ def main():
     p.set_defaults(func=cmd_evidence)
 
     p = sub.add_parser("submit", help="seal package (compute evidence_root into manifest)")
-    p.add_argument("path"); p.set_defaults(func=cmd_submit)
+    p.add_argument("path")
+    p.add_argument("--key", default=None, metavar="KEYFILE",
+                   help="hex key file: also write an HMAC-SHA256 seal signature")
+    p.set_defaults(func=cmd_submit)
 
     p = sub.add_parser("verify", help="verify package (exit 0 = PASS)")
-    p.add_argument("path"); p.set_defaults(func=cmd_verify)
+    p.add_argument("path")
+    p.add_argument("--key", default=None, metavar="KEYFILE",
+                   help="hex owner key: strict mode - unsigned/mismatched seal FAILS (S6)")
+    p.set_defaults(func=cmd_verify)
+
+    p = sub.add_parser("keygen", help="generate a 256-bit seal key (hex file)")
+    p.add_argument("--out", required=True, metavar="KEYFILE")
+    p.set_defaults(func=cmd_keygen)
 
     p = sub.add_parser("inspect", help="human-readable package summary")
     p.add_argument("path"); p.set_defaults(func=cmd_inspect)

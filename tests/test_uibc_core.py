@@ -1,9 +1,11 @@
 """uibc-core full test suite (unit + edge cases). Stdlib unittest only.
 
 Covers: canonical serialization, lifecycle state machine L1-L7, verifier
-S1-S5, report discipline, CLI chain, tamper-evidence behaviours.
+S1-S6, seal signing (v0.2), report discipline, CLI chain, tamper-evidence
+and key-substitution behaviours.
 """
 
+import base64
 import json
 import os
 import shutil
@@ -16,6 +18,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from uibc_core.canonical import canonicalize, evidence_root, hash_file, hash_obj
 from uibc_core.lifecycle import validate_lifecycle
+from uibc_core.signing import (ALGORITHM, generate_key, key_id, seal_payload,
+                               seal_sign, seal_verify)
 from uibc_core.verify import verify
 from uibc_core import cli as ucli
 from uibc_core import SPEC_VERSION, __version__
@@ -217,6 +221,143 @@ class TestVerifier(unittest.TestCase):
         self.assertEqual(c["S5"], "FAIL")
 
 
+class TestSigning(unittest.TestCase):
+    """v0.2 seal signature primitives (archive SS19/SS10-B5)."""
+
+    def setUp(self):
+        self.key = generate_key()
+        self.identity = {"agent_id": "a", "owner": "o", "version": "1"}
+        self.manifest = {"evidence_root": "x" * 64, "status": "SUBMITTED"}
+
+    def test_keygen_random_and_keyid_stable(self):
+        k2 = generate_key()
+        self.assertNotEqual(self.key, k2)
+        self.assertEqual(key_id(self.key), key_id(self.key))
+        self.assertNotEqual(key_id(self.key), key_id(k2))
+        self.assertEqual(len(key_id(self.key)), 64)
+
+    def test_roundtrip_and_determinism(self):
+        s1 = seal_sign(self.key, self.identity, self.manifest)
+        s2 = seal_sign(self.key, self.identity, self.manifest)
+        self.assertEqual(s1, s2)
+        self.assertTrue(seal_verify(self.key, self.identity, self.manifest, s1))
+
+    def test_payload_tamper_detected(self):
+        s = seal_sign(self.key, self.identity, self.manifest)
+        bad = dict(self.manifest, evidence_root="f" * 64)
+        self.assertFalse(seal_verify(self.key, self.identity, bad, s))
+
+    def test_identity_tamper_detected(self):
+        s = seal_sign(self.key, self.identity, self.manifest)
+        bad = dict(self.identity, owner="attacker")
+        self.assertFalse(seal_verify(self.key, bad, self.manifest, s))
+
+    def test_wrong_key_fails(self):
+        s = seal_sign(self.key, self.identity, self.manifest)
+        self.assertFalse(seal_verify(generate_key(), self.identity, self.manifest, s))
+
+    def test_malformed_signature_fails(self):
+        self.assertFalse(seal_verify(self.key, self.identity, self.manifest, "not-base64!!!"))
+        self.assertFalse(seal_verify(self.key, self.identity, self.manifest, ""))
+        self.assertFalse(seal_verify(self.key, self.identity, self.manifest, None))
+        # valid base64 but garbage bytes
+        self.assertFalse(seal_verify(self.key, self.identity, self.manifest,
+                                     base64.b64encode(b"\x00" * 32).decode()))
+
+    def test_key_not_in_package_material(self):
+        # key_id is a one-way digest of the key: recording it is safe
+        self.assertNotIn(self.key, seal_payload(self.identity, self.manifest))
+
+
+class TestSealVerification(unittest.TestCase):
+    """Verifier S6: open vs strict mode, forgery + key substitution."""
+
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp()
+        self.owner_key = generate_key()
+        self.attacker_key = generate_key()
+        self.pkg = os.path.join(self.tmp, "p.uibc")
+        ucli.cmd_init(type("A", (), {"path": self.pkg})())
+        ns = type("A", (), {"path": self.pkg, "agent_id": "a1", "owner": "o",
+                            "agent_type": "t", "version": "1"})
+        ucli.cmd_register(ns)
+        src = os.path.join(self.tmp, "e.txt")
+        with open(src, "w", encoding="utf-8") as f:
+            f.write("evidence body\n")
+        ucli.cmd_evidence(type("A", (), {"path": self.pkg, "type": "ACTION",
+                                         "file": src, "media_type": "text/plain",
+                                         "note": ""})())
+        ucli.cmd_submit(type("A", (), {"path": self.pkg})())
+
+    def tearDown(self):
+        shutil.rmtree(self.tmp)
+
+    def _seal_with(self, key):
+        identity = json.load(open(os.path.join(self.pkg, "identity.json"), encoding="utf-8"))
+        manifest = json.load(open(os.path.join(self.pkg, "manifest.json"), encoding="utf-8"))
+        sig_dir = os.path.join(self.pkg, "signatures")
+        os.makedirs(sig_dir, exist_ok=True)
+        with open(os.path.join(sig_dir, "seal.json"), "w", encoding="utf-8") as f:
+            json.dump({"algorithm": ALGORITHM, "key_id": key_id(key),
+                       "signature": seal_sign(key, identity, manifest)}, f)
+
+    def _s6(self, report):
+        return {c["id"]: c["result"] for c in report["checks"]}.get("S6")
+
+    def _detail(self, report):
+        return "; ".join(c["detail"] for c in report["checks"] if c["id"] == "S6")
+
+    def test_unsigned_open_passes_skip(self):
+        r = verify(self.pkg)
+        self.assertEqual(r["result"], "PASS")
+        self.assertEqual(self._s6(r), "SKIP")
+
+    def test_unsigned_strict_fails(self):
+        r = verify(self.pkg, key=self.owner_key)
+        self.assertEqual(r["result"], "FAIL")
+        self.assertEqual(self._s6(r), "FAIL")
+        self.assertIn("unsigned", self._detail(r))
+
+    def test_signed_owner_key_passes_strict(self):
+        self._seal_with(self.owner_key)
+        r = verify(self.pkg, key=self.owner_key)
+        self.assertEqual(r["result"], "PASS")
+        self.assertEqual(self._s6(r), "PASS")
+
+    def test_signed_no_key_inconclusive(self):
+        self._seal_with(self.owner_key)
+        r = verify(self.pkg)
+        self.assertEqual(r["result"], "PASS")  # open mode: integrity only
+        self.assertEqual(self._s6(r), "INCONCLUSIVE")
+
+    def test_manifest_forgery_detected_strict(self):
+        """THE v0.2 fix: self-consistent forgery (recomputed root) without
+        the owner key FAILs strict verification at S6."""
+        self._seal_with(self.owner_key)
+        m = json.load(open(os.path.join(self.pkg, "manifest.json"), encoding="utf-8"))
+        m["evidence_root"] = evidence_root(["forged"])  # recompute everything
+        json.dump(m, open(os.path.join(self.pkg, "manifest.json"), "w", encoding="utf-8"))
+        r = verify(self.pkg, key=self.owner_key)
+        self.assertEqual(r["result"], "FAIL")
+        self.assertEqual(self._s6(r), "FAIL")
+        self.assertIn("signature invalid", self._detail(r))
+
+    def test_key_substitution_detected_with_owner_key(self):
+        """Known boundary: attacker re-signs with their own key. Owner-key
+        strict verification catches it (key_id mismatch)."""
+        self._seal_with(self.attacker_key)
+        r = verify(self.pkg, key=self.owner_key)
+        self.assertEqual(r["result"], "FAIL")
+        self.assertIn("key mismatch", self._detail(r))
+
+    def test_key_substitution_undetected_with_attacker_key(self):
+        """Honest recording of the known boundary: verifying with the
+        ATTACKER's own key passes - hence out-of-band key pinning matters."""
+        self._seal_with(self.attacker_key)
+        r = verify(self.pkg, key=self.attacker_key)
+        self.assertEqual(r["result"], "PASS")
+
+
 class TestCLIChain(unittest.TestCase):
     def test_full_chain_exit_codes(self):
         tmp = tempfile.mkdtemp()
@@ -247,6 +388,42 @@ class TestCLIChain(unittest.TestCase):
             run("event", pkg2, "--type", "TELEPORT")
             run("submit", pkg2)
             self.assertEqual(run("verify", pkg2).returncode, 1)
+        finally:
+            shutil.rmtree(tmp)
+
+
+class TestCLISigning(unittest.TestCase):
+    """v0.2 CLI: keygen / submit --key / verify --key end-to-end."""
+
+    def test_keygen_submit_verify_strict(self):
+        tmp = tempfile.mkdtemp()
+        try:
+            pkg = os.path.join(tmp, "s.uibc")
+            keyf = os.path.join(tmp, "owner.key")
+            py = sys.executable
+            root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            env = dict(os.environ, PYTHONPATH=root, PYTHONIOENCODING="utf-8")
+
+            def run(*a):
+                return subprocess.run([py, "-m", "uibc_core.cli", *a],
+                                      capture_output=True, text=True, env=env)
+
+            ef = os.path.join(tmp, "log.txt")
+            with open(ef, "w", encoding="utf-8") as f:
+                f.write("data\n")
+            self.assertEqual(run("keygen", "--out", keyf).returncode, 0)
+            # refuse to overwrite an existing key
+            self.assertNotEqual(run("keygen", "--out", keyf).returncode, 0)
+            self.assertEqual(run("init", pkg).returncode, 0)
+            self.assertEqual(run("register", pkg, "--agent-id", "a", "--owner", "o").returncode, 0)
+            self.assertEqual(run("evidence", pkg, "--type", "ACTION", "--file", ef).returncode, 0)
+            self.assertEqual(run("submit", pkg, "--key", keyf).returncode, 0)
+            self.assertTrue(os.path.isfile(os.path.join(pkg, "signatures", "seal.json")))
+            # strict verify passes; tamper then fails; no key = inconclusive
+            self.assertEqual(run("verify", pkg, "--key", keyf).returncode, 0)
+            with open(os.path.join(pkg, "evidence", "files", "log.txt"), "w", encoding="utf-8") as f:
+                f.write("evil\n")
+            self.assertEqual(run("verify", pkg, "--key", keyf).returncode, 1)
         finally:
             shutil.rmtree(tmp)
 

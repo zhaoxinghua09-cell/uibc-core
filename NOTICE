@@ -1,0 +1,27 @@
+uibc-core
+Copyright 2026 Xinghua Zhao (Steven Zhao)
+
+This product includes software developed by the Open Source Security
+Foundation and the Sigstore project (https://www.sigstore.dev/), used only
+as optional external tooling for release-artifact transparency logging.
+No Sigstore code is vendored or redistributed in this repository.
+
+This product includes an OpenTimestamps proof (dist/uibc-core-0.2.1.zip.ots
+and timestamps/uibc-core-0.2.1.zip.ots) generated using the OpenTimestamps
+client (https://opentimestamps.org/), which is licensed under the
+GNU Lesser General Public License v3.0. The proof file, not the client, is
+distributed here.
+
+Third-party source documents referenced in research notes are not
+redistributed in this repository.
+
+--------------------------------------------------------------------------
+
+Runtime dependencies: none beyond the Python standard library.
+
+Development-only dependencies (not redistributed): pytest.
+
+Third-party names, product names and trademarks mentioned in documentation
+remain the property of their respective owners, and are used
+descriptively only. Their mention does not imply any affiliation with,
+endorsement by, or sponsorship of this project.

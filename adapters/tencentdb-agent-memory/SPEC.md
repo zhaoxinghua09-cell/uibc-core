@@ -36,10 +36,10 @@ python verify_agentmemory.py root --before manifest.json                   # 汇
 
 ## 5. 里程碑
 
-- M1 extract（对 SQLite 读指纹）——公司机可开发
-- M2 compare + 报告——公司机可开发
+- M1 extract（对 SQLite 读指纹）——可离线开发
+- M2 compare + 报告——可离线开发
 - M3 全链路 demo：真实 SQLite → migrate → TCVDB 回读 → 验收报告 → **专栏 03《22.7k 星的记忆系统，搬家我不放心》素材**
-- 运行环境：家用机（Steven 2026-09-18 拍板）
+- 运行环境：本地环境（个人机器）
 
 ## 6. 红线
 

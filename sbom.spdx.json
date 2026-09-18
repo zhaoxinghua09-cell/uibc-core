@@ -1,0 +1,215 @@
+{
+  "spdxVersion": "SPDX-2.3",
+  "dataLicense": "CC0-1.0",
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "name": "uibc-core-0.2.1",
+  "documentNamespace": "https://github.com/zhaoxinghua09-cell/uibc-core/spdx/0.2.1-402ac6b3ce6e",
+  "creationInfo": {
+    "created": "2026-09-18T02:29:37Z",
+    "creators": [
+      "Person: Xinghua Zhao (Steven Zhao)",
+      "Tool: gen-sbom.py (Python standard library)"
+    ],
+    "licenseListVersion": "3.29.0",
+    "comment": "Minimal SBOM. uibc-core has no runtime dependencies beyond the Python standard library, so there is no dependency graph to express beyond the package's own files."
+  },
+  "packages": [
+    {
+      "name": "uibc-core",
+      "SPDXID": "SPDXRef-Package-uibc-core",
+      "versionInfo": "0.2.1",
+      "downloadLocation": "https://github.com/zhaoxinghua09-cell/uibc-core",
+      "filesAnalyzed": true,
+      "licenseConcluded": "Apache-2.0",
+      "licenseDeclared": "Apache-2.0",
+      "copyrightText": "Copyright 2026 Xinghua Zhao (Steven Zhao)",
+      "supplier": "Person: Xinghua Zhao (Steven Zhao)",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:pypi/uibc-core@0.2.1"
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "spdxElementId": "SPDXRef-DOCUMENT",
+      "relatedSpdxElement": "SPDXRef-Package-uibc-core",
+      "relationshipType": "DESCRIBES"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-uibc-core",
+      "relatedSpdxElement": "SPDXRef-File-uibc-core-init-.py",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-uibc-core",
+      "relatedSpdxElement": "SPDXRef-File-uibc-core-canonical.py",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-uibc-core",
+      "relatedSpdxElement": "SPDXRef-File-uibc-core-certificate.py",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-uibc-core",
+      "relatedSpdxElement": "SPDXRef-File-uibc-core-cli.py",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-uibc-core",
+      "relatedSpdxElement": "SPDXRef-File-uibc-core-gate.py",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-uibc-core",
+      "relatedSpdxElement": "SPDXRef-File-uibc-core-lifecycle.py",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-uibc-core",
+      "relatedSpdxElement": "SPDXRef-File-uibc-core-memory.py",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-uibc-core",
+      "relatedSpdxElement": "SPDXRef-File-uibc-core-runtime.py",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-uibc-core",
+      "relatedSpdxElement": "SPDXRef-File-uibc-core-signing.py",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-uibc-core",
+      "relatedSpdxElement": "SPDXRef-File-uibc-core-verify.py",
+      "relationshipType": "CONTAINS"
+    }
+  ],
+  "files": [
+    {
+      "fileName": "uibc_core/__init__.py",
+      "SPDXID": "SPDXRef-File-uibc-core-init-.py",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "2c2d4e0248c674b3e5683279fe87d4344dda8d40ad75c4f7e1bde801d127854b"
+        }
+      ],
+      "licenseConcluded": "Apache-2.0",
+      "copyrightText": "Copyright 2026 Xinghua Zhao (Steven Zhao)"
+    },
+    {
+      "fileName": "uibc_core/canonical.py",
+      "SPDXID": "SPDXRef-File-uibc-core-canonical.py",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "5002cb2289abf1a7d622129e9df666114700e11b970d8bc269143f5271939490"
+        }
+      ],
+      "licenseConcluded": "Apache-2.0",
+      "copyrightText": "Copyright 2026 Xinghua Zhao (Steven Zhao)"
+    },
+    {
+      "fileName": "uibc_core/certificate.py",
+      "SPDXID": "SPDXRef-File-uibc-core-certificate.py",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "8e4cfff246f73e13b6de0380faa22a44de19964db6a5e7cbaa7cb65bdc0e2182"
+        }
+      ],
+      "licenseConcluded": "Apache-2.0",
+      "copyrightText": "Copyright 2026 Xinghua Zhao (Steven Zhao)"
+    },
+    {
+      "fileName": "uibc_core/cli.py",
+      "SPDXID": "SPDXRef-File-uibc-core-cli.py",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "1df4bd0063cdf4ec8cc0e9f0e839715b42a2bbf21ab12574158fcc235410b514"
+        }
+      ],
+      "licenseConcluded": "Apache-2.0",
+      "copyrightText": "Copyright 2026 Xinghua Zhao (Steven Zhao)"
+    },
+    {
+      "fileName": "uibc_core/gate.py",
+      "SPDXID": "SPDXRef-File-uibc-core-gate.py",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "ef102f252875b657604e4817bb03cc08fa5048ff3de30b295a798405c270562b"
+        }
+      ],
+      "licenseConcluded": "Apache-2.0",
+      "copyrightText": "Copyright 2026 Xinghua Zhao (Steven Zhao)"
+    },
+    {
+      "fileName": "uibc_core/lifecycle.py",
+      "SPDXID": "SPDXRef-File-uibc-core-lifecycle.py",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "66e68018a3d28097dc03878e01989ab249bcaa94d4b977dac884be534e0ebc8b"
+        }
+      ],
+      "licenseConcluded": "Apache-2.0",
+      "copyrightText": "Copyright 2026 Xinghua Zhao (Steven Zhao)"
+    },
+    {
+      "fileName": "uibc_core/memory.py",
+      "SPDXID": "SPDXRef-File-uibc-core-memory.py",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "2eee786e750fb3056b43108aa43c1396a701574361cab5110d22dda2d4e6c184"
+        }
+      ],
+      "licenseConcluded": "Apache-2.0",
+      "copyrightText": "Copyright 2026 Xinghua Zhao (Steven Zhao)"
+    },
+    {
+      "fileName": "uibc_core/runtime.py",
+      "SPDXID": "SPDXRef-File-uibc-core-runtime.py",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "eff5ffaddf70e78be51087d063ad7db20ef0c4e70a2c1964a04fadb7ac3d899c"
+        }
+      ],
+      "licenseConcluded": "Apache-2.0",
+      "copyrightText": "Copyright 2026 Xinghua Zhao (Steven Zhao)"
+    },
+    {
+      "fileName": "uibc_core/signing.py",
+      "SPDXID": "SPDXRef-File-uibc-core-signing.py",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "cad899dc926365ea70b822bc13c9c6fee6357d9af724d2ff674426b46309677c"
+        }
+      ],
+      "licenseConcluded": "Apache-2.0",
+      "copyrightText": "Copyright 2026 Xinghua Zhao (Steven Zhao)"
+    },
+    {
+      "fileName": "uibc_core/verify.py",
+      "SPDXID": "SPDXRef-File-uibc-core-verify.py",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "78cc6439333d08c0baf7db906f0556d4572d66e5ba15ef64303b8cf55fb2ded5"
+        }
+      ],
+      "licenseConcluded": "Apache-2.0",
+      "copyrightText": "Copyright 2026 Xinghua Zhao (Steven Zhao)"
+    }
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
+  "@type": "SoftwareSourceCode",
+  "identifier": "uibc-core",
+  "name": "uibc-core",
+  "version": "0.2.1",
+  "developmentStatus": "wip",
+  "description": "Reference implementation of UIBC (Uniform Identity-Behavior Chain): verifiable evidence packages for autonomous AI agents, built on the LGD principles of Registry, Evidence and Gates. Every agent action can be sealed into a submission.uibc package (identity + lifecycle events + content-hashed evidence + evidence root + optional seal), then verified offline. Status: PROPOSAL, not a formal standard. Verification results are scoped proofs, not absolute trust claims.",
+  "applicationCategory": "DeveloperApplication",
+  "applicationSubCategory": "AI agent governance",
+  "codeRepository": "https://github.com/zhaoxinghua09-cell/uibc-core",
+  "url": "https://medxpert.cn/uibc/",
+  "issueTracker": "https://github.com/zhaoxinghua09-cell/uibc-core/issues",
+  "license": "https://spdx.org/licenses/Apache-2.0",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "Python",
+    "url": "https://www.python.org/"
+  },
+  "runtimePlatform": "Python 3.9+",
+  "operatingSystem": ["Windows", "Linux", "macOS"],
+  "softwareRequirements": ["Python >=3.9 (standard library only)"],
+  "author": [
+    {
+      "@type": "Person",
+      "givenName": "Xinghua",
+      "familyName": "Zhao",
+      "alternateName": "Steven Zhao",
+      "@id": "https://orcid.org/0009-0001-0512-1237",
+      "affiliation": {
+        "@type": "Organization",
+        "name": "Independent researcher - personal regulatory-knowledge and agent-governance project"
+      }
+    }
+  ],
+  "maintainer": [
+    {
+      "@type": "Person",
+      "givenName": "Xinghua",
+      "familyName": "Zhao",
+      "@id": "https://orcid.org/0009-0001-0512-1237"
+    }
+  ],
+  "dateCreated": "2026-09-17",
+  "datePublished": "2026-09-17",
+  "dateModified": "2026-09-18",
+  "keywords": [
+    "autonomous agents",
+    "verifiable evidence",
+    "agent governance",
+    "lifecycle governance",
+    "memory migration",
+    "accountability",
+    "reproducibility",
+    "AI agent identity",
+    "provenance"
+  ],
+  "referencePublication": {
+    "@type": "ScholarlyArticle",
+    "name": "UIBC: an open competition for post-migration judgment and accountability of autonomous agents",
+    "author": [
+      {
+        "@type": "Person",
+        "givenName": "Xinghua",
+        "familyName": "Zhao"
+      }
+    ],
+    "datePublished": "2026",
+    "description": "Competition / benchmark description paper (in preparation)."
+  },
+  "citation": [
+    {
+      "@type": "SoftwareSourceCode",
+      "name": "uibc-core: Verifiable Evidence Packages for Autonomous AI Agents",
+      "identifier": "10.5281/zenodo.22821835",
+      "url": "https://doi.org/10.5281/zenodo.22821835"
+    }
+  ]
+}

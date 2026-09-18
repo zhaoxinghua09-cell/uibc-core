@@ -1,0 +1,27 @@
+{
+  "metadata": {
+    "title": "uibc-core v0.2.1: verifiable evidence packages for autonomous AI agents (PROPOSAL)",
+    "upload_type": "software",
+    "publication_date": "2026-09-18",
+    "creators": [
+      {
+        "name": "Zhao, Xinghua",
+        "affiliation": "Independent researcher",
+        "orcid": ""
+      }
+    ],
+    "description": "Reference implementation of UIBC (Unified Identity-Behavior-Continuity) Core: agent lifecycle evidence packages with Registry/Evidence/Gates (LGD). Includes verifier, HMAC seals, golden attack fixtures, independent second implementation, UIBC-MEM verifiable memory migration, MCP server, A2A adapter, contest package. PROPOSAL - scoped proofs, not absolute trust.",
+    "access_right": "open",
+    "license": {
+      "id": "mit"
+    },
+    "related_identifiers": [
+      {
+        "identifier": "https://github.com/zhaoxinghua09-cell/uibc-core",
+        "relation": "isSupplementTo",
+        "resource_type": "software"
+      }
+    ],
+    "version": "0.2.1"
+  }
+}

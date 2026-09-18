@@ -1,0 +1,41 @@
+{
+  "title": "uibc-core: Verifiable Evidence Packages for Autonomous AI Agents",
+  "description": "<p><strong>uibc-core</strong> is the reference implementation of <strong>UIBC</strong> (Uniform Identity-Behavior Chain): verifiable evidence packages for autonomous AI agents, built on the <em>LGD</em> principles of <strong>Registry, Evidence and Gates</strong>.</p><p>Every agent action can be sealed into a <code>submission.uibc</code> package &mdash; identity record + lifecycle events + content-hashed evidence + evidence root + optional HMAC seal &mdash; and then verified <em>offline</em> by any third party, with no trust in the producing system required.</p><p>The repository ships: a pure-standard-library CLI (<code>uibc</code>), an independent zero-dependency verifier for cross-implementation checks, three append-only registries (certificates / revocations / disputes), a read-only MCP server, an A2A HTTP adapter, an OpenTimestamps-anchored release artifact, and a 115-case unit suite plus 7 stress scenarios.</p><p><strong>Status: PROPOSAL, not a formal standard.</strong> Verification results are <em>scoped proofs</em>: PASS means &quot;no violation found within the observed evidence boundary&quot;, not an absolute claim of trustworthiness. The honest boundary is documented and machine-readable in the repository.</p>",
+  "creators": [
+    {
+      "name": "Zhao, Xinghua",
+      "affiliation": "Independent researcher - personal regulatory-knowledge and agent-governance project",
+      "orcid": "0009-0001-0512-1237"
+    }
+  ],
+  "license": "Apache-2.0",
+  "upload_type": "software",
+  "access_right": "open",
+  "language": "eng",
+  "version": "0.2.1",
+  "keywords": [
+    "autonomous agents",
+    "verifiable evidence",
+    "agent governance",
+    "lifecycle governance",
+    "memory migration",
+    "accountability",
+    "reproducibility",
+    "AI agent identity",
+    "provenance",
+    "AI governance"
+  ],
+  "related_identifiers": [
+    {
+      "relation": "isSupplementTo",
+      "identifier": "https://github.com/zhaoxinghua09-cell/uibc-core",
+      "resource_type": "software"
+    },
+    {
+      "relation": "isDocumentedBy",
+      "identifier": "https://github.com/zhaoxinghua09-cell/uibc-core/blob/main/docs/api-scope.md",
+      "resource_type": "publication-technicalnote"
+    }
+  ],
+  "publication_date": "2026-09-18"
+}

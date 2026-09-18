@@ -15,7 +15,13 @@ identifiers:
   - type: other
     value: "10.5281/zenodo.22821834"
     description: "Concept DOI — uibc-core across all versions. Resolves to the latest release: https://doi.org/10.5281/zenodo.22821834"
-license: "No license file yet — see docs/citation-kit.md §6. Do not redistribute until a LICENSE is added."
+  - type: other
+    value: "swh:1:ori:819530c8be2adf6da901256ce9fd28063f8f1296"
+    description: "Software Heritage origin identifier for https://github.com/zhaoxinghua09-cell/uibc-core (SWHID format standardised as ISO/IEC 18670). Verified against the archive index on 2026-09-18."
+  - type: other
+    value: "swh:1:snp:a901225b50ae3fe84f9f878b8c0d6b0399867e64"
+    description: "Software Heritage snapshot SWHID of the archived repository state (main = git revision 402ac6b). Archive request 2482855, save task status succeeded, visit status full, 2026-09-18. Browse: https://archive.softwareheritage.org/browse/snapshot/a901225b50ae3fe84f9f878b8c0d6b0399867e64/"
+license: "Apache-2.0"
 repository-code: "https://github.com/zhaoxinghua09-cell/uibc-core"
 url: "https://medxpert.cn/uibc/"
 keywords:
@@ -43,17 +49,17 @@ preferred-citation:
   notes: "Competition / benchmark description paper (in preparation). Cite the entry above until this is published."
 references:
   - type: article
-    title: "PAI-Bench: Persistent Identity Contract Fidelity for Deployed AI Agents"
+    title: "Identity Is More Than Recall: A Benchmark for Persistent Identity in Deployed AI Agents"
     authors:
       - family-names: "Zhao"
         given-names: "Zhenyu"
       - family-names: "Zhao"
         given-names: "Roy"
     year: 2026
-    notes: "arXiv:2609.13637 — neighbour benchmark; the closest prior art to our problem statement. Cite alongside us."
+    notes: "arXiv:2609.13637 (v1, 2026-09-12). Neighbour benchmark and the closest prior art to our problem statement; the benchmark itself is named PAI-Bench inside the paper. Title and author list verified against arXiv on 2026-09-18. Cite alongside us."
   - type: article
     title: "Agent Memory Leaderboard (AML)"
     authors:
       - name: "AML-memory contributors"
     year: 2026
-    notes: "https://github.com/AML-memory/agent-memory-leaderboard — the de-facto memory evaluation leaderboard."
+    notes: "https://github.com/AML-memory/agent-memory-leaderboard — the de-facto memory evaluation leaderboard. Repository existence verified 2026-09-18."

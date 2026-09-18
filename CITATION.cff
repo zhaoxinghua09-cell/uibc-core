@@ -10,6 +10,11 @@ abstract: >-
   evidence root + optional seal), then verified offline.
 version: "0.2.1"
 date-released: "2026-09-17"
+doi: "10.5281/zenodo.22821835"
+identifiers:
+  - type: other
+    value: "10.5281/zenodo.22821834"
+    description: "Concept DOI — uibc-core across all versions. Resolves to the latest release: https://doi.org/10.5281/zenodo.22821834"
 license: "No license file yet — see docs/citation-kit.md §6. Do not redistribute until a LICENSE is added."
 repository-code: "https://github.com/zhaoxinghua09-cell/uibc-core"
 url: "https://medxpert.cn/uibc/"

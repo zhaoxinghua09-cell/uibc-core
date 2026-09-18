@@ -2,6 +2,8 @@
 
 [中文文档](README.md)
 
+> **万物互联，数智共生** — Everything Connected, Digital-Intelligence Symbiosis.
+
 UIBC Core reference implementation v0.2.1 **[PROPOSAL]** — agent lifecycle
 evidence packages and a verifier.
 

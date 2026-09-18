@@ -1,5 +1,7 @@
 # uibc-core
 
+> **万物互联，数智共生** —— Everything Connected, Digital-Intelligence Symbiosis.
+
 UIBC Core 参考实现 v0.2.1 **[PROPOSAL]** —— Agent 生命周期证据包与验证器。
 
 理念（LGD）：**有籍 · 有证 · 有门禁** → Registry（身份注册）/ Evidence（内容哈希证据 + 封签）/ Gates（生命周期状态机 + 验证门禁）。

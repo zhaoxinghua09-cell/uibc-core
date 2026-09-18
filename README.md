@@ -9,6 +9,10 @@ UIBC Core 参考实现 v0.2.1 **[PROPOSAL]** —— Agent 生命周期证据包�
 > ⚠️ 状态：PROPOSAL，非正式标准。验证结果是**限定范围的证明**（scoped proof）：
 > PASS 仅表示"在观测到的证据边界内未发现违规"，不声称绝对可信。
 
+> 🔏 发布产物已进入 Sigstore Rekor 公共透明日志（logIndex 2883389783，见 `dist/*.cosign.bundle`）与
+> OpenTimestamps 区块链时间锚（`dist/*.ots`）；Zenodo DOI 与 Software Heritage SWHID 见 CITATION.cff。
+> 以上均为**存证**，非质量认可。
+
 ## 5 分钟 Quickstart
 
 **30 秒先看效果（无需任何准备）：**

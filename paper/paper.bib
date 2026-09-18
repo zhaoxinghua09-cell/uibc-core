@@ -1,44 +1,67 @@
-% TODO(Steven): 正式投稿前逐条核验每条 DOI 与著录信息（铁律：不编造文献）。
-% 以下为占位条目，字段需用 doi.org / 官方页核对后填实。
+% 2026-09-19 全部条目已逐条核验（老二 🟡）：
+%  - DOI 10.1145/3183558 / 10.1145/3548606.3560596 经 doi.org handle API 验证解析正常；
+%  - Sigstore 论文著录（作者/年份/页码）取自 Crossref API（权威著录源）；
+%  - in-toto 论文经 NSF PAR / CERIAS 双源核对（USENIX Security 2019，非 CCS；USENIX 不发 DOI）；
+%  - W3C VC DM 2.0 为 Recommendation（2025-05-15），C2PA 现行规范 2.4，OpenTimestamps 官网措辞已对齐。
+%  引用纪律：宁可少引，不可错引；后续新增引用须同样走实查。
 
-@misc{sigstore,
-  author = {{Sigstore project}},
-  title  = {Sigstore: Software Signing for Everybody},
-  howpublished = {\url{https://www.sigstore.dev/}},
-  note   = {Accessed 2026-09-18}
+@article{swh,
+  author  = {Abramatic, Jean-Fran{\c c}ois and Di Cosmo, Roberto and Zacchiroli, Stefano},
+  title   = {Building the Universal Archive of Source Code},
+  journal = {Communications of the ACM},
+  volume  = {61},
+  number  = {10},
+  pages   = {29--31},
+  year    = {2018},
+  month   = oct,
+  issn    = {0001-0782},
+  doi     = {10.1145/3183558},
+  url     = {https://doi.org/10.1145/3183558}
+}
+
+@inproceedings{intoto,
+  author    = {Torres-Arias, Santiago and Afzali, Hammad and Kuppusamy, Trishank Karthik and Curtmola, Reza and Cappos, Justin},
+  title     = {In-Toto: Providing Farm-to-Table Guarantees for Bits and Bytes},
+  booktitle = {Proceedings of the 28th USENIX Security Symposium},
+  pages     = {1393--1410},
+  year      = {2019},
+  address   = {Santa Clara, CA},
+  publisher = {USENIX Association},
+  url       = {https://www.usenix.org/conference/usenixsecurity19/presentation/torres-arias}
+}
+
+@inproceedings{sigstore,
+  author    = {Newman, Zachary and Meyers, John Speed and Torres-Arias, Santiago},
+  title     = {Sigstore: Software Signing for Everybody},
+  booktitle = {Proceedings of the 2022 ACM SIGSAC Conference on Computer and Communications Security},
+  pages     = {2353--2367},
+  year      = {2022},
+  publisher = {ACM},
+  doi       = {10.1145/3548606.3560596},
+  url       = {https://doi.org/10.1145/3548606.3560596}
 }
 
 @misc{w3c_vc,
-  author = {{W3C}},
-  title  = {Verifiable Credentials Data Model v2.0},
-  howpublished = {\url{https://www.w3.org/TR/vc-data-model-2.0/}},
-  note   = {Accessed 2026-09-18}
+  author       = {{W3C Verifiable Credentials Working Group}},
+  title        = {Verifiable Credentials Data Model v2.0},
+  howpublished = {W3C Recommendation, 15 May 2025},
+  year         = {2025},
+  url          = {https://www.w3.org/TR/vc-data-model-2.0/},
+  note         = {W3C Recommendation, 15 May 2025. Accessed 2026-09-19}
 }
 
 @misc{c2pa,
-  author = {{C2PA}},
-  title  = {Content Credentials: C2PA Technical Specification},
-  howpublished = {\url{https://c2pa.org/specifications/}},
-  note   = {Accessed 2026-09-18}
-}
-
-@misc{intoto,
-  author = {{in-toto project}},
-  title  = {in-toto: A Framework to Define and Secure the Integrity of Supply Chains},
-  howpublished = {\url{https://in-toto.io/}},
-  note   = {Accessed 2026-09-18}
-}
-
-@misc{swh,
-  author = {{Software Heritage}},
-  title  = {Software Heritage: The Universal Archive of Source Code},
-  howpublished = {\url{https://www.softwareheritage.org/}},
-  note   = {Accessed 2026-09-18}
+  author       = {{Coalition for Content Provenance and Authenticity (C2PA)}},
+  title        = {Content Credentials: C2PA Technical Specification, Version 2.4},
+  howpublished = {\url{https://spec.c2pa.org/specifications/specifications/2.4/}},
+  year         = {2025},
+  note         = {Accessed 2026-09-19}
 }
 
 @misc{ots,
-  author = {{OpenTimestamps}},
-  title  = {OpenTimestamps: A Standardized, Trustless, Distributed Timestamping Protocol},
+  author       = {{OpenTimestamps project}},
+  title        = {OpenTimestamps: A Timestamping Proof Standard},
   howpublished = {\url{https://opentimestamps.org/}},
-  note   = {Accessed 2026-09-18}
+  year         = {2026},
+  note         = {Blockchain-anchored (Bitcoin) timestamping protocol, maintained by Peter Todd. Accessed 2026-09-19}
 }

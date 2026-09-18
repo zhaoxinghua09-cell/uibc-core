@@ -72,6 +72,14 @@
     {
       "@type": "SoftwareSourceCode",
       "name": "uibc-core: Verifiable Evidence Packages for Autonomous AI Agents",
+      "description": "Concept DOI — resolves to the latest version. Cite this to refer to uibc-core as software.",
+      "identifier": "10.5281/zenodo.22821834",
+      "url": "https://doi.org/10.5281/zenodo.22821834"
+    },
+    {
+      "@type": "SoftwareVersion",
+      "name": "uibc-core v0.2.1 (release artifact)",
+      "description": "Version DOI — pins the v0.2.1 fixed artifact (zip). Cite this for exact-version reproducibility.",
       "identifier": "10.5281/zenodo.22821835",
       "url": "https://doi.org/10.5281/zenodo.22821835"
     }

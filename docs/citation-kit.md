@@ -105,7 +105,7 @@ uibc-core v0.2.1 的**固化发布包**已在 Zenodo 存证，得到一个**版�
 | MD5（Zenodo 侧核验） | `d8789c65a309e869977b0d74825a9b1e` |
 | 大小 | 155,450 字节 |
 | 记录页 | https://zenodo.org/records/22821835 |
-| 元数据 | Open Access · MIT · version 0.2.1 · publication_date 2026-09-18 |
+| 元数据 | Open Access · Apache-2.0 · version 0.2.1 · publication_date 2026-09-18（注：初版记录曾误填 MIT，2026-09-18 已按专家核验通过 Zenodo API 修正为 Apache-2.0，与仓库 LICENSE 一致） |
 | 关联标识 | `isSupplementTo` → https://github.com/zhaoxinghua09-cell/uibc-core |
 
 **给引用者的建议**：正文写可点击的 `https://doi.org/...`；artifact 说明里**同时给出 SHA256**，第三方才能核验下载物与本文所述一致。
@@ -127,6 +127,19 @@ uibc-core v0.2.1 的**固化发布包**已在 Zenodo 存证，得到一个**版�
 ```
 
 > ⚠️ 本件存档的是**固化发布包（zip）**，不是 git 源码树；源码以 GitHub 仓库为唯一真源（SSOT）。二者以上述 SHA256 对齐。
+
+### 7.1 引用口径（SSOT — 多 DOI 并存的统一用法）
+
+Zenodo 的机制是**一条记录天生两个 DOI**：概念 DOI（all versions）+ 每发布一个版本就多一个版本 DOI。这不是重复，无需合并、也无法删除。当前共 2 个号，全部有效：
+
+| 场景 | 用哪个 | 原因 |
+|---|---|---|
+| **对外泛引**（知乎专栏、W3C/IETF 材料、社媒、简历、名片） | 概念 DOI `10.5281/zenodo.22821834` | 永指最新版，链接永不过期；发 v0.3/v1.0 后依然有效 |
+| **学术精确引用 / 复现**（CITATION.cff、论文、issue 里的版本锚点） | 版本 DOI `10.5281/zenodo.22821835` + 注明 v0.2.1 | 精确钉住该 artifact；配合 SHA256 才可核验 |
+
+**已落位的引用点一致性**：CITATION.cff（doi=版本 DOI + identifiers 概念 DOI ✅）、codemeta.json（citation 双条目：概念为主、版本为辅，2026-09-18 修正）、ENDORSEMENTS.md（概念 DOI 为主引用，2026-09-18 修正）。
+
+**未来发布新版本的规则**：① 版本 DOI 会自动新增一个号，**无需宣传它**，只在 CHANGELOG 该版本条目下记录一行；② 概念 DOI 不变，对外一切引用**不跟随更新**；③ `citation-kit.md` 在表格中追加新版本 DOI 行即可，§7.1 的口径永不改。
 
 ---
 

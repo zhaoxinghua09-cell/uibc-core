@@ -8,7 +8,7 @@ tags:
   - AI transparency
 authors:
   - name: Xinghua Zhao
-    orcid: 0000-0000-0000-0000   # TODO(Steven): 若无 ORCID，先在 orcid.org 免费注册一个再填
+    orcid: 0009-0001-0512-1237   # 已核验：claimed、邮箱已验证、公开记录
     affiliation: 1
 affiliations:
   - name: Independent Researcher

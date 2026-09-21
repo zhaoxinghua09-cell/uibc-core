@@ -116,19 +116,39 @@ Benchmark as executable evidence — eight mutation categories, each a runnable,
 owner-signed submission.uibc package:
 
 ```text
-fixtures/              open 模式        strict(--key) 模式
-├── clean.uibc         PASS (S6 INCONCLUSIVE)   PASS (S6 PASS)   基线
-├── tampered.uibc      FAIL (S4)        FAIL (S4+S6)     证据内容改写
-├── deleted.uibc       FAIL (S4)        FAIL (S4+S6)     证据文件删除
-├── duplicated.uibc    FAIL (S5)        FAIL (S5+S6)     索引条目重复
-├── reordered.uibc     FAIL (S3)        FAIL (S3+S6)     生命周期换序
-├── migrated.uibc      FAIL (S5)        FAIL (S5+S6)     部分迁移未重封
-├── malicious.uibc     PASS (S6 不定)   FAIL (S6)        全自洽伪造——v0.1 盲区，
-│                                                        v0.2 严格模式已拦截
-└── malicious-keyswap  PASS (S6 不定)   FAIL (S6)        换钥重签——仅业主密钥
-                                                         可检（v0.3 动机案例）
+fixtures/              open 模式        strict(--key) 模式   变异
+├── clean.uibc         PASS (S6 不定)   PASS (S6 PASS)    基线
+├── tampered.uibc      FAIL (S4)        FAIL (S4)         证据内容改写
+├── deleted.uibc       FAIL (S4)        FAIL (S4)         证据文件删除
+├── duplicated.uibc    FAIL (S5)        FAIL (S5)         索引条目重复
+├── reordered.uibc     FAIL (S3)        FAIL (S3)         生命周期换序
+├── migrated.uibc      FAIL (S5)        FAIL (S5)         部分迁移未重封
+├── malicious.uibc     PASS (S6 不定)   FAIL (S6)         全自洽伪造——v0.1 盲区，
+│                                                          v0.2 严格模式已拦截
+└── malicious-keyswap  PASS (S6 不定)   FAIL (S6)         换钥重签——仅业主密钥
+                                                          可检（v0.3 动机案例）
 ```
+
+**封印的作用域是 `identity+manifest`，不含证据内容。** 所以改写/删除/换序证据
+**不会**让签名失效——上面前五行的 strict 结果只有 S4/S5/S3，S6 仍是 PASS，检测
+来自那些检查而非签名；只有动了 manifest 的伪造（`malicious`）才会破坏封印。
+请把 `S6=PASS` 读作"封印未被扰动"，**不能**读作"内容为真"。
 
 Regenerate + re-verify: `python fixtures/generate_fixtures.py` (writes
 `fixtures/EXPECTED.md` with expected-vs-observed per archive SS31 fields,
 both modes + attacker-key column).
+
+两个 fixtures 生成器都**带门禁**：实测结果与手工推导的期望矩阵逐格机器比对，
+任何偏差即以非零码退出。散文写的 Expected 列永远"不会失败"，矩阵才会——
+上面那句 `S4+S6` 的错述，正是靠着这道门禁才被发现。
+
+## Memory Migration Fixtures (UIBC-MEM)
+
+`python fixtures/generate_memory_fixtures.py` —— 22 个具名威胁，打的是可验证
+记忆迁移（M0 输入结构 / M1 条目完整 + 四项 Preservation）：重复、注入、换 id、
+丢失、畸形输入、真空输入、换序、已记录边界、500 条规模。输出
+`fixtures/MEMORY_EXPECTED.md`，同样门禁。
+
+其中三个 case 是**回归锁**，锁住这套语料挖出的真实缺陷（两者原本都是静默通过）：
+往 target 塞一个与真条目同 `memory_id` 的假条目（被 dict 折叠吞掉，报告却写
+"no injections"），以及空到空的迁移在四项 Preservation 上全拿 PASS。

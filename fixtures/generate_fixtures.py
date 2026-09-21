@@ -40,6 +40,9 @@ from uibc_core import cli as ucli
 from uibc_core import __version__
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+import _matrix_gate as _mg  # noqa: E402  (needs HERE on sys.path first)
+
 FIXTURES = ["clean", "tampered", "deleted", "duplicated", "reordered",
             "migrated", "malicious", "malicious-keyswap"]
 
@@ -195,33 +198,127 @@ MUTATIONS = {
     "malicious-keyswap": mut_malicious_keyswap,
 }
 
+# ---------------------------------------------------------------------------
+# Prose rationale (human-readable "why"), one line per fixture per mode.
+#
+# v0.2.1 CORRECTION: the previous wording claimed "S4 + S6 signature invalid"
+# for the evidence-content mutations. That was FALSE. A seal computed over
+# identity+manifest cannot be invalidated by rewriting an evidence file, so S6
+# is PASS in those cases - the detection comes from S4/S5/S3, not from the
+# signature. Documenting a defence that never fired is worse than documenting
+# none: it inflates apparent coverage. Corrected below and enforced by
+# EXPECTED_MATRIX.
+# ---------------------------------------------------------------------------
 EXPECTED_OPEN = {
-    "clean": "PASS (S6 INCONCLUSIVE: seal present, no key)",
-    "tampered": "FAIL (S4 hash mismatch, S5 INCONCLUSIVE)",
-    "deleted": "FAIL (S4 missing file, S5 INCONCLUSIVE)",
-    "duplicated": "FAIL (S4 PASS, S5 root mismatch)",
-    "reordered": "FAIL (S3 lifecycle L1/L4 violations)",
-    "migrated": "FAIL (S4 PASS, S5 root mismatch)",
-    "malicious": "open mode: S6 INCONCLUSIVE -> overall PASS (integrity unchecked "
+    "clean": "PASS (S6 INCONCLUSIVE: seal present, no key to check it with)",
+    "tampered": "FAIL (S4 hash mismatch; S5 INCONCLUSIVE - root not recomputable; "
+                "S6 PASS - the seal never covered evidence content)",
+    "deleted": "FAIL (S4 missing evidence file; S5 INCONCLUSIVE; S6 PASS - seal untouched)",
+    "duplicated": "FAIL (S4 PASS - the duplicated entry still matches its file; "
+                  "S5 root mismatch; S6 PASS)",
+    "reordered": "FAIL (S3 lifecycle L1/L4 violations; S6 PASS - lifecycle is outside the seal)",
+    "migrated": "FAIL (S4 PASS - index hash was updated; S5 root mismatch vs the "
+                "unchanged manifest; S6 PASS)",
+    "malicious": "PASS in open mode (S6 INCONCLUSIVE -> integrity is unchecked "
                  "cryptographically; use --key for strict)",
-    "malicious-keyswap": "open mode: S6 INCONCLUSIVE -> overall PASS "
-                         "(key substitution UNDETECTABLE without the owner key)",
+    "malicious-keyswap": "PASS in open mode (S6 INCONCLUSIVE -> key substitution is "
+                         "UNDETECTABLE without the owner key)",
 }
 
 EXPECTED_STRICT = {
     "clean": "PASS (S6 PASS: owner seal valid)",
-    "tampered": "FAIL (S4 + S6 signature invalid)",
-    "deleted": "FAIL (S4 + S6 signature invalid)",
-    "duplicated": "FAIL (S5 root mismatch + S6 signature invalid)",
-    "reordered": "FAIL (S3 + S6 signature invalid)",
-    "migrated": "FAIL (S5 root mismatch + S6 signature invalid)",
-    "malicious": "FAIL (S6 signature invalid - forgery without the owner key is impossible)",
+    "tampered": "FAIL (S4 hash mismatch; S6 PASS - evidence content is outside seal scope)",
+    "deleted": "FAIL (S4 missing file; S6 PASS - seal untouched)",
+    "duplicated": "FAIL (S5 root mismatch; S6 PASS - manifest untouched)",
+    "reordered": "FAIL (S3 lifecycle violation; S6 PASS - lifecycle is outside the seal)",
+    "migrated": "FAIL (S5 root mismatch; S6 PASS - manifest untouched)",
+    "malicious": "FAIL (S6 signature invalid - the forged manifest no longer matches the owner seal)",
     "malicious-keyswap": "FAIL (S6 key mismatch: attacker key != owner key)",
 }
+
+# ---------------------------------------------------------------------------
+# Structured expectation matrix (v0.2.1): the machine-checkable prior.
+#
+# WHY THIS EXISTS: until v0.2.1 the Expected column above was prose and NOTHING
+# compared it to Observed. A wrong sentence could sit next to a contradictory
+# observation forever while the generator exited 0 (exactly what the "S4 + S6"
+# wording did). Prose cannot fail; a matrix can.
+#
+# DISCIPLINE: every cell below was derived BY HAND from verify.py's control flow
+# before being compared with observed output. It is a prior, not a recording of
+# a run. A mismatch therefore means one of two real things - the verifier drifted
+# or the prior was wrong - and both stop the build instead of printing quietly.
+#
+# Note the deliberately non-obvious cells: `clean[open]` is result=PASS while
+# S6=INCONCLUSIVE (an unanswerable check must not be laundered into a pass), and
+# `malicious[open]` is PASS while `malicious[strict]` is FAIL on the SAME package
+# - mode, not content, decides the verdict there.
+# ---------------------------------------------------------------------------
+P, F, I, S = "PASS", "FAIL", "INCONCLUSIVE", "SKIP"
+
+EXPECTED_MATRIX = {
+    "clean": {
+        "open":     {"result": P, "checks": {"S1": P, "S2": P, "S3": P, "S4": P, "S5": P, "S6": I}},
+        "strict":   {"result": P, "checks": {"S1": P, "S2": P, "S3": P, "S4": P, "S5": P, "S6": P}},
+        "attacker": {"result": F, "checks": {"S1": P, "S2": P, "S3": P, "S4": P, "S5": P, "S6": F}},
+    },
+    "tampered": {
+        "open":     {"result": F, "checks": {"S1": P, "S2": P, "S3": P, "S4": F, "S5": I, "S6": I}},
+        "strict":   {"result": F, "checks": {"S1": P, "S2": P, "S3": P, "S4": F, "S5": I, "S6": P}},
+        "attacker": {"result": F, "checks": {"S1": P, "S2": P, "S3": P, "S4": F, "S5": I, "S6": F}},
+    },
+    "deleted": {
+        "open":     {"result": F, "checks": {"S1": P, "S2": P, "S3": P, "S4": F, "S5": I, "S6": I}},
+        "strict":   {"result": F, "checks": {"S1": P, "S2": P, "S3": P, "S4": F, "S5": I, "S6": P}},
+        "attacker": {"result": F, "checks": {"S1": P, "S2": P, "S3": P, "S4": F, "S5": I, "S6": F}},
+    },
+    "duplicated": {
+        "open":     {"result": F, "checks": {"S1": P, "S2": P, "S3": P, "S4": P, "S5": F, "S6": I}},
+        "strict":   {"result": F, "checks": {"S1": P, "S2": P, "S3": P, "S4": P, "S5": F, "S6": P}},
+        "attacker": {"result": F, "checks": {"S1": P, "S2": P, "S3": P, "S4": P, "S5": F, "S6": F}},
+    },
+    "reordered": {
+        "open":     {"result": F, "checks": {"S1": P, "S2": P, "S3": F, "S4": P, "S5": P, "S6": I}},
+        "strict":   {"result": F, "checks": {"S1": P, "S2": P, "S3": F, "S4": P, "S5": P, "S6": P}},
+        "attacker": {"result": F, "checks": {"S1": P, "S2": P, "S3": F, "S4": P, "S5": P, "S6": F}},
+    },
+    "migrated": {
+        "open":     {"result": F, "checks": {"S1": P, "S2": P, "S3": P, "S4": P, "S5": F, "S6": I}},
+        "strict":   {"result": F, "checks": {"S1": P, "S2": P, "S3": P, "S4": P, "S5": F, "S6": P}},
+        "attacker": {"result": F, "checks": {"S1": P, "S2": P, "S3": P, "S4": P, "S5": F, "S6": F}},
+    },
+    "malicious": {
+        "open":     {"result": P, "checks": {"S1": P, "S2": P, "S3": P, "S4": P, "S5": P, "S6": I}},
+        "strict":   {"result": F, "checks": {"S1": P, "S2": P, "S3": P, "S4": P, "S5": P, "S6": F}},
+        "attacker": {"result": F, "checks": {"S1": P, "S2": P, "S3": P, "S4": P, "S5": P, "S6": F}},
+    },
+    "malicious-keyswap": {
+        "open":     {"result": P, "checks": {"S1": P, "S2": P, "S3": P, "S4": P, "S5": P, "S6": I}},
+        "strict":   {"result": F, "checks": {"S1": P, "S2": P, "S3": P, "S4": P, "S5": P, "S6": F}},
+        "attacker": {"result": P, "checks": {"S1": P, "S2": P, "S3": P, "S4": P, "S5": P, "S6": P}},
+    },
+}
+
+MODES = ("open", "strict", "attacker")
+CHECK_ORDER = ("S1", "S2", "S3", "S4", "S5", "S6")
+
+# The comparison/rendering/gate logic is shared with the memory-fixtures
+# generator (fixtures/_matrix_gate.py) so the two cannot drift apart. These thin
+# wrappers keep this module's call sites - and its tests - unchanged.
+observed_cell = _mg.observed_cell
+
+
+def compare_matrix(observed: dict) -> list:
+    return _mg.compare(EXPECTED_MATRIX, observed, FIXTURES, MODES)
+
+
+def render_check_cell(cell: dict) -> str:
+    return _mg.render_cell(cell, CHECK_ORDER)
 
 
 def main():
     results = []
+    observed = {}
     for name in FIXTURES:
         pkg = os.path.join(HERE, f"{name}.uibc")
         if os.path.exists(pkg):
@@ -232,30 +329,39 @@ def main():
         r_open = verify(pkg, key=None)
         r_strict = verify(pkg, key=OWNER_KEY)
         r_attack = verify(pkg, key=ATTACKER_KEY)  # only meaningful for keyswap
-        failed_open = [f"{c['id']}:{c['result']}" for c in r_open["checks"] if c["result"] not in ("PASS", "SKIP")]
-        failed_strict = [f"{c['id']}:{c['result']}" for c in r_strict["checks"] if c["result"] != "PASS"]
-        results.append({
-            "fixture": f"{name}.uibc",
-            "open": r_open["result"],
-            "strict": r_strict["result"],
-            "attacker_key": r_attack["result"],
-            "non_pass_open": ", ".join(failed_open) if failed_open else "-",
-            "non_pass_strict": ", ".join(failed_strict) if failed_strict else "-",
-        })
+        cells = {"open": observed_cell(r_open), "strict": observed_cell(r_strict),
+                 "attacker": observed_cell(r_attack)}
+        for mode, cell in cells.items():
+            observed[(name, mode)] = cell
+        results.append({"fixture": f"{name}.uibc", "cells": cells})
         print(f"{name:18s} open={r_open['result']:5s} strict={r_strict['result']:5s} "
-              f"{', '.join(failed_strict) if failed_strict else 'all PASS'}")
+              f"atk={r_attack['result']:5s} | open[{render_check_cell(cells['open'])}] "
+              f"strict[{render_check_cell(cells['strict'])}]")
+
+    deviations = compare_matrix(observed)
 
     # write EXPECTED.md (archive SS31 fields)
     rows = []
     for r in results:
         name = r["fixture"].replace(".uibc", "")
+        c = r["cells"]
         rows.append(
             f"| FIX-{name.upper():17s} | evidence boundary manipulation | "
             f"{name} | open: {EXPECTED_OPEN[name]}<br>strict: {EXPECTED_STRICT[name]} | "
-            f"open: **{r['open']}** ({r['non_pass_open']})<br>strict: **{r['strict']}** ({r['non_pass_strict']}) | "
-            f"attacker-key verify: **{r['attacker_key']}** | "
+            f"open: **{c['open']['result']}** `{render_check_cell(c['open'])}`<br>"
+            f"strict: **{c['strict']['result']}** `{render_check_cell(c['strict'])}` | "
+            f"attacker-key verify: **{c['attacker']['result']}** | "
             f"uibc-core verifier {__version__} |"
         )
+
+    # Matrix appendix: printed straight from the prior so the document and the
+    # gate cannot disagree - if this section looks wrong, the build already failed.
+    mrows = []
+    for name in FIXTURES:
+        for mode in MODES:
+            exp = EXPECTED_MATRIX[name][mode]
+            mrows.append(f"| {name} | {mode} | {exp['result']} | "
+                         + " ".join(f"{cid}={exp['checks'][cid]}" for cid in CHECK_ORDER) + " |")
     md = f"""# Golden Fixtures - Expected vs Observed (archive SS30/SS31)
 
 > Benchmark as executable evidence. Generated by `generate_fixtures.py`
@@ -269,10 +375,24 @@ def main():
 >   reported INCONCLUSIVE (nothing to check it with).
 > - **strict** (`verify --key owner.key`): owner demands a valid seal -
 >   unsigned/forged/substituted packages FAIL at S6.
+>
+> The Observed column is machine-compared against a hand-derived expectation
+> matrix (`EXPECTED_MATRIX` in the generator). Any cell mismatch aborts the
+> run with a non-zero exit code: this table cannot drift silently.
 
 | Fixture | Threat Model | Target | Expected | Observed | Evidence | Verifier Version |
 |---------|--------------|--------|----------|----------|----------|------------------|
 {chr(10).join(rows)}
+
+## Expectation matrix (the gate)
+
+Cells below are the prior the generator enforces. `result` is the overall
+verdict; the rest are per-check results (S1 structure / S2 identity / S3
+lifecycle / S4 evidence hashes / S5 evidence root / S6 seal signature).
+
+| Fixture | Mode | Result | Checks |
+|---------|------|--------|--------|
+{chr(10).join(mrows)}
 
 ## Findings
 
@@ -286,16 +406,30 @@ def main():
    verifying with the OWNER key (out-of-band pinning) detects it. This is
    the standing motivating case for Ed25519 + a public key registry (v0.3).
 4. Detection is precise: each failure localizes to its check id (S3/S4/S5/S6).
+5. **Seal scope is `identity+manifest` - evidence content is OUTSIDE it**
+   (v0.2.1 correction): rewriting/deleting/reordering evidence never
+   invalidates the seal, so S6 stays PASS for `tampered`, `deleted`,
+   `duplicated`, `reordered` and `migrated`. Those are caught by S4/S5/S3
+   instead. Only a mutation that rewrites the manifest itself (`malicious`)
+   breaks the seal. An earlier revision of this table claimed "S4 + S6
+   signature invalid" - that described a defence which never fired, and it
+   has been removed. Read `S6=PASS` as "the seal was not disturbed", never as
+   "the content is authentic".
+6. Every cell above is enforced: the generator compares observed vs expected
+   and exits non-zero on any deviation.
 
 ## Scope statement (archive SS17)
 
 These fixtures demonstrate detection within the observed evidence boundary of
-the v0.2 verifier. They do not prove the absence of undetected attacks.
+the v{__version__} verifier. They do not prove the absence of undetected attacks.
 """
     with open(os.path.join(HERE, "EXPECTED.md"), "w", encoding="utf-8") as f:
         f.write(md)
     print("\nEXPECTED.md written")
 
+    # --- MATRIX GATE: prose cannot fail; a matrix can ------------------------
+    return _mg.gate(deviations, len(FIXTURES) * len(MODES))
+
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

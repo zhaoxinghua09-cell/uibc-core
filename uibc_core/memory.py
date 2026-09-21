@@ -24,12 +24,36 @@ Honest scope:
    explicitly out of scope and must not be claimed.
 3. No trust language: a PASS means "these four fields are identical",
    nothing more.
+
+v0.1.1 corrections (2026-09-18, found by mutation fixtures - see
+fixtures/generate_memory_fixtures.py):
+4. Duplicate memory_id is now checked on BOTH sides. v0.1 checked `source`
+   only, while `target` was collapsed with
+   `{e["memory_id"]: e for e in target}` - a dict comprehension that silently
+   keeps the LAST entry per id. An injected fake entry sharing a real entry's
+   id was therefore discarded before comparison, and the report still claimed
+   "no injections": a silent memory-injection path straight through the
+   highest-weighted rubric dimension (M2 fact preservation, 0.30).
+5. An empty source AND empty target is no longer a PASS. Comparing zero
+   entries made every Preservation vacuously true, so a submission that
+   migrated nothing scored full marks. It is now INCONCLUSIVE/VACUOUS_INPUT:
+   nothing was verified, therefore nothing may be claimed.
+6. An empty field value is reported as empty, not as missing (the old wording
+   conflated `{"content": ""}` with `{}`).
+7. Recorded boundary (unchanged, deliberate): undeclared extra fields on an
+   entry are NOT inspected - the four Preservations are all that is claimed.
 """
 
 import hashlib
 import json
 
 MEM_SCHEMA = "uibc-mem/0.1"
+
+# Verifier version for THIS module, carried in every report so a rubric score
+# can cite "which verify produced this" (archive SS31 'Verifier Version' field).
+# v0.1 -> v0.1.1 because the duplicate-id and vacuous-input paths below change
+# which verdict is produced - a breaking change by this project's own rule.
+MEM_VERIFIER_VERSION = "0.1.1"
 
 REQUIRED_FIELDS = ["memory_id", "content", "attribution", "citation", "version"]
 
@@ -50,8 +74,10 @@ def _validate_entry(entry, idx) -> list:
     if not isinstance(entry, dict):
         return [f"entry[{idx}] is not an object"]
     for f in REQUIRED_FIELDS:
-        if not entry.get(f):
+        if f not in entry:
             errs.append(f"entry[{idx}] missing field {f!r}")
+        elif not entry.get(f):
+            errs.append(f"entry[{idx}] field {f!r} is empty (must be non-empty)")
     return errs
 
 
@@ -72,18 +98,51 @@ def verify_migration(source: list, target: list) -> dict:
         for i, e in enumerate(entries):
             structural_errors.extend(
                 f"{label}: {msg}" for msg in _validate_entry(e, i))
-    ids_s = [e.get("memory_id") for e in source if isinstance(e, dict)]
-    if len(ids_s) != len(set(ids_s)):
-        structural_errors.append("source has duplicate memory_id values")
+    # Duplicate ids are checked on BOTH sides (v0.1.1). `target` is collapsed
+    # into a dict a few lines below; that keeps only the LAST entry per id, so
+    # an injected duplicate was previously discarded before comparison and the
+    # report still said "no injections".
+    for label, entries in (("source", source), ("target", target)):
+        if not isinstance(entries, list):
+            continue
+        ids = [e.get("memory_id") for e in entries if isinstance(e, dict)]
+        dupes = sorted({i for i in ids if ids.count(i) > 1})
+        if dupes:
+            structural_errors.append(f"{label} has duplicate memory_id values: {dupes}")
     if structural_errors:
         return {
             "schema": MEM_SCHEMA, "result": "FAIL",
             "result_code": "MALFORMED_INPUT",
+            "verifier_version": MEM_VERIFIER_VERSION,
             "checks": [{"id": "M0", "name": "input structure",
                         "result": "FAIL", "detail": "; ".join(structural_errors)}],
             "scope": "Structure only; preservation checks not run.",
         }
 
+    # Vacuous input (v0.1.1): with zero entries every Preservation is trivially
+    # true, so an empty-to-empty "migration" used to PASS and score full marks.
+    # Nothing was verified, therefore nothing may be claimed - INCONCLUSIVE,
+    # which is explicitly not a pass.
+    if not source and not target:
+        return {
+            "schema": MEM_SCHEMA, "result": "INCONCLUSIVE",
+            "result_code": "VACUOUS_INPUT",
+            "verifier_version": MEM_VERIFIER_VERSION,
+            "source_memory_root": memory_root(source),
+            "target_memory_root": memory_root(target),
+            "entries_compared": 0,
+            "changed_entries": [],
+            "checks": [{"id": "M0", "name": "input sufficiency",
+                        "result": "INCONCLUSIVE",
+                        "detail": "source and target are both empty: nothing to migrate, "
+                                  "so the four Preservations cannot be evidenced. "
+                                  "INCONCLUSIVE is NOT a pass."}],
+            "scope": "No preservation check was run; an empty entry set cannot support "
+                     "a fidelity claim.",
+            "statement": "Nothing was verified (empty entry set).",
+        }
+
+    # Safe to collapse now: duplicates on both sides were rejected above.
     src = {e["memory_id"]: e for e in source}
     tgt = {e["memory_id"]: e for e in target}
 
@@ -123,6 +182,8 @@ def verify_migration(source: list, target: list) -> dict:
     return {
         "schema": MEM_SCHEMA,
         "result": "PASS" if ok else "FAIL",
+        "result_code": "OK",
+        "verifier_version": MEM_VERIFIER_VERSION,
         "source_memory_root": memory_root(source),
         "target_memory_root": memory_root(target),
         "entries_compared": len(set(src) & set(tgt)),

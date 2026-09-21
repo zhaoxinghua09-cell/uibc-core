@@ -15,6 +15,65 @@ Nothing here is a ratified standard.
 
 ## [Unreleased]
 
+### ⚠️ VERDICT-AFFECTING (breaking in effect) — released as 0.2.2
+
+Per this project's own rule above, *a change to what produces which verifier
+verdict is a breaking change*. This release contains one, in the **memory
+migration verifier**:
+
+| Input | Before | After |
+|---|---|---|
+| migration `target` contains a duplicate `memory_id` | `PASS` when the real entry happened to be kept by dict collapse — reported as "no injections" | `FAIL` / `MALFORMED_INPUT`; duplicate ids rejected on **both** sides |
+| `source` and `target` both empty | `PASS` on all four Preservations | `INCONCLUSIVE` / `VACUOUS_INPUT` |
+
+The patch number is used deliberately. `0.3.0` is already committed in the
+public narrative to Ed25519 + a public key registry (the standing answer to the
+`malicious-keyswap` boundary), and silently renumbering that promise would be a
+more confusing change than an honest patch with this notice. **The substance is
+breaking; this notice exists so nobody discovers it from a failing suite.**
+
+> **Release status — which version number lives where.**
+> `0.2.1` is **already published** (Zenodo DOI `10.5281/zenodo.22821835`; see
+> `dist/`) and therefore must never be redefined. So this fix ships as `0.2.2`,
+> and the files that describe the *published artifact* — `CITATION.cff`,
+> `.zenodo.json`, `codemeta.json`, `dist/` — deliberately still read `0.2.1`.
+> `__init__.py` and `pyproject.toml` carry the *working-tree* version.
+>
+> Consequence worth stating plainly: **the published `0.2.1` contains the two
+> memory-migration gaps fixed here.** A `0.2.2` release should be published
+> (the existing concept DOI supports "new version"), so that the version a
+> researcher cites is not the one with a silent injection path. Publishing is
+> an outbound, irreversible action and is left to the maintainer.
+
+### Added
+- `fixtures/generate_memory_fixtures.py` — a 22-case memory-migration mutation
+  corpus (M0-M5), with the same hand-derived expectation matrix and non-zero
+  exit gate as the package fixtures. It is what found the two defects above.
+- `fixtures/_matrix_gate.py` — the comparison/rendering/gate logic shared by
+  both fixture generators, so the two cannot drift apart.
+- `tests/test_fixture_expectations.py` (16 tests) and
+  `tests/test_memory_fixtures.py` (19 tests) — gate tests in both directions
+  (green when the prior holds, red when it breaks) plus regression locks.
+- `MEM_VERIFIER_VERSION` in `uibc_core/memory.py`, carried in every migration
+  report so a rubric score can cite which verify produced it (SS31 field).
+
+### Changed
+- `fixtures/EXPECTED.md` and `README.md` no longer claim "S4 + S6 signature
+  invalid" for the evidence-content mutations. A seal over
+  `identity+manifest` cannot be invalidated by rewriting an evidence file, so
+  S6 stays `PASS` in those cases and the detection comes from S4/S5/S3. The old
+  wording described a defence that never fired.
+- Memory migration reports now always carry a `result_code`
+  (`OK` / `MALFORMED_INPUT` / `VACUOUS_INPUT`).
+
+### Fixed
+- Memory injection was possible through a duplicate `memory_id` in the target:
+  the entry was collapsed away before comparison and the report still said
+  "no injections" — a silent pass through M2 Fact Preservation (rubric weight
+  0.30, the heaviest dimension).
+- A migration of nothing scored `PASS` on all four Preservations.
+- An empty field value (`{"content": ""}`) was reported as a *missing* field.
+
 ### Added
 - `LICENSE` (Apache-2.0). Previously `pyproject.toml` declared Apache-2.0 but no
   licence file existed, and `CITATION.cff` warned against redistribution. This

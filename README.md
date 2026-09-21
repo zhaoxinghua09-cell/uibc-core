@@ -1,5 +1,8 @@
 # uibc-core
 
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/zhaoxinghua09-cell/uibc-core/badge)](https://api.scorecard.dev/projects/github.com/zhaoxinghua09-cell/uibc-core)
+[![CI](https://github.com/zhaoxinghua09-cell/uibc-core/actions/workflows/ci.yml/badge.svg)](https://github.com/zhaoxinghua09-cell/uibc-core/actions/workflows/ci.yml)
+
 > **万物互联，数智共生** —— Everything Connected, Digital-Intelligence Symbiosis.
 
 UIBC Core 参考实现 v0.2.1 **[PROPOSAL]** —— Agent 生命周期证据包与验证器。

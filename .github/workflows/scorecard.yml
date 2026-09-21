@@ -17,12 +17,18 @@ jobs:
       id-token: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        # 固定到 commit SHA（= v4.4.0）。Scorecard 自身的 Pinned-Dependencies
+        # 检查要求第三方 action 用 SHA 固定，移动 tag 会被扣分。
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           persist-credentials: false
 
       - name: Run analysis
-        uses: ossf/scorecard-action@v2
+        # 固定到 commit SHA（= v2.4.4）。
+        # 此前写的是 ossf/scorecard-action@v2 —— 上游并没有裸 v2 这个移动 tag，
+        # 因此首次推送即报 "unable to resolve action ... unable to find version v2"
+        # 而失败（run#1，2026-09-22 01:08 +08）。改为 SHA 固定后不再依赖移动 tag。
+        uses: ossf/scorecard-action@2d1146689b8cda280b9bc96326124645441f03bc
         with:
           results_file: results.sarif
           results_format: sarif

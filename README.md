@@ -1,4 +1,10 @@
 # uibc-core
+> **LGD for Medical AI** — uibc-core is the reference implementation of the LGD (Ling Gong Dao) operational
+> governance laws, proven in the world's hardest regulated domain: **medical AI / medical-device compliance**.
+> Globally applicable, fully deployed in production (MedXpert), low-cost, practical, deployable in days.
+> Every artifact you see here is independently verifiable: Sigstore Rekor transparency log, OpenTimestamps
+> anchoring, DOI + SWHID archival. Theory that already runs. Context: [FG-TIDA themes #27](https://github.com/FG-TIDA/themes/issues/27).
+
 
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/zhaoxinghua09-cell/uibc-core/badge)](https://api.scorecard.dev/projects/github.com/zhaoxinghua09-cell/uibc-core)
 [![CI](https://github.com/zhaoxinghua09-cell/uibc-core/actions/workflows/ci.yml/badge.svg)](https://github.com/zhaoxinghua09-cell/uibc-core/actions/workflows/ci.yml)

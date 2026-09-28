@@ -22,7 +22,7 @@
 
 **LGD Core Specification v0.1 = LGD 三律（有籍 / 有证 / 有门禁）的机器可校验规范。**
 
-- 指针（可复算）：`VALIDATOR/validate_manifest.py` ＋ `TESTS/`（16 项测试）；
+- 指针（可复算）：`VALIDATOR/validate_manifest.py` ＋ `TESTS/`（28 项测试）；
 - 复现命令见下方「快速上手」，逐条给出可运行的命令行。
 
 ## 分层结构

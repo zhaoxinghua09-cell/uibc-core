@@ -36,6 +36,7 @@ Key files:
 https://zhaoxinghua09-cell.github.io/uibc-core/ - rendered site mirror (landing page, handbook, AI index)
 - ai/manifest.json - machine manifest of all entry points
 - docs/SPEC-PROPOSAL-v0.1.md - the spec (PROPOSAL)
+- lgd-core/ - LGD Core Specification v0.1: machine-checkable three-laws spec (manifest schema + validator + 16 tests); dual-layer license (code Apache-2.0, theory text all rights reserved)
 - docs/governance.md - Dispute/Correction/Revocation/Accountability/Continuity/Provenance
 - docs/api-scope.md - what is public (read-only) vs local (writes)
 - docs/adoption-guide.md - minimal adoption path for a small team

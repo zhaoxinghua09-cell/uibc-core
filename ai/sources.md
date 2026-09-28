@@ -2,7 +2,7 @@
 
 - Canonical repository: https://github.com/zhaoxinghua09-cell/uibc-core
 - Author / maintainer: Steven Zhao (zhaoxinghua09-cell), independent
-  researcher. This is a personal research project (XLGD/LGD/UIBC),
+  researcher. This is a personal research project (LGD/UIBC),
   not a corporate or standards-body artifact.
 - License: see repository root.
 - Trust model for AI consumers: this `ai/` directory is self-published.

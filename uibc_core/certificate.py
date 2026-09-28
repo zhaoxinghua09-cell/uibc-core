@@ -9,7 +9,7 @@ v0.1 honest scope:
 1. HMAC-SHA256 (symmetric) - same boundary as v0.2 seals: only key holders
    can issue AND verify. Third-party verifiable certs are the Ed25519/v0.3
    target. Do NOT represent this as "publicly verifiable certification".
-2. "XLGD Certified" branding is explicitly OUT OF SCOPE (route note 17:
+2. "LGD Certified" branding is explicitly OUT OF SCOPE (route note 17:
    certification must be cautious). This module issues machine-checkable
    attestation objects, not brand endorsements.
 3. Certificate revocation is NOT in v0.1 (revocation overlay at the gate

@@ -1,6 +1,6 @@
 """uibc-core: UIBC Core reference implementation v0.2.2 [PROPOSAL].
 
-Implements the minimal object model from the XLGD/LGD/UIBC master archive (v0.1.0, SS9-SS22):
+Implements the minimal object model from the LGD/UIBC master archive (v0.1.0, SS9-SS22):
 Agent, Identity, Event, Evidence, Run/Manifest, Evidence Root, Verification, Seal Signature.
 
 v0.2: adds seal signatures (HMAC-SHA256 PROVISIONAL, Ed25519 = v0.3 target),

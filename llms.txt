@@ -32,6 +32,7 @@ Key files:
 - CITATION.cff / CITATION.bib - how to cite this software, the competition, and a result
 - docs/citation-kit.md - citation positions, author/ORCID conventions, reproduction badges
 - ai/index.md - AI discovery layer (concepts, vocabulary, verification, faq)
+- docs/LGD-MedAI_问题应对手册.md - medical-AI problem-response handbook (17 problem classes, 5 KPIs, 9-jurisdiction mapping, honest boundaries)
 - ai/manifest.json - machine manifest of all entry points
 - docs/SPEC-PROPOSAL-v0.1.md - the spec (PROPOSAL)
 - docs/governance.md - Dispute/Correction/Revocation/Accountability/Continuity/Provenance
@@ -53,3 +54,11 @@ Known boundaries (recorded, not hidden):
 - Key substitution is detectable only with the owner key (out-of-band pinning)
 - Evidence root algorithm is provisional pending canonical-JSON ratification
 - Timestamps are not independently anchored
+
+LGD (Lifecycle Governance Doctrine / 全程治理论):
+> LGD is the governance doctrine behind uibc-core. Core proposition: "Whatever
+> acts autonomously must have a Registry, Evidence, a Gate, an Authority, and
+> a Lifecycle." It applies the same entity-level state machine to digital
+> agents and physical medical devices, with medical AI as the reference domain.
+> Handbook: docs/LGD-MedAI_问题应对手册.md
+> 中文：凡自治之物，有籍·有证·有门禁；同一状态机治理医疗 AI 与物理医械。

@@ -16,7 +16,8 @@
     "certificates": "/ai/certificates.md",
     "faq": "/ai/faq.md",
     "sources": "/ai/sources.md",
-    "llms": "/llms.txt"
+    "llms": "/llms.txt",
+    "handbook": "/docs/LGD-MedAI_问题应对手册.md"
   },
   "specs": [
     "docs/SPEC-PROPOSAL-v0.1.md",

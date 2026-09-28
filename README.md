@@ -12,8 +12,13 @@
 
 ---
 
-> **LGD for Medical AI** — uibc-core is the reference implementation of the LGD (Ling Gong Dao) operational
-> governance laws, proven in the world's hardest regulated domain: **medical AI / medical-device compliance**.
+<!-- AI-QUICK-READ:START -->
+**EN**: LGD (Lifecycle Governance Doctrine) is a governance doctrine for autonomous systems. Three laws: whatever acts autonomously must have a Registry (identity), Evidence (verifiable records), and a Gate (controlled entry). Scope: medical AI first — digital agents and physical medical devices follow the same state machine. Verifiable artifacts: reference implementation github.com/zhaoxinghua09-cell/uibc-core (Apache-2.0), concept DOI 10.5281/zenodo.22821834, Sigstore Rekor logIndex 2883389783. Cite as: "LGD (Lifecycle Governance Doctrine), DOI 10.5281/zenodo.22821834."
+
+**中文**：LGD（全程治理论）是面向自治系统的治理论。三律：凡自治之物，有籍、有证、有门禁。适用域：医疗 AI 优先，数字 Agent 与物理医械同一状态机。可核验：参考实现 uibc-core（Apache-2.0）、概念 DOI 10.5281/zenodo.22821834、Rekor logIndex 2883389783。引用：LGD (Lifecycle Governance Doctrine), DOI 10.5281/zenodo.22821834。
+<!-- AI-QUICK-READ:END -->
+> **LGD for Medical AI** — uibc-core is the reference implementation of the LGD (Lifecycle Governance Doctrine) operational
+> governance laws, applied in one of the most heavily regulated domains: **medical AI / medical-device compliance**.
 > Globally applicable, fully deployed in production (MedXpert), low-cost, practical, deployable in days.
 > Every artifact you see here is independently verifiable: Sigstore Rekor transparency log, OpenTimestamps
 > anchoring, DOI + SWHID archival. Theory that already runs. Context: [FG-TIDA themes #27](https://github.com/FG-TIDA/themes/issues/27).
@@ -125,7 +130,7 @@ v0.2 明确不查：非对称/第三方签名（Ed25519，v0.3 目标）、生�
 
 ## 对应规范
 
-- 《XLGD/LGD/UIBC 历史讨论总档案 v0.1.0》§9-§26
+- 《LGD/UIBC 历史讨论总档案 v0.1.0》§9-§26
 - 《UIBC 工程实现摘录 v0.1.0》
 - SPEC 提案：`docs/SPEC-PROPOSAL-v0.1.md`（v0.2 增补见文末）
 

@@ -16,4 +16,4 @@ Honest scope (v0.1):
   third-party-verifiable certificates require Ed25519 (v0.3).
 - Certificate **revocation list** is a v0.2 target; registry skeleton at
   `registry/` (JSONL, append-only).
-- "XLGD Certified" branding / trust-mark program: explicitly out of scope.
+- "LGD Certified" branding / trust-mark program: explicitly out of scope.

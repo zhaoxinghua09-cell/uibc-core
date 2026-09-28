@@ -13,7 +13,7 @@ Copyright (c) 2026 赵兴华 / Steven Zhao·China。保留所有权利。
 
 ```
 © 2026 赵兴华 / Steven Zhao·China (ORCID 0009-0001-0512-1237). All rights reserved.
-理论署名 (attribution) : LGD（Ling Gong Dao / 凡自治之道）— SynomosAI initiative
+理论署名 (attribution) : LGD（Lifecycle Governance Doctrine / 全程治理论）— SynomosAI initiative
 名称状态 (name status)  : "SynomosAI" / "MedXpert" — 未申请实体注册、未申请商标注册
                         (not a registered legal entity; no trademark registered)
 生产参考部署 (production reference, self-reported) : MedXpert

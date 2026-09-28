@@ -3,7 +3,7 @@
 Status: PROPOSAL（与 SPEC v0.2 同级，未经独立实现核验前不得宣称 ratified）
 Spec version: 0.2.0
 Date: 2026-09-18
-依据：XLGD/LGD/UIBC 历史总档案 v0.1.0（§分层表）+ 2026-09-17 路线评审
+依据：LGD/UIBC 历史总档案 v0.1.0（§分层表）+ 2026-09-17 路线评审
 
 ---
 

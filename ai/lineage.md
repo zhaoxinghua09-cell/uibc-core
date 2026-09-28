@@ -1,6 +1,6 @@
 # Lineage
 
-UIBC Core grew out of the XLGD / LGD working archives on autonomous-object
+UIBC Core grew out of the LGD working archives on autonomous-object
 governance (60-section historical archive, frozen as v0.1.0 with SHA-256).
 
 Design decisions with dated rationale:
@@ -16,7 +16,7 @@ Design decisions with dated rationale:
   designed before the verifier was trusted; the malicious self-consistent
   forgery that passed v0.1 is preserved as a fixture and is caught by S6
   in strict mode.
-- Honest scope: governance layers ship as PROPOSAL; "XLGD Certified"
+- Honest scope: governance layers ship as PROPOSAL; "LGD Certified"
   branding is explicitly out of scope.
 
 Full archive: repository of the author (see sources.md).

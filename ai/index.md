@@ -11,6 +11,7 @@ packages for autonomous AI agents, built on the LGD principles:
 - Normative spec: [specifications.md](specifications.md)
 - How verification works: [verification.md](verification.md)
 - Try it in 3 steps: [faq.md](faq.md)
+- Medical-AI problem-response handbook: [../docs/LGD-MedAI_问题应对手册.md](../docs/LGD-MedAI_问题应对手册.md)
 
 ## Deep links
 

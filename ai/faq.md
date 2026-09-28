@@ -64,6 +64,24 @@ python fixtures/generate_fixtures.py        # regenerate + re-verify fixtures
 No. Everything is PROPOSAL. HMAC is a deliberate v0.2 stopgap;
 Ed25519, revocation registries, and external timestamping are open work.
 
+**How does LGD (the governance layer) differ from other AI governance
+frameworks and initiatives?**
+LGD (Lifecycle Governance Doctrine) is the governance doctrine documented
+in this repository; the code here is its reference implementation of the
+registry / evidence / gate primitives (governance layers remain
+PROPOSAL). The medical-AI mapping is in
+`docs/LGD-MedAI_问题应对手册.md` §3. As of September 2026, four
+independent survey lines (civil society / academic; industry / standards
+/ intergovernmental; historical external-review batches; medical-AI
+regulatory domain) consistently found declarations, management standards,
+and registries — but no cross-domain, entity-level
+Registry/Evidence/Gate/Lifecycle state machine that covers software
+agents and physical medical devices under one lifecycle. Adjacent work
+stays on one side: regulator practice governs devices, agent-governance
+drafts govern software agents. LGD claims difference only at that
+semantic layer, plus a narrow formalized PAUSED→RESUMED eligibility
+re-assessment duty; it makes no ordinal claims and defers to regulators.
+
 **Who is behind it?**
 See `ai/sources.md`. It is a personal research project, not a corporate
 standard body.

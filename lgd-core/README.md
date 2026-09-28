@@ -1,4 +1,4 @@
-# LGD Core Specification v0.1
+# LGD Core Specification v0.2
 
 ```
 © 2026 赵兴华 / Steven Zhao·China (ORCID 0009-0001-0512-1237). All rights reserved.
@@ -14,13 +14,15 @@
                     外锚 (external anchor): Sigstore Rekor logIndex 2883389783
 ```
 
-> 以上权属宣告统一块按 `LGD对外表述规范_v1.2` §3.2 整块复制，未删改。
+> 以上权属宣告统一块按《LGD 对外表述规范 v1.3》§3.2 复制：A 段（公共段）逐字一致；B 段（资产参数段）按本资产（uibc-core 仓内 `lgd-core/` 规范件）已核实事实填写。
 
 ---
 
 ## 一句话定位
 
-**LGD Core Specification v0.1 = LGD 三律（有籍 / 有证 / 有门禁）的机器可校验规范。**
+**LGD Core Specification v0.2 = LGD 三律（有籍 / 有证 / 有门禁）的机器可校验规范。**
+
+- v0.2 为**向后兼容的文本澄清**（规范-实现仲裁、判定细则成文、self-attested 标注、定位边界声明），未增删任何字段；变更记录见 `SPEC.md` §5。
 
 - 指针（可复算）：`VALIDATOR/validate_manifest.py` ＋ `TESTS/`（28 项测试）；
 - 复现命令见下方「快速上手」，逐条给出可运行的命令行。
@@ -58,7 +60,7 @@ UIBC — 挑战 / 验证 / 实验
 | 01 | What is LGD | 分层定位与本索引 | ✅ 在位：本文件 `README.md` |
 | 02 | Three Laws | 三律定义、对应字段、校验方式（并列非递进） | ✅ 在位：`THREE-LAWS.md` |
 | 03 | Specification | Manifest 格式、合规等级、Medical AI Profile、版本演进 | ✅ 在位：`SPEC.md` |
-| 04 | Reference Implementation | 参考实现 | 🔗 指向外部仓：`uibc-core`（Apache-2.0，见 `CITATION.cff`） |
+| 04 | Reference Implementation | 参考实现 | ✅ 在位：本目录 `VALIDATOR/`（同仓 `uibc-core`，Apache-2.0，见 `CITATION.cff`） |
 | 05 | Compliance Test | 合规测试流程与报告模板；validator ＋ tests | ✅ 在位：`COMPLIANCE.md`、`VALIDATOR/`、`TESTS/` |
 | 06 | Examples | 最小 agent / 医疗 AI / 非合规 三示例 | ✅ 在位：`EXAMPLES/` |
 | 07 | UIBC | 挑战 / 验证 / 实验 | 🔗 外部：另行规划（本草案不含赛事件） |
@@ -110,7 +112,8 @@ LGD-Core_v0.1/
 
 ## 边界声明
 
-1. **草案**：v0.1 为草案；截至本草案，**未经任何第三方评审**。
+1. **草案**：v0.2 为草案（v0.1 已公开，2026-09-28 授权推送）；截至本草案，**未经任何第三方评审**。
 2. **已公开**：本目录已随 uibc-core 公开仓发布（2026-09-28，Steven 授权推送）；代码 Apache-2.0，理论文本保留所有权利。
 3. **不构成认可**：通过本目录的 validator 或测试，**不等于**任何认证、背书或监管认可。
 4. **示例非声明**：`EXAMPLES/` 全部为中性示例（占位符 `placeholder:*` / `YYYY-MM-DD`），不含真实产品名、机构名，也不构成任何未经核实的声明。
+5. **定位边界**：LGD 不主张优先权（组合与统一抽象站位）；已核实最近邻与 V3 口径边界见 `SPEC.md` §7。

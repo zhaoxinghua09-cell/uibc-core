@@ -15,6 +15,22 @@
 | Agent action receipts / notarization | AgentNotary, agent-receipts / Obsigna (both small, stars unverified) | seal/attest/receipt CLI tools; closest in spirit to uibc-core |
 | Agent memory (product layer) | Mem0, Zep, Letta/MemGPT | memory stores; memory *verifiability* is not their feature |
 
+### The governance-initiative layer (the open ground, September 2026)
+
+A four-line survey (civil society / academic; industry / standards /
+intergovernmental; historical external-review batches; medical-AI
+regulatory domain) maps the initiative layer: management standards
+(ISO/IEC 42001, 42005), regulator practice (FDA PCCP), intergovernmental
+study groups (UN / ITU), open-source guidance (OpenSSF SAFE-MCP),
+academic agent-governance drafts (AEP / AADP), and civil-society
+declarations — all declarative, management-system-level, or
+software-only. None specifies a cross-domain entity-level
+Registry/Evidence/Gate/Lifecycle state machine spanning digital agents
+and physical devices. LGD (lifecycle governance) targets exactly that
+layer; honest wording and per-claim status are in
+`docs/LGD-MedAI_问题应对手册.md` §3. Eligibility re-assessment is claimed
+only as a narrow formalized PAUSED→RESUMED duty at entity level.
+
 ## Where uibc-core genuinely differs
 
 1. **Verifiable memory migration (UIBC-MEM)** — none of the above makes

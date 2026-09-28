@@ -1,0 +1,26 @@
+# 测试夹具 · 合法 #2（带证据条目）
+# 三律全过：有证为 required=true 且 items 非空，每条含 source + date。
+# date 用「YYYY-MM-DD」占位符（中性占位，非具体日期）。
+lgd:
+  version: "0.1"
+subject:
+  type: skill
+  id: skill.fixture.valid-02
+identity:
+  owner: fixture-owner
+  version: "0.2.0"
+evidence:
+  required: true
+  items:
+    - source: "placeholder:run-log"
+      date: "YYYY-MM-DD"
+    - source: "placeholder:review-note"
+      date: "YYYY-MM-DD"
+governance:
+  gates:
+    - authorization
+    - safety
+    - audit
+audit:
+  logging: true
+  immutable: true

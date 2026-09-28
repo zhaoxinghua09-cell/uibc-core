@@ -1,0 +1,20 @@
+# 测试夹具 · 非法 #2：evidence.required=true 而 items 为空（违反 LGD-II 有证）
+# 预期：validator 判 FAIL，报 items 必须为非空数组。
+lgd:
+  version: "0.1"
+subject:
+  type: agent
+  id: agent.fixture.invalid-02
+identity:
+  owner: fixture-owner
+  version: "0.1.0"
+evidence:
+  required: true
+  items: []
+governance:
+  gates:
+    - authorization
+    - audit
+audit:
+  logging: true
+  immutable: true

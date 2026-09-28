@@ -1,0 +1,22 @@
+# LGD Manifest 示例 · 非合规（反例）
+# 用途：演示一份会被 validator 判 FAIL 的 manifest，供对照。
+# 本示例同时违反三律：
+#   - LGD-I  有籍：identity 缺 owner
+#   - LGD-II 有证：evidence.required=true 而 items 为空
+#   - LGD-III有门禁：gates 缺 audit，且 audit.logging / audit.immutable 均为 false
+lgd:
+  version: "0.1"
+subject:
+  type: agent
+  id: agent.example.noncompliant
+identity:
+  version: "0.1.0"
+evidence:
+  required: true
+  items: []
+governance:
+  gates:
+    - safety
+audit:
+  logging: false
+  immutable: false

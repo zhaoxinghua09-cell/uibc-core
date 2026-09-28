@@ -1,0 +1,20 @@
+# 测试夹具 · 合法 #1（最小 agent）
+# 三律全过：有籍（identity 三字段）/ 有证（required=false，items 可空）/ 有门禁（含 audit，logging+immutable=true）
+lgd:
+  version: "0.1"
+subject:
+  type: agent
+  id: agent.fixture.valid-01
+identity:
+  owner: fixture-owner
+  version: "0.1.0"
+evidence:
+  required: false
+  items: []
+governance:
+  gates:
+    - authorization
+    - audit
+audit:
+  logging: true
+  immutable: true

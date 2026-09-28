@@ -1,0 +1,16 @@
+# 测试夹具 · 非法 #1：缺 identity（违反 LGD-I 有籍）
+# 预期：validator 判 FAIL，报 identity.owner / identity.version 缺失。
+lgd:
+  version: "0.1"
+subject:
+  type: agent
+  id: agent.fixture.invalid-01
+evidence:
+  required: false
+  items: []
+governance:
+  gates:
+    - audit
+audit:
+  logging: true
+  immutable: true

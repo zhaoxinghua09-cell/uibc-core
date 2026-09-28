@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:lgd-core:manifest:0.1",
+  "title": "LGD Manifest (LGD Core Specification v0.1)",
+  "description": "LGD 三律的机器可校验载体：LGD-I 有籍（identity）/ LGD-II 有证（evidence）/ LGD-III 有门禁（governance + audit）。字段与 SPEC.md §2 一一对应。",
+  "type": "object",
+  "required": ["lgd", "subject", "identity", "evidence", "governance", "audit"],
+  "additionalProperties": false,
+  "properties": {
+    "lgd": {
+      "type": "object",
+      "description": "规范版本声明。",
+      "required": ["version"],
+      "additionalProperties": false,
+      "properties": {
+        "version": {
+          "type": "string",
+          "enum": ["0.1"]
+        }
+      }
+    },
+    "subject": {
+      "type": "object",
+      "description": "被治理对象（agent / skill / system 等）。",
+      "required": ["type", "id"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {"type": "string", "minLength": 1},
+        "id": {"type": "string", "minLength": 1}
+      }
+    },
+    "identity": {
+      "type": "object",
+      "description": "LGD-I 有籍：责任主体与声明版本。",
+      "required": ["owner", "version"],
+      "additionalProperties": false,
+      "properties": {
+        "owner": {"type": "string", "minLength": 1},
+        "version": {"type": "string", "minLength": 1}
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "description": "LGD-II 有证：证据需求与证据条目。",
+      "required": ["required"],
+      "additionalProperties": false,
+      "properties": {
+        "required": {"type": "boolean"},
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["source", "date"],
+            "additionalProperties": false,
+            "properties": {
+              "source": {"type": "string", "minLength": 1},
+              "date": {"type": "string", "minLength": 1}
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {"required": {"const": true}},
+            "required": ["required"]
+          },
+          "then": {
+            "properties": {"items": {"minItems": 1}},
+            "required": ["items"]
+          }
+        }
+      ]
+    },
+    "governance": {
+      "type": "object",
+      "description": "LGD-III 有门禁：治理门禁清单。",
+      "required": ["gates"],
+      "additionalProperties": false,
+      "properties": {
+        "gates": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": ["authorization", "safety", "audit"]
+          }
+        }
+      }
+    },
+    "audit": {
+      "type": "object",
+      "description": "LGD-III 有门禁：审计要求。",
+      "required": ["logging", "immutable"],
+      "additionalProperties": false,
+      "properties": {
+        "logging": {"type": "boolean"},
+        "immutable": {"type": "boolean"}
+      }
+    },
+    "medical": {
+      "type": "object",
+      "description": "Medical AI Profile（可选，SPEC.md §4）。仅定义字段与必填性，不定义取值。",
+      "required": [
+        "data_source",
+        "model_version",
+        "evidence",
+        "authorization",
+        "clinical_risk_gates",
+        "audit"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "data_source": {"type": "string", "minLength": 1},
+        "model_version": {"type": "string", "minLength": 1},
+        "evidence": {"type": "array", "items": {"type": "string"}},
+        "authorization": {"type": "string", "minLength": 1},
+        "clinical_risk_gates": {"type": "array", "items": {"type": "string"}},
+        "audit": {"type": "array", "items": {"type": "string"}}
+      }
+    }
+  }
+}

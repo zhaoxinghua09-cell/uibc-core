@@ -1,0 +1,48 @@
+# LGD Manifest 示例 · 医疗 AI agent（骨架）
+# 用途：演示 SPEC.md §4 Medical AI Profile 六字段的填写位置与必填性。
+# 权利约束：全部取值均为中性占位符（placeholder:* / YYYY-MM-DD），
+#           不含任何真实产品名、机构名，也不构成任何未经核实的声明。
+lgd:
+  version: "0.1"
+
+subject:
+  type: agent
+  id: agent.example.medical-ai
+
+# LGD-I 有籍
+identity:
+  owner: placeholder-owner
+  version: "0.1.0"
+
+# LGD-II 有证（占位证据条目，source 与 date 均为中性占位）
+evidence:
+  required: true
+  items:
+    - source: "placeholder:evidence-index-01"
+      date: "YYYY-MM-DD"
+    - source: "placeholder:evidence-index-02"
+      date: "YYYY-MM-DD"
+
+# LGD-III 有门禁
+governance:
+  gates:
+    - authorization
+    - safety
+    - audit
+
+audit:
+  logging: true
+  immutable: true
+
+# Medical AI Profile（SPEC.md §4）：仅定义字段与必填性，不定义取值
+medical:
+  data_source: "placeholder:dataset-source-ref"              # 数据来源
+  model_version: "placeholder:model-version-ref"             # 模型版本
+  evidence:                                                  # 证据（引用上方 items）
+    - "placeholder:evidence-index-01"
+    - "placeholder:evidence-index-02"
+  authorization: "placeholder:authorization-ref"             # 权限
+  clinical_risk_gates:                                       # 临床风险门禁
+    - "placeholder:clinical-risk-gate-ref"
+  audit:                                                     # 审计
+    - "placeholder:audit-log-ref"

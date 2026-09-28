@@ -1,0 +1,31 @@
+# LGD Manifest 示例 · 最小 agent
+# 用途：演示一份通过三律的最小 manifest（可直接用 VALIDATOR 校验）。
+# 定位：示例，非任何真实部署声明。
+lgd:
+  version: "0.1"
+
+# 被治理对象
+subject:
+  type: agent
+  id: agent.example.minimal
+
+# LGD-I 有籍：责任主体 + 声明版本
+identity:
+  owner: example-owner
+  version: "0.1.0"
+
+# LGD-II 有证：本示例不强制证据
+evidence:
+  required: false
+  items: []
+
+# LGD-III 有门禁：至少含 audit
+governance:
+  gates:
+    - authorization
+    - audit
+
+# LGD-III 有门禁：审计要求
+audit:
+  logging: true
+  immutable: true

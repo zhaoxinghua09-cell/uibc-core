@@ -106,7 +106,7 @@ python VALIDATOR/validate_manifest.py <manifest>
 
 ## 权属宣告与状态
 
-> 状态：**v0.1 草案**；截至本草案，**未经任何第三方评审**；发布待授权（G0）。
+> 状态：**v0.1 草案**；截至本草案，**未经任何第三方评审**；已公开（2026-09-28 授权推送）。
 
 ```text
 © 2026 赵兴华 / Steven Zhao·China (ORCID 0009-0001-0512-1237). All rights reserved.

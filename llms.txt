@@ -33,6 +33,7 @@ Key files:
 - docs/citation-kit.md - citation positions, author/ORCID conventions, reproduction badges
 - ai/index.md - AI discovery layer (concepts, vocabulary, verification, faq)
 - docs/LGD-MedAI_问题应对手册.md - medical-AI problem-response handbook (17 problem classes, 5 KPIs, 9-jurisdiction mapping, honest boundaries)
+https://zhaoxinghua09-cell.github.io/uibc-core/ - rendered site mirror (landing page, handbook, AI index)
 - ai/manifest.json - machine manifest of all entry points
 - docs/SPEC-PROPOSAL-v0.1.md - the spec (PROPOSAL)
 - docs/governance.md - Dispute/Correction/Revocation/Accountability/Continuity/Provenance

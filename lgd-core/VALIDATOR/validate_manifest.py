@@ -2,13 +2,20 @@
 # -*- coding: utf-8 -*-
 """LGD Core Specification v0.1 — manifest validator.
 
-按《LGD Core Spec v0.1》三律逐项校验一份 LGD Manifest：
+按《LGD Core Spec v0.1》校验一份 LGD Manifest：
 
   LGD-I  有籍   (identity)  : subject.id / identity.owner / identity.version 三字段齐全且非空
   LGD-II 有证   (evidence)  : evidence.required=true 时 items 非空，且每条含 source 与 date
-  LGD-III有门禁 (governance): governance.gates 非空且含 audit；audit.logging 与 audit.immutable 均为 true
+  LGD-III有门禁 (governance): governance.gates 非空、含 audit、不重复、值均在枚举内；
+                              audit.logging 与 audit.immutable 均为 true
 
-输出：每条问题一行（带律别前缀）＋ RESULT: PASS / FAIL；正确退出码 0（PASS）/ 1（FAIL）。
+  [结构]        (structural): 与 MANIFEST.schema.json 语义一致的无依赖镜像——
+                              lgd.version 枚举（当前仅 "0.1"）、subject.type/subject.id
+                              非空字符串、identity.owner/version 类型、medical 段出现时
+                              六字段全必填及类型、顶层禁未知字段。默认路径即执行，
+                              不依赖 --schema（L2 判据口径与 schema 不脱节）。
+
+输出：每条问题一行（带律别/结构前缀）＋ RESULT: PASS / FAIL；正确退出码 0（PASS）/ 1（FAIL）。
 
 依赖：
   - 仅用 Python 3 标准库（argparse / json / sys / pathlib）。
@@ -43,8 +50,20 @@ except Exception:  # pragma: no cover - 环境相关
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA_PATH = ROOT / "MANIFEST.schema.json"
 
-# LGD-I「有籍」三字段（最小判据；subject.type 由 schema 层保证）
+# LGD-I「有籍」三字段（最小判据）
 IDENTITY_FIELDS = ("subject.id", "identity.owner", "identity.version")
+
+# ---- 结构校验常量（与 MANIFEST.schema.json 一致；2026-09-28 EAI-2a D1-D5 修复） ---- #
+_LGD_VERSIONS = ("0.1",)  # schema: lgd.version enum
+_GATE_ENUM = ("authorization", "safety", "audit")  # schema: gates enum
+_TOP_KEYS = ("lgd", "subject", "identity", "evidence", "governance", "audit", "medical")
+# schema: additionalProperties=false
+_MEDICAL_STR_FIELDS = ("data_source", "model_version", "authorization")
+_MEDICAL_LIST_FIELDS = ("evidence", "clinical_risk_gates", "audit")
+
+
+def _nonblank_str(value) -> bool:
+    return isinstance(value, str) and value.strip() != ""
 
 
 # --------------------------------------------------------------------------- #
@@ -211,6 +230,57 @@ def validate(data) -> list:
         if _blank(_get(data, field)):
             problems.append(f"[LGD-I 有籍] 必填字段缺失或为空: {field}")
 
+    # ---- [结构] 与 MANIFEST.schema.json 语义一致的无依赖镜像（默认路径执行） ----
+    unknown_top = [k for k in data.keys() if k not in _TOP_KEYS]
+    for k in unknown_top:
+        problems.append(f"[结构] 未知的顶层字段: {k}（schema 不允许额外字段）")
+
+    lgd = data.get("lgd")
+    if not isinstance(lgd, dict):
+        problems.append("[结构] 缺失或非法 lgd 段（须为映射）")
+    else:
+        ver = lgd.get("version")
+        if not isinstance(ver, str) or ver not in _LGD_VERSIONS:
+            problems.append(
+                f"[结构] lgd.version 必须为 {_LGD_VERSIONS} 中的字符串（实际: {ver!r}）"
+            )
+
+    subject = data.get("subject")
+    if not isinstance(subject, dict):
+        problems.append("[结构] 缺失或非法 subject 段（须为映射）")
+    else:
+        if not _nonblank_str(subject.get("type")):
+            problems.append("[结构] subject.type 必须为非空字符串")
+        if not _nonblank_str(subject.get("id")):
+            problems.append("[结构] subject.id 必须为非空字符串")
+
+    identity = data.get("identity")
+    if not isinstance(identity, dict):
+        problems.append("[结构] 缺失或非法 identity 段（须为映射）")
+    else:
+        for f in ("owner", "version"):
+            if not _nonblank_str(identity.get(f)):
+                problems.append(f"[结构] identity.{f} 必须为非空字符串")
+
+    medical = data.get("medical")
+    if medical is not None:
+        if not isinstance(medical, dict):
+            problems.append("[结构] medical 段必须为映射（出现时）")
+        else:
+            for f in _MEDICAL_STR_FIELDS:
+                if not _nonblank_str(medical.get(f)):
+                    problems.append(
+                        f"[结构] medical.{f} 必须为非空字符串（medical 出现时六字段全必填）"
+                    )
+            for f in _MEDICAL_LIST_FIELDS:
+                val = medical.get(f)
+                if not isinstance(val, list) or not all(
+                    isinstance(x, str) for x in val
+                ):
+                    problems.append(
+                        f"[结构] medical.{f} 必须为字符串数组（medical 出现时六字段全必填）"
+                    )
+
     # ---- LGD-II 有证 ----
     evidence = data.get("evidence")
     if not isinstance(evidence, dict):
@@ -251,8 +321,17 @@ def validate(data) -> list:
         gates = governance.get("gates")
         if not isinstance(gates, list) or len(gates) == 0:
             problems.append("[LGD-III 有门禁] governance.gates 必须为非空数组")
-        elif "audit" not in gates:
-            problems.append("[LGD-III 有门禁] governance.gates 必须包含 'audit'")
+        else:
+            bad = [g for g in gates if not (isinstance(g, str) and g in _GATE_ENUM)]
+            if bad:
+                problems.append(
+                    "[LGD-III 有门禁] governance.gates 含非法或非字符串项: "
+                    f"{bad}（enum: authorization/safety/audit）"
+                )
+            if len({str(g) for g in gates}) != len(gates):
+                problems.append("[LGD-III 有门禁] governance.gates 存在重复项（须不重复）")
+            if "audit" not in gates:
+                problems.append("[LGD-III 有门禁] governance.gates 必须包含 'audit'")
 
     audit = data.get("audit")
     if not isinstance(audit, dict):
@@ -296,7 +375,7 @@ def _report(path, data, use_schema) -> list:
             print(f"  - {line}")
     else:
         print("RESULT: PASS")
-        print("  - LGD-I 有籍 / LGD-II 有证 / LGD-III 有门禁：全部通过")
+        print("  - LGD-I 有籍 / LGD-II 有证 / LGD-III 有门禁 / [结构]：全部通过")
     return problems
 
 

@@ -8,7 +8,7 @@
   **均未申请实体注册、未申请商标注册**；出现仅作来源标识，
   不构成对法人实体或商标权的任何主张。
 - **完整条款**：见仓库根目录 [LICENSE](LICENSE)。
-- **联系**：zhaoxinghua06@126.com ｜ ORCID 0009-0001-0512-1237
+- **联系**：zhaoxinghua09@gmail.com ｜ ORCID 0009-0001-0512-1237
 
 ---
 
@@ -18,10 +18,13 @@
 **中文**：LGD（全程治理论）是面向自治系统的治理论。三律：凡自治之物，有籍、有证、有门禁。适用域：医疗 AI 优先，数字 Agent 与物理医械同一状态机。可核验：参考实现 uibc-core（Apache-2.0）、概念 DOI 10.5281/zenodo.22821834、Rekor logIndex 2883389783。引用：LGD (Lifecycle Governance Doctrine), DOI 10.5281/zenodo.22821834。
 <!-- AI-QUICK-READ:END -->
 > **LGD for Medical AI** — uibc-core is the reference implementation of the LGD (Lifecycle Governance Doctrine) operational
-> governance laws, applied in one of the most heavily regulated domains: **medical AI / medical-device compliance**.
-> Globally applicable, fully deployed in production (MedXpert), low-cost, practical, deployable in days.
-> Every artifact you see here is independently verifiable: Sigstore Rekor transparency log,
-> DOI + SWHID archival. Theory that already runs. Context: [FG-TIDA themes #27](https://github.com/FG-TIDA/themes/issues/27).
+> governance laws, applied to medical AI / medical-device compliance.
+> **Verifiable today** — every artifact is independently checkable: Sigstore Rekor transparency log
+> (logIndex 2883389783), concept DOI 10.5281/zenodo.22821834, SWHID
+> `swh:1:ori:819530c8be2adf6da901256ce9fd28063f8f1296` (ISO/IEC 18670).
+> Reproduce: `python -m unittest discover tests` (151 tests) · `python independent_verifier/cross_check.py`.
+> **Honest boundary** — no third-party quality review to date; any operational use is self-reported
+> (see ENDORSEMENTS.md: 存证 ≠ 参与 ≠ 认可). Context: [FG-TIDA themes #27](https://github.com/FG-TIDA/themes/issues/27).
 
 
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/zhaoxinghua09-cell/uibc-core/badge)](https://api.scorecard.dev/projects/github.com/zhaoxinghua09-cell/uibc-core)

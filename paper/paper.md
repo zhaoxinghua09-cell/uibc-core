@@ -82,7 +82,7 @@ communities.
 Development of `uibc-core` used AI assistance (Claude-family models via the
 WorkBuddy agent environment, 2026) for code drafting, test scaffolding,
 documentation, and paper text. All AI-assisted outputs were reviewed, edited, and
-validated by the author, who made all core design decisions (evidence model, gate
+verified by the author, who made all core design decisions (evidence model, gate
 semantics, scoped-validation doctrine, disclosure-first governance stance). The
 author affirms full responsibility for accuracy, originality, and licensing of all
 materials.

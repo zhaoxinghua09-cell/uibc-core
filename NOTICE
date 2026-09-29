@@ -6,11 +6,14 @@ Foundation and the Sigstore project (https://www.sigstore.dev/), used only
 as optional external tooling for release-artifact transparency logging.
 No Sigstore code is vendored or redistributed in this repository.
 
-This product includes an OpenTimestamps proof (dist/uibc-core-0.2.1.zip.ots
-and timestamps/uibc-core-0.2.1.zip.ots) generated using the OpenTimestamps
-client (https://opentimestamps.org/), which is licensed under the
-GNU Lesser General Public License v3.0. The proof file, not the client, is
-distributed here.
+Earlier v0.2.1 draft releases shipped a third-party timestamp proof
+(dist/uibc-core-0.2.1.zip.ots and timestamps/uibc-core-0.2.1.zip.ots),
+generated with the OpenTimestamps client (https://opentimestamps.org/), which
+is licensed under the GNU Lesser General Public License v3.0; the proof file,
+not the client, is what was distributed. Re-verification on 2026-09-26 found
+that this proof does not constitute a valid OpenTimestamps time anchor, so it
+is retained for audit only and must not be cited as evidence of existence or
+priority.
 
 Third-party source documents referenced in research notes are not
 redistributed in this repository.

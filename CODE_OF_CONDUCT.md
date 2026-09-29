@@ -39,7 +39,7 @@ when an individual is representing the project in public.
 
 ## Enforcement
 
-Report unacceptable behaviour to **zhaoxinghua06@126.com**.
+Report unacceptable behaviour to **zhaoxinghua09@gmail.com**.
 
 Reports are handled by the maintainer. Responses will be proportionate:
 a private clarification, a formal warning, temporary suspension, or a permanent

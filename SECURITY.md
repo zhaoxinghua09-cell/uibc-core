@@ -43,7 +43,7 @@ Out of scope (by design, and documented as such):
 
 Please **do not open a public issue** for a security report.
 
-Email: **zhaoxinghua06@126.com** with the subject prefix `[uibc-security]`.
+Email: **zhaoxinghua09@gmail.com** with the subject prefix `[uibc-security]`.
 
 Include, as far as you can:
 

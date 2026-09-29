@@ -32,7 +32,7 @@ identity, runs four preservation checks plus injection-detection and anti-gaming
 heuristics against it, and emits a scoped validation report: a PASS verdict asserts
 only that *no violation was observed within the evidenced boundary* — never absolute
 trustworthiness. Release artifacts are anchored in public transparency infrastructure
-(Sigstore Rekor transparency log, OpenTimestamps, Software Heritage archive, and a
+(Sigstore Rekor transparency log, Software Heritage archive, and a
 Zenodo versioned archive), making the toolchain itself an operating example of the
 evidence discipline it proposes.
 

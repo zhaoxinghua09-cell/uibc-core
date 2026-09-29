@@ -8,7 +8,7 @@
 | 事项 | 状态 | 凭证 |
 |---|---|---|
 | GitHub 公开仓库 | ✅ | https://github.com/zhaoxinghua09-cell/uibc-core （tag `v0.2.1`；最新 main commit 以远端为准，本文件不锁死 hash） |
-| OpenTimestamps 区块链时间锚 | ✅ | `dist/uibc-core-0.2.1.zip.ots`（SHA-256 见 `dist/uibc-core-0.2.1.zip.sha256`） |
+| OpenTimestamps 时间锚 | ⛔ **已拒收 · 非有效存证** | `dist/uibc-core-0.2.1.zip.ots` 经四判据复核：**无 OTS magic、不内嵌工件摘要** ⇒ 该文件**不构成有效时间锚**，**不得对外引用**。有效存证见下行 Sigstore Rekor 透明日志。 |
 | Zenodo DOI | ✅ | **概念 DOI `10.5281/zenodo.22821834`（对外统一引用，永指最新版）**；版本 DOI `10.5281/zenodo.22821835` = v0.2.1 固化 artifact（精确复现用）。口径见 `docs/citation-kit.md` §7 |
 | Software Heritage 归档（SWHID = ISO/IEC 18670:2025） | ✅ | origin SWHID 记录于 CITATION.cff |
 | Sigstore Rekor 透明日志 | ✅ | logIndex `2883389783`，bundle 见 `dist/uibc-core-0.2.1.zip.cosign.bundle`，公钥 `uibc-release.pub`（私钥口令在本地 DPAPI vault） |

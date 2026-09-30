@@ -1,4 +1,6 @@
 # uibc-core
+
+> **层级定位**：**可执行协议层（Protocol）** — XLGD 伞下 registry / evidence / gates 的参考实现。词汇表与全景见 [XLGD 伞总览](https://github.com/zhaoxinghua09-cell/xlgd#readme)。
 ## 许可说明 · License Notice
 
 - **权利状态**：本仓库以 **Apache-2.0** 许可发布，可依该许可证条款自由使用、修改与再分发。

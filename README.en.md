@@ -52,7 +52,7 @@ uibc verify demo.uibc                   # open mode: integrity checks only
 ## Running the tests (the outsider reproduction kit)
 
 ```bash
-python -m unittest discover tests           # full suite, 115 cases (incl. 11 MCP, 9 registry-server, 15 A2A, 9 runtime)
+python -m unittest discover tests           # full suite, 151 cases (verified: `Ran 151 tests, OK`)
 python -m unittest tests.stress_test        # stress suite, 7 scenarios
 python independent_verifier/cross_check.py  # independent second implementation, 70 checks, 0 mismatches
 ```

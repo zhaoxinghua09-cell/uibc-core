@@ -1,5 +1,7 @@
 # uibc-core
 
+> **获取仓库 / Get the repo**：`git clone https://github.com/zhaoxinghua09-cell/uibc-core.git`（若 clone 失败，请点仓库页 **Code → Download ZIP** 获取源码包）。
+
 > **层级定位**：**可执行协议层（Protocol）** — XLGD 伞下 registry / evidence / gates 的参考实现。词汇表与全景见 [XLGD 伞总览](https://github.com/zhaoxinghua09-cell/xlgd#readme)。
 ## 许可说明 · License Notice
 

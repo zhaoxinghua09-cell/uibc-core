@@ -1,0 +1,23 @@
+name: codeql-sast
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "23 3 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  codeql:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: github/codeql-action/init@66e692051da0915b214c5158091a226015d453f4
+        with:
+          languages: python
+      - uses: github/codeql-action/analyze@66e692051da0915b214c5158091a226015d453f4
+        with:
+          upload: false

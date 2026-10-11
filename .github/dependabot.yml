@@ -1,0 +1,7 @@
+# 由 SECBASE-01 D-2 批量铺设（2026-10-12）——Dependency-Update-Tool 基线
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"

@@ -183,3 +183,9 @@ both modes + attacker-key column).
 其中三个 case 是**回归锁**，锁住这套语料挖出的真实缺陷（两者原本都是静默通过）：
 往 target 塞一个与真条目同 `memory_id` 的假条目（被 dict 折叠吞掉，报告却写
 "no injections"），以及空到空的迁移在四项 Preservation 上全拿 PASS。
+
+## Permanent Archive / 永久存档
+
+[![Software Heritage](https://archive.softwareheritage.org/badge/origin/save/https://github.com/zhaoxinghua09-cell/uibc-core/)](https://archive.softwareheritage.org/browse/origin/?origin_url=https%3A%2F%2Fgithub.com%2Fzhaoxinghua09-cell%2Fuibc-core%2F)
+
+- **Software Heritage Visit ID**: `2558386` — 本仓已由 Software Heritage 永久存档（不可篡改证据），为该生态资产的长期可引用性提供基础设施级保证。

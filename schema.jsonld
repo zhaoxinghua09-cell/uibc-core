@@ -1,0 +1,19 @@
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareSourceCode",
+  "name": "UIBC — Universal Intelligent-agent Benchmark Championship (lgd-core)",
+  "url": "https://github.com/zhaoxinghua09-cell/uibc-core",
+  "author": {
+    "@type": "Person",
+    "name": "Zhao Xinghua (Steven Zhao)",
+    "identifier": "https://orcid.org/0009-0001-0512-1237"
+  },
+  "codeRepository": "https://github.com/zhaoxinghua09-cell/uibc-core",
+  "programmingLanguage": "Python",
+  "description": "Machine-checkable norms for LGD: manifest schema, validator, 28 tests, independent verifier.",
+  "keywords": [
+    "agent benchmark",
+    "LGD",
+    "verifier"
+  ]
+}

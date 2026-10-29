@@ -5,6 +5,13 @@ name: build-provenance
 # attestation (SLSA build provenance), so consumers can verify the artifact
 # was built by this repository's GitHub Actions, not re-hosted or tampered.
 # Pinned actions to commit SHAs (Scorecard Pinned-Dependencies).
+#
+# FIX (audit 2026-10-29): the attestation step failed with
+# "Resource not accessible by integration" because the job token lacked the
+# `attestations: write` scope required by the GitHub Attestations API
+# (POST /repos/{owner}/{repo}/attestations). `id-token: write` alone is NOT
+# enough — it only grants the OIDC token. `attestations: write` is the
+# minimum additional permission needed to persist the attestation.
 
 on:
   push:
@@ -19,8 +26,9 @@ jobs:
   build-and-attest:
     runs-on: ubuntu-latest
     permissions:
-      id-token: write
-      contents: read
+      id-token: write      # OIDC token for sigstore / SLSA provenance
+      attestations: write  # REQUIRED to persist the attestation via the Attestations API
+      contents: read       # checkout source
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
 

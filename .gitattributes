@@ -1,0 +1,6 @@
+# G-13 外人实测 F-03 修复（2026-10-31）：fixtures 为证据包（内含哈希敏感的文本文件），
+# 必须禁止 git 行尾转换——否则 Windows core.autocrlf 检出会把 LF 转 CRLF，
+# 导致 S4 证据哈希不匹配、随附 fixtures 开箱即 FAIL。
+fixtures/** -text
+*.uibc -text
+*.cosign.bundle -text

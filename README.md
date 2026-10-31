@@ -92,7 +92,7 @@ python -m unittest tests.stress_test        # 压力 7 场景
 python independent_verifier/cross_check.py  # 独立第二实现交叉核验（70 项，0 分歧）
 ```
 
-零第三方依赖，`pip install -e .` 可选（只为获得 `uibc` 短命令）。
+零第三方依赖，`pip install -e .` 可选（只为获得 `uibc` 短命令）。注：部分环境下安装后 `uibc` 不在 PATH，等价命令为 `python -m uibc_core.cli <子命令>`。
 
 ## 验证什么（v0.2 检查项）
 
@@ -171,6 +171,11 @@ fixtures/              open 模式        strict(--key) 模式   变异
 Regenerate + re-verify: `python fixtures/generate_fixtures.py` (writes
 `fixtures/EXPECTED.md` with expected-vs-observed per archive SS31 fields,
 both modes + attacker-key column).
+
+> ⚠️ **Windows 检出注意**：若以 `core.autocrlf=true` 检出，随附 fixtures 内的
+> 文本文件曾被行尾转换破坏 SHA-256（S4 开箱 FAIL）。仓库 `.gitattributes` 已将
+> `fixtures/**` 标记为 `-text` 禁止转换；若仍见开箱 FAIL，先运行
+> `python fixtures/generate_fixtures.py` 重新生成本地 fixtures 再验证。
 
 两个 fixtures 生成器都**带门禁**：实测结果与手工推导的期望矩阵逐格机器比对，
 任何偏差即以非零码退出。散文写的 Expected 列永远"不会失败"，矩阵才会——

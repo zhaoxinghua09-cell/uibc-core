@@ -1,8 +1,8 @@
 From 644c629fd56257e628a8961a940cb35359689988 Mon Sep 17 00:00:00 2001
 From: zhaoxinghua09-cell <zhaoxinghua09-cell@users.noreply.github.com>
 Date: Sat, 31 Oct 2026 08:44:12 +0800
-Subject: [PATCH] workbuddy | G-13 outsider audit fixes: .gitattributes -text
- for fixtures + Windows/PATH notes (F-03/F-05)
+Subject: [PATCH 1/2] workbuddy | G-13 outsider audit fixes: .gitattributes
+ -text for fixtures + Windows/PATH notes (F-03/F-05)
 
 ---
  .gitattributes | 6 ++++++

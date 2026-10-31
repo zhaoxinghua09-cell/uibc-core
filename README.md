@@ -172,10 +172,12 @@ Regenerate + re-verify: `python fixtures/generate_fixtures.py` (writes
 `fixtures/EXPECTED.md` with expected-vs-observed per archive SS31 fields,
 both modes + attacker-key column).
 
-> ⚠️ **Windows 检出注意**：若以 `core.autocrlf=true` 检出，随附 fixtures 内的
-> 文本文件曾被行尾转换破坏 SHA-256（S4 开箱 FAIL）。仓库 `.gitattributes` 已将
-> `fixtures/**` 标记为 `-text` 禁止转换；若仍见开箱 FAIL，先运行
-> `python fixtures/generate_fixtures.py` 重新生成本地 fixtures 再验证。
+> **行尾与哈希口径（2026-10-31 修复）**：fixtures 由 Windows 文本模式写出（CRLF），
+> 记录哈希即 CRLF 字节口径；`.gitattributes` 已将 `fixtures/**` 标记为 `-text`
+> （检出/提交均不做行尾转换），且 fixtures 已按当前 blob 口径重新生成并通过
+> 24 格矩阵门——任何平台、任何 `core.autocrlf` 设置下检出后开箱 `verify` 均应
+> 通过。若本地改动过 fixtures 或仍见 S4 FAIL，运行
+> `python fixtures/generate_fixtures.py` 以本地口径重写哈希与 `EXPECTED.md`。
 
 两个 fixtures 生成器都**带门禁**：实测结果与手工推导的期望矩阵逐格机器比对，
 任何偏差即以非零码退出。散文写的 Expected 列永远"不会失败"，矩阵才会——

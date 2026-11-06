@@ -1,0 +1,13 @@
+# UIBC golden fixtures: byte-deterministic cross-platform (archive SS32).
+#
+# Root cause of the #177 S4 failure: evidence files were written in Python
+# text mode without `newline="\n"`, so on Windows they gained CRLF while the
+# stored git blob was LF. The manifest recorded the CRLF content hash, so a
+# Linux/macOS (LF) checkout failed S4 while Windows (CRLF) passed -- the same
+# signature package verified differently per platform.
+#
+# Fix (two layers):
+#   1. Generators/library now write all fixture content with newline="\n" (LF).
+#   2. This attribute forces LF on BOTH store and checkout for every file under
+#      fixtures/, so content hashes are identical on every platform.
+fixtures/** text eol=lf

@@ -69,9 +69,9 @@ def build_base(pkg: str):
     ucli.cmd_event(_ns(path=pkg, type="UPDATE", actor="fixture-owner"))
     src1 = os.path.join(HERE, "action-log.txt")
     src2 = os.path.join(HERE, "run-summary.txt")
-    with open(src1, "w", encoding="utf-8") as f:
+    with open(src1, "w", encoding="utf-8", newline="\n") as f:
         f.write(ACTION_V1)
-    with open(src2, "w", encoding="utf-8") as f:
+    with open(src2, "w", encoding="utf-8", newline="\n") as f:
         f.write(SUMMARY)
     ucli.cmd_evidence(_ns(path=pkg, type="ACTION", file=src1,
                           media_type="text/plain", note="action log"))
@@ -102,7 +102,7 @@ def _read(path):
 
 
 def _write(path, obj):
-    with open(path, "w", encoding="utf-8") as f:
+    with open(path, "w", encoding="utf-8", newline="\n") as f:
         json.dump(obj, f, ensure_ascii=False, indent=2)
 
 
@@ -112,7 +112,7 @@ def mut_tampered(pkg):
     """ATTACK-002 Evidence Tampering (archive SS31): rewrite evidence content,
     leave recorded hash stale."""
     p = os.path.join(pkg, "evidence", "files", "action-log.txt")
-    with open(p, "w", encoding="utf-8") as f:
+    with open(p, "w", encoding="utf-8", newline="\n") as f:
         f.write("agent fx-agent executed db:read; result: 999999 rows; reviewed by NOBODY\n")
 
 
@@ -145,7 +145,7 @@ def mut_migrated(pkg):
     evidence content and update the index hash, but do NOT re-seal the
     manifest - the evidence root no longer matches."""
     p = os.path.join(pkg, "evidence", "files", "action-log.txt")
-    with open(p, "w", encoding="utf-8") as f:
+    with open(p, "w", encoding="utf-8", newline="\n") as f:
         f.write(ACTION_V2)
     idxp = os.path.join(pkg, "evidence", "index.json")
     idx = _read(idxp)
@@ -423,7 +423,7 @@ lifecycle / S4 evidence hashes / S5 evidence root / S6 seal signature).
 These fixtures demonstrate detection within the observed evidence boundary of
 the v{__version__} verifier. They do not prove the absence of undetected attacks.
 """
-    with open(os.path.join(HERE, "EXPECTED.md"), "w", encoding="utf-8") as f:
+    with open(os.path.join(HERE, "EXPECTED.md"), "w", encoding="utf-8", newline="\n") as f:
         f.write(md)
     print("\nEXPECTED.md written")
 

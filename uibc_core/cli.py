@@ -21,7 +21,7 @@ def _now() -> str:
 
 
 def _write(path, obj):
-    with open(path, "w", encoding="utf-8") as f:
+    with open(path, "w", encoding="utf-8", newline="\n") as f:
         json.dump(obj, f, ensure_ascii=False, indent=2)
 
 
@@ -196,7 +196,7 @@ def cmd_demo(args):
                                 "owner": "alice", "agent_type": "software-agent",
                                 "version": "0.1.0"})())
     ev = os.path.join(base, "report.txt")
-    with open(ev, "w", encoding="utf-8") as f:
+    with open(ev, "w", encoding="utf-8", newline="\n") as f:
         f.write("demo evidence: agent action log\n")
     _step(3, "add evidence (Evidence)")
     cmd_evidence(type("A", (), {"path": pkg, "type": "ACTION", "file": ev,
@@ -210,7 +210,7 @@ def cmd_demo(args):
     _step(6, "tamper with the evidence behind the owner's back")
     ev_files = os.path.join(pkg, "evidence", "files")
     with open(os.path.join(ev_files, os.listdir(ev_files)[0]), "a",
-              encoding="utf-8") as f:
+              encoding="utf-8", newline="\n") as f:
         f.write("forged line added by attacker\n")
     r = _verify(pkg, key=_load_key(key_file))
     print(f"     -> result: {r['result']} (expected FAIL: tampered content)")

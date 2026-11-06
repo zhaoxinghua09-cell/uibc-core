@@ -78,7 +78,7 @@ def snapshot(package, facts, key_file=None):
     out = os.path.join(package, "snapshots") if os.path.isdir(package) else path
     os.makedirs(out, exist_ok=True)
     fp = os.path.join(out, "snapshot-%d.json" % int(time.time() * 1000))
-    with open(fp, "w", encoding="utf-8") as f:
+    with open(fp, "w", encoding="utf-8", newline="\n") as f:
         json.dump(payload, f, ensure_ascii=False, indent=2, sort_keys=True)
     record_action(package, fp, action_type="ACTION",
                   note=str(payload.get("note", "")), media_type="application/json")

@@ -2,7 +2,7 @@
 name = "uibc-core"
 version = "0.2.2"
 description = "UIBC Core reference implementation (v0.2.1 PROPOSAL) - agent lifecycle evidence packaging and verification. LGD: registry / evidence / gates."
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = { text = "Apache-2.0" }
 
 [project.scripts]

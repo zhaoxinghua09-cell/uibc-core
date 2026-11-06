@@ -7,6 +7,12 @@ Independence discipline:
   - Different internal naming/structure on purpose: agreement between two
     differently-structured implementations is the spec-determinism signal.
 
+NOTE (P1-1): "Independent" here means code-independent from the reference
+implementation (zero shared imports, written from the spec). It is NOT an
+independent third-party audit: this file is authored by the same maintainer
+as uibc_core and shares the same trust root. It cross-checks spec determinism,
+not organizational independence.
+
 If this implementation and uibc_core.verify() ever disagree on a fixture,
 that is a SPEC BUG (ambiguous spec), not merely a code bug.
 """

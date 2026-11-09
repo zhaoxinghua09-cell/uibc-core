@@ -101,7 +101,7 @@ python independent_verifier/cross_check.py  # 独立第二实现交叉核验（7
 | S1 | 包结构完整（manifest / identity / lifecycle / evidence index） |
 | S2 | identity 与 manifest 的 agent_id 一致 |
 | S3 | 生命周期状态机（REGISTER 开头、previous_event 链、REVOKE/RETIRE 终态、非法转移报 lifecycle state violation） |
-| S4 | 证据文件 SHA-256 逐一重算比对（防篡改核心） |
+| S4 | 证据文件 SHA-256 逐一重算比对（篡改检测机制之一：内容篡改由 S3 状态机 + S4 哈希 + S5 Evidence Root **组合**捕捉，并非由单一签名/S4 单独负责） |
 | S5 | Evidence Root 重算比对 manifest |
 | S6 | **封签签名**（v0.2 新增）：`--key` 严格模式下，未签/伪造/换钥的包 FAIL；开放模式下已签包报 INCONCLUSIVE、未签包 SKIP |
 
@@ -120,6 +120,8 @@ v0.2 明确不查：非对称/第三方签名（Ed25519，v0.3 目标）、生�
 ## 已知边界（诚实清单）
 
 - **封签为对称 HMAC-SHA256（v0.2 临时方案，纯标准库零依赖）**：验证需持有密钥；第三方可验证需 Ed25519（v0.3 目标，待 `cryptography` 依赖决策）
+- **对称 HMAC 无可否认性（non-repudiation）缺口**：HMAC 只向持钥者证明"持有该共享密钥的一方签署了封印"，无法向第三方证明"是特定 owner 本人签署"——owner 持有密钥即可事后否认曾签署。此缺口同样待 v0.3 Ed25519 非对称签名从密码学上化解。
+- **`owner.key` 单点失效**：对称密钥一旦泄露或丢失，"持钥即可信"的封签前提即崩塌，且 v0.2 无密钥吊销/轮换机制。生产部署须将 `owner.key` 纳入密钥管理（HSM / 分片 / 定期轮换）；v0.3 以"Ed25519 公钥注册表 + 吊销列表"从架构上化解单点。
 - **换钥攻击只能靠链外钉扎检测**：攻击者可用自己的密钥重新签署整个包——用业主密钥 `--key` 验证即 FAIL（key mismatch），不持业主密钥则无法察觉。这是 v0.3（Ed25519 + 公钥注册表）的常设动机案例（见 fixtures/malicious-keyswap）
 - Evidence Root 算法为临时版（sorted hashes 的 SHA-256），待 canonical serialization 定稿后升级为 Merkle 树
 - 时间戳未做外部锚定（生产用 OTS/Rekor，见行动计划）

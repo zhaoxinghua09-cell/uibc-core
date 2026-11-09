@@ -67,7 +67,7 @@ you the short `uibc` command).
 | S1 | package structure (manifest / identity / lifecycle / evidence index) |
 | S2 | identity consistency between identity.json and manifest |
 | S3 | lifecycle state machine (REGISTER first, previous_event chain, REVOKE/RETIRE terminal, illegal transitions rejected) |
-| S4 | every evidence file's SHA-256 recomputed and compared (the anti-tamper core) |
+| S4 | every evidence file's SHA-256 recomputed and compared (detects evidence-content tampering, together with S5; S3 covers the lifecycle event chain only and does NOT detect content tampering; the seal (S6) scopes to identity+manifest and does not cover evidence content) |
 | S5 | Evidence Root recomputed and compared against the manifest |
 | S6 | **seal signature** (new in v0.2): in strict `--key` mode, unsigned/forged/key-swapped packages FAIL; in open mode a signed package is INCONCLUSIVE, an unsigned one SKIP |
 
@@ -90,6 +90,17 @@ timestamp anchoring, behavior evaluation, memory faithfulness/continuity.
 - **The seal is symmetric HMAC-SHA256 (v0.2 stopgap, stdlib-only)**:
   verification requires the key; third-party verifiability needs Ed25519
   (v0.3 target, pending the `cryptography` dependency decision)
+- **Symmetric HMAC has a non-repudiation gap (N2)**: HMAC only proves to the
+  key holder that "a party holding this shared key signed the seal". It cannot
+  prove to a third party that the owner personally signed it — an owner who
+  holds the key can later deny having signed. This gap is to be resolved
+  cryptographically by Ed25519 asymmetric signatures in v0.3.
+- **`owner.key` is a single point of failure (N3)**: once the symmetric key
+  leaks or is lost, the "hold the key and be trusted" premise of the seal
+  collapses, and v0.2 has no key revocation/rotation mechanism. Production
+  deployments must bring `owner.key` under key management (HSM / sharding /
+  periodic rotation); v0.3 resolves the single point architecturally with an
+  "Ed25519 public-key registry + revocation list".
 - **Key-swap detection requires out-of-band pinning**: an attacker can re-sign
   the whole package with their own key — verifying with the owner's `--key`
   FAILs (key mismatch), but without the owner's key the swap is invisible.

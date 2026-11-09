@@ -101,7 +101,7 @@ python independent_verifier/cross_check.py  # 独立第二实现交叉核验（7
 | S1 | 包结构完整（manifest / identity / lifecycle / evidence index） |
 | S2 | identity 与 manifest 的 agent_id 一致 |
 | S3 | 生命周期状态机（REGISTER 开头、previous_event 链、REVOKE/RETIRE 终态、非法转移报 lifecycle state violation） |
-| S4 | 证据文件 SHA-256 逐一重算比对（篡改检测机制之一：内容篡改由 S3 状态机 + S4 哈希 + S5 Evidence Root **组合**捕捉，并非由单一签名/S4 单独负责） |
+| S4 | 证据文件 SHA-256 逐一重算比对（**内容篡改**由 S4 逐文件哈希与 S5 Evidence Root 捕捉；S3 只管生命周期事件序列与转移合法性，**不检测内容篡改**；封签（S6）作用于 identity+manifest，也不覆盖证据内容） |
 | S5 | Evidence Root 重算比对 manifest |
 | S6 | **封签签名**（v0.2 新增）：`--key` 严格模式下，未签/伪造/换钥的包 FAIL；开放模式下已签包报 INCONCLUSIVE、未签包 SKIP |
 

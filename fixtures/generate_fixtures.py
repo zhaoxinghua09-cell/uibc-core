@@ -210,7 +210,8 @@ MUTATIONS = {
 # EXPECTED_MATRIX.
 # ---------------------------------------------------------------------------
 EXPECTED_OPEN = {
-    "clean": "PASS (S6 INCONCLUSIVE: seal present, no key to check it with)",
+    "clean": "INCONCLUSIVE (v0.3: S6 INCONCLUSIVE - seal present, no key to check it "
+                "with; an unresolved check now caps the top-level verdict)",
     "tampered": "FAIL (S4 hash mismatch; S5 INCONCLUSIVE - root not recomputable; "
                 "S6 PASS - the seal never covered evidence content)",
     "deleted": "FAIL (S4 missing evidence file; S5 INCONCLUSIVE; S6 PASS - seal untouched)",
@@ -219,10 +220,12 @@ EXPECTED_OPEN = {
     "reordered": "FAIL (S3 lifecycle L1/L4 violations; S6 PASS - lifecycle is outside the seal)",
     "migrated": "FAIL (S4 PASS - index hash was updated; S5 root mismatch vs the "
                 "unchanged manifest; S6 PASS)",
-    "malicious": "PASS in open mode (S6 INCONCLUSIVE -> integrity is unchecked "
-                 "cryptographically; use --key for strict)",
-    "malicious-keyswap": "PASS in open mode (S6 INCONCLUSIVE -> key substitution is "
-                         "UNDETECTABLE without the owner key)",
+    "malicious": "INCONCLUSIVE in open mode (v0.3: S6 INCONCLUSIVE caps the verdict - "
+                 "the forgery is not DETECTED without a key, but it no longer "
+                 "receives a top-level PASS either; use --key for strict)",
+    "malicious-keyswap": "INCONCLUSIVE in open mode (v0.3: S6 INCONCLUSIVE caps the "
+                         "verdict; key substitution remains UNDETECTABLE without the "
+                         "owner key or a pinned public key)",
 }
 
 EXPECTED_STRICT = {
@@ -249,16 +252,23 @@ EXPECTED_STRICT = {
 # a run. A mismatch therefore means one of two real things - the verifier drifted
 # or the prior was wrong - and both stop the build instead of printing quietly.
 #
-# Note the deliberately non-obvious cells: `clean[open]` is result=PASS while
-# S6=INCONCLUSIVE (an unanswerable check must not be laundered into a pass), and
-# `malicious[open]` is PASS while `malicious[strict]` is FAIL on the SAME package
-# - mode, not content, decides the verdict there.
+# v0.3 verdict-semantics change (2026-11, external review): through v0.2 the
+# top-level result was PASS whenever no check FAILed, so an INCONCLUSIVE S6
+# rode along under a PASS - stated in the detail line, but a reader (human or
+# machine) consuming only the top-level verdict saw provenance it could not
+# have had. An external reviewer demonstrated the consequence: a fully
+# self-consistent forgery verified "PASS" in open mode. From seal v0.3 the
+# verdict is three-valued - FAIL if any check FAILs, else INCONCLUSIVE if
+# any check is INCONCLUSIVE, else PASS - so exactly three cells changed,
+# all in open mode, all result-only (no check outcome moved): clean,
+# malicious, malicious-keyswap. `malicious[strict]` remains FAIL on the
+# SAME package - mode, not content, decides the verdict there.
 # ---------------------------------------------------------------------------
 P, F, I, S = "PASS", "FAIL", "INCONCLUSIVE", "SKIP"
 
 EXPECTED_MATRIX = {
     "clean": {
-        "open":     {"result": P, "checks": {"S1": P, "S2": P, "S3": P, "S4": P, "S5": P, "S6": I}},
+        "open":     {"result": I, "checks": {"S1": P, "S2": P, "S3": P, "S4": P, "S5": P, "S6": I}},
         "strict":   {"result": P, "checks": {"S1": P, "S2": P, "S3": P, "S4": P, "S5": P, "S6": P}},
         "attacker": {"result": F, "checks": {"S1": P, "S2": P, "S3": P, "S4": P, "S5": P, "S6": F}},
     },
@@ -288,12 +298,12 @@ EXPECTED_MATRIX = {
         "attacker": {"result": F, "checks": {"S1": P, "S2": P, "S3": P, "S4": P, "S5": F, "S6": F}},
     },
     "malicious": {
-        "open":     {"result": P, "checks": {"S1": P, "S2": P, "S3": P, "S4": P, "S5": P, "S6": I}},
+        "open":     {"result": I, "checks": {"S1": P, "S2": P, "S3": P, "S4": P, "S5": P, "S6": I}},
         "strict":   {"result": F, "checks": {"S1": P, "S2": P, "S3": P, "S4": P, "S5": P, "S6": F}},
         "attacker": {"result": F, "checks": {"S1": P, "S2": P, "S3": P, "S4": P, "S5": P, "S6": F}},
     },
     "malicious-keyswap": {
-        "open":     {"result": P, "checks": {"S1": P, "S2": P, "S3": P, "S4": P, "S5": P, "S6": I}},
+        "open":     {"result": I, "checks": {"S1": P, "S2": P, "S3": P, "S4": P, "S5": P, "S6": I}},
         "strict":   {"result": F, "checks": {"S1": P, "S2": P, "S3": P, "S4": P, "S5": P, "S6": F}},
         "attacker": {"result": P, "checks": {"S1": P, "S2": P, "S3": P, "S4": P, "S5": P, "S6": P}},
     },

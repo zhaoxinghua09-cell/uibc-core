@@ -27,7 +27,7 @@ def _canonical_sig_payload(body: dict) -> bytes:
                       ensure_ascii=False).encode("utf-8")
 
 
-def _make_pkg(tmp, name="g.uibc", sign_key=None, n_evidence=2):
+def _make_pkg(tmp, name="g.uibc", sign_key=None, n_evidence=2, sign_ed=False):
     pkg = os.path.join(tmp, name)
     ucli.cmd_init(type("A", (), {"path": pkg})())
     ucli.cmd_register(type("A", (), {
@@ -41,7 +41,13 @@ def _make_pkg(tmp, name="g.uibc", sign_key=None, n_evidence=2):
             "path": pkg, "type": "ACTION", "file": src,
             "media_type": "text/plain", "note": f"n{i}"})())
     kf = None
-    if sign_key is not None:
+    if sign_ed:
+        from uibc_core.signing import ed_generate_seed
+        kf = os.path.join(tmp, name + ".edkey")
+        with open(kf, "w", encoding="ascii") as f:
+            f.write("ed25519:" + ed_generate_seed().hex())
+        ucli.cmd_submit(type("A", (), {"path": pkg, "key": kf})())
+    elif sign_key is not None:
         kf = os.path.join(tmp, name + ".key")
         with open(kf, "w", encoding="ascii") as f:
             f.write(sign_key.hex())
@@ -80,11 +86,15 @@ class GateTests(unittest.TestCase):
         self.assertEqual(r["verify_result"], "PASS")
 
     # 2. clean unsigned package, open mode -> ALLOW
-    def test_02_clean_unsigned_open_allows(self):
+    def test_02_clean_unsigned_open_holds(self):
+        """Seal v0.3: an unsigned package is internally consistent but its
+        provenance is unattested (verify INCONCLUSIVE), so the gate HOLDs
+        for a human decision instead of ALLOWing. Through v0.2 this same
+        package ALLOWed - the laundered PASS the external review flagged."""
         pkg, _ = _make_pkg(self.tmp)
         r = gate(pkg)
-        self.assertEqual(r["decision"], "ALLOW")
-        self.assertEqual(r["exit_code"], 0)
+        self.assertEqual(r["decision"], "HOLD")
+        self.assertEqual(r["exit_code"], 3)
 
     # 3. tampered evidence -> DENY exit 2
     def test_03_tampered_denies(self):
@@ -144,7 +154,9 @@ class GateTests(unittest.TestCase):
 
     # 7. valid dispute -> ALLOW_DISPUTED exit 0 (flagged, never auto-denied)
     def test_07_dispute_flags_not_blocks(self):
-        pkg, _ = _make_pkg(self.tmp)
+        # Ed25519-sealed so verify resolves PASS publicly; the dispute
+        # overlay is then what the decision turns on.
+        pkg, _ = _make_pkg(self.tmp, sign_ed=True)
         root = _read_manifest_root(pkg)
         dp = _write_json(os.path.join(self.tmp, "disp.json"), {
             "dispute_id": "d-test-1", "target_root": root,

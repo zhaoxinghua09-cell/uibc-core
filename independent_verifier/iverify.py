@@ -79,21 +79,104 @@ def lifecycle_violations(events) -> list:
     return problems
 
 
+# --- Ed25519 verification, reimplemented from RFC 8032 5.1.7 --------------
+# Affine-coordinate formulation on purpose: the reference implementation
+# uses extended coordinates. Two encodings of the same equations agreeing
+# is the determinism signal this file exists to provide.
+_P = 2 ** 255 - 19
+_DP = (-121665 * pow(121666, _P - 2, _P)) % _P
+_GRP = 2 ** 252 + 27742317777372353535851937790883648493
+
+
+def _pt_add(p1, p2):
+    x1, y1 = p1
+    x2, y2 = p2
+    t = _DP * x1 * x2 * y1 * y2 % _P
+    return ((x1 * y2 + x2 * y1) * pow(1 + t, _P - 2, _P) % _P,
+            (y1 * y2 + x1 * x2) * pow(1 - t, _P - 2, _P) % _P)
+
+
+def _pt_mul(p, n):
+    q = (0, 1)
+    while n:
+        if n & 1:
+            q = _pt_add(q, p)
+        p = _pt_add(p, p)
+        n >>= 1
+    return q
+
+
+def _pt_decode(data: bytes):
+    y = int.from_bytes(data, "little") & ((1 << 255) - 1)
+    sign = data[31] >> 7
+    u = (y * y - 1) % _P
+    v = (_DP * y * y + 1) % _P
+    x = u * pow(v, _P - 2, _P) % _P
+    x = pow(x, (_P + 3) // 8, _P)
+    if (x * x - u * pow(v, _P - 2, _P)) % _P != 0:
+        x = x * pow(2, (_P - 1) // 4, _P) % _P
+    if (x * x - u * pow(v, _P - 2, _P)) % _P != 0:
+        raise ValueError("not on curve")
+    if (x & 1) != sign:
+        x = _P - x
+    return (x, y)
+
+
+_BASE_Y = 4 * pow(5, _P - 2, _P) % _P
+_BASE = _pt_decode(_BASE_Y.to_bytes(32, "little"))
+
+
+def _ed25519_verify(pub: bytes, msg: bytes, sig: bytes) -> bool:
+    try:
+        if len(pub) != 32 or len(sig) != 64:
+            return False
+        r_bytes, s = sig[:32], int.from_bytes(sig[32:], "little")
+        if s >= _GRP:
+            return False
+        a_pt = _pt_decode(pub)
+        r_pt = _pt_decode(r_bytes)
+        h = int.from_bytes(hashlib.sha512(r_bytes + pub + msg).digest(),
+                           "little") % _GRP
+        return _pt_mul(_BASE, s) == _pt_add(r_pt, _pt_mul(a_pt, h))
+    except Exception:
+        return False
+
+
 def check_seal(key: bytes, package_dir: str) -> str:
-    """S6 equivalent: PASS / FAIL / INCONCLUSIVE / SKIP."""
+    """S6 equivalent: PASS / FAIL / INCONCLUSIVE (seal v0.3 semantics).
+
+    - Ed25519 seal: verified publicly with the recorded public key, in
+      every mode; key_id must equal SHA-256 of that public key.
+    - HMAC seal: checked only when the owner key is provided; without it
+      INCONCLUSIVE (symmetric seals cannot be checked publicly).
+    - No seal: FAIL when a key is demanded, otherwise INCONCLUSIVE
+      (internally consistent, provenance unattested).
+    """
     seal_path = os.path.join(package_dir, "signatures", "seal.json")
     if not os.path.isfile(seal_path):
-        return "SKIP" if key is None else "FAIL"
+        return "FAIL" if key is not None else "INCONCLUSIVE"
     with open(seal_path, "r", encoding="utf-8") as f:
         seal = json.load(f)
-    if key is None:
-        return "INCONCLUSIVE"
-    if seal.get("algorithm") != "HMAC-SHA256":
-        return "FAIL"
     with open(os.path.join(package_dir, "identity.json"), encoding="utf-8") as f:
         identity = json.load(f)
     with open(os.path.join(package_dir, "manifest.json"), encoding="utf-8") as f:
         manifest = json.load(f)
+    if seal.get("algorithm") == "Ed25519":
+        if key is not None:
+            return "FAIL"  # an HMAC owner key cannot check a public seal
+        try:
+            pub = base64.b64decode(seal.get("public_key", ""), validate=True)
+            sig = base64.b64decode(seal.get("signature", ""), validate=True)
+        except Exception:
+            return "FAIL"
+        if len(pub) != 32 or seal.get("key_id") != hashlib.sha256(pub).hexdigest():
+            return "FAIL"
+        payload = canon_bytes({"identity": identity, "manifest": manifest})
+        return "PASS" if _ed25519_verify(pub, payload, sig) else "FAIL"
+    if key is None:
+        return "INCONCLUSIVE"
+    if seal.get("algorithm") != "HMAC-SHA256":
+        return "FAIL"
     if seal.get("key_id") != hashlib.sha256(key).hexdigest():
         return "FAIL"
     try:
@@ -106,7 +189,7 @@ def check_seal(key: bytes, package_dir: str) -> str:
 
 
 def independent_verify(package_dir: str, key: bytes = None) -> dict:
-    """Return {'result': PASS/FAIL, 'checks': {V1..V6: result}}."""
+    """Return {'result': PASS/FAIL/INCONCLUSIVE, 'checks': {V1..V6: result}}."""
     outcomes = {}
 
     outcomes["V1"] = "PASS" if all(
@@ -148,10 +231,15 @@ def independent_verify(package_dir: str, key: bytes = None) -> dict:
 
     outcomes["V6"] = check_seal(key, package_dir)
 
-    # overall: V6 handled like S6 (strict FAIL, open INCONCLUSIVE is not fatal)
-    blocking = [vid for vid in ("V1", "V2", "V3", "V4", "V5") if outcomes[vid] != "PASS"]
-    if outcomes["V6"] == "FAIL":
-        blocking.append("V6")
+    # overall (seal v0.3 three-valued rule, same as the reference):
+    # FAIL anywhere -> FAIL; unresolved INCONCLUSIVE anywhere -> INCONCLUSIVE.
+    vals = list(outcomes.values())
+    if "FAIL" in vals:
+        overall = "FAIL"
+    elif "INCONCLUSIVE" in vals:
+        overall = "INCONCLUSIVE"
+    else:
+        overall = "PASS"
     return {"implementer": "independent_verifier/0.1.0",
-            "result": "FAIL" if blocking else "PASS",
+            "result": overall,
             "checks": outcomes}

@@ -60,7 +60,8 @@ class MatrixShapeTests(unittest.TestCase):
             self.assertEqual(set(G.EXPECTED_MATRIX[name]), set(G.MODES), name)
             for mode in G.MODES:
                 cell = G.EXPECTED_MATRIX[name][mode]
-                self.assertIn(cell["result"], ("PASS", "FAIL"), f"{name}[{mode}]")
+                # seal v0.3: verdicts are three-valued (INCONCLUSIVE caps)
+                self.assertIn(cell["result"], ("PASS", "FAIL", "INCONCLUSIVE"), f"{name}[{mode}]")
                 self.assertEqual(set(cell["checks"]), set(G.CHECK_ORDER),
                                  f"{name}[{mode}] check ids")
 
@@ -85,17 +86,21 @@ class RegressionLockTests(unittest.TestCase):
                   if G.EXPECTED_MATRIX[n]["strict"]["checks"]["S6"] == "FAIL"}
         self.assertEqual(breaks, {"malicious", "malicious-keyswap"})
 
-    def test_12_open_mode_passes_the_undetectable_forgeries(self):
-        """Honest boundary: with no key, `malicious` and `malicious-keyswap`
-        PASS overall (S6 INCONCLUSIVE). Stated, not hidden."""
+    def test_12_open_mode_no_longer_passes_the_undetectable_forgeries(self):
+        """Seal v0.3 (2026-11 external review): with no key, `malicious` and
+        `malicious-keyswap` are INCONCLUSIVE overall (S6 INCONCLUSIVE caps
+        the verdict). The forgery is still not DETECTED without a key --
+        that boundary is unchanged -- but it no longer receives a top-level
+        PASS a verdict-only reader could mistake for provenance."""
         for fx in ("malicious", "malicious-keyswap"):
-            self.assertEqual(G.EXPECTED_MATRIX[fx]["open"]["result"], "PASS", fx)
+            self.assertEqual(G.EXPECTED_MATRIX[fx]["open"]["result"], "INCONCLUSIVE", fx)
             self.assertEqual(G.EXPECTED_MATRIX[fx]["open"]["checks"]["S6"], "INCONCLUSIVE", fx)
 
-    def test_13_unanswerable_check_is_not_laundered_into_a_pass(self):
-        """clean[open] verifies PASS while S6 is INCONCLUSIVE: an unchecked
-        signature must not be reported as a checked one."""
-        self.assertEqual(G.EXPECTED_MATRIX["clean"]["open"]["result"], "PASS")
+    def test_13_unanswerable_check_caps_the_verdict(self):
+        """clean[open]: every content check PASSes, S6 is INCONCLUSIVE, and
+        the top-level verdict is INCONCLUSIVE -- an unanswerable check is
+        not laundered into a pass at ANY level of the report."""
+        self.assertEqual(G.EXPECTED_MATRIX["clean"]["open"]["result"], "INCONCLUSIVE")
         self.assertEqual(G.EXPECTED_MATRIX["clean"]["open"]["checks"]["S6"], "INCONCLUSIVE")
 
 

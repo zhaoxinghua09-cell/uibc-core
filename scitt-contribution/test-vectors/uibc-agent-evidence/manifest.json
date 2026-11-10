@@ -1,0 +1,461 @@
+{
+  "suite": "uibc-agent-evidence",
+  "version": "v1",
+  "title": "Agent evidence package verification vectors (UIBC), with a proposed SCITT mapping",
+  "provenance": {
+    "source_repo": "https://github.com/zhaoxinghua09-cell/uibc-core",
+    "source_ref": "main @ dc9eba3146e4e32bb1356f24ce8d72249a64702a (v0.3.0)",
+    "vendored_from": [
+      "fixtures/*.uibc",
+      "examples/sample-package",
+      "examples/sample-owner.pub"
+    ],
+    "byte_identity": "Package trees are byte-identical copies of the source fixtures; verify with SHA256SUMS in this directory.",
+    "verifier": "uibc-core 0.3.0 reference verifier (pure Python standard library), cross-checked by an independent verifier in the source repo"
+  },
+  "cases": [
+    {
+      "id": "clean",
+      "mutation": "none — unmodified base package",
+      "open_result": "INCONCLUSIVE",
+      "checks": {
+        "S1": "PASS",
+        "S2": "PASS",
+        "S3": "PASS",
+        "S4": "PASS",
+        "S5": "PASS",
+        "S6": "INCONCLUSIVE"
+      }
+    },
+    {
+      "id": "tampered",
+      "mutation": "one evidence file's content altered after sealing",
+      "open_result": "FAIL",
+      "checks": {
+        "S1": "PASS",
+        "S2": "PASS",
+        "S3": "PASS",
+        "S4": "FAIL",
+        "S5": "INCONCLUSIVE",
+        "S6": "INCONCLUSIVE"
+      }
+    },
+    {
+      "id": "deleted",
+      "mutation": "one evidence file removed after sealing",
+      "open_result": "FAIL",
+      "checks": {
+        "S1": "PASS",
+        "S2": "PASS",
+        "S3": "PASS",
+        "S4": "FAIL",
+        "S5": "INCONCLUSIVE",
+        "S6": "INCONCLUSIVE"
+      }
+    },
+    {
+      "id": "duplicated",
+      "mutation": "one evidence entry duplicated in the index",
+      "open_result": "FAIL",
+      "checks": {
+        "S1": "PASS",
+        "S2": "PASS",
+        "S3": "PASS",
+        "S4": "PASS",
+        "S5": "FAIL",
+        "S6": "INCONCLUSIVE"
+      }
+    },
+    {
+      "id": "reordered",
+      "mutation": "lifecycle events reordered after sealing",
+      "open_result": "FAIL",
+      "checks": {
+        "S1": "PASS",
+        "S2": "PASS",
+        "S3": "FAIL",
+        "S4": "PASS",
+        "S5": "PASS",
+        "S6": "INCONCLUSIVE"
+      }
+    },
+    {
+      "id": "migrated",
+      "mutation": "evidence index hash updated, manifest left unchanged",
+      "open_result": "FAIL",
+      "checks": {
+        "S1": "PASS",
+        "S2": "PASS",
+        "S3": "PASS",
+        "S4": "PASS",
+        "S5": "FAIL",
+        "S6": "INCONCLUSIVE"
+      }
+    },
+    {
+      "id": "malicious",
+      "mutation": "fully self-consistent forgery: index and manifest recomputed, owner seal kept",
+      "open_result": "INCONCLUSIVE",
+      "checks": {
+        "S1": "PASS",
+        "S2": "PASS",
+        "S3": "PASS",
+        "S4": "PASS",
+        "S5": "PASS",
+        "S6": "INCONCLUSIVE"
+      }
+    },
+    {
+      "id": "malicious-keyswap",
+      "mutation": "forgery re-sealed with an attacker key (key substitution)",
+      "open_result": "INCONCLUSIVE",
+      "checks": {
+        "S1": "PASS",
+        "S2": "PASS",
+        "S3": "PASS",
+        "S4": "PASS",
+        "S5": "PASS",
+        "S6": "INCONCLUSIVE"
+      }
+    },
+    {
+      "id": "sample-ed25519",
+      "mutation": "none — public sample package (fictional support agent, 2 evidence files)",
+      "open_result": "PASS",
+      "pinned_result": "PASS"
+    }
+  ],
+  "expectation_matrix_24_cells": {
+    "about": "Full fixture x mode matrix (8 HMAC-sealed fixtures x open/strict/attacker-key). The prior is hand-derived in the source repo (fixtures/EXPECTED.md) and enforced by fixtures/generate_fixtures.py, which rebuilds the fixtures with fresh ephemeral keys and exits non-zero on any deviation. Reproduced 2026-11-10: 24/24 cells match, exit 0.",
+    "cells": [
+      {
+        "fixture": "clean",
+        "mode": "open",
+        "result": "INCONCLUSIVE",
+        "checks": {
+          "S1": "PASS",
+          "S2": "PASS",
+          "S3": "PASS",
+          "S4": "PASS",
+          "S5": "PASS",
+          "S6": "INCONCLUSIVE"
+        }
+      },
+      {
+        "fixture": "clean",
+        "mode": "strict",
+        "result": "PASS",
+        "checks": {
+          "S1": "PASS",
+          "S2": "PASS",
+          "S3": "PASS",
+          "S4": "PASS",
+          "S5": "PASS",
+          "S6": "PASS"
+        }
+      },
+      {
+        "fixture": "clean",
+        "mode": "attacker",
+        "result": "FAIL",
+        "checks": {
+          "S1": "PASS",
+          "S2": "PASS",
+          "S3": "PASS",
+          "S4": "PASS",
+          "S5": "PASS",
+          "S6": "FAIL"
+        }
+      },
+      {
+        "fixture": "tampered",
+        "mode": "open",
+        "result": "FAIL",
+        "checks": {
+          "S1": "PASS",
+          "S2": "PASS",
+          "S3": "PASS",
+          "S4": "FAIL",
+          "S5": "INCONCLUSIVE",
+          "S6": "INCONCLUSIVE"
+        }
+      },
+      {
+        "fixture": "tampered",
+        "mode": "strict",
+        "result": "FAIL",
+        "checks": {
+          "S1": "PASS",
+          "S2": "PASS",
+          "S3": "PASS",
+          "S4": "FAIL",
+          "S5": "INCONCLUSIVE",
+          "S6": "PASS"
+        }
+      },
+      {
+        "fixture": "tampered",
+        "mode": "attacker",
+        "result": "FAIL",
+        "checks": {
+          "S1": "PASS",
+          "S2": "PASS",
+          "S3": "PASS",
+          "S4": "FAIL",
+          "S5": "INCONCLUSIVE",
+          "S6": "FAIL"
+        }
+      },
+      {
+        "fixture": "deleted",
+        "mode": "open",
+        "result": "FAIL",
+        "checks": {
+          "S1": "PASS",
+          "S2": "PASS",
+          "S3": "PASS",
+          "S4": "FAIL",
+          "S5": "INCONCLUSIVE",
+          "S6": "INCONCLUSIVE"
+        }
+      },
+      {
+        "fixture": "deleted",
+        "mode": "strict",
+        "result": "FAIL",
+        "checks": {
+          "S1": "PASS",
+          "S2": "PASS",
+          "S3": "PASS",
+          "S4": "FAIL",
+          "S5": "INCONCLUSIVE",
+          "S6": "PASS"
+        }
+      },
+      {
+        "fixture": "deleted",
+        "mode": "attacker",
+        "result": "FAIL",
+        "checks": {
+          "S1": "PASS",
+          "S2": "PASS",
+          "S3": "PASS",
+          "S4": "FAIL",
+          "S5": "INCONCLUSIVE",
+          "S6": "FAIL"
+        }
+      },
+      {
+        "fixture": "duplicated",
+        "mode": "open",
+        "result": "FAIL",
+        "checks": {
+          "S1": "PASS",
+          "S2": "PASS",
+          "S3": "PASS",
+          "S4": "PASS",
+          "S5": "FAIL",
+          "S6": "INCONCLUSIVE"
+        }
+      },
+      {
+        "fixture": "duplicated",
+        "mode": "strict",
+        "result": "FAIL",
+        "checks": {
+          "S1": "PASS",
+          "S2": "PASS",
+          "S3": "PASS",
+          "S4": "PASS",
+          "S5": "FAIL",
+          "S6": "PASS"
+        }
+      },
+      {
+        "fixture": "duplicated",
+        "mode": "attacker",
+        "result": "FAIL",
+        "checks": {
+          "S1": "PASS",
+          "S2": "PASS",
+          "S3": "PASS",
+          "S4": "PASS",
+          "S5": "FAIL",
+          "S6": "FAIL"
+        }
+      },
+      {
+        "fixture": "reordered",
+        "mode": "open",
+        "result": "FAIL",
+        "checks": {
+          "S1": "PASS",
+          "S2": "PASS",
+          "S3": "FAIL",
+          "S4": "PASS",
+          "S5": "PASS",
+          "S6": "INCONCLUSIVE"
+        }
+      },
+      {
+        "fixture": "reordered",
+        "mode": "strict",
+        "result": "FAIL",
+        "checks": {
+          "S1": "PASS",
+          "S2": "PASS",
+          "S3": "FAIL",
+          "S4": "PASS",
+          "S5": "PASS",
+          "S6": "PASS"
+        }
+      },
+      {
+        "fixture": "reordered",
+        "mode": "attacker",
+        "result": "FAIL",
+        "checks": {
+          "S1": "PASS",
+          "S2": "PASS",
+          "S3": "FAIL",
+          "S4": "PASS",
+          "S5": "PASS",
+          "S6": "FAIL"
+        }
+      },
+      {
+        "fixture": "migrated",
+        "mode": "open",
+        "result": "FAIL",
+        "checks": {
+          "S1": "PASS",
+          "S2": "PASS",
+          "S3": "PASS",
+          "S4": "PASS",
+          "S5": "FAIL",
+          "S6": "INCONCLUSIVE"
+        }
+      },
+      {
+        "fixture": "migrated",
+        "mode": "strict",
+        "result": "FAIL",
+        "checks": {
+          "S1": "PASS",
+          "S2": "PASS",
+          "S3": "PASS",
+          "S4": "PASS",
+          "S5": "FAIL",
+          "S6": "PASS"
+        }
+      },
+      {
+        "fixture": "migrated",
+        "mode": "attacker",
+        "result": "FAIL",
+        "checks": {
+          "S1": "PASS",
+          "S2": "PASS",
+          "S3": "PASS",
+          "S4": "PASS",
+          "S5": "FAIL",
+          "S6": "FAIL"
+        }
+      },
+      {
+        "fixture": "malicious",
+        "mode": "open",
+        "result": "INCONCLUSIVE",
+        "checks": {
+          "S1": "PASS",
+          "S2": "PASS",
+          "S3": "PASS",
+          "S4": "PASS",
+          "S5": "PASS",
+          "S6": "INCONCLUSIVE"
+        }
+      },
+      {
+        "fixture": "malicious",
+        "mode": "strict",
+        "result": "FAIL",
+        "checks": {
+          "S1": "PASS",
+          "S2": "PASS",
+          "S3": "PASS",
+          "S4": "PASS",
+          "S5": "PASS",
+          "S6": "FAIL"
+        }
+      },
+      {
+        "fixture": "malicious",
+        "mode": "attacker",
+        "result": "FAIL",
+        "checks": {
+          "S1": "PASS",
+          "S2": "PASS",
+          "S3": "PASS",
+          "S4": "PASS",
+          "S5": "PASS",
+          "S6": "FAIL"
+        }
+      },
+      {
+        "fixture": "malicious-keyswap",
+        "mode": "open",
+        "result": "INCONCLUSIVE",
+        "checks": {
+          "S1": "PASS",
+          "S2": "PASS",
+          "S3": "PASS",
+          "S4": "PASS",
+          "S5": "PASS",
+          "S6": "INCONCLUSIVE"
+        }
+      },
+      {
+        "fixture": "malicious-keyswap",
+        "mode": "strict",
+        "result": "FAIL",
+        "checks": {
+          "S1": "PASS",
+          "S2": "PASS",
+          "S3": "PASS",
+          "S4": "PASS",
+          "S5": "PASS",
+          "S6": "FAIL"
+        }
+      },
+      {
+        "fixture": "malicious-keyswap",
+        "mode": "attacker",
+        "result": "PASS",
+        "checks": {
+          "S1": "PASS",
+          "S2": "PASS",
+          "S3": "PASS",
+          "S4": "PASS",
+          "S5": "PASS",
+          "S6": "PASS"
+        }
+      }
+    ]
+  },
+  "scitt_mapping_status": "Mapping proposed (see README.md). One genuine SCITT Signed Statement is included for the sample package; no Transparency Service receipt is included or claimed.",
+  "scitt_statement": {
+    "case": "sample-ed25519",
+    "file": "v1/sample-ed25519/statement.cose",
+    "also_at": "signed-statements/uibc-agent-evidence-sample-manifest.scitt",
+    "type": "COSE_Sign1 hash envelope (draft-ietf-cose-hash-envelope), EdDSA",
+    "payload": "SHA-256 of the sample package manifest.json",
+    "signature_valid": true,
+    "cross_verified_with": [
+      "cryptography library",
+      "uibc-core pure-Python RFC 8032",
+      "suite verify_statement.py (stdlib only)"
+    ],
+    "receipt": null,
+    "note": "Signed Statement only; no Transparency Service receipt yet."
+  }
+}

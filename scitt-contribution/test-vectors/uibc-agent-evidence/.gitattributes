@@ -1,0 +1,10 @@
+# Frozen vector bytes must never be EOL-normalized. Every file under v1/ is
+# pinned by SHA256SUMS, so any autocrlf newline conversion on checkout (e.g. a
+# Windows contributor with core.autocrlf=true) would change the bytes and make
+# `shasum -a 256 -c SHA256SUMS` fail — for the checkout-er, not the author.
+# In-repo attributes override local git config, so the published bytes are the
+# bytes everyone gets. Covers the PEM keys, expected.json, and SHA256SUMS too,
+# not only the .cose/.bin payloads.
+* -text
+*.cose binary
+*.bin  binary

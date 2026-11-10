@@ -1,0 +1,21 @@
+{
+  "case": "malicious-keyswap",
+  "package": "package/",
+  "seal": "HMAC-SHA256 (fixture owner seal; key not published — see README on modes)",
+  "mutation": "forgery re-sealed with an attacker key (key substitution)",
+  "modes": {
+    "open": {
+      "result": "INCONCLUSIVE",
+      "assurance": "unattested",
+      "checks": {
+        "S1": "PASS",
+        "S2": "PASS",
+        "S3": "PASS",
+        "S4": "PASS",
+        "S5": "PASS",
+        "S6": "INCONCLUSIVE"
+      }
+    }
+  },
+  "note": "Strict and attacker-key outcomes for this case are in the suite expectation matrix (README / manifest.json); they are reproduced by the fixture generator gate, not from these shipped bytes, because fixture keys are ephemeral by design."
+}

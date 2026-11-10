@@ -1,0 +1,8 @@
+{
+  "schema": "uibc-core/0.2.0-proposal",
+  "algorithm": "HMAC-SHA256",
+  "key_id": "1b7a5056b32cf39cd60270ae36bc809c29a9d0dd0fabb03d834582517c9a7a46",
+  "signed": "identity+manifest",
+  "signature": "97KzlHtAbcCg1wBD3eWkewHbnc7uBIt3JAco5g7S9tI=",
+  "created_at": "fixture"
+}

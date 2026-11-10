@@ -1,0 +1,61 @@
+{
+  "case": "sample-ed25519",
+  "package": "package/",
+  "seal": "Ed25519 (public key carried in package/signatures/seal.json; owner public key also shipped as owner.pub for pinning)",
+  "mutation": "none — public sample package (fictional support agent, 2 evidence files)",
+  "modes": {
+    "open": {
+      "result": "PASS",
+      "assurance": "public-key",
+      "checks": {
+        "S1": "PASS",
+        "S2": "PASS",
+        "S3": "PASS",
+        "S4": "PASS",
+        "S5": "PASS",
+        "S6": "PASS"
+      }
+    },
+    "pinned": {
+      "result": "PASS",
+      "assurance": "public-key",
+      "checks": {
+        "S1": "PASS",
+        "S2": "PASS",
+        "S3": "PASS",
+        "S4": "PASS",
+        "S5": "PASS",
+        "S6": "PASS"
+      }
+    }
+  },
+  "scitt_statement": {
+    "file": "statement.cose",
+    "also_at": "signed-statements/uibc-agent-evidence-sample-manifest.scitt (repo root, same bytes)",
+    "envelope": "COSE_Sign1 (tag 18), COSE hash envelope (draft-ietf-cose-hash-envelope): payload is the hash of the preimage, not the preimage itself",
+    "preimage": "package/manifest.json (the sample package's manifest, byte-identical to the vendored copy)",
+    "payload_sha256": "997208bb06fe78c7a01d6047595e87266f13b89d1a44dca6cedc95f58dbf3455",
+    "protected_header": {
+      "alg": "EdDSA",
+      "alg_code": -8,
+      "cwt_claims_label": 15,
+      "issuer": "https://github.com/zhaoxinghua09-cell/uibc-core",
+      "subject": "urn:uibc:agent:sample-support-agent",
+      "iat": 1762740000,
+      "payload_hash_alg_label": 258,
+      "payload_hash_alg": "SHA-256 (-16)",
+      "payload_content_type_label": 259,
+      "payload_content_type": "application/json"
+    },
+    "issuer_key": "issuer-key.pub (SPKI PEM); same key as the package seal — the published demo key of examples/build_example.py (seed bytes(range(32)), DEMO ONLY by design)",
+    "signature_valid": true,
+    "verified_with": [
+      "cryptography (Ed25519, independent backend)",
+      "uibc-core pure-Python RFC 8032 verifier",
+      "verify_statement.py in this suite (self-contained)"
+    ],
+    "negative_controls": "payload tamper and wrong key both rejected under both backends before submission",
+    "receipt": null,
+    "note": "A Signed Statement, not a Transparent Statement: no Transparency Service receipt exists yet; registration is the open next step."
+  }
+}

@@ -9,7 +9,9 @@ import uuid
 from datetime import datetime, timezone
 
 from .canonical import hash_file
-from .signing import ALGORITHM, generate_key, key_id, seal_sign
+from .signing import (ALGORITHM, ALGORITHM_ED25519, ed_generate_seed,
+                      ed_key_id, ed_public_key, ed_seal_sign, generate_key,
+                      key_id, seal_sign)
 from .verify import verify
 from . import SPEC_VERSION, __version__
 
@@ -126,10 +128,59 @@ def _load_key(path):
         sys.exit(f"error: key file is not 64-char hex: {path}")
 
 
+def _load_seal_key(path):
+    """Load a seal key file: ("hmac", key) or ("ed25519", seed).
+
+    HMAC files are the v0.2 bare 64-hex format; Ed25519 files start with
+    "ed25519:" followed by the 64-hex seed (uibc keygen --ed25519).
+    """
+    if not os.path.isfile(path):
+        sys.exit(f"error: key file not found: {path}")
+    with open(path, "r", encoding="ascii") as f:
+        raw = f.read().strip()
+    if raw.startswith("ed25519:"):
+        try:
+            seed = bytes.fromhex(raw[len("ed25519:"):].strip())
+        except ValueError:
+            sys.exit(f"error: Ed25519 key file is not valid hex: {path}")
+        if len(seed) != 32:
+            sys.exit(f"error: Ed25519 seed must be 32 bytes: {path}")
+        return "ed25519", seed
+    return "hmac", _load_key(path)
+
+
+def _load_pubkey(path):
+    """Load a pinned Ed25519 public key file (bare 64-hex of the key)."""
+    if not os.path.isfile(path):
+        sys.exit(f"error: pubkey file not found: {path}")
+    with open(path, "r", encoding="ascii") as f:
+        raw = f.read().strip()
+    try:
+        pub = bytes.fromhex(raw)
+    except ValueError:
+        sys.exit(f"error: pubkey file is not hex: {path}")
+    if len(pub) != 32:
+        sys.exit(f"error: Ed25519 public key must be 32 bytes: {path}")
+    return pub
+
+
 def cmd_keygen(args):
     out = os.path.abspath(args.out)
     if os.path.exists(out):
         sys.exit(f"error: {out} already exists (refusing to overwrite a key)")
+    if getattr(args, "ed25519", False):
+        seed = ed_generate_seed()
+        with open(out, "w", encoding="ascii") as f:
+            f.write("ed25519:" + seed.hex())
+        pub = ed_public_key(seed)
+        with open(out + ".pub", "w", encoding="ascii") as f:
+            f.write(pub.hex())
+        print(f"Ed25519 seal key written to {out}")
+        print(f"public key written to {out}.pub")
+        print(f"key_id (of the public key, safe to share): {ed_key_id(pub)}")
+        print("keep the seed file secret - anyone holding it can sign as you; "
+              "the .pub file is for verifiers and is safe to publish")
+        return
     key = generate_key()
     with open(out, "w", encoding="ascii") as f:
         f.write(key.hex())
@@ -162,23 +213,38 @@ def cmd_submit(args):
     _write(os.path.join(pkg, "manifest.json"), manifest)
     msg = f"submission sealed: agent={identity['agent_id']} evidence={len(idx['entries'])} root={root}"
     if getattr(args, "key", None):
-        key = _load_key(args.key)
+        kind, secret = _load_seal_key(args.key)
         sig_dir = os.path.join(pkg, "signatures")
         os.makedirs(sig_dir, exist_ok=True)
-        _write(os.path.join(sig_dir, "seal.json"), {
-            "schema": SPEC_VERSION,
-            "algorithm": ALGORITHM,
-            "key_id": key_id(key),
-            "signed": "identity+manifest",
-            "signature": seal_sign(key, identity, manifest),
-            "created_at": _now(),
-        })
-        msg += " | seal signed (key_id %s...)" % key_id(key)[:16]
+        if kind == "ed25519":
+            sig, pub_b64 = ed_seal_sign(secret, identity, manifest)
+            pub = ed_public_key(secret)
+            _write(os.path.join(sig_dir, "seal.json"), {
+                "schema": SPEC_VERSION,
+                "algorithm": ALGORITHM_ED25519,
+                "key_id": ed_key_id(pub),
+                "public_key": pub_b64,
+                "signed": "identity+manifest",
+                "signature": sig,
+                "created_at": _now(),
+            })
+            msg += " | Ed25519 seal signed (key_id %s...; third-party verifiable)" % ed_key_id(pub)[:16]
+        else:
+            _write(os.path.join(sig_dir, "seal.json"), {
+                "schema": SPEC_VERSION,
+                "algorithm": ALGORITHM,
+                "key_id": key_id(secret),
+                "signed": "identity+manifest",
+                "signature": seal_sign(secret, identity, manifest),
+                "created_at": _now(),
+            })
+            msg += " | seal signed (key_id %s...)" % key_id(secret)[:16]
     print(msg)
 
 
 def cmd_demo(args):
-    """One-command end-to-end demo: build -> seal -> verify -> tamper -> catch."""
+    """One-command end-to-end demo (v0.3): build -> public seal -> a stranger
+    verifies -> tamper -> catch -> forge-and-reseal -> pinning catches it."""
     import tempfile
     from .verify import verify as _verify
 
@@ -187,7 +253,7 @@ def cmd_demo(args):
     key_file = os.path.join(base, "owner.key")
 
     def _step(n, text):
-        print(f"[{n}/7] {text}")
+        print(f"[{n}/8] {text}")
 
     _step(1, "init package")
     cmd_init(type("A", (), {"path": pkg})())
@@ -201,23 +267,45 @@ def cmd_demo(args):
     _step(3, "add evidence (Evidence)")
     cmd_evidence(type("A", (), {"path": pkg, "type": "ACTION", "file": ev,
                                 "media_type": "text/plain", "note": ""})())
-    _step(4, "generate owner key + seal the package (Gates)")
-    cmd_keygen(type("A", (), {"out": key_file})())
+    _step(4, "generate an Ed25519 seal key + seal the package (Gates)")
+    cmd_keygen(type("A", (), {"out": key_file, "ed25519": True})())
     cmd_submit(type("A", (), {"path": pkg, "key": key_file})())
-    _step(5, "strict verify with owner key")
-    r = _verify(pkg, key=_load_key(key_file))
-    print(f"     -> result: {r['result']} (expected PASS)")
+    _step(5, "a STRANGER verifies - no key, no permission, public seal only")
+    r = _verify(pkg)
+    print(f"     -> result: {r['result']} (expected PASS; assurance: {r['assurance']})")
     _step(6, "tamper with the evidence behind the owner's back")
     ev_files = os.path.join(pkg, "evidence", "files")
     with open(os.path.join(ev_files, os.listdir(ev_files)[0]), "a",
               encoding="utf-8", newline="\n") as f:
         f.write("forged line added by attacker\n")
-    r = _verify(pkg, key=_load_key(key_file))
+    r = _verify(pkg)
     print(f"     -> result: {r['result']} (expected FAIL: tampered content)")
-    _step(7, "done - the demo package is kept for inspection at:")
-    print(f"     {pkg}")
+    _step(7, "stronger attack: recompute every hash and re-seal with the "
+             "attacker's OWN key, then verify unpinned")
+    forge = os.path.join(base, "forged")
+    shutil.copytree(pkg, forge)
+    idx = _read(os.path.join(forge, "evidence", "index.json"))
+    for e in idx["entries"]:
+        e["content_hash"] = hash_file(os.path.join(forge, "evidence", e["path"]))
+    _write(os.path.join(forge, "evidence", "index.json"), idx)
+    from .canonical import evidence_root
+    man = _read(os.path.join(forge, "manifest.json"))
+    man["evidence_root"] = evidence_root([e["content_hash"] for e in idx["entries"]])
+    _write(os.path.join(forge, "manifest.json"), man)
+    atk_key = os.path.join(base, "attacker.key")
+    cmd_keygen(type("A", (), {"out": atk_key, "ed25519": True})())
+    cmd_submit(type("A", (), {"path": forge, "key": atk_key})())
+    r = _verify(forge)
+    print(f"     -> result: {r['result']} (the attacker's seal is valid against the "
+          "attacker's key - a substituted key verifies against itself)")
+    _step(8, "verify the same package PINNED to the owner's public key")
+    r = _verify(forge, pubkey=_load_pubkey(key_file + ".pub"))
+    print(f"     -> result: {r['result']} (expected FAIL: key substitution caught "
+          "by pinning - publish your .pub where verifiers can pin it)")
     print("Try it yourself: python -m uibc_core.cli verify "
-          + pkg + " --key " + key_file)
+          + pkg + "   (no key needed - the seal is public)")
+    print("                 python -m uibc_core.cli verify "
+          + forge + " --pubkey " + key_file + ".pub")
 
 
 def cmd_cert_issue(args):
@@ -258,7 +346,8 @@ def cmd_gate(args):
     if not os.path.isdir(pkg):
         sys.exit(f"error: package dir not found: {pkg}")
     key = _load_key(args.key) if args.key else None
-    report = gate(pkg, key=key,
+    pubkey = _load_pubkey(args.pubkey) if getattr(args, "pubkey", None) else None
+    report = gate(pkg, key=key, pubkey=pubkey,
                   revocation_path=args.revocation, dispute_path=args.dispute)
     print(json.dumps(report, ensure_ascii=False, indent=2))
     sys.exit(report["exit_code"])
@@ -269,7 +358,8 @@ def cmd_verify(args):
     if not os.path.isdir(pkg):
         sys.exit(f"error: package dir not found: {pkg}")
     key = _load_key(args.key) if args.key else None
-    report = verify(pkg, key=key)
+    pubkey = _load_pubkey(args.pubkey) if getattr(args, "pubkey", None) else None
+    report = verify(pkg, key=key, pubkey=pubkey)
     print(json.dumps(report, ensure_ascii=False, indent=2))
     sys.exit(0 if report["result"] == "PASS" else 1)
 
@@ -311,17 +401,24 @@ def main():
     p = sub.add_parser("submit", help="seal package (compute evidence_root into manifest)")
     p.add_argument("path")
     p.add_argument("--key", default=None, metavar="KEYFILE",
-                   help="hex key file: also write an HMAC-SHA256 seal signature")
+                   help="key file: write a seal signature (HMAC hex key, or an "
+                        "ed25519: key file for a third-party-verifiable seal)")
     p.set_defaults(func=cmd_submit)
 
     p = sub.add_parser("verify", help="verify package (exit 0 = PASS)")
     p.add_argument("path")
     p.add_argument("--key", default=None, metavar="KEYFILE",
                    help="hex owner key: strict mode - unsigned/mismatched seal FAILS (S6)")
+    p.add_argument("--pubkey", default=None, metavar="PUBFILE",
+                   help="pinned Ed25519 public key (hex file): the seal's recorded "
+                        "public key must match it, else S6 FAILS")
     p.set_defaults(func=cmd_verify)
 
     p = sub.add_parser("keygen", help="generate a 256-bit seal key (hex file)")
     p.add_argument("--out", required=True, metavar="KEYFILE")
+    p.add_argument("--ed25519", action="store_true",
+                   help="generate an Ed25519 seal key instead: writes an ed25519: "
+                        "seed file plus a publishable .pub file (v0.3)")
     p.set_defaults(func=cmd_keygen)
 
     p = sub.add_parser("cert-issue", help="issue a certificate for a verified package")
@@ -342,6 +439,8 @@ def main():
     p.add_argument("path")
     p.add_argument("--key", default=None, metavar="KEYFILE",
                    help="hex owner key: strict verify + revocation signature check")
+    p.add_argument("--pubkey", default=None, metavar="PUBFILE",
+                   help="pinned Ed25519 public key (hex file) for the verify step")
     p.add_argument("--revocation", default=None, metavar="FILE",
                    help="revocation.json overlay (governance.md section 3)")
     p.add_argument("--dispute", default=None, metavar="FILE",

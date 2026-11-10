@@ -143,9 +143,20 @@ class TestVerifier(unittest.TestCase):
     def _checks(self, report):
         return {c["id"]: c["result"] for c in report["checks"]}
 
+    def _ed_seal(self, pkg):
+        """(Re)submit a package with a fresh Ed25519 seal (v0.3 public seal)."""
+        from uibc_core.signing import ed_generate_seed
+        kf = os.path.join(self.tmp, "owner.edkey")
+        with open(kf, "w", encoding="ascii") as f:
+            f.write("ed25519:" + ed_generate_seed().hex())
+        ucli.cmd_submit(type("A", (), {"path": pkg, "key": kf})())
+        return kf
+
     def test_clean_pass_and_discipline(self):
+        self._ed_seal(self.pkg)  # v0.3: a top-level PASS must be earned by a resolvable seal
         r = verify(self.pkg)
         self.assertEqual(r["result"], "PASS")
+        self.assertEqual(r["assurance"], "public-key")
         for field in ("scope", "limitations", "checked", "not_checked", "statement"):
             self.assertIn(field, r)
         self.assertIn("No violation was detected", r["statement"])
@@ -196,7 +207,7 @@ class TestVerifier(unittest.TestCase):
         ucli.cmd_evidence(type("A", (), {"path": pkg2, "type": "OUTPUT",
                                          "file": src, "media_type": "text/plain",
                                          "note": "中文"})())
-        ucli.cmd_submit(type("A", (), {"path": pkg2})())
+        self._ed_seal(pkg2)
         self.assertEqual(verify(pkg2)["result"], "PASS")
 
     def test_duplicate_filename_autorenamed(self):
@@ -206,7 +217,7 @@ class TestVerifier(unittest.TestCase):
                                          "note": ""})())
         # re-seal: a new evidence entry after sealing invalidates the root,
         # so the package must be re-submitted before verify (by design).
-        ucli.cmd_submit(type("A", (), {"path": self.pkg})())
+        self._ed_seal(self.pkg)
         self.assertEqual(verify(self.pkg)["result"], "PASS")
 
     def test_stale_seal_fails_S5(self):
@@ -307,10 +318,14 @@ class TestSealVerification(unittest.TestCase):
     def _detail(self, report):
         return "; ".join(c["detail"] for c in report["checks"] if c["id"] == "S6")
 
-    def test_unsigned_open_passes_skip(self):
+    def test_unsigned_open_inconclusive(self):
+        """Seal v0.3: unsigned in open mode is INCONCLUSIVE at S6 and at the
+        top level (was: SKIP under a PASS). Internal consistency is not
+        provenance."""
         r = verify(self.pkg)
-        self.assertEqual(r["result"], "PASS")
-        self.assertEqual(self._s6(r), "SKIP")
+        self.assertEqual(r["result"], "INCONCLUSIVE")
+        self.assertEqual(self._s6(r), "INCONCLUSIVE")
+        self.assertEqual(r["assurance"], "unattested")
 
     def test_unsigned_strict_fails(self):
         r = verify(self.pkg, key=self.owner_key)
@@ -327,7 +342,9 @@ class TestSealVerification(unittest.TestCase):
     def test_signed_no_key_inconclusive(self):
         self._seal_with(self.owner_key)
         r = verify(self.pkg)
-        self.assertEqual(r["result"], "PASS")  # open mode: integrity only
+        # Seal v0.3: an HMAC seal a stranger cannot check caps the verdict
+        # at INCONCLUSIVE (through v0.2 it rode under a top-level PASS).
+        self.assertEqual(r["result"], "INCONCLUSIVE")
         self.assertEqual(self._s6(r), "INCONCLUSIVE")
 
     def test_manifest_forgery_detected_strict(self):
@@ -377,6 +394,10 @@ class TestCLIChain(unittest.TestCase):
             self.assertEqual(run("event", pkg, "--type", "ACTIVATE").returncode, 0)
             self.assertEqual(run("evidence", pkg, "--type", "ACTION", "--file", ef).returncode, 0)
             self.assertEqual(run("submit", pkg).returncode, 0)
+            # v0.3 happy path: seal publicly, then a stranger's verify exits 0
+            kf = os.path.join(tmp, "owner.key")
+            self.assertEqual(run("keygen", "--ed25519", "--out", kf).returncode, 0)
+            self.assertEqual(run("submit", pkg, "--key", kf).returncode, 0)
             self.assertEqual(run("verify", pkg).returncode, 0)
             self.assertEqual(run("inspect", pkg).returncode, 0)
             # re-init same path must fail

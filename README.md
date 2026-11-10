@@ -1,5 +1,7 @@
 # uibc-core
 
+<!-- mcp-name: io.github.zhaoxinghua09-cell/uibc-core -->
+
 > **在线门户 Portal**：https://zhaoxinghua09-cell.github.io/lgd-hub/ — LGD 生态全景（理论 / 参考实现 / 技能全库），一跳即达。
 
 
@@ -94,7 +96,7 @@ python independent_verifier/cross_check.py  # 独立第二实现交叉核验（7
 
 零第三方依赖，`pip install -e .` 可选（只为获得 `uibc` 短命令）。
 
-## 验证什么（v0.2 检查项）
+## 验证什么（v0.3 检查项）
 
 | 检查 | 内容 |
 |------|------|
@@ -103,26 +105,28 @@ python independent_verifier/cross_check.py  # 独立第二实现交叉核验（7
 | S3 | 生命周期状态机（REGISTER 开头、previous_event 链、REVOKE/RETIRE 终态、非法转移报 lifecycle state violation） |
 | S4 | 证据文件 SHA-256 逐一重算比对（**内容篡改**由 S4 逐文件哈希与 S5 Evidence Root 捕捉；S3 只管生命周期事件序列与转移合法性，**不检测内容篡改**；封签（S6）作用于 identity+manifest，也不覆盖证据内容） |
 | S5 | Evidence Root 重算比对 manifest |
-| S6 | **封签签名**（v0.2 新增）：`--key` 严格模式下，未签/伪造/换钥的包 FAIL；开放模式下已签包报 INCONCLUSIVE、未签包 SKIP |
+| S6 | **封签签名**：Ed25519 封签（v0.3 新增）在开放模式下即可公开核验——包里带公钥，任何人可验；HMAC 封签（v0.2）需 `--key` 严格模式核对；未签包 INCONCLUSIVE。判定语义（三值裁决）见 `docs/verdict-and-seal-semantics.md` |
 
-## 两种验证模式
+## 验证模式（v0.3）
 
 | 模式 | 命令 | 语义 |
 |------|------|------|
-| 开放 | `uibc verify pkg` | v0.1 兼容：只查完整性（S1-S5），封签存在但无法核对 → INCONCLUSIVE |
-| 严格 | `uibc verify pkg --key owner.key` | 业主持钥：封签必须存在且有效，伪造与换钥在 S6 被拦 |
+| 开放 | `uibc verify pkg` | Ed25519 已签包 → 公开核验 S6（PASS/FAIL）；HMAC 已签包 → S6 INCONCLUSIVE（对称封签无法公开核对）；未签包 → INCONCLUSIVE。**v0.3 起裁决为三值：任一检查 INCONCLUSIVE，则总结果封顶 INCONCLUSIVE，不再藏在 PASS 之下** |
+| 严格 | `uibc verify pkg --key owner.key` | 业主持钥：HMAC 封签必须存在且有效，伪造与换钥在 S6 被拦 |
+| 钉扎 | `uibc verify pkg --pubkey owner.pub` | Ed25519 公钥钉扎：封签记录的公钥须与钉扎值一致，换钥重签在 S6 被拦 |
+
+仓库内 `examples/sample-package/` 是一个完整的已签样本包，外人零密钥即可验证（见 `examples/README.md`）。
 
 ## 报告纪律（总档案 §16/§17）
 
 每份验证报告必须包含：`scope`（范围）、`limitations`（局限）、`checked`（查了什么）、`not_checked`（没查什么）。
-v0.2 明确不查：非对称/第三方签名（Ed25519，v0.3 目标）、生命周期事件签名、外部时间戳锚定、行为评估、记忆忠实性/连续性。
+明确不查：生命周期事件签名（封签只覆盖 identity+manifest）、外部时间戳锚定、行为评估、记忆忠实性/连续性。非对称/第三方签名已于 v0.3 落地（Ed25519，纯标准库实现，RFC 8032 向量锁定）。
 
 ## 已知边界（诚实清单）
 
-- **封签为对称 HMAC-SHA256（v0.2 临时方案，纯标准库零依赖）**：验证需持有密钥；第三方可验证需 Ed25519（v0.3 目标，待 `cryptography` 依赖决策）
-- **对称 HMAC 无可否认性（non-repudiation）缺口**：HMAC 只向持钥者证明"持有该共享密钥的一方签署了封印"，无法向第三方证明"是特定 owner 本人签署"——owner 持有密钥即可事后否认曾签署。此缺口同样待 v0.3 Ed25519 非对称签名从密码学上化解。
-- **`owner.key` 单点失效**：对称密钥一旦泄露或丢失，"持钥即可信"的封签前提即崩塌，且 v0.2 无密钥吊销/轮换机制。生产部署须将 `owner.key` 纳入密钥管理（HSM / 分片 / 定期轮换）；v0.3 以"Ed25519 公钥注册表 + 吊销列表"从架构上化解单点。
-- **换钥攻击只能靠链外钉扎检测**：攻击者可用自己的密钥重新签署整个包——用业主密钥 `--key` 验证即 FAIL（key mismatch），不持业主密钥则无法察觉。这是 v0.3（Ed25519 + 公钥注册表）的常设动机案例（见 fixtures/malicious-keyswap）
+- **HMAC 封签（v0.2 保留）为对称方案**：验证需持有密钥、无第三方可验证性、无不可否认性——这些缺口已由 v0.3 的 Ed25519 公开封签化解；HMAC 模式仅建议用于业主自验场景。注：v0.3 的 Ed25519 为纯 Python 实现（非恒定时间），大批量签名场景应替换为原生实现（接口不变）。
+- **密钥单点失效（两种封签共有）**：私钥/种子一旦泄露或丢失，封签前提即崩塌，本版本无吊销/轮换机制。生产部署须将私钥纳入密钥管理（HSM / 分片 / 定期轮换）；吊销列表留待后续版本。
+- **换钥攻击只能靠钉扎检测**：攻击者可用自己的密钥重新签署整个包——其封签对自己的公钥是有效的；只有验证者钉扎了真业主的公钥（`--pubkey`，或 HMAC 的 `--key`）才在 S6 被拦。故业主应把公钥发布在可被钉扎之处（仓库、注册表条目、论文附带）。常设动机案例见 fixtures/malicious-keyswap 与 `uibc demo` 第 7–8 步
 - Evidence Root 算法为临时版（sorted hashes 的 SHA-256），待 canonical serialization 定稿后升级为 Merkle 树
 - 时间戳未做外部锚定（生产用 OTS/Rekor，见行动计划）
 

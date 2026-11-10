@@ -15,6 +15,46 @@ Nothing here is a ratified standard.
 
 ## [Unreleased]
 
+## [0.3.0] — 2026-11-10
+
+### ⚠️ VERDICT-AFFECTING (breaking in effect)
+
+Per this project's own rule above, this release changes what produces
+which verdict, in two connected moves. The full semantics are specified
+in `docs/verdict-and-seal-semantics.md`.
+
+**1. Three-valued verdicts.** Through 0.2.x the top-level result was
+PASS unless a check FAILed, so an INCONCLUSIVE S6 (seal present but not
+checkable in open mode) rode under a PASS. An external review (2026-11)
+demonstrated the consequence: a fully self-consistent forgery verified
+PASS in open mode. From 0.3.0: any FAIL → FAIL; else any INCONCLUSIVE →
+INCONCLUSIVE; else PASS. Exactly three fixture cells changed — clean /
+malicious / malicious-keyswap in open mode, PASS → INCONCLUSIVE. No
+individual check outcome moved; the forgery is still not *detected*
+without a key, it is simply no longer *passed*.
+
+**2. Ed25519 public seals.** The v0.2 notes promised an asymmetric seal
+for v0.3, pending a `cryptography` dependency decision. The decision
+landed differently: Ed25519 (RFC 8032) is implemented in pure Python on
+the standard library, and the project stays zero-dependency. An
+Ed25519 seal records its public key in the package, so anyone can
+verify provenance without the owner's secret (`uibc keygen --ed25519`,
+`uibc submit --key`, `uibc verify --pubkey <pin>`). Reports gain an
+`assurance` field: `public-key` / `owner-key` / `unattested`.
+
+Also in this release: an unsigned package in open mode is INCONCLUSIVE
+at S6 (was SKIP under PASS); `uibc demo` now runs the v0.3 arc
+(stranger-verifies → tamper → forge-and-reseal → pinning catch);
+`examples/` ships a committed sample package verifiable by any
+stranger; the independent verifier mirrors the new semantics so the
+two implementations still cross-check; gate HOLD now also results
+from an unattested (unsigned) package in open mode.
+
+Note: `CITATION.cff` / `codemeta.json` still pin the archived 0.2.1
+artifact and its version DOI; they will be updated when the 0.3.0
+archive is deposited.
+
+
 ### ⚠️ VERDICT-AFFECTING (breaking in effect) — released as 0.2.2
 
 Per this project's own rule above, *a change to what produces which verifier

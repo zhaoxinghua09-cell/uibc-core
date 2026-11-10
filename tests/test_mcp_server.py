@@ -38,7 +38,9 @@ class McpServerTests(unittest.TestCase):
             with open("log.txt", "w", encoding="utf-8") as f:
                 f.write("evidence line\n")
             _run_cli("evidence", "demo", "--type", "ACTION", "--file", "log.txt")
-            _run_cli("submit", "demo")
+            # v0.3: seal with Ed25519 so open verification resolves to PASS
+            _run_cli("keygen", "--ed25519", "--out", "owner.key")
+            _run_cli("submit", "demo", "--key", "owner.key")
         finally:
             os.chdir(cwd)
 

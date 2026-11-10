@@ -81,7 +81,8 @@ def _check_dispute(disp: dict, manifest: dict) -> tuple:
 
 
 def gate(package_dir: str, key: bytes = None,
-         revocation_path: str = None, dispute_path: str = None) -> dict:
+         revocation_path: str = None, dispute_path: str = None,
+         pubkey: bytes = None) -> dict:
     """Run verify, then apply governance overlays. Returns a gate report.
 
     Exit-code contract (CLI layer):
@@ -89,7 +90,7 @@ def gate(package_dir: str, key: bytes = None,
         DENY            -> 2   (blocking: mirrors poka-yoke hook semantics)
         HOLD            -> 3   (INCONCLUSIVE: human decision required)
     """
-    report = verify(package_dir, key=key)
+    report = verify(package_dir, key=key, pubkey=pubkey)
     manifest = _load_json(os.path.join(package_dir, "manifest.json")) \
         if os.path.isfile(os.path.join(package_dir, "manifest.json")) else {}
 

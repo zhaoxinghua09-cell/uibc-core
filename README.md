@@ -1,5 +1,7 @@
 # uibc-core
 
+<!-- mcp-name: io.github.zhaoxinghua09-cell/uibc-core -->
+
 > **在线门户 Portal**：https://zhaoxinghua09-cell.github.io/lgd-hub/ — LGD 生态全景（理论 / 参考实现 / 技能全库），一跳即达。
 
 

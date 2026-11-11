@@ -1,0 +1,12 @@
+SESSION SUMMARY - fictional MCP gateway session (Casdoor-style gateway)
+An agent client, delegated by a human principal, called three tools
+through the gateway and was blocked from a fourth. The gateway did the
+authorization: registration, consent, scopes, audience binding, per-tool
+policy. Its audit records say what happened.
+
+What the gateway does not do: make those records provable to anyone
+else. The records live in the operator's database, editable by the
+operator. This package seals one export of them, so an auditor who
+trusts neither the operator nor the gateway can still check that the
+export they hold is the export that was sealed - and catch a record
+that was washed after the fact.

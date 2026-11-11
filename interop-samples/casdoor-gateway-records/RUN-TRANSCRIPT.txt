@@ -1,0 +1,381 @@
+CASDOOR x UIBC INTEROP SAMPLE - verification transcript
+Story: one fictional agent session through an MCP gateway.
+The gateway blocked a delete_record call. Its audit export
+was sealed. In the washed variant, the blocked record was
+rewritten to look like a success.
+==============================================================
+
+1. Sealed export, open verification
+  $ uibc verify exported-sealed
+  {
+    "verifier_id": "uibc-core-verifier",
+    "verifier_version": "0.3.0",
+    "spec_version": "uibc-core/0.3.0-proposal",
+    "result": "PASS",
+    "subject": "casdoor-gateway-session-export",
+    "checks": [
+      {
+        "id": "S1",
+        "name": "package structure",
+        "result": "PASS",
+        "detail": "all required files present"
+      },
+      {
+        "id": "S2",
+        "name": "identity consistency",
+        "result": "PASS",
+        "detail": "identity.agent_id='casdoor-gateway-session-export', manifest.agent_id='casdoor-gateway-session-export'"
+      },
+      {
+        "id": "S3",
+        "name": "lifecycle state machine",
+        "result": "PASS",
+        "detail": "2 events, chain valid"
+      },
+      {
+        "id": "S4",
+        "name": "evidence integrity",
+        "result": "PASS",
+        "detail": "3 entries checked; all hashes match"
+      },
+      {
+        "id": "S5",
+        "name": "evidence root",
+        "result": "PASS",
+        "detail": "computed=31e82ad843ff03ca16084379e8ca6f2201e05f5399c20fb2679a7db709162c2b, manifest=31e82ad843ff03ca16084379e8ca6f2201e05f5399c20fb2679a7db709162c2b"
+      },
+      {
+        "id": "S6",
+        "name": "seal signature",
+        "result": "PASS",
+        "detail": "Ed25519 seal valid (key_id fdf72a088f18f739...) - third-party verifiable, no secret involved"
+      }
+    ],
+    "root_algorithm": "sha256(canonical-json(sorted(content_hashes))) v0.1-provisional",
+    "assurance": "public-key",
+    "scope": "Structure, identity consistency, lifecycle state machine, evidence content hashes, evidence root, and the seal signature of this submission package only. Ed25519 seals are verified publicly in every mode; HMAC seals only in strict --key mode.",
+    "limitations": [
+      "HMAC-SHA256 seals (v0.2) are symmetric: verification requires the owner key. Ed25519 seals (v0.3) are third-party verifiable with the public key recorded in the seal.",
+      "Key substitution is detectable only when verifying with the owner key (--key), a pinned public key (--pubkey), or out-of-band key pinning.",
+      "Evidence Root algorithm is provisional (pending canonical serialization ratification).",
+      "Timestamps are not independently anchored.",
+      "Lifecycle event signatures (event.signature) are not ratified and not verified.",
+      "No behavioral evaluation is performed (Evaluation is out of verifier scope, archive SS15)."
+    ],
+    "checked": [
+      "structure",
+      "identity",
+      "lifecycle",
+      "evidence hashes",
+      "evidence root",
+      "seal signature"
+    ],
+    "not_checked": [
+      "lifecycle event signatures",
+      "external timestamp anchoring",
+      "behavioral evaluation",
+      "memory fidelity/continuity"
+    ],
+    "statement": "No violation was detected within the observed evidence boundary."
+  }
+  exit code: 0
+
+2. Sealed export, auditor pins the operator public key
+  $ uibc verify --pubkey /home/hatch/workspace/casdoor-uibc-interop-demo/operator.pub exported-sealed
+  {
+    "verifier_id": "uibc-core-verifier",
+    "verifier_version": "0.3.0",
+    "spec_version": "uibc-core/0.3.0-proposal",
+    "result": "PASS",
+    "subject": "casdoor-gateway-session-export",
+    "checks": [
+      {
+        "id": "S1",
+        "name": "package structure",
+        "result": "PASS",
+        "detail": "all required files present"
+      },
+      {
+        "id": "S2",
+        "name": "identity consistency",
+        "result": "PASS",
+        "detail": "identity.agent_id='casdoor-gateway-session-export', manifest.agent_id='casdoor-gateway-session-export'"
+      },
+      {
+        "id": "S3",
+        "name": "lifecycle state machine",
+        "result": "PASS",
+        "detail": "2 events, chain valid"
+      },
+      {
+        "id": "S4",
+        "name": "evidence integrity",
+        "result": "PASS",
+        "detail": "3 entries checked; all hashes match"
+      },
+      {
+        "id": "S5",
+        "name": "evidence root",
+        "result": "PASS",
+        "detail": "computed=31e82ad843ff03ca16084379e8ca6f2201e05f5399c20fb2679a7db709162c2b, manifest=31e82ad843ff03ca16084379e8ca6f2201e05f5399c20fb2679a7db709162c2b"
+      },
+      {
+        "id": "S6",
+        "name": "seal signature",
+        "result": "PASS",
+        "detail": "Ed25519 seal valid (key_id fdf72a088f18f739...) - third-party verifiable, no secret involved"
+      }
+    ],
+    "root_algorithm": "sha256(canonical-json(sorted(content_hashes))) v0.1-provisional",
+    "assurance": "public-key",
+    "scope": "Structure, identity consistency, lifecycle state machine, evidence content hashes, evidence root, and the seal signature of this submission package only. Ed25519 seals are verified publicly in every mode; HMAC seals only in strict --key mode.",
+    "limitations": [
+      "HMAC-SHA256 seals (v0.2) are symmetric: verification requires the owner key. Ed25519 seals (v0.3) are third-party verifiable with the public key recorded in the seal.",
+      "Key substitution is detectable only when verifying with the owner key (--key), a pinned public key (--pubkey), or out-of-band key pinning.",
+      "Evidence Root algorithm is provisional (pending canonical serialization ratification).",
+      "Timestamps are not independently anchored.",
+      "Lifecycle event signatures (event.signature) are not ratified and not verified.",
+      "No behavioral evaluation is performed (Evaluation is out of verifier scope, archive SS15)."
+    ],
+    "checked": [
+      "structure",
+      "identity",
+      "lifecycle",
+      "evidence hashes",
+      "evidence root",
+      "seal signature"
+    ],
+    "not_checked": [
+      "lifecycle event signatures",
+      "external timestamp anchoring",
+      "behavioral evaluation",
+      "memory fidelity/continuity"
+    ],
+    "statement": "No violation was detected within the observed evidence boundary."
+  }
+  exit code: 0
+
+3. Washed export (blocked record rewritten as ok)
+  $ uibc verify exported-edited
+  {
+    "verifier_id": "uibc-core-verifier",
+    "verifier_version": "0.3.0",
+    "spec_version": "uibc-core/0.3.0-proposal",
+    "result": "FAIL",
+    "subject": "casdoor-gateway-session-export",
+    "checks": [
+      {
+        "id": "S1",
+        "name": "package structure",
+        "result": "PASS",
+        "detail": "all required files present"
+      },
+      {
+        "id": "S2",
+        "name": "identity consistency",
+        "result": "PASS",
+        "detail": "identity.agent_id='casdoor-gateway-session-export', manifest.agent_id='casdoor-gateway-session-export'"
+      },
+      {
+        "id": "S3",
+        "name": "lifecycle state machine",
+        "result": "PASS",
+        "detail": "2 events, chain valid"
+      },
+      {
+        "id": "S4",
+        "name": "evidence integrity",
+        "result": "FAIL",
+        "detail": "3 entries checked; hash mismatch on 'files/records-export.json'"
+      },
+      {
+        "id": "S5",
+        "name": "evidence root",
+        "result": "INCONCLUSIVE",
+        "detail": "skipped: evidence missing or S4 failed"
+      },
+      {
+        "id": "S6",
+        "name": "seal signature",
+        "result": "PASS",
+        "detail": "Ed25519 seal valid (key_id fdf72a088f18f739...) - third-party verifiable, no secret involved"
+      }
+    ],
+    "root_algorithm": "sha256(canonical-json(sorted(content_hashes))) v0.1-provisional",
+    "assurance": "public-key",
+    "scope": "Structure, identity consistency, lifecycle state machine, evidence content hashes, evidence root, and the seal signature of this submission package only. Ed25519 seals are verified publicly in every mode; HMAC seals only in strict --key mode.",
+    "limitations": [
+      "HMAC-SHA256 seals (v0.2) are symmetric: verification requires the owner key. Ed25519 seals (v0.3) are third-party verifiable with the public key recorded in the seal.",
+      "Key substitution is detectable only when verifying with the owner key (--key), a pinned public key (--pubkey), or out-of-band key pinning.",
+      "Evidence Root algorithm is provisional (pending canonical serialization ratification).",
+      "Timestamps are not independently anchored.",
+      "Lifecycle event signatures (event.signature) are not ratified and not verified.",
+      "No behavioral evaluation is performed (Evaluation is out of verifier scope, archive SS15)."
+    ],
+    "checked": [
+      "structure",
+      "identity",
+      "lifecycle",
+      "evidence hashes",
+      "evidence root",
+      "seal signature"
+    ],
+    "not_checked": [
+      "lifecycle event signatures",
+      "external timestamp anchoring",
+      "behavioral evaluation",
+      "memory fidelity/continuity"
+    ],
+    "statement": "Violations were detected within the observed evidence boundary."
+  }
+  exit code: 1
+
+4. Washed export re-sealed with a substitute key, open verification
+  $ uibc verify exported-resealed
+  {
+    "verifier_id": "uibc-core-verifier",
+    "verifier_version": "0.3.0",
+    "spec_version": "uibc-core/0.3.0-proposal",
+    "result": "PASS",
+    "subject": "casdoor-gateway-session-export",
+    "checks": [
+      {
+        "id": "S1",
+        "name": "package structure",
+        "result": "PASS",
+        "detail": "all required files present"
+      },
+      {
+        "id": "S2",
+        "name": "identity consistency",
+        "result": "PASS",
+        "detail": "identity.agent_id='casdoor-gateway-session-export', manifest.agent_id='casdoor-gateway-session-export'"
+      },
+      {
+        "id": "S3",
+        "name": "lifecycle state machine",
+        "result": "PASS",
+        "detail": "2 events, chain valid"
+      },
+      {
+        "id": "S4",
+        "name": "evidence integrity",
+        "result": "PASS",
+        "detail": "3 entries checked; all hashes match"
+      },
+      {
+        "id": "S5",
+        "name": "evidence root",
+        "result": "PASS",
+        "detail": "computed=3d50531a0f7bd01b46f39e5ed8c5dae1df9c84b77c4f65bf72c6ef81970e4df2, manifest=3d50531a0f7bd01b46f39e5ed8c5dae1df9c84b77c4f65bf72c6ef81970e4df2"
+      },
+      {
+        "id": "S6",
+        "name": "seal signature",
+        "result": "PASS",
+        "detail": "Ed25519 seal valid (key_id defe6330f78fcc11...) - third-party verifiable, no secret involved"
+      }
+    ],
+    "root_algorithm": "sha256(canonical-json(sorted(content_hashes))) v0.1-provisional",
+    "assurance": "public-key",
+    "scope": "Structure, identity consistency, lifecycle state machine, evidence content hashes, evidence root, and the seal signature of this submission package only. Ed25519 seals are verified publicly in every mode; HMAC seals only in strict --key mode.",
+    "limitations": [
+      "HMAC-SHA256 seals (v0.2) are symmetric: verification requires the owner key. Ed25519 seals (v0.3) are third-party verifiable with the public key recorded in the seal.",
+      "Key substitution is detectable only when verifying with the owner key (--key), a pinned public key (--pubkey), or out-of-band key pinning.",
+      "Evidence Root algorithm is provisional (pending canonical serialization ratification).",
+      "Timestamps are not independently anchored.",
+      "Lifecycle event signatures (event.signature) are not ratified and not verified.",
+      "No behavioral evaluation is performed (Evaluation is out of verifier scope, archive SS15)."
+    ],
+    "checked": [
+      "structure",
+      "identity",
+      "lifecycle",
+      "evidence hashes",
+      "evidence root",
+      "seal signature"
+    ],
+    "not_checked": [
+      "lifecycle event signatures",
+      "external timestamp anchoring",
+      "behavioral evaluation",
+      "memory fidelity/continuity"
+    ],
+    "statement": "No violation was detected within the observed evidence boundary."
+  }
+  exit code: 0
+
+5. Same re-sealed export, auditor pins the operator public key
+  $ uibc verify --pubkey /home/hatch/workspace/casdoor-uibc-interop-demo/operator.pub exported-resealed
+  {
+    "verifier_id": "uibc-core-verifier",
+    "verifier_version": "0.3.0",
+    "spec_version": "uibc-core/0.3.0-proposal",
+    "result": "FAIL",
+    "subject": "casdoor-gateway-session-export",
+    "checks": [
+      {
+        "id": "S1",
+        "name": "package structure",
+        "result": "PASS",
+        "detail": "all required files present"
+      },
+      {
+        "id": "S2",
+        "name": "identity consistency",
+        "result": "PASS",
+        "detail": "identity.agent_id='casdoor-gateway-session-export', manifest.agent_id='casdoor-gateway-session-export'"
+      },
+      {
+        "id": "S3",
+        "name": "lifecycle state machine",
+        "result": "PASS",
+        "detail": "2 events, chain valid"
+      },
+      {
+        "id": "S4",
+        "name": "evidence integrity",
+        "result": "PASS",
+        "detail": "3 entries checked; all hashes match"
+      },
+      {
+        "id": "S5",
+        "name": "evidence root",
+        "result": "PASS",
+        "detail": "computed=3d50531a0f7bd01b46f39e5ed8c5dae1df9c84b77c4f65bf72c6ef81970e4df2, manifest=3d50531a0f7bd01b46f39e5ed8c5dae1df9c84b77c4f65bf72c6ef81970e4df2"
+      },
+      {
+        "id": "S6",
+        "name": "seal signature",
+        "result": "FAIL",
+        "detail": "public key does not match the pinned --pubkey (possible key substitution or wrong pin)"
+      }
+    ],
+    "root_algorithm": "sha256(canonical-json(sorted(content_hashes))) v0.1-provisional",
+    "assurance": "unattested",
+    "scope": "Structure, identity consistency, lifecycle state machine, evidence content hashes, evidence root, and the seal signature of this submission package only. Ed25519 seals are verified publicly in every mode; HMAC seals only in strict --key mode.",
+    "limitations": [
+      "HMAC-SHA256 seals (v0.2) are symmetric: verification requires the owner key. Ed25519 seals (v0.3) are third-party verifiable with the public key recorded in the seal.",
+      "Key substitution is detectable only when verifying with the owner key (--key), a pinned public key (--pubkey), or out-of-band key pinning.",
+      "Evidence Root algorithm is provisional (pending canonical serialization ratification).",
+      "Timestamps are not independently anchored.",
+      "Lifecycle event signatures (event.signature) are not ratified and not verified.",
+      "No behavioral evaluation is performed (Evaluation is out of verifier scope, archive SS15)."
+    ],
+    "checked": [
+      "structure",
+      "identity",
+      "lifecycle",
+      "evidence hashes",
+      "evidence root",
+      "seal signature"
+    ],
+    "not_checked": [
+      "lifecycle event signatures",
+      "external timestamp anchoring",
+      "behavioral evaluation",
+      "memory fidelity/continuity"
+    ],
+    "statement": "Violations were detected within the observed evidence boundary."
+  }
+  exit code: 1

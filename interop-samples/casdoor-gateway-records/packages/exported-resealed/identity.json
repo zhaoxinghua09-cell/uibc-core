@@ -1,0 +1,9 @@
+{
+  "schema": "uibc-core/0.3.0-proposal",
+  "agent_id": "casdoor-gateway-session-export",
+  "agent_type": "evidence-package",
+  "owner": "acme-health-ops",
+  "created_at": "2026-11-11T00:21:39Z",
+  "status": "REGISTERED",
+  "version": "1.0.0"
+}

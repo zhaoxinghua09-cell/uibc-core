@@ -1,0 +1,24 @@
+{
+  "gateway_server": "acme-health/device-registry-mcp",
+  "upstream": "device-registry MCP server (operator-run)",
+  "client_registration": "dynamic client registration (DCR), client tagged dcr",
+  "delegation": {
+    "human_principal": "j.osei (clinical engineering)",
+    "agent_client": "clinical-support-agent",
+    "flow": "authorization code + PKCE (S256), RFC 8707 resource indicator",
+    "audience": "/api/server/acme-health/device-registry-mcp",
+    "scopes_granted": [
+      "device-registry:read",
+      "documents:read",
+      "tickets:write"
+    ],
+    "consent": "recorded on the operator's consent page; subset of requested scopes",
+    "token_lifetimes": "access 168h / refresh 720h (gateway defaults), refresh rotation on"
+  },
+  "tool_policy": {
+    "query_device_registry": "allow",
+    "read_document": "allow",
+    "update_ticket": "allow",
+    "delete_record": "block"
+  }
+}

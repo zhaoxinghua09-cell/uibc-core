@@ -1,0 +1,64 @@
+{
+  "export_note": "FICTIONAL session. Field names follow the audit Record shape documented for Casdoor-style gateways: createdTime, organization, owner, clientIp, method, requestUri, action, requestBody (secrets masked), response.",
+  "exported_from": "MCP gateway audit records (operator console export)",
+  "exported_by": "acme-health-ops",
+  "exported_at": "2026-11-10T10:02:00Z",
+  "server": "acme-health/device-registry-mcp",
+  "records": [
+    {
+      "createdTime": "2026-11-10T09:14:02Z",
+      "organization": "acme-health",
+      "owner": "app/clinical-support-agent (on behalf of user j.osei)",
+      "clientIp": "10.4.1.27",
+      "method": "POST",
+      "requestUri": "/api/server/acme-health/device-registry-mcp",
+      "action": "mcp-tools-list",
+      "requestBody": "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/list\"}",
+      "response": "ok"
+    },
+    {
+      "createdTime": "2026-11-10T09:14:19Z",
+      "organization": "acme-health",
+      "owner": "app/clinical-support-agent (on behalf of user j.osei)",
+      "clientIp": "10.4.1.27",
+      "method": "POST",
+      "requestUri": "/api/server/acme-health/device-registry-mcp",
+      "action": "mcp-tools-call",
+      "requestBody": "{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/call\",\"params\":{\"name\":\"query_device_registry\",\"arguments\":{\"udi\":\"(01)06912345678901\"},\"authorization\":\"***\"}}",
+      "response": "ok"
+    },
+    {
+      "createdTime": "2026-11-10T09:15:44Z",
+      "organization": "acme-health",
+      "owner": "app/clinical-support-agent (on behalf of user j.osei)",
+      "clientIp": "10.4.1.27",
+      "method": "POST",
+      "requestUri": "/api/server/acme-health/device-registry-mcp",
+      "action": "mcp-tools-call",
+      "requestBody": "{\"jsonrpc\":\"2.0\",\"id\":3,\"method\":\"tools/call\",\"params\":{\"name\":\"read_document\",\"arguments\":{\"doc\":\"ifu-cp2-rev-c\"}}}",
+      "response": "ok"
+    },
+    {
+      "createdTime": "2026-11-10T09:17:03Z",
+      "organization": "acme-health",
+      "owner": "app/clinical-support-agent (on behalf of user j.osei)",
+      "clientIp": "10.4.1.27",
+      "method": "POST",
+      "requestUri": "/api/server/acme-health/device-registry-mcp",
+      "action": "mcp-tools-call",
+      "requestBody": "{\"jsonrpc\":\"2.0\",\"id\":4,\"method\":\"tools/call\",\"params\":{\"name\":\"update_ticket\",\"arguments\":{\"ticket\":\"INC-2211\",\"note\":\"registry entry confirmed\"}}}",
+      "response": "ok"
+    },
+    {
+      "createdTime": "2026-11-10T09:18:37Z",
+      "organization": "acme-health",
+      "owner": "app/clinical-support-agent (on behalf of user j.osei)",
+      "clientIp": "10.4.1.27",
+      "method": "POST",
+      "requestUri": "/api/server/acme-health/device-registry-mcp",
+      "action": "mcp-tools-call",
+      "requestBody": "{\"jsonrpc\":\"2.0\",\"id\":5,\"method\":\"tools/call\",\"params\":{\"name\":\"delete_record\",\"arguments\":{\"record\":\"reg-88412\"}}}",
+      "response": "ok"
+    }
+  ]
+}

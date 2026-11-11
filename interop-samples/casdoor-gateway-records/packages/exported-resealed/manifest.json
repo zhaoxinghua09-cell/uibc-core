@@ -1,0 +1,9 @@
+{
+  "schema": "uibc-core/0.3.0-proposal",
+  "agent_id": "casdoor-gateway-session-export",
+  "agent_version": "1.0.0",
+  "created_at": "2026-11-11T00:21:39Z",
+  "evidence_count": 3,
+  "evidence_root": "3d50531a0f7bd01b46f39e5ed8c5dae1df9c84b77c4f65bf72c6ef81970e4df2",
+  "status": "SUBMITTED"
+}

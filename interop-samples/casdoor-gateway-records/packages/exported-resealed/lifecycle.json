@@ -1,0 +1,25 @@
+{
+  "schema": "uibc-core/0.3.0-proposal",
+  "events": [
+    {
+      "event_id": "26feba46-27cf-462a-b308-0dab51c3b800",
+      "event_type": "REGISTER",
+      "agent_id": "casdoor-gateway-session-export",
+      "timestamp": "2026-11-11T00:21:39Z",
+      "actor": "acme-health-ops",
+      "payload_hash": null,
+      "previous_event": null,
+      "signature": null
+    },
+    {
+      "event_id": "db4c88a9-4508-4b21-8b4a-d7dc44388f09",
+      "event_type": "ACTIVATE",
+      "agent_id": "casdoor-gateway-session-export",
+      "timestamp": "2026-11-11T00:21:39Z",
+      "actor": "acme-health-ops",
+      "payload_hash": null,
+      "previous_event": "26feba46-27cf-462a-b308-0dab51c3b800",
+      "signature": null
+    }
+  ]
+}

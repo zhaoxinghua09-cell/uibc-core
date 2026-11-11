@@ -1,0 +1,31 @@
+{
+  "entries": [
+    {
+      "evidence_id": "7506d295-f800-4840-93ed-a7d25e4fb442",
+      "type": "ACTION",
+      "path": "files/records-export.json",
+      "content_hash": "a47bb9846676bb63dd4741dafa0b5985cb8dadb22239851f69e8c0daaa614b37",
+      "created_at": "2026-11-11T00:21:39Z",
+      "media_type": "application/json",
+      "note": "gateway audit records export for one agent session"
+    },
+    {
+      "evidence_id": "15decf80-1768-44b5-bea2-7ecac79a5b3f",
+      "type": "INPUT",
+      "path": "files/gateway-config-summary.json",
+      "content_hash": "a01b8a0753fcbbcb673e7bc715503737dd9b56a27a1fc8ba9d9e1ceae04a5013",
+      "created_at": "2026-11-11T00:21:39Z",
+      "media_type": "application/json",
+      "note": "authorization context recorded by the gateway operator"
+    },
+    {
+      "evidence_id": "35719657-7150-4d90-8911-7e4610dfe6d5",
+      "type": "OUTPUT",
+      "path": "files/session-summary.txt",
+      "content_hash": "a9b28e028498e3435fde40651dce873fe5d7f58d2ff76cafb436c7a50c9e7476",
+      "created_at": "2026-11-11T00:21:39Z",
+      "media_type": "text/plain",
+      "note": "plain-language session summary"
+    }
+  ]
+}

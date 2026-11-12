@@ -31,7 +31,7 @@
 > **Verifiable today** — every artifact is independently checkable: Sigstore Rekor transparency log
 > (logIndex 2883389783), concept DOI 10.5281/zenodo.22456647, SWHID
 > `swh:1:ori:819530c8be2adf6da901256ce9fd28063f8f1296` (ISO/IEC 18670).
-> Reproduce: `python -m unittest discover tests` (151 tests) · `python independent_verifier/cross_check.py`.
+> Reproduce: `python -m unittest discover tests` (160 tests) · `python independent_verifier/cross_check.py`.
 > **Honest boundary** — no third-party quality review to date; any operational use is self-reported
 > (see ENDORSEMENTS.md: 存证 ≠ 参与 ≠ 认可). Context: [FG-TIDA themes #27](https://github.com/FG-TIDA/themes/issues/27).
 
@@ -89,7 +89,7 @@ uibc verify demo.uibc                   # 开放模式：仅完整性检查
 ## 运行测试（外人复现三件套）
 
 ```bash
-python -m unittest discover tests           # 全量 151 用例（实测 `Ran 151 tests, OK`；覆盖 MCP／Registry／A2A／runtime／stress 等子集）
+python -m unittest discover tests           # 全量 160 用例（实测 `Ran 160 tests, OK`；覆盖 MCP／Registry／A2A／runtime／stress 等子集）
 python -m unittest tests.stress_test        # 压力 7 场景
 python independent_verifier/cross_check.py  # 独立第二实现交叉核验（70 项，0 分歧）
 ```

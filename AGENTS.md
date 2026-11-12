@@ -31,7 +31,7 @@ uibc init demo.uibc                       # 建包
 uibc register demo.uibc --agent-id my-agent-001 --owner alice   # 注册 agent（有籍）
 # 生命周期事件 / 签封 / 验证：见 README Quickstart 与 CLI --help
 
-python -m unittest discover tests         # 151 tests，改动必跑（CI ci.yml 同逻辑）
+python -m unittest discover tests         # 160 tests，改动必跑（CI ci.yml 同逻辑）
 python independent_verifier/cross_check.py  # 独立交叉验证（独立验证器路径）
 ```
 
@@ -44,7 +44,7 @@ python independent_verifier/cross_check.py  # 独立交叉验证（独立验证�
 | `registry_server/` | registry 服务端 |
 | `adapters/` | 外部适配（如医疗设备/数字 agent 状态机桥接） |
 | `independent_verifier/` | **独立验证器**：与主实现分离的第二计算路径，交叉核验（`cross_check.py`） |
-| `tests/` | 单元测试（151 个，负对照必须存在） |
+| `tests/` | 单元测试（160 个，负对照必须存在） |
 | `failure_corpus/` `fixtures/` | 失败样例/固定夹具（负对照来源） |
 | `dist/` | 发布产物（cosign bundle 等）：由发布流程生成，禁止手改 |
 | `paper/` `docs/` `brand/` | 理论文本/文档/品牌素材：ARR，只可引用不可复制 |
@@ -79,7 +79,7 @@ python independent_verifier/cross_check.py  # 独立交叉验证（独立验证�
 
 ## Definition of done / 完成定义
 
-1. `python -m unittest discover tests` 全绿（151）；2. `independent_verifier/cross_check.py` 通过；3. 新逻辑有负对照；4. CHANGELOG 有行；5. 无密钥、无锚定声明改动未经批准；6. demo 演示 PASS→FAIL 捉获可复现。
+1. `python -m unittest discover tests` 全绿（160）；2. `independent_verifier/cross_check.py` 通过；3. 新逻辑有负对照；4. CHANGELOG 有行；5. 无密钥、无锚定声明改动未经批准；6. demo 演示 PASS→FAIL 捉获可复现。
 
 ## Escalation / 升级路径
 

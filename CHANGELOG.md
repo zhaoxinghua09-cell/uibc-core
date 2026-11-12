@@ -15,6 +15,18 @@ Nothing here is a ratified standard.
 
 ## [Unreleased]
 
+### Packaging / distribution (no verdict change)
+
+- The MCP server now ships inside the package as `uibc_core.mcp_server`
+  with a `uibc-mcp` console script, so `pip install uibc-core` is enough
+  to run it; `mcp_server/server.py` remains as a compatibility shim.
+- `verify_package` and `gate_check` MCP tools accept `pubkey_hex` to pin
+  the expected Ed25519 signer (a substituted key FAILS S6), matching the
+  CLI `--pubkey` behaviour.
+- README (中文 / English) updated from v0.2.1 to v0.3.0; PyPI metadata
+  description and development-status classifier updated to match.
+
+
 ## [0.3.0] — 2026-11-10
 
 ### ⚠️ VERDICT-AFFECTING (breaking in effect)

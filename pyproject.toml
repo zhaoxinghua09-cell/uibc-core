@@ -23,6 +23,7 @@ Issues = "https://github.com/zhaoxinghua09-cell/uibc-core/issues"
 [project.scripts]
 uibc = "uibc_core.cli:main"
 uibc-mcp = "uibc_core.mcp_server:main"
+uibc-core = "uibc_core.mcp_server:main"
 
 [build-system]
 requires = ["setuptools>=61"]

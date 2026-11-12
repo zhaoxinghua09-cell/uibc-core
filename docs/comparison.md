@@ -52,9 +52,10 @@ only as a narrow formalized PAUSED→RESUMED duty at entity level.
 - **Crypto**: HMAC (symmetric) only until v0.3 Ed25519; no external
   timestamp anchoring (OTS/Rekor); key-substitution detection requires
   out-of-band key pinning.
-- **Distribution**: no PyPI package yet; documentation is primarily
-  Chinese; no hosted demo; no runtime hooks (auto-capture from agent
-  frameworks) — adoption currently requires manual CLI usage.
+- **Distribution**: on PyPI since 2026-11-12 (`uibc-core 0.3.0`, sdist +
+  wheel); documentation is primarily Chinese (English README ships as
+  `README.en.md`); no hosted demo; no runtime hooks (auto-capture from agent
+  frameworks) — adoption still needs a manual CLI step.
 - **Breadth**: governance layers (dispute/revocation registries) are
   skeletons; certificates are not third-party verifiable yet.
 
@@ -65,7 +66,7 @@ only as a narrow formalized PAUSED→RESUMED duty at entity level.
 | One-command demo (`uibc demo`) | shipped this release |
 | Test commands in README first screen | shipped this release |
 | MCP read-only server | shipped (mcp_server/) |
-| PyPI publication + English README | queued (needs owner decision on package name/account) |
+| PyPI publication + English README | shipped 2026-11-12: `pip install uibc-core==0.3.0`; English README in `README.en.md` |
 | Runtime hook (auto-evidence capture) | queued, design wanted |
 | Transparency log for keys (Rekor-style) | v0.3+ with Ed25519 |
 

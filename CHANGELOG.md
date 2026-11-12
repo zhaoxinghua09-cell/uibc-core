@@ -15,7 +15,11 @@ Nothing here is a ratified standard.
 
 ## [Unreleased]
 
-Nothing yet. v0.3.0 below is the release cut on 2026-11-12 (tag `v0.3.0`, GitHub Release published; the PyPI upload step is still blocked on the trusted-publisher registration).
+Nothing yet. v0.3.0 below is the release cut on 2026-11-12: tag `v0.3.0`, GitHub Release published,
+and `uibc-core 0.3.0` uploaded to PyPI on 2026-11-12 (sdist + wheel, same bytes as the CI build —
+sha256 listed in `docs/pypi-0.3.0-release.md`). The release-triggered `publish-pypi.yml` run
+`43150166821` still fails at the upload step because the trusted-publisher registration is not in
+place; that workflow is a convenience path, not the only one.
 
 
 ## [0.3.0] — 2026-11-12

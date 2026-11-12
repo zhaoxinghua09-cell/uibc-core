@@ -25,7 +25,17 @@ import re
 import subprocess
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-VERSION = "0.2.1"
+def _read_version():
+    """版本号只从包自身读，避免像 0.2.1 那样在发版时漏改。"""
+    init = os.path.join(ROOT, "uibc_core", "__init__.py")
+    with open(init, encoding="utf-8") as fh:
+        m = re.search(r'__version__\\s*=\\s*"([^"]+)"', fh.read())
+    if not m:
+        raise SystemExit("cannot find __version__ in uibc_core/__init__.py")
+    return m.group(1)
+
+
+VERSION = _read_version()
 SPDX_LICENSE_LIST_VERSION = "3.29.0"
 
 
@@ -57,15 +67,16 @@ def collect():
 
 
 def build(files):
-    head = git("rev-parse", "HEAD")
     doc = {
         "spdxVersion": "SPDX-2.3",
         "dataLicense": "CC0-1.0",
         "SPDXID": "SPDXRef-DOCUMENT",
         "name": f"uibc-core-{VERSION}",
+        # 命名空间只带版本号：带 commit 短哈希时，任何 squash 合并都会让
+        # 文档里写的 commit 与真正承载这个 SBOM 的 commit 对不上。
         "documentNamespace": (
             "https://github.com/zhaoxinghua09-cell/uibc-core/spdx/"
-            f"{VERSION}-{head[:12]}"
+            f"{VERSION}"
         ),
         "creationInfo": {
             "created": datetime.datetime.now(datetime.timezone.utc).strftime(

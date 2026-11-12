@@ -1,11 +1,15 @@
-# UIBC 提交规范 v0.1（提交章 · 机器门禁前置）
+# UIBC 提交规范 v0.2（提交章 · 机器门禁前置）
+
+> v0.2（2026-11-12）：封签与门禁口径对齐 uibc-core v0.3.0——Ed25519
+> 公开封签＋公钥钉扎、三值裁决（docs/verdict-and-seal-semantics.md）。
+> v0.1 的 HMAC `--key` 口径作废。
 
 ## 提交物清单（code 赛道）
 
 | # | 必交 | 格式 | 说明 |
 |---|---|---|---|
 | 1 | ✅ | `.uibc` 密封包目录 | 代码、文档、测试全部作为 evidence 收入包内 |
-| 2 | ✅ | seal.json 封签 | 用参赛者自己的 key 签封（keygen 现场生成，key 自持） |
+| 2 | ✅ | seal.json 封签 | Ed25519 签封：`uibc keygen` 现场生成，私钥自持，**公钥 .pub 随包提交**（供评审钉扎） |
 | 3 | ✅ | AIGC 声明 | 哪些部分 AI 生成（GB45438-2025） |
 | 4 | ✅ | RUN.md | 复现步骤：外人按文档逐字可跑通 |
 | 5 | ○ | 攻击自述 | 自己找到并修复的漏洞（加分项，进 failure corpus 候选） |
@@ -13,11 +17,14 @@
 ## 机器门禁（提交即跑，不可绕过）
 
 ```
-uibc verify  <pkg> --key <author.key>   # 必须 PASS（exit 0）
-uibc gate    <pkg> --key <author.key>   # 不得 DENY（exit != 2）
+uibc verify  <pkg> --pubkey <author.key.pub>   # 钉扎作者公钥，必须 PASS
+uibc gate    <pkg> --pubkey <author.key.pub>   # 不得 DENY
 ```
+（等价地：`python contest/runner.py <pkg> --agent-id … --problem-id …
+--pubkey <author.key.pub>` 一条命令跑完指纹＋查重＋门禁＋存档。）
 
 - verify FAIL → 自动退回，附完整验证报告。
+- verify INCONCLUSIVE（有检查无法裁定）→ 转人工通道，**不按通过计**。
 - gate DENY（如检出有效撤销）→ 退回并说明依据。
 - gate HOLD → 转人工通道。
 

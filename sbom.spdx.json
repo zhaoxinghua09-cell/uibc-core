@@ -2,10 +2,10 @@
   "spdxVersion": "SPDX-2.3",
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
-  "name": "uibc-core-0.2.1",
-  "documentNamespace": "https://github.com/zhaoxinghua09-cell/uibc-core/spdx/0.2.1-402ac6b3ce6e",
+  "name": "uibc-core-0.3.0",
+  "documentNamespace": "https://github.com/zhaoxinghua09-cell/uibc-core/spdx/0.3.0",
   "creationInfo": {
-    "created": "2026-09-18T02:29:37Z",
+    "created": "2026-11-12T05:04:11Z",
     "creators": [
       "Person: Xinghua Zhao (Steven Zhao)",
       "Tool: gen-sbom.py (Python standard library)"
@@ -17,7 +17,7 @@
     {
       "name": "uibc-core",
       "SPDXID": "SPDXRef-Package-uibc-core",
-      "versionInfo": "0.2.1",
+      "versionInfo": "0.3.0",
       "downloadLocation": "https://github.com/zhaoxinghua09-cell/uibc-core",
       "filesAnalyzed": true,
       "licenseConcluded": "Apache-2.0",
@@ -28,7 +28,7 @@
         {
           "referenceCategory": "PACKAGE-MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:pypi/uibc-core@0.2.1"
+          "referenceLocator": "pkg:pypi/uibc-core@0.3.0"
         }
       ]
     }

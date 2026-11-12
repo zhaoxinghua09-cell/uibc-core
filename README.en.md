@@ -4,8 +4,10 @@
 
 > **万物互联，数智共生** — Everything Connected, Digital-Intelligence Symbiosis.
 
-UIBC Core reference implementation v0.2.1 **[PROPOSAL]** — agent lifecycle
-evidence packages and a verifier.
+UIBC Core reference implementation v0.3.0 — agent lifecycle evidence
+packages and a verifier, with three-valued verdicts (PASS / FAIL /
+INCONCLUSIVE — an undecided check is never washed into a PASS) and
+public Ed25519 seals anyone can verify, with optional key pinning.
 
 Philosophy (LGD): **Registry · Evidence · Gates** → identity registration /
 content-hashed evidence with a cryptographic seal / a lifecycle state machine
@@ -24,7 +26,7 @@ python -m uibc_core.cli demo   # one command: build → seal → verify PASS →
 ```
 
 ```bash
-pip install -e .
+pip install uibc-core   # from PyPI (source checkout: pip install -e .)
 
 # 0. generate a seal key (optional, recommended in v0.2)
 uibc keygen --out owner.key    # keep it yourself; NEVER put it in the package

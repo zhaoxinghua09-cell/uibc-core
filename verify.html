@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UIBC Browser Verifier — verify an evidence package without installing anything</title>
+<meta name="description" content="Run the uibc-core S1-S6 verification in your browser: three-valued verdicts (PASS / FAIL / INCONCLUSIVE) and public Ed25519 seals. Nothing is uploaded.">
+<style>
+  :root { --navy:#0b1f3a; --gold:#d4af37; --ink:#1a2332; --paper:#f7f5ef; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: -apple-system, "Segoe UI", "Noto Sans CJK SC", sans-serif; background:var(--paper); color:var(--ink); }
+  header { background:var(--navy); color:#fff; padding:28px 20px 22px; }
+  header h1 { margin:0 0 6px; font-size:24px; }
+  header .gold { color:var(--gold); }
+  header p { margin:4px 0; max-width:820px; line-height:1.55; }
+  main { max-width:860px; margin:0 auto; padding:20px; }
+  .card { background:#fff; border:1px solid #ddd6c4; border-radius:10px; padding:18px; margin:16px 0; }
+  button { background:var(--navy); color:#fff; border:0; border-radius:8px; padding:10px 16px; font-size:15px; cursor:pointer; }
+  button.gold { background:var(--gold); color:var(--navy); font-weight:600; }
+  button:disabled { opacity:.45; cursor:default; }
+  label { display:block; margin:12px 0 4px; font-weight:600; font-size:14px; }
+  input[type=text] { width:100%; padding:9px; border:1px solid #bbb; border-radius:6px; font-family:ui-monospace, monospace; font-size:13px; }
+  #drop { border:2px dashed #b9ac7f; border-radius:10px; padding:22px; text-align:center; color:#5a5342; }
+  #drop.over { background:#fdf6dd; }
+  .verdict { font-size:26px; font-weight:700; padding:14px 18px; border-radius:10px; color:#fff; }
+  .verdict.PASS { background:#1e7a34; } .verdict.FAIL { background:#b3271e; } .verdict.INCONCLUSIVE { background:#b07d10; }
+  table { width:100%; border-collapse:collapse; margin-top:12px; font-size:14px; }
+  td, th { border-bottom:1px solid #e5e0d0; padding:7px 8px; text-align:left; vertical-align:top; }
+  .r-PASS { color:#1e7a34; font-weight:700; } .r-FAIL { color:#b3271e; font-weight:700; } .r-INCONCLUSIVE { color:#b07d10; font-weight:700; }
+  .small { font-size:13px; color:#55503f; line-height:1.6; }
+  code { background:#f0ecdd; padding:1px 5px; border-radius:4px; }
+  footer { max-width:860px; margin:0 auto; padding:6px 20px 34px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Verify a UIBC evidence package <span class="gold">— in your browser</span></h1>
+  <p>在浏览器里验证一个 UIBC 证据包</p>
+  <p>The same S1–S6 checks and the same three-valued verdict as <code>uibc verify</code> (v0.3.0): PASS, FAIL, or an honest INCONCLUSIVE. Everything runs locally on this page — <strong>nothing is uploaded</strong>.</p>
+  <p>与命令行 <code>uibc verify</code>（v0.3.0）同一套 S1–S6 检查、同一个三值裁决：PASS、FAIL，或诚实的 INCONCLUSIVE。全部在本页本地运行，<strong>不上传任何数据</strong>。</p>
+</header>
+<main>
+  <div class="card">
+    <button class="gold" id="btnSample">Load the sample package · 载入样例包</button>
+    <button id="btnTamper" disabled>Tamper its evidence · 篡改其中一份证据</button>
+    <p class="small">The sample is a real package, sealed with an Ed25519 public seal when this page was built. Tampering flips one byte of its evidence file — watch S4 turn FAIL. 样例是本页构建时用 Ed25519 公开封签真实签封的包；“篡改”会改动证据文件的一个字节，看 S4 如何变 FAIL。</p>
+    <div id="drop">…or drop a package folder here, or pick it: 或把包文件夹拖到这里，或点选：
+      <input type="file" id="folder" webkitdirectory multiple></div>
+    <label for="pin">Pinned public key (optional, hex) · 钉扎公钥（可选，十六进制）</label>
+    <input type="text" id="pin" placeholder="64 hex chars — a substituted signer key then FAILS S6">
+    <label for="ownkey">Owner key for HMAC seals (optional, hex) · HMAC 所有者密钥（可选）</label>
+    <input type="text" id="ownkey" placeholder="64 hex chars — strict mode for v0.2 HMAC seals">
+    <p><button id="btnRun" disabled>Verify · 开始验证</button></p>
+  </div>
+  <div id="out"></div>
+  <div class="card small">
+    <strong>How to make your own package · 自己做一个包</strong><br>
+    <code>pip install uibc-core</code>（once v0.3.0 is on PyPI · 上架后）or from source:
+    <code>git clone https://github.com/zhaoxinghua09-cell/uibc-core.git</code>, then
+    <code>uibc demo</code> builds, seals, verifies, tampers and catches — one command.<br>
+    Repository 仓库: <a href="https://github.com/zhaoxinghua09-cell/uibc-core">github.com/zhaoxinghua09-cell/uibc-core</a> ·
+    Portal 门户: <a href="https://zhaoxinghua09-cell.github.io/lgd-hub/">LGD ecosystem overview</a>
+  </div>
+</main>
+<footer class="small">
+  <p><strong>Honest limits · 诚实边界</strong> — This page is a JavaScript port of the Python reference verifier; on the published fixture corpus its verdicts agree check-for-check with <code>uibc verify</code>. HMAC seals (v0.2) can only be checked with the owner key; without one they are INCONCLUSIVE, never silently passed. Ed25519 seals (v0.3) are verified publicly. Timestamps are not independently anchored. JSON numbers are formatted the JavaScript way; a package whose sealed JSON contains non-integer numbers may hash differently from the Python verifier. 本页是 Python 参考验证器的 JavaScript 移植版，在已发布夹具集上与 <code>uibc verify</code> 逐项一致。HMAC 封签（v0.2）无所有者密钥时只能判 INCONCLUSIVE，绝不放行；Ed25519 封签（v0.3）可公开验证。时间戳未做独立锚定。</p>
+</footer>
+<script>
+"use strict";
+/* uibc-verify.js — browser port of the uibc-core verifier (v0.3.0 semantics).
+ *
+ * Mirrors uibc_core/verify.py check-for-check (S1-S6) and the three-valued
+ * verdict: FAIL if any check FAILs, else INCONCLUSIVE if any check is
+ * INCONCLUSIVE, else PASS. Canonical JSON, evidence root, seal payload,
+ * lifecycle rules L1-L7 and the Ed25519 equation [S]B == R + [H]A follow
+ * uibc_core/canonical.py, signing.py, lifecycle.py and ed25519.py.
+ *
+ * Pure JavaScript, no dependencies, no network. SHA-256/SHA-512/HMAC use
+ * WebCrypto; Ed25519 verification is implemented here with BigInt.
+ *
+ * Known edge: JSON number formatting follows JavaScript (Python formats
+ * a float like 1.0 as "1.0"); packages whose sealed JSON contains
+ * non-integer numbers may hash differently from the Python verifier.
+ */
+"use strict";
+
+/* ------------------------------------------------ canonical JSON + hash */
+function canonicalize(obj) {
+  if (obj === null || typeof obj !== "object") return JSON.stringify(obj);
+  if (Array.isArray(obj)) return "[" + obj.map(canonicalize).join(",") + "]";
+  const keys = Object.keys(obj).sort();
+  return "{" + keys.map(k => JSON.stringify(k) + ":" + canonicalize(obj[k])).join(",") + "}";
+}
+const _enc = new TextEncoder();
+function utf8(s) { return _enc.encode(s); }
+function hexOf(bytes) {
+  return Array.from(bytes, b => b.toString(16).padStart(2, "0")).join("");
+}
+async function sha256Hex(data) {
+  const buf = await crypto.subtle.digest("SHA-256", data);
+  return hexOf(new Uint8Array(buf));
+}
+async function sha512Bytes(data) {
+  const buf = await crypto.subtle.digest("SHA-512", data);
+  return new Uint8Array(buf);
+}
+function evidenceRoot(contentHashes) {
+  return sha256Hex(utf8(canonicalize([...contentHashes].sort())));
+}
+function b64DecodeStrict(text) {
+  if (typeof text !== "string") return null;
+  if (!/^[A-Za-z0-9+/]*={0,2}$/.test(text) || text.length % 4 !== 0) return null;
+  try {
+    const bin = atob(text);
+    const out = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out;
+  } catch { return null; }
+}
+function hexToBytes(hex) {
+  if (typeof hex !== "string" || !/^[0-9a-fA-F]*$/.test(hex) || hex.length % 2) return null;
+  const out = new Uint8Array(hex.length / 2);
+  for (let i = 0; i < out.length; i++) out[i] = parseInt(hex.substr(2 * i, 2), 16);
+  return out;
+}
+
+/* ------------------------------------------------------- Ed25519 (BigInt) */
+const _q = (1n << 255n) - 19n;
+const _L = (1n << 252n) + 27742317777372353535851937790883648493n;
+function _mod(a) { const r = a % _q; return r >= 0n ? r : r + _q; }
+function _pow(base, exp) {
+  let r = 1n, b = _mod(base), e = exp;
+  while (e > 0n) { if (e & 1n) r = _mod(r * b); b = _mod(b * b); e >>= 1n; }
+  return r;
+}
+function _inv(x) { return _pow(x, _q - 2n); }
+const _d = _mod(-121665n * _inv(121666n));
+const _I = _pow(2n, (_q - 1n) / 4n);
+function _xRecover(y) {
+  const xx = _mod((y * y - 1n) * _inv(_mod(_d * y * y + 1n)));
+  let x = _pow(xx, (_q + 3n) / 8n);
+  if (_mod(x * x - xx) !== 0n) x = _mod(x * _I);
+  return x;
+}
+const _By = _mod(4n * _inv(5n));
+const _BxRaw = _xRecover(_By);
+const _Bx = (_BxRaw & 1n) === 0n ? _BxRaw : _mod(-_BxRaw); // base point: x is even
+const _B = [_Bx, _By, 1n, _mod(_Bx * _By)]; // extended coords (X, Y, Z, T)
+function _edAdd(P, Q) {
+  const A = _mod((P[1] - P[0]) * (Q[1] - Q[0]));
+  const Bv = _mod((P[1] + P[0]) * (Q[1] + Q[0]));
+  const C = _mod(2n * P[3] * Q[3] * _d);
+  const Dv = _mod(2n * P[2] * Q[2]);
+  const E = _mod(Bv - A), F = _mod(Dv - C), G = _mod(Dv + C), H = _mod(Bv + A);
+  return [_mod(E * F), _mod(G * H), _mod(F * G), _mod(E * H)];
+}
+function _edDouble(P) {
+  const A = _mod(P[0] * P[0]);
+  const Bv = _mod(P[1] * P[1]);
+  const C = _mod(2n * P[2] * P[2]);
+  const Dv = _mod(-A);
+  const E = _mod((P[0] + P[1]) * (P[0] + P[1]) - A - Bv);
+  const G = _mod(Dv + Bv), F = _mod(G - C), H = _mod(Dv - Bv);
+  return [_mod(E * F), _mod(G * H), _mod(F * G), _mod(E * H)];
+}
+function _scalarMult(P, e) {
+  let R = [0n, 1n, 1n, 0n];
+  let Q = P, n = e;
+  while (n > 0n) {
+    if (n & 1n) R = _edAdd(R, Q);
+    Q = _edDouble(Q);
+    n >>= 1n;
+  }
+  return R;
+}
+function _decodeInt(bytes) {
+  let n = 0n;
+  for (let i = bytes.length - 1; i >= 0; i--) n = (n << 8n) | BigInt(bytes[i]);
+  return n;
+}
+function _decodePoint(bytes) {
+  if (bytes.length !== 32) throw new Error("bad point length");
+  const y = _decodeInt(bytes) & ((1n << 255n) - 1n);
+  const sign = (bytes[31] >> 7) & 1;
+  if (y >= _q) throw new Error("point y out of range");
+  let x = _xRecover(y);
+  if (Number(x & 1n) !== sign) x = _mod(-x);
+  return [x, y, 1n, _mod(x * y)];
+}
+function _pointsEqual(P, Q) {
+  const ziP = _inv(P[2]), ziQ = _inv(Q[2]);
+  return _mod(P[0] * ziP - Q[0] * ziQ) === 0n && _mod(P[1] * ziP - Q[1] * ziQ) === 0n;
+}
+async function ed25519Verify(pubkey, message, signature) {
+  try {
+    if (pubkey.length !== 32 || signature.length !== 64) return false;
+    const R = _decodePoint(signature.slice(0, 32));
+    const A = _decodePoint(pubkey);
+    const S = _decodeInt(signature.slice(32));
+    if (S >= _L) return false;
+    const hBytes = await sha512Bytes(new Uint8Array([
+      ...signature.slice(0, 32), ...pubkey, ...message]));
+    const h = _decodeInt(hBytes) % _L;
+    const left = _scalarMult(_B, S);
+    const right = _edAdd(R, _scalarMult(A, h));
+    return _pointsEqual(left, right);
+  } catch { return false; }
+}
+async function hmacVerify(keyBytes, message, sigBytes) {
+  const key = await crypto.subtle.importKey("raw", keyBytes,
+    { name: "HMAC", hash: "SHA-256" }, false, ["verify"]);
+  return crypto.subtle.verify("HMAC", key, sigBytes, message);
+}
+
+/* ---------------------------------------------------- lifecycle (L1-L7) */
+const _EVENTS = ["REGISTER", "ACTIVATE", "UPDATE", "TRANSFER", "DELEGATE",
+  "MIGRATE", "SUSPEND", "RESUME", "REVOKE", "RETIRE"];
+const _TERMINAL = new Set(["REVOKE", "RETIRE"]);
+function validateLifecycle(events) {
+  const errors = [];
+  const seenIds = new Set();
+  let prevId = null, registered = false, prevType = null;
+  events.forEach((ev, i) => {
+    const etype = ev.event_type, eid = ev.event_id;
+    if (!_EVENTS.includes(etype))
+      errors.push(`L3 unknown event_type '${etype}' at position ${i}`);
+    if (seenIds.has(eid))
+      errors.push(`L5 duplicate event_id '${eid}' at position ${i}`);
+    seenIds.add(eid);
+    if ((ev.previous_event ?? null) !== prevId)
+      errors.push(`L4 previous_event chain broken at position ${i} (expected ${JSON.stringify(prevId)}, got ${JSON.stringify(ev.previous_event ?? null)})`);
+    if (i === 0) {
+      if (etype !== "REGISTER") errors.push("L1 first event must be REGISTER");
+    } else if (!registered) {
+      errors.push(`L1 event before REGISTER at position ${i}`);
+    } else if (etype === "REGISTER") {
+      errors.push(`L2 duplicate REGISTER at position ${i}`);
+    }
+    if (etype === "REGISTER") registered = true;
+    if (etype === "RESUME" && prevType !== "SUSPEND")
+      errors.push(`L6 RESUME at position ${i} not preceded by SUSPEND`);
+    if (i > 0 && _TERMINAL.has(prevType))
+      errors.push(`L7 event after terminal event at position ${i}`);
+    prevId = eid; prevType = etype;
+  });
+  return errors;
+}
+
+/* --------------------------------------------------------- the verifier */
+const REQUIRED_FILES = ["manifest.json", "identity.json", "lifecycle.json", "evidence/index.json"];
+const EVIDENCE_TYPES = new Set(["IDENTITY", "LIFECYCLE", "INPUT", "ACTION",
+  "TOOL", "MEMORY", "OUTPUT", "EVALUATION", "HUMAN_DECISION", "VERIFICATION",
+  "INCIDENT", "RETIREMENT"]);
+
+/* files: Map<string, Uint8Array> with package-relative paths.
+ * opts:  { keyHex, pubkeyHex } — owner key (strict HMAC mode) / pinned key. */
+async function verifyPackage(files, opts = {}) {
+  const checks = [];
+  const record = (id, name, result, detail) => checks.push({ id, name, result, detail });
+  const key = opts.keyHex ? hexToBytes(opts.keyHex) : null;
+  const pubkey = opts.pubkeyHex ? hexToBytes(opts.pubkeyHex) : null;
+
+  const missing = REQUIRED_FILES.filter(f => !files.has(f));
+  record("S1", "package structure", missing.length ? "FAIL" : "PASS",
+    missing.length ? `missing: ${missing.join(", ")}` : "all required files present");
+
+  const loadJson = (rel) => {
+    if (!files.has(rel)) return {};
+    try { return JSON.parse(new TextDecoder().decode(files.get(rel))); }
+    catch { return {}; }
+  };
+  const manifest = missing.length ? {} : loadJson("manifest.json");
+  const identity = missing.length ? {} : loadJson("identity.json");
+  const lifecycle = missing.length ? {} : loadJson("lifecycle.json");
+  const index = missing.length ? { entries: [] } : loadJson("evidence/index.json");
+
+  // S2 identity consistency
+  const s2ok = Boolean(identity.agent_id) && manifest.agent_id === identity.agent_id;
+  record("S2", "identity consistency", s2ok ? "PASS" : "FAIL",
+    `identity.agent_id=${JSON.stringify(identity.agent_id)}, manifest.agent_id=${JSON.stringify(manifest.agent_id)}`);
+
+  // S3 lifecycle
+  const events = lifecycle.events || [];
+  const lErrs = validateLifecycle(events);
+  record("S3", "lifecycle state machine", lErrs.length ? "FAIL" : "PASS",
+    lErrs.length ? lErrs.join("; ") : `${events.length} events, chain valid`);
+
+  // S4 evidence integrity
+  const entries = index.entries || [];
+  const s4failures = [];
+  const recomputed = [];
+  for (const e of entries) {
+    const p = "evidence/" + (e.path || "");
+    if (!files.has(p)) { s4failures.push(`missing file '${e.path}'`); continue; }
+    const actual = await sha256Hex(files.get(p));
+    recomputed.push(actual);
+    if (actual !== e.content_hash) s4failures.push(`hash mismatch on '${e.path}'`);
+    if (!EVIDENCE_TYPES.has(e.type)) s4failures.push(`unknown evidence type '${e.type}'`);
+  }
+  record("S4", "evidence integrity", s4failures.length ? "FAIL" : "PASS",
+    `${entries.length} entries checked; ` + (s4failures.length ? s4failures.join("; ") : "all hashes match"));
+
+  // S5 evidence root
+  if (entries.length && !s4failures.length) {
+    const computed = await evidenceRoot(recomputed);
+    record("S5", "evidence root", computed === manifest.evidence_root ? "PASS" : "FAIL",
+      `computed=${computed}, manifest=${manifest.evidence_root}`);
+  } else {
+    record("S5", "evidence root", "INCONCLUSIVE", "skipped: evidence missing or S4 failed");
+  }
+
+  // S6 seal signature
+  let assurance = "unattested";
+  const hasSeal = files.has("signatures/seal.json") && !missing.length;
+  const sealPayload = utf8(canonicalize({ identity, manifest }));
+  if (hasSeal) {
+    const seal = loadJson("signatures/seal.json");
+    const algo = seal.algorithm;
+    if (algo === "Ed25519") {
+      const pub = b64DecodeStrict(seal.public_key);
+      if (!pub || pub.length !== 32) {
+        record("S6", "seal signature", "FAIL", "Ed25519 seal records no valid public_key");
+      } else if (seal.key_id !== await sha256Hex(pub)) {
+        record("S6", "seal signature", "FAIL",
+          "key_id does not match the recorded public key (seal metadata inconsistent)");
+      } else if (pubkey && hexOf(pubkey) !== hexOf(pub)) {
+        record("S6", "seal signature", "FAIL",
+          "public key does not match the pinned --pubkey (possible key substitution or wrong pin)");
+      } else if (key) {
+        record("S6", "seal signature", "FAIL",
+          "seal algorithm is Ed25519; the provided key is an HMAC owner key and cannot check it — re-run without a key, or pin the signer with a public key");
+      } else if (!await ed25519Verify(pub, sealPayload, b64DecodeStrict(seal.signature || "") || new Uint8Array())) {
+        record("S6", "seal signature", "FAIL",
+          "Ed25519 signature invalid: identity/manifest do not match the seal");
+      } else {
+        assurance = "public-key";
+        record("S6", "seal signature", "PASS",
+          `Ed25519 seal valid (key_id ${(await sha256Hex(pub)).slice(0, 16)}...) — third-party verifiable, no secret involved`);
+      }
+    } else if (algo === "HMAC-SHA256") {
+      if (key) {
+        const kid = await sha256Hex(key);
+        if (seal.key_id !== kid) {
+          record("S6", "seal signature", "FAIL",
+            "key mismatch: seal was not created by this key (possible key substitution or wrong key)");
+        } else if (!await hmacVerify(key, sealPayload, b64DecodeStrict(seal.signature || "") || new Uint8Array())) {
+          record("S6", "seal signature", "FAIL",
+            "signature invalid: identity/manifest do not match the seal");
+        } else {
+          assurance = "owner-key";
+          record("S6", "seal signature", "PASS", `HMAC-SHA256 seal valid (key_id ${kid.slice(0, 16)}...)`);
+        }
+      } else {
+        record("S6", "seal signature", "INCONCLUSIVE",
+          "HMAC seal present but no verification key provided; symmetric seals cannot be checked publicly — an Ed25519 seal can");
+      }
+    } else {
+      record("S6", "seal signature", "FAIL", `unknown seal algorithm ${JSON.stringify(algo)}`);
+    }
+  } else if (key) {
+    record("S6", "seal signature", "FAIL",
+      "strict mode (owner key given): package is unsigned — owner demands a sealed submission");
+  } else {
+    record("S6", "seal signature", "INCONCLUSIVE",
+      "package unsigned: evidence chain is internally consistent but provenance is unattested");
+  }
+
+  const results = checks.map(c => c.result);
+  const result = results.includes("FAIL") ? "FAIL"
+    : results.includes("INCONCLUSIVE") ? "INCONCLUSIVE" : "PASS";
+  return {
+    verifier_id: "uibc-core-browser-verifier",
+    verifier_version: "0.3.0",
+    spec_version: "uibc-core/0.3.0-proposal",
+    result,
+    subject: manifest.agent_id ?? null,
+    checks,
+    root_algorithm: "sha256(canonical-json(sorted(content_hashes))) v0.1-provisional",
+    assurance,
+    statement: result === "PASS"
+      ? "No violation was detected within the observed evidence boundary."
+      : result === "FAIL"
+        ? "Violations were detected within the observed evidence boundary."
+        : "No violation was detected, but verification is incomplete: at least one check could not be resolved within the observed evidence boundary.",
+  };
+}
+
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = { verifyPackage, canonicalize, ed25519Verify };
+}
+
+const SAMPLE = {"evidence/files/note.txt": "RGlzY2hhcmdlIHN1bW1hcnkgcmV2aWV3ZWQuIERldmljZTogQ2FyZGlvUGF0Y2ggQ1AtMi4gUmVzdWx0OiB3aXRoaW4gbGltaXRzLgo=", "evidence/index.json": "ewogICJlbnRyaWVzIjogWwogICAgewogICAgICAiZXZpZGVuY2VfaWQiOiAiNDk4NWI5Y2EtYTYxMi00MDY2LWJjZDQtYjljZGMyMmIzYTI2IiwKICAgICAgInR5cGUiOiAiQUNUSU9OIiwKICAgICAgInBhdGgiOiAiZmlsZXMvbm90ZS50eHQiLAogICAgICAiY29udGVudF9oYXNoIjogIjVkZjdjYWM1M2QzZGYxZjcyYWE3MWU4MjBjYzUwMTc3NDI4MGY3YjZlZmQxN2Q1NGEwYWI2NGE4YTMxNGRiMzIiLAogICAgICAiY3JlYXRlZF9hdCI6ICIyMDI2LTExLTEyVDAyOjA5OjAzWiIsCiAgICAgICJtZWRpYV90eXBlIjogInRleHQvcGxhaW4iLAogICAgICAibm90ZSI6ICIiCiAgICB9CiAgXQp9", "identity.json": "ewogICJzY2hlbWEiOiAidWliYy1jb3JlLzAuMy4wLXByb3Bvc2FsIiwKICAiYWdlbnRfaWQiOiAiZGVtby1hZ2VudC0wMDEiLAogICJhZ2VudF90eXBlIjogInNvZnR3YXJlLWFnZW50IiwKICAib3duZXIiOiAiZGVtby1vd25lciIsCiAgImNyZWF0ZWRfYXQiOiAiMjAyNi0xMS0xMlQwMjowOTowM1oiLAogICJzdGF0dXMiOiAiUkVHSVNURVJFRCIsCiAgInZlcnNpb24iOiAiMC4xLjAiCn0=", "lifecycle.json": "ewogICJzY2hlbWEiOiAidWliYy1jb3JlLzAuMy4wLXByb3Bvc2FsIiwKICAiZXZlbnRzIjogWwogICAgewogICAgICAiZXZlbnRfaWQiOiAiNTA0MjMwMWQtMmE5NC00NjYyLWI4OGUtYzhmMTFjNTI0NjBjIiwKICAgICAgImV2ZW50X3R5cGUiOiAiUkVHSVNURVIiLAogICAgICAiYWdlbnRfaWQiOiAiZGVtby1hZ2VudC0wMDEiLAogICAgICAidGltZXN0YW1wIjogIjIwMjYtMTEtMTJUMDI6MDk6MDNaIiwKICAgICAgImFjdG9yIjogImRlbW8tb3duZXIiLAogICAgICAicGF5bG9hZF9oYXNoIjogbnVsbCwKICAgICAgInByZXZpb3VzX2V2ZW50IjogbnVsbCwKICAgICAgInNpZ25hdHVyZSI6IG51bGwKICAgIH0KICBdCn0=", "manifest.json": "ewogICJzY2hlbWEiOiAidWliYy1jb3JlLzAuMy4wLXByb3Bvc2FsIiwKICAiYWdlbnRfaWQiOiAiZGVtby1hZ2VudC0wMDEiLAogICJhZ2VudF92ZXJzaW9uIjogIjAuMS4wIiwKICAiY3JlYXRlZF9hdCI6ICIyMDI2LTExLTEyVDAyOjA5OjAzWiIsCiAgImV2aWRlbmNlX2NvdW50IjogMSwKICAiZXZpZGVuY2Vfcm9vdCI6ICJlMTNmZWI1MjRhMDI1NjNlODQxMzZmMDA4NWM4ODI5ZWM4NDllMGE3NzQxNWRjODhkNTBhYTBjYTY0NmZmYTUwIiwKICAic3RhdHVzIjogIlNVQk1JVFRFRCIKfQ==", "signatures/seal.json": "ewogICJzY2hlbWEiOiAidWliYy1jb3JlLzAuMy4wLXByb3Bvc2FsIiwKICAiYWxnb3JpdGhtIjogIkVkMjU1MTkiLAogICJrZXlfaWQiOiAiN2Q3ZGZiYTZmNDRjNjY3NDJjMmZiYTYzNzM1OGZmYmJmOWYwNGU4YmNlZmM0NmI2YjkzZjI2YTgzMDFlMWQxMSIsCiAgInB1YmxpY19rZXkiOiAiRm1zRzk2WlMrcWZNdmNJWmhtejgyUVVEUDQrMk96eE1aQjJBaFRMT2hEcz0iLAogICJzaWduZWQiOiAiaWRlbnRpdHkrbWFuaWZlc3QiLAogICJzaWduYXR1cmUiOiAiR1Z5TU9odjhrTUxJd3ZyWlZwV1l4SkJjQW1iR2VyVkdYVUluZzdJZnpsRDVQRFBVQXFUdVZ2M3MxTjE4Yll4T0tUWjJTUkZYZ0NRa0hXdnc5aDY3QVE9PSIsCiAgImNyZWF0ZWRfYXQiOiAiMjAyNi0xMS0xMlQwMjowOTowM1oiCn0="};
+let currentFiles = null;
+function b64ToBytes(b64) { const bin = atob(b64); const out = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i); return out; }
+function sampleFiles() { const m = new Map(); for (const [k, v] of Object.entries(SAMPLE)) m.set(k, b64ToBytes(v)); return m; }
+const $ = id => document.getElementById(id);
+function ready(files) { currentFiles = files; $("btnRun").disabled = !files; }
+$("btnSample").onclick = () => { ready(sampleFiles()); $("btnTamper").disabled = false; $("out").innerHTML = "<p class='small'>Sample loaded. Press Verify. 样例已载入，点“开始验证”。</p>"; };
+$("btnTamper").onclick = () => {
+  const m = sampleFiles(); const k = "evidence/files/note.txt"; const b = m.get(k).slice(); b[0] = b[0] ^ 0xff; m.set(k, b);
+  ready(m); $("out").innerHTML = "<p class='small'>Evidence byte flipped. Press Verify — S4 should FAIL. 证据已被改动一个字节，点“开始验证”，S4 应判 FAIL。</p>";
+};
+async function handleFileList(list) {
+  const m = new Map();
+  for (const f of list) {
+    const parts = (f.webkitRelativePath || f.name).split("/");
+    const rel = parts.slice(1).join("/") || f.name;
+    m.set(rel, new Uint8Array(await f.arrayBuffer()));
+  }
+  if (m.size) { ready(m); $("btnTamper").disabled = true; $("out").innerHTML = "<p class='small'>Package loaded (" + m.size + " files). Press Verify. 包已载入（" + m.size + " 个文件），点“开始验证”。</p>"; }
+}
+$("folder").onchange = e => handleFileList(e.target.files);
+const drop = $("drop");
+drop.ondragover = e => { e.preventDefault(); drop.classList.add("over"); };
+drop.ondragleave = () => drop.classList.remove("over");
+drop.ondrop = async e => { e.preventDefault(); drop.classList.remove("over"); if (e.dataTransfer.files.length) handleFileList(e.dataTransfer.files); };
+$("btnRun").onclick = async () => {
+  if (!currentFiles) return;
+  $("btnRun").disabled = true; $("btnRun").textContent = "Verifying… 验证中…";
+  try {
+    const report = await verifyPackage(currentFiles, { keyHex: $("ownkey").value.trim() || undefined, pubkeyHex: $("pin").value.trim() || undefined });
+    const rows = report.checks.map(c => "<tr><td>" + c.id + "</td><td>" + c.name + "</td><td class='r-" + c.result + "'>" + c.result + "</td><td>" + c.detail.replace(/</g, "&lt;") + "</td></tr>").join("");
+    $("out").innerHTML = "<div class='verdict " + report.result + "'>" + report.result + "</div>" +
+      "<p class='small'>" + report.statement + "<br>Subject 主体: " + (report.subject || "—") + " · Assurance 保证级别: " + report.assurance + " · Root algorithm 根算法: " + report.root_algorithm + "</p>" +
+      "<table><tr><th>Check</th><th>Name</th><th>Result</th><th>Detail</th></tr>" + rows + "</table>";
+  } catch (err) {
+    $("out").innerHTML = "<div class='verdict FAIL'>ERROR</div><p class='small'>" + String(err).replace(/</g, "&lt;") + "</p>";
+  }
+  $("btnRun").disabled = false; $("btnRun").textContent = "Verify · 开始验证";
+};
+</script>
+</body>
+</html>

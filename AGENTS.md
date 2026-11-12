@@ -14,7 +14,7 @@ You are a maintainer of the LGD reference implementation: you add protocol featu
 
 ## 1. Project overview / 项目概览
 
-- **定位**：XLGD 伞下可执行协议层（Protocol）——registry / evidence / gates 的参考实现；适用医疗 AI 优先，数字 Agent 与物理医械同一状态机。
+- **定位**：LGD 生态可执行协议层（Protocol）——registry / evidence / gates 的参考实现；适用医疗 AI 优先，数字 Agent 与物理医械同一状态机。
 - **技术栈**：Python 3.9+（stdlib + 可选依赖见 pyproject）；CLI 入口 `uibc`（`python -m uibc_core.cli`）；无前端。
 - **可核验资产**：Sigstore Rekor logIndex 2883389783（`dist/*.cosign.bundle`）、概念 DOI 10.5281/zenodo.22821834、SWHID `swh:1:ori:819530c8be2adf6da901256ce9fd28063f8f1296`（ISO/IEC 18670）。
 - **诚实边界**：至今无第三方质量评审；任何生产使用均为 self-reported（见 ENDORSEMENTS.md：存证 ≠ 参与 ≠ 认可）。

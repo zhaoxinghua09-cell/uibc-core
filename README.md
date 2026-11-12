@@ -7,7 +7,7 @@
 
 > **获取仓库 / Get the repo**：`git clone https://github.com/zhaoxinghua09-cell/uibc-core.git`（若 clone 失败，请点仓库页 **Code → Download ZIP** 获取源码包）。
 
-> **层级定位**：**可执行协议层（Protocol）** — XLGD 伞下 registry / evidence / gates 的参考实现。词汇表与全景见 [XLGD 伞总览](https://github.com/zhaoxinghua09-cell/xlgd#readme)。
+> **层级定位**：**可执行协议层（Protocol）** — LGD 生态中 registry / evidence / gates 的参考实现。词汇表与全景见 [LGD 门户](https://zhaoxinghua09-cell.github.io/lgd-hub/)。
 ## 许可说明 · License Notice
 
 - **权利状态**：本仓库以 **Apache-2.0** 许可发布，可依该许可证条款自由使用、修改与再分发。
@@ -16,7 +16,7 @@
 - **品牌状态限定**：MedXpert、SynomosAI、LGD 等为相关项目标识，
   **均未申请实体注册、未申请商标注册**；出现仅作来源标识，
   不构成对法人实体或商标权的任何主张。
-- **完整条款**：见仓库根目录 [LICENSE](LICENSE)。
+- **完整条款**：见仓库根目录 [LICENSE](https://github.com/zhaoxinghua09-cell/uibc-core/blob/main/LICENSE)。
 - **联系**：zhaoxinghua09 [at] gmail [dot] com ｜ ORCID 0009-0001-0512-1237
 
 ---
@@ -41,7 +41,7 @@
 
 > **万物互联，数智共生** —— Everything Connected, Digital-Intelligence Symbiosis.
 
-UIBC Core 参考实现 v0.2.1 **[PROPOSAL]** —— Agent 生命周期证据包与验证器。
+UIBC Core 参考实现 v0.3.0 —— Agent 生命周期证据包与验证器：三值裁决（PASS / FAIL / INCONCLUSIVE，未决不洗成通过）＋ Ed25519 公开封签（任何人可验、可钉扎公钥）。
 
 理念（LGD）：**有籍 · 有证 · 有门禁** → Registry（身份注册）/ Evidence（内容哈希证据 + 封签）/ Gates（生命周期状态机 + 验证门禁）。
 
@@ -51,6 +51,14 @@ UIBC Core 参考实现 v0.2.1 **[PROPOSAL]** —— Agent 生命周期证据包�
 > 🔏 发布产物已进入 Sigstore Rekor 公共透明日志（logIndex 2883389783，见 `dist/*.cosign.bundle`）；
 > Zenodo DOI 与 Software Heritage SWHID 见 CITATION.cff。
 > 以上均为**存证**，非质量认可。
+
+## 安装 · Install
+
+```bash
+pip install uibc-core
+```
+
+装好后：`uibc` 是命令行，`uibc-mcp` 是只读 MCP 服务器（stdio）。从源码跑见下方 Quickstart。
 
 ## 5 分钟 Quickstart
 

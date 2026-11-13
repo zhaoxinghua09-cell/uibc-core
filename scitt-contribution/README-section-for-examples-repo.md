@@ -23,7 +23,7 @@ test-vectors/uibc-agent-evidence/README.md      mapping, verify steps, field ref
 test-vectors/uibc-agent-evidence/manifest.json  case index + 24-cell expectation matrix
 test-vectors/uibc-agent-evidence/SHA256SUMS     digest of every file in the suite
 test-vectors/uibc-agent-evidence/run_vectors.py runner for the shipped cases
-test-vectors/uibc-agent-evidence/v1/<case>/     package/ (byte-identical fixture) + expected.json
+test-vectors/uibc-agent-evidence/v1/<case>/     package/ (generated fixture; sample is a byte-identical copy) + expected.json
 ```
 
 Verify:
@@ -33,3 +33,4 @@ Verify:
 git clone https://github.com/zhaoxinghua09-cell/uibc-core
 PYTHONPATH=uibc-core python3 test-vectors/uibc-agent-evidence/run_vectors.py test-vectors/uibc-agent-evidence
 ```
+

@@ -60,9 +60,10 @@ envelope) over the package manifest, signed with the same key
 (SPKI PEM in `issuer-key.pub`), verifiable with
 `verify_statement.py` in this directory — standard library only.
 
-Each case directory holds `package/` (byte-identical to the source
-fixture) and `expected.json` (the outcomes reproducible from the
-shipped bytes).
+Each case directory holds `package/` (generated from the source
+fixture definitions — see Provenance for exactly what that means;
+the sample package is a byte-identical copy) and `expected.json`
+(the outcomes reproducible from the shipped bytes).
 
 ## Verify
 
@@ -103,11 +104,53 @@ python3 test-vectors/uibc-agent-evidence/verify_statement.py test-vectors/uibc-a
   verifies against the attacker's key — only pinning the owner's key
   out-of-band detects it. These limits are part of the vectors, not
   footnotes.
+- Reference readings (normative for these vectors — an independent
+  reader building only from the texts must apply the same rules to
+  reach the same verdicts):
+  - **S3 is positional.** The lifecycle is evaluated as an ordered
+    list: position 0 must be `REGISTER`, and each entry's
+    `previous_event` must name the immediately preceding entry *in
+    the file*. Reordering entries — even with the pointers kept
+    self-consistent — breaks the chain at the first displaced
+    position, so `reordered` is S3 FAIL. Reconstructing the order by
+    following pointers alone is a different rule and yields a
+    different verdict.
+  - **S5 counts duplicates.** The evidence root is computed over the
+    sorted *list* of per-entry content hashes, duplicates counted
+    (a multiset). Duplicating an index entry therefore changes the
+    computed root, so `duplicated` is S5 FAIL. Hashing a deduplicated
+    *set* of hashes is a different rule and yields a different
+    verdict.
+  - **Statement payload vs seal.** The COSE statement's payload is
+    the SHA-256 of the manifest *file bytes* (whitespace-sensitive);
+    the package seal signs the *canonical JSON* of identity+manifest
+    (whitespace-insensitive). Reformatting `manifest.json` changes
+    the statement payload while leaving the seal valid. The statement
+    therefore binds the exact manifest bytes shipped in the package;
+    consumers must not re-serialize the manifest before checking the
+    payload.
 
 ## Provenance
 
-Vendored byte-identical from `zhaoxinghua09-cell/uibc-core`,
-`main @ dc9eba3146e4e32bb1356f24ce8d72249a64702a` (v0.3.0, 2026-11-10).
-All expected outcomes in this suite were reproduced from the shipped
-bytes with the source verifier before submission; the 24-cell matrix
-was reproduced via the generator gate on the same date.
+The eight HMAC fixture packages were generated on 2026-11-10 with
+the uibc-core 0.3.0 fixture generator, from the same fixture
+definitions as the golden fixtures in `zhaoxinghua09-cell/uibc-core`
+(`main @ dc9eba3146e4e32bb1356f24ce8d72249a64702a`, v0.3.0).
+Generation embeds wall-clock timestamps and the current schema
+string (`uibc-core/0.3.0-proposal`), so these trees are **not**
+byte-identical to the fixture copies checked into the source repo at
+that commit (those read `uibc-core/0.2.2-proposal`). The
+`sample-ed25519` package **is** a byte-identical copy of
+`examples/sample-package`. All expected outcomes in this suite were
+reproduced from the shipped bytes with the source verifier before
+submission; the 24-cell matrix was reproduced via the generator gate
+on the same date.
+
+Corrections (2026-11-14), after an independent review by Konrad
+Gruszka, who rebuilt a reader from the texts alone: an earlier
+revision of this suite described the fixture packages as
+byte-identical copies of the source fixtures — they are not, as
+detailed above — and the sample statement's CWT `iat` read
+1762740000 (2025-11-10), one year early. The statement has been
+re-issued with `iat` 1794276000 (2026-11-10), same key, same
+payload; the reference readings above were added in the same round.

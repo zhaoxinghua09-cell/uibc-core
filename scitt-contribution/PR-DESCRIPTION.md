@@ -11,8 +11,12 @@ for discussion.
 
 **What is included** (`test-vectors/uibc-agent-evidence/`):
 
-- Nine evidence packages, byte-identical to the source repo's golden
-  fixtures at `main @ dc9eba31` (v0.3.0): one clean package, seven
+- Nine evidence packages: eight generated with the source repo's
+  fixture generator (v0.3.0, definitions as at `main @ dc9eba31`;
+  generation embeds timestamps, so they are not byte-identical to
+  the copies checked into the source repo — see the suite README's
+  Provenance section) and one public sample package, byte-identical
+  to the source repo's `examples/sample-package`: one clean package, seven
   single-mutation cases (tampered / deleted / duplicated / reordered /
   migrated / malicious / malicious-keyswap), and one public sample
   package sealed with Ed25519 (owner public key included, so the
@@ -53,3 +57,4 @@ standing argument for public-key seals).
 
 Contributed by Xinghua Zhao (uibc-core maintainer), in an individual
 capacity.
+

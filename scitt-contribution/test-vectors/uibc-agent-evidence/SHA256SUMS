@@ -1,6 +1,6 @@
 c03ab7d864aa27fc1c78dc54ca8164a95fe416a21c57a94c670a54f36c699db3  ./.gitattributes
-40165e7c8997806e17aefe0ea6b803a289382bb667c44d26b6bcd99c45293658  ./README.md
-02d27f8b91042aa60baa3e91f17243b906765bda67437073e6564dfdd079bd76  ./manifest.json
+7b5609287fa40d13e249bd6d9660afa0d76d4894292ef67cb1cf98de1ae32689  ./README.md
+528b608f1a7ece92820262c1c70108556b85d98852fe278ddcdfeab1bb08dd0f  ./manifest.json
 5bb3c38f610edd2be6bf9647a9226d2f0b57fe8ade4069172e283311d80ba9ed  ./run_vectors.py
 0dc86edc57867c219a8da4c4de960b6424499809c8955b378a2d4bb7e206ba0f  ./v1/clean/expected.json
 823f8c9abbf6d7252f2731330155932d616a41f326546f1ef10fb85f37329709  ./v1/clean/package/evidence/files/action-log.txt
@@ -57,7 +57,7 @@ a8e6a809464e4d985baf26520e87e4e7bc27fc07688f41fa9b1427a396f3a6dd  ./v1/reordered
 6ffe666dcb4b5ffc561e2a5391cefe795f43b3ddf13d46d1288bc585852b779a  ./v1/reordered/package/lifecycle.json
 fbeaec7f515484d1ab8347da73a4a3d9ec5bc35f5a54e45a5112e82bea92e73f  ./v1/reordered/package/manifest.json
 2b29c5316445caecc066e2930903a15893955f9143e7b3c457fcf7d82c81a84a  ./v1/reordered/package/signatures/seal.json
-9121bb19b0f8888ca8a639952b7ec1b7319a1bacc80bff5a2e2688913b84ca67  ./v1/sample-ed25519/expected.json
+72bffcb8b17ff2e38a78f2cc278a9d76afd71c136c35dfb7a0985ced59993ef1  ./v1/sample-ed25519/expected.json
 f0ff50dacf109dea7f716d7c03eb7a821aa3a283fd3fa02f4c14dbba7d3c3322  ./v1/sample-ed25519/issuer-key.pub
 25f578ee40fd903d47753dab144a834d683f759efa4c7e62b874873fcec40a06  ./v1/sample-ed25519/owner.pub
 6140233ffa382dcae22aed6de32a4a475e0be0d68a2116a358eb30d50db2e94e  ./v1/sample-ed25519/package/evidence/files/_eval.txt
@@ -67,7 +67,7 @@ f0ff50dacf109dea7f716d7c03eb7a821aa3a283fd3fa02f4c14dbba7d3c3322  ./v1/sample-ed
 62f9c936a8f0d754907a37290817c4ba005152b4a05fcad9dde4195abecfa9b4  ./v1/sample-ed25519/package/lifecycle.json
 997208bb06fe78c7a01d6047595e87266f13b89d1a44dca6cedc95f58dbf3455  ./v1/sample-ed25519/package/manifest.json
 4e22187396118d5406039c7a6a45b47c2ab896a39acc199b0f658497599b27c5  ./v1/sample-ed25519/package/signatures/seal.json
-1e7e2b7c23e59e411119644d508fe7d8f99f8f296b9c4a0cb500f90e14889c3a  ./v1/sample-ed25519/statement.cose
+03d0b56240dbe15d76e4f2f57f91ab022fc4e706665985ebb3d177122347c927  ./v1/sample-ed25519/statement.cose
 56a247e3f559e433845c65525dd0028389abe8116f67075d7e94a7f2235dbd9f  ./v1/tampered/expected.json
 0f58a906d255f9429cd13d7d8c9ccb0f41cdf1441c01e57a4667b8b1a4bf7f58  ./v1/tampered/package/evidence/files/action-log.txt
 a8e6a809464e4d985baf26520e87e4e7bc27fc07688f41fa9b1427a396f3a6dd  ./v1/tampered/package/evidence/files/run-summary.txt

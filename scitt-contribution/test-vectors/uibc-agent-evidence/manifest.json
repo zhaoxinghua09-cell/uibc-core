@@ -10,8 +10,8 @@
       "examples/sample-package",
       "examples/sample-owner.pub"
     ],
-    "byte_identity": "Package trees are byte-identical copies of the source fixtures; verify with SHA256SUMS in this directory.",
-    "verifier": "uibc-core 0.3.0 reference verifier (pure Python standard library), cross-checked by an independent verifier in the source repo"
+    "verifier": "uibc-core 0.3.0 reference verifier (pure Python standard library), cross-checked by an independent verifier in the source repo",
+    "provenance_note": "The eight HMAC fixture packages were generated on 2026-11-10 with the uibc-core 0.3.0 fixture generator, from the same fixture definitions as the source repo's golden fixtures. Generation embeds wall-clock timestamps and the current schema string (uibc-core/0.3.0-proposal), so these trees are NOT byte-identical to the fixture copies checked into the source repo at the cited commit (those read uibc-core/0.2.2-proposal). The sample-ed25519 package IS a byte-identical copy of examples/sample-package. All expected outcomes were reproduced from the shipped bytes with the source verifier; verify integrity with SHA256SUMS in this directory."
   },
   "cases": [
     {

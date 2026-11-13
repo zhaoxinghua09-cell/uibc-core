@@ -28,7 +28,7 @@ jobs:
         # 此前写的是 ossf/scorecard-action@v2 —— 上游并没有裸 v2 这个移动 tag，
         # 因此首次推送即报 "unable to resolve action ... unable to find version v2"
         # 而失败（run#1，2026-09-22 01:08 +08）。改为 SHA 固定后不再依赖移动 tag。
-        uses: ossf/scorecard-action@2d1146689b8cda280b9bc96326124645441f03bc
+        uses: ossf/scorecard-action@fa7117db83c52d787ae5a89f350999701505d78e
         with:
           results_file: results.sarif
           results_format: sarif

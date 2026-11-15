@@ -16,6 +16,11 @@ Status: PROPOSAL. Not a ratified standard. Verification results are scoped proof
 a PASS means "no violation detected within the observed evidence boundary".
 """
 
-__version__ = "0.3.0"
-SPEC_VERSION = "uibc-core/0.3.0-proposal"
+try:  # single source of truth: the installed distribution version
+    from importlib.metadata import version as _dist_version
+
+    __version__ = _dist_version("uibc-core")
+except Exception:  # running from a source tree without an installed dist
+    __version__ = "0.0.0"
+SPEC_VERSION = f"uibc-core/{__version__}-proposal"
 VERIFIER_ID = "uibc-core-verifier"

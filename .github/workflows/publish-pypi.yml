@@ -50,18 +50,28 @@ jobs:
       - name: Verify the version is actually on PyPI
         env:
           PKG: uibc-core
+          MANIFEST: pyproject.toml
           TAG: ${{ github.event.release.tag_name }}
         run: |
           python - <<'PY'
-          import json, os, sys, time, urllib.request
+          import json, os, re, sys, time, urllib.request
           pkg = os.environ["PKG"]
           want = (os.environ.get("TAG") or "").lstrip("v")
+          if not want:
+              # workflow_dispatch has no tag: fall back to the version declared in the manifest
+              txt = open(os.environ["MANIFEST"], encoding="utf-8").read()
+              m = re.search(r'^version\s*=\s*"([^"]+)"', txt, re.M)
+              want = m.group(1) if m else ""
+              print("no tag event; manifest says %s" % want)
+          if not want:
+              print("cannot determine a version to verify")
+              sys.exit(1)
           op = urllib.request.build_opener()
           for attempt in range(12):
               try:
                   with op.open("https://pypi.org/pypi/%s/json" % pkg, timeout=20) as r:
                       have = list((json.load(r).get("releases") or {}).keys())
-                  if want and want in have:
+                  if want in have:
                       print("VERIFIED %s %s on PyPI" % (pkg, want))
                       sys.exit(0)
                   print("poll %d: %s not released yet (latest known: %s)" % (attempt + 1, want, have[-3:]))

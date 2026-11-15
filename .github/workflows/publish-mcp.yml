@@ -1,0 +1,66 @@
+name: Publish MCP to Official Registry
+
+# OIDC zero-credential publishing: tag push, plus manual dispatch for the first run.
+# `mcp-publisher login github-oidc` takes the repository owner's identity, which is what
+# authorises the io.github.zhaoxinghua09-cell/* namespace.
+
+on:
+  push:
+    tags: ["v*.*.*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: publish-mcp-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Sync server.json version with the tag
+        if: github.ref_type == 'tag'
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          python - <<'PY'
+          import json, os
+          tag = os.environ["TAG"].lstrip("v")
+          with open("server.json", encoding="utf-8") as f:
+              d = json.load(f)
+          d["version"] = tag
+          d["packages"][0]["version"] = tag
+          with open("server.json", "w", encoding="utf-8") as f:
+              json.dump(d, f, ensure_ascii=False, indent=2)
+              f.write("\n")
+          print("server.json synced to", tag)
+          PY
+
+      - name: Publish to MCP Registry (GitHub OIDC)
+        run: |
+          curl -fsSL "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_linux_amd64.tar.gz" | tar xz mcp-publisher
+          ./mcp-publisher validate server.json
+          ./mcp-publisher login github-oidc
+          ./mcp-publisher publish
+
+      - name: Verify on the registry
+        run: |
+          for _ in $(seq 30); do
+            curl -fsS "https://registry.modelcontextprotocol.io/v0.1/servers/io.github.zhaoxinghua09-cell%2Fuibc-core/versions/latest" && exit 0
+            sleep 10
+          done
+          echo "registry entry not visible after 5 min" >&2
+          exit 1

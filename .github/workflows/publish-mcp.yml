@@ -49,6 +49,36 @@ jobs:
           print("server.json synced to", tag)
           PY
 
+      - name: Wait until PyPI serves this version
+        if: steps.check.outputs.already_exists == 'false'
+        run: |
+          python3 - <<'PY'
+          import json, sys, time, urllib.request
+          raw = json.load(open("server.json", encoding="utf-8"))
+          srv = raw[0] if isinstance(raw, list) else raw
+          pkg = [p for p in srv.get("packages", []) if p.get("registryType") == "pypi"]
+          if not pkg:
+              print("no pypi package in server.json - nothing to wait for"); sys.exit(0)
+          name, ver = pkg[0]["identifier"], pkg[0]["version"]
+          want = "mcp-name: " + srv["name"]
+          deadline = time.time() + 300
+          while time.time() < deadline:
+              try:
+                  with urllib.request.urlopen("https://pypi.org/pypi/%s/json" % name, timeout=20) as r:
+                      d = json.loads(r.read())
+              except Exception as e:
+                  print("pypi not reachable yet: %s" % e); time.sleep(15); continue
+              files = (d.get("releases") or {}).get(ver, [])
+              desc = (d.get("info") or {}).get("description") or ""
+              if files and want in desc:
+                  print("OK: %s %s has %d files and the ownership marker" % (name, ver, len(files)))
+                  sys.exit(0)
+              print("%s %s not ready yet (files=%d, marker=%s)" % (name, ver, len(files), want in desc))
+              time.sleep(15)
+          print("TIMEOUT: %s %s never appeared on PyPI with the ownership marker" % (name, ver))
+          sys.exit(1)
+          PY
+
       - name: Publish to MCP Registry (GitHub OIDC)
         run: |
           curl -fsSL "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_linux_amd64.tar.gz" | tar xz mcp-publisher

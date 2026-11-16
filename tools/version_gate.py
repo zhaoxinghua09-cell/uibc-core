@@ -71,10 +71,13 @@ def pin_problems() -> list[str]:
             break
         probe = probe.parent
     if wf_dir is None:
+        print("  PIN SKIP: 未找到 .github/workflows（从 ROOT 向上 4 层），钉版规则未生效")
         return bad
     pat = _re.compile(r"uses:\s*([^\s#]+)")
     sha = _re.compile(r"^[^@]+@[0-9a-f]{40}$")
-    for p in sorted(wf_dir.glob("*.yml")) + sorted(wf_dir.glob("*.yaml")):
+    wf_files = sorted(wf_dir.glob("*.yml")) + sorted(wf_dir.glob("*.yaml"))
+    checked = 0
+    for p in wf_files:
         for lineno, line in enumerate(p.read_text(encoding="utf-8").splitlines(), 1):
             m = pat.search(line)
             if not m:
@@ -82,8 +85,10 @@ def pin_problems() -> list[str]:
             ref = m.group(1)
             if ref.startswith("./"):
                 continue
+            checked += 1
             if not sha.match(ref):
                 bad.append(f"{p.name}:{lineno}: {ref} is not pinned to a 40-character SHA")
+    print(f"  PIN CHECK: {len(wf_files)} 个 workflow、{checked} 处 uses 已核，浮动 {len(bad)} 处")
     return bad
 
 def main() -> int:

@@ -49,6 +49,24 @@ jobs:
           print("server.json synced to", tag)
           PY
 
+      - name: Check whether this version is already registered
+        id: check
+        run: |
+          NAME=$(python3 -c "import json;print(json.load(open('server.json'))['name'])")
+          VER=$(python3 -c "import json;print(json.load(open('server.json'))['version'])")
+          ENC=$(python3 -c "import sys,urllib.parse;print(urllib.parse.quote(sys.argv[1],safe=''))" "$NAME")
+          echo "checking $NAME@$VER"
+          CODE=$(curl -s -o /dev/null -w '%{http_code}' \
+            "https://registry.modelcontextprotocol.io/v0/servers/$ENC/versions/$VER")
+          if [ "$CODE" = "200" ]; then
+            echo "already_exists=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::already registered (HTTP $CODE), publish skipped"
+          else
+            echo "already_exists=false" >> "$GITHUB_OUTPUT"
+            echo "not registered yet (HTTP $CODE), publishing"
+          fi
+
+
       - name: Wait until PyPI serves this version
         if: steps.check.outputs.already_exists == 'false'
         run: |
@@ -80,6 +98,7 @@ jobs:
           PY
 
       - name: Publish to MCP Registry (GitHub OIDC)
+        if: steps.check.outputs.already_exists == 'false'
         run: |
           curl -fsSL "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_linux_amd64.tar.gz" | tar xz mcp-publisher
           ./mcp-publisher validate server.json

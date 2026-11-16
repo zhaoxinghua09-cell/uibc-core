@@ -52,6 +52,39 @@ def runtime_version(dist_name: str) -> tuple[str, str]:
     except Exception as e:  # 未安装时降级
         return "", f"unavailable ({type(e).__name__})"
 
+def pin_problems() -> list[str]:
+    """Every `uses:` must be a full 40-character commit SHA.
+
+    A floating tag (@v4, release/v1) runs whatever that ref points at today, with this
+    repository's token, and nothing reviews the move. Proven in both directions before
+    shipping: a pinned-only tree passes, one floating line fails with file:line.
+    """
+    import re as _re
+
+    bad: list[str] = []
+    wf_dir = None
+    probe = ROOT
+    for _ in range(4):
+        cand = probe / ".github" / "workflows"
+        if cand.is_dir():
+            wf_dir = cand
+            break
+        probe = probe.parent
+    if wf_dir is None:
+        return bad
+    pat = _re.compile(r"uses:\s*([^\s#]+)")
+    sha = _re.compile(r"^[^@]+@[0-9a-f]{40}$")
+    for p in sorted(wf_dir.glob("*.yml")) + sorted(wf_dir.glob("*.yaml")):
+        for lineno, line in enumerate(p.read_text(encoding="utf-8").splitlines(), 1):
+            m = pat.search(line)
+            if not m:
+                continue
+            ref = m.group(1)
+            if ref.startswith("./"):
+                continue
+            if not sha.match(ref):
+                bad.append(f"{p.name}:{lineno}: {ref} is not pinned to a 40-character SHA")
+    return bad
 
 def main() -> int:
     ap = argparse.ArgumentParser()
@@ -87,6 +120,8 @@ def main() -> int:
 
     for label, value in checks:
         print(f"  {label:<46} {value or '<empty>'}")
+
+    problems += pin_problems()
 
     if problems:
         print("\nGATE FAIL:")

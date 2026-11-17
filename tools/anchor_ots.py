@@ -83,10 +83,73 @@ def inspect(proof_path):
     return found
 
 
+def upgrade(proof_path, calendar=CALENDARS[0], timeout=30):
+    """Ask the calendar whether the commitment has landed in a Bitcoin block.
+
+    Returns {"upgraded": bool, "attestations": [...], "bytes": n}. The proof is
+    rewritten only when a new attestation was actually obtained, so a failed
+    upgrade never silently replaces a good pending proof with an empty one.
+    """
+    from opentimestamps.calendar import RemoteCalendar
+    from opentimestamps.core.serialize import (BytesDeserializationContext,
+                                               BytesSerializationContext)
+    from opentimestamps.core.timestamp import Timestamp
+
+    with open(proof_path, "rb") as f:
+        blob = f.read()
+
+    before = inspect(proof_path)
+    ts = Timestamp.deserialize(BytesDeserializationContext(blob), blob[:32])
+    cal = RemoteCalendar(calendar)
+
+    # Walk to the deepest timestamp and ask for an upgrade at each node that
+    # still has only a pending attestation.
+    upgraded_any = False
+    pending_nodes = []
+
+    def walk(t):
+        for att in t.attestations:
+            if type(att).__name__ == "PendingAttestation":
+                pending_nodes.append(t)
+                break
+        for _op, child in t.ops.items():
+            walk(child)
+
+    walk(ts)
+
+    for node in pending_nodes:
+        try:
+            got = cal.get_timestamp(node.msg, timeout=timeout)
+        except Exception:  # noqa: BLE001 - calendar down, unknown commitment, etc.
+            continue
+        if got is not None:
+            node.merge(got)
+            upgraded_any = True
+
+    after = inspect(proof_path)  # re-read is meaningless before write; kept simple below
+    if upgraded_any:
+        ctx = BytesSerializationContext()
+        ts.serialize(ctx)
+        new_blob = ctx.getbytes()
+        with open(proof_path, "wb") as f:
+            f.write(new_blob)
+    else:
+        new_blob = blob
+
+    kinds = [a["kind"] for a in inspect(proof_path)]
+    return {"upgraded": upgraded_any,
+            "bitcoin_block": kinds.count("BitcoinBlockHeaderAttestation"),
+            "pending_calendar": kinds.count("PendingAttestation"),
+            "bytes": len(new_blob),
+            "before": [a["kind"] for a in before],
+            "after": kinds}
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--stamp", metavar="FILE")
     ap.add_argument("--verify", metavar="FILE")
+    ap.add_argument("--upgrade", metavar="PROOF", help="upgrade an existing .ots proof")
     ap.add_argument("--proof")
     ap.add_argument("--calendar", default=CALENDARS[0])
     ap.add_argument("--json", action="store_true")
@@ -96,6 +159,15 @@ def main(argv=None):
         info = stamp(args.stamp, calendar=args.calendar)
         print(json.dumps(info, ensure_ascii=False, indent=2))
         print("status=pending_calendar (no Bitcoin block attestation yet)")
+        return 0
+
+    if args.upgrade:
+        info = upgrade(args.upgrade, calendar=args.calendar)
+        print(json.dumps(info, ensure_ascii=False, indent=2))
+        if info["bitcoin_block"]:
+            print("status=bitcoin_attested (block header NOT cross-checked here)")
+        else:
+            print("status=still_pending_calendar (upgrade not available yet)")
         return 0
 
     if args.verify:

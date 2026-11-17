@@ -108,8 +108,48 @@ prefix, never the key.
 | open item | why it is still open |
 |---|---|
 | a verifier written by someone who is not us | needs a third party; cannot be manufactured |
-| a language-neutral conformance corpus | not written; Tracekit and agent-receipts both have one |
+| a language-neutral conformance corpus | **written since**: `docs/conformance/vectors.json` (15 vectors) with `tools/conformance_check.py`, which imports nothing from `uibc_core`. Still missing is the second *complete* implementation, not the corpus |
 | signed tarball per release | not implemented; reproduction still depends on a branch |
 | ISO/IEC 24970 clause-by-clause mapping | referenced, not mapped |
 | reverse interoperability (they verify us) | no peer has been asked, so every such cell is unknown |
 | a human expert, not a model | nothing in this log substitutes for one |
+
+## Round 30 — an outsider run on a machine we do not own (2026-11-17)
+
+Not a review round: a stranger-simulation. A Linux cloud host with no credentials, a different
+network path, Python 3.12, clone of `main` at `e6519c3`. What it changed is recorded here because
+two of its findings were defects, not opinions.
+
+| step | command | result |
+|---|---|---|
+| clone + tests, **without** the `verify` extra | `python -m unittest discover -s tests -p "test_*.py"` | `Ran 295 tests ... OK (skipped=7)` — no failures, three anchor modules skip with the install line |
+| tests **with** the extra | `pip install -e ".[verify]"` then the same | `Ran 305 tests ... OK (skipped=6)` |
+| language-neutral corpus | `python tools/conformance_check.py` | `15/15 vectors reproduced by a non-uibc implementation` |
+| corpus byte equality | `python tools/conformance_vectors.py --check` | `MATCH: 15 vectors reproduce exactly` |
+| red team | `python tools/redteam_suite.py` | 15 cases; **RT03 returned PASS** (defect, below) |
+| citations | `python tools/check_citations.py` | 41/45, failure set almost disjoint from the local run — see `docs/CITATION-REACHABILITY.md` |
+| attestation | `python tools/attest.py` | `files_hashed=393`, `manifest_sha256=090a2198…4983`, commit `e6519c3`, version 0.3.3 |
+| anchor bytes (the 3.11 CI failure) | `git hash-object tests/fixtures/anchor/anchored_head.json` | blob `3bb43a83…`, file sha256 `4ad23d91…`, 276 bytes — the CRLF fix holds on Linux, so the platform-specific failure is gone |
+
+### Defect found: a symlink could point the verifier outside the package (RT03)
+
+The case replaced an evidence file with a symlink to a file outside the package and the verifier
+answered **PASS**, because it hashed whatever the path resolved to. A package that can make a
+verifier read an arbitrary file is not a package that describes itself.
+
+Fixed in `uibc_core/verify.py`: S4 now resolves each evidence entry and fails when it is a symlink
+or resolves outside `evidence/`. Regression test: `tests/test_v15_symlink_containment.py` (skips on
+Windows without symlink privilege, runs on Linux).
+
+### Defect found: the citation checker reported network weather as dead links
+
+Two of the four "failures" reproduced as 200 with a browser user agent, and one was fixed by an
+alternate canonical source. Fixed in `tools/check_citations.py`: browser UA, retry on 5xx/429, and
+an `ALTERNATES` map so a mirror counts. Details and the per-link table live in
+`docs/CITATION-REACHABILITY.md`.
+
+### What this round did **not** do
+
+It is still our own code running on our own cloud host with our own credentials for the clone. It
+demonstrates that the repository works for a machine we do not sit at; it does not make us a third
+party. "A human expert, not a model" stays open.

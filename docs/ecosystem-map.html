@@ -192,8 +192,44 @@ code{background:#eef2f7;padding:1px 5px;border-radius:4px;font-size:12.5px}
   ③一个维度从"声称"升级为"已演示"：第二实现或语言中立语料。
 </div>
 
-<h2>四、我方覆盖度：12 个检查符现在到哪</h2>
-<p class="lead">这张表是我们自己的体检，不是竞品数据。303 测试、红队 15 例、引用直达 42/45。</p>
+<h2>四、四视角外审：外部模型按四把不同的提问集，各评一份不同的件</h2>
+<p class="lead">不是"我方分四次写"，是 DeepSeek-V3（温度 0）按四套互不相同的提问，分别评了四份不同的被审件。四份回执原文存放于 <code>docs/external-review/</code>，账本 <code>seq=37..40</code> 哈希成链。</p>
+
+<div class="cards">
+  <div class="card">
+    <h3>专家视角 <span class="chip c-part">CONTINUE</span></h3>
+    <p><b>评的件：</b><code>docs/ECOSYSTEM-MAP.md</code><br>
+    <b>挑出的最狠一条：</b>整张表引的是 arXiv 个人稿，委员会读者第一句就是"这不是已采纳工作项"。<br>
+    <b>已改：</b>表头之上先声明来源属性；另补"未映射的标准"一节，写入 <b>ISO/IEC 23053</b>（此前我们根本没有）。</p>
+  </div>
+  <div class="card">
+    <h3>流程视角 <span class="chip c-part">CONTINUE</span></h3>
+    <p><b>评的件：</b><code>README.md</code><br>
+    <b>挑出的最狠一条：</b>最弱的复现步骤是"依赖一个可能移动或消失的 GitHub 分支"。<br>
+    <b>已改：</b>两个 Rekor 条目分别说明归属；给"已验证表"加了 <b>"你自己怎么查"</b> 一列（命令写在表里），并指出校验 SET 只需日志公钥、不需要 Sigstore 私有设施。</p>
+  </div>
+  <div class="card">
+    <h3>红队视角 <span class="chip c-part">CONTINUE</span></h3>
+    <p><b>评的件：</b><code>docs/INTEROP-MATRIX.md</code><br>
+    <b>挑出的最狠一条：</b>"要跑他们代码的格子标 not tested 而非 works"这句本身会被反用成"没测却宣称互通"。<br>
+    <b>已改：</b>补 agent-receipts 一致性语料的直达链接与路径（并注明"数量是他们自报、我们没跑"）；明写 <b>"公布失败"是缺陷、不是设计立场</b>。</p>
+  </div>
+  <div class="card">
+    <h3>外人视角 <span class="chip c-part">CONTINUE</span></h3>
+    <p><b>评的件：</b><code>README.md</code><br>
+    <b>挑出的最狠一条：</b><code>external verification nodes: 0</code> 让外人看到缺失，却没量化这意味着什么。<br>
+    <b>已改：</b>补一句"零 = 独立性全靠同一位作者的两份实现"；名字说明提到首屏最上。</p>
+  </div>
+</div>
+
+<div class="callout">
+<b>有一条建议被拒收。</b>外人视角给出的"最能提升试用意愿的一句话"是：<i>"Independent audits by [named entity] confirmed the verifier rejects all 15 attack vectors with zero false negatives."</i>
+这句话效果最好，但我们<b>没有</b>任何具名第三方审计——写上去就是编造背书。已记录在 <code>docs/REVIEW-LOG.md</code>：
+<b>接受一次评审，不等于接受它给的每一句话。</b>
+</div>
+
+<h2>五、我方覆盖度：12 个检查符现在到哪</h2>
+<p class="lead">这张表是我们自己的体检，不是竞品数据。303 测试、红队 15 例、引用直达 43/45。</p>
 <table>
 <thead><tr><th style="width:220px">维度</th><th>状态</th><th>证据在哪</th></tr></thead>
 <tbody>
@@ -207,24 +243,24 @@ code{background:#eef2f7;padding:1px 5px;border-radius:4px;font-size:12.5px}
 <tr><td>跨实现验证</td><td><span class="chip c-no">未做</span></td><td>仅 Python 一种实现</td></tr>
 <tr><td>调用点拦截</td><td><span class="chip c-no">未做</span></td><td>无 MCP 代理</td></tr>
 <tr><td>回放</td><td><span class="chip c-no">未做</span></td><td>无</td></tr>
-<tr><td>引用直达</td><td><span class="chip c-part">42/45</span></td><td>3 条未达：iso.org 403、两站点超时</td></tr>
-<tr><td>外人实测</td><td><span class="chip c-ok">已测</span></td><td>匿名克隆 <code>06ff25c</code> → 303 测试 OK</td></tr>
+<tr><td>引用直达</td><td><span class="chip c-part">43/45</span></td><td>2 条未达：iso.org 403、eips 超时（两条经外部出口实测 200）</td></tr>
+<tr><td>外人实测</td><td><span class="chip c-ok">已测</span></td><td>匿名克隆 <code>66aa129</code> → 303 测试 OK</td></tr>
 </tbody>
 </table>
 
-<h2>四、下一步（成本已标的四个动作）</h2>
+<h2>六、下一步（成本已标的四个动作）</h2>
 <table>
 <thead><tr><th style="width:260px">动作</th><th>目标</th><th>成本</th></tr></thead>
 <tbody>
 <tr><td>语言中立一致性语料（JSON 向量 + 固定 digest）</td><td>追平 agent-receipts 的维度</td><td>约 1 天</td></tr>
-<tr><td>装 treeship（npm/Rust）真跑</td><td>把最后一行"文档级"换成"实测级"</td><td>约 1 天，含环境排查</td></tr>
+<tr><td>treeship 真跑（已实测：Windows 拒装 <code>EBADPLATFORM</code>）</td><td>需要 Linux/macOS 环境才能继续</td><td>约半天，换环境</td></tr>
 <tr><td>MCP 拦截点（代理写我方回执）</td><td>追平 Vaara 的调用现场</td><td>数天</td></tr>
 <tr><td>回放协议</td><td>追平 NovaFabric</td><td>数周，暂不建议</td></tr>
 </tbody>
 </table>
 
 <footer>
-数据日期 2026-11-17 · 我方证据：公共仓 <a href="https://github.com/zhaoxinghua09-cell/uibc-core">zhaoxinghua09-cell/uibc-core</a>（分支 release/v1.1-precheck，匿名克隆 06ff25c 全量测试通过）<br>
+数据日期 2026-11-17 · 我方证据：公共仓 <a href="https://github.com/zhaoxinghua09-cell/uibc-core">zhaoxinghua09-cell/uibc-core</a>（分支 release/v1.1-precheck，匿名克隆 66aa129 全量测试通过）<br>
 同行来源：<a href="https://arxiv.org/html/2609.35659">Tracekit</a> · <a href="https://www.treeship.dev/">Treeship</a> · <a href="https://novafabric.ai/">NovaFabric</a> · <a href="https://arxiv.org/html/2609.12582">NovaFabric 论文</a> · <a href="https://www.npmjs.com/package/agent-receipts-cli">agent-receipts</a> · <a href="https://pypi.org/project/aiauditlog/">AIAuditLog</a> · <a href="https://fact0.io/">fact0</a> · <a href="https://pypi.org/project/vaara/">Vaara</a><br>
 竞品行为：矩阵行为其公开文本所述；"本机真跑"一节为实装实测结果（Windows / Python 3.13）。<b>反向列（他们验我们）全部未测。</b>引用即直达链接，无需二次跳转。
 </footer>

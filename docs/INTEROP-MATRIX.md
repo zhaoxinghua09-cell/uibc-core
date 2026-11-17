@@ -44,7 +44,12 @@ verification path "has not yet been exercised by an independently implemented
 verifier", and that "neither a second implementation nor that corpus exists yet".
 agent-receipts publishes a spec with eight conformance vectors and a Python
 reference implementation, which is more than we publish in that dimension - our
-tests are not a language-neutral conformance corpus.
+tests are not a language-neutral conformance corpus. Their corpus, so that a
+reader does not have to take our word for it: the npm README states the format is
+specified in `spec/v0.1/SPEC.md` with 8 conformance vectors and a Python reference
+implementation — <https://www.npmjs.com/package/agent-receipts-cli>. Read
+`spec/v0.1/SPEC.md` at the commit you check out; the count is their claim, and we
+did not run their vectors.
 
 ## What this matrix says about "beating the competition"
 
@@ -58,13 +63,19 @@ tests are not a language-neutral conformance corpus.
 3. **Vaara is ahead on**: policy enforcement at the call site and EU AI Act
    Article 12 framing. Behind on: cryptographic structure of the record.
 4. **We are ahead on**: a public repository an outsider can clone and run
-   (297 tests, 15 red-team cases, all re-run from a fresh anonymous clone), a
+   (303 tests, 15 red-team cases, all re-run from a fresh anonymous clone), a
    published crosswalk to an IETF draft with the failing cells written down, and
    a habit of publishing our own failed verification attempts (Rekor inclusion
    proof) with the third-party cross-check that also failed.
 
 The differentiator is not a feature. It is that **our claims are already
 exercised by someone who is not us**, and we publish the parts that do not work.
+
+**The failed inclusion proof is a defect, not a policy.** It is written down because
+hiding it would make every other number here unverifiable; it is not a design position,
+and it is not "expected failure". The fix path is an adapter written against the log's
+documented proof format, and until that exists this row stays red. Reading this file
+should not leave the impression that a failing proof is acceptable output.
 That is rarer than any of the technical cells above.
 
 ## What would move the needle next

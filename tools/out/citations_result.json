@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at_utc": "2026-11-17T09:58:32Z",
+    "generated_at_utc": "2026-11-17T10:21:35Z",
     "checked": 45,
     "reachable": 43
   },
@@ -12,7 +12,7 @@
       "final_url": "https://www.rfc-editor.org/rfc/rfc9943.html",
       "content_type": "text/html",
       "bytes_probed": 4096,
-      "secs": 0.76,
+      "secs": 0.83,
       "ok": true
     },
     {
@@ -22,7 +22,7 @@
       "final_url": "https://www.ietf.org/archive/id/draft-noa-scitt-ai-agent-receipt-01.html",
       "content_type": "text/html; charset=utf-8",
       "bytes_probed": 4096,
-      "secs": 0.62,
+      "secs": 0.6,
       "ok": true
     },
     {
@@ -32,7 +32,7 @@
       "final_url": "https://datatracker.ietf.org/doc/draft-noa-scitt-ai-agent-receipt/",
       "content_type": "text/html; charset=utf-8",
       "bytes_probed": 4096,
-      "secs": 0.91,
+      "secs": 0.65,
       "ok": true
     },
     {
@@ -42,7 +42,7 @@
       "final_url": "https://datatracker.ietf.org/doc/html/draft-sato-soos-gar-08",
       "content_type": "text/html; charset=utf-8",
       "bytes_probed": 4096,
-      "secs": 0.81,
+      "secs": 0.64,
       "ok": true
     },
     {
@@ -52,7 +52,7 @@
       "final_url": "https://datatracker.ietf.org/doc/html/draft-schrock-ep-authorization-evidence-chain-02",
       "content_type": "text/html; charset=utf-8",
       "bytes_probed": 4096,
-      "secs": 0.82,
+      "secs": 0.64,
       "ok": true
     },
     {
@@ -62,7 +62,7 @@
       "final_url": "https://datatracker.ietf.org/doc/html/draft-raskar-scitt-agent-provenance-00",
       "content_type": "text/html; charset=utf-8",
       "bytes_probed": 4096,
-      "secs": 0.83,
+      "secs": 0.64,
       "ok": true
     },
     {
@@ -72,7 +72,7 @@
       "final_url": "https://www.ietf.org/archive/id/draft-maintainer-1f916-agent-record-01.txt",
       "content_type": "text/plain; charset=utf-8",
       "bytes_probed": 4096,
-      "secs": 0.67,
+      "secs": 0.61,
       "ok": true
     },
     {
@@ -82,7 +82,7 @@
       "final_url": "https://www.ietf.org/archive/id/draft-mih-scitt-agent-action-capsule-04.txt",
       "content_type": "text/plain; charset=utf-8",
       "bytes_probed": 4096,
-      "secs": 0.59,
+      "secs": 0.56,
       "ok": true
     },
     {
@@ -92,7 +92,7 @@
       "final_url": "https://datatracker.ietf.org/doc/draft-bailey-scitt-agent-session-receipt/",
       "content_type": "text/html; charset=utf-8",
       "bytes_probed": 4096,
-      "secs": 0.85,
+      "secs": 0.66,
       "ok": true
     },
     {
@@ -102,7 +102,7 @@
       "final_url": "https://www.ietf.org/archive/id/draft-emirdag-scitt-ai-agent-execution-00.html",
       "content_type": "text/html; charset=utf-8",
       "bytes_probed": 4096,
-      "secs": 0.61,
+      "secs": 0.58,
       "ok": true
     },
     {
@@ -112,7 +112,7 @@
       "final_url": "https://www.ietf.org/archive/id/draft-wilder-scitt-physical-site-engage-receipt-04.html",
       "content_type": "text/html; charset=utf-8",
       "bytes_probed": 4096,
-      "secs": 0.6,
+      "secs": 0.62,
       "ok": true
     },
     {
@@ -122,7 +122,7 @@
       "final_url": "https://www.rfc-editor.org/rfc/rfc9864.html",
       "content_type": "text/html",
       "bytes_probed": 4096,
-      "secs": 0.7,
+      "secs": 0.73,
       "ok": true
     },
     {
@@ -132,7 +132,7 @@
       "final_url": "https://www.rfc-editor.org/rfc/rfc8785.html",
       "content_type": "text/html",
       "bytes_probed": 4096,
-      "secs": 0.74,
+      "secs": 0.73,
       "ok": true
     },
     {
@@ -142,7 +142,7 @@
       "final_url": "https://www.rfc-editor.org/rfc/rfc6962.html",
       "content_type": "text/html",
       "bytes_probed": 4096,
-      "secs": 0.73,
+      "secs": 0.71,
       "ok": true
     },
     {
@@ -152,7 +152,7 @@
       "final_url": "https://learn.microsoft.com/en-us/entra/agent-id/whats-new-agent-id",
       "content_type": "text/html",
       "bytes_probed": 4096,
-      "secs": 1.3,
+      "secs": 1.49,
       "ok": true
     },
     {
@@ -161,7 +161,7 @@
       "status": null,
       "final_url": "https://eips.ethereum.org/EIPS/eip-8004",
       "error": "URLError: <urlopen error [WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。>",
-      "secs": 42.11,
+      "secs": 42.08,
       "ok": false
     },
     {
@@ -171,7 +171,7 @@
       "final_url": "https://www.gleif.org/en",
       "content_type": "text/html; charset=UTF-8",
       "bytes_probed": 4096,
-      "secs": 2.59,
+      "secs": 2.67,
       "ok": true
     },
     {
@@ -181,7 +181,7 @@
       "final_url": "https://www.houndtag.xyz/whitepaper",
       "content_type": "text/html; charset=utf-8",
       "bytes_probed": 4096,
-      "secs": 0.33,
+      "secs": 0.3,
       "ok": true
     },
     {
@@ -191,7 +191,7 @@
       "final_url": "https://arxiv.org/pdf/2605.11032",
       "content_type": "application/pdf",
       "bytes_probed": 4096,
-      "secs": 1.3,
+      "secs": 1.23,
       "ok": true
     },
     {
@@ -201,7 +201,7 @@
       "final_url": "https://arxiv.org/pdf/2606.26028",
       "content_type": "application/pdf",
       "bytes_probed": 4096,
-      "secs": 0.62,
+      "secs": 0.65,
       "ok": true
     },
     {
@@ -211,7 +211,7 @@
       "final_url": "https://assaylabs.xyz/Assay_Whitepaper.pdf",
       "content_type": "application/pdf",
       "bytes_probed": 4096,
-      "secs": 0.7,
+      "secs": 1.67,
       "ok": true
     },
     {
@@ -221,7 +221,7 @@
       "final_url": "https://vanzik.lictorate.com/",
       "content_type": "text/html; charset=utf-8",
       "bytes_probed": 4096,
-      "secs": 0.77,
+      "secs": 0.93,
       "ok": true
     },
     {
@@ -231,7 +231,7 @@
       "final_url": "https://scopegate.dev/",
       "content_type": "text/html; charset=utf-8",
       "bytes_probed": 4096,
-      "secs": 0.5,
+      "secs": 0.45,
       "ok": true
     },
     {
@@ -241,7 +241,7 @@
       "final_url": "https://pypi.org/project/mcp-vanguard/",
       "content_type": "text/html; charset=utf-8",
       "bytes_probed": 3038,
-      "secs": 0.61,
+      "secs": 0.76,
       "ok": true
     },
     {
@@ -251,7 +251,7 @@
       "final_url": "https://agentgateway.dev/",
       "content_type": "text/html; charset=utf-8",
       "bytes_probed": 4096,
-      "secs": 4.1,
+      "secs": 2.84,
       "ok": true
     },
     {
@@ -261,7 +261,7 @@
       "final_url": "https://github.com/zhaoxinghua09-cell/uibc-core",
       "content_type": "text/html; charset=utf-8",
       "bytes_probed": 4096,
-      "secs": 1.3,
+      "secs": 1.11,
       "ok": true
     },
     {
@@ -271,7 +271,7 @@
       "final_url": "https://www.ietf.org/archive/id/draft-sharif-agent-audit-trail-03.txt",
       "content_type": "text/plain; charset=utf-8",
       "bytes_probed": 4096,
-      "secs": 0.61,
+      "secs": 0.58,
       "ok": true
     },
     {
@@ -281,7 +281,7 @@
       "final_url": "https://www.ietf.org/archive/id/draft-stone-aivs-01.html",
       "content_type": "text/html; charset=utf-8",
       "bytes_probed": 4096,
-      "secs": 0.63,
+      "secs": 0.62,
       "ok": true
     },
     {
@@ -291,7 +291,7 @@
       "final_url": "https://www.ietf.org/archive/id/draft-kuehlewind-audit-architecture-00.html",
       "content_type": "text/html; charset=utf-8",
       "bytes_probed": 4096,
-      "secs": 0.61,
+      "secs": 0.62,
       "ok": true
     },
     {
@@ -301,7 +301,7 @@
       "final_url": "https://www.ietf.org/archive/id/draft-mih-agent-accountability-conformance-00.txt",
       "content_type": "text/plain; charset=utf-8",
       "bytes_probed": 4096,
-      "secs": 0.6,
+      "secs": 0.59,
       "ok": true
     },
     {
@@ -311,7 +311,7 @@
       "final_url": "https://www.ietf.org/archive/id/draft-noctem-cogitator-witness-protocol-00.txt",
       "content_type": "text/plain; charset=utf-8",
       "bytes_probed": 4096,
-      "secs": 0.62,
+      "secs": 0.6,
       "ok": true
     },
     {
@@ -321,7 +321,7 @@
       "final_url": "https://datatracker.ietf.org/doc/draft-ruvalcaba-nhe-audit/",
       "content_type": "text/html; charset=utf-8",
       "bytes_probed": 4096,
-      "secs": 0.85,
+      "secs": 0.64,
       "ok": true
     },
     {
@@ -331,7 +331,7 @@
       "final_url": "https://aport.io/about/",
       "content_type": "text/html; charset=utf-8",
       "bytes_probed": 4096,
-      "secs": 5.02,
+      "secs": 5.11,
       "ok": true
     },
     {
@@ -341,7 +341,7 @@
       "final_url": "https://www.ecfr.gov/current/title-21/chapter-I/subchapter-H/part-892/subpart-B/section-892.2055",
       "content_type": "text/html; charset=utf-8",
       "bytes_probed": 4096,
-      "secs": 1.1,
+      "secs": 1.07,
       "ok": true
     },
     {
@@ -351,7 +351,7 @@
       "final_url": "https://www.modernrequirements.com/fr-ca/med-tech/",
       "content_type": "text/html; charset=UTF-8",
       "bytes_probed": 4096,
-      "secs": 2.78,
+      "secs": 0.64,
       "ok": true
     },
     {
@@ -361,7 +361,7 @@
       "final_url": "https://www.cloudtheapp.com/blog/predetermined-change-control-plans-pccps-fdas-framework-for-managing-ai-ml-device-updates",
       "content_type": "text/html; charset=utf-8",
       "bytes_probed": 4096,
-      "secs": 0.2,
+      "secs": 0.35,
       "ok": true
     },
     {
@@ -371,7 +371,7 @@
       "final_url": "https://www.compliancequest.com/medical-device/",
       "content_type": "text/html; charset=UTF-8",
       "bytes_probed": 4096,
-      "secs": 0.73,
+      "secs": 0.69,
       "ok": true
     },
     {
@@ -391,7 +391,7 @@
       "final_url": "https://datatracker.ietf.org/doc/draft-zambo-aer1/",
       "content_type": "text/html; charset=utf-8",
       "bytes_probed": 4096,
-      "secs": 0.89,
+      "secs": 0.64,
       "ok": true
     },
     {
@@ -401,7 +401,7 @@
       "final_url": "https://datatracker.ietf.org/doc/draft-zambo-aer1-wimse-mapping/",
       "content_type": "text/html; charset=utf-8",
       "bytes_probed": 4096,
-      "secs": 0.79,
+      "secs": 0.66,
       "ok": true
     },
     {
@@ -411,7 +411,7 @@
       "final_url": "https://kenpriore.ai/papers/certificate-of-action.pdf",
       "content_type": "application/pdf",
       "bytes_probed": 4096,
-      "secs": 0.65,
+      "secs": 0.56,
       "ok": true
     },
     {
@@ -421,7 +421,7 @@
       "final_url": "https://www.ietf.org/archive/id/draft-sahu-agent-action-receipts-00.html",
       "content_type": "text/html; charset=utf-8",
       "bytes_probed": 4096,
-      "secs": 0.61,
+      "secs": 0.65,
       "ok": true
     },
     {
@@ -440,7 +440,7 @@
       "final_url": "https://www.imdrf.org/sites/default/files/2026-08/IMDRF%20SaMD%20WG%20N90%20FINAL%20Essential%20Principles%20and%20Content%20PCCPs%20(1).pdf",
       "content_type": "application/pdf",
       "bytes_probed": 4096,
-      "secs": 1.96,
+      "secs": 0.77,
       "ok": true
     },
     {
@@ -450,7 +450,7 @@
       "final_url": "https://zambo.dev/aer1/corpus.json",
       "content_type": "application/json; charset=utf-8",
       "bytes_probed": 4096,
-      "secs": 0.59,
+      "secs": 0.73,
       "ok": true
     }
   ]

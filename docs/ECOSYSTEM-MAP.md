@@ -7,6 +7,18 @@ where it does not, the stage is inferred from what is published and marked so.
 This document exists to stop us from writing claims that a reader can falsify in
 one click. It replaced the earlier assumption that the field was thin.
 
+**Source status, stated before the table**: most entries below are read from arXiv
+preprints and project sites, i.e. individual drafts and vendor pages, **not** adopted
+standards and **not** peer-reviewed publications. Nothing here should be read as a
+committee position.
+
+**Verdict words, and what they do not mean**: where this document says a project
+"verified" something, it reports what that project's own text claims, not an audit we
+performed. Our own verdict has one meaning only, and it is narrower:
+"A uibc PASS means: within the observed evidence boundary, no violation was detected.
+It does not claim the agent was correct, safe, or wise; that the recorded inputs were
+true or complete; or that any real-world outcome followed."
+
 ## The field is crowded, and several entries are further along than we are
 
 | project | stage (their word) | signature / canonicalization | time | log / anchoring | independent verification | what we do not have |
@@ -60,6 +72,23 @@ Rekor failure - as an observation with a reproduction, never as a verdict on the
    signatures". We publish Python tests, which is not the same object. A language-neutral
    vector file is a day of work and it converts our "we have tests" into "anyone can
    check us without our code".
+
+## Standards we did not map, and one an external reviewer caught
+
+This map compares projects, not standards. Two published standards that any committee
+reader would expect beside it are absent, and one of them was pointed out by an external
+review of this document rather than by us:
+
+* **ISO/IEC 23053** — Framework for AI systems using machine learning. None of the
+  projects above, and not this repository, maps its record-keeping to that framework's
+  model-documentation requirements. Absent means absent: we have no mapping, and no
+  project here has published one either.
+* **ISO/IEC 24970** — AI system logging. We reference it but publish no clause-by-clause
+  mapping; the crosswalk is a separate task, not a claim we make here.
+
+Source for both, direct: <https://www.iso.org/standard/88723.html> is the 24970 page;
+23053 has no free full text, so the claim above is limited to "we have no mapping" and
+makes no claim about the standard's contents.
 
 ## What "total dominance" honestly means here
 

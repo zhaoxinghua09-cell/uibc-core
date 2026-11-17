@@ -19,7 +19,7 @@ It prints `CONSISTENT` only when **both** hold: a second, independently written 
 
 > A uibc PASS means: within the observed evidence boundary, no violation was detected. It does not claim the agent was correct, safe, or wise; that the recorded inputs were true or complete; or that any real-world outcome followed.
 
-**Current state, including what we are short of:** 303 tests green · the verifier needs no third-party package (Ed25519 is implemented in-repo) · **external verification nodes: 0** — we publish the number we do not have; running the command above and sending back `external_node_result.json` makes it 1.
+**Current state, including what we are short of:** 303 tests green · the verifier needs no third-party package (Ed25519 is implemented in-repo) · **external verification nodes: 0** — we publish the number we do not have; running the command above and sending back `external_node_result.json` makes it 1. Zero means the independence of this repository's verification rests entirely on two implementations written by the same author; it is not evidence of a third party having reproduced anything.
 
 **Three more commands, if you want to see the failure paths rather than the green ones:**
 
@@ -31,14 +31,21 @@ python tools/redteam_suite.py                              # 15 attacks, expecte
 
 **Verified vs not verified, in one place** (full detail in [`docs/EXTERNAL-ANCHOR.md`](docs/EXTERNAL-ANCHOR.md)):
 
-| item | state |
-|---|---|
-| RFC 3161 external timestamp (Free TSA) | verified, offline-checkable token in repo |
-| OpenTimestamps second anchor | **pending calendar only — not a Bitcoin anchor** |
-| Rekor entry + SET signature | written and verified |
-| Rekor **inclusion proof** | **does not verify — ours and a third-party implementation both fail; published as-is** |
+| item | state | how you check it yourself |
+|---|---|---|
+| RFC 3161 external timestamp (Free TSA) | verified | `openssl ts -verify -in tests/fixtures/anchor/freetsa.tsr -data … -CAfile tests/fixtures/anchor/freetsa_ca.pem` — token and CA are in the repo, so no network and no account |
+| OpenTimestamps second anchor | **pending calendar only — not a Bitcoin anchor** | `ots verify tools/out/release_status.json.ots` returns "pending"; a Bitcoin block height would have to be printed for it to be an anchor |
+| Rekor entry + SET signature | written and verified | `rekor-cli get --log-index 3944456508 --rekor_server https://rekor.sigstore.dev`, then check the SET with the log public key published in `tests/fixtures/anchor/rekor_log_pub.pem` — the verification needs only that public key, never Sigstore's private infrastructure |
+| Rekor **inclusion proof** | **does not verify** — ours and a third-party implementation both fail; published as-is | `python tools/anchor_rekor.py --verify tests/fixtures/anchor/rekor_entry.json --artifact …`; `python -m unittest tests.test_v13_rekor -v` shows the SET check passing and the inclusion proof not overclaimed. The failure is a defect we have not fixed, not a design choice |
+
+The two Rekor indices are different objects and must not be conflated: `2883389783` is the
+entry for the earlier release bundle in `dist/`, `3944456508` is the entry for the anchor of
+this repository's head digest. Each is distinct within the log; neither is a claim that the
+other exists.
 
 **Not** a QMS, and **not** a competing receipt standard: it answers one question a platform cannot answer about itself — *can a stranger recompute your conclusion, offline?*
+
+**What has been reviewed, and what it changed**: [`docs/REVIEW-LOG.md`](docs/REVIEW-LOG.md) — seven rounds by an external model under four different question sets, the receipts verbatim, what was accepted, and one suggestion that was **refused** because we could not substantiate it.
 
 
 > **在线门户 Portal**：https://zhaoxinghua09-cell.github.io/lgd-hub/ — LGD 生态全景（理论 / 参考实现 / 技能全库），一跳即达。

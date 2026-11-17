@@ -2,8 +2,8 @@
 
 **Project**: uibc-core 0.3.0  ·  **Licence**: Apache-2.0  ·  **Author**: Steven Zhao (Xinghua Zhao)
 **Canonical repository**: https://github.com/zhaoxinghua09-cell/uibc-core
-**Branch / commit**: `release/v1.1-precheck` / `b27a23c3da1b241cd50c3bf2f89560cce9393fb9`
-**Generated (UTC)**: 2026-11-17T10:08:58Z
+**Branch / commit**: `release/v1.1-precheck` / `66aa1292909febd2610a2d2c3087e98895d1a1fc`
+**Generated (UTC)**: 2026-11-17T10:19:17Z
 
 ---
 
@@ -14,9 +14,9 @@ This is the **attribution five-piece set** for this repository as published:
 | Piece | Where it is |
 |---|---|
 | 1. Inner anchor (author + repo + version, inside the artifact) | this paragraph, and `manifest.json → anchors.internal` |
-| 2. Outer anchor (an identifier outside this repo) | commit `b27a23c3da1b241cd50c3bf2f89560cce9393fb9` on `release/v1.1-precheck`; Zenodo concept DOI `10.5281/zenodo.22456647` covers the LGD doctrine, **not this package** — a DOI for the 0.3.0 deposit is **not yet assigned**, so it must not be cited as this package's DOI |
-| 3. Hash | `manifest.json → files[*].sha256` for 363 tracked files; manifest digest `sha256:b9892e4bc748738807f2efc784ca0895585b8e0b8ecc52d0f8f1c0eceb19d3f3` |
-| 4. Timestamp | `2026-11-17T10:08:58Z` (UTC), recorded both here and in `manifest.json` |
+| 2. Outer anchor (an identifier outside this repo) | commit `66aa1292909febd2610a2d2c3087e98895d1a1fc` on `release/v1.1-precheck`; Zenodo concept DOI `10.5281/zenodo.22456647` covers the LGD doctrine, **not this package** — a DOI for the 0.3.0 deposit is **not yet assigned**, so it must not be cited as this package's DOI |
+| 3. Hash | `manifest.json → files[*].sha256` for 363 tracked files; manifest digest `sha256:951c899356f5e4247a7d52c68cd6ef456317e773eeaf1628ef3f53a3003be0e1` |
+| 4. Timestamp | `2026-11-17T10:19:17Z` (UTC), recorded both here and in `manifest.json` |
 | 5. Licence + notice | Apache-2.0; disclaimer below |
 
 ## How to check it yourself, offline

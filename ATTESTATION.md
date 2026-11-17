@@ -2,8 +2,8 @@
 
 **Project**: uibc-core 0.3.0  ·  **Licence**: Apache-2.0  ·  **Author**: Steven Zhao (Xinghua Zhao)
 **Canonical repository**: https://github.com/zhaoxinghua09-cell/uibc-core
-**Branch / commit**: `release/v1.1-precheck` / `71c15ecffa4da50b3c05eef4beb1ef98f8ae193c`
-**Generated (UTC)**: 2026-11-17T08:18:23Z
+**Branch / commit**: `release/v1.1-precheck` / `b009e1ca4a58a20df8a4f1a671a0b09a5ad86e33`
+**Generated (UTC)**: 2026-11-17T08:24:27Z
 
 ---
 
@@ -14,9 +14,9 @@ This is the **attribution five-piece set** for this repository as published:
 | Piece | Where it is |
 |---|---|
 | 1. Inner anchor (author + repo + version, inside the artifact) | this paragraph, and `manifest.json → anchors.internal` |
-| 2. Outer anchor (an identifier outside this repo) | commit `71c15ecffa4da50b3c05eef4beb1ef98f8ae193c` on `release/v1.1-precheck`; DOI: none assigned |
-| 3. Hash | `manifest.json → files[*].sha256` for 330 tracked files; manifest digest `sha256:55c7184e5ef71c90fba10a5b5be6e3208758548da9454b4120967326081da79f` |
-| 4. Timestamp | `2026-11-17T08:18:23Z` (UTC), recorded both here and in `manifest.json` |
+| 2. Outer anchor (an identifier outside this repo) | commit `b009e1ca4a58a20df8a4f1a671a0b09a5ad86e33` on `release/v1.1-precheck`; DOI: none assigned |
+| 3. Hash | `manifest.json → files[*].sha256` for 332 tracked files; manifest digest `sha256:dd60b8c16886a3899ad9734c160f49cdd09f0d2c92203f3fd8a63121d8da4126` |
+| 4. Timestamp | `2026-11-17T08:24:27Z` (UTC), recorded both here and in `manifest.json` |
 | 5. Licence + notice | Apache-2.0; disclaimer below |
 
 ## How to check it yourself, offline

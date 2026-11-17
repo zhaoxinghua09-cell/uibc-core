@@ -1,0 +1,16 @@
+{
+  "status": "unanchored",
+  "rekor": "https://rekor.sigstore.dev",
+  "artifact_sha256": "4ad23d9153c33c77253b23e1f5938249cb6877de93eb7593dea26fa5f7fd6e98",
+  "public_key_sha256": "1c568c1dbe1c13f9caddffb9c704975e1144438f22fd931164a1b8cec0eb2811",
+  "info": {
+    "uuid": "108e9186e8c5677aaa1a5779f028caf1f126f30a115f2540e8b5f8b9051268f91d00ce0d938d636f",
+    "log_index": 3944456508,
+    "log_id": "c0d23d6ad406973f9559f3ba2d1ca01f84147d8ffc5b8445c224f98b9591801d",
+    "integrated_time": 1794903738,
+    "tree_size": 3822552250
+  },
+  "problems": [
+    "inclusion proof does not verify (index 3822552246, size 3822552250)"
+  ]
+}

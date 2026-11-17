@@ -91,3 +91,40 @@ time. Opt in by shipping `evidence/external_anchor.json`:
 
 Verified from a public anonymous clone of `fb8b17b`: `248 tests OK` and
 `S16 = PASS` with the real freetsa token, offline.
+
+## Rekor (public transparency log)
+
+`tools/anchor_rekor.py` submits a signed `hashedrekord` entry to
+`https://rekor.sigstore.dev`. This is the layer arkforge uses; it closes the same
+door, not a wider one.
+
+Real entry, 2026-11-17:
+
+| field | value |
+|---|---|
+| log index | `3944456508` |
+| log id | `c0d23d6a…91801d` |
+| integrated time | `1794903738` |
+| tree size | `3822552250` |
+| body digest | `4ad23d91…6e98` (same head as the TSA token) |
+
+### What this tool checks, and what it refuses to claim
+
+| check | verdict |
+|---|---|
+| entry body hashes the artifact we hold | verified |
+| signature over the artifact verifies with the public key in the entry | verified |
+| the digest really is in the log's tree (inclusion proof) | **not verified** - see below |
+
+Rekor's `inclusionProof` is a Trillian-side partial proof (20 siblings for a
+3.8e9-leaf tree) and does not verify as a full RFC 6962 path from the leaf with
+our own walker, in either sibling order (tested 2026-11-17). Judging it properly
+needs the log's signed checkpoint. Until that is implemented, the tool reports
+`inclusion.verified = false` and the test suite asserts that it stays false:
+"we submitted an entry" is not "the entry is provably in the tree".
+
+### Key type
+
+ECDSA P-256, key at `tools/out/rekor_ec_key.pem` (git-ignored, never commit).
+Ed25519 was rejected twice by Rekor (`"SHA-256" not in [SHA-512]`, then
+`invalid signature` after switching to SHA-512), so P-256 is the working path.

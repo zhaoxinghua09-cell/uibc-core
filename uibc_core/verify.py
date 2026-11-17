@@ -28,6 +28,12 @@ REQUIRED_FILES = ["manifest.json", "identity.json", "lifecycle.json", "evidence/
 PRINCIPAL_TYPES = {"HUMAN", "SERVICE", "POLICY", "SANDBOX_SIM"}
 
 _POLICY_HASH_RE = re.compile(r"^(sha256:)?[0-9a-f]{64}$")
+_SHA256_ONLY = re.compile(r"^(sha256:)?[0-9a-f]{64}$")
+
+# draft-sharif-agent-audit-trail-03 Section 13.6: any component left outside the
+# attested set is a forgery channel. Declared, not verified - see S10.
+CLOSURE_FIELDS = ("model_weights", "tokenizer", "chat_template", "engine_build",
+                  "decoding", "numeric_env")
 
 EVIDENCE_TYPES = {
     "IDENTITY", "LIFECYCLE", "INPUT", "ACTION", "TOOL", "MEMORY", "OUTPUT",
@@ -205,6 +211,35 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
             checks.append({"id": "S7", "name": "evidence index metadata",
                            "result": "PASS",
                            "detail": "index metadata matches evidence_index_digest"})
+
+    # S10 attestation closure (draft-sharif-agent-audit-trail-03 Section 13.6).
+    # AAT's point is that any component left outside the attested set is a
+    # forgery channel: weights, tokenizer, chat template, engine build, decoding
+    # configuration, numeric environment. We can only check that a submitter
+    # DECLARED all six and gave each a digest; whether those digests correspond
+    # to what actually ran is not decidable from a package, and saying otherwise
+    # would be the exact overclaim this project refuses elsewhere.
+    closure = manifest.get("closure")
+    if closure is not None:
+        missing = []
+        if not isinstance(closure, dict):
+            missing = ["closure is not an object"]
+        else:
+            for k in CLOSURE_FIELDS:
+                v = closure.get(k)
+                if not isinstance(v, str) or not _SHA256_ONLY.match(v):
+                    missing.append(k)
+        if missing:
+            ok = False
+            checks.append({"id": "S10", "name": "attestation closure declared",
+                           "result": "FAIL",
+                           "detail": "closure is incomplete or malformed: "
+                                     + ", ".join(missing)})
+        else:
+            checks.append({"id": "S10", "name": "attestation closure declared",
+                           "result": "PASS",
+                           "detail": "all 6 closure components declared with digests "
+                                     "(declaration only, contents are not verified)"})
 
     # S8 / S9 checkpoint head over the WHOLE package state (v1.1).
     # S8: manifest checkpoint vs what is on disk - catches a log that was

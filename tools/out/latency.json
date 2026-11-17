@@ -1,0 +1,25 @@
+{
+  "meta": {
+    "generated_at_utc": "2026-11-17T06:14:10Z",
+    "unit": "one offline verification of one package",
+    "not_claimed": "per-invocation receipt latency (see CCS); our unit is the package, not the call"
+  },
+  "rows": [
+    {
+      "package": "base",
+      "result": "PASS",
+      "repeats": 50,
+      "median_ms": 22.91,
+      "p95_ms": 44.98,
+      "max_ms": 88.5
+    },
+    {
+      "package": "m_M12",
+      "result": "FAIL",
+      "repeats": 10,
+      "median_ms": 22.97,
+      "p95_ms": 25.72,
+      "max_ms": 28.01
+    }
+  ]
+}

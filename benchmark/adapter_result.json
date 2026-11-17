@@ -5,7 +5,7 @@
     "boundary": "same repository, same author: demonstrates the contract, not independent judgement"
   },
   "corpus_cases": 21,
-  "agree": 18,
+  "agree": 21,
   "rows": [
     {
       "id": "M01",
@@ -112,13 +112,13 @@
     {
       "id": "M18",
       "ours": "FAIL",
-      "theirs": "PASS",
+      "theirs": "FAIL",
       "mutation": "包根加 notes.md（未声明文件）"
     },
     {
       "id": "M19",
       "ours": "FAIL",
-      "theirs": "PASS",
+      "theirs": "FAIL",
       "mutation": "索引元数据 type/note 改动（不动文件字节）"
     },
     {
@@ -130,28 +130,9 @@
     {
       "id": "M21",
       "ours": "FAIL",
-      "theirs": "INCONCLUSIVE",
+      "theirs": "FAIL",
       "mutation": "未封签包截断尾部（manifest 仍写长链）"
     }
   ],
-  "disagreements": [
-    {
-      "id": "M18",
-      "ours": "FAIL",
-      "theirs": "PASS",
-      "mutation": "包根加 notes.md（未声明文件）"
-    },
-    {
-      "id": "M19",
-      "ours": "FAIL",
-      "theirs": "PASS",
-      "mutation": "索引元数据 type/note 改动（不动文件字节）"
-    },
-    {
-      "id": "M21",
-      "ours": "FAIL",
-      "theirs": "INCONCLUSIVE",
-      "mutation": "未封签包截断尾部（manifest 仍写长链）"
-    }
-  ]
+  "disagreements": []
 }

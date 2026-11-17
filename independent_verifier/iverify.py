@@ -260,6 +260,59 @@ def check_seal(key: bytes, package_dir: str) -> str:
     return "PASS" if hmac.compare_digest(expected, sig) else "FAIL"
 
 
+def _hex(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
+
+
+def index_metadata_digest(entries) -> str:
+    """Metadata-only digest of the evidence index (mirrors check S7)."""
+    meta = [{"path": str(e.get("path", "")), "type": e.get("type"),
+             "note": e.get("note"), "action_digest": e.get("action_digest")}
+            for e in entries]
+    meta.sort(key=lambda m: m["path"])
+    return "sha256:" + _hex(canon_bytes(meta))
+
+
+def lifecycle_head(events) -> str:
+    n = len(events)
+    last = events[-1] if n else None
+    return "sha256:" + _hex(canon_bytes({
+        "count": n,
+        "last_sequence_number": (last or {}).get("sequence_number"),
+        "last_event_digest": (_hex(canon_bytes(last)) if last is not None else None),
+    }))
+
+
+def checkpoint_head(lh: str, root: str, idx: str, count: int) -> str:
+    return "sha256:" + _hex(canon_bytes({
+        "lifecycle_head": lh, "evidence_root": root,
+        "evidence_index_digest": idx, "evidence_count": count}))
+
+
+def undeclared_root_files(package_dir: str, entries) -> list:
+    """Files in the package ROOT that the package never declares (mirrors S1).
+
+    Auxiliary files under a sub-directory (runtime snapshots) are not flagged:
+    the root is what a reader sees, and only the root can carry a contradicting
+    notes.md / README.md.
+    """
+    declared = set(REQUIRED) | {"signatures/seal.json"}
+    for e in entries:
+        declared.add("evidence/" + str(e.get("path", "")).replace("\\", "/"))
+    junk = {"thumbs.db", ".ds_store", "desktop.ini"}
+    extra = []
+    for name in sorted(os.listdir(package_dir)):
+        if name in ("evidence", "signatures"):
+            continue
+        if os.path.isdir(os.path.join(package_dir, name)):
+            continue
+        if name.lower() in junk:
+            continue
+        if name.replace("\\", "/") not in declared:
+            extra.append(name)
+    return extra
+
+
 def independent_verify(package_dir: str, key: bytes = None) -> dict:
     """Return {'result': PASS/FAIL/INCONCLUSIVE, 'checks': {V1..V6: result}}."""
     outcomes = {}
@@ -302,6 +355,28 @@ def independent_verify(package_dir: str, key: bytes = None) -> dict:
         outcomes["V5"] = "INCONCLUSIVE"
 
     outcomes["V6"] = check_seal(key, package_dir)
+
+    # v1.1 parity: three checks the corpus (benchmark/adapter.py) showed this
+    # implementation was missing while the reference already had them.
+    extra_root = undeclared_root_files(package_dir, index)
+    outcomes["V7"] = "FAIL" if extra_root else "PASS"
+
+    sealed_idx = manifest.get("evidence_index_digest")
+    if sealed_idx:
+        outcomes["V8"] = ("PASS" if index_metadata_digest(index) == sealed_idx
+                          else "FAIL")
+    else:
+        outcomes["V8"] = "INCONCLUSIVE"
+
+    sealed_ckpt = manifest.get("checkpoint_head")
+    if sealed_ckpt:
+        recomputed = checkpoint_head(lifecycle_head(events),
+                                     manifest.get("evidence_root") or
+                                     root_from_hashes(hashes),
+                                     index_metadata_digest(index), len(index))
+        outcomes["V9"] = "PASS" if recomputed == sealed_ckpt else "FAIL"
+    else:
+        outcomes["V9"] = "INCONCLUSIVE"
 
     # overall (seal v0.3 three-valued rule, same as the reference):
     # FAIL anywhere -> FAIL; unresolved INCONCLUSIVE anywhere -> INCONCLUSIVE.

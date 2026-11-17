@@ -223,3 +223,27 @@ One more honest note: the independent checker is written by the same maintainer 
 implementation. It imports nothing from `uibc_core` and its Merkle rebuild is a separate code
 path, but "written by someone else" is a claim we still cannot make, and Round 30's public
 re-run register is the only place where a genuinely foreign run is recorded.
+
+## Round 33 — the rail meets a foreign corpus (2026-11-18)
+
+`uibc_core/aee.py` existed since #65 and had never been pointed at the corpus it
+was written for. Today it was.
+
+| item | value |
+|---|---|
+| corpus | `probityai/agent-evidence-vectors` 0.37.0, suiteRevision 32 |
+| corpus digest | `bf3e5befd71640757ff1b3f0af63507364b823b5e3f9059678f72f64a46e11c1` |
+| manifest | `5f828f57e4e6845a48d802ae6c9a32d3365b092aa7d23969a2daa7438ac7f368` |
+| command | `uv tool run "agent-evidence-vectors==0.37.0" --verifier "python -m uibc_core.aee"` |
+| result | **288 vectors, 288 pass, 0 fail**; `rail: external`; `vectorsExecuted 288 of 288`; `suiteRefusals 0`; `reasonParityMismatch 0` |
+
+What this does and does not settle. It settles the sentence that appeared in Rounds
+30–32: "no second implementation, nobody has run us independently" — **for the AEE
+rail**. A corpus written by someone else, driving verifiers through its own contract,
+executed our code across every vector with no refusal. It does **not** settle the same
+sentence for uibc-core's own 29-vector corpus: that checker is still ours.
+
+Windows caveat worth keeping: the corpus tool crashes printing its report path when the
+suite runs from a `D:` directory (`ValueError: path is on mount 'D:', start on mount 'C:'`).
+Run it from a `C:` directory with `PYTHONPATH` pointing at the checkout; the verdicts are
+unaffected.

@@ -4,10 +4,16 @@
 
 `S13` proves a leaf is inside a tree **we built**. `S9` proves a head was pinned
 **somewhere else of ours**. Neither proves the tree existed at time T, because we
-are the only witness to our own clock. That is exactly the gap arkforge closes by
-anchoring to Sigstore Rekor and calling it a "third independent witness".
+are the only witness to our own clock.
 
-We now have an equivalent witness for the timestamp question, via RFC 3161.
+A public transparency log (Sigstore Rekor, which arkforge reports using at
+https://arkforge.tech/en/blog/mcp-client-verification-receipts/) covers the "did
+anyone else see this" half. We make no claim to have matched it: our entry
+exists, its inclusion proof is not verified here, and the table below says so.
+What we do have is a time witness, via RFC 3161.
+
+We now have a time witness of our own, via RFC 3161 - not an equivalent of a
+public log, just the "when" half.
 
 ## A real token, not a mock
 
@@ -26,6 +32,27 @@ The token itself is committed at `tests/fixtures/anchor/freetsa.tsr` with the CA
 bundle and the anchored file, so `tests/test_v13_anchor_tsa.py` verifies bytes
 **we did not generate**. That is the whole point: a mock token would only prove
 the mock agrees with itself.
+
+## Where the CA comes from (so the bundle is not just ours)
+
+The token is checked against `tests/fixtures/anchor/freetsa_ca.pem`, a 5,107-byte bundle
+we ship. A reviewer should not have to trust that file: fetch the same material from the
+TSA and compare.
+
+| item | value |
+|---|---|
+| published by Free TSA | `https://freetsa.org/files/tsa.crt` and `https://freetsa.org/files/cacert.pem` |
+| bundle we ship | `freetsa_ca.pem`, SHA-256 `b8201c19ae46a882ceb83ce58251662fa0e47b0ebff40d6bc025f3e4626ab51e` |
+
+```bash
+# reproduce the bundle from the TSA's own endpoints and compare
+curl -s https://freetsa.org/files/tsa.crt https://freetsa.org/files/cacert.pem > /tmp/ca.pem
+sha256sum /tmp/ca.pem   # compare with the value above
+```
+
+If the hashes differ, the bundle is stale or substituted - and then every "verified"
+verdict in this file is worth nothing until it is re-fetched. That dependency is real
+and is stated rather than hidden.
 
 ## What it proves
 
@@ -95,8 +122,8 @@ Verified from a public anonymous clone of `fb8b17b`: `248 tests OK` and
 ## Rekor (public transparency log)
 
 `tools/anchor_rekor.py` submits a signed `hashedrekord` entry to
-`https://rekor.sigstore.dev`. This is the layer arkforge uses; it closes the same
-door, not a wider one.
+`https://rekor.sigstore.dev`. It is the mechanism arkforge reports using; we
+anchor one entry for one artifact, not an ecosystem, and we do not claim parity.
 
 Real entry, 2026-11-17:
 
@@ -124,6 +151,22 @@ our own walker, in either sibling order (tested 2026-11-17). Judging it properly
 needs the log's signed checkpoint. Until that is implemented, the tool reports
 `inclusion.verified = false` and the test suite asserts that it stays false:
 "we submitted an entry" is not "the entry is provably in the tree".
+
+
+### Checkpoint key: what was tried (2026-11-17, all negative)
+
+| attempt | result |
+|---|---|
+| `GET /api/v1/log/publicKey` + note text with trailing newline / without / double newline / prefix line included | `InvalidSignature` |
+| same key, SHA-256 / SHA-384 / SHA-512 | `InvalidSignature` |
+| brute over note bodies (1-4 lines, 3 newline forms) | no match |
+| `https://tuf-repo-cdn.sigstore.dev/targets/trusted_root.json` as the authoritative key source | HTTP 404 |
+
+Sigstore's own guidance is that verifiers take log keys from a TrustedRoot
+distribution (blog.sigstore.dev/rekor-v2-ga), and the key published at
+`/api/v1/log/publicKey` verifies the entry SET but not this checkpoint. Until the
+correct key and note format are established, independent inclusion verification
+stays **blocked**, and this repository does not claim it.
 
 ### Key type
 

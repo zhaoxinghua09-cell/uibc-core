@@ -100,10 +100,89 @@ def _strict_scan(path):
     return problems
 
 
+import json
+import os
+import re
+from typing import Any
+
+RFC3339 = re.compile(
+    r"^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(\.\d+)?(Z|[+-]\d{2}:\d{2})$")
+UUID_FORM = re.compile(r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-"
+                       r"[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
+TIME_KEYS = {"timestamp", "created_at", "updated_at", "at", "issued_at",
+             "effective_at", "observed_at"}
+ID_KEYS = {"agent_id", "event_id", "id", "owner", "logical_agent_id"}
+
+
+def _calendar_ok(y, m, d):
+    """True iff the date exists. 1900 is deliberately NOT a leap year."""
+    if not (1 <= m <= 12 and 1 <= d <= 31):
+        return False
+    days = [31, 29 if (y % 4 == 0 and (y % 100 != 0 or y % 400 == 0)) else 28,
+            31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+    return d <= days[m - 1]
+
+
+def _offset_ok(off):
+    if off == "Z":
+        return True
+    hh, mm = int(off[1:3]), int(off[4:6])
+    return hh <= 14 and mm < 60 and not (hh == 14 and mm)
+
+
+def _semantic_problems(obj, path=""):
+    """S12: timestamps and identifiers, judged on values rather than on hashes.
+
+    Why a separate check: S4/S5/S7 all answer "was this byte changed?" - none of
+    them answers "is this value a legal time?". A log whose timestamps are
+    '2026-11-17T05:59:59' (no zone), 'feb29 1900', or a lowercase 't' hashes
+    perfectly and orders nothing. AER-1's corpus treats those as must-fail; we
+    had no counterpart before this check.
+
+    Policy choices, stated so they can be argued with:
+      * leap second (":60") is REJECTED - evidence timestamps are machine
+        generated, and a leap second in an evidence log has no defensible
+        ordering meaning;
+      * UUID-shaped identifiers must be lowercase and non-nil - two readers must
+        not disagree about whether 'ABC...' and 'abc...' are the same device;
+      * non-UUID identifiers (e.g. 'mb-agent-001') are left alone: our schema
+        allows them, so rejecting them would be a false positive.
+    """
+    problems = []
+    if isinstance(obj, dict):
+        for k, v in obj.items():
+            child = path + "/" + str(k) if path else str(k)
+            if k in TIME_KEYS and isinstance(v, str):
+                m = RFC3339.match(v)
+                if not m:
+                    problems.append("%s: %r is not RFC 3339 (needs uppercase T, "
+                                    "a timezone, full seconds)" % (child, v[:40]))
+                else:
+                    y, mo, d = int(m.group(1)), int(m.group(2)), int(m.group(3))
+                    if not _calendar_ok(y, mo, d):
+                        problems.append("%s: %r is not a real calendar date"
+                                        % (child, v[:40]))
+                    if int(m.group(6)) > 59:
+                        problems.append("%s: %r has a leap second; not accepted "
+                                        "in evidence timestamps" % (child, v[:40]))
+                    if not _offset_ok(m.group(8)):
+                        problems.append("%s: %r has an out-of-range UTC offset"
+                                        % (child, v[:40]))
+            if k in ID_KEYS and isinstance(v, str) and UUID_FORM.match(v):
+                if v != v.lower():
+                    problems.append("%s: %r is an uppercase UUID" % (child, v))
+                if v.replace("-", "").strip("0") == "":
+                    problems.append("%s: %r is the nil UUID" % (child, v))
+            problems.extend(_semantic_problems(v, child))
+    elif isinstance(obj, list):
+        for i, v in enumerate(obj):
+            problems.extend(_semantic_problems(v, "%s[%d]" % (path, i)))
+    return problems
+
+
 def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
                 expect_head: str = None) -> dict:
     """Verify a submission.uibc package directory. Returns a report dict.
-
     Seal v0.3 verdict semantics (docs/verdict-and-seal-semantics.md):
 
     - The top-level result is three-valued: FAIL if any check FAILs, else
@@ -257,6 +336,19 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
             s4_failures.append(f"unknown evidence type {e.get('type')!r}")
     record("S4", "evidence integrity", not s4_failures,
            f"{len(entries)} entries checked; " + ("; ".join(s4_failures) if s4_failures else "all hashes match"))
+
+    # S12 semantic strictness: timestamps must be real, ordered things and
+    # identifiers must be canonical. Runs on the parsed values, so it is
+    # deliberately separate from S11 (which runs on the bytes).
+    s12_problems = []
+    for doc_name, doc in (("manifest.json", manifest), ("identity.json", identity),
+                          ("lifecycle.json", lifecycle),
+                          ("evidence/index.json", index)):
+        for problem in _semantic_problems(doc):
+            s12_problems.append("%s: %s" % (doc_name, problem))
+    record("S12", "timestamp and identifier strictness", not s12_problems,
+           "; ".join(s12_problems[:4]) if s12_problems else
+           "timestamps are RFC 3339 with a zone; UUIDs are lowercase and non-nil")
 
     # S4b: index METADATA must match its committed digest (v1.1). Content
     # hashes alone cannot see an entry's type/note/action_digest being

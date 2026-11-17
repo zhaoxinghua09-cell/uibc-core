@@ -1,9 +1,9 @@
 {
   "meta": {
-    "generated_at_utc": "2026-11-17T06:31:01Z",
+    "generated_at_utc": "2026-11-17T06:41:11Z",
     "source": "tools/out/mutation_benchmark.json",
     "expected": "benchmark/expected.json",
-    "spec_id": "uibc-core/0.3.0-proposal@9954dc78b49a"
+    "spec_id": "uibc-core/0.3.0-proposal@f163c2466861"
   },
   "summary": {
     "open": {

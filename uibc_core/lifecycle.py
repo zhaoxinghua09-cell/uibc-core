@@ -90,9 +90,16 @@ def _parse_ts(value):
         return None
     text = value.strip().replace("Z", "+00:00")
     try:
-        return _dt.datetime.fromisoformat(text)
+        dt = _dt.datetime.fromisoformat(text)
     except ValueError:
         return None
+    # A timestamp without a zone is a *finding* (S12 rejects it), not a crash:
+    # comparing it against an aware manifest.created_at raised TypeError and the
+    # fail-closed wrapper then reported "verifier robustness" instead of the real
+    # problem. Assume UTC for ordering purposes only.
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=_dt.timezone.utc)
+    return dt
 
 
 def validate_lifecycle_strict(events: list, created_at: str = None,

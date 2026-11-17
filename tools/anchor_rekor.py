@@ -113,7 +113,60 @@ def _inclusion_status(payload: dict, body_bytes: bytes):
             "log_index_in_tree": proof.get("logIndex")}
 
 
-def verify_entry(entry_doc: dict, artifact: bytes):
+def _log_public_key(out_dir: str, timeout: int = 20):
+    """Rekor's log public key, cached next to the anchor record."""
+    from cryptography.hazmat.primitives import serialization
+    cache = os.path.join(out_dir, "rekor_log_pub.pem")
+    if os.path.isfile(cache):
+        return serialization.load_pem_public_key(open(cache, "rb").read())
+    with urllib.request.urlopen(REKOR + "/api/v1/log/publicKey", timeout=timeout) as r:
+        pem = r.read()
+    os.makedirs(out_dir, exist_ok=True)
+    with open(cache, "wb") as f:
+        f.write(pem)
+    return serialization.load_pem_public_key(pem)
+
+
+def verify_set(payload: dict, log_pub) -> bool:
+    """Verify Rekor's signedEntryTimestamp: the log's own attestation of the entry.
+
+    The SET is the log key signing the canonical JSON of the entry without the
+    verification block. No RFC 8785 canonicalizer is needed here: the four values
+    are strings and integers, so a sorted compact dump is byte-identical.
+    """
+    from cryptography.hazmat.primitives import hashes
+    from cryptography.hazmat.primitives.asymmetric import ec
+    sig = base64.b64decode((payload.get("verification") or {})["signedEntryTimestamp"])
+    core = {k: payload[k] for k in ("body", "integratedTime", "logID", "logIndex")}
+    text = json.dumps(core, sort_keys=True, separators=(",", ":"))
+    log_pub.verify(sig, text.encode(), ec.ECDSA(hashes.SHA256()))
+    return True
+
+
+def _checkpoint_status(payload: dict):
+    """Report the checkpoint honestly: present, and NOT signature-verified by us.
+
+    Its signature does not verify against /api/v1/log/publicKey under any note
+    encoding we tried (body, body+newline, body+blank line, prefix included;
+    SHA-256/384/512). Rekor's checkpoint appears to use a separate key, and
+    guessing which one would be exactly the unverified claim we refuse to make.
+    """
+    proof = (payload.get("verification") or {}).get("inclusionProof") or {}
+    cp = proof.get("checkpoint")
+    if not cp:
+        return {"present": False, "verified": False}
+    try:
+        head = cp.split("\n\n")[0].split("\n")
+        return {"present": True, "verified": False,
+                "origin": head[0], "tree_size": head[1] if len(head) > 1 else None,
+                "root_b64": head[2] if len(head) > 2 else None,
+                "reason": "checkpoint signature not verified: its key is not the one "
+                          "published at /api/v1/log/publicKey"}
+    except Exception:
+        return {"present": True, "verified": False, "reason": "unreadable checkpoint"}
+
+
+def verify_entry(entry_doc: dict, artifact: bytes, log_pub=None):
     problems = []
     try:
         uuid, payload = list(entry_doc.items())[0]
@@ -146,12 +199,25 @@ def verify_entry(entry_doc: dict, artifact: bytes):
     except Exception as e:
         problems.append("signature in the log entry does not verify (%s)" % e)
 
+    set_ok = None
+    set_problem = ""
+    if log_pub is not None:
+        try:
+            set_ok = verify_set(payload, log_pub)
+        except Exception as e:
+            set_ok = False
+            set_problem = "log's signedEntryTimestamp does not verify (%s: %s)" % (
+                type(e).__name__, str(e) or "no message")
+            problems.append(set_problem)
+
     info = {
         "uuid": uuid,
         "log_index": payload.get("logIndex"),
         "log_id": payload.get("logID"),
         "integrated_time": payload.get("integratedTime"),
         "tree_size": ((payload.get("verification") or {}).get("inclusionProof") or {}).get("treeSize"),
+        "set_verified": set_ok,
+        "checkpoint": _checkpoint_status(payload),
         "inclusion": _inclusion_status(payload, body_bytes),
     }
     return (not problems), info, problems
@@ -179,7 +245,13 @@ def main():
                 print(json.dumps({"verified": False, "problems": [fetched["error"]]}, indent=2))
                 return 3
             doc = fetched
-        ok, info, probs = verify_entry(doc, open(args.artifact, "rb").read())
+        log_pub = None
+        try:
+            log_pub = _log_public_key(args.out_dir, args.timeout)
+        except Exception as e:
+            print(json.dumps({"note": "log public key unavailable, SET not checked: %s" % e},
+                             ensure_ascii=False))
+        ok, info, probs = verify_entry(doc, open(args.artifact, "rb").read(), log_pub=log_pub)
         print(json.dumps({"verified": ok, "info": info, "problems": probs},
                          indent=2, ensure_ascii=False, default=str))
         return 0 if ok else 3
@@ -194,7 +266,12 @@ def main():
     out = os.path.join(args.out_dir, "rekor_entry.json")
     with open(out, "w", encoding="utf-8") as f:
         json.dump(resp, f, indent=2)
-    v_ok, vinfo, vprobs = verify_entry(resp, artifact)
+    log_pub = None
+    try:
+        log_pub = _log_public_key(args.out_dir, args.timeout)
+    except Exception as e:
+        print("log public key unavailable; SET not checked (%s)" % e)
+    v_ok, vinfo, vprobs = verify_entry(resp, artifact, log_pub=log_pub)
     rec = {"status": "anchored" if v_ok else "unanchored",
            "rekor": REKOR,
            "artifact_sha256": hashlib.sha256(artifact).hexdigest(),

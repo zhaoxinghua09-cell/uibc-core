@@ -19,20 +19,38 @@ It prints `CONSISTENT` only when **both** hold: a second, independently written 
 
 > A uibc PASS means: within the observed evidence boundary, no violation was detected. It does not claim the agent was correct, safe, or wise; that the recorded inputs were true or complete; or that any real-world outcome followed.
 
-**Current state, including what we are short of:** 305 tests green · the verifier needs no third-party package (Ed25519 is implemented in-repo) · **external verification nodes: 0** — we publish the number we do not have; running the command above and sending back `external_node_result.json` makes it 1. Zero means the independence of this repository's verification rests entirely on two implementations written by the same author; it is not evidence of a third party having reproduced anything.
+**Current state, including what we are short of:** 313 tests green · the verifier needs no third-party package (Ed25519 is implemented in-repo) · **external verification nodes: 0** — we publish the number we do not have; running the command above and sending back `external_node_result.json` makes it 1. Zero means the independence of this repository's verification rests entirely on two implementations written by the same author; it is not evidence of a third party having reproduced anything.
+
+**External conformance, measured against someone else's corpus** — a different number from the one above, and a different kind of claim:
+
+| item | value |
+|---|---|
+| corpus | [`probityai/agent-evidence-vectors`](https://github.com/probityai/agent-evidence-vectors) 0.37.0, suiteRevision 32 |
+| corpus digest | `bf3e5befd71640757ff1b3f0af63507364b823b5e3f9059678f72f64a46e11c1` |
+| command | `uv tool run "agent-evidence-vectors==0.37.0" --verifier "python -m uibc_core.aee"` |
+| result | **288 vectors, 288 pass, 0 fail** · `rail: external` · `vectorsExecuted 288 of 288` · `suiteRefusals 0` · `reasonParityMismatch 0` |
+
+This is a corpus written by someone else, driving third-party verifiers through its own
+contract, executed against `uibc_core/aee.py` with no vector refused. It covers the **AEE
+predicate only** — it is not a claim that this repository passes every agent-evidence format,
+and it does not turn the count above into 1: that counter is about people sending back this
+repository's own node result.
 
 **Three more commands, if you want to see the failure paths rather than the green ones:**
 
 ```bash
-python -m unittest discover -s tests -p "test_*.py"        # 305 tests
+python -m unittest discover -s tests -p "test_*.py"        # 313 tests
 python tools/emit_receipts.py --package fixtures/clean.uibc --count 3   # 3 chained receipts
 python tools/redteam_suite.py                              # 15 attacks, expected vs actual
 ```
 
 **Check us without our code**: [`docs/conformance/vectors.json`](docs/conformance/vectors.json) —
-15 language-neutral vectors (canonical bytes + digests, Ed25519 valid/invalid). A checker
-that imports nothing from this project reproduces all 15, verifying signatures with the
-third-party `cryptography` library: `python tools/conformance_check.py`.
+29 language-neutral vectors across seven steps (canonical bytes, Ed25519 valid/invalid,
+receipt envelope digests, the linear chain link, RFC 6962 Merkle roots and inclusion paths,
+policy artefact digests, and anchor binding against a real RFC 3161 token). A checker that
+imports nothing from this project reproduces all 29, verifying signatures with the third-party
+`cryptography` library and reading the token with `asn1crypto`:
+`python tools/conformance_check.py`.
 What it does **not** prove: that a second implementation of the whole receipt exists —
 it does not (see [`docs/CONFORMANCE.md`](docs/CONFORMANCE.md)).
 

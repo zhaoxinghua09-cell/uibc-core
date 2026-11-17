@@ -65,4 +65,4 @@ python tools/pccp_case.py --prev benchmark/corpus/base --curr tools/out/_mb/m_M1
 
 - 整包回滚：仅靠包内信息无法发现，需包外记录的 head（S9）；
 - 若证据不是我们自己采集，"证据为真"永远不会被这份报告证明；
-- AER-1 语料的 base64 严格性与 Merkle 包含证明，我们目前**没有对等实现**（见 `docs/AER1-CROSSWALK-RESULT.md`）。
+- AER-1 语料的 **strict base64** 与 **Merkle 包含证明**已有对等实现（`uibc_core/aee.py` 的 `_b64decode_strict`、`uibc_core/merkle.py` 的 `verify_inclusion`）；仍然成立的是更强的那句：我们没有对 AER-1 全语料逐向量执行过，只有分类级映射（见 `docs/AER1-CROSSWALK-RESULT.md`）。

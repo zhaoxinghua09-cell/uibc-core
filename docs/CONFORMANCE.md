@@ -35,6 +35,9 @@ written somewhere else can be measured without importing this repository.
 | `canonical_json` | 10 | canonicalize the embedded object and match **both** the exact UTF-8 bytes and the SHA-256 |
 | `ed25519_signature` (valid) | 3 | verify with any Ed25519 library; verdict `valid` |
 | `ed25519_signature` (invalid) | 2 | reject a signature made over another message, and one with a single flipped byte |
+| `receipt_digest` | 3 | hash the RFC 8785 JCS bytes of a receipt envelope and match the published digest |
+| `receipt_chain` | 3 | recompute the linear links: first receipt carries 64 zeros, every later one carries its predecessor's digest; one valid chain, one broken link, one non-zero genesis |
+| `anchor_binding` | 2 | hash the shipped artifact and parse a real RFC 3161 token; the token must bind the one file and must not bind the other |
 
 The signature vectors publish the throwaway 32-byte seed (`00…01`) used to produce
 them, so the values are reproducible rather than asserted. The seed is worthless
@@ -44,20 +47,24 @@ outside the corpus and must not be used for anything else.
 python tools/conformance_vectors.py --check   # regenerate and compare byte for byte
 python tools/conformance_check.py             # a checker that imports nothing from uibc_core
 ```
-The second command implements its own canonicalizer with `json`/`hashlib` and verifies
-signatures with the third-party `cryptography` package. Measured output: **15/15 vectors
-reproduced by a non-uibc implementation**. If the corpus only passed under our own verifier
-it would prove nothing.
+The second command implements its own canonicalizer with `json`/`hashlib`, verifies signatures
+with the third-party `cryptography` package, recomputes the chain links itself, and reads the
+token's `messageImprint` with `asn1crypto`. Measured output: **23/23 vectors reproduced by a
+non-uibc implementation**. If the corpus only passed under our own verifier it would prove
+nothing.
 
 What it does **not** cover, and the difference matters:
 
 * **No second implementation.** We ship the object a second implementation can be measured
   against; we do not ship that implementation. Tracekit and agent-receipts publish both.
   "We match Tracekit here" would be a false claim.
-* **No receipt structure, chain, anchoring or policy vectors.** Those steps have tests,
-  not vectors. `docs/INTEROP-MATRIX.md` labels the untested cells as untested.
+* **No receipt schema validation, no policy resolution, no Merkle inclusion proof.** Those
+  steps have tests, not vectors. `docs/INTEROP-MATRIX.md` labels the untested cells as untested.
+* **No floats in the receipt or chain envelopes.** The corpus tests structure and linking, not
+  ECMAScript number formatting; saying otherwise would be a false claim.
 * **Passing it does not make an implementation interoperable with our receipts.** It makes
-  the two primitive steps — canonical bytes and signature — comparable.
+  four steps — canonical bytes, signature, receipt digest, linear link — plus anchor binding
+  comparable, not the whole format.
 
 ## Public re-run register
 

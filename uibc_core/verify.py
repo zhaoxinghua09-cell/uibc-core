@@ -359,10 +359,21 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
     entries = index.get("entries", [])
     s4_failures = []
     recomputed_hashes = []
+    # Containment: an evidence entry must resolve to a real file inside evidence/.
+    # Without this a package can put a symlink at evidence/files/x and have us hash
+    # something that lives outside the package (RT03 in tools/redteam_suite.py hit
+    # exactly that on 2026-11-17: the verifier returned PASS).
+    evidence_dir_real = os.path.realpath(os.path.join(package_dir, "evidence"))
     for e in entries:
         p = os.path.join(package_dir, "evidence", e.get("path", ""))
         if not os.path.isfile(p):
             s4_failures.append(f"missing file {e.get('path')!r}")
+            continue
+        real = os.path.realpath(p)
+        if os.path.islink(p) or not (real == evidence_dir_real or
+                                     real.startswith(evidence_dir_real + os.sep)):
+            s4_failures.append(
+                f"evidence file {e.get('path')!r} resolves outside the evidence root")
             continue
         actual = hash_file(p)
         recomputed_hashes.append(actual)

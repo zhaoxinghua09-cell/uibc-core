@@ -68,34 +68,64 @@ URLS = [
 ]
 
 
-def check(url, timeout=25):
+# A citation may have a mirror that is equally primary. Measured 2026-11-17 from a
+# second network (Linux host, no credentials): eips.ethereum.org answered 503 to every
+# request for a full minute, while the canonical source document in ethereum/ERCs was
+# 200. A citation counts as reachable if either URL answers 200 — both are listed so a
+# reader in a blocked region still has a way through.
+ALTERNATES = {
+    "https://eips.ethereum.org/EIPS/eip-8004":
+        "https://raw.githubusercontent.com/ethereum/ERCs/master/ERCS/erc-8004.md",
+}
+
+
+def check(url, timeout=25, retries=2):
     req = urllib.request.Request(url, headers={
-        "User-Agent": "Mozilla/5.0 (compatible; citation-check/1.0)",
-        "Accept": "*/*"})
+        # Some hosts answer 503/403 to the default urllib agent while serving a browser
+        # normally (kenpriore.ai and modernrequirements.com both did on 2026-11-17).
+        "User-Agent": ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                       "(KHTML, like Gecko) Chrome/120.0 Safari/537.36"),
+        "Accept": "text/html,application/pdf,*/*"})
     ctx = ssl.create_default_context()
-    t0 = time.perf_counter()
-    try:
-        with urllib.request.urlopen(req, timeout=timeout, context=ctx) as r:
-            code, final = r.status, r.geturl()
-            ctype = r.headers.get("Content-Type", "")
-            n = len(r.read(4096))
-        return {"status": code, "final_url": final, "content_type": ctype,
-                "bytes_probed": n, "secs": round(time.perf_counter() - t0, 2),
-                "ok": 200 <= code < 300}
-    except urllib.error.HTTPError as e:
-        return {"status": e.code, "final_url": url, "error": "HTTPError",
-                "secs": round(time.perf_counter() - t0, 2),
-                "ok": 200 <= e.code < 300}
-    except Exception as e:
-        return {"status": None, "final_url": url,
-                "error": f"{type(e).__name__}: {str(e)[:80]}",
-                "secs": round(time.perf_counter() - t0, 2), "ok": False}
+    last = None
+    for attempt in range(retries + 1):
+        t0 = time.perf_counter()
+        try:
+            with urllib.request.urlopen(req, timeout=timeout, context=ctx) as r:
+                code, final = r.status, r.geturl()
+                ctype = r.headers.get("Content-Type", "")
+                n = len(r.read(4096))
+            return {"status": code, "final_url": final, "content_type": ctype,
+                    "bytes_probed": n, "secs": round(time.perf_counter() - t0, 2),
+                    "ok": 200 <= code < 300, "attempts": attempt + 1}
+        except urllib.error.HTTPError as e:
+            last = {"status": e.code, "final_url": url, "error": "HTTPError",
+                    "secs": round(time.perf_counter() - t0, 2),
+                    "ok": 200 <= e.code < 300, "attempts": attempt + 1}
+            # 4xx other than 429 is a real answer; only retry when the host is busy.
+            if e.code != 429 and e.code < 500:
+                return last
+        except Exception as e:
+            last = {"status": None, "final_url": url,
+                    "error": f"{type(e).__name__}: {str(e)[:80]}",
+                    "secs": round(time.perf_counter() - t0, 2), "ok": False,
+                    "attempts": attempt + 1}
+        time.sleep(2 * (attempt + 1))
+    return last
 
 
 def main():
     rows = []
     for name, url in URLS:
         r = check(url)
+        alt = ALTERNATES.get(url)
+        if not r["ok"] and alt:
+            a = check(alt)
+            r["alternate"] = alt
+            r["alternate_status"] = a["status"]
+            if a["ok"]:
+                r["ok"] = True
+                r["satisfied_by"] = alt
         rows.append({"name": name, "url": url, **r})
         print("%-34s %-5s %s" % (name, r["status"], r.get("error", "")))
     ok = sum(1 for r in rows if r["ok"])

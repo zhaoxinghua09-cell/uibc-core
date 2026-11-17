@@ -121,12 +121,12 @@ code{background:#eef2f7;padding:1px 5px;border-radius:4px;font-size:12.5px}
   <td><span class="dot d-part"></span>"20+ 测试"，跨框架集成</td>
 </tr>
 <tr>
-  <td class="name">Vaara<small>PyPI 0.63.0</small></td>
-  <td>已发布</td>
+  <td class="name">Vaara<small>PyPI 2.17.0（实测）</small></td>
+  <td>AGPL-3.0 · 2.17.0</td>
   <td><span class="dot d-part"></span>哈希链 + 导出签名</td>
-  <td><span class="dot d-no"></span>未声明</td>
-  <td><span class="dot d-no"></span>未声明</td>
-  <td><span class="dot d-part"></span>导出轨迹离线可验</td>
+  <td><span class="dot d-ok"></span><code>trail verify-anchor</code></td>
+  <td><span class="dot d-ok"></span><code>trail publish-head</code> 到公共透明日志（opt-in）</td>
+  <td><span class="dot d-part"></span>签名 zip 离线可验；<code>attest verify</code> 逐工具调用</td>
 </tr>
 <tr style="background:#f4f9fd">
   <td class="name">uibc-core（我们）<small>公共仓 · release/v1.1-precheck</small></td>
@@ -139,7 +139,34 @@ code{background:#eef2f7;padding:1px 5px;border-radius:4px;font-size:12.5px}
 </tbody>
 </table>
 
-<h2>二、三个必须改口的判断</h2>
+<h2>二、本机真跑：三家装上之后发生了什么</h2>
+<p class="lead">不是读文档。在 Windows + Python 3.13 上真实安装并执行；失败的照实写，不做产品评价。</p>
+<table>
+<thead><tr><th style="width:140px">包</th><th style="width:120px">装到的版本</th><th>跑了什么</th><th>结果</th></tr></thead>
+<tbody>
+<tr>
+  <td class="name">novafabric</td><td><b>0.108.0</b></td>
+  <td><code>nova capture</code> 三次（含 <code>--runner local --no-daemon</code>）、<code>seal init</code>、<code>verify</code>、<code>inspect</code></td>
+  <td><span class="chip c-no">路径未跑通</span> 每次都触发它自己的完整性守卫：<i>"the capsule directory was replaced while the workload ran … must not be trusted"</i>；<code>seal init</code> 建了身份但 capsule 仍无 <code>.seal/</code>，<code>verify</code> 拒绝；<code>inspect</code> 报 asset not found。我们没有去调试它的代码。</td>
+</tr>
+<tr>
+  <td class="name">vaara</td><td><b>2.17.0</b><small>AGPL-3.0</small></td>
+  <td><code>--help</code>、<code>trail --help</code>、<code>attest --help</code>、<code>keygen</code></td>
+  <td><span class="chip c-part">比旧页面多得多</span> 有 <code>trail export</code>（签名交付 zip）、<code>export-threshold</code>（k-of-n）、<code>verify</code>、<b><code>publish-head</code> 到公共透明日志</b>、<b><code>verify-anchor</code> 验外部时间锚</b>、<code>attest verify</code>。<b>我们此前写的"Vaara 无锚定"必须作废。</b></td>
+</tr>
+<tr>
+  <td class="name">aiauditlog<small>模块 ai_audit_log</small></td><td><b>0.2.0b1</b></td>
+  <td>import、<code>AuditRecorder</code>、<code>EventBuilder.create</code>、<code>ChainVerifier</code></td>
+  <td><span class="chip c-part">装得上，端到端未成立</span> 嵌套 pydantic 模型（<code>Source</code>/<code>Actor</code>/<code>Outcome(status=, code=)</code>），冒烟脚本每次卡在模型校验；<code>ChainVerifier</code> 存在。记"未成立"，不记成它的失败。</td>
+</tr>
+<tr><td class="name">treeship / tracekit</td><td>未安装</td><td>本轮未尝试</td><td>—</td></tr>
+</tbody>
+</table>
+<div class="callout">
+  <strong>这一格的分量：</strong>矩阵里第一次出现"竞品的可执行声明在它的主场之外跑不通"。写它必须和对我们自己的 Rekor 失败一样——<b>带复现的观察，不是对设计下判决</b>。
+</div>
+
+<h2>三、三个必须改口的判断</h2>
 <div class="cards">
   <div class="card">
     <div class="big">不是我们独有</div>
@@ -165,7 +192,7 @@ code{background:#eef2f7;padding:1px 5px;border-radius:4px;font-size:12.5px}
   ③一个维度从"声称"升级为"已演示"：第二实现或语言中立语料。
 </div>
 
-<h2>三、我方覆盖度：12 个检查符现在到哪</h2>
+<h2>四、我方覆盖度：12 个检查符现在到哪</h2>
 <p class="lead">这张表是我们自己的体检，不是竞品数据。303 测试、红队 15 例、引用直达 42/45。</p>
 <table>
 <thead><tr><th style="width:220px">维度</th><th>状态</th><th>证据在哪</th></tr></thead>
@@ -190,7 +217,7 @@ code{background:#eef2f7;padding:1px 5px;border-radius:4px;font-size:12.5px}
 <thead><tr><th style="width:260px">动作</th><th>目标</th><th>成本</th></tr></thead>
 <tbody>
 <tr><td>语言中立一致性语料（JSON 向量 + 固定 digest）</td><td>追平 agent-receipts 的维度</td><td>约 1 天</td></tr>
-<tr><td>装 novafabric / treeship / aiauditlog 真跑</td><td>把上表"文档级"换成"实测级"</td><td>约 1 天，含环境排查</td></tr>
+<tr><td>装 treeship（npm/Rust）真跑</td><td>把最后一行"文档级"换成"实测级"</td><td>约 1 天，含环境排查</td></tr>
 <tr><td>MCP 拦截点（代理写我方回执）</td><td>追平 Vaara 的调用现场</td><td>数天</td></tr>
 <tr><td>回放协议</td><td>追平 NovaFabric</td><td>数周，暂不建议</td></tr>
 </tbody>
@@ -198,8 +225,8 @@ code{background:#eef2f7;padding:1px 5px;border-radius:4px;font-size:12.5px}
 
 <footer>
 数据日期 2026-11-17 · 我方证据：公共仓 <a href="https://github.com/zhaoxinghua09-cell/uibc-core">zhaoxinghua09-cell/uibc-core</a>（分支 release/v1.1-precheck，匿名克隆 06ff25c 全量测试通过）<br>
-同行来源：<a href="https://arxiv.org/html/2609.35659">Tracekit</a> · <a href="https://www.treeship.dev/">Treeship</a> · <a href="https://novafabric.ai/">NovaFabric</a> · <a href="https://arxiv.org/html/2609.12582">NovaFabric 论文</a> · <a href="https://www.npmjs.com/package/agent-receipts-cli">agent-receipts</a> · <a href="https://pypi.org/project/aiauditlog/0.1.0a3/">AIAuditLog</a> · <a href="https://fact0.io/">fact0</a> · <a href="https://pypi.org/project/vaara/0.63.0/">Vaara</a><br>
-本页所有竞品行为均为其公开文本所述，本机未安装、未运行；引用即为直达链接，无需二次跳转。
+同行来源：<a href="https://arxiv.org/html/2609.35659">Tracekit</a> · <a href="https://www.treeship.dev/">Treeship</a> · <a href="https://novafabric.ai/">NovaFabric</a> · <a href="https://arxiv.org/html/2609.12582">NovaFabric 论文</a> · <a href="https://www.npmjs.com/package/agent-receipts-cli">agent-receipts</a> · <a href="https://pypi.org/project/aiauditlog/">AIAuditLog</a> · <a href="https://fact0.io/">fact0</a> · <a href="https://pypi.org/project/vaara/">Vaara</a><br>
+竞品行为：矩阵行为其公开文本所述；"本机真跑"一节为实装实测结果（Windows / Python 3.13）。<b>反向列（他们验我们）全部未测。</b>引用即直达链接，无需二次跳转。
 </footer>
 </div>
 </body>

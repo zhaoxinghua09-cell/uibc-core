@@ -18,8 +18,25 @@ one click. It replaced the earlier assumption that the field was thin.
 | **AIAuditLog** — [PyPI 0.1.0a3](https://pypi.org/project/aiauditlog/0.1.0a3/) | **alpha** | RFC 8785 canonical JSON, SHA-256 digests, optional hash chain | checkpoints, **optional Ed25519 checkpoint signatures** | checkpoints, no external log | schema export, JSONL + SQLite, redaction modes | signed checkpoint policy as a first-class object |
 | **fact0** — [fact0.io](https://fact0.io/) | **experimental**, MIT, self-hosted | hash-chained audit records | none | none | signed export files verified against a separately trusted key; ZIP itself not signed | replay; honest "capture gaps remain visible" is the same stance we take |
 | **Attested Logs** — [paper](https://pys8vc40ox3z7qxp.public.blob.vercel-storage.com/files/2277477cbbe69000-554a6703-fac0-4715-84a6-d6613c72cda3-Attested-Multi-Agent-Conversation-Logs.pdf) | research library, AutoGen + LangGraph integrations | Ed25519 per message, SHA-256 chain | none | none (Merkle checkpoints planned) | "20+ passing tests", offline self-contained verification | framework integration breadth |
-| **Vaara** — [PyPI 0.63.0](https://pypi.org/project/vaara/0.63.0/) | released | hash chain, export signature | none stated | none | offline verify of exported trail | call-site interception |
+| **Vaara** — [PyPI](https://pypi.org/project/vaara/) | **2.17.0**, AGPL-3.0, installed and CLI inspected | hash chain, export signature | `trail verify-anchor` for external time anchor | `trail publish-head` to a public transparency log (opt-in) | offline verify of signed trail zip; `attest verify` per tool call | call-site policy depth; permissive licensing for bundling (AGPL) |
 | **us** — `uibc-core` | 0.3.0, Apache-2.0, public repo | Ed25519 over DSSE PAE of JCS payload | RFC 3161 verified + OTS pending calendar | Rekor entry written; inclusion **not verified** | **one Python implementation**, public anonymous clone + 303 tests + 15 red-team cases | second verifier; witnesses; replay; call-site interception |
+
+## Measured on this machine (Windows, Python 3.13, 2026-11-17)
+
+Not documentation. Actual runs:
+
+| package | installed version | what we ran | outcome |
+|---|---|---|---|
+| `novafabric` | **0.108.0** | `nova capture` ×3 (default and `--runner local --no-daemon`), `nova seal init`, `nova verify`, `nova inspect` | capture writes a capsule, but its own guard fires every time: *"the capsule directory was replaced while the workload ran (moved, or swapped for a link) … must not be trusted"*. `nova seal init` created a local identity, the capsule still has no `.seal/`, so `nova verify` refuses ("not sealed with NovaSeal"). `nova inspect` reports the asset not found. **The capture → seal → verify path was not executable here.** We did not debug their code. |
+| `vaara` | **2.17.0** (PyPI moved from 0.63.0; **AGPL-3.0**) | `vaara --help`, `trail --help`, `attest --help`, `keygen` | subcommand set is far wider than the 0.63.0 page: `trail export` (signed regulator-handoff zip), `trail export-threshold` (k-of-n, no single-key issuance), `trail verify`, **`trail publish-head` to a public transparency log**, **`trail verify-anchor`**, `attest verify` (tool-call envelope with TTL). **The "no anchoring" line we wrote for 0.63.0 must be retired.** |
+| `aiauditlog` / `ai_audit_log` | **0.2.0b1** (PyPI moved from 0.1.0a3) | import, `AuditRecorder`, `EventBuilder.create`, `ChainVerifier` | installs and imports; the API is nested pydantic models (`Source`, `Actor`, `Outcome(status=, code=)`). Our end-to-end smoke run **did not complete** - each attempt failed model validation. `ChainVerifier` exists. Recorded as *not established*, not as a product failure. |
+| `treeship` | not installed | - | npm/Rust toolchain not attempted this round. |
+| `tracekit` | not installed | - | paper only; no package located. |
+
+Two previously documentation-only cells are now measured, and one came back negative: NovaFabric's
+sealing path did not yield a verifiable capsule here. That is the first case where our matrix shows a
+competitor's instrumented claim failing outside its home setup. It must be stated the way we state our own
+Rekor failure - as an observation with a reproduction, never as a verdict on their design.
 
 ## The three findings that change our story
 
@@ -64,13 +81,14 @@ installable. What it can mean, and what is achievable this quarter:
 * agent-receipts: <https://www.npmjs.com/package/agent-receipts-cli> ; repo: <https://github.com/agent-viscro/agent-receipts>
 * AIAuditLog: <https://pypi.org/project/aiauditlog/0.1.0a3/>
 * fact0: <https://fact0.io/>
-* Vaara: <https://pypi.org/project/vaara/0.63.0/>
+* Vaara: <https://pypi.org/project/vaara/> (2.17.0 measured; 0.63.0 page is stale)
 * Attested Logs paper: same PDF linked in the table above (the project has no arXiv
   identifier of its own; the HTML edition above is Tracekit's)
 
 ## What was not tested, stated plainly
 
-None of the packages above was installed on this machine. Every cell about their
-behaviour comes from their published text. Running them - `pip install novafabric`
-and `nova verify`, `npm i -g treeship`, `pip install aiauditlog` - would replace
-"documented" with "measured", and that is the next step, not a finished claim.
+Three packages were installed and exercised (NovaFabric, Vaara, AIAuditLog); see the
+measured section above for exactly what happened, including the two runs that did not
+complete. Not tested: Treeship and Tracekit (no install attempted this round), any peer's
+behaviour on Linux, and the reverse direction - **no peer has been asked to verify one of
+our packages**, so every "they verify ours" cell remains unknown, not passing.

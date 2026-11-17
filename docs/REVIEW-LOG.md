@@ -153,3 +153,38 @@ an `ALTERNATES` map so a mirror counts. Details and the per-link table live in
 It is still our own code running on our own cloud host with our own credentials for the clone. It
 demonstrates that the repository works for a machine we do not sit at; it does not make us a third
 party. "A human expert, not a model" stays open.
+## Round 31 — corpus extended to structure and anchoring (2026-11-17, same day)
+
+Round 30's own closing line was the most damning item in it: "the corpus still
+covers only canonicalization and Ed25519, with no second full implementation." Half
+of that is now closed, and the record says which half.
+
+**What changed.** `docs/conformance/vectors.json` went from 15 to 23 vectors, schema
+`@2`, three new kinds:
+
+* `receipt_digest` (3) — SHA-256 over the RFC 8785 JCS bytes of an envelope, incl.
+  one with a nested `counts` object and a `policy_digest`, one with CJK text;
+* `receipt_chain` (3) — the linear link from draft-marques-asqav-compliance-receipts-01
+  §4.3: receipt[0] carries 64 zeros, every later receipt carries its predecessor's digest.
+  One valid chain, one with a single corrupted link (envelopes untouched, so only the link
+  is wrong), one with a non-zero genesis;
+* `anchor_binding` (2) — the shipped RFC 3161 token must bind `anchored_head.json` and must
+  not bind `ots_head.ots`. Both use the real token, not a stub.
+
+**How it was checked, and by what.** `tools/conformance_check.py` imports nothing from
+`uibc_core`: its own canonicalizer from `json`/`hashlib`, signatures via third-party
+`cryptography`, chain links recomputed from the published rule, and the token's
+`messageImprint` read with `asn1crypto`. Measured: **23/23 vectors reproduced by a non-uibc
+implementation**.
+
+**What this round does not close, stated rather than implied.** There is still no second
+*implementation* — we ship the object to measure against, not the measurer's code, and
+Tracekit and agent-receipts ship both. Receipt **schema** validation, **policy** resolution
+and **Merkle inclusion** still have tests and not vectors, so `docs/INTEROP-MATRIX.md` keeps
+those cells as untested. The new vectors also deliberately contain no floats: the corpus tests
+structure and linking, not ECMAScript number formatting.
+
+**One trap worth recording.** `asn1crypto` returns the token's encapsulated content as a
+`ParsableOctetString`; `token["content"]["encap_content_info"]["content"]["message_imprint"]`
+raises `TypeError: 'ParsableOctetString' object is not subscriptable`. The imprint lives one
+`.parsed` hop further in.

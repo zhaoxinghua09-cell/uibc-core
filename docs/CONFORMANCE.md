@@ -38,6 +38,9 @@ written somewhere else can be measured without importing this repository.
 | `receipt_digest` | 3 | hash the RFC 8785 JCS bytes of a receipt envelope and match the published digest |
 | `receipt_chain` | 3 | recompute the linear links: first receipt carries 64 zeros, every later one carries its predecessor's digest; one valid chain, one broken link, one non-zero genesis |
 | `anchor_binding` | 2 | hash the shipped artifact and parse a real RFC 3161 token; the token must bind the one file and must not bind the other |
+| `merkle_root` | 2 | build the RFC 6962 tree (leaf = SHA-256(0x00‖leaf), node = SHA-256(0x01‖left‖right), odd tail promoted not duplicated) and match the root; one five-leaf tree and one single-leaf tree |
+| `merkle_inclusion` | 3 | recompute the root from a leaf, its index, the tree size and the sibling path; the genuine path must be `included`, a tampered leaf and a wrong index must both be `not_included` |
+| `policy_digest` | 1 | hash the RFC 8785 JCS bytes of a retained policy artefact and match the published digest |
 
 The signature vectors publish the throwaway 32-byte seed (`00…01`) used to produce
 them, so the values are reproducible rather than asserted. The seed is worthless
@@ -48,23 +51,24 @@ python tools/conformance_vectors.py --check   # regenerate and compare byte for 
 python tools/conformance_check.py             # a checker that imports nothing from uibc_core
 ```
 The second command implements its own canonicalizer with `json`/`hashlib`, verifies signatures
-with the third-party `cryptography` package, recomputes the chain links itself, and reads the
-token's `messageImprint` with `asn1crypto`. Measured output: **23/23 vectors reproduced by a
-non-uibc implementation**. If the corpus only passed under our own verifier it would prove
-nothing.
+with the third-party `cryptography` package, recomputes the chain links itself, rebuilds the
+Merkle roots and inclusion paths itself, and reads the token's `messageImprint` with
+`asn1crypto`. Measured output: **29/29 vectors reproduced by a non-uibc implementation**. If the
+corpus only passed under our own verifier it would prove nothing.
 
 What it does **not** cover, and the difference matters:
 
 * **No second implementation.** We ship the object a second implementation can be measured
   against; we do not ship that implementation. Tracekit and agent-receipts publish both.
   "We match Tracekit here" would be a false claim.
-* **No receipt schema validation, no policy resolution, no Merkle inclusion proof.** Those
-  steps have tests, not vectors. `docs/INTEROP-MATRIX.md` labels the untested cells as untested.
-* **No floats in the receipt or chain envelopes.** The corpus tests structure and linking, not
-  ECMAScript number formatting; saying otherwise would be a false claim.
+* **No end-to-end receipt schema validation.** A receipt is a composite: the seven steps here
+  are published, the assembly rules are not. `docs/INTEROP-MATRIX.md` labels the untested cells
+  as untested.
+* **No floats in the receipt, chain or policy artefacts.** The corpus tests structure, linking
+  and trees, not ECMAScript number formatting; saying otherwise would be a false claim.
 * **Passing it does not make an implementation interoperable with our receipts.** It makes
-  four steps — canonical bytes, signature, receipt digest, linear link — plus anchor binding
-  comparable, not the whole format.
+  seven steps — canonical bytes, signature, receipt digest, linear link, Merkle root, Merkle
+  inclusion, policy digest — plus anchor binding comparable, not the whole format.
 
 ## Public re-run register
 

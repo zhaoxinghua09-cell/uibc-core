@@ -188,3 +188,38 @@ structure and linking, not ECMAScript number formatting.
 `ParsableOctetString`; `token["content"]["encap_content_info"]["content"]["message_imprint"]`
 raises `TypeError: 'ParsableOctetString' object is not subscriptable`. The imprint lives one
 `.parsed` hop further in.
+
+## Round 32 — Merkle inclusion and policy digests join the corpus (2026-11-18)
+
+Round 31 closed the chain and anchor gap and left two named holes: Merkle inclusion had
+tests but no vectors, and a `policy_digest` was a number nobody outside could recompute.
+Both are now vectors. Corpus 23 → **29**, schema `@3`.
+
+**New kinds.**
+
+* `merkle_root` (2) — five leaves and one leaf. RFC 6962: leaf = SHA-256(0x00‖leaf),
+  node = SHA-256(0x01‖left‖right), split at the largest power of two below the length, odd
+  tail promoted rather than duplicated. A one-leaf tree's root is that leaf, which catches
+  implementations that hash an inner node anyway.
+* `merkle_inclusion` (3) — one genuine path, one tampered leaf, one right-leaf-wrong-index.
+  The third is the interesting one: same leaf, same proof, index 1 instead of 2, and a
+  conforming verifier must say `not_included`, because the index decides left/right at every
+  step. It is the cheap shortcut a verifier that ignores the index would happily pass.
+* `policy_digest` (1) — SHA-256 over the JCS of a retained policy artefact, with CJK text in
+  the artefact so escaping differences surface.
+
+**How it was checked.** `tools/conformance_check.py` rebuilt the whole Merkle layer
+independently — its own `_leaf`/`_node`/`_root`, and `_root_from_path` walking the path
+top-down using the split rule and the index, not our bottom-up `fn/sn` walk. Measured:
+**29/29 vectors reproduced by a non-uibc implementation**; `--check` → `MATCH: 29 vectors
+reproduce exactly`; full suite `Ran 306 tests … OK (skipped=2)`.
+
+**Still not closed, same wording as before, because it has not changed.** No second
+*implementation*; no end-to-end receipt schema validation; no floats anywhere in the corpus
+(these vectors test structure, linking, trees and policy digests, not ECMAScript number
+formatting).
+
+One more honest note: the independent checker is written by the same maintainer as the
+implementation. It imports nothing from `uibc_core` and its Merkle rebuild is a separate code
+path, but "written by someone else" is a claim we still cannot make, and Round 30's public
+re-run register is the only place where a genuinely foreign run is recorded.

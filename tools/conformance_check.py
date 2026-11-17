@@ -45,6 +45,73 @@ def _digest(obj) -> str:
 
 GENESIS = "0" * 64
 
+LEAF_PREFIX = b"\x00"
+NODE_PREFIX = b"\x01"
+
+
+def _leaf(data: bytes) -> bytes:
+    return hashlib.sha256(LEAF_PREFIX + data).digest()
+
+
+def _node(l: bytes, r: bytes) -> bytes:
+    return hashlib.sha256(NODE_PREFIX + l + r).digest()
+
+
+def _split(n: int) -> int:
+    k = 1
+    while k * 2 < n:
+        k *= 2
+    return k
+
+
+def _root(leaves) -> bytes:
+    if not leaves:
+        return b"\x00" * 32
+    if len(leaves) == 1:
+        return leaves[0]
+    k = _split(len(leaves))
+    return _node(_root(leaves[:k]), _root(leaves[k:]))
+
+
+def _root_from_path(leaf: bytes, index: int, size: int, proof) -> bytes:
+    """Rebuild the root by walking the path top-down, independently of uibc_core.
+
+    At each level the list splits at the largest power of two below its length;
+    which side the leaf's index falls on is what tells us whether the sibling that
+    level contributes is on the left or the right. `proof` arrives bottom-up.
+    """
+    if size == 1:
+        return leaf
+    k = _split(size)
+    sibling = proof[-1]
+    if index < k:
+        return _node(_root_from_path(leaf, index, k, proof[:-1]), sibling)
+    return _node(sibling, _root_from_path(leaf, index - k, size - k, proof[:-1]))
+
+
+def check_merkle_root(v: dict) -> tuple[bool, str]:
+    leaves = [_leaf(s.encode("utf-8")) for s in v["leaves_utf8"]]
+    got = _root(leaves).hex()
+    if got != v["expected_root_hex"]:
+        return False, "root differs"
+    return True, "root reproduced"
+
+
+def check_merkle_inclusion(v: dict) -> tuple[bool, str]:
+    leaves = [_leaf(s.encode("utf-8")) for s in v["leaves_utf8"]]
+    root = _root(leaves)
+    leaf = _leaf(v["leaf_utf8"].encode("utf-8"))
+    proof = [bytes.fromhex(h) for h in v["proof_hex"]]
+    try:
+        rebuilt = _root_from_path(leaf, v["index"], v["size"], proof)
+        included = rebuilt == root
+    except Exception:
+        included = False
+    verdict = "included" if included else "not_included"
+    if verdict != v["expected_verdict"]:
+        return False, "expected %s, recomputed %s" % (v["expected_verdict"], verdict)
+    return True, "recomputed " + verdict
+
 
 def check_chain(v: dict) -> tuple[bool, str]:
     """Recompute the linear links. Independent of uibc_core: JCS + sha256 only.
@@ -141,6 +208,20 @@ def check_vectors(doc: dict, root: str) -> tuple[bool, list[dict]]:
                 row["detail"] = "envelope digest reproduced"
         elif v["kind"] == "receipt_chain":
             row["ok"], row["detail"] = check_chain(v)
+        elif v["kind"] == "merkle_root":
+            row["ok"], row["detail"] = check_merkle_root(v)
+        elif v["kind"] == "merkle_inclusion":
+            row["ok"], row["detail"] = check_merkle_inclusion(v)
+        elif v["kind"] == "policy_digest":
+            got = canonical_json(v["artifact"])
+            got_sha = hashlib.sha256(got.encode("utf-8")).hexdigest()
+            if got != v["expected_canonical_utf8"]:
+                row["detail"] = "canonical bytes differ"
+            elif got_sha != v["expected_sha256_hex"]:
+                row["detail"] = "digest differs"
+            else:
+                row["ok"] = True
+                row["detail"] = "artefact digest reproduced"
         elif v["kind"] == "anchor_binding":
             row["ok"], row["detail"] = check_anchor(v, root)
         else:
@@ -162,7 +243,7 @@ def main(argv):
     else:
         for r in rows:
             print(f"{'PASS' if r['ok'] else 'FAIL'}  {r['id']:<26} {r['detail']}")
-        print(f"\n{sum(1 for r in rows if r['ok'])}/{len(rows)} vectors reproduced by a non-uibc implementation")
+    print(f"\n{sum(1 for r in rows if r['ok'])}/{len(rows)} vectors reproduced by a non-uibc implementation")
     return 0 if ok else 1
 
 

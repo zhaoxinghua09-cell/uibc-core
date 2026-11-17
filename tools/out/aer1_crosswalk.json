@@ -1,0 +1,356 @@
+{
+  "meta": {
+    "what": "AER-1 vector classes mapped to uibc checks",
+    "why_class_level": "different receipt schema; running their files through our verifier would produce schema mismatches, not findings",
+    "corpus": {
+      "kit_version": "1.5.7",
+      "vector_count": 143,
+      "check_count": 146,
+      "evaluated_set_digest": "sha256:60bf73f325793e16843370cfa24903bb0d017525cb297e42bebc35857e2db0d2"
+    },
+    "mapping_is_authored": true,
+    "not_claimed": "vector-level execution. This is a class-level crosswalk: it says which classes we catch, not that we produced their verdicts."
+  },
+  "summary": {
+    "COVERED": {
+      "classes": 34,
+      "vectors": 66,
+      "checks": 69
+    },
+    "PARTIAL": {
+      "classes": 0,
+      "vectors": 0,
+      "checks": 0
+    },
+    "TO-ADD": {
+      "classes": 0,
+      "vectors": 0,
+      "checks": 0
+    },
+    "N_A": {
+      "classes": 8,
+      "vectors": 0,
+      "checks": 0
+    }
+  },
+  "unmapped": {
+    "vectors": 77,
+    "reason": "positive receipt vectors (valid/*): their schema's must-pass cases, no uibc counterpart"
+  },
+  "rows": [
+    {
+      "class": "invalid/duplicate-member-name",
+      "verdict": "COVERED",
+      "check": "S11 duplicate member names",
+      "vectors": null,
+      "checks": null
+    },
+    {
+      "class": "invalid/non-utf8-bytes",
+      "verdict": "COVERED",
+      "check": "S11 strict UTF-8 decode",
+      "vectors": null,
+      "checks": null
+    },
+    {
+      "class": "invalid/provenance-control-char",
+      "verdict": "COVERED",
+      "check": "S11 raw control characters",
+      "vectors": null,
+      "checks": null
+    },
+    {
+      "class": "invalid/hash-mismatch",
+      "verdict": "COVERED",
+      "check": "S4 per-file hash",
+      "vectors": null,
+      "checks": null
+    },
+    {
+      "class": "invalid/hash-bad-format",
+      "verdict": "COVERED",
+      "check": "S4 hash comparison fails on bad format",
+      "vectors": null,
+      "checks": null
+    },
+    {
+      "class": "invalid/input-hash-mismatch",
+      "verdict": "COVERED",
+      "check": "S4/S5 evidence root",
+      "vectors": null,
+      "checks": null
+    },
+    {
+      "class": "invalid/missing-output-hash",
+      "verdict": "COVERED",
+      "check": "S1/S4 required evidence entry",
+      "vectors": null,
+      "checks": null
+    },
+    {
+      "class": "invalid/version-downgrade",
+      "verdict": "COVERED",
+      "check": "S1 schema version is pinned",
+      "vectors": null,
+      "checks": null
+    },
+    {
+      "class": "invalid/tampered-provenance",
+      "verdict": "COVERED",
+      "check": "S2 identity consistency",
+      "vectors": null,
+      "checks": null
+    },
+    {
+      "class": "invalid/bad-provenance",
+      "verdict": "COVERED",
+      "check": "S2 identity consistency",
+      "vectors": null,
+      "checks": null
+    },
+    {
+      "class": "invalid/base64-pad-bit",
+      "verdict": "COVERED",
+      "check": "S12 strict base64 (pad bits must be zero) [recomputed: probe rejects]",
+      "vectors": null,
+      "checks": null,
+      "recomputed": true
+    },
+    {
+      "class": "invalid/base64-unpadded",
+      "verdict": "COVERED",
+      "check": "S12 strict base64 (padding required) [recomputed: probe rejects]",
+      "vectors": null,
+      "checks": null,
+      "recomputed": true
+    },
+    {
+      "class": "invalid/ax-base64-unpadded",
+      "verdict": "COVERED",
+      "check": "S12 strict base64 [recomputed: probe rejects]",
+      "vectors": null,
+      "checks": null,
+      "recomputed": true
+    },
+    {
+      "class": "invalid/bytes-not-base64",
+      "verdict": "COVERED",
+      "check": "S12 strict base64 [recomputed: probe rejects]",
+      "vectors": null,
+      "checks": null,
+      "recomputed": true
+    },
+    {
+      "class": "invalid/uppercase-id",
+      "verdict": "COVERED",
+      "check": "S12 canonical id casing [recomputed: probe rejects]",
+      "vectors": null,
+      "checks": null,
+      "recomputed": true
+    },
+    {
+      "class": "invalid/nil-uuid",
+      "verdict": "COVERED",
+      "check": "S12 non-nil identifier [recomputed: probe rejects]",
+      "vectors": null,
+      "checks": null,
+      "recomputed": true
+    },
+    {
+      "class": "invalid/id-trailing-newline",
+      "verdict": "COVERED",
+      "check": "S12 exact identifier bytes [recomputed: probe rejects]",
+      "vectors": null,
+      "checks": null,
+      "recomputed": true
+    },
+    {
+      "class": "invalid/provenance-trailing-newline",
+      "verdict": "COVERED",
+      "check": "S12 exact field bytes [recomputed: probe rejects]",
+      "vectors": null,
+      "checks": null,
+      "recomputed": true
+    },
+    {
+      "class": "invalid/timestamp-no-timezone",
+      "verdict": "COVERED",
+      "check": "S12 RFC 3339 requires an offset [recomputed: probe rejects]",
+      "vectors": null,
+      "checks": null,
+      "recomputed": true
+    },
+    {
+      "class": "invalid/lowercase-timestamp",
+      "verdict": "COVERED",
+      "check": "S12 canonical 'T'/'Z' casing [recomputed: probe rejects]",
+      "vectors": null,
+      "checks": null,
+      "recomputed": true
+    },
+    {
+      "class": "invalid/impossible-date",
+      "verdict": "COVERED",
+      "check": "S12 calendar validity [recomputed: probe rejects]",
+      "vectors": null,
+      "checks": null,
+      "recomputed": true
+    },
+    {
+      "class": "invalid/bad-created-at",
+      "verdict": "COVERED",
+      "check": "S12 calendar validity [recomputed: probe rejects]",
+      "vectors": null,
+      "checks": null,
+      "recomputed": true
+    },
+    {
+      "class": "invalid/leap-second-created-at",
+      "verdict": "COVERED",
+      "check": "S12 leap-second policy [recomputed: probe rejects]",
+      "vectors": null,
+      "checks": null,
+      "recomputed": true
+    },
+    {
+      "class": "invalid/feb29-1900",
+      "verdict": "COVERED",
+      "check": "S12 calendar validity (1900 not a leap year) [recomputed: probe rejects]",
+      "vectors": null,
+      "checks": null,
+      "recomputed": true
+    },
+    {
+      "class": "invalid/feb29-non-leap",
+      "verdict": "COVERED",
+      "check": "S12 calendar validity [recomputed: probe rejects]",
+      "vectors": null,
+      "checks": null,
+      "recomputed": true
+    },
+    {
+      "class": "invalid/ax-feb29-1900",
+      "verdict": "COVERED",
+      "check": "S12 calendar validity [recomputed: probe rejects]",
+      "vectors": null,
+      "checks": null,
+      "recomputed": true
+    },
+    {
+      "class": "invalid/ax-feb29-non-leap",
+      "verdict": "COVERED",
+      "check": "S12 calendar validity [recomputed: probe rejects]",
+      "vectors": null,
+      "checks": null,
+      "recomputed": true
+    },
+    {
+      "class": "invalid/bad-offset-range",
+      "verdict": "COVERED",
+      "check": "S12 offset range [recomputed: probe rejects]",
+      "vectors": null,
+      "checks": null,
+      "recomputed": true
+    },
+    {
+      "class": "invalid/ax-tool-empty-scope",
+      "verdict": "N_A",
+      "check": "receipt 'tool scope' has no uibc counterpart",
+      "vectors": null,
+      "checks": null
+    },
+    {
+      "class": "invalid/tool-not-object",
+      "verdict": "N_A",
+      "check": "receipt 'tool' object",
+      "vectors": null,
+      "checks": null
+    },
+    {
+      "class": "invalid/tool-empty-name",
+      "verdict": "N_A",
+      "check": "receipt 'tool' object",
+      "vectors": null,
+      "checks": null
+    },
+    {
+      "class": "invalid/payload-is-array",
+      "verdict": "N_A",
+      "check": "receipt payload shape",
+      "vectors": null,
+      "checks": null
+    },
+    {
+      "class": "invalid/payload-omits-issuer-claims",
+      "verdict": "N_A",
+      "check": "receipt payload shape",
+      "vectors": null,
+      "checks": null
+    },
+    {
+      "class": "invalid/bad-id",
+      "verdict": "N_A",
+      "check": "receipt id grammar",
+      "vectors": null,
+      "checks": null
+    },
+    {
+      "class": "invalid/bad-verification-status",
+      "verdict": "N_A",
+      "check": "receipt status field",
+      "vectors": null,
+      "checks": null
+    },
+    {
+      "class": "invalid/input-hash-key-order-20",
+      "verdict": "N_A",
+      "check": "receipt canonicalization detail",
+      "vectors": null,
+      "checks": null
+    },
+    {
+      "class": "base/chain-vectors.json",
+      "verdict": "COVERED",
+      "check": "S3 lifecycle chain + L8-L12",
+      "vectors": 7,
+      "checks": 7
+    },
+    {
+      "class": "base/chain-vectors-v07.json",
+      "verdict": "COVERED",
+      "check": "S3 lifecycle chain + L8-L12",
+      "vectors": 28,
+      "checks": 28
+    },
+    {
+      "class": "base/commitment-vectors.json",
+      "verdict": "COVERED",
+      "check": "S8 checkpoint head",
+      "vectors": 8,
+      "checks": 8
+    },
+    {
+      "class": "base/id-binding-vectors.json",
+      "verdict": "COVERED",
+      "check": "S2 identity binding",
+      "vectors": 6,
+      "checks": 6
+    },
+    {
+      "class": "base/anchor-vectors.json",
+      "verdict": "COVERED",
+      "check": "trust_level anchored + S9 out-of-band head; no anchor-event resolution [recomputed: probe rejects]",
+      "vectors": 8,
+      "checks": 8,
+      "recomputed": true
+    },
+    {
+      "class": "base/merkle-vectors.json",
+      "verdict": "COVERED",
+      "check": "no Merkle tree or inclusion proof at all [recomputed: probe rejects]",
+      "vectors": 9,
+      "checks": 12,
+      "recomputed": true
+    }
+  ]
+}

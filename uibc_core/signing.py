@@ -27,16 +27,19 @@ Honest scope (archive SS17 discipline - read before relying on this):
    seal payloads only; deployments that need side-channel resistance at
    volume should swap in a native implementation behind this interface.
 4. Lifecycle event signatures (event.signature) remain unratified and are
-   NOT covered by the seal.
+   NOT covered by the seal. The lifecycle LOG as a whole IS covered as of
+   v1.1 when the sealer passes it in (``signed`` reads
+   "identity+manifest+lifecycle"); seals created before v1.1 cover
+   identity+manifest only and are reported as "legacy" by the verifier.
 """
 
 import base64
 import hashlib
 import hmac
-import json
 import os
 
 from . import ed25519 as _ed
+from .canonical import canonicalize
 
 ALGORITHM = "HMAC-SHA256"
 ALGORITHM_ED25519 = "Ed25519"
@@ -53,25 +56,36 @@ def key_id(key: bytes) -> str:
     return hashlib.sha256(key).hexdigest()
 
 
-def seal_payload(identity: dict, manifest: dict) -> bytes:
-    """Canonical bytes covering identity (who) + manifest (the seal).
+def seal_payload(identity: dict, manifest: dict, lifecycle: dict = None) -> bytes:
+    """RFC 8785 (JCS) canonical bytes covering identity (who) + manifest,
+    and - when ``lifecycle`` is given - the lifecycle event log too.
 
-    Uses the same provisional canonical JSON as evidence hashing, so the
-    RFC 8785 caveat from canonical.py applies here too.
+    Using JCS means any third party with a standard JCS tool - e.g. a W3C VC
+    eddsa-jcs-2022 verifier - can re-derive these exact bytes and verify the
+    Ed25519 seal with zero UIBC-specific code.
+
+    v1.1 (mutation-benchmark fix F1): the lifecycle log is folded into the
+    signed payload. Without it, an attacker can rewrite event timestamps,
+    actors, or append events and every check still passes - measured as 4 of
+    the 18 single-point mutations being accepted (see tools/mutation_benchmark.py).
+    ``lifecycle=None`` reproduces the legacy v0.3 payload exactly, so packages
+    sealed before this change keep verifying.
     """
-    return json.dumps(
-        {"identity": identity, "manifest": manifest},
-        sort_keys=True, separators=(",", ":"), ensure_ascii=False,
-    ).encode("utf-8")
+    doc = {"identity": identity, "manifest": manifest}
+    if lifecycle is not None:
+        doc["lifecycle"] = lifecycle
+    return canonicalize(doc)
 
 
-def seal_sign(key: bytes, identity: dict, manifest: dict) -> str:
+def seal_sign(key: bytes, identity: dict, manifest: dict,
+              lifecycle: dict = None) -> str:
     """Return base64 HMAC-SHA256 signature over the seal payload."""
-    mac = hmac.new(key, seal_payload(identity, manifest), hashlib.sha256)
+    mac = hmac.new(key, seal_payload(identity, manifest, lifecycle), hashlib.sha256)
     return base64.b64encode(mac.digest()).decode("ascii")
 
 
-def seal_verify(key: bytes, identity: dict, manifest: dict, sig_b64: str) -> bool:
+def seal_verify(key: bytes, identity: dict, manifest: dict, sig_b64: str,
+                lifecycle: dict = None) -> bool:
     """Constant-time verify. Returns False on any malformed input."""
     if not isinstance(sig_b64, str):
         return False
@@ -79,7 +93,8 @@ def seal_verify(key: bytes, identity: dict, manifest: dict, sig_b64: str) -> boo
         sig = base64.b64decode(sig_b64.encode("ascii"), validate=True)
     except Exception:
         return False
-    mac = hmac.new(key, seal_payload(identity, manifest), hashlib.sha256).digest()
+    mac = hmac.new(key, seal_payload(identity, manifest, lifecycle),
+                   hashlib.sha256).digest()
     return hmac.compare_digest(mac, sig)
 
 
@@ -105,16 +120,17 @@ def ed_key_id(public_key: bytes) -> str:
     return hashlib.sha256(public_key).hexdigest()
 
 
-def ed_seal_sign(seed: bytes, identity: dict, manifest: dict):
+def ed_seal_sign(seed: bytes, identity: dict, manifest: dict,
+                 lifecycle: dict = None):
     """Return (signature_b64, public_key_b64) over the seal payload."""
     pub = _ed.publickey(seed)
-    sig = _ed.sign(seed, seal_payload(identity, manifest))
+    sig = _ed.sign(seed, seal_payload(identity, manifest, lifecycle))
     return base64.b64encode(sig).decode("ascii"), \
         base64.b64encode(pub).decode("ascii")
 
 
 def ed_seal_verify(public_key: bytes, identity: dict, manifest: dict,
-                   sig_b64: str) -> bool:
+                   sig_b64: str, lifecycle: dict = None) -> bool:
     """Verify an Ed25519 seal signature. Returns False on malformed input."""
     if not isinstance(sig_b64, str) or not isinstance(public_key, (bytes, bytearray)):
         return False
@@ -122,7 +138,28 @@ def ed_seal_verify(public_key: bytes, identity: dict, manifest: dict,
         sig = base64.b64decode(sig_b64.encode("ascii"), validate=True)
     except Exception:
         return False
-    return _ed.verify(bytes(public_key), seal_payload(identity, manifest), sig)
+    return _ed.verify(bytes(public_key), seal_payload(identity, manifest, lifecycle), sig)
+
+
+def ed_seal_verify_scoped(public_key: bytes, identity: dict, manifest: dict,
+                          lifecycle: dict, sig_b64: str):
+    """Verify an Ed25519 seal and report WHAT it covers.
+
+    Returns one of:
+      "lifecycle-bound" - signature covers identity+manifest+lifecycle (v1.1)
+      "legacy"          - signature covers identity+manifest only (v0.3)
+      None              - signature is invalid for both payload shapes
+
+    The distinction matters: a legacy seal cannot detect lifecycle tampering,
+    so the verifier must rely on semantic checks alone for those packages and
+    must say so in the report.
+    """
+    if lifecycle is not None and ed_seal_verify(public_key, identity, manifest,
+                                                sig_b64, lifecycle):
+        return "lifecycle-bound"
+    if ed_seal_verify(public_key, identity, manifest, sig_b64):
+        return "legacy"
+    return None
 
 
 def b64decode_strict(text):

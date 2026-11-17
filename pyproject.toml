@@ -25,6 +25,11 @@ uibc = "uibc_core.cli:main"
 uibc-mcp = "uibc_core.mcp_server:main"
 uibc-core = "uibc_core.mcp_server:main"
 
+[project.optional-dependencies]
+# The verification path uses these two; the core needs neither. CI installs this extra
+# so a green run means the real path was exercised, not a path with the hard parts skipped.
+verify = ["cryptography>=41", "asn1crypto>=1.5"]
+
 [build-system]
 requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"

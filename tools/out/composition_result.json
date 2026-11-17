@@ -1,0 +1,83 @@
+{
+  "meta": {
+    "what": "one case, many origins, one deterministic verdict",
+    "checks": "K1 self-digest, K2 subject, K3 chain continuity, K4 cross-origin ordering, K5 reference closure, K6 duplicate identity, K7 assembly actually composed, K8 timestamps present",
+    "boundary": "structural self-consistency only; no behaviour, truthfulness or completeness claim"
+  },
+  "scenarios": [
+    {
+      "scenario": "A_clean_three_origins",
+      "records": 4,
+      "verdict": "PASS",
+      "codes": [],
+      "detail": []
+    },
+    {
+      "scenario": "B_payload_edited_digest_untouched",
+      "records": 4,
+      "verdict": "FAIL",
+      "codes": [
+        "K1"
+      ],
+      "detail": [
+        "record 1 digest does not match its payload (edited in place)"
+      ]
+    },
+    {
+      "scenario": "C_sequence_gap",
+      "records": 4,
+      "verdict": "FAIL",
+      "codes": [
+        "K3"
+      ],
+      "detail": [
+        "origin gate-A has a sequence gap: [1, 5]"
+      ]
+    },
+    {
+      "scenario": "D_dangling_cross_origin_ref",
+      "records": 4,
+      "verdict": "FAIL",
+      "codes": [
+        "K5"
+      ],
+      "detail": [
+        "record from reviewer-B refers to a record not present in the case"
+      ]
+    },
+    {
+      "scenario": "E_stacked_not_composed",
+      "records": 3,
+      "verdict": "INCONCLUSIVE",
+      "codes": [
+        "K7"
+      ],
+      "detail": [
+        "origin gate-A contributes no linked record: the set is stacked, not composed",
+        "origin other-C contributes no linked record: the set is stacked, not composed"
+      ]
+    },
+    {
+      "scenario": "F_ordering_contradiction",
+      "records": 4,
+      "verdict": "FAIL",
+      "codes": [
+        "K4"
+      ],
+      "detail": [
+        "record from scitt-log is dated before the record it relies on (2026-11-17T06:00:30Z < 2026-11-17T06:45:00Z)"
+      ]
+    },
+    {
+      "scenario": "G_single_origin",
+      "records": 1,
+      "verdict": "INCONCLUSIVE",
+      "codes": [
+        "K7"
+      ],
+      "detail": [
+        "only 1 origin(s): a single-origin record set is not a composition and its self-consistency proves nothing extra"
+      ]
+    }
+  ]
+}

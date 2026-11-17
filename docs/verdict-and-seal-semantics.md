@@ -109,7 +109,7 @@ interface.
 
 ## 3. What the evidence root binds — and what it does not
 
-`evidence_root = SHA-256(canonical(sorted(content_hashes)))`. It binds
+`evidence_root = SHA-256(RFC8785-JCS(sorted(content_hashes)))`. (RFC 8785 JSON Canonicalization Scheme; `canonical` is the JCS serializer, ratified in v0.3.1.) It binds
 the **set** of evidence content hashes. It does **not** bind:
 
 - **Order.** Reordering entries in `evidence/index.json` leaves the root

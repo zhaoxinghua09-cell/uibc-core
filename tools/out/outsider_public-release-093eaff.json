@@ -1,0 +1,105 @@
+{
+  "label": "public-release-093eaff",
+  "repo": "D:\\Workbuddy\\_pubtest_b6",
+  "generated_at_utc": "2026-11-17T06:59:14Z",
+  "interpreter": "C:\\Users\\SZYL\\AppData\\Local\\Doubao\\User Data\\sandbox_runtime\\bases\\fa694f517e5995233c80a9a8db5212c2\\python\\python.exe",
+  "steps": [],
+  "runs": [
+    {
+      "name": "unittest",
+      "cmd": "C:\\Users\\SZYL\\AppData\\Local\\Doubao\\User Data\\sandbox_runtime\\bases\\fa694f517e5995233c80a9a8db5212c2\\python\\python.exe -m unittest discover -s tests -p test_*.py",
+      "rc": 0,
+      "tail": [
+        "",
+        "OK (skipped=1)",
+        "<sys>:0: ResourceWarning: unclosed <socket.socket fd=352, family=2, type=1, proto=0, laddr=('127.0.0.1', 7394)>"
+      ],
+      "secs": 11.8
+    },
+    {
+      "name": "version",
+      "cmd": "C:\\Users\\SZYL\\AppData\\Local\\Doubao\\User Data\\sandbox_runtime\\bases\\fa694f517e5995233c80a9a8db5212c2\\python\\python.exe -c import uibc_core as u; print(u.SPEC_VERSION)",
+      "rc": 0,
+      "tail": [
+        "uibc-core/0.3.0-proposal"
+      ],
+      "secs": 0.0
+    },
+    {
+      "name": "cose_sign1_interop.py",
+      "cmd": "C:\\Users\\SZYL\\AppData\\Local\\Doubao\\User Data\\sandbox_runtime\\bases\\fa694f517e5995233c80a9a8db5212c2\\python\\python.exe tools\\cose_sign1_interop.py",
+      "rc": 0,
+      "tail": [
+        "RESULT_JSON=D:\\Workbuddy\\_pubtest_b6\\tools\\out\\cose_sign1_result.json",
+        "",
+        "=== 9/9 PASS ==="
+      ],
+      "secs": 0.4
+    },
+    {
+      "name": "guardrail_shim.py",
+      "cmd": "C:\\Users\\SZYL\\AppData\\Local\\Doubao\\User Data\\sandbox_runtime\\bases\\fa694f517e5995233c80a9a8db5212c2\\python\\python.exe tools\\guardrail_shim.py",
+      "rc": 0,
+      "tail": [
+        "5/5 符合策略预期",
+        "phantom 账本：PASS｜5 条（其中被拒 4 条）｜head ca6ce710393b64bf...",
+        "RESULT_JSON=D:\\Workbuddy\\_pubtest_b6\\tools\\out\\guardrail_result.json"
+      ],
+      "secs": 0.3
+    },
+    {
+      "name": "mutation_benchmark.py",
+      "cmd": "C:\\Users\\SZYL\\AppData\\Local\\Doubao\\User Data\\sandbox_runtime\\bases\\fa694f517e5995233c80a9a8db5212c2\\python\\python.exe tools\\mutation_benchmark.py",
+      "rc": 0,
+      "tail": [
+        "",
+        "假接受率 open=9.5%  pinned=4.8%",
+        "RESULT_JSON=D:\\Workbuddy\\_pubtest_b6\\tools\\out\\mutation_benchmark.json"
+      ],
+      "secs": 1.4
+    },
+    {
+      "name": "redteam_suite.py",
+      "cmd": "C:\\Users\\SZYL\\AppData\\Local\\Doubao\\User Data\\sandbox_runtime\\bases\\fa694f517e5995233c80a9a8db5212c2\\python\\python.exe tools\\redteam_suite.py",
+      "rc": 0,
+      "tail": [
+        "RT10  攻击者自洽重签（换钥）                                -> PASS            trust=unanchored",
+        "RT11  索引 type: ACTION→OUTPUT（M19 变体）             -> FAIL           S7,S8 trust=unanchored",
+        "RESULT_JSON=D:\\Workbuddy\\_pubtest_b6\\tools\\out\\redteam_result.json"
+      ],
+      "secs": 1.2
+    },
+    {
+      "name": "uibc_to_epaec.py",
+      "cmd": "C:\\Users\\SZYL\\AppData\\Local\\Doubao\\User Data\\sandbox_runtime\\bases\\fa694f517e5995233c80a9a8db5212c2\\python\\python.exe tools\\uibc_to_epaec.py",
+      "rc": 0,
+      "tail": [
+        "",
+        "all expectations met: True",
+        "RESULT_JSON=D:\\Workbuddy\\_pubtest_b6\\tools\\out\\epaec_result.json"
+      ],
+      "secs": 0.2
+    }
+  ],
+  "tools_present": [
+    "aer1_crosswalk.py",
+    "check_citations.py",
+    "compose_demo.py",
+    "cose_sign1_interop.py",
+    "embed_verifier.py",
+    "eqms_contract.py",
+    "eqms_sample.py",
+    "external_node_check.py",
+    "gen-sbom.py",
+    "guardrail_shim.py",
+    "latency_probe.py",
+    "lgd_eval.py",
+    "mcp_gate_proxy.py",
+    "muse_review.py",
+    "mutation_benchmark.py",
+    "outsider_run.py",
+    "pccp_case.py",
+    "redteam_suite.py",
+    "uibc_to_epaec.py"
+  ]
+}

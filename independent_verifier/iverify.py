@@ -21,6 +21,7 @@ import base64
 import hashlib
 import hmac
 import json
+import math
 import os
 
 REQUIRED = ["manifest.json", "identity.json", "lifecycle.json", "evidence/index.json"]
@@ -33,10 +34,67 @@ KNOWN_EVIDENCE_TYPES = {
 }
 
 
+def _jcs_number_str(x):
+    """ECMAScript Number::toString (RFC 8785 number rule), restated."""
+    if isinstance(x, bool):
+        raise TypeError("bool is not a JSON number")
+    if isinstance(x, int):
+        if not (-(2 ** 53) + 1 <= x <= 2 ** 53 - 1):
+            raise ValueError("JCS: integer %r outside safe double range" % (x,))
+        return str(x)
+    if isinstance(x, float):
+        if math.isnan(x) or math.isinf(x):
+            raise ValueError("JCS: NaN/Infinity are not valid JSON numbers")
+        if x == 0.0:
+            return "0"
+        s = json.dumps(x)
+        if "e" in s or "E" in s:
+            # Python uses exponent for 1e20..; ECMAScript keeps the fixed form
+            # for whole numbers with <= 21 integer digits. Normalise that edge.
+            if x.is_integer():
+                iv = int(x)
+                if 1 <= len(str(iv)) <= 21:
+                    return str(iv)
+            return s
+        if s.endswith(".0"):
+            return s[:-2]
+        return s
+    raise TypeError("JCS: unsupported number type %r" % (type(x),))
+
+
+def _jcs_scalar(v):
+    if v is None:
+        return "null"
+    if v is True:
+        return "true"
+    if v is False:
+        return "false"
+    if isinstance(v, bool):
+        return "true" if v else "false"
+    if isinstance(v, (int, float)):
+        return _jcs_number_str(v)
+    if isinstance(v, str):
+        # json.dumps(ensure_ascii=False) is a faithful JCS string serializer.
+        return json.dumps(v, ensure_ascii=False)
+    raise TypeError("JCS: unsupported scalar type %r" % (type(v),))
+
+
+def _jcs_value(v) -> str:
+    """Recursive JCS serializer. Structured independently of uibc_core so that
+    agreement is a determinism signal, not code reuse."""
+    if isinstance(v, dict):
+        parts = [json.dumps(k, ensure_ascii=False) + ":" + _jcs_value(v[k])
+                 for k in sorted(v.keys(), key=lambda s: s.encode("utf-16-be"))]
+        return "{" + ",".join(parts) + "}"
+    if isinstance(v, list):
+        return "[" + ",".join(_jcs_value(e) for e in v) + "]"
+    return _jcs_scalar(v)
+
+
 def canon_bytes(obj) -> bytes:
-    """Canonical serialization (provisional): sorted keys, tight separators."""
-    return json.dumps(obj, sort_keys=True, separators=(",", ":"),
-                      ensure_ascii=False).encode("utf-8")
+    """RFC 8785 (JCS) canonical serialization - written from the SPEC, not from
+    uibc_core.canonical. The two must agree only because JCS is deterministic."""
+    return _jcs_value(obj).encode("utf-8")
 
 
 def sha256_file(path) -> str:
@@ -161,6 +219,20 @@ def check_seal(key: bytes, package_dir: str) -> str:
         identity = json.load(f)
     with open(os.path.join(package_dir, "manifest.json"), encoding="utf-8") as f:
         manifest = json.load(f)
+    # v1.1: the seal may cover the lifecycle log as well. The coverage is
+    # declared in the seal itself ("signed"), so a verifier never has to guess.
+    lifecycle = {}
+    lc_path = os.path.join(package_dir, "lifecycle.json")
+    if os.path.isfile(lc_path):
+        with open(lc_path, encoding="utf-8") as f:
+            lifecycle = json.load(f)
+
+    def _payload():
+        doc = {"identity": identity, "manifest": manifest}
+        if "lifecycle" in str(seal.get("signed", "")):
+            doc["lifecycle"] = lifecycle
+        return canon_bytes(doc)
+
     if seal.get("algorithm") == "Ed25519":
         if key is not None:
             return "FAIL"  # an HMAC owner key cannot check a public seal
@@ -171,7 +243,7 @@ def check_seal(key: bytes, package_dir: str) -> str:
             return "FAIL"
         if len(pub) != 32 or seal.get("key_id") != hashlib.sha256(pub).hexdigest():
             return "FAIL"
-        payload = canon_bytes({"identity": identity, "manifest": manifest})
+        payload = _payload()
         return "PASS" if _ed25519_verify(pub, payload, sig) else "FAIL"
     if key is None:
         return "INCONCLUSIVE"
@@ -183,9 +255,62 @@ def check_seal(key: bytes, package_dir: str) -> str:
         sig = base64.b64decode(seal.get("signature", ""), validate=True)
     except Exception:
         return "FAIL"
-    payload = canon_bytes({"identity": identity, "manifest": manifest})
+    payload = _payload()
     expected = hmac.new(key, payload, hashlib.sha256).digest()
     return "PASS" if hmac.compare_digest(expected, sig) else "FAIL"
+
+
+def _hex(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
+
+
+def index_metadata_digest(entries) -> str:
+    """Metadata-only digest of the evidence index (mirrors check S7)."""
+    meta = [{"path": str(e.get("path", "")), "type": e.get("type"),
+             "note": e.get("note"), "action_digest": e.get("action_digest")}
+            for e in entries]
+    meta.sort(key=lambda m: m["path"])
+    return "sha256:" + _hex(canon_bytes(meta))
+
+
+def lifecycle_head(events) -> str:
+    n = len(events)
+    last = events[-1] if n else None
+    return "sha256:" + _hex(canon_bytes({
+        "count": n,
+        "last_sequence_number": (last or {}).get("sequence_number"),
+        "last_event_digest": (_hex(canon_bytes(last)) if last is not None else None),
+    }))
+
+
+def checkpoint_head(lh: str, root: str, idx: str, count: int) -> str:
+    return "sha256:" + _hex(canon_bytes({
+        "lifecycle_head": lh, "evidence_root": root,
+        "evidence_index_digest": idx, "evidence_count": count}))
+
+
+def undeclared_root_files(package_dir: str, entries) -> list:
+    """Files in the package ROOT that the package never declares (mirrors S1).
+
+    Auxiliary files under a sub-directory (runtime snapshots) are not flagged:
+    the root is what a reader sees, and only the root can carry a contradicting
+    notes.md / README.md.
+    """
+    declared = set(REQUIRED) | {"signatures/seal.json"}
+    for e in entries:
+        declared.add("evidence/" + str(e.get("path", "")).replace("\\", "/"))
+    junk = {"thumbs.db", ".ds_store", "desktop.ini"}
+    extra = []
+    for name in sorted(os.listdir(package_dir)):
+        if name in ("evidence", "signatures"):
+            continue
+        if os.path.isdir(os.path.join(package_dir, name)):
+            continue
+        if name.lower() in junk:
+            continue
+        if name.replace("\\", "/") not in declared:
+            extra.append(name)
+    return extra
 
 
 def independent_verify(package_dir: str, key: bytes = None) -> dict:
@@ -230,6 +355,28 @@ def independent_verify(package_dir: str, key: bytes = None) -> dict:
         outcomes["V5"] = "INCONCLUSIVE"
 
     outcomes["V6"] = check_seal(key, package_dir)
+
+    # v1.1 parity: three checks the corpus (benchmark/adapter.py) showed this
+    # implementation was missing while the reference already had them.
+    extra_root = undeclared_root_files(package_dir, index)
+    outcomes["V7"] = "FAIL" if extra_root else "PASS"
+
+    sealed_idx = manifest.get("evidence_index_digest")
+    if sealed_idx:
+        outcomes["V8"] = ("PASS" if index_metadata_digest(index) == sealed_idx
+                          else "FAIL")
+    else:
+        outcomes["V8"] = "INCONCLUSIVE"
+
+    sealed_ckpt = manifest.get("checkpoint_head")
+    if sealed_ckpt:
+        recomputed = checkpoint_head(lifecycle_head(events),
+                                     manifest.get("evidence_root") or
+                                     root_from_hashes(hashes),
+                                     index_metadata_digest(index), len(index))
+        outcomes["V9"] = "PASS" if recomputed == sealed_ckpt else "FAIL"
+    else:
+        outcomes["V9"] = "INCONCLUSIVE"
 
     # overall (seal v0.3 three-valued rule, same as the reference):
     # FAIL anywhere -> FAIL; unresolved INCONCLUSIVE anywhere -> INCONCLUSIVE.

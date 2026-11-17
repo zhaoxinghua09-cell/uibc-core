@@ -29,7 +29,7 @@ v0.1 采用临时方案：sorted-keys / compact / UTF-8 JSON。
 ## 4. Evidence Root（v0.1 临时算法）
 
 ```
-evidence_root = SHA-256( canonical_json( sorted( [content_hash_1...content_hash_n] ) ) )
+evidence_root = SHA-256( RFC8785-JCS( sorted( [content_hash_1...content_hash_n] ) ) )  # canonical_json -> RFC 8785 JCS (v0.3.1)
 ```
 
 ## 5. 生命周期状态机（§11）

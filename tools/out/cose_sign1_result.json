@@ -1,0 +1,67 @@
+{
+  "meta": {
+    "generated_at_utc": "2026-11-17T05:59:59Z",
+    "uibc_core": "D:\\Workbuddy\\uibc-core-local",
+    "probe": "scitt-cose-sign1"
+  },
+  "tests": [
+    {
+      "name": "S0_UIBC_SEAL",
+      "pass": true,
+      "detail": "uibc S6 seal 先自验（这是要被包进 COSE 的东西）"
+    },
+    {
+      "name": "C1_COSE_SIGN",
+      "pass": true,
+      "detail": "COSE_Sign1(alg=-8 EdDSA) 封装完成 envelope=350B sign=38.59ms",
+      "envelope_len": 350,
+      "sign_ms": 38.593,
+      "alg": -8
+    },
+    {
+      "name": "C2_DECODE",
+      "pass": true,
+      "detail": "解包成功（tag=18；已绕过 list/tuple 与 frozendict 差异）"
+    },
+    {
+      "name": "C3_THIRD_PARTY_VERIFY",
+      "pass": true,
+      "detail": "第三方仅持公钥验签 = True，verify=0.167ms",
+      "verify_ms": 0.167
+    },
+    {
+      "name": "C4_PAYLOAD_ROUNDTRIP",
+      "pass": true,
+      "detail": "COSE 载荷与 uibc 规范字节逐字节一致（221 B）",
+      "payload_len": 221,
+      "payload_sha256": "0979fe8aeabd6d04f7ed2c127458ebb803a2604b717669bffa160951dc2046f1"
+    },
+    {
+      "name": "C5_TAMPER_REJECTED",
+      "pass": true,
+      "detail": "篡改 1 字节后 verify_signature=False（必须非 True）"
+    },
+    {
+      "name": "C6_STATEMENT_ENVELOPE",
+      "pass": true,
+      "detail": "SCITT 风格 statement（iss/sub/iat/evidence_root）可封装+离线验签，340B",
+      "statement_len": 340
+    },
+    {
+      "name": "C8_ALG_19_MANUAL",
+      "pass": true,
+      "detail": "alg=-19（RFC 9864）信封手工构造 + 只持公钥验签通过，envelope=385B",
+      "envelope_len": 385,
+      "alg": -19
+    },
+    {
+      "name": "C9_LIB_GAP",
+      "pass": true,
+      "detail": "pycose 1.1.0 拒绝 alg=-19（CoseException）→ -19 仍走在库配套之前：对外只能说“我们的信封支持 -19”，不能宣称“生态已通用 -19”"
+    }
+  ],
+  "summary": {
+    "pass": 9,
+    "total": 9
+  }
+}

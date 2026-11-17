@@ -1,0 +1,121 @@
+{
+  "meta": {
+    "what_this_is": "two-implementation cross-check, NOT an organization-level independent evaluation",
+    "boundary": "both implementations live in the same repository and share an author; only the code paths are separate.利益隔离未成立。",
+    "packages": 8,
+    "agree": 8,
+    "agreement_rate": 1.0
+  },
+  "rows": [
+    {
+      "package": "clean.uibc",
+      "uibc_core": "INCONCLUSIVE",
+      "independent": "INCONCLUSIVE",
+      "agree": true,
+      "a_detail": [
+        "S6:INCONCLUSIVE"
+      ],
+      "b_detail": [
+        "V6:INCONCLUSIVE"
+      ]
+    },
+    {
+      "package": "deleted.uibc",
+      "uibc_core": "FAIL",
+      "independent": "FAIL",
+      "agree": true,
+      "a_detail": [
+        "S4:FAIL",
+        "S5:INCONCLUSIVE",
+        "S6:INCONCLUSIVE"
+      ],
+      "b_detail": [
+        "V4:FAIL",
+        "V5:INCONCLUSIVE",
+        "V6:INCONCLUSIVE"
+      ]
+    },
+    {
+      "package": "duplicated.uibc",
+      "uibc_core": "FAIL",
+      "independent": "FAIL",
+      "agree": true,
+      "a_detail": [
+        "S5:FAIL",
+        "S6:INCONCLUSIVE"
+      ],
+      "b_detail": [
+        "V5:FAIL",
+        "V6:INCONCLUSIVE"
+      ]
+    },
+    {
+      "package": "malicious-keyswap.uibc",
+      "uibc_core": "INCONCLUSIVE",
+      "independent": "INCONCLUSIVE",
+      "agree": true,
+      "a_detail": [
+        "S6:INCONCLUSIVE"
+      ],
+      "b_detail": [
+        "V6:INCONCLUSIVE"
+      ]
+    },
+    {
+      "package": "malicious.uibc",
+      "uibc_core": "INCONCLUSIVE",
+      "independent": "INCONCLUSIVE",
+      "agree": true,
+      "a_detail": [
+        "S6:INCONCLUSIVE"
+      ],
+      "b_detail": [
+        "V6:INCONCLUSIVE"
+      ]
+    },
+    {
+      "package": "migrated.uibc",
+      "uibc_core": "FAIL",
+      "independent": "FAIL",
+      "agree": true,
+      "a_detail": [
+        "S5:FAIL",
+        "S6:INCONCLUSIVE"
+      ],
+      "b_detail": [
+        "V5:FAIL",
+        "V6:INCONCLUSIVE"
+      ]
+    },
+    {
+      "package": "reordered.uibc",
+      "uibc_core": "FAIL",
+      "independent": "FAIL",
+      "agree": true,
+      "a_detail": [
+        "S3:FAIL",
+        "S6:INCONCLUSIVE"
+      ],
+      "b_detail": [
+        "V3:FAIL",
+        "V6:INCONCLUSIVE"
+      ]
+    },
+    {
+      "package": "tampered.uibc",
+      "uibc_core": "FAIL",
+      "independent": "FAIL",
+      "agree": true,
+      "a_detail": [
+        "S4:FAIL",
+        "S5:INCONCLUSIVE",
+        "S6:INCONCLUSIVE"
+      ],
+      "b_detail": [
+        "V4:FAIL",
+        "V5:INCONCLUSIVE",
+        "V6:INCONCLUSIVE"
+      ]
+    }
+  ]
+}

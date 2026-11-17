@@ -1,0 +1,196 @@
+{
+  "schema": "uibc-core/conformance-vectors@1",
+  "generated_by": "tools/conformance_vectors.py",
+  "what_this_is": "Inputs and expected bytes for the canonical-JSON and Ed25519 steps only. It is not a full-receipt corpus and it does not contain a second implementation.",
+  "how_to_use": "For each vector of kind canonical_json, canonicalize the embedded input with your own implementation and compare both the exact bytes and the SHA-256. For kind ed25519_signature, verify with any Ed25519 library and compare the verdict. A conforming implementation reproduces every expected value; it needs no code from us.",
+  "not_claimed": [
+    "that we publish a second implementation — we do not",
+    "that these vectors cover receipt structure, chains, anchoring or policy — they do not",
+    "that passing them makes an implementation interoperable with our receipts — it does not"
+  ],
+  "vectors": [
+    {
+      "id": "c01-empty-object",
+      "kind": "canonical_json",
+      "input": {},
+      "expected_canonical_utf8": "{}",
+      "expected_sha256_hex": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "check": "canonicalize(input) must equal expected_canonical_utf8 byte for byte, and sha256 of it must equal expected_sha256_hex"
+    },
+    {
+      "id": "c02-key-order",
+      "kind": "canonical_json",
+      "input": {
+        "b": 1,
+        "a": 2
+      },
+      "expected_canonical_utf8": "{\"a\":2,\"b\":1}",
+      "expected_sha256_hex": "d3626ac30a87e6f7a6428233b3c68299976865fa5508e4267c5415c76af7a772",
+      "check": "canonicalize(input) must equal expected_canonical_utf8 byte for byte, and sha256 of it must equal expected_sha256_hex"
+    },
+    {
+      "id": "c03-nested",
+      "kind": "canonical_json",
+      "input": {
+        "z": {
+          "y": [
+            3,
+            2,
+            1
+          ]
+        },
+        "a": "s"
+      },
+      "expected_canonical_utf8": "{\"a\":\"s\",\"z\":{\"y\":[3,2,1]}}",
+      "expected_sha256_hex": "0bfcb844a9fa9e9346a4a047b5b284bed87931a242763231d71869a6c5a4fbb5",
+      "check": "canonicalize(input) must equal expected_canonical_utf8 byte for byte, and sha256 of it must equal expected_sha256_hex"
+    },
+    {
+      "id": "c04-unicode",
+      "kind": "canonical_json",
+      "input": {
+        "name": "张 三",
+        "role": "агент"
+      },
+      "expected_canonical_utf8": "{\"name\":\"张 三\",\"role\":\"агент\"}",
+      "expected_sha256_hex": "7505c0da4192605d3840d33d259448e08dea8bcedeab269d29a0870eb48146ab",
+      "check": "canonicalize(input) must equal expected_canonical_utf8 byte for byte, and sha256 of it must equal expected_sha256_hex"
+    },
+    {
+      "id": "c05-numbers",
+      "kind": "canonical_json",
+      "input": {
+        "i": 7,
+        "f": 1.5,
+        "neg": -2,
+        "zero": 0
+      },
+      "expected_canonical_utf8": "{\"f\":1.5,\"i\":7,\"neg\":-2,\"zero\":0}",
+      "expected_sha256_hex": "0a724849362632941f6e7dd8e3ad3ad4a60aad3c86ed223d8c86435844566adb",
+      "check": "canonicalize(input) must equal expected_canonical_utf8 byte for byte, and sha256 of it must equal expected_sha256_hex"
+    },
+    {
+      "id": "c06-escapes",
+      "kind": "canonical_json",
+      "input": {
+        "q": "he said \"hi\"",
+        "nl": "a\nb",
+        "tab": "a\tb"
+      },
+      "expected_canonical_utf8": "{\"nl\":\"a\\nb\",\"q\":\"he said \\\"hi\\\"\",\"tab\":\"a\\tb\"}",
+      "expected_sha256_hex": "6eed5830b02e04471d1692c7461129ae74e9d5b65a151b5a813dfc97a776c37d",
+      "check": "canonicalize(input) must equal expected_canonical_utf8 byte for byte, and sha256 of it must equal expected_sha256_hex"
+    },
+    {
+      "id": "c07-bools-null",
+      "kind": "canonical_json",
+      "input": {
+        "t": true,
+        "f": false,
+        "n": null
+      },
+      "expected_canonical_utf8": "{\"f\":false,\"n\":null,\"t\":true}",
+      "expected_sha256_hex": "22e00dc2f7b01420f940fbdbfbdf34fa0667cc6500186495023ba37722cbd05e",
+      "check": "canonicalize(input) must equal expected_canonical_utf8 byte for byte, and sha256 of it must equal expected_sha256_hex"
+    },
+    {
+      "id": "c08-array-order",
+      "kind": "canonical_json",
+      "input": {
+        "xs": [
+          1,
+          "a",
+          null,
+          {
+            "k": "v"
+          }
+        ]
+      },
+      "expected_canonical_utf8": "{\"xs\":[1,\"a\",null,{\"k\":\"v\"}]}",
+      "expected_sha256_hex": "442a9f03e9cc454d7f171ffe15513f7394cd3bf4ed2221b67c82dd017860990b",
+      "check": "canonicalize(input) must equal expected_canonical_utf8 byte for byte, and sha256 of it must equal expected_sha256_hex"
+    },
+    {
+      "id": "c09-deep",
+      "kind": "canonical_json",
+      "input": {
+        "a": {
+          "b": {
+            "c": {
+              "d": [
+                {
+                  "e": 1
+                }
+              ]
+            }
+          }
+        }
+      },
+      "expected_canonical_utf8": "{\"a\":{\"b\":{\"c\":{\"d\":[{\"e\":1}]}}}}",
+      "expected_sha256_hex": "18daf33e34321c2d2974d31798276c8b0932db7e0e602b31c535d39253b626e2",
+      "check": "canonicalize(input) must equal expected_canonical_utf8 byte for byte, and sha256 of it must equal expected_sha256_hex"
+    },
+    {
+      "id": "c10-empty-containers",
+      "kind": "canonical_json",
+      "input": {
+        "o": {},
+        "a": []
+      },
+      "expected_canonical_utf8": "{\"a\":[],\"o\":{}}",
+      "expected_sha256_hex": "9bee7ebfc94b459dacb8cbc72cb2900e61f0aa42189df18329f84f92568f4f89",
+      "check": "canonicalize(input) must equal expected_canonical_utf8 byte for byte, and sha256 of it must equal expected_sha256_hex"
+    },
+    {
+      "id": "m01-ascii",
+      "kind": "ed25519_signature",
+      "seed_hex": "0000000000000000000000000000000000000000000000000000000000000001",
+      "public_key_hex": "4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29",
+      "message_utf8": "uibc conformance vector 01",
+      "message_hex": "7569626320636f6e666f726d616e636520766563746f72203031",
+      "signature_hex": "025748e24e6c37bd9c7faa7738dfe233522a0e34ca0d31ce01504721ec5e2a114c61a6756a2b2837692eb3b147edaf8b7a7408bb103a6db17d6d3dda88a08204",
+      "expected_verdict": "valid",
+      "check": "verify(public_key_hex, message, signature_hex) must return valid; no private key is published, only a throwaway seed for reproduction"
+    },
+    {
+      "id": "m02-utf8",
+      "kind": "ed25519_signature",
+      "seed_hex": "0000000000000000000000000000000000000000000000000000000000000001",
+      "public_key_hex": "4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29",
+      "message_utf8": "边界检查",
+      "message_hex": "e8beb9e7958ce6a380e69fa5",
+      "signature_hex": "e398dbb593eae010c0661cb752c464dcb15ad5058fa99ebb1a996eacd5c9c6441bc9bb1d6a98f51655a2f2748c9a2266cfe95e5f1e28e38a8f1939e95b79400e",
+      "expected_verdict": "valid",
+      "check": "verify(public_key_hex, message, signature_hex) must return valid; no private key is published, only a throwaway seed for reproduction"
+    },
+    {
+      "id": "m03-empty",
+      "kind": "ed25519_signature",
+      "seed_hex": "0000000000000000000000000000000000000000000000000000000000000001",
+      "public_key_hex": "4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29",
+      "message_utf8": "",
+      "message_hex": "",
+      "signature_hex": "7e1b9dc1e332c4238edcd07a68101474b640fdcb1b7b84fb711ac4bfbc85eb85a77480950d69398dcd19f61e1ea74d0f183cfbf34df8f6e7733ebfb9f944f106",
+      "expected_verdict": "valid",
+      "check": "verify(public_key_hex, message, signature_hex) must return valid; no private key is published, only a throwaway seed for reproduction"
+    },
+    {
+      "id": "r01-signature-other-message",
+      "kind": "ed25519_signature",
+      "public_key_hex": "4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29",
+      "message_hex": "7569626320636f6e666f726d616e636520766563746f7220303178",
+      "signature_hex": "025748e24e6c37bd9c7faa7738dfe233522a0e34ca0d31ce01504721ec5e2a114c61a6756a2b2837692eb3b147edaf8b7a7408bb103a6db17d6d3dda88a08204",
+      "expected_verdict": "invalid",
+      "check": "verify must reject: the signature was made over a different message"
+    },
+    {
+      "id": "r02-signature-tampered-byte",
+      "kind": "ed25519_signature",
+      "public_key_hex": "4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29",
+      "message_hex": "7569626320636f6e666f726d616e636520766563746f72203031",
+      "signature_hex": "025748e24e6c37bd9c7faa7738dfe233522a0e34ca0d31ce01504721ec5e2a114c61a6756a2b2837692eb3b147edaf8b7a7408bb103a6db17d6d3dda88a08205",
+      "expected_verdict": "invalid",
+      "check": "verify must reject: one signature byte flipped"
+    }
+  ]
+}

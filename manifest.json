@@ -1,7 +1,7 @@
 {
   "anchors": {
     "external": {
-      "commit": "67330de8e2d90e3c49bd267954bd7abe8f668b45",
+      "commit": "67b7ed5e52173c91ec8ea01d4b65f50dc5ba4fb1",
       "doi": null
     },
     "internal": {
@@ -155,9 +155,9 @@
       "sha256": "ff4fc40548d1a6fad6c9809f6aa1d29183ea2e1810fb9fd56d6570b9eb1adf0c"
     },
     {
-      "bytes": 22672,
+      "bytes": 23184,
       "path": "README.md",
-      "sha256": "5f42c77c37bd535decf921b7f1ac4376a0e6d83e2123a277ccaa1c16396acabf"
+      "sha256": "3befa50aa0997485fe54c86cd351cf837820a5546b28c8aabeb8a606332e8405"
     },
     {
       "bytes": 3189,
@@ -435,9 +435,9 @@
       "sha256": "f712794c6bd6625aca32aa4ac08d4ce8d5f4ac14d976a13b4288bf9c6de8dfde"
     },
     {
-      "bytes": 11336,
+      "bytes": 11959,
       "path": "docs/ECOSYSTEM-MAP.md",
-      "sha256": "707265af9296205a4d4324f2e4852f26727c4d9d4cf5d694a526ee2d07aa3b7a"
+      "sha256": "2a6c2cd31114d40b83a3a238e3b5e87824a02a3e0da35d661479822fce2ba660"
     },
     {
       "bytes": 2099,
@@ -455,9 +455,9 @@
       "sha256": "f10a8a7233dacccf6d6419213c54a4fb59c03468ee61d2a8b39fe02ac06886c8"
     },
     {
-      "bytes": 6530,
+      "bytes": 7270,
       "path": "docs/INTEROP-MATRIX.md",
-      "sha256": "98b8fad50b01c48a23ae3ee67247d0ce2de967ccac1acb13df03c77cdf1eb1e1"
+      "sha256": "e740566bb664cf241929c98e1a494c07093b7d20b6ab00581473fef4c3c924be"
     },
     {
       "bytes": 5136,
@@ -520,9 +520,9 @@
       "sha256": "5ef67cd5adf483cd0dfe2bfa3c835ff6f49509d2db19a44f3a932be56cad177d"
     },
     {
-      "bytes": 18078,
+      "bytes": 18509,
       "path": "docs/ecosystem-map.html",
-      "sha256": "c63e3a8c68b5a6afac45a122dd4b6ed0be4042dee5fdf00bd429f69196d9ce47"
+      "sha256": "7364065cf988bcc6a26ddef36f6bd12111ab971ff200306e1a5e4f8ddf361b31"
     },
     {
       "bytes": 11504,
@@ -1560,9 +1560,9 @@
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     {
-      "bytes": 15926,
+      "bytes": 15922,
       "path": "tools/out/citations_result.json",
-      "sha256": "0382f59258920cf24587d3ba5791d88c508906a29126908ae0f083dd0ee2ae80"
+      "sha256": "dfc355b8f73f1468e49731f635cea5e121715d0c48cb921633b1c5099df281fe"
     },
     {
       "bytes": 2252,
@@ -1860,14 +1860,14 @@
       "sha256": "73e3463174226c368ca1d807eee33ebdf1d44a86cf5e7c6e2cb5e32f1ad0b8cd"
     }
   ],
-  "generated_at": "2026-11-17T10:23:57Z",
+  "generated_at": "2026-11-17T10:32:10Z",
   "licence": "Apache-2.0",
   "project": "uibc-core",
   "reproduce": "python tools/attest.py  (then compare manifest digests)",
   "schema": "uibc.attestation/1",
   "source": {
     "branch": "release/v1.1-precheck",
-    "commit": "67330de8e2d90e3c49bd267954bd7abe8f668b45",
+    "commit": "67b7ed5e52173c91ec8ea01d4b65f50dc5ba4fb1",
     "repo": "https://github.com/zhaoxinghua09-cell/uibc-core"
   },
   "version": "0.3.0"

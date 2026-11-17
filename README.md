@@ -19,15 +19,22 @@ It prints `CONSISTENT` only when **both** hold: a second, independently written 
 
 > A uibc PASS means: within the observed evidence boundary, no violation was detected. It does not claim the agent was correct, safe, or wise; that the recorded inputs were true or complete; or that any real-world outcome followed.
 
-**Current state, including what we are short of:** 303 tests green · the verifier needs no third-party package (Ed25519 is implemented in-repo) · **external verification nodes: 0** — we publish the number we do not have; running the command above and sending back `external_node_result.json` makes it 1. Zero means the independence of this repository's verification rests entirely on two implementations written by the same author; it is not evidence of a third party having reproduced anything.
+**Current state, including what we are short of:** 305 tests green · the verifier needs no third-party package (Ed25519 is implemented in-repo) · **external verification nodes: 0** — we publish the number we do not have; running the command above and sending back `external_node_result.json` makes it 1. Zero means the independence of this repository's verification rests entirely on two implementations written by the same author; it is not evidence of a third party having reproduced anything.
 
 **Three more commands, if you want to see the failure paths rather than the green ones:**
 
 ```bash
-python -m unittest discover -s tests -p "test_*.py"        # 303 tests
+python -m unittest discover -s tests -p "test_*.py"        # 305 tests
 python tools/emit_receipts.py --package fixtures/clean.uibc --count 3   # 3 chained receipts
 python tools/redteam_suite.py                              # 15 attacks, expected vs actual
 ```
+
+**Check us without our code**: [`docs/conformance/vectors.json`](docs/conformance/vectors.json) —
+15 language-neutral vectors (canonical bytes + digests, Ed25519 valid/invalid). A checker
+that imports nothing from this project reproduces all 15, verifying signatures with the
+third-party `cryptography` library: `python tools/conformance_check.py`.
+What it does **not** prove: that a second implementation of the whole receipt exists —
+it does not (see [`docs/CONFORMANCE.md`](docs/CONFORMANCE.md)).
 
 **Verified vs not verified, in one place** (full detail in [`docs/EXTERNAL-ANCHOR.md`](docs/EXTERNAL-ANCHOR.md)):
 
@@ -77,7 +84,7 @@ other exists.
 > **Verifiable today** — every artifact is independently checkable: Sigstore Rekor transparency log
 > (logIndex 2883389783), concept DOI 10.5281/zenodo.22456647, SWHID
 > `swh:1:ori:819530c8be2adf6da901256ce9fd28063f8f1296` (ISO/IEC 18670).
-> Reproduce: `python -m unittest discover -s tests -p "test_*.py"` (303 tests) · `python independent_verifier/cross_check.py`.
+> Reproduce: `python -m unittest discover -s tests -p "test_*.py"` (305 tests) · `python independent_verifier/cross_check.py`.
 > **Honest boundary** — no third-party quality review to date; any operational use is self-reported
 > (see ENDORSEMENTS.md: 存证 ≠ 参与 ≠ 认可). Context: [FG-TIDA themes #27](https://github.com/FG-TIDA/themes/issues/27).
 

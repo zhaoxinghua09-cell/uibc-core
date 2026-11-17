@@ -63,7 +63,7 @@ did not run their vectors.
 3. **Vaara is ahead on**: policy enforcement at the call site and EU AI Act
    Article 12 framing. Behind on: cryptographic structure of the record.
 4. **We are ahead on**: a public repository an outsider can clone and run
-   (303 tests, 15 red-team cases, all re-run from a fresh anonymous clone), a
+   (305 tests, 15 red-team cases, all re-run from a fresh anonymous clone), a
    published crosswalk to an IETF draft with the failing cells written down, and
    a habit of publishing our own failed verification attempts (Rekor inclusion
    proof) with the third-party cross-check that also failed.
@@ -78,11 +78,20 @@ documented proof format, and until that exists this row stays red. Reading this 
 should not leave the impression that a failing proof is acceptable output.
 That is rarer than any of the technical cells above.
 
+**On the corpus dimension, as of 2026-11-17.** agent-receipts publishes a spec with 8
+vectors plus a Python reference implementation; we now publish 15 vectors
+(`docs/conformance/vectors.json`) **but no second implementation**. Two of the three
+steps — canonical bytes and Ed25519 — are checkable by anyone holding the file plus
+`cryptography` (`tools/conformance_check.py`, 15/15 from a checker that imports nothing
+from this project). Receipt structure, chains, anchoring and policy are **not** in the
+corpus. Closer, not parity; the difference is stated, not smoothed (`docs/CONFORMANCE.md`).
+
 ## What would move the needle next
 
 | action | needs | closes |
 |---|---|---|
 | run their real samples through an adapter | install Vaara / agent-receipts; NovaFabric sample from authors | three "not tested" cells |
-| publish a language-neutral conformance corpus (JSON vectors + digests) | us only | the one dimension where agent-receipts is ahead |
+| extend the corpus to receipt structure, chains and anchors | us only | the rest of the dimension where agent-receipts and Tracekit are ahead |
+| a verifier written by someone who is not us | a third party | the "second implementation" gap, which 15 vectors do not close |
 | MCP interception point (proxy that writes our receipts) | us only, larger build | Vaara's advantage |
 | replay protocol | us only, much larger | NovaFabric's advantage |

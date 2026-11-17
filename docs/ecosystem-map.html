@@ -134,7 +134,7 @@ code{background:#eef2f7;padding:1px 5px;border-radius:4px;font-size:12.5px}
   <td><span class="dot d-ours"></span>Ed25519 over DSSE PAE of JCS</td>
   <td><span class="dot d-part"></span>RFC 3161 已验证；OTS 仅 pending 日历</td>
   <td><span class="dot d-part"></span>Rekor 已写入；<b>包含证明未验过</b></td>
-  <td><span class="dot d-ours"></span>单一 Python 实现；匿名克隆 303 测试 + 红队 15 例</td>
+  <td><span class="dot d-ours"></span>单一 Python 实现；匿名克隆 305 测试 + 红队 15 例</td>
 </tr>
 </tbody>
 </table>
@@ -229,7 +229,7 @@ code{background:#eef2f7;padding:1px 5px;border-radius:4px;font-size:12.5px}
 </div>
 
 <h2>五、我方覆盖度：12 个检查符现在到哪</h2>
-<p class="lead">这张表是我们自己的体检，不是竞品数据。303 测试、红队 15 例、引用直达 43/45。</p>
+<p class="lead">这张表是我们自己的体检，不是竞品数据。305 测试、红队 15 例、引用直达 43/45。</p>
 <table>
 <thead><tr><th style="width:220px">维度</th><th>状态</th><th>证据在哪</th></tr></thead>
 <tbody>
@@ -240,11 +240,12 @@ code{background:#eef2f7;padding:1px 5px;border-radius:4px;font-size:12.5px}
 <tr><td>时间与偏斜</td><td><span class="chip c-ok">已测</span></td><td>S12，注入时钟，300s 上限，7 测试</td></tr>
 <tr><td>外部时间锚</td><td><span class="chip c-part">半</span></td><td>RFC 3161 已验证；OTS 仅 pending 日历</td></tr>
 <tr><td>透明日志包含证明</td><td><span class="chip c-no">未过</span></td><td>第三方实现同样失败，已公开</td></tr>
-<tr><td>跨实现验证</td><td><span class="chip c-no">未做</span></td><td>仅 Python 一种实现</td></tr>
+<tr><td>跨实现验证</td><td><span class="chip c-part">半</span></td><td>语料 15 条，非本实现的检查器 15/15 复现；但仍无第二份完整实现</td></tr>
+<tr><td>语言中立一致性语料</td><td><span class="chip c-part">半</span></td><td><code>docs/conformance/vectors.json</code>：只覆盖规范化与 Ed25519，未覆盖回执结构/链/锚</td></tr>
 <tr><td>调用点拦截</td><td><span class="chip c-no">未做</span></td><td>无 MCP 代理</td></tr>
 <tr><td>回放</td><td><span class="chip c-no">未做</span></td><td>无</td></tr>
 <tr><td>引用直达</td><td><span class="chip c-part">43/45</span></td><td>2 条未达：iso.org 403、eips 超时（两条经外部出口实测 200）</td></tr>
-<tr><td>外人实测</td><td><span class="chip c-ok">已测</span></td><td>匿名克隆 <code>06ff25c</code> → 303 测试 OK；<code>66aa129</code> 起改经外部出口逐字段核对</td></tr>
+<tr><td>外人实测</td><td><span class="chip c-ok">已测</span></td><td>匿名克隆 <code>06ff25c</code> → 305 测试 OK；<code>66aa129</code> 起改经外部出口逐字段核对</td></tr>
 </tbody>
 </table>
 
@@ -252,7 +253,7 @@ code{background:#eef2f7;padding:1px 5px;border-radius:4px;font-size:12.5px}
 <table>
 <thead><tr><th style="width:260px">动作</th><th>目标</th><th>成本</th></tr></thead>
 <tbody>
-<tr><td>语言中立一致性语料（JSON 向量 + 固定 digest）</td><td>追平 agent-receipts 的维度</td><td>约 1 天</td></tr>
+<tr><td>语料扩到回执结构/链/锚（已有 15 条，已覆盖规范化与签名）</td><td>补齐 agent-receipts 与 Tracekit 领先的那一维</td><td>约 2 天</td></tr>
 <tr><td>treeship 真跑（已实测：Windows 拒装 <code>EBADPLATFORM</code>）</td><td>需要 Linux/macOS 环境才能继续</td><td>约半天，换环境</td></tr>
 <tr><td>MCP 拦截点（代理写我方回执）</td><td>追平 Vaara 的调用现场</td><td>数天</td></tr>
 <tr><td>回放协议</td><td>追平 NovaFabric</td><td>数周，暂不建议</td></tr>

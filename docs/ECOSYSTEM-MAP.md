@@ -31,7 +31,7 @@ true or complete; or that any real-world outcome followed."
 | **fact0** — [fact0.io](https://fact0.io/) | **experimental**, MIT, self-hosted | hash-chained audit records | none | none | signed export files verified against a separately trusted key; ZIP itself not signed | replay; honest "capture gaps remain visible" is the same stance we take |
 | **Attested Logs** — [paper](https://pys8vc40ox3z7qxp.public.blob.vercel-storage.com/files/2277477cbbe69000-554a6703-fac0-4715-84a6-d6613c72cda3-Attested-Multi-Agent-Conversation-Logs.pdf) | research library, AutoGen + LangGraph integrations | Ed25519 per message, SHA-256 chain | none | none (Merkle checkpoints planned) | "20+ passing tests", offline self-contained verification | framework integration breadth |
 | **Vaara** — [PyPI](https://pypi.org/project/vaara/) | **2.17.0**, AGPL-3.0, installed and CLI inspected | hash chain, export signature | `trail verify-anchor` for external time anchor | `trail publish-head` to a public transparency log (opt-in) | offline verify of signed trail zip; `attest verify` per tool call | call-site policy depth; permissive licensing for bundling (AGPL) |
-| **us** — `uibc-core` | 0.3.0, Apache-2.0, public repo | Ed25519 over DSSE PAE of JCS payload | RFC 3161 verified + OTS pending calendar | Rekor entry written; inclusion **not verified** | **one Python implementation**, public anonymous clone + 303 tests + 15 red-team cases | second verifier; witnesses; replay; call-site interception |
+| **us** — `uibc-core` | 0.3.0, Apache-2.0, public repo | Ed25519 over DSSE PAE of JCS payload | RFC 3161 verified + OTS pending calendar | Rekor entry written; inclusion **not verified** | **one Python implementation**, public anonymous clone + 305 tests + 15 red-team cases | second verifier; witnesses; replay; call-site interception |
 
 ## Measured on this machine (Windows, Python 3.13, 2026-11-17)
 
@@ -101,6 +101,23 @@ installable. What it can mean, and what is achievable this quarter:
   reproduction command, which is rarer than any green feature;
 * **one dimension we must upgrade from "claimed" to "demonstrated"** - a second
   verifier or a language-neutral corpus, because Tracekit already did it.
+  Status 2026-11-17: the **corpus half** exists (`docs/conformance/vectors.json`, 15
+  vectors, reproduced 15/15 by a checker that imports nothing from this repository);
+  the **second-implementation half** does not, and no quantity of vectors produces it.
+
+## What was not tested, stated plainly
+
+Three packages were installed and exercised (NovaFabric, Vaara, AIAuditLog); see the
+measured section above for exactly what happened, including the two runs that did not
+complete. Not tested: Treeship and Tracekit (no install attempted this round), any peer's
+behaviour on Linux, and the reverse direction - **no peer has been asked to verify one of
+our packages**, so every "they verify ours" cell remains unknown, not passing.
+
+Also not done, and now stated as a gap rather than a plan: the conformance corpus covers
+only canonical bytes and Ed25519. Receipt structure, chain linkage, anchoring and policy
+have tests, not vectors, so an implementation written elsewhere cannot be measured against
+those steps yet. `docs/CONFORMANCE.md` says the same thing to a reader who arrives there
+first.
 
 ## Sources, direct
 
@@ -113,11 +130,3 @@ installable. What it can mean, and what is achievable this quarter:
 * Vaara: <https://pypi.org/project/vaara/> (2.17.0 measured; 0.63.0 page is stale)
 * Attested Logs paper: same PDF linked in the table above (the project has no arXiv
   identifier of its own; the HTML edition above is Tracekit's)
-
-## What was not tested, stated plainly
-
-Three packages were installed and exercised (NovaFabric, Vaara, AIAuditLog); see the
-measured section above for exactly what happened, including the two runs that did not
-complete. Not tested: Treeship and Tracekit (no install attempted this round), any peer's
-behaviour on Linux, and the reverse direction - **no peer has been asked to verify one of
-our packages**, so every "they verify ours" cell remains unknown, not passing.

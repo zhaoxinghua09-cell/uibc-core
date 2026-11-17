@@ -62,3 +62,32 @@ python tools/anchor_tsa.py --head-file tools/out/release_status.json --tsa freet
 python tools/anchor_tsa.py --verify tools/out/anchor_freetsa.tsr \
        --data tools/out/release_status.json --cabundle tools/out/anchor_freetsa_ca.pem
 ```
+
+## Package-level check (S16)
+
+`verify.py` now judges an external token as a check of its own, so a package can
+carry its own time witness instead of relying on this tool being run at release
+time. Opt in by shipping `evidence/external_anchor.json`:
+
+```json
+{
+  "scheme": "rfc3161",
+  "tsa": "Free TSA",
+  "tsr": "evidence/tsa/freetsa.tsr",
+  "cabundle": "evidence/tsa/ca.pem",
+  "digest_of": "manifest.json",
+  "tsr_sha256": "<sha256 of the .tsr bytes, optional but recommended>"
+}
+```
+
+| Situation | S16 |
+|---|---|
+| token dates `digest_of`, signature chains to the shipped CA | **PASS** |
+| token dates a different digest | **FAIL** |
+| token bytes differ from declared `tsr_sha256` | **FAIL** |
+| token or CA bundle missing | **FAIL** |
+| verifier has no `asn1crypto` (cannot judge) | **INCONCLUSIVE**, never PASS |
+| no `external_anchor.json` in the package | check not run |
+
+Verified from a public anonymous clone of `fb8b17b`: `248 tests OK` and
+`S16 = PASS` with the real freetsa token, offline.

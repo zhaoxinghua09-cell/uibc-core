@@ -2,7 +2,7 @@
   "meta": {
     "probe": "guardrail-shim",
     "uibc_core": "D:\\Workbuddy\\uibc-core-local",
-    "generated_at_utc": "2026-11-17T05:54:58Z"
+    "generated_at_utc": "2026-11-17T05:59:59Z"
   },
   "policy": {
     "name": "guardrail-v1",
@@ -106,6 +106,14 @@
         ]
       }
     },
-    "anchor_rule": "draft-maintainer-1f916-agent-record-01 S3.6"
+    "anchor_rule": "draft-maintainer-1f916-agent-record-01 S3.6",
+    "phantom_log": {
+      "result": "PASS",
+      "entries": 5,
+      "phantom_entries": 4,
+      "head": "7469a2b73c76aeeb6b7ba35ca6fd75e113a8facb8bb867e67b27d6904445da78",
+      "scope": "internal consistency of the local ledger only; unsigned, unwitnessed, no external anchor",
+      "problems": []
+    }
   }
 }

@@ -30,6 +30,8 @@ sys.path.insert(0, ROOT)
 
 from uibc_core import cli as ucli  # noqa: E402
 from uibc_core import ed25519  # noqa: E402
+from uibc_core.phantom import (PhantomLog, request_digest,  # noqa: E402
+                               verify_phantom_log)
 from uibc_core.verify import verify  # noqa: E402
 
 OUT = os.path.join(ROOT, "tools", "out")
@@ -102,6 +104,14 @@ def main():
     pub = ed25519.publickey(DEMO_SEED)
 
     cases = []
+    # Every decision lands in a hash-chained ledger, refusals included. A gate
+    # that DENY-s silently cannot be told apart from a gate that never saw the
+    # request (draft-noctem-cogitator-witness-protocol-00 "phantom entry").
+    log_path = os.path.join(OUT, "guardrail_phantom.jsonl")
+    if os.path.exists(log_path):
+        os.remove(log_path)
+    phantom = PhantomLog(log_path)
+    stamp = __import__("time").strftime("%Y-%m-%dT%H:%M:%SZ", __import__("time").gmtime())
 
     def run(name, expect, pkg, *, pinned):
         rep = verify(pkg, pubkey=pub if pinned else None)
@@ -111,6 +121,12 @@ def main():
         cases.append({"case": name, "expect": expect, **got, "ok": ok,
                       "why": why, "checks_failed": [c["id"] for c in rep["checks"]
                                                     if c["result"] != "PASS"]})
+        phantom.append(decision=action, reason=why, rule_id="GR-ALLOW-ANCHORED",
+                       request_digest=request_digest(
+                           {"case": name, "pkg": os.path.basename(pkg),
+                            "result": rep["result"], "trust": rep["trust_level"]}),
+                       executed=(action == "ALLOW"), at=stamp,
+                       subject=rep.get("subject"))
         print(("  [OK] " if ok else "  [XX] ") + f"{name}: {got['action']} "
               f"({got['result']}/{got['trust_level']}) — {why}")
 
@@ -127,9 +143,14 @@ def main():
     p4 = build_pkg(os.path.join(tmp, "4.uibc"), key_path, extra_event_gap=True)
     run("lifecycle sequence gap", "DENY", p4, pinned=True)
 
+    plog = verify_phantom_log(log_path)
     summary = {"total": len(cases), "ok": sum(1 for c in cases if c["ok"]),
                "policy": POLICY,
-               "anchor_rule": "draft-maintainer-1f916-agent-record-01 S3.6"}
+               "anchor_rule": "draft-maintainer-1f916-agent-record-01 S3.6",
+               "phantom_log": {"result": plog["result"], "entries": plog["entries"],
+                               "phantom_entries": plog.get("phantom_entries"),
+                               "head": plog["head"], "scope": plog.get("scope"),
+                               "problems": plog["problems"]}}
     doc = {"meta": {"probe": "guardrail-shim", "uibc_core": ROOT,
                     "generated_at_utc": __import__("time").strftime(
                         "%Y-%m-%dT%H:%M:%SZ", __import__("time").gmtime())},
@@ -137,6 +158,8 @@ def main():
     with open(a.json, "w", encoding="utf-8") as f:
         json.dump(doc, f, ensure_ascii=False, indent=2)
     print(f"\n{summary['ok']}/{summary['total']} 符合策略预期")
+    print(f"phantom 账本：{plog['result']}｜{plog['entries']} 条（其中被拒 "
+          f"{plog.get('phantom_entries')} 条）｜head {plog['head'][:16]}...")
     print("RESULT_JSON=" + a.json)
     shutil.rmtree(tmp, ignore_errors=True)
     return 0 if summary["ok"] == summary["total"] else 1

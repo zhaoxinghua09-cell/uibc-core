@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at_utc": "2026-11-17T05:54:57Z",
+    "generated_at_utc": "2026-11-17T05:59:59Z",
     "uibc_core": "D:\\Workbuddy\\uibc-core-local",
     "probe": "scitt-cose-sign1"
   },
@@ -13,9 +13,9 @@
     {
       "name": "C1_COSE_SIGN",
       "pass": true,
-      "detail": "COSE_Sign1(alg=-8 EdDSA) 封装完成 envelope=350B sign=67.44ms",
+      "detail": "COSE_Sign1(alg=-8 EdDSA) 封装完成 envelope=350B sign=38.59ms",
       "envelope_len": 350,
-      "sign_ms": 67.445,
+      "sign_ms": 38.593,
       "alg": -8
     },
     {
@@ -26,8 +26,8 @@
     {
       "name": "C3_THIRD_PARTY_VERIFY",
       "pass": true,
-      "detail": "第三方仅持公钥验签 = True，verify=0.384ms",
-      "verify_ms": 0.384
+      "detail": "第三方仅持公钥验签 = True，verify=0.167ms",
+      "verify_ms": 0.167
     },
     {
       "name": "C4_PAYLOAD_ROUNDTRIP",

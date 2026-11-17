@@ -153,6 +153,19 @@ needs the log's signed checkpoint. Until that is implemented, the tool reports
 "we submitted an entry" is not "the entry is provably in the tree".
 
 
+
+### Third-party cross-check of the inclusion proof (2026-11-17)
+
+| attempt | result |
+|---|---|
+| our own RFC 6962 walker, both sibling orders | root mismatch |
+| `pip install rekor_log_verifier` (independent PyPI implementation of Rekor log verification), called with the entry's own `logIndex` / `treeSize` / `rootHash` / `hashes` | `RootMismatchError`, and its own computed root (`4576ba40…2c5d`) differs from the published root |
+
+Two independent implementations, using the documented RFC 6962 conventions, both
+fail on the same proof. That is evidence about the *proof format* (20 siblings for
+a 3.8e9-leaf tree, leaf/step conventions not documented on the pages we found),
+not about one implementation's arithmetic. Independent inclusion verification
+therefore stays **blocked**, and no claim of it appears anywhere in the release.
 ### Checkpoint key: what was tried (2026-11-17, all negative)
 
 | attempt | result |

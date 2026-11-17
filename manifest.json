@@ -1,7 +1,7 @@
 {
   "anchors": {
     "external": {
-      "commit": "3ec71ba7bfb20dff8e6bf88f5443ae7758c24976",
+      "commit": "c452e6bf7e0090aec05ed1516c7835aae4701edc",
       "doi": null
     },
     "internal": {
@@ -12,7 +12,7 @@
   },
   "author": "Steven Zhao (Xinghua Zhao)",
   "disclaimer": "This attestation records provenance only. It is not a certification, not a regulatory clearance, not an audit opinion, and not a claim that the software is fit for any particular use. A uibc PASS means: within the observed evidence boundary, no violation was detected. It does not claim the agent was correct, safe, or wise; that the recorded inputs were true or complete; or that any real-world outcome followed.",
-  "file_count": 355,
+  "file_count": 363,
   "files": [
     {
       "bytes": 725,
@@ -155,9 +155,9 @@
       "sha256": "ff4fc40548d1a6fad6c9809f6aa1d29183ea2e1810fb9fd56d6570b9eb1adf0c"
     },
     {
-      "bytes": 19241,
+      "bytes": 20383,
       "path": "README.md",
-      "sha256": "45aad68cffb69b52395b978f6d6141940f1437aa690fc5587c1ffe9104992871"
+      "sha256": "f0cd1f1093d55933df35efa6ce13ec7e9bc9a834628a401cf7209fab36fa98fd"
     },
     {
       "bytes": 3189,
@@ -420,6 +420,11 @@
       "sha256": "f3e75124e082e7aa77d7ade71d54b9fd0fe63a9126d676b7c1dcd8784668db44"
     },
     {
+      "bytes": 2602,
+      "path": "docs/CITATION-REACHABILITY.md",
+      "sha256": "418d1bb611b4e9214935d37509999e24ce3dd8d3d0d8445ce0cb6616781836d3"
+    },
+    {
       "bytes": 6412,
       "path": "docs/COMPOSITION-VERIFIER.md",
       "sha256": "8abeb470fc1a58d80d6ccaf36b6c05637cb3db8ad3b6cbfa971b3a9db53ce697"
@@ -428,6 +433,11 @@
       "bytes": 7213,
       "path": "docs/CROSSWALK-ASQAV-COMPLIANCE.md",
       "sha256": "f712794c6bd6625aca32aa4ac08d4ce8d5f4ac14d976a13b4288bf9c6de8dfde"
+    },
+    {
+      "bytes": 9629,
+      "path": "docs/ECOSYSTEM-MAP.md",
+      "sha256": "dc654cc3fb35de8c4858d794dbb5ee7cf233efac020a2aa30241de5ebfada1b7"
     },
     {
       "bytes": 2099,
@@ -443,6 +453,11 @@
       "bytes": 3563,
       "path": "docs/EXTERNAL-NODE-KIT.md",
       "sha256": "f10a8a7233dacccf6d6419213c54a4fb59c03468ee61d2a8b39fe02ac06886c8"
+    },
+    {
+      "bytes": 5735,
+      "path": "docs/INTEROP-MATRIX.md",
+      "sha256": "e92d0a0bcec1343ae724ff1041b11fee43171d48634655cc10576a472a5f6220"
     },
     {
       "bytes": 5136,
@@ -500,9 +515,29 @@
       "sha256": "5ef67cd5adf483cd0dfe2bfa3c835ff6f49509d2db19a44f3a932be56cad177d"
     },
     {
+      "bytes": 15264,
+      "path": "docs/ecosystem-map.html",
+      "sha256": "bab807bcc8cc6a6f7282a3b70b338c4c76576cde92e61a6ec0b9c6758b577075"
+    },
+    {
       "bytes": 11504,
       "path": "docs/expert-review-2026-09-18.md",
       "sha256": "0bcfb3ee7937a3b764f4f5dd0d73f4434d1295720e8202c3902d601abe4b3245"
+    },
+    {
+      "bytes": 7934,
+      "path": "docs/external-review/20261117_23_ecosystem-map-claims-v1_siliconflow_receipt.md",
+      "sha256": "512592173be746f556fb18fd19ddf790ce086856396dfc64cee2eb0a4bbee648"
+    },
+    {
+      "bytes": 8105,
+      "path": "docs/external-review/20261117_24_ecosystem-map-claims-v2_siliconflow_receipt.md",
+      "sha256": "af5808e7ae80f40de81517bc1826c8368f5090502b9f07938a353a3f43019e66"
+    },
+    {
+      "bytes": 11099,
+      "path": "docs/external-review/20261117_25_ecosystem-map-claims-v3_siliconflow_receipt.md",
+      "sha256": "9af8d6dfac901aaca34639150e2a43f0f1a2d37700441b3827acf12cecfe2234"
     },
     {
       "bytes": 6447,
@@ -1315,6 +1350,11 @@
       "sha256": "20242cce84cb756e3953b7b74e1311f875aaa4cd0c22252dfd5e765147ed10be"
     },
     {
+      "bytes": 4897,
+      "path": "tests/test_v14_interop_matrix.py",
+      "sha256": "1e20115f0afd39b6b06f2f6808fc41eef72e49c89478b09021d0d6507bd51ac0"
+    },
+    {
       "bytes": 4503,
       "path": "tests/test_v14_linear_chain.py",
       "sha256": "4150ec4bed0b0e18b656137658802fbebb32e88f6da40d2cb9e13f58e1abaf6e"
@@ -1490,9 +1530,9 @@
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     {
-      "bytes": 15941,
+      "bytes": 15918,
       "path": "tools/out/citations_result.json",
-      "sha256": "20c6628651b084880df2fced23e6cb98956a56aab4214d6cd28a832a5c963189"
+      "sha256": "c4fc42aa69b4b6938e652b74bedd116f13cbfd4bb129a0efaa61fc3b6b843385"
     },
     {
       "bytes": 2252,
@@ -1607,7 +1647,7 @@
     {
       "bytes": 3895,
       "path": "tools/out/redteam_result.json",
-      "sha256": "8fa84c125893193ac2cfcf22b6ce3659a523e08184e69cf9af5c1788919fd190"
+      "sha256": "00a1d12bff0aa7dd75f177591d4ed02136fe2c7474a6c16faa662d70ded4647e"
     },
     {
       "bytes": 646,
@@ -1790,14 +1830,14 @@
       "sha256": "73e3463174226c368ca1d807eee33ebdf1d44a86cf5e7c6e2cb5e32f1ad0b8cd"
     }
   ],
-  "generated_at": "2026-11-17T09:34:38Z",
+  "generated_at": "2026-11-17T10:02:18Z",
   "licence": "Apache-2.0",
   "project": "uibc-core",
   "reproduce": "python tools/attest.py  (then compare manifest digests)",
   "schema": "uibc.attestation/1",
   "source": {
     "branch": "release/v1.1-precheck",
-    "commit": "3ec71ba7bfb20dff8e6bf88f5443ae7758c24976",
+    "commit": "c452e6bf7e0090aec05ed1516c7835aae4701edc",
     "repo": "https://github.com/zhaoxinghua09-cell/uibc-core"
   },
   "version": "0.3.0"

@@ -2,6 +2,10 @@
 
 <!-- mcp-name: io.github.zhaoxinghua09-cell/uibc-core -->
 
+**Name note:** UIBC here means *unified integrity boundary check* — an agent-evidence verifier.
+It is **not** the clinical chemistry assay of the same acronym (unsaturated iron binding capacity),
+and it is unrelated to the UIBCDF computational-biology organisation.
+
 ## Verify it yourself — one command, no install, no account
 
 ```bash
@@ -15,7 +19,24 @@ It prints `CONSISTENT` only when **both** hold: a second, independently written 
 
 > A uibc PASS means: within the observed evidence boundary, no violation was detected. It does not claim the agent was correct, safe, or wise; that the recorded inputs were true or complete; or that any real-world outcome followed.
 
-**Current state, including what we are short of:** 208 tests green · the verifier needs no third-party package (Ed25519 is implemented in-repo) · **external verification nodes: 0** — we publish the number we do not have; running the command above and sending back `external_node_result.json` makes it 1.
+**Current state, including what we are short of:** 303 tests green · the verifier needs no third-party package (Ed25519 is implemented in-repo) · **external verification nodes: 0** — we publish the number we do not have; running the command above and sending back `external_node_result.json` makes it 1.
+
+**Three more commands, if you want to see the failure paths rather than the green ones:**
+
+```bash
+python -m unittest discover -s tests -p "test_*.py"        # 303 tests
+python tools/emit_receipts.py --package fixtures/clean.uibc --count 3   # 3 chained receipts
+python tools/redteam_suite.py                              # 15 attacks, expected vs actual
+```
+
+**Verified vs not verified, in one place** (full detail in [`docs/EXTERNAL-ANCHOR.md`](docs/EXTERNAL-ANCHOR.md)):
+
+| item | state |
+|---|---|
+| RFC 3161 external timestamp (Free TSA) | verified, offline-checkable token in repo |
+| OpenTimestamps second anchor | **pending calendar only — not a Bitcoin anchor** |
+| Rekor entry + SET signature | written and verified |
+| Rekor **inclusion proof** | **does not verify — ours and a third-party implementation both fail; published as-is** |
 
 **Not** a QMS, and **not** a competing receipt standard: it answers one question a platform cannot answer about itself — *can a stranger recompute your conclusion, offline?*
 

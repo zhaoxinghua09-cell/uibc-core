@@ -236,12 +236,95 @@ def build():
                  "a verifier must say not_bound rather than bound",
     })
 
+    # ---- merkle layer -------------------------------------------------------
+    # RFC 6962: leaf = SHA-256(0x00 || bytes), node = SHA-256(0x01 || left || right),
+    # an odd tail is promoted rather than duplicated (duplicating it would let two
+    # different trees share a root). Anyone can recompute these with sha256 alone.
+    from uibc_core import merkle as _merkle
+
+    items = [b"evidence-1", b"evidence-2", b"evidence-3", b"evidence-4", b"evidence-5"]
+    leaves = [_merkle.leaf_hash(i) for i in items]
+    vectors.append({
+        "id": "l01-merkle-root-five-leaves",
+        "kind": "merkle_root",
+        "leaves_utf8": [i.decode() for i in items],
+        "expected_root_hex": _merkle.root_hash(leaves).hex(),
+        "check": "leaf = sha256(0x00 || leaf bytes); node = sha256(0x01 || left || right); "
+                 "split the list at the largest power of two below its length, promote an odd "
+                 "tail instead of duplicating it; root of 5 leaves must equal expected_root_hex",
+    })
+    one = [b"only-leaf"]
+    vectors.append({
+        "id": "l02-merkle-root-single-leaf",
+        "kind": "merkle_root",
+        "leaves_utf8": [one[0].decode()],
+        "expected_root_hex": _merkle.leaf_hash(one[0]).hex(),
+        "check": "a one-leaf tree's root is that leaf's hash, not sha256 of an inner node",
+    })
+
+    idx = 2
+    proof = _merkle.audit_path(leaves, idx)
+    vectors.append({
+        "id": "l03-inclusion-index-2",
+        "kind": "merkle_inclusion",
+        "leaves_utf8": [i.decode() for i in items],
+        "leaf_utf8": items[idx].decode(),
+        "index": idx,
+        "size": len(items),
+        "proof_hex": [h.hex() for h in proof],
+        "expected_root_hex": _merkle.root_hash(leaves).hex(),
+        "expected_verdict": "included",
+        "check": "recompute the root from this leaf, its index, the tree size and the sibling "
+                 "path; it must equal expected_root_hex and the verdict must be included",
+    })
+    vectors.append({
+        "id": "l04-inclusion-tampered-leaf",
+        "kind": "merkle_inclusion",
+        "leaves_utf8": [i.decode() for i in items],
+        "leaf_utf8": "evidence-3-altered",
+        "index": idx,
+        "size": len(items),
+        "proof_hex": [h.hex() for h in proof],
+        "expected_root_hex": _merkle.root_hash(leaves).hex(),
+        "expected_verdict": "not_included",
+        "check": "the same path with one byte changed in the leaf: recomputed root must differ, "
+                 "verdict not_included",
+    })
+    vectors.append({
+        "id": "l05-inclusion-wrong-index",
+        "kind": "merkle_inclusion",
+        "leaves_utf8": [i.decode() for i in items],
+        "leaf_utf8": items[idx].decode(),
+        "index": 1,
+        "size": len(items),
+        "proof_hex": [h.hex() for h in proof],
+        "expected_root_hex": _merkle.root_hash(leaves).hex(),
+        "expected_verdict": "not_included",
+        "check": "the right leaf with the wrong index: a verifier must not accept it, because the "
+                 "index decides left/right at every step",
+    })
+
+    # ---- policy layer -------------------------------------------------------
+    policy_body = {"rules": [{"id": "R-1", "effect": "HOLD", "predicate": "missing_signature"}],
+                   "version": "2026-11", "reviewer": "张三"}
+    vectors.append({
+        "id": "p01-policy-artefact-digest",
+        "kind": "policy_digest",
+        "artifact": policy_body,
+        "expected_canonical_utf8": canonicalize(policy_body).decode("utf-8"),
+        "expected_sha256_hex": sha256_hex(canonicalize(policy_body)),
+        "check": "a policy_digest is SHA-256 over the RFC 8785 JCS bytes of the retained artefact; "
+                 "canonicalize(artifact) must equal expected_canonical_utf8 and hash to "
+                 "expected_sha256_hex",
+    })
+
     doc = {
-        "schema": "uibc-core/conformance-vectors@2",
+        "schema": "uibc-core/conformance-vectors@3",
         "generated_by": "tools/conformance_vectors.py",
-        "what_this_is": "Inputs and expected bytes for four steps: canonical JSON, Ed25519 "
-                        "signatures, receipt envelope digests, and the linear chain link, "
-                        "plus two anchor-binding cases against a real RFC 3161 token. "
+        "what_this_is": "Inputs and expected bytes for seven steps: canonical JSON, Ed25519 "
+                        "signatures, receipt envelope digests, the linear chain link, "
+                        "Merkle roots and inclusion paths (RFC 6962), policy artefact digests, "
+                        "and two anchor-binding cases against a real RFC 3161 token. "
                         "It is not a full-receipt corpus and it does not contain a second "
                         "implementation.",
         "how_to_use": "For each vector, reproduce the expected value with your own "
@@ -249,14 +332,17 @@ def build():
                       "ed25519_signature - verify with any Ed25519 library and compare the "
                       "verdict; receipt_digest - hash the JCS bytes of the envelope; "
                       "receipt_chain - recompute the links and compare the verdict; "
+                      "merkle_root - build the RFC 6962 tree and compare the root; "
+                      "merkle_inclusion - recompute the root from the leaf, index, size and "
+                      "path; policy_digest - hash the JCS bytes of the artefact; "
                       "anchor_binding - hash the artifact and parse the token, then compare "
                       "the messageImprint. A conforming implementation needs no code from us.",
         "not_claimed": [
             "that we publish a second implementation — we do not",
-            "that these vectors validate a receipt schema, resolve policies, or check a "
-            "Merkle inclusion proof — they do not; those steps have tests, not vectors",
+            "that these vectors validate a receipt schema end to end — they do not; a receipt "
+            "is a composite of steps that are published here and rules that are not",
             "that passing them makes an implementation interoperable with our receipts — "
-            "it makes four steps comparable, not the whole format",
+            "it makes seven steps comparable, not the whole format",
         ],
         "vectors": vectors,
     }

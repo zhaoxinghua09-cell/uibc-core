@@ -26,7 +26,7 @@ class ConformanceCorpusTests(unittest.TestCase):
         if r.returncode == 2 and "cryptography" in (r.stdout + r.stderr):
             self.skipTest("cryptography not installed")
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
-        self.assertIn("23/23", r.stdout)
+        self.assertIn("29/29", r.stdout)
 
 
 if __name__ == "__main__":

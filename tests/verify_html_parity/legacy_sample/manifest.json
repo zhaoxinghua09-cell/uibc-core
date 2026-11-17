@@ -1,0 +1,9 @@
+{
+  "schema": "uibc-core/0.3.0-proposal",
+  "agent_id": "demo-agent-001",
+  "agent_version": "0.1.0",
+  "created_at": "2026-11-12T02:09:03Z",
+  "evidence_count": 1,
+  "evidence_root": "e13feb524a02563e84136f0085c8829ec849e0a77415dc88d50aa0ca646ffa50",
+  "status": "SUBMITTED"
+}

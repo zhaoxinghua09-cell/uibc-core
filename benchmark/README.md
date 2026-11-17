@@ -76,4 +76,30 @@ Point your own verifier at `tools/out/_mb/m_M*/` after a run and compare per-cas
 verdicts; `expected.json` is the shared matrix, `results.json` is ours. If your numbers
 differ, that is the interesting result — please open an issue with the case id.
 
+**Portable corpus + plug-in contract.**
+
+```bash
+python benchmark/corpus.py     # writes benchmark/corpus/{base,cases/M01..M21,manifest.json}
+python benchmark/adapter.py    # runs a SECOND verifier over the same corpus
+```
+
+The contract is one function: `verify(package_dir, pubkey_b64, expect_head) ->
+"PASS" | "FAIL" | "INCONCLUSIVE"`. Verdicts are per package; the three modes are
+properties of the *call*, not of the bytes. `corpus/manifest.json` records, per case,
+the authored expectation, the tree digest, and which checks our implementation fired —
+so a disagreement can be located, not merely counted.
+
+**First run against a second verifier: 18/21 agree.**
+
+| case | ours | second impl. | why |
+|---|---|---|---|
+| M18 root extra file | FAIL | PASS | no "undeclared file in package root" check (S1) |
+| M19 index metadata edited | FAIL | PASS | no index-metadata digest check (S7) |
+| M21 unsigned log truncated | FAIL | INCONCLUSIVE | no checkpoint head (S8) |
+
+That is the corpus doing its job: it found that **our own second implementation lags
+the first on three checks** — something "8/8 agreement on fixtures" could never have
+revealed. Until it reaches parity, `independent_verifier/` must not be cited as
+evidence that a package was checked for these three attacks.
+
 Spec identity: `python -c "import uibc_core as u; print(u.spec_id())"`.

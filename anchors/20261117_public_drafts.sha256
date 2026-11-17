@@ -20,18 +20,41 @@ Where each item went (all public, all verifiable without credentials):
 c304e4c7030ace2fe5e4b9660a017b49ea44db460e300edf887b66984d0af1dc  11_稿件2_gh177回帖_20261117.md
 fce2bc15f340fce14c3e71f9d1f5f9bb50c9292008f44eeef1916d407b533d1b  12_稿件3_Guigui公开issue_20261117.md
 6669c3fa6eab9843481da6dc38c412f3b2fc6bbcdbe5a93a32f43e120d1c4896  13_稿件4_themes62评论_20261117.md
-f87e2c85cfc97ecf91e5fc8cc74cb7e4b70de13c6c651a9c4a8a11af7e69768c  14_稿件5_巴黎投稿AB_20261117.md
+dac18ed797314d1b53f5e8d17b14ef93e6d6126607a491b013637783cf357e3b  14_稿件5_巴黎投稿AB_20261117.md
 
 ## Review-package anchors
 
-33d462ab175f2730aa1fb4acaf30903cbd029824e1ff4ff4bf9e2df598809b79  SHA256SUMS.txt (review package, 20 files)
-6ce33433fe8313cb50020ece96c91080c36d21b7aeeea3184eeed2ef095c9824  SHA256SUMS_digicert.tsr (RFC 3161 timestamp over SHA256SUMS.txt)
+9ef1b6ccb872494148c8b7445d02137d12729c2344b845450176cef4a4400fb6  SHA256SUMS.txt (review package, 22 files)
+671c07147e42233aedadbfcd22547ac6e10ec3fd193efaae7ea955eed6c3af4e  SHA256SUMS_digicert.tsr (RFC 3161 timestamp over SHA256SUMS.txt)
 
-The RFC 3161 token above was issued by DigiCert (http://timestamp.digicert.com).
-The review package itself is not published; its manifest hash is anchored here so
-that a later release of it can be checked against this commit.
+The RFC 3161 token above was issued by DigiCert (http://timestamp.digicert.com). Its
+`messageImprint` digest equals the `SHA256SUMS.txt` hash on the line above, so the
+timestamp covers exactly that file. The review package itself is not published; its
+manifest hash is anchored here so that a later release of it can be checked against this commit.
 
-Note on status: item 1 is a correction posted after two earlier messages of mine
-did not reach the list; item 5 is a draft I have deliberately not submitted.
+A second timestamp from FreeTSA was attempted on the same manifest and **failed**: the
+service returned a 50-byte error record (`Bad request format or system error`), not a
+token, both on the original request and on a re-submission of the identical `.tsq`.
+`SHA256SUMS_freetsa.tsr` is that error record and must not be read as a timestamp.
+Only the DigiCert token is evidence; a second independent TSA remains outstanding.
+
+Note on status: item 1 is a correction posted after two earlier messages of mine did
+not reach the list; item 5 is a draft I have deliberately not submitted.
+
+## Revision note — why two values above changed
+
+This anchor was first published with `f87e2c85…` for item 5 and `33d462ab…` for the
+review-package manifest. Both were correct when written and are no longer the current
+bytes, so the anchor was corrected rather than left standing as a false claim:
+
+- **item 5** (`14_稿件5_巴黎投稿AB_20261117.md`): edited after the anchor was written,
+  during the S1–S10 review pass. Old `f87e2c85cfc97ecf91e5fc8cc74cb7e4b70de13c6c651a9c4a8a11af7e69768c`,
+  new `dac18ed797314d1b53f5e8d17b14ef93e6d6126607a491b013637783cf357e3b`. The draft is held, never sent,
+  so no recipient is affected.
+- **review package** (`SHA256SUMS.txt`): regenerated after the final review edits and then
+  time-stamped. Old `33d462ab175f2730aa1fb4acaf30903cbd029824e1ff4ff4bf9e2df598809b79`,
+  new `9ef1b6ccb872494148c8b7445d02137d12729c2344b845450176cef4a4400fb6`. The DigiCert token was
+  re-issued over the new manifest (see the `.tsr` hash above).
+- The four already-sent items are unchanged: their hashes still match the text that went out.
 
 Xinghua Zhao (independent researcher, ORCID 0009-0001-0512-1237)

@@ -1,0 +1,33 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
+  "name": "io.github.zhaoxinghua09-cell/uibc-core",
+  "description": "UIBC Core: three-valued verdicts and Ed25519 seals for agent lifecycle evidence.",
+  "version": "0.3.3",
+  "websiteUrl": "https://github.com/zhaoxinghua09-cell/uibc-core",
+  "icons": [
+    {
+      "src": "https://cdn.jsdelivr.net/gh/zhaoxinghua09-cell/uibc-core@v0.3.3/icon.svg",
+      "mimeType": "image/svg+xml",
+      "sizes": [
+        "any"
+      ],
+      "theme": "dark"
+    }
+  ],
+  "repository": {
+    "url": "https://github.com/zhaoxinghua09-cell/uibc-core",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registryType": "pypi",
+      "registryBaseUrl": "https://pypi.org",
+      "identifier": "uibc-core",
+      "version": "0.3.3",
+      "runtimeHint": "uvx",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}

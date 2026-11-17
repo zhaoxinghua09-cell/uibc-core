@@ -20,7 +20,9 @@ __version__ = "0.3.0"
 # A version string that is a literal, not a lookup. A clean `git clone` with
 # no installed distribution must still report the same identifier; deriving it
 # from installed package metadata made an outsider see "0.0.0-proposal"
-# (pre-release review blocker P0-2).
+# (pre-release review blocker P0-2). The importlib branch kept on `main` is the
+# version of that code this merge deliberately drops: an outsider who clones and
+# runs from the source tree is exactly the case it broke.
 SPEC_VERSION = "uibc-core/0.3.0-proposal"
 VERIFIER_ID = "uibc-core-verifier"
 

@@ -19,7 +19,7 @@ jobs:
       - name: Checkout code
         # 固定到 commit SHA（= v4.4.0）。Scorecard 自身的 Pinned-Dependencies
         # 检查要求第三方 action 用 SHA 固定，移动 tag 会被扣分。
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
 

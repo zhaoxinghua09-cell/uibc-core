@@ -1,0 +1,53 @@
+{
+  "schema": "asqav/compliance-receipts@1",
+  "meta": {
+    "generated_at_utc": "2026-11-17T09:17:25Z",
+    "source_package": "clean.uibc",
+    "verifier": "uibc_core.compliance"
+  },
+  "public_key_hex": "766db290eef26a0062281ac175abde2a08b033a8d15355e51a54eb3ce939b84b",
+  "receipts": [
+    {
+      "type": "protectmcp:decision",
+      "issued_at": "2026-11-17T09:17:25Z",
+      "issuer_id": "did:web:example.eu",
+      "action_ref": "sha256:2caf5160840e1279a9575bf2d292cb64c00c5784974521827e0641c6b14cde05",
+      "policy_digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "payload_digest": "sha256:a9348d857ee5efb322db8c4e611f59e0a727116745987c5a9613f571f2e9287a",
+      "previousReceiptHash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "signatureObject": {
+        "alg": "Ed25519",
+        "kid": "ed25519:766db290eef26a00",
+        "sig": "l4Jh98dnzBDknm+RaPcKKX9TvMznzyUNx6KFtAUVmEknyT0N7/rg8lGz0rns2GjBZfHGa8dm3GiG3Lm2pnaCDQ=="
+      }
+    },
+    {
+      "type": "protectmcp:decision",
+      "issued_at": "2026-11-17T09:17:25Z",
+      "issuer_id": "did:web:example.eu",
+      "action_ref": "sha256:aeb8c72aa8a3dedee3f961b611de89f1e30b696d25361baa4576469265ee92e4",
+      "policy_digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "payload_digest": "sha256:a9348d857ee5efb322db8c4e611f59e0a727116745987c5a9613f571f2e9287a",
+      "previousReceiptHash": "9e85020872bd89ae5113cfb98086307a868f1ccf243d46ea3ca02b4993adadf0",
+      "signatureObject": {
+        "alg": "Ed25519",
+        "kid": "ed25519:766db290eef26a00",
+        "sig": "fYVnVJXywWU/kNfZ3uKodJBr3nZKNOuE7PzBIWraOD4VlfPK0D6yGQq7hEyB+YrqoqfSkOuD4cjcThgB0tkdAg=="
+      }
+    },
+    {
+      "type": "protectmcp:decision",
+      "issued_at": "2026-11-17T09:17:25Z",
+      "issuer_id": "did:web:example.eu",
+      "action_ref": "sha256:ed36a615f905d81d55e0ecd42082bab050243022d4030b1b4e118f0260fdaf64",
+      "policy_digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "payload_digest": "sha256:a9348d857ee5efb322db8c4e611f59e0a727116745987c5a9613f571f2e9287a",
+      "previousReceiptHash": "9e4a1ed2fe1ddf1712d93486400c7822cd051af84919906170c1473be79c77d7",
+      "signatureObject": {
+        "alg": "Ed25519",
+        "kid": "ed25519:766db290eef26a00",
+        "sig": "v87AvbsyYnn980mIDoK2SBV4oF3wTFnaJkDifX9AQKicHdF48Z1NK307VezfUBZHrK6RUNIh9N/tc0CSQlAJAA=="
+      }
+    }
+  ]
+}

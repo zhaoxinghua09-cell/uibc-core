@@ -1,7 +1,7 @@
 {
   "anchors": {
     "external": {
-      "commit": "0e8b7912f25426f5c0c6df262e29f8cfe2d24cba",
+      "commit": "72895f6ddf18a40356d109d0df961c78f29a2432",
       "doi": null
     },
     "internal": {
@@ -12,7 +12,7 @@
   },
   "author": "Steven Zhao (Xinghua Zhao)",
   "disclaimer": "This attestation records provenance only. It is not a certification, not a regulatory clearance, not an audit opinion, and not a claim that the software is fit for any particular use. A uibc PASS means: within the observed evidence boundary, no violation was detected. It does not claim the agent was correct, safe, or wise; that the recorded inputs were true or complete; or that any real-world outcome followed.",
-  "file_count": 313,
+  "file_count": 316,
   "files": [
     {
       "bytes": 725,
@@ -415,9 +415,9 @@
       "sha256": "b2620d53eff206abc79a52b6acf9c6d16f9dc7bb2e4c54bc658d554e77ee8d76"
     },
     {
-      "bytes": 2747,
+      "bytes": 2731,
       "path": "docs/AER1-CROSSWALK-RESULT.md",
-      "sha256": "8b516c4f094bf3d6175fcdfdbd60400339b919b84be59f7a1c7a2cf05e2c9d74"
+      "sha256": "f3e75124e082e7aa77d7ade71d54b9fd0fe63a9126d676b7c1dcd8784668db44"
     },
     {
       "bytes": 6412,
@@ -1235,6 +1235,11 @@
       "sha256": "8922417604bff0b69deb61defb0bba7a5f9d114c17f1fdbbfe3a9a6e8b60dd52"
     },
     {
+      "bytes": 5194,
+      "path": "tests/test_v13_merkle_encoding.py",
+      "sha256": "d43a643b4faa06cabbd56404c80e9b244f477bd73eef8e0ffec51943ac298626"
+    },
+    {
       "bytes": 1544,
       "path": "timestamps/README.md",
       "sha256": "b1ea5eb7a969375a69bd783c12d3a7d9b64229761e744fafbece15f56fb07ec9"
@@ -1250,9 +1255,9 @@
       "sha256": "023309eba518714c83c2eb37373aa5989810fe187ee78794744d8d7102bc4310"
     },
     {
-      "bytes": 13675,
+      "bytes": 14992,
       "path": "tools/aer1_crosswalk.py",
-      "sha256": "c06ba09a33f0c5f1d74e08e1fc41c340be39e90ffc5b849edf3029ab8bebf109"
+      "sha256": "a0311a0e242bd6cff0dcabda82d75ca4d8923ff1fce7590e8fa4f3d02b5669c7"
     },
     {
       "bytes": 5146,
@@ -1335,9 +1340,9 @@
       "sha256": "dd3fbcd52ff7ba18536925b2700e4c38171d988acc335dbc240b3090f83a4bf0"
     },
     {
-      "bytes": 9739,
+      "bytes": 9794,
       "path": "tools/out/aer1_crosswalk.json",
-      "sha256": "ea282319002a04c3b991fee29ca980faed27c6b39b73880d9c73abc6d160cef1"
+      "sha256": "94be22659dc4386ecdc063bb34fb3ba3e230148dab3a6289793859e0499da128"
     },
     {
       "bytes": 15941,
@@ -1535,6 +1540,11 @@
       "sha256": "ad821b6af6f13cf85b331c2ba5b993770610388498d1f3d30afdfe8003b2bbff"
     },
     {
+      "bytes": 3260,
+      "path": "uibc_core/encoding.py",
+      "sha256": "51e1635e790dc096204f36b483dafdaf2378cc567a03415a0040efdabc48463f"
+    },
+    {
       "bytes": 7266,
       "path": "uibc_core/gate.py",
       "sha256": "ea6e3cc53fd0cffd3e8cfb0de59036fb9ab2ccbd2901fbe1887d618bcf08754c"
@@ -1555,6 +1565,11 @@
       "sha256": "763880b5748716d7fed2649bc94db11650c5ec81efd146f6a80e3a7f9152eb08"
     },
     {
+      "bytes": 3491,
+      "path": "uibc_core/merkle.py",
+      "sha256": "4f1086229fa85472b1dbfd463db5ca913eaed6222026e083a6b23b90acf5f844"
+    },
+    {
       "bytes": 5445,
       "path": "uibc_core/phantom.py",
       "sha256": "7ce02227fae1ea07d37e914c6db6b0609499e12df58e29dfd7d763f0a1a48b76"
@@ -1570,9 +1585,9 @@
       "sha256": "ce9efd3f1ccefca8553f9592b5d4b9b9853badb3ec649cd7dfef41a6655b69c2"
     },
     {
-      "bytes": 41758,
+      "bytes": 43214,
       "path": "uibc_core/verify.py",
-      "sha256": "f25a8675c90ce70442bb798d7f3b31e83e2f2bb1eca030b3c071885f54ef7258"
+      "sha256": "420ca82af590bcc3077f91cecbd998616cf11b19760d57e7fc03a54dae6c92c8"
     },
     {
       "bytes": 26036,
@@ -1580,14 +1595,14 @@
       "sha256": "73e3463174226c368ca1d807eee33ebdf1d44a86cf5e7c6e2cb5e32f1ad0b8cd"
     }
   ],
-  "generated_at": "2026-11-17T07:59:58Z",
+  "generated_at": "2026-11-17T08:06:44Z",
   "licence": "Apache-2.0",
   "project": "uibc-core",
   "reproduce": "python tools/attest.py  (then compare manifest digests)",
   "schema": "uibc.attestation/1",
   "source": {
     "branch": "release/v1.1-precheck",
-    "commit": "0e8b7912f25426f5c0c6df262e29f8cfe2d24cba",
+    "commit": "72895f6ddf18a40356d109d0df961c78f29a2432",
     "repo": "https://github.com/zhaoxinghua09-cell/uibc-core"
   },
   "version": "0.3.0"

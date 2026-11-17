@@ -13,14 +13,14 @@
   },
   "summary": {
     "COVERED": {
-      "classes": 33,
-      "vectors": 58,
-      "checks": 61
+      "classes": 34,
+      "vectors": 66,
+      "checks": 69
     },
     "PARTIAL": {
-      "classes": 1,
-      "vectors": 8,
-      "checks": 8
+      "classes": 0,
+      "vectors": 0,
+      "checks": 0
     },
     "TO-ADD": {
       "classes": 0,
@@ -338,10 +338,11 @@
     },
     {
       "class": "base/anchor-vectors.json",
-      "verdict": "PARTIAL",
-      "check": "trust_level anchored + S9 out-of-band head; no anchor-event resolution",
+      "verdict": "COVERED",
+      "check": "trust_level anchored + S9 out-of-band head; no anchor-event resolution [recomputed: probe rejects]",
       "vectors": 8,
-      "checks": 8
+      "checks": 8,
+      "recomputed": true
     },
     {
       "class": "base/merkle-vectors.json",

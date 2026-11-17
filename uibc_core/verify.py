@@ -440,6 +440,33 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
                "; ".join(b64_problems[:4]) if b64_problems else
                "%d declared base64 field(s) are canonical" % b64_count)
 
+    # S15 anchor event resolution (v1.1). S9 answers "is the head pinned
+    # out-of-band?"; it cannot answer "can I resolve this anchor to a leaf in a
+    # set I can recompute myself?". Runs only when the package carries
+    # evidence/anchors.json. An anchor naming an external log stays unresolved
+    # rather than being counted as checked: "I could not verify" is not "OK".
+    anchors_file = os.path.join(package_dir, "evidence", "anchors.json")
+    if os.path.isfile(anchors_file):
+        from . import anchor as _anchor
+        from . import merkle as _mk2
+        adoc = _load_json(anchors_file)
+        leaves = []
+        for e in sorted(entries, key=lambda x: x.get("path", "")):
+            p = os.path.join(package_dir, "evidence", e.get("path", ""))
+            try:
+                with open(p, "rb") as fh:
+                    leaves.append(_mk2.leaf_hash(fh.read()))
+            except OSError:
+                leaves = None
+                break
+        aroot = _mk2.root_hash(leaves) if leaves else None
+        a_problems, a_resolved, a_external = _anchor.check_document(
+            adoc, root=aroot, leaves=leaves)
+        record("S15", "anchor event resolution", not a_problems,
+               "; ".join(a_problems[:3]) if a_problems else
+               "%d anchor(s) resolved against the evidence Merkle root; "
+               "%d external anchor(s) unresolved by design" % (a_resolved, a_external))
+
     # S4b: index METADATA must match its committed digest (v1.1). Content
     # hashes alone cannot see an entry's type/note/action_digest being
     # rewritten; the index digest is carried in the sealed manifest.

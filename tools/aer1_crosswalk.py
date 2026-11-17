@@ -110,7 +110,33 @@ def _probes():
         bad_leaf = mk.verify_inclusion(mk.leaf_hash(b"X"), 2, len(leaves), proof, root)
         return good and not bad_idx and not bad_leaf
 
+    def anchor_ok():
+        from uibc_core import anchor as an
+        leaves = [mk.leaf_hash(("l%d" % i).encode()) for i in range(3)]
+        root = mk.root_hash(leaves)
+
+        def doc(index=1, **over):
+            d = {"id": "a1", "version": 1, "leaf_hash": leaves[index].hex(),
+                 "anchored_at": "2026-11-17T08:00:00Z", "root": root.hex(),
+                 "size": len(leaves), "index": index,
+                 "proof": mk.build_proof(leaves, index)}
+            d.update(over)
+            return d
+
+        if not an.resolve(doc(), root=root, leaves=leaves)[0]:
+            return False
+        cases = [
+            dict(doc(), proof=[]),                            # anchored-missing-proof
+            dict(doc(), leaf_hash="XYZ"),                     # anchored-bad-leaf-hash
+            dict(doc(), anchored_at="2026-11-17T08:00:00"),   # anchored-bad-timestamp
+            dict(doc(), id=" ", version=0),                   # anchored-bad-id-version
+            dict(doc(), root=(b"\x11" * 32).hex()),           # anchored-unresolvable
+            dict(doc(), index=0),                             # right proof, wrong position
+        ]
+        return all(not an.resolve(c, root=root, leaves=leaves)[0] for c in cases)
+
     return {
+        "anchor": anchor_ok,
         "base64_pad_bit": lambda: bool(enc.problems("AB==")),
         "base64_unpadded": lambda: bool(enc.problems("YWI")),
         "base64_not_base64": lambda: bool(enc.problems("YW Jj")),
@@ -148,6 +174,7 @@ CAP_FOR_CLASS = {
     "invalid/ax-feb29-non-leap": "ts_feb29_nonleap",
     "invalid/bad-offset-range": "ts_offset_range",
     "base/merkle-vectors.json": "merkle",
+    "base/anchor-vectors.json": "anchor",
 }
 
 

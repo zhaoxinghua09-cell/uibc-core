@@ -21,13 +21,13 @@ Read the column "verdict" strictly:
 | 3 | Verify all REQUIRED fields present and well-formed | S1 structure+root, S7 index metadata, S11 strict serialization, S14 strict base64, S0 fail-closed | partial | Our REQUIRED set is ours, not the draft's (`type`, `issued_at`, `issuer_id`, `payload_digest`, `action_ref`, `policy_digest`, `previousReceiptHash`). Field names and vocabulary differ. |
 | 4 | Recompute the predecessor envelope digest and compare to `previousReceiptHash` | **S17** linear receipt chain (`uibc_core/chain.py`): genesis is 64 zeros, each link recomputed as SHA-256 over the JCS of the predecessor envelope | **covered (our shape)** | The clause is implemented and tested (edited envelope, dropped head, reordered pair, empty chain, unjudgeable envelope all FAIL); the envelope field names are ours, not ACTA-RECEIPTS'. |
 | 5 | At least one anchor, and re-verify it cryptographically against the signed envelope; metadata presence alone MUST NOT yield "valid" | **S16** RFC 3161: token parsed offline, signature verified against the shipped CA, digest bound to the anchored head; tool reports `signature_verified` and refuses to report "anchored" without it | **covered** (RFC 3161 half) | No OpenTimestamps anchor. The draft wants "RFC 3161, OTS, or both" and calls both stronger. We have one of two. |
-| 6 | Future-skew bound on `issued_at` (>300 s ahead ⇒ reject); past timestamps MUST NOT be rejected when within retention | S12 time and identifiers | partial | S12 checks RFC 3339 shape, real calendar dates, rejects leap seconds and out-of-range UTC offsets (`verify.py:128` onward) - it never compares a timestamp to the verifier's own clock, so the 300 s future bound is absent. |
+| 6 | Future-skew bound on `issued_at` (>300 s ahead ⇒ reject); past timestamps MUST NOT be rejected when within retention | **S12** (`verify.py`, `_semantic_problems(..., now=, future_skew_s=300)`): one-sided bound against the verifier's clock; a past timestamp is never rejected for age | **covered** | The clock is injected, so the bound is testable without sleeping (7 tests, including 250 s pass / 350 s fail / ten-year-old pass). |
 | 7 | `policy_digest` resolves through the Audit Pack; recompute `SHA-256(JCS(artefact))`; a nonced form MUST NOT count | **S18** policy artefact resolution (`uibc_core/policy.py`): every listed digest recomputed over JCS of the shipped artefact, and any `policy_digest` declared by a receipt must resolve there | **covered (our shape)** | Non-JSON artefacts have no JCS form, so a PDF policy must ship a JSON projection - a constraint of the draft, documented in the module. |
 
-**Score as a Compliance Verifier today: 3 covered (rows 2, 4, 5, 7 - row 2 by
-mechanism only) / 3 partial / no silent gaps.** Two of these (S17, S18) were
-added on 2026-11-17 after this table was first written; before that the honest
-number was 1 covered.
+**Score as a Compliance Verifier today: 4 covered (rows 2, 4, 5, 6, 7 - row 2 by
+mechanism only) / 2 partial (rows 1 and 3, both wire-format) / no silent gaps.**
+S17, S18 and the S12 skew bound were added on 2026-11-17 after this table was
+first written; before that the honest number was 1 covered out of 7.
 
 ## What this means competitively
 

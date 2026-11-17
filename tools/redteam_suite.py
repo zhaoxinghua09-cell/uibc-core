@@ -217,6 +217,20 @@ def rt14(d, key):
     return verify(d)
 
 
+# RT15 回填未来时间戳：manifest 时间写成未来，让"新鲜"由攻击者定义 --------
+def rt15(d, key):
+    from datetime import datetime, timedelta, timezone
+    man = _j(os.path.join(d, "manifest.json"))
+    future = (datetime.now(timezone.utc) + timedelta(hours=6)).strftime(
+        "%Y-%m-%dT%H:%M:%SZ")
+    for k in ("created_at", "updated_at", "timestamp", "issued_at"):
+        if k in man:
+            man[k] = future
+            break
+    _w(os.path.join(d, "manifest.json"), man)
+    return verify(d)
+
+
 case("RT01", "索引路径穿越 ../../outside.txt", "FAIL（路径必须落在证据根内）", rt01)
 case("RT02", "索引绝对路径 C:\\Windows\\win.ini", "FAIL（不得读任意绝对路径）", rt02)
 case("RT03", "证据文件换成指向外部的符号链接", "FAIL（或至少不得读穿）", rt03)
@@ -231,6 +245,7 @@ case("RT11", "索引 type: ACTION→OUTPUT（M19 变体）", "FAIL（S7）", rt1
 case("RT12", "换钥重签 + 验证方钉住原公钥", "FAIL（S6）", rt12)
 case("RT13", "链尾追加伪造回执（前驱链接写错）", "FAIL（S17）", rt13)
 case("RT14", "策略制品换掉、声明摘要不改", "FAIL（S18）", rt14)
+case("RT15", "manifest 时间回填到 6 小时后", "FAIL（S12 未来偏斜）", rt15)
 
 
 def main():

@@ -9,6 +9,7 @@ Report discipline (archive SS16/SS17):
 import json
 import os
 import re
+from datetime import datetime, timedelta, timezone
 
 from .canonical import evidence_root, hash_file
 from .lifecycle import validate_lifecycle, validate_lifecycle_strict
@@ -125,7 +126,12 @@ def _offset_ok(off):
     return hh <= 14 and mm < 60 and not (hh == 14 and mm)
 
 
-def _semantic_problems(obj, path=""):
+def _now_utc():
+    """Verifier clock, isolated so tests and callers can reason about it."""
+    return datetime.now(timezone.utc)
+
+
+def _semantic_problems(obj, path="", now=None, future_skew_s=300):
     """S12: timestamps and identifiers, judged on values rather than on hashes.
 
     Why a separate check: S4/S5/S7 all answer "was this byte changed?" - none of
@@ -142,6 +148,12 @@ def _semantic_problems(obj, path=""):
         not disagree about whether 'ABC...' and 'abc...' are the same device;
       * non-UUID identifiers (e.g. 'mb-agent-001') are left alone: our schema
         allows them, so rejecting them would be a false positive.
+      * a timestamp more than 300 s ahead of the verifier's own clock is
+        REJECTED (draft-marques-asqav-compliance-receipts-01 4.1.2), while
+        a past timestamp is never rejected on age alone: an evidence log
+        that stops verifying once it is old is not an evidence log.
+        The bound is a parameter so a test can move the clock instead of
+        sleeping.
     """
     problems = []
     if isinstance(obj, dict):
@@ -163,6 +175,24 @@ def _semantic_problems(obj, path=""):
                     if not _offset_ok(m.group(8)):
                         problems.append("%s: %r has an out-of-range UTC offset"
                                         % (child, v[:40]))
+                    if now is not None:
+                        # A record dated in the future is not "fresh": it is a
+                        # claim about a clock the producer does not control. The
+                        # bound is one-sided on purpose - see the policy note
+                        # above about past timestamps.
+                        try:
+                            ts = datetime.fromisoformat(v.replace("Z", "+00:00"))
+                        except ValueError:
+                            ts = None
+                        if ts is not None:
+                            if ts.tzinfo is None:
+                                ts = ts.replace(tzinfo=timezone.utc)
+                            ahead = (ts - now).total_seconds()
+                            if ahead > future_skew_s:
+                                problems.append(
+                                    "%s: %r is %.0f s in the future; the accepted "
+                                    "lead of the verifier's clock is %d s"
+                                    % (child, v[:40], ahead, future_skew_s))
             if k in ID_KEYS and isinstance(v, str) and UUID_FORM.match(v):
                 if v != v.lower():
                     problems.append("%s: %r is an uppercase UUID" % (child, v))
@@ -176,10 +206,13 @@ def _semantic_problems(obj, path=""):
                 if v != v.strip() or any(ord(c) < 0x21 for c in v):
                     problems.append("%s: identifier %r has surrounding whitespace "
                                     "or a control character" % (child, v[:40]))
-            problems.extend(_semantic_problems(v, child))
+            problems.extend(_semantic_problems(v, child, now=now,
+                                            future_skew_s=future_skew_s))
     elif isinstance(obj, list):
         for i, v in enumerate(obj):
-            problems.extend(_semantic_problems(v, "%s[%d]" % (path, i)))
+            problems.extend(_semantic_problems(
+                v, "%s[%d]" % (path, i), now=now,
+                future_skew_s=future_skew_s))
     return problems
 
 
@@ -347,7 +380,7 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
     for doc_name, doc in (("manifest.json", manifest), ("identity.json", identity),
                           ("lifecycle.json", lifecycle),
                           ("evidence/index.json", index)):
-        for problem in _semantic_problems(doc):
+        for problem in _semantic_problems(doc, now=_now_utc()):
             s12_problems.append("%s: %s" % (doc_name, problem))
     record("S12", "timestamp and identifier strictness", not s12_problems,
            "; ".join(s12_problems[:4]) if s12_problems else

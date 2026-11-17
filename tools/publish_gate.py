@@ -154,8 +154,11 @@ th{{color:var(--dim);font-weight:500}} code{{font-size:12px;color:#9ecbff;word-b
 <table><tr><th>名称</th><th>链接</th><th>状态</th></tr>{{CITES}}</table>
 <div class="note">403 / 无响应 <b>不等于链接失效</b>：本机对 iso.org 有反爬、对 eips.ethereum.org 与 aport.io 超时。发布材料里凡引用这三条的，附注“本机不可达，需在目标网络复核”。</div>
 
-<h2>4. 外人角度实跑（公开仓克隆）</h2>
-<p class="lead">在匿名克隆上执行：<code>unittest</code>、<code>version</code>、<code>cose_sign1_interop</code>、<code>guardrail_shim</code>、<code>mutation_benchmark</code>、<code>redteam_suite</code>、<code>uibc_to_epaec</code>，全部返回码 0；外部节点自检输出 <b>{{VERDICT}}</b>。</p>
+<h2>4. 外人角度实跑（克隆来源如实标注）</h2>
+<p class="lead">克隆来源：<code>{{LABEL}}</code>。执行 <code>unittest</code>、<code>version</code>、<code>cose_sign1_interop</code>、<code>guardrail_shim</code>、<code>mutation_benchmark</code>、<code>redteam_suite</code>、<code>uibc_to_epaec</code>；外部节点自检输出 <b>{{VERDICT}}</b>。</p>
+
+<h2>4b. 发布位置（本地 vs 公网，不含糊）</h2>
+<p class="lead">本地 HEAD <code>{{LOCALHEAD}}</code> ・ 公网 <code>{{REMOTEHEAD}}</code> ・ <b>{{SYNC}}</b></p>
 
 <h2>5. 口径（发布材料唯一允许的措辞）</h2>
 <p class="lead">A uibc PASS means: within the observed evidence boundary, no violation was detected. It does not claim the agent was correct, safe, or wise; that the recorded inputs were true or complete; or that any real-world outcome followed.</p>
@@ -167,6 +170,23 @@ th{{color:var(--dim);font-weight:500}} code{{font-size:12px;color:#9ecbff;word-b
     sources = "; ".join(os.path.basename(p) for p in
                         [cites_path, red_path, ext_path, xw_path, bench_path,
                          lat_path, case_path] if os.path.isfile(p))
+    # which clone produced the outsider run: the label inside the newest file,
+    # so "public branch" is never claimed when it was a local-repo clone
+    outsider_label = "-"
+    outs = sorted(glob.glob(os.path.join(OUT, "outsider_*.json")),
+                  key=os.path.getmtime, reverse=True)
+    if outs:
+        try:
+            doc = json.load(open(outs[0], encoding="utf-8"))
+            outsider_label = "local repo clone" if doc.get("label") else "-"
+            lab = doc.get("label")
+            if lab:
+                outsider_label = "%s（本地仓库克隆）" % lab if lab.startswith("local-") \
+                    else "%s（公网克隆）" % lab
+        except Exception:
+            pass
+
+    rel, rel_path = load("release_status.json")
     tokens = {
         "WHEN": subprocess.run([sys.executable, "-c",
                                 "import time;print(time.strftime('%Y-%m-%d %H:%M'))"],
@@ -175,6 +195,13 @@ th{{color:var(--dim);font-weight:500}} code{{font-size:12px;color:#9ecbff;word-b
         "RT": rt_table or '<tr><td colspan="3">无</td></tr>',
         "CITES": cite_rows or '<tr><td colspan="3">全部直达</td></tr>',
         "VERDICT": verdict_ext, "SOURCES": sources,
+        "LABEL": outsider_label,
+        "LOCALHEAD": (rel or {}).get("local_head") or "-",
+        "REMOTEHEAD": (rel or {}).get("public_head") or "不可达",
+        "SYNC": ("已同步" if (rel or {}).get("in_sync") else
+                 ("未同步：公网落后于本地" if (rel or {}).get("local_head") and
+                  (rel or {}).get("public_head") else
+                  "公网状态未知（网络不可达，本地已提交但未推送）")),
     }
     for k, v in tokens.items():
         html = html.replace("{{%s}}" % k, v)

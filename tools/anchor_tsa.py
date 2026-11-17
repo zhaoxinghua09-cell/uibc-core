@@ -31,7 +31,11 @@ import sys
 import urllib.error
 import urllib.request
 
-from uibc_core.tsa import build_request, parse_response, verify_token  # noqa: F401
+# Allow `python tools/anchor_tsa.py ...` from the repository root without an install:
+# the package directory sits one level above this file.
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from uibc_core.tsa import build_request, parse_response, verify_token  # noqa: F401,E402
 
 TSAS = {
     "open-tsa": {

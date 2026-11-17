@@ -33,8 +33,8 @@ python tools/redteam_suite.py                              # 15 attacks, expecte
 
 | item | state | how you check it yourself |
 |---|---|---|
-| RFC 3161 external timestamp (Free TSA) | verified | `openssl ts -verify -in tests/fixtures/anchor/freetsa.tsr -data … -CAfile tests/fixtures/anchor/freetsa_ca.pem` — token and CA are in the repo, so no network and no account |
-| OpenTimestamps second anchor | **pending calendar only — not a Bitcoin anchor** | `ots verify tools/out/release_status.json.ots` returns "pending"; a Bitcoin block height would have to be printed for it to be an anchor |
+| RFC 3161 external timestamp (Free TSA) | verified | `python tools/anchor_tsa.py --verify tests/fixtures/anchor/freetsa.tsr --data tests/fixtures/anchor/anchored_head.json --cabundle tests/fixtures/anchor/freetsa_ca.pem` — token, its CA bundle and the anchored file are all in the repo, so no network and no account |
+| OpenTimestamps second anchor | **pending calendar only — not a Bitcoin anchor** | `python tools/anchor_ots.py --verify tests/fixtures/anchor/anchored_head.json --proof tests/fixtures/anchor/ots_head.ots` prints `pending_calendar` and never a Bitcoin claim; a block attestation would have to appear in the proof for it to be an anchor |
 | Rekor entry + SET signature | written and verified | `rekor-cli get --log-index 3944456508 --rekor_server https://rekor.sigstore.dev`, then check the SET with the log public key published in `tests/fixtures/anchor/rekor_log_pub.pem` — the verification needs only that public key, never Sigstore's private infrastructure |
 | Rekor **inclusion proof** | **does not verify** — ours and a third-party implementation both fail; published as-is | `python tools/anchor_rekor.py --verify tests/fixtures/anchor/rekor_entry.json --artifact …`; `python -m unittest tests.test_v13_rekor -v` shows the SET check passing and the inclusion proof not overclaimed. The failure is a defect we have not fixed, not a design choice |
 

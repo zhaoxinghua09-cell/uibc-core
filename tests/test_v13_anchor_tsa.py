@@ -12,6 +12,14 @@ import json
 import os
 import unittest
 
+# Parsing an RFC 3161 token needs asn1crypto. Without it the tool answers
+# "asn1crypto is unavailable" and this suite would report failures that are really
+# a missing optional dependency; skip with the install line instead.
+try:
+    import asn1crypto  # noqa: F401
+except ImportError:  # pragma: no cover
+    raise unittest.SkipTest("asn1crypto not installed; run: pip install -e .[verify]")
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 TOOL = os.path.join(os.path.dirname(HERE), "tools", "anchor_tsa.py")
 FIX = os.path.join(HERE, "fixtures", "anchor")

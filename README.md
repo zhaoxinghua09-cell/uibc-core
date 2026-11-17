@@ -94,7 +94,9 @@ other exists.
 
 > **万物互联，数智共生** —— Everything Connected, Digital-Intelligence Symbiosis.
 
-UIBC Core 参考实现 v0.3.0 —— Agent 生命周期证据包与验证器：三值裁决（PASS / FAIL / INCONCLUSIVE，未决不洗成通过）＋ Ed25519 公开封签（任何人可验、可钉扎公钥）。
+UIBC Core 参考实现 v0.3.3 —— Agent 生命周期证据包与验证器：三值裁决（PASS / FAIL / INCONCLUSIVE，未决不洗成通过）＋ Ed25519 公开封签（任何人可验、可钉住公钥）。
+
+> 版本口径：PyPI 上已发布到 `0.3.3`；本仓 `zenodo_deposit/` 备好的存缴包是 **0.3.0** 那一版快照（419 项），两者不是同一份字节。
 
 理念（LGD）：**有籍 · 有证 · 有门禁** → Registry（身份注册）/ Evidence（内容哈希证据 + 封签）/ Gates（生命周期状态机 + 验证门禁）。
 

@@ -16,6 +16,14 @@ import json
 import os
 import unittest
 
+# A clean machine without the `verify` extra would otherwise show these as failures,
+# which reads as "the project is broken" rather than "one optional path is untested".
+# Skip loudly instead: `pip install -e .[verify]` runs them.
+try:
+    import cryptography  # noqa: F401
+except ImportError:  # pragma: no cover
+    raise unittest.SkipTest("cryptography not installed; run: pip install -e .[verify]")
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 TOOL = os.path.join(os.path.dirname(HERE), "tools", "anchor_rekor.py")
 FIX = os.path.join(HERE, "fixtures", "anchor")

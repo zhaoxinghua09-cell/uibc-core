@@ -15,6 +15,14 @@ import shutil
 import tempfile
 import unittest
 
+# Without asn1crypto the verifier answers INCONCLUSIVE for every token, so the five
+# assertions below would fail for a reason that has nothing to do with the logic
+# they test. Skip, and say how to install it.
+try:
+    import asn1crypto  # noqa: F401
+except ImportError:  # pragma: no cover
+    raise unittest.SkipTest("asn1crypto not installed; run: pip install -e .[verify]")
+
 from uibc_core.verify import verify
 
 BASE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),

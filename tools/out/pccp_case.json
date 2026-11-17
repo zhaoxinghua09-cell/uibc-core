@@ -1,0 +1,8 @@
+{
+  "subject": "mb-agent-001",
+  "verdict": "PASS",
+  "records": 2,
+  "excluded_other_subject": 5,
+  "findings": [],
+  "scope": "structural self-consistency of the assembled case only; does not judge behaviour, truthfulness of any producer, or completeness"
+}

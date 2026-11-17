@@ -15,6 +15,25 @@ Nothing here is a ratified standard.
 
 ## [Unreleased]
 
+### Added
+
+- **AEE rail (`uibc_core/aee.py`): an external verifier for the
+  Adversarial Execution Evidence in-toto predicate v0.7**, so the
+  `agent-evidence-vectors` conformance corpus (288 vectors) can run
+  against uibc-core: `python3 -m uibc_core.aee <statement.json>` under
+  the corpus contract (exit 0 = valid; last stdout line one JSON report
+  with verdict / codes / result / tiers; consumer key policy via
+  `AEE_SUBSTRATE_KEYS`). GATE 0 well-formedness (strict I-JSON,
+  vocabulary and corpus digests, coverage partition), GATE 1
+  byte-checkable coverage validity (run-binding derivation v2, kind
+  constraints, method cap), the 0.7 statement-level commitments, the
+  total result recompute, and GATE 2 evidence tiers against pinned
+  substrate keys (strict Ed25519). Stdlib only; the RFC 6962 batch root
+  reuses `uibc_core.merkle`. Corpus result at build time: 288/288
+  (63 accept / 223 reject / 2 indeterminate), reason parity on all
+  rejects. Spot-checks live in `tests/test_aee_rail.py` (skipped when
+  the corpus package is not installed).
+
 ### Fixed
 
 - **Browser verifier (`verify.html`) brought back to parity with the CLI.**

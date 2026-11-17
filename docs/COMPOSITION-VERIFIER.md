@@ -92,3 +92,26 @@ PROPOSAL, not a ratified standard. No third-party review to date; the internal
 pre-release review (red team 11 cases, anonymous-clone outsider run, external-model
 review) is recorded in the project report and is **not** a substitute for independent
 evaluation.
+
+**Implemented and runnable as of 2026-11-17** (`uibc_core/composition.py`, checks K1-K8):
+
+```bash
+python tools/compose_demo.py            # 7 scenarios, one deterministic verdict each
+python -m uibc_core.composition case.json
+```
+
+| scenario | verdict | code |
+|---|---|---|
+| three origins, refs closed | PASS | - |
+| payload edited, digest untouched | FAIL | K1 |
+| sequence gap in one origin | FAIL | K3 |
+| dangling cross-origin reference | FAIL | K5 |
+| stacked, not composed | INCONCLUSIVE | K7 |
+| record dated before what it cites | FAIL | K4 |
+| single origin | INCONCLUSIVE | K7 |
+
+The failures are the deliverable: a case assembled from three different producers
+gets a verdict **named by code**, not by prose, and two of the seven outcomes are
+`INCONCLUSIVE` on purpose - a set that is merely stacked, or that has one origin, must
+never be reported as a case.
+

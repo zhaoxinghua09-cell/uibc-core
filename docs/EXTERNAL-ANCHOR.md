@@ -114,7 +114,9 @@ Real entry, 2026-11-17:
 |---|---|
 | entry body hashes the artifact we hold | verified |
 | signature over the artifact verifies with the public key in the entry | verified |
-| the digest really is in the log's tree (inclusion proof) | **not verified** - see below |
+| the log's own signature over the entry (`signedEntryTimestamp`) verifies with `https://rekor.sigstore.dev/api/v1/log/publicKey` | **verified** |
+| the log's tree checkpoint signature | **not verified** - its key is not the one published at `/api/v1/log/publicKey`; note encodings tried (body, body+newline, body+blank line, prefix included; SHA-256/384/512) all reject |
+| the digest really is in the log's tree (inclusion proof) | **not verified** - 20 siblings for a 3.8e9-leaf tree does not verify as a full RFC 6962 path in either order |
 
 Rekor's `inclusionProof` is a Trillian-side partial proof (20 siblings for a
 3.8e9-leaf tree) and does not verify as a full RFC 6962 path from the leaf with

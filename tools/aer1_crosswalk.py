@@ -84,6 +84,95 @@ MAPPING = [
 
 VERDICT_ORDER = {"COVERED": 0, "PARTIAL": 1, "TO-ADD": 2, "N_A": 3}
 
+# --- dynamic recompute (2026-11-17) -----------------------------------------
+# The verdicts above were authored by hand, so they went stale the moment S11/S12
+# landed: the file still said TO-ADD for classes we now reject. A static list that
+# claims to describe code is a claim that rots. So each class that could plausibly
+# be closed is tied to a PROBE - a real call into the verifier on the hostile
+# input the class encodes. If the probe passes, the class is COVERED regardless of
+# what the hand-written row said; if the code regresses, the class falls back to
+# TO-ADD on its own. Nothing is asserted; everything is executed.
+def _probes():
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    from uibc_core import encoding as enc, merkle as mk
+    from uibc_core.verify import _semantic_problems as sem
+
+    def rejects(doc):
+        return bool(sem(doc))
+
+    def merkle_ok():
+        data = [b"a", b"b", b"c", b"d", b"e"]
+        leaves = [mk.leaf_hash(d) for d in data]
+        root = mk.root_hash(leaves)
+        proof = [bytes.fromhex(h) for h in mk.build_proof(leaves, 2)]
+        good = mk.verify_inclusion(leaves[2], 2, len(leaves), proof, root)
+        bad_idx = mk.verify_inclusion(leaves[2], 3, len(leaves), proof, root)
+        bad_leaf = mk.verify_inclusion(mk.leaf_hash(b"X"), 2, len(leaves), proof, root)
+        return good and not bad_idx and not bad_leaf
+
+    return {
+        "base64_pad_bit": lambda: bool(enc.problems("AB==")),
+        "base64_unpadded": lambda: bool(enc.problems("YWI")),
+        "base64_not_base64": lambda: bool(enc.problems("YW Jj")),
+        "id_uppercase": lambda: rejects({"agent_id": "ABCDEF01-2345-6789-ABCD-EF0123456789"}),
+        "id_nil": lambda: rejects({"agent_id": "00000000-0000-0000-0000-000000000000"}),
+        "id_trailing_newline": lambda: rejects({"agent_id": "mb-agent-001\n"}),
+        "ts_no_zone": lambda: rejects({"created_at": "2026-11-17T05:59:59"}),
+        "ts_lowercase": lambda: rejects({"created_at": "2026-11-17t05:59:59z"}),
+        "ts_impossible_date": lambda: rejects({"created_at": "2026-02-30T00:00:00Z"}),
+        "ts_feb29_1900": lambda: rejects({"created_at": "1900-02-29T00:00:00Z"}),
+        "ts_feb29_nonleap": lambda: rejects({"created_at": "2026-02-29T00:00:00Z"}),
+        "ts_leap_second": lambda: rejects({"created_at": "2026-06-30T23:59:60Z"}),
+        "ts_offset_range": lambda: rejects({"created_at": "2026-11-17T05:59:59+15:00"}),
+        "merkle": merkle_ok,
+    }
+
+
+CAP_FOR_CLASS = {
+    "invalid/base64-pad-bit": "base64_pad_bit",
+    "invalid/base64-unpadded": "base64_unpadded",
+    "invalid/ax-base64-unpadded": "base64_unpadded",
+    "invalid/bytes-not-base64": "base64_not_base64",
+    "invalid/uppercase-id": "id_uppercase",
+    "invalid/nil-uuid": "id_nil",
+    "invalid/id-trailing-newline": "id_trailing_newline",
+    "invalid/provenance-trailing-newline": "id_trailing_newline",
+    "invalid/timestamp-no-timezone": "ts_no_zone",
+    "invalid/lowercase-timestamp": "ts_lowercase",
+    "invalid/impossible-date": "ts_impossible_date",
+    "invalid/bad-created-at": "ts_impossible_date",
+    "invalid/leap-second-created-at": "ts_leap_second",
+    "invalid/feb29-1900": "ts_feb29_1900",
+    "invalid/feb29-non-leap": "ts_feb29_nonleap",
+    "invalid/ax-feb29-1900": "ts_feb29_1900",
+    "invalid/ax-feb29-non-leap": "ts_feb29_nonleap",
+    "invalid/bad-offset-range": "ts_offset_range",
+    "base/merkle-vectors.json": "merkle",
+}
+
+
+def recompute(rows):
+    """Flip TO-ADD/PARTIAL rows to COVERED when the probe actually rejects."""
+    probes = _probes()
+    out = []
+    for r in rows:
+        cap = CAP_FOR_CLASS.get(r["class"])
+        if cap and r["verdict"] in ("TO-ADD", "PARTIAL"):
+            ok = False
+            try:
+                ok = bool(probes[cap]())
+            except Exception as e:                      # a probe that throws is not a pass
+                r = dict(r)
+                r["check"] = "%s [probe error: %s]" % (r["check"], e)
+            if ok:
+                r = dict(r)
+                r["verdict"] = "COVERED"
+                r["check"] = r["check"] + " [recomputed: probe rejects]"
+                r["recomputed"] = True
+        out.append(r)
+    return out
+
+
 
 def main():
     if not os.path.isfile(INDEX):
@@ -119,9 +208,14 @@ def main():
         mapped_keys.add(hit)
         rows.append({"class": key, "verdict": verdict, "check": note,
                      "vectors": vectors, "checks": checks})
-        if vectors:
-            summary[verdict][0] += vectors
-            summary[verdict][1] += checks or 0
+
+    # verdicts are recomputed by probe before they are counted, so the summary
+    # describes the code as it runs now rather than as it was authored.
+    rows = recompute(rows)
+    for r in rows:
+        if r.get("vectors"):
+            summary[r["verdict"]][0] += r["vectors"]
+            summary[r["verdict"]][1] += r["checks"] or 0
 
     # Everything unmapped is a POSITIVE vector (valid/*): a receipt that must pass
     # their verifier. There is no uibc counterpart - our schema differs - so it is

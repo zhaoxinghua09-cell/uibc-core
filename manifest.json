@@ -1,7 +1,7 @@
 {
   "anchors": {
     "external": {
-      "commit": "0d4c0b26e48235cf6a5de1424034af48976a8a69",
+      "commit": "0e8b7912f25426f5c0c6df262e29f8cfe2d24cba",
       "doi": null
     },
     "internal": {
@@ -12,7 +12,7 @@
   },
   "author": "Steven Zhao (Xinghua Zhao)",
   "disclaimer": "This attestation records provenance only. It is not a certification, not a regulatory clearance, not an audit opinion, and not a claim that the software is fit for any particular use. A uibc PASS means: within the observed evidence boundary, no violation was detected. It does not claim the agent was correct, safe, or wise; that the recorded inputs were true or complete; or that any real-world outcome followed.",
-  "file_count": 312,
+  "file_count": 313,
   "files": [
     {
       "bytes": 725,
@@ -415,9 +415,9 @@
       "sha256": "b2620d53eff206abc79a52b6acf9c6d16f9dc7bb2e4c54bc658d554e77ee8d76"
     },
     {
-      "bytes": 2524,
+      "bytes": 2747,
       "path": "docs/AER1-CROSSWALK-RESULT.md",
-      "sha256": "0ded1ea476514fc4d68368c79ec5a0c2b29de638c24d59bf4a66ae043cda4862"
+      "sha256": "8b516c4f094bf3d6175fcdfdbd60400339b919b84be59f7a1c7a2cf05e2c9d74"
     },
     {
       "bytes": 6412,
@@ -1250,9 +1250,14 @@
       "sha256": "023309eba518714c83c2eb37373aa5989810fe187ee78794744d8d7102bc4310"
     },
     {
-      "bytes": 9196,
+      "bytes": 13675,
       "path": "tools/aer1_crosswalk.py",
-      "sha256": "e0864854dbb50825bd19f7b9475a98063cd28f59f65ca4bb75b4b57734cc1562"
+      "sha256": "c06ba09a33f0c5f1d74e08e1fc41c340be39e90ffc5b849edf3029ab8bebf109"
+    },
+    {
+      "bytes": 5146,
+      "path": "tools/attest.py",
+      "sha256": "cd4c7b68fc9544eedacd2e7d811235a0be417fdde545dc6fc4a145fc136db805"
     },
     {
       "bytes": 6740,
@@ -1330,9 +1335,9 @@
       "sha256": "dd3fbcd52ff7ba18536925b2700e4c38171d988acc335dbc240b3090f83a4bf0"
     },
     {
-      "bytes": 8677,
+      "bytes": 9739,
       "path": "tools/out/aer1_crosswalk.json",
-      "sha256": "4a29b706f6bfc4b4005f0308467035f4fd527164ddbb1b6ebf8cc575f768253c"
+      "sha256": "ea282319002a04c3b991fee29ca980faed27c6b39b73880d9c73abc6d160cef1"
     },
     {
       "bytes": 15941,
@@ -1565,9 +1570,9 @@
       "sha256": "ce9efd3f1ccefca8553f9592b5d4b9b9853badb3ec649cd7dfef41a6655b69c2"
     },
     {
-      "bytes": 36514,
+      "bytes": 41758,
       "path": "uibc_core/verify.py",
-      "sha256": "73ceaa329fa626663aa4a009a2738189873ba2758e295185152a35b55250cbc8"
+      "sha256": "f25a8675c90ce70442bb798d7f3b31e83e2f2bb1eca030b3c071885f54ef7258"
     },
     {
       "bytes": 26036,
@@ -1575,14 +1580,14 @@
       "sha256": "73e3463174226c368ca1d807eee33ebdf1d44a86cf5e7c6e2cb5e32f1ad0b8cd"
     }
   ],
-  "generated_at": "2026-11-17T07:52:04Z",
+  "generated_at": "2026-11-17T07:59:58Z",
   "licence": "Apache-2.0",
   "project": "uibc-core",
   "reproduce": "python tools/attest.py  (then compare manifest digests)",
   "schema": "uibc.attestation/1",
   "source": {
     "branch": "release/v1.1-precheck",
-    "commit": "0d4c0b26e48235cf6a5de1424034af48976a8a69",
+    "commit": "0e8b7912f25426f5c0c6df262e29f8cfe2d24cba",
     "repo": "https://github.com/zhaoxinghua09-cell/uibc-core"
   },
   "version": "0.3.0"

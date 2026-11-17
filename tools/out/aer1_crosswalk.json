@@ -13,9 +13,9 @@
   },
   "summary": {
     "COVERED": {
-      "classes": 14,
-      "vectors": 49,
-      "checks": 49
+      "classes": 33,
+      "vectors": 58,
+      "checks": 61
     },
     "PARTIAL": {
       "classes": 1,
@@ -23,9 +23,9 @@
       "checks": 8
     },
     "TO-ADD": {
-      "classes": 19,
-      "vectors": 9,
-      "checks": 12
+      "classes": 0,
+      "vectors": 0,
+      "checks": 0
     },
     "N_A": {
       "classes": 8,
@@ -110,129 +110,147 @@
     },
     {
       "class": "invalid/base64-pad-bit",
-      "verdict": "TO-ADD",
-      "check": "S12 strict base64 (pad bits must be zero)",
+      "verdict": "COVERED",
+      "check": "S12 strict base64 (pad bits must be zero) [recomputed: probe rejects]",
       "vectors": null,
-      "checks": null
+      "checks": null,
+      "recomputed": true
     },
     {
       "class": "invalid/base64-unpadded",
-      "verdict": "TO-ADD",
-      "check": "S12 strict base64 (padding required)",
+      "verdict": "COVERED",
+      "check": "S12 strict base64 (padding required) [recomputed: probe rejects]",
       "vectors": null,
-      "checks": null
+      "checks": null,
+      "recomputed": true
     },
     {
       "class": "invalid/ax-base64-unpadded",
-      "verdict": "TO-ADD",
-      "check": "S12 strict base64",
+      "verdict": "COVERED",
+      "check": "S12 strict base64 [recomputed: probe rejects]",
       "vectors": null,
-      "checks": null
+      "checks": null,
+      "recomputed": true
     },
     {
       "class": "invalid/bytes-not-base64",
-      "verdict": "TO-ADD",
-      "check": "S12 strict base64",
+      "verdict": "COVERED",
+      "check": "S12 strict base64 [recomputed: probe rejects]",
       "vectors": null,
-      "checks": null
+      "checks": null,
+      "recomputed": true
     },
     {
       "class": "invalid/uppercase-id",
-      "verdict": "TO-ADD",
-      "check": "S12 canonical id casing",
+      "verdict": "COVERED",
+      "check": "S12 canonical id casing [recomputed: probe rejects]",
       "vectors": null,
-      "checks": null
+      "checks": null,
+      "recomputed": true
     },
     {
       "class": "invalid/nil-uuid",
-      "verdict": "TO-ADD",
-      "check": "S12 non-nil identifier",
+      "verdict": "COVERED",
+      "check": "S12 non-nil identifier [recomputed: probe rejects]",
       "vectors": null,
-      "checks": null
+      "checks": null,
+      "recomputed": true
     },
     {
       "class": "invalid/id-trailing-newline",
-      "verdict": "TO-ADD",
-      "check": "S12 exact identifier bytes",
+      "verdict": "COVERED",
+      "check": "S12 exact identifier bytes [recomputed: probe rejects]",
       "vectors": null,
-      "checks": null
+      "checks": null,
+      "recomputed": true
     },
     {
       "class": "invalid/provenance-trailing-newline",
-      "verdict": "TO-ADD",
-      "check": "S12 exact field bytes",
+      "verdict": "COVERED",
+      "check": "S12 exact field bytes [recomputed: probe rejects]",
       "vectors": null,
-      "checks": null
+      "checks": null,
+      "recomputed": true
     },
     {
       "class": "invalid/timestamp-no-timezone",
-      "verdict": "TO-ADD",
-      "check": "S12 RFC 3339 requires an offset",
+      "verdict": "COVERED",
+      "check": "S12 RFC 3339 requires an offset [recomputed: probe rejects]",
       "vectors": null,
-      "checks": null
+      "checks": null,
+      "recomputed": true
     },
     {
       "class": "invalid/lowercase-timestamp",
-      "verdict": "TO-ADD",
-      "check": "S12 canonical 'T'/'Z' casing",
+      "verdict": "COVERED",
+      "check": "S12 canonical 'T'/'Z' casing [recomputed: probe rejects]",
       "vectors": null,
-      "checks": null
+      "checks": null,
+      "recomputed": true
     },
     {
       "class": "invalid/impossible-date",
-      "verdict": "TO-ADD",
-      "check": "S12 calendar validity",
+      "verdict": "COVERED",
+      "check": "S12 calendar validity [recomputed: probe rejects]",
       "vectors": null,
-      "checks": null
+      "checks": null,
+      "recomputed": true
     },
     {
       "class": "invalid/bad-created-at",
-      "verdict": "TO-ADD",
-      "check": "S12 calendar validity",
+      "verdict": "COVERED",
+      "check": "S12 calendar validity [recomputed: probe rejects]",
       "vectors": null,
-      "checks": null
+      "checks": null,
+      "recomputed": true
     },
     {
       "class": "invalid/leap-second-created-at",
-      "verdict": "TO-ADD",
-      "check": "S12 leap-second policy",
+      "verdict": "COVERED",
+      "check": "S12 leap-second policy [recomputed: probe rejects]",
       "vectors": null,
-      "checks": null
+      "checks": null,
+      "recomputed": true
     },
     {
       "class": "invalid/feb29-1900",
-      "verdict": "TO-ADD",
-      "check": "S12 calendar validity (1900 not a leap year)",
+      "verdict": "COVERED",
+      "check": "S12 calendar validity (1900 not a leap year) [recomputed: probe rejects]",
       "vectors": null,
-      "checks": null
+      "checks": null,
+      "recomputed": true
     },
     {
       "class": "invalid/feb29-non-leap",
-      "verdict": "TO-ADD",
-      "check": "S12 calendar validity",
+      "verdict": "COVERED",
+      "check": "S12 calendar validity [recomputed: probe rejects]",
       "vectors": null,
-      "checks": null
+      "checks": null,
+      "recomputed": true
     },
     {
       "class": "invalid/ax-feb29-1900",
-      "verdict": "TO-ADD",
-      "check": "S12 calendar validity",
+      "verdict": "COVERED",
+      "check": "S12 calendar validity [recomputed: probe rejects]",
       "vectors": null,
-      "checks": null
+      "checks": null,
+      "recomputed": true
     },
     {
       "class": "invalid/ax-feb29-non-leap",
-      "verdict": "TO-ADD",
-      "check": "S12 calendar validity",
+      "verdict": "COVERED",
+      "check": "S12 calendar validity [recomputed: probe rejects]",
       "vectors": null,
-      "checks": null
+      "checks": null,
+      "recomputed": true
     },
     {
       "class": "invalid/bad-offset-range",
-      "verdict": "TO-ADD",
-      "check": "S12 offset range",
+      "verdict": "COVERED",
+      "check": "S12 offset range [recomputed: probe rejects]",
       "vectors": null,
-      "checks": null
+      "checks": null,
+      "recomputed": true
     },
     {
       "class": "invalid/ax-tool-empty-scope",
@@ -327,10 +345,11 @@
     },
     {
       "class": "base/merkle-vectors.json",
-      "verdict": "TO-ADD",
-      "check": "no Merkle tree or inclusion proof at all",
+      "verdict": "COVERED",
+      "check": "no Merkle tree or inclusion proof at all [recomputed: probe rejects]",
       "vectors": 9,
-      "checks": 12
+      "checks": 12,
+      "recomputed": true
     }
   ]
 }

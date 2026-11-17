@@ -168,6 +168,14 @@ def _semantic_problems(obj, path=""):
                     problems.append("%s: %r is an uppercase UUID" % (child, v))
                 if v.replace("-", "").strip("0") == "":
                     problems.append("%s: %r is the nil UUID" % (child, v))
+            if k in ID_KEYS and isinstance(v, str) and not UUID_FORM.match(v):
+                # v1.1: an identifier is bytes, not text. A trailing newline or
+                # padding space makes two identifiers that print identically
+                # compare differently - the exact cause of the AER-1 corpus
+                # classes the corpus calls id-trailing-newline / provenance-trailing-newline.
+                if v != v.strip() or any(ord(c) < 0x21 for c in v):
+                    problems.append("%s: identifier %r has surrounding whitespace "
+                                    "or a control character" % (child, v[:40]))
             problems.extend(_semantic_problems(v, child))
     elif isinstance(obj, list):
         for i, v in enumerate(obj):
@@ -344,6 +352,93 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
     record("S12", "timestamp and identifier strictness", not s12_problems,
            "; ".join(s12_problems[:4]) if s12_problems else
            "timestamps are RFC 3339 with a zone; UUIDs are lowercase and non-nil")
+
+    # S13 Merkle inclusion (v1.1). A hash chain answers "was file N changed?";
+    # a Merkle tree answers "is this one file inside a set of size N that the
+    # manifest committed to, without handing over all N files?". The class had
+    # no counterpart in our code at all. Runs only when the package carries
+    # evidence/merkle.json - a package with no tree is not penalised for it.
+    merkle_file = os.path.join(package_dir, "evidence", "merkle.json")
+    if os.path.isfile(merkle_file):
+        from . import merkle as _mk
+        mdoc = _load_json(merkle_file)
+        s13_problems = []
+        order = sorted(entries, key=lambda e: e.get("path", ""))
+        leaves = []
+        for e in order:
+            p = os.path.join(package_dir, "evidence", e.get("path", ""))
+            try:
+                leaves.append(_mk.leaf_hash(open(p, "rb").read()))
+            except OSError:
+                s13_problems.append("cannot read evidence file %r" % e.get("path"))
+        root = _mk.root_hash(leaves)
+        if mdoc.get("algorithm") != "rfc6962-sha256":
+            s13_problems.append("algorithm %r is not rfc6962-sha256"
+                                % mdoc.get("algorithm"))
+        if mdoc.get("size") != len(leaves):
+            s13_problems.append("declared size %r != %d evidence leaves"
+                                % (mdoc.get("size"), len(leaves)))
+        if str(mdoc.get("root", "")).lower() != root.hex():
+            s13_problems.append("declared root does not match recomputed root")
+        proofs = mdoc.get("proofs") or []
+        for pr in proofs:
+            idx = pr.get("index")
+            path = pr.get("path")
+            want = [e for e in order if e.get("path") == path]
+            if not want:
+                s13_problems.append("proof names unknown evidence %r" % path)
+                continue
+            i = order.index(want[0])
+            if idx is not None and idx != i:
+                s13_problems.append("proof index for %r is %r, recomputed %d"
+                                    % (path, idx, i))
+            try:
+                pf = [bytes.fromhex(h) for h in (pr.get("proof") or [])]
+            except ValueError:
+                s13_problems.append("proof for %r has a non-hex sibling" % path)
+                continue
+            if not _mk.verify_inclusion(leaves[i], i, len(leaves), pf, root):
+                s13_problems.append("inclusion proof for %r does not verify" % path)
+        record("S13", "merkle inclusion proofs", not s13_problems,
+               "; ".join(s13_problems[:4]) if s13_problems else
+               "root %s... over %d leaves; %d inclusion proofs verified"
+               % (root.hex()[:16], len(leaves), len(proofs)))
+
+    # S14 strict base64 (v1.1). "Signature verifies" and "two decoders disagree
+    # about the bytes" are not exclusive: pad bits, missing padding and stray
+    # characters all decode permissively. Runs only on fields the package
+    # itself marks as base64 (keys ending _b64 / _base64 or named 'base64'),
+    # so a schema that does not use base64 cannot be false-flagged.
+    def _b64_fields(obj, path=""):
+        found = []
+        if isinstance(obj, dict):
+            for k, v in obj.items():
+                child = "%s/%s" % (path, k) if path else str(k)
+                if isinstance(v, str) and (str(k).endswith("_b64")
+                                           or str(k).endswith("_base64")
+                                           or str(k) == "base64"):
+                    found.append((child, v, str(k) == "base64_url"))
+                else:
+                    found.extend(_b64_fields(v, child))
+        elif isinstance(obj, list):
+            for i, v in enumerate(obj):
+                found.extend(_b64_fields(v, "%s[%d]" % (path, i)))
+        return found
+
+    from . import encoding as _enc
+    b64_problems = []
+    b64_count = 0
+    for doc_name, doc in (("manifest.json", manifest), ("identity.json", identity),
+                          ("lifecycle.json", lifecycle),
+                          ("evidence/index.json", index)):
+        for field, value, urlsafe in _b64_fields(doc):
+            b64_count += 1
+            for problem in _enc.problems(value, urlsafe=urlsafe):
+                b64_problems.append("%s:%s %s" % (doc_name, field, problem))
+    if b64_count:
+        record("S14", "strict base64", not b64_problems,
+               "; ".join(b64_problems[:4]) if b64_problems else
+               "%d declared base64 field(s) are canonical" % b64_count)
 
     # S4b: index METADATA must match its committed digest (v1.1). Content
     # hashes alone cannot see an entry's type/note/action_digest being

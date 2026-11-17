@@ -1,7 +1,7 @@
 {
   "anchors": {
     "external": {
-      "commit": "c452e6bf7e0090aec05ed1516c7835aae4701edc",
+      "commit": "b27a23c3da1b241cd50c3bf2f89560cce9393fb9",
       "doi": null
     },
     "internal": {
@@ -155,9 +155,9 @@
       "sha256": "ff4fc40548d1a6fad6c9809f6aa1d29183ea2e1810fb9fd56d6570b9eb1adf0c"
     },
     {
-      "bytes": 20383,
+      "bytes": 20830,
       "path": "README.md",
-      "sha256": "f0cd1f1093d55933df35efa6ce13ec7e9bc9a834628a401cf7209fab36fa98fd"
+      "sha256": "90867395cfc606c99fdd04b2f61babdb775b972d1cecf0474472275a4da346a2"
     },
     {
       "bytes": 3189,
@@ -1410,9 +1410,9 @@
       "sha256": "67c937d1ee1bc4005dd1186b007f2205605cf76f7d40e7e114b7b1fab0e13bfd"
     },
     {
-      "bytes": 5146,
+      "bytes": 5321,
       "path": "tools/attest.py",
-      "sha256": "cd4c7b68fc9544eedacd2e7d811235a0be417fdde545dc6fc4a145fc136db805"
+      "sha256": "11d987d95b714b857711f8315f389e4008b2a9de99d912f8da9fe61d13bfdc7b"
     },
     {
       "bytes": 6740,
@@ -1830,14 +1830,14 @@
       "sha256": "73e3463174226c368ca1d807eee33ebdf1d44a86cf5e7c6e2cb5e32f1ad0b8cd"
     }
   ],
-  "generated_at": "2026-11-17T10:02:18Z",
+  "generated_at": "2026-11-17T10:08:58Z",
   "licence": "Apache-2.0",
   "project": "uibc-core",
   "reproduce": "python tools/attest.py  (then compare manifest digests)",
   "schema": "uibc.attestation/1",
   "source": {
     "branch": "release/v1.1-precheck",
-    "commit": "c452e6bf7e0090aec05ed1516c7835aae4701edc",
+    "commit": "b27a23c3da1b241cd50c3bf2f89560cce9393fb9",
     "repo": "https://github.com/zhaoxinghua09-cell/uibc-core"
   },
   "version": "0.3.0"

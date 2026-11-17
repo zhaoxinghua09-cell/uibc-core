@@ -103,7 +103,7 @@ This is the **attribution five-piece set** for this repository as published:
 | Piece | Where it is |
 |---|---|
 | 1. Inner anchor (author + repo + version, inside the artifact) | this paragraph, and `manifest.json → anchors.internal` |
-| 2. Outer anchor (an identifier outside this repo) | commit `{commit}` on `{branch}`; DOI: none assigned |
+| 2. Outer anchor (an identifier outside this repo) | commit `{commit}` on `{branch}`; Zenodo concept DOI `10.5281/zenodo.22456647` covers the LGD doctrine, **not this package** — a DOI for the 0.3.0 deposit is **not yet assigned**, so it must not be cited as this package's DOI |
 | 3. Hash | `manifest.json → files[*].sha256` for {len(files)} tracked files; manifest digest `sha256:{manifest_digest}` |
 | 4. Timestamp | `{now}` (UTC), recorded both here and in `manifest.json` |
 | 5. Licence + notice | Apache-2.0; disclaimer below |

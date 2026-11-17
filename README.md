@@ -70,7 +70,7 @@ python tools/redteam_suite.py                              # 15 attacks, expecte
 > **Verifiable today** — every artifact is independently checkable: Sigstore Rekor transparency log
 > (logIndex 2883389783), concept DOI 10.5281/zenodo.22456647, SWHID
 > `swh:1:ori:819530c8be2adf6da901256ce9fd28063f8f1296` (ISO/IEC 18670).
-> Reproduce: `python -m unittest discover tests` (174 tests) · `python independent_verifier/cross_check.py`.
+> Reproduce: `python -m unittest discover -s tests -p "test_*.py"` (303 tests) · `python independent_verifier/cross_check.py`.
 > **Honest boundary** — no third-party quality review to date; any operational use is self-reported
 > (see ENDORSEMENTS.md: 存证 ≠ 参与 ≠ 认可). Context: [FG-TIDA themes #27](https://github.com/FG-TIDA/themes/issues/27).
 
@@ -87,8 +87,11 @@ UIBC Core 参考实现 v0.3.0 —— Agent 生命周期证据包与验证器：�
 > ⚠️ 状态：PROPOSAL，非正式标准。验证结果是**限定范围的证明**（scoped proof）：
 > PASS 仅表示"在观测到的证据边界内未发现违规"，不声称绝对可信。
 
-> 🔏 发布产物已进入 Sigstore Rekor 公共透明日志（logIndex 2883389783，见 `dist/*.cosign.bundle`）；
-> Zenodo DOI 与 Software Heritage SWHID 见 CITATION.cff。
+> 🔏 发布产物已进入 Sigstore Rekor 公共透明日志（条目 `2883389783` 属早期发布产物 `dist/*.cosign.bundle`；另有条目
+> `3944456508` 记录本仓 head 摘要的外部锚，见 `docs/EXTERNAL-ANCHOR.md`）。
+> **包含证明（inclusion proof）目前验不过**：我们的 RFC 6962 走法与第三方库 `rekor_log_verifier` 同时失败，如实记在文档里。
+> Zenodo **概念 DOI** `10.5281/zenodo.22456647` 属 LGD 理论本体；**本包 0.3.0 的单独 DOI 尚未分配**（存缴包已备，需本人登录上传）。
+> Software Heritage SWHID 见 `CITATION.cff`。
 > 以上均为**存证**，非质量认可。
 
 ## The claim we make (and the claim we refuse to make) · 窄声明

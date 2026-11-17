@@ -15,7 +15,42 @@ Nothing here is a ratified standard.
 
 ## [Unreleased]
 
-Nothing yet. v0.3.0 below is the release cut on 2026-11-12: tag `v0.3.0`, GitHub Release published,
+### Added
+
+- **AEE rail (`uibc_core/aee.py`): an external verifier for the
+  Adversarial Execution Evidence in-toto predicate v0.7**, so the
+  `agent-evidence-vectors` conformance corpus (288 vectors) can run
+  against uibc-core: `python3 -m uibc_core.aee <statement.json>` under
+  the corpus contract (exit 0 = valid; last stdout line one JSON report
+  with verdict / codes / result / tiers; consumer key policy via
+  `AEE_SUBSTRATE_KEYS`). GATE 0 well-formedness (strict I-JSON,
+  vocabulary and corpus digests, coverage partition), GATE 1
+  byte-checkable coverage validity (run-binding derivation v2, kind
+  constraints, method cap), the 0.7 statement-level commitments, the
+  total result recompute, and GATE 2 evidence tiers against pinned
+  substrate keys (strict Ed25519). Stdlib only; the RFC 6962 batch root
+  reuses `uibc_core.merkle`. Corpus result at build time: 288/288
+  (63 accept / 223 reject / 2 indeterminate), reason parity on all
+  rejects. Spot-checks live in `tests/test_aee_rail.py` (skipped when
+  the corpus package is not installed).
+
+### Fixed
+
+- **Browser verifier (`verify.html`) brought back to parity with the CLI.**
+  The page still implemented the v0.3.0 semantics: its seal payload covered
+  identity+manifest only, so every package sealed since v1.1 (seal payload
+  identity+manifest+lifecycle) failed S6 in the browser while passing
+  `uibc verify`. The page now ports the 0.3.3 verifier check-for-check
+  (S1–S18 in the reference report order, including S11 strict serialization,
+  S12 semantic strictness, and the conditional S7/S10/S13–S18 surfaces),
+  canonicalizes with RFC 8785 JCS like the CLI, accepts the legacy payload
+  as `coverage=legacy`, supports a pinned checkpoint head (S9), and embeds
+  a sample package built with the current release. A 27-run parity corpus
+  ships in `tests/verify_html_parity/`; the page and the CLI agree on every
+  check. Declared limit: S16 (RFC 3161 tokens) is INCONCLUSIVE on the page
+  by design — the port does not parse DER tokens.
+
+v0.3.0 below is the release cut on 2026-11-12: tag `v0.3.0`, GitHub Release published,
 and `uibc-core 0.3.0` uploaded to PyPI on 2026-11-12 (sdist + wheel, same bytes as the CI build —
 sha256 listed in `docs/pypi-0.3.0-release.md`). The release-triggered `publish-pypi.yml` run
 `43150166821` still fails at the upload step because the trusted-publisher registration is not in

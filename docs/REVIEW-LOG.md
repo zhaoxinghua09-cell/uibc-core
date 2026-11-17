@@ -188,6 +188,7 @@ structure and linking, not ECMAScript number formatting.
 `ParsableOctetString`; `token["content"]["encap_content_info"]["content"]["message_imprint"]`
 raises `TypeError: 'ParsableOctetString' object is not subscriptable`. The imprint lives one
 `.parsed` hop further in.
+
 ## Round 32 — Merkle inclusion and policy digests join the corpus (2026-11-18)
 
 Round 31 closed the chain and anchor gap and left two named holes: Merkle inclusion had

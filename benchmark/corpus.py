@@ -52,7 +52,12 @@ def tree_digest(path):
 
 
 def build(out, rerun=False):
-    if rerun or not os.path.exists(RESULTS):
+    # Self-seeding: a fresh clone has neither results.json nor the materialised
+    # mutation packages (both are build products and gitignored). Before this
+    # check, `python benchmark/corpus.py` on a clean clone died with
+    # "FileNotFoundError: tools/out/_mb/base" and took 18 tests down with it -
+    # found by cloning the public branch as an outsider, not by reading the docs.
+    if rerun or not os.path.exists(RESULTS) or not os.path.isdir(os.path.join(MB, "base")):
         print("building benchmark packages ...")
         rc = subprocess.call([sys.executable,
                               os.path.join(ROOT, "tools", "mutation_benchmark.py")],

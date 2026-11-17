@@ -1,7 +1,7 @@
 {
   "anchors": {
     "external": {
-      "commit": "d63895d3ccbeca2b072ccc6b283bf956cddb5a20",
+      "commit": "71c15ecffa4da50b3c05eef4beb1ef98f8ae193c",
       "doi": null
     },
     "internal": {
@@ -12,7 +12,7 @@
   },
   "author": "Steven Zhao (Xinghua Zhao)",
   "disclaimer": "This attestation records provenance only. It is not a certification, not a regulatory clearance, not an audit opinion, and not a claim that the software is fit for any particular use. A uibc PASS means: within the observed evidence boundary, no violation was detected. It does not claim the agent was correct, safe, or wise; that the recorded inputs were true or complete; or that any real-world outcome followed.",
-  "file_count": 318,
+  "file_count": 330,
   "files": [
     {
       "bytes": 725,
@@ -428,6 +428,11 @@
       "bytes": 2099,
       "path": "docs/EQMS-SAMPLE.md",
       "sha256": "62d86a9211221d3248f86852bcdc7c84ba5fc6ec451e84e342348c941072cef5"
+    },
+    {
+      "bytes": 2771,
+      "path": "docs/EXTERNAL-ANCHOR.md",
+      "sha256": "20c4d16d02c83a295e4b97f40f800642142f1a27ba03a7271d160f4dd9e7f2f5"
     },
     {
       "bytes": 3563,
@@ -1125,6 +1130,21 @@
       "sha256": "be49eed2ee01b4b44843a93e8d737e6085d10d65a5ddb698114d5a06faf4aacc"
     },
     {
+      "bytes": 276,
+      "path": "tests/fixtures/anchor/anchored_head.json",
+      "sha256": "4ad23d9153c33c77253b23e1f5938249cb6877de93eb7593dea26fa5f7fd6e98"
+    },
+    {
+      "bytes": 4644,
+      "path": "tests/fixtures/anchor/freetsa.tsr",
+      "sha256": "b95e5c70a3b26c440deec9c0dca73bf928d8261ddff1dc393e22a6c1674d6a16"
+    },
+    {
+      "bytes": 5107,
+      "path": "tests/fixtures/anchor/freetsa_ca.pem",
+      "sha256": "b8201c19ae46a882ceb83ce58251662fa0e47b0ebff40d6bc025f3e4626ab51e"
+    },
+    {
       "bytes": 12263,
       "path": "tests/stress_test.py",
       "sha256": "7e4c2ed83d56d4c1ad8f65576ecfe9c6527610c5971d899bcb67911563f85caf"
@@ -1240,6 +1260,11 @@
       "sha256": "006148f5ba2b5224a287ba59c6914e72bcb7ecbb0a2e3b2c85f764ad72ef0d0d"
     },
     {
+      "bytes": 3130,
+      "path": "tests/test_v13_anchor_tsa.py",
+      "sha256": "81f2e7b2512c1b03646752b6a9bdc42d38dd1b0f3a6cfbc62617256d6575bb3a"
+    },
+    {
       "bytes": 5194,
       "path": "tests/test_v13_merkle_encoding.py",
       "sha256": "d43a643b4faa06cabbd56404c80e9b244f477bd73eef8e0ffec51943ac298626"
@@ -1263,6 +1288,11 @@
       "bytes": 14992,
       "path": "tools/aer1_crosswalk.py",
       "sha256": "a0311a0e242bd6cff0dcabda82d75ca4d8923ff1fce7590e8fa4f3d02b5669c7"
+    },
+    {
+      "bytes": 4931,
+      "path": "tools/anchor_tsa.py",
+      "sha256": "67c937d1ee1bc4005dd1186b007f2205605cf76f7d40e7e114b7b1fab0e13bfd"
     },
     {
       "bytes": 5146,
@@ -1348,6 +1378,36 @@
       "bytes": 9794,
       "path": "tools/out/aer1_crosswalk.json",
       "sha256": "94be22659dc4386ecdc063bb34fb3ba3e230148dab3a6289793859e0499da128"
+    },
+    {
+      "bytes": 985,
+      "path": "tools/out/anchor_freetsa.json",
+      "sha256": "bc9bd11c9c561fc830df09aae25badadb262bd90684b2d8892ceafcdf7c353f2"
+    },
+    {
+      "bytes": 4644,
+      "path": "tools/out/anchor_freetsa.tsr",
+      "sha256": "b95e5c70a3b26c440deec9c0dca73bf928d8261ddff1dc393e22a6c1674d6a16"
+    },
+    {
+      "bytes": 5107,
+      "path": "tools/out/anchor_freetsa_ca.pem",
+      "sha256": "b8201c19ae46a882ceb83ce58251662fa0e47b0ebff40d6bc025f3e4626ab51e"
+    },
+    {
+      "bytes": 323,
+      "path": "tools/out/anchor_open-tsa.json",
+      "sha256": "fe5288aa66507b02e17ed833997c43949f50bb0acb72ad84b8d1ec0490d5c611"
+    },
+    {
+      "bytes": 2514,
+      "path": "tools/out/anchor_open-tsa.tsr",
+      "sha256": "ecb6a2961b8341108935c9e4818ab93ccf74533da2c23e514e700418ad134f95"
+    },
+    {
+      "bytes": 0,
+      "path": "tools/out/anchor_open-tsa_ca.pem",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     {
       "bytes": 15941,
@@ -1595,9 +1655,9 @@
       "sha256": "ce9efd3f1ccefca8553f9592b5d4b9b9853badb3ec649cd7dfef41a6655b69c2"
     },
     {
-      "bytes": 43214,
+      "bytes": 46460,
       "path": "uibc_core/verify.py",
-      "sha256": "420ca82af590bcc3077f91cecbd998616cf11b19760d57e7fc03a54dae6c92c8"
+      "sha256": "052666f3c1eca04c1ce220d3848967fbd918755f51350add4ce55de050e6c93c"
     },
     {
       "bytes": 26036,
@@ -1605,14 +1665,14 @@
       "sha256": "73e3463174226c368ca1d807eee33ebdf1d44a86cf5e7c6e2cb5e32f1ad0b8cd"
     }
   ],
-  "generated_at": "2026-11-17T08:13:07Z",
+  "generated_at": "2026-11-17T08:18:23Z",
   "licence": "Apache-2.0",
   "project": "uibc-core",
   "reproduce": "python tools/attest.py  (then compare manifest digests)",
   "schema": "uibc.attestation/1",
   "source": {
     "branch": "release/v1.1-precheck",
-    "commit": "d63895d3ccbeca2b072ccc6b283bf956cddb5a20",
+    "commit": "71c15ecffa4da50b3c05eef4beb1ef98f8ae193c",
     "repo": "https://github.com/zhaoxinghua09-cell/uibc-core"
   },
   "version": "0.3.0"

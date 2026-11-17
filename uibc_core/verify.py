@@ -467,6 +467,71 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
                "%d anchor(s) resolved against the evidence Merkle root; "
                "%d external anchor(s) unresolved by design" % (a_resolved, a_external))
 
+    # S16 external timestamp (v1.1). Everything above is witnessed by parties we
+    # choose: our tree, our head file, our pin. An RFC 3161 token is the one
+    # witness we cannot mint ourselves - it dates a digest with a key held by a
+    # third party. Runs only when the package carries evidence/external_anchor.json,
+    # and an unjudgeable token is INCONCLUSIVE, never PASS.
+    ext_file = os.path.join(package_dir, "evidence", "external_anchor.json")
+    if os.path.isfile(ext_file):
+        from . import tsa as _tsa
+        ext = _load_json(ext_file)
+        ext_problems = []
+        if not _tsa.HAVE_ASN1:
+            checks.append({"id": "S16", "name": "external timestamp (RFC 3161)",
+                           "result": "INCONCLUSIVE",
+                           "detail": "verifier lacks asn1crypto; a token in the package "
+                                     "cannot be judged, so it is not counted as checked"})
+            ok = False
+        else:
+            rel_data = ext.get("digest_of") or "manifest.json"
+            data_path = os.path.join(package_dir, rel_data)
+            tsr_path = ext.get("tsr") or ""
+            ca_path = ext.get("cabundle") or ""
+            body = b""
+            cabundle = b""
+            try:
+                with open(data_path, "rb") as fh:
+                    data_bytes = fh.read()
+            except OSError:
+                data_bytes = None
+                ext_problems.append("cannot read anchored file %r" % rel_data)
+            try:
+                with open(os.path.join(package_dir, tsr_path), "rb") as fh:
+                    body = fh.read()
+            except OSError:
+                ext_problems.append("cannot read token %r" % tsr_path)
+            try:
+                with open(os.path.join(package_dir, ca_path), "rb") as fh:
+                    cabundle = fh.read()
+            except OSError:
+                ext_problems.append("cannot read CA bundle %r" % ca_path)
+
+            declared_tsr_sha = ext.get("tsr_sha256")
+            if body and declared_tsr_sha:
+                import hashlib as _hl
+                if _hl.sha256(body).hexdigest() != declared_tsr_sha:
+                    ext_problems.append("token digest is not the declared tsr_sha256")
+
+            ext_info = {}
+            if not ext_problems and data_bytes is not None:
+                import hashlib as _hl
+                v_ok, ext_info, v_problems = _tsa.verify_token(
+                    body, _hl.sha256(data_bytes).digest(), cabundle)
+                if not v_ok:
+                    ext_problems.extend(v_problems)
+
+            if ext_problems:
+                record("S16", "external timestamp (RFC 3161)", False,
+                       "; ".join(ext_problems[:3]))
+            else:
+                record("S16", "external timestamp (RFC 3161)", True,
+                       "token dates %r at %s (%s, serial %s); signature verified offline"
+                       % (rel_data, ext_info.get("gen_time"),
+                          (ext_info.get("tsa") or {}).get("organization_name")
+                          if isinstance(ext_info.get("tsa"), dict) else "TSA",
+                          ext_info.get("serial")))
+
     # S4b: index METADATA must match its committed digest (v1.1). Content
     # hashes alone cannot see an entry's type/note/action_digest being
     # rewritten; the index digest is carried in the sealed manifest.

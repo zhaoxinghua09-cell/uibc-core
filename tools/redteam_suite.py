@@ -190,6 +190,33 @@ def rt11(d, key):
     return verify(d)
 
 
+# RT13 追加一条伪造回执：前驱链接填错，试图把编造记录接在真链尾巴上 -----
+def rt13(d, key):
+    env = {"type": "protectmcp:decision", "issued_at": "2026-11-17T09:00:00Z",
+           "issuer_id": "did:web:attacker.eu"}
+    _w(os.path.join(d, "evidence", "chain.json"), {
+        "schema": "uibc-core/chain@1",
+        "receipts": [
+            {"envelope": env, "previous_receipt_hash": "0" * 64},
+            {"envelope": {"type": "protectmcp:decision",
+                          "issued_at": "2026-11-17T09:01:00Z",
+                          "issuer_id": "did:web:attacker.eu"},
+             "previous_receipt_hash": "c" * 64}]})
+    return verify(d)
+
+
+# RT14 策略制品被换掉但声明摘要不改（digest 与内容脱钩）---------------
+def rt14(d, key):
+    pol = os.path.join(d, "evidence", "policy")
+    os.makedirs(pol, exist_ok=True)
+    with open(os.path.join(pol, "p.json"), "w", encoding="utf-8") as f:
+        json.dump({"action": "allow_all"}, f)
+    _w(os.path.join(d, "evidence", "policies.json"),
+       {"policies": [{"digest": "sha256:" + "d" * 64,
+                      "path": "evidence/policy/p.json"}]})
+    return verify(d)
+
+
 case("RT01", "索引路径穿越 ../../outside.txt", "FAIL（路径必须落在证据根内）", rt01)
 case("RT02", "索引绝对路径 C:\\Windows\\win.ini", "FAIL（不得读任意绝对路径）", rt02)
 case("RT03", "证据文件换成指向外部的符号链接", "FAIL（或至少不得读穿）", rt03)
@@ -202,6 +229,8 @@ case("RT09", "只改行尾 CRLF（语义不变）", "FAIL（哈希敏感，属�
 case("RT10", "攻击者自洽重签（换钥）", "open=PASS 但必须标 unanchored", rt10)
 case("RT11", "索引 type: ACTION→OUTPUT（M19 变体）", "FAIL（S7）", rt11)
 case("RT12", "换钥重签 + 验证方钉住原公钥", "FAIL（S6）", rt12)
+case("RT13", "链尾追加伪造回执（前驱链接写错）", "FAIL（S17）", rt13)
+case("RT14", "策略制品换掉、声明摘要不改", "FAIL（S18）", rt14)
 
 
 def main():

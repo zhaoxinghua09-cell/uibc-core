@@ -532,6 +532,46 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
                           if isinstance(ext_info.get("tsa"), dict) else "TSA",
                           ext_info.get("serial")))
 
+    # S17 linear receipt chain (v1.1). S8/S9/S13 all commit a TREE: they answer
+    # "was this byte changed" and "is this leaf inside the set". None of them
+    # answers "is this record the successor of that record", which is what a
+    # regulator asks when one receipt is pulled out of the middle of a stream.
+    # draft-marques-asqav-compliance-receipts-01 section 4.3 makes the linear
+    # link mandatory (previousReceiptHash over the JCS of the predecessor) and
+    # section 8 requires the verifier to recompute it. Runs only when the
+    # package carries evidence/chain.json.
+    chain_file = os.path.join(package_dir, "evidence", "chain.json")
+    if os.path.isfile(chain_file):
+        from . import chain as _chain
+        cdoc = _load_json(chain_file)
+        c_problems, c_checked = _chain.check_chain(cdoc)
+        record("S17", "linear receipt chain", not c_problems,
+               "; ".join(c_problems[:3]) if c_problems else
+               "%d receipt(s) linked by previousReceiptHash over JCS; "
+               "genesis is 64 zeros" % c_checked)
+
+    # S18 policy artefact resolution (v1.1). A `policy_digest` nobody can
+    # resolve is a number, not evidence. draft-marques-asqav-compliance-receipts-01
+    # section 8 makes the verifier reject a receipt whose digest does not
+    # resolve, and section 4.2.4 defines the value as SHA-256 over the JCS of a
+    # retained artefact. Runs only when the package carries
+    # evidence/policies.json; any policy_digest declared in evidence/chain.json
+    # must resolve there.
+    policies_file = os.path.join(package_dir, "evidence", "policies.json")
+    if os.path.isfile(policies_file):
+        from . import policy as _policy
+        pdoc = _load_json(policies_file)
+        required = []
+        if os.path.isfile(chain_file):
+            required = _policy.declared_digests(_load_json(chain_file))
+        p_problems, p_resolved = _policy.check_policies(
+            package_dir, pdoc, required_digests=required)
+        record("S18", "policy artefact resolution", not p_problems,
+               "; ".join(p_problems[:3]) if p_problems else
+               "%d policy artefact(s) resolve to their declared SHA-256 over "
+               "JCS; %d digest(s) referenced by receipts resolved"
+               % (p_resolved, len(required)))
+
     # S4b: index METADATA must match its committed digest (v1.1). Content
     # hashes alone cannot see an entry's type/note/action_digest being
     # rewritten; the index digest is carried in the sealed manifest.

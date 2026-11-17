@@ -170,6 +170,8 @@ python independent_verifier/cross_check.py  # 独立第二实现交叉核验（7
 | S4 | 证据文件 SHA-256 逐一重算比对（**内容篡改**由 S4 逐文件哈希与 S5 Evidence Root 捕捉；S3 只管生命周期事件序列与转移合法性，**不检测内容篡改**；封签（S6）作用于 identity+manifest，也不覆盖证据内容） |
 | S5 | Evidence Root 重算比对 manifest |
 | S6 | **封签签名**：Ed25519 封签（v0.3 新增）在开放模式下即可公开核验——包里带公钥，任何人可验；HMAC 封签（v0.2）需 `--key` 严格模式核对；未签包 INCONCLUSIVE。判定语义（三值裁决）见 `docs/verdict-and-seal-semantics.md` |
+| S17 | **线性回执链**（包内有 `evidence/chain.json` 时运行）：逐条重算前驱信封的 SHA-256(JCS)，与声明的 `previous_receipt_hash` 比对；首条必须是 64 个 0；改中间信封、丢首条、乱序、空链、无法规范化一律 FAIL |
+| S18 | **策略制品解析**（包内有 `evidence/policies.json` 时运行）：每个 `sha256:<hex>` 必须与随包 JSON 制品的 SHA-256(JCS) 相符；回执声明的 `policy_digest` 若解析不到即 FAIL |
 
 ## 验证模式（v0.3）
 

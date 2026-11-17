@@ -53,6 +53,18 @@ URLS = [
     ("NHE 审计链 -00", "https://datatracker.ietf.org/doc/draft-ruvalcaba-nhe-audit/"),
     ("APort 平台", "https://aport.io/about/"),
     ("21 CFR 892.2055", "https://www.ecfr.gov/current/title-21/chapter-I/subchapter-H/part-892/subpart-B/section-892.2055"),
+    # --- 第六轮（2026-11-17 晚）竞品实测新增 ---
+    ("Modern Requirements PCCP 监控", "https://www.modernrequirements.com/fr-ca/med-tech/"),
+    ("Cloudtheapp PCCP 变更记录", "https://www.cloudtheapp.com/blog/predetermined-change-control-plans-pccps-fdas-framework-for-managing-ai-ml-device-updates"),
+    ("ComplianceQuest 器械 QMS", "https://www.compliancequest.com/medical-device/"),
+    ("AER-1 -12 文本", "https://www.ietf.org/archive/id/draft-zambo-aer1-12.txt"),
+    ("AER-1 -26 草案页", "https://datatracker.ietf.org/doc/draft-zambo-aer1/"),
+    ("AER-1 → WIMSE 映射", "https://datatracker.ietf.org/doc/draft-zambo-aer1-wimse-mapping/"),
+    ("CoA 论文（Certificate of Action）", "https://kenpriore.ai/papers/certificate-of-action.pdf"),
+    ("sahu 行动收据 -00", "https://www.ietf.org/archive/id/draft-sahu-agent-action-receipts-00.html"),
+    ("ISO/IEC 24970 标准页", "https://www.iso.org/standard/88723.html"),
+    ("IMDRF PCCP N90", "https://www.imdrf.org/sites/default/files/2026-08/IMDRF%20SaMD%20WG%20N90%20FINAL%20Essential%20Principles%20and%20Content%20PCCPs%20(1).pdf"),
+    ("AER-1 公开语料", "https://zambo.dev/aer1/corpus.json"),
 ]
 
 

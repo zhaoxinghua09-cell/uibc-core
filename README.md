@@ -2,6 +2,24 @@
 
 <!-- mcp-name: io.github.zhaoxinghua09-cell/uibc-core -->
 
+## Verify it yourself — one command, no install, no account
+
+```bash
+git clone --depth 1 --branch release/v1.1-precheck https://github.com/zhaoxinghua09-cell/uibc-core.git
+cd uibc-core && python tools/external_node_check.py
+```
+
+It prints `CONSISTENT` only when **both** hold: a second, independently written verifier agrees with the reference one, **and** three packages that must be rejected (timestamp without a zone, `1900-02-29`, uppercase UUID) are rejected. A checker that answers PASS for everything cannot pass this.
+
+**What a PASS means** — and nothing more:
+
+> A uibc PASS means: within the observed evidence boundary, no violation was detected. It does not claim the agent was correct, safe, or wise; that the recorded inputs were true or complete; or that any real-world outcome followed.
+
+**Current state, including what we are short of:** 208 tests green · the verifier needs no third-party package (Ed25519 is implemented in-repo) · **external verification nodes: 0** — we publish the number we do not have; running the command above and sending back `external_node_result.json` makes it 1.
+
+**Not** a QMS, and **not** a competing receipt standard: it answers one question a platform cannot answer about itself — *can a stranger recompute your conclusion, offline?*
+
+
 > **在线门户 Portal**：https://zhaoxinghua09-cell.github.io/lgd-hub/ — LGD 生态全景（理论 / 参考实现 / 技能全库），一跳即达。
 
 

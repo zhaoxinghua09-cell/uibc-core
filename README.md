@@ -65,7 +65,12 @@ UIBC Core 参考实现 v0.3.0 —— Agent 生命周期证据包与验证器：�
 ## Terminology alignment · 术语与上游对齐
 
 本项目**不自造词**。下列术语与已有草案是同名或上下位关系，写清楚是为了让评审方一眼判断
-哪些是我们的增量、哪些是复用。完整映射见 `docs/TERMINOLOGY.md`。
+哪些是我们的增量、哪些是复用。完整映射见 `docs/TERMINOLOGY.md`；
+我们的定位与"不主张什么"见 `docs/COMPOSITION-VERIFIER.md`。
+
+**可复算的度量衡**：`python benchmark/run.py` —— 21 类篡改 × 3 种观测模式，输出两个不同
+的数字（接受率 / **未被设计解释的接受数**）。当前 open 9.5%（2/21，均为设计边界）、
+pinned 4.8%（1/21）、head-pinned 0.0%，**三档未解释接受均为 0**。见 `benchmark/README.md`。
 
 | uibc 用词 | 上游用词（出处） | 关系 |
 |---|---|---|

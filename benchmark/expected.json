@@ -1,0 +1,41 @@
+{
+  "note": "Expectation matrix for the 21-class mutation benchmark. `should_reject` is the AUTHORED intent, written before looking at results; `run.py` reports what actually happened and computes undocumented acceptance separately from acceptance that the design itself explains.",
+  "semantics": {
+    "open": "no key supplied: the seal's public key is read out of the package under test, so a signature proves internal consistency only (`trust_level=unanchored`).",
+    "pinned": "public key supplied out-of-band (--pubkey), so key substitution is detectable.",
+    "head-pinned": "pinned key AND a checkpoint head supplied out-of-band (--expect-head), so rollback to an older self-consistent package is detectable."
+  },
+  "metric": "undocumented_accept_rate = accepted cases that are NOT explained by an observation channel the mode lacks. This is the number that matters; the raw acceptance rate is reported beside it so the two can never be confused.",
+  "by_design_accept": {
+    "open": ["M17", "M20"],
+    "pinned": ["M20"],
+    "head-pinned": []
+  },
+  "by_design_reason": {
+    "M17": "key substitution needs a key from outside the package; open mode has none.",
+    "M20": "a whole-package rollback is self-consistent and correctly signed; without a head observed outside the package there is nothing to compare against."
+  },
+  "cases": [
+    {"id": "M01", "mutation": "manifest.agent_id 替换为 evil-agent", "should_reject": ["open", "pinned", "head-pinned"]},
+    {"id": "M02", "mutation": "manifest.evidence_root 换成全 0", "should_reject": ["open", "pinned", "head-pinned"]},
+    {"id": "M03", "mutation": "manifest.agent_version 改版本号", "should_reject": ["open", "pinned", "head-pinned"]},
+    {"id": "M04", "mutation": "manifest.status 自封 APPROVED", "should_reject": ["open", "pinned", "head-pinned"]},
+    {"id": "M05", "mutation": "manifest 增字段 human_approval=granted", "should_reject": ["open", "pinned", "head-pinned"]},
+    {"id": "M06", "mutation": "identity.owner 换所有者", "should_reject": ["open", "pinned", "head-pinned"]},
+    {"id": "M07", "mutation": "identity.agent_type 改代理类型", "should_reject": ["open", "pinned", "head-pinned"]},
+    {"id": "M08", "mutation": "lifecycle ACTIVATE 时间改到 2030", "should_reject": ["open", "pinned", "head-pinned"]},
+    {"id": "M09", "mutation": "lifecycle REGISTER 的 actor 改成 attacker", "should_reject": ["open", "pinned", "head-pinned"]},
+    {"id": "M10", "mutation": "lifecycle 删首事件（断链）", "should_reject": ["open", "pinned", "head-pinned"]},
+    {"id": "M11", "mutation": "lifecycle 追加非法 ACTIVATE", "should_reject": ["open", "pinned", "head-pinned"]},
+    {"id": "M12", "mutation": "证据内容改 1 字节", "should_reject": ["open", "pinned", "head-pinned"]},
+    {"id": "M13", "mutation": "证据扩表（追加文件+条目，哈希自洽）", "should_reject": ["open", "pinned", "head-pinned"]},
+    {"id": "M14", "mutation": "证据从 index 删掉一条", "should_reject": ["open", "pinned", "head-pinned"]},
+    {"id": "M15", "mutation": "删掉证据文件", "should_reject": ["open", "pinned", "head-pinned"]},
+    {"id": "M16", "mutation": "封签签名末字节翻转", "should_reject": ["open", "pinned", "head-pinned"]},
+    {"id": "M17", "mutation": "换钥重签（攻击者公钥 + 私钥）", "should_reject": ["pinned", "head-pinned"]},
+    {"id": "M18", "mutation": "包根加 notes.md（未声明文件）", "should_reject": ["open", "pinned", "head-pinned"]},
+    {"id": "M19", "mutation": "索引元数据 type/note 改动（不动文件字节）", "should_reject": ["open", "pinned", "head-pinned"]},
+    {"id": "M20", "mutation": "整包回滚（装回旧的自洽包）", "should_reject": ["head-pinned"]},
+    {"id": "M21", "mutation": "未封签包截断尾部（manifest 仍写长链）", "should_reject": ["open", "pinned", "head-pinned"]}
+  ]
+}

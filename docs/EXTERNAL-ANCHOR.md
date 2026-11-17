@@ -166,6 +166,28 @@ fail on the same proof. That is evidence about the *proof format* (20 siblings f
 a 3.8e9-leaf tree, leaf/step conventions not documented on the pages we found),
 not about one implementation's arithmetic. Independent inclusion verification
 therefore stays **blocked**, and no claim of it appears anywhere in the release.
+
+### OpenTimestamps: the second anchor type (2026-11-17)
+
+The ASQAV compliance profile wants "RFC 3161, OpenTimestamps, or both". We
+submitted the same head digest to a public OTS calendar, so the two anchors
+cover one digest rather than two unrelated claims:
+
+| item | value |
+|---|---|
+| file | `tools/out/release_status.json`, digest `4ad23d9153c3…7fd6e98` |
+| RFC 3161 | Free TSA token, `genTime=2026-11-17T08:11:35Z`, signature verified offline |
+| OpenTimestamps | `alice.btc.calendar.opentimestamps.org`, proof `tests/fixtures/anchor/ots_head.ots` (207 bytes) |
+| what the OTS proof says today | **one pending calendar attestation, zero Bitcoin block attestations** |
+
+That is the honest status: a calendar attestation says the calendar had this
+digest at submission time, which is weaker than a block attestation. The
+upgrade path (`tools/anchor_ots.py --upgrade`) needs hours to days, and the
+Bitcoin block header is not cross-checked here because that requires a chain
+source. `tests/test_v14_ots_anchor.py` asserts the proof contains **no**
+block attestation, so the claim cannot drift into "Bitcoin-anchored" by
+accident. The test is skipped when the `opentimestamps` library is absent: the
+verifier stays dependency-free.
 ### Checkpoint key: what was tried (2026-11-17, all negative)
 
 | attempt | result |

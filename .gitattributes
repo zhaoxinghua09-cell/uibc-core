@@ -11,3 +11,14 @@
 #   2. This attribute forces LF on BOTH store and checkout for every file under
 #      fixtures/, so content hashes are identical on every platform.
 fixtures/** text eol=lf
+
+# Exception, and it is deliberate: `anchored_head.json` is the file an external RFC 3161
+# token was taken over. The token fixes its bytes (CRLF, digest 4ad23d91…), so any
+# normalisation changes the digest and makes the token look like it dates something else.
+# Marked `-text` the bytes travel unchanged, which is what a byte-level anchor requires.
+# Everything else under fixtures/ stays LF per the rule above.
+tests/fixtures/anchor/anchored_head.json -text
+tests/fixtures/anchor/*.tsr -text
+tests/fixtures/anchor/*.ots -text
+tests/fixtures/anchor/*.json -text
+tests/fixtures/anchor/*.pem -text

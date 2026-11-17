@@ -1,0 +1,59 @@
+name: manifest-verify demo
+
+# Proves the Action on GitHub's own runners, in public: builds a small tree,
+# writes a manifest, runs the Action (must PASS), then flips one byte and
+# re-runs (must FAIL). A demo that can only pass is not a demo.
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  demo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v4, pinned
+
+      - name: Build a fixture tree and its manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p demo/data
+          printf 'alpha\n' > demo/data/a.txt
+          printf 'beta\n'  > demo/data/b.txt
+          printf 'gamma\n' > demo/data/c.txt
+          cd demo
+          sha256sum data/a.txt data/b.txt data/c.txt > manifest.sha256
+          cat manifest.sha256
+
+      - name: Action must PASS on an intact tree
+        id: ok
+        uses: ./.github/actions/manifest-verify
+        with:
+          manifest: demo/manifest.sha256
+          root: demo
+          negative_control: "true"
+
+      - name: Flip one byte, the Action must FAIL
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp demo/data/b.txt demo/data/b.txt.bak
+          python3 - <<'PY'
+          p = "demo/data/b.txt"
+          b = bytearray(open(p, "rb").read())
+          b[0] ^= 0x01
+          open(p, "wb").write(bytes(b))
+          PY
+          set +e
+          python "$GITHUB_WORKSPACE/.github/actions/manifest-verify/entry.py" \
+            --manifest demo/manifest.sha256 --root demo --negative-control false
+          rc=$?
+          set -e
+          mv demo/data/b.txt.bak demo/data/b.txt
+          if [ "$rc" -ne 1 ]; then
+            echo "expected exit 1 (MISMATCH), got $rc"
+            exit 1
+          fi
+          echo "tampered tree correctly rejected with exit 1"

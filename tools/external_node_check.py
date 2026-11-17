@@ -102,8 +102,17 @@ def main(argv=None):
     args = ap.parse_args(argv)
 
     if not os.path.isdir(args.pkg):
-        print("package not found: %s\n(run: python benchmark/corpus.py)" % args.pkg)
-        return 2
+        if os.path.abspath(args.pkg) == os.path.abspath(BASE):
+            print("corpus missing; building it (first run only, ~10s) ...")
+            rc = subprocess.call([sys.executable,
+                                  os.path.join(ROOT, "benchmark", "corpus.py")],
+                                 cwd=ROOT)
+            if rc != 0 or not os.path.isdir(args.pkg):
+                print("could not build the corpus (rc=%d)" % rc)
+                return 2
+        else:
+            print("package not found: %s" % args.pkg)
+            return 2
 
     ind_result, ind_ms = _independent(args.pkg)
     ref_result, ref_ms, ref_detail = _reference(args.pkg)

@@ -15,9 +15,10 @@
 ```bash
 git clone --depth 1 --branch release/v1.1-precheck https://github.com/zhaoxinghua09-cell/uibc-core.git
 cd uibc-core
-python benchmark/corpus.py                 # 首次会自建语料，约 10 秒
 python tools/external_node_check.py --out external_node_result.json
 ```
+
+**只用一条命令。** 首次运行若没有语料，脚本会自己建（约 10 秒），不需要你先跑别的。
 
 最后一条会打印类似：
 

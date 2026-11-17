@@ -20,7 +20,7 @@ Copyright (c) 2026 赵兴华 / Steven Zhao·China。保留所有权利。
                     ← 非认证、非背书、非监管认可（not a certification or endorsement）
 代码许可 (code license) : uibc-core = Apache-2.0 (see repo LICENSE)
                     本文本与理论表述不在 Apache-2.0 覆盖范围内
-引用格式 (cite as)      : uibc-core/CITATION.cff · concept DOI 10.5281/zenodo.22821834
+引用格式 (cite as)      : uibc-core/CITATION.cff · concept DOI 10.5281/zenodo.22456647
 首次公开锚 (first public): 2026-09-17 13:31:45 UTC (commit cb6f11b)
                     外锚 (external anchor): Sigstore Rekor logIndex 2883389783
 ```

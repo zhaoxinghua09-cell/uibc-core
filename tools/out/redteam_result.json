@@ -1,7 +1,7 @@
 {
   "meta": {
     "probe": "redteam",
-    "generated_at_utc": "2026-11-17T06:56:49Z"
+    "generated_at_utc": "2026-11-17T08:39:54Z"
   },
   "cases": [
     {
@@ -82,7 +82,7 @@
       "expect": "PASS 且耗时线性可接受",
       "result": "PASS",
       "failed_checks": [],
-      "note": "trust=unanchored elapsed=158.4ms"
+      "note": "trust=unanchored elapsed=236.7ms"
     },
     {
       "id": "RT09",
@@ -113,6 +113,16 @@
         "S8"
       ],
       "note": "trust=unanchored"
+    },
+    {
+      "id": "RT12",
+      "case": "换钥重签 + 验证方钉住原公钥",
+      "expect": "FAIL（S6）",
+      "result": "FAIL",
+      "failed_checks": [
+        "S6"
+      ],
+      "note": "trust=unattested"
     }
   ]
 }

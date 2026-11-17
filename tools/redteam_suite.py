@@ -166,6 +166,22 @@ def rt10(d, key):
     return verify(d)
 
 
+# RT12 同一攻击，但验证方钉住了原公钥：暴露 RT10 的真缺口在 open 模式 ------
+def rt12(d, key, pubkey=None):
+    seed = us.ed_generate_seed()
+    ident = _j(os.path.join(d, "identity.json"))
+    man = _j(os.path.join(d, "manifest.json"))
+    lc = _j(os.path.join(d, "lifecycle.json"))
+    sig, pub_b64 = us.ed_seal_sign(seed, ident, man, lc)
+    _w(os.path.join(d, "signatures", "seal.json"), {
+        "schema": "x", "algorithm": "Ed25519",
+        "key_id": us.ed_key_id(us.ed_public_key(seed)), "public_key": pub_b64,
+        "signed": "identity+manifest+lifecycle", "signature": sig,
+        "created_at": "2026-11-17T00:00:00Z"})
+    # here the verifier pins the ORIGINAL key, which the attacker does not hold
+    return verify(d, pubkey=us.ed_public_key(SEED))
+
+
 # RT11 evidence 索引条目 type 改成合法但错误的值（M19 的变体：action→output）
 def rt11(d, key):
     idx = _j(os.path.join(d, "evidence", "index.json"))
@@ -185,6 +201,7 @@ case("RT08", "50MB 证据文件", "PASS 且耗时线性可接受", rt08)
 case("RT09", "只改行尾 CRLF（语义不变）", "FAIL（哈希敏感，属已知硬化代价）", rt09)
 case("RT10", "攻击者自洽重签（换钥）", "open=PASS 但必须标 unanchored", rt10)
 case("RT11", "索引 type: ACTION→OUTPUT（M19 变体）", "FAIL（S7）", rt11)
+case("RT12", "换钥重签 + 验证方钉住原公钥", "FAIL（S6）", rt12)
 
 
 def main():

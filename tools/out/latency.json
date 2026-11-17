@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at_utc": "2026-11-17T06:14:10Z",
+    "generated_at_utc": "2026-11-17T06:31:02Z",
     "unit": "one offline verification of one package",
     "not_claimed": "per-invocation receipt latency (see CCS); our unit is the package, not the call"
   },
@@ -9,17 +9,17 @@
       "package": "base",
       "result": "PASS",
       "repeats": 50,
-      "median_ms": 22.91,
-      "p95_ms": 44.98,
-      "max_ms": 88.5
+      "median_ms": 16.3,
+      "p95_ms": 21.33,
+      "max_ms": 25.17
     },
     {
       "package": "m_M12",
       "result": "FAIL",
       "repeats": 10,
-      "median_ms": 22.97,
-      "p95_ms": 25.72,
-      "max_ms": 28.01
+      "median_ms": 15.99,
+      "p95_ms": 16.45,
+      "max_ms": 19.1
     }
   ]
 }

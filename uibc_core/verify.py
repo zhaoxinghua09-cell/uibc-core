@@ -53,6 +53,53 @@ def _load_json(path):
         return json.load(f)
 
 
+# S11 strict serialization (v1.1). Motivated by vectors the AER-1 conformance
+# corpus treats as must-fail and a plain json.load() silently accepts:
+#   * duplicate member names - RFC 8259 leaves it undefined, Python keeps the
+#     LAST one, so "{\"a\":1,\"a\":0}" verifies as if it said 0 while a reader
+#     sees 1 - a two-reader split, which is worse than either value;
+#   * raw control characters - invisible in an editor, meaningful to a parser;
+#   * bytes that are not valid UTF-8 - the spec is UTF-8 or it is nothing.
+# These are encoding-level, so they are checked on the bytes before any digest
+# comparison: a package that fails here must not reach the hash checks at all.
+_S11_FILES = ("manifest.json", "identity.json", "lifecycle.json",
+              "evidence/index.json")
+
+
+def _strict_scan(path):
+    """Return a list of problems found by re-reading the file as bytes."""
+    problems = []
+    dups = []
+
+    def hook(pairs):
+        seen = set()
+        for k, _ in pairs:
+            if k in seen:
+                dups.append(k)
+            seen.add(k)
+        return dict(pairs)
+
+    try:
+        raw = open(path, "rb").read()
+    except OSError:
+        return problems
+    try:
+        text = raw.decode("utf-8")
+    except UnicodeDecodeError:
+        return ["not valid UTF-8"]
+    try:
+        json.loads(text, object_pairs_hook=hook)
+    except ValueError as e:
+        problems.append("not parseable JSON (%s)" % e)
+    for name in dups:
+        problems.append("duplicate member name %r" % name)
+    for ch in text:
+        if ord(ch) < 0x20 and ch not in "\t\n\r":
+            problems.append("raw control character U+%04X" % ord(ch))
+            break
+    return problems
+
+
 def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
                 expect_head: str = None) -> dict:
     """Verify a submission.uibc package directory. Returns a report dict.
@@ -83,16 +130,35 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
         if not passed:
             ok = False
 
+    # S11 strict serialization runs FIRST, before any parse: if the bytes are not
+    # UTF-8, or carry a duplicate member name, the later checks must not be the
+    # ones that notice. Recorded here so the report still names the encoding
+    # problem even when json.load would have raised and the fail-closed wrapper
+    # would have collapsed everything into S0.
+    s11_problems = []
+    for rel in _S11_FILES:
+        for problem in _strict_scan(os.path.join(package_dir, rel)):
+            s11_problems.append("%s: %s" % (rel, problem))
+    record("S11", "strict serialization", not s11_problems,
+           "; ".join(s11_problems[:4]) if s11_problems else
+           "UTF-8, no duplicate member names, no raw control characters")
+
+    def _safe_load(rel):
+        try:
+            return _load_json(os.path.join(package_dir, rel))
+        except Exception:
+            return {}
+
     # S1 structure: required files present AND nothing undeclared inside the
     # package directory (v1.1 fix F4). Before this, a notes.md / README that
     # contradicted the evidence could sit in the package root and no check
     # noticed - one of the 18 mutations was accepted that way.
     missing = [f for f in REQUIRED_FILES if not os.path.isfile(os.path.join(package_dir, f))]
 
-    manifest = _load_json(os.path.join(package_dir, "manifest.json")) if not missing else {}
-    identity = _load_json(os.path.join(package_dir, "identity.json")) if not missing else {}
-    lifecycle = _load_json(os.path.join(package_dir, "lifecycle.json")) if not missing else {}
-    index = _load_json(os.path.join(package_dir, "evidence", "index.json")) if not missing else {"entries": []}
+    manifest = _safe_load("manifest.json") if not missing else {}
+    identity = _safe_load("identity.json") if not missing else {}
+    lifecycle = _safe_load("lifecycle.json") if not missing else {}
+    index = (_safe_load("evidence/index.json") if not missing else {"entries": []}) or {"entries": []}
 
     declared = set(REQUIRED_FILES) | {"signatures/seal.json"}
     for e in index.get("entries", []):
@@ -212,8 +278,7 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
                            "result": "PASS",
                            "detail": "index metadata matches evidence_index_digest"})
 
-    # S10 attestation closure (draft-sharif-agent-audit-trail-03 Section 13.6).
-    # AAT's point is that any component left outside the attested set is a
+    # S10 attestation closure (draft-sharif-agent-audit-trail-03 Section 13.6).    # AAT's point is that any component left outside the attested set is a
     # forgery channel: weights, tokenizer, chat template, engine build, decoding
     # configuration, numeric environment. We can only check that a submitter
     # DECLARED all six and gave each a digest; whether those digests correspond

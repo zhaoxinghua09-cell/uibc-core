@@ -191,7 +191,7 @@ uibc verify demo.uibc                   # 开放模式：仅完整性检查
 ## 运行测试（外人复现三件套）
 
 ```bash
-python -m unittest discover tests           # 全量 174 用例（实测 `Ran 174 tests, OK`；MCP／Registry／A2A／runtime 合并计入；stress 7 场景单跑，见下条）
+python -m unittest discover -s tests -p "test_*.py"   # 全量 305 用例（实测 `Ran 305 tests, OK (skipped=1)`；stress 7 场景单跑，见下条）
 python -m unittest tests.stress_test        # 压力 7 场景
 python independent_verifier/cross_check.py  # 独立第二实现交叉核验（70 项，0 分歧）
 ```

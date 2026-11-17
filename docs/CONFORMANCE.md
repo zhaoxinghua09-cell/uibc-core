@@ -1,52 +1,84 @@
-# Conformance corpus
+# Conformance — re-run it yourself
 
-`docs/conformance/vectors.json` is a small, language-neutral corpus: each vector
-embeds its own input and the exact expected output, so an implementation written
-somewhere else can be measured against our format without importing our code.
+`uibc-core` claims a small, checkable set of behaviours. This page lists
+each claim, the vector set that pins it down, and the exact command that
+reproduces it. Nothing here asks to be believed: every row is a command
+a stranger can run.
 
-## What it covers
+Reference version: PyPI carries **0.3.3**; the fixture trees quoted below
+were pinned at **0.3.0** and are unchanged since, so a `v0.3.0` checkout
+reproduces them. Where the two differ the row says so. Verdict semantics
+are specified in [verdict-and-seal-semantics.md](verdict-and-seal-semantics.md).
+
+## Vector sets
+
+| Set | What it pins | Expected result | Reproduce |
+|---|---|---|---|
+| Verdict fixture matrix (`fixtures/`, 8 packages × S1–S6 checks) | Three-valued verdicts: tampered / deleted / duplicated / reordered / migrated packages FAIL; unresolved cases stay INCONCLUSIVE, never PASS | 24 / 24 cells match `fixtures/EXPECTED.md` | `python fixtures/generate_fixtures.py` |
+| Independent-verifier corpus | The bundled independent verifier (a second implementation path) agrees with the main verifier | 70 checks, 0 mismatches | `python independent_verifier/cross_check.py` |
+| Memory-migration matrix (UIBC-MEM) | Migration preservation checks M0–M5 over faithful and attacked memory packages | 22 / 22 cells match `fixtures/MEMORY_EXPECTED.md` | `python fixtures/generate_memory_fixtures.py` |
+| Unit + stress suite | Package behaviour incl. negative controls (bad inputs must fail) | **305 tests OK (skipped=1)**; three anchor modules skip instead of fail when `cryptography`/`asn1crypto` are absent — `pip install -e .[verify]` runs them | `python -m unittest discover -s tests -p "test_*.py"` |
+| Seal vectors | Ed25519 seal is plain RFC 8032; the published test vector is locked in the suite | Vector 1 passes; a substituted signer key FAILS S6 when the expected key is pinned (`--pubkey`) | unit suite, S6 cases |
+
+A zero-install path exists for single packages: the browser verifier at
+<https://zhaoxinghua09-cell.github.io/uibc-core/verify.html> runs the
+same S1–S6 checks client-side.
+
+## Language-neutral corpus
+
+`docs/conformance/vectors.json` is a corpus for implementations that are not ours:
+each vector embeds its own input and the exact expected output, so a program
+written somewhere else can be measured without importing this repository.
 
 | kind | vectors | what a conforming implementation must do |
 |---|---|---|
 | `canonical_json` | 10 | canonicalize the embedded object and match **both** the exact UTF-8 bytes and the SHA-256 |
-| `ed25519_signature` (valid) | 3 | verify the signature with any Ed25519 library; verdict `valid` |
+| `ed25519_signature` (valid) | 3 | verify with any Ed25519 library; verdict `valid` |
 | `ed25519_signature` (invalid) | 2 | reject a signature made over another message, and one with a single flipped byte |
 
 The signature vectors publish the throwaway 32-byte seed (`00…01`) used to produce
 them, so the values are reproducible rather than asserted. The seed is worthless
 outside the corpus and must not be used for anything else.
 
-## What it does **not** cover, and the difference matters
-
-* **No second implementation.** We ship the object a second implementation can be
-  measured against; we do not ship that implementation. Tracekit and agent-receipts
-  publish both. Saying "we match Tracekit here" would be false.
-* **No receipt structure, chain, anchoring or policy vectors.** Those steps have
-  tests, not vectors. A reader who needs those should read `docs/INTEROP-MATRIX.md`,
-  where the untested cells are labelled as untested.
-* **Passing it does not make an implementation interoperable with our receipts.**
-  It makes the two primitive steps — canonical bytes and signature — comparable.
-
-## Why the checker is not our verifier
-
-`tools/conformance_check.py` implements its own canonicalizer with `json` and
-`hashlib` only, and verifies signatures with the third-party `cryptography`
-package, never with our in-repo Ed25519. If the corpus only passed when checked
-by our own code, it would prove nothing.
-
-Current result on this machine:
-
 ```
-15/15 vectors reproduced by a non-uibc implementation
+python tools/conformance_vectors.py --check   # regenerate and compare byte for byte
+python tools/conformance_check.py             # a checker that imports nothing from uibc_core
 ```
+The second command implements its own canonicalizer with `json`/`hashlib` and verifies
+signatures with the third-party `cryptography` package. Measured output: **15/15 vectors
+reproduced by a non-uibc implementation**. If the corpus only passed under our own verifier
+it would prove nothing.
 
-## Reproduce
+What it does **not** cover, and the difference matters:
 
-```bash
-python tools/conformance_vectors.py --check   # on-disk corpus == fresh build
-python tools/conformance_check.py             # a foreign checker reproduces all 15
-python -m unittest tests.test_v15_conformance_corpus -v
-```
+* **No second implementation.** We ship the object a second implementation can be measured
+  against; we do not ship that implementation. Tracekit and agent-receipts publish both.
+  "We match Tracekit here" would be a false claim.
+* **No receipt structure, chain, anchoring or policy vectors.** Those steps have tests,
+  not vectors. `docs/INTEROP-MATRIX.md` labels the untested cells as untested.
+* **Passing it does not make an implementation interoperable with our receipts.** It makes
+  the two primitive steps — canonical bytes and signature — comparable.
 
-`tests/test_v15_conformance_corpus.py` runs both, so a drifting canonicalizer
-breaks CI rather than the published corpus.
+## Public re-run register
+
+Independent and third-party re-runs we know of, with receipts. A listing
+here records that the run happened and what it found — it is not an
+endorsement in either direction.
+
+| Date | Who | What | Result | Receipt |
+|---|---|---|---|---|
+| 2026-11-12 | Takao Sato (Poke-nushi), VATE reader (does not import uibc-core) | 18 selected S4/S5/S6 comparisons; receiving example pinned to the v0.3.0 tree: 22 conditions, 66 comparisons; reseal case with and without the expected key | All agree; reseal case: `not_assessed` without a key, key-mismatch reported with the published key | Comment on aeoess/agent-governance-vocabulary#177; package: github.com/Poke-nushi/Verifiable-Agent-Trust-Envelope |
+| 2026-11-12 | tomjwxf (author of the consuming fixture — not an independent run) | Reproduction of `run_v120.json` against the frozen fixture | All 14 verdicts, 8 claims and codes match; `payment_ready: false` reproduced | Recorded in VeritasActa/e6-fixture#4 |
+
+Ran it yourself? Open an issue with your environment, the commit or
+release you ran, and your output — matching or not. A mismatch with a
+receipt is a finding, and findings get fixed in the open (that is how
+v0.3.0 got its seal semantics).
+
+## The standing challenge
+
+The tamper cases above are also the entry level of the UIBC contest:
+`contest/` in this repository carries the charter, the problem set
+(P-01–P-07) and the intake runner. Break the seal under pinning, or
+implement the semantics independently and disagree with us somewhere —
+both are credited results.

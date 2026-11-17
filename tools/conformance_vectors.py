@@ -32,8 +32,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from uibc_core.canonical import canonicalize, sha256_hex  # noqa: E402
 from uibc_core import ed25519  # noqa: E402
 
-OUT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                   "docs", "conformance", "vectors.json")
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+OUT = os.path.join(ROOT, "docs", "conformance", "vectors.json")
 
 # --- inputs: small, self-contained, and chosen to punish a lazy canonicalizer ---
 
@@ -57,6 +57,51 @@ MESSAGES = [
     ("m02-utf8", "边界检查".encode("utf-8")),
     ("m03-empty", b""),
 ]
+
+# --- receipt and chain layer (added 2026-11-17) -----------------------------
+#
+# The first corpus covered the two primitive steps. These vectors cover the two
+# structural claims a regulator actually asks about:
+#   * a receipt's digest - SHA-256 over the RFC 8785 JCS encoding of its envelope;
+#   * the linear link - every receipt carries previous_receipt_hash, the digest of
+#     its predecessor's envelope, and the first receipt of a chain carries 64 zeros
+#     (draft-marques-asqav-compliance-receipts-01 section 4.3).
+# Deliberately no floats in these envelopes: the corpus tests structure and linking,
+# not ECMAScript number formatting, and saying otherwise would be a false claim.
+
+RECEIPT_CASES = [
+    ("h01-receipt-minimal",
+     {"receipt_id": "r-0001", "issued_at": "2026-11-17T08:11:35Z",
+      "agent_id": "agent-0001", "verdict": "PASS"}),
+    ("h02-receipt-with-policy",
+     {"receipt_id": "r-0002", "issued_at": "2026-11-17T09:02:11Z",
+      "agent_id": "agent-0001", "verdict": "HOLD",
+      "policy_digest": "sha256:" + "a" * 64,
+      "previous_receipt_hash": "0" * 64,
+      "counts": {"events": 12, "failures": 1}}),
+    ("h03-receipt-unicode",
+     {"receipt_id": "r-0003", "issued_at": "2026-11-17T10:00:00Z",
+      "agent_id": "张三的 agent", "note": "边界检查 —— 不转义"}),
+]
+
+CHAIN_OF_THREE = [c[1] for c in RECEIPT_CASES]
+
+
+def _chain_doc(envelopes, break_at=None, genesis="0" * 64):
+    """Build a chain document, with the declared predecessor digests recomputed.
+
+    `break_at` corrupts the declared hash at that index, which is how the two
+    rejection vectors are made: the link is what is wrong, not the digest.
+    """
+    receipts = []
+    prev = genesis
+    for i, env in enumerate(envelopes):
+        declared = genesis if i == 0 else prev
+        if break_at is not None and i == break_at:
+            declared = ("f" * 64) if declared != ("f" * 64) else ("e" * 64)
+        receipts.append({"envelope": env, "previous_receipt_hash": declared})
+        prev = sha256_hex(canonicalize(env))
+    return {"schema": "uibc-core/receipt-chain@1", "receipts": receipts}
 
 
 def build():
@@ -113,19 +158,105 @@ def build():
         "check": "verify must reject: one signature byte flipped",
     })
 
+    # ---- receipt layer ------------------------------------------------------
+    for vid, env in RECEIPT_CASES:
+        canon = canonicalize(env).decode("utf-8")
+        vectors.append({
+            "id": vid,
+            "kind": "receipt_digest",
+            "envelope": env,
+            "expected_canonical_utf8": canon,
+            "expected_sha256_hex": sha256_hex(canonicalize(env)),
+            "check": "digest of a receipt envelope = sha256 over its RFC 8785 JCS bytes; "
+                     "canonicalize(envelope) must equal expected_canonical_utf8 and its "
+                     "sha256 must equal expected_sha256_hex",
+        })
+
+    # ---- chain layer --------------------------------------------------------
+    valid = _chain_doc(CHAIN_OF_THREE)
+    vectors.append({
+        "id": "k01-chain-valid",
+        "kind": "receipt_chain",
+        "chain": valid,
+        "expected_verdict": "valid",
+        "expected_digests": [sha256_hex(canonicalize(e)) for e in CHAIN_OF_THREE],
+        "check": "recompute each envelope digest; receipt[0].previous_receipt_hash must be "
+                 "64 zeros; receipt[i].previous_receipt_hash must equal digest of "
+                 "receipt[i-1].envelope; verdict valid",
+    })
+    broken = _chain_doc(CHAIN_OF_THREE, break_at=1)
+    vectors.append({
+        "id": "k02-chain-broken-link",
+        "kind": "receipt_chain",
+        "chain": broken,
+        "expected_verdict": "invalid",
+        "expected_reason": "previous_receipt_hash_mismatch",
+        "expected_digests": [sha256_hex(canonicalize(e)) for e in CHAIN_OF_THREE],
+        "check": "the same chain with receipt[1].previous_receipt_hash replaced: the "
+                 "envelopes are untouched, so only the link is wrong; verdict invalid",
+    })
+    nonzero = _chain_doc(CHAIN_OF_THREE, genesis="a" * 64)
+    vectors.append({
+        "id": "k03-chain-nonzero-genesis",
+        "kind": "receipt_chain",
+        "chain": nonzero,
+        "expected_verdict": "invalid",
+        "expected_reason": "genesis_not_64_zeros",
+        "expected_digests": [sha256_hex(canonicalize(e)) for e in CHAIN_OF_THREE],
+        "check": "receipt[0] declares a predecessor it cannot have: a chain whose first "
+                 "link is not 64 zeros must be rejected",
+    })
+
+    # ---- anchor layer -------------------------------------------------------
+    # The token is a real RFC 3161 token from freetsa.org over the digest of the file
+    # shipped beside it. A stranger reproduces this by hashing the file and parsing the
+    # token with any ASN.1 library; no code of ours is needed.
+    anchor_file = os.path.join(ROOT, "tests", "fixtures", "anchor", "anchored_head.json")
+    with open(anchor_file, "rb") as fh:
+        anchor_digest = hashlib.sha256(fh.read()).hexdigest()
+    vectors.append({
+        "id": "a01-anchor-binds-the-shipped-file",
+        "kind": "anchor_binding",
+        "token_path": "tests/fixtures/anchor/freetsa.tsr",
+        "artifact_path": "tests/fixtures/anchor/anchored_head.json",
+        "expected_artifact_sha256_hex": anchor_digest,
+        "expected_verdict": "bound",
+        "check": "sha256 of artifact_path must equal expected_artifact_sha256_hex and the "
+                 "token's messageImprint must equal the same digest; parse the token with "
+                 "any ASN.1/RFC 3161 library",
+    })
+    vectors.append({
+        "id": "a02-anchor-does-not-bind-another-file",
+        "kind": "anchor_binding",
+        "token_path": "tests/fixtures/anchor/freetsa.tsr",
+        "artifact_path": "tests/fixtures/anchor/ots_head.ots",
+        "expected_artifact_sha256_hex": None,
+        "expected_verdict": "not_bound",
+        "check": "the same token against a different file: the digests must disagree, and "
+                 "a verifier must say not_bound rather than bound",
+    })
+
     doc = {
-        "schema": "uibc-core/conformance-vectors@1",
+        "schema": "uibc-core/conformance-vectors@2",
         "generated_by": "tools/conformance_vectors.py",
-        "what_this_is": "Inputs and expected bytes for the canonical-JSON and Ed25519 steps only. "
-                        "It is not a full-receipt corpus and it does not contain a second implementation.",
-        "how_to_use": "For each vector of kind canonical_json, canonicalize the embedded input with your own "
-                      "implementation and compare both the exact bytes and the SHA-256. For kind "
-                      "ed25519_signature, verify with any Ed25519 library and compare the verdict. "
-                      "A conforming implementation reproduces every expected value; it needs no code from us.",
+        "what_this_is": "Inputs and expected bytes for four steps: canonical JSON, Ed25519 "
+                        "signatures, receipt envelope digests, and the linear chain link, "
+                        "plus two anchor-binding cases against a real RFC 3161 token. "
+                        "It is not a full-receipt corpus and it does not contain a second "
+                        "implementation.",
+        "how_to_use": "For each vector, reproduce the expected value with your own "
+                      "implementation: canonical_json - compare bytes and SHA-256; "
+                      "ed25519_signature - verify with any Ed25519 library and compare the "
+                      "verdict; receipt_digest - hash the JCS bytes of the envelope; "
+                      "receipt_chain - recompute the links and compare the verdict; "
+                      "anchor_binding - hash the artifact and parse the token, then compare "
+                      "the messageImprint. A conforming implementation needs no code from us.",
         "not_claimed": [
             "that we publish a second implementation — we do not",
-            "that these vectors cover receipt structure, chains, anchoring or policy — they do not",
-            "that passing them makes an implementation interoperable with our receipts — it does not",
+            "that these vectors validate a receipt schema, resolve policies, or check a "
+            "Merkle inclusion proof — they do not; those steps have tests, not vectors",
+            "that passing them makes an implementation interoperable with our receipts — "
+            "it makes four steps comparable, not the whole format",
         ],
         "vectors": vectors,
     }

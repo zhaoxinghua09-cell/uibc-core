@@ -1,12 +1,12 @@
 {
-  "schema": "uibc-core/conformance-vectors@1",
+  "schema": "uibc-core/conformance-vectors@2",
   "generated_by": "tools/conformance_vectors.py",
-  "what_this_is": "Inputs and expected bytes for the canonical-JSON and Ed25519 steps only. It is not a full-receipt corpus and it does not contain a second implementation.",
-  "how_to_use": "For each vector of kind canonical_json, canonicalize the embedded input with your own implementation and compare both the exact bytes and the SHA-256. For kind ed25519_signature, verify with any Ed25519 library and compare the verdict. A conforming implementation reproduces every expected value; it needs no code from us.",
+  "what_this_is": "Inputs and expected bytes for four steps: canonical JSON, Ed25519 signatures, receipt envelope digests, and the linear chain link, plus two anchor-binding cases against a real RFC 3161 token. It is not a full-receipt corpus and it does not contain a second implementation.",
+  "how_to_use": "For each vector, reproduce the expected value with your own implementation: canonical_json - compare bytes and SHA-256; ed25519_signature - verify with any Ed25519 library and compare the verdict; receipt_digest - hash the JCS bytes of the envelope; receipt_chain - recompute the links and compare the verdict; anchor_binding - hash the artifact and parse the token, then compare the messageImprint. A conforming implementation needs no code from us.",
   "not_claimed": [
     "that we publish a second implementation — we do not",
-    "that these vectors cover receipt structure, chains, anchoring or policy — they do not",
-    "that passing them makes an implementation interoperable with our receipts — it does not"
+    "that these vectors validate a receipt schema, resolve policies, or check a Merkle inclusion proof — they do not; those steps have tests, not vectors",
+    "that passing them makes an implementation interoperable with our receipts — it makes four steps comparable, not the whole format"
   ],
   "vectors": [
     {
@@ -191,6 +191,218 @@
       "signature_hex": "025748e24e6c37bd9c7faa7738dfe233522a0e34ca0d31ce01504721ec5e2a114c61a6756a2b2837692eb3b147edaf8b7a7408bb103a6db17d6d3dda88a08205",
       "expected_verdict": "invalid",
       "check": "verify must reject: one signature byte flipped"
+    },
+    {
+      "id": "h01-receipt-minimal",
+      "kind": "receipt_digest",
+      "envelope": {
+        "receipt_id": "r-0001",
+        "issued_at": "2026-11-17T08:11:35Z",
+        "agent_id": "agent-0001",
+        "verdict": "PASS"
+      },
+      "expected_canonical_utf8": "{\"agent_id\":\"agent-0001\",\"issued_at\":\"2026-11-17T08:11:35Z\",\"receipt_id\":\"r-0001\",\"verdict\":\"PASS\"}",
+      "expected_sha256_hex": "48b911f67cb565b2e9c7dcc8e7b707855dcd9d1a7db7d642ad6faddbf1ab933e",
+      "check": "digest of a receipt envelope = sha256 over its RFC 8785 JCS bytes; canonicalize(envelope) must equal expected_canonical_utf8 and its sha256 must equal expected_sha256_hex"
+    },
+    {
+      "id": "h02-receipt-with-policy",
+      "kind": "receipt_digest",
+      "envelope": {
+        "receipt_id": "r-0002",
+        "issued_at": "2026-11-17T09:02:11Z",
+        "agent_id": "agent-0001",
+        "verdict": "HOLD",
+        "policy_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "previous_receipt_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+        "counts": {
+          "events": 12,
+          "failures": 1
+        }
+      },
+      "expected_canonical_utf8": "{\"agent_id\":\"agent-0001\",\"counts\":{\"events\":12,\"failures\":1},\"issued_at\":\"2026-11-17T09:02:11Z\",\"policy_digest\":\"sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"previous_receipt_hash\":\"0000000000000000000000000000000000000000000000000000000000000000\",\"receipt_id\":\"r-0002\",\"verdict\":\"HOLD\"}",
+      "expected_sha256_hex": "9ed65765c6098e69305a91481f26138e26296aa4489721780b2480eb79d77769",
+      "check": "digest of a receipt envelope = sha256 over its RFC 8785 JCS bytes; canonicalize(envelope) must equal expected_canonical_utf8 and its sha256 must equal expected_sha256_hex"
+    },
+    {
+      "id": "h03-receipt-unicode",
+      "kind": "receipt_digest",
+      "envelope": {
+        "receipt_id": "r-0003",
+        "issued_at": "2026-11-17T10:00:00Z",
+        "agent_id": "张三的 agent",
+        "note": "边界检查 —— 不转义"
+      },
+      "expected_canonical_utf8": "{\"agent_id\":\"张三的 agent\",\"issued_at\":\"2026-11-17T10:00:00Z\",\"note\":\"边界检查 —— 不转义\",\"receipt_id\":\"r-0003\"}",
+      "expected_sha256_hex": "9dd852a5783f102c0614fef76e1738664cf4bfa67f7c3f5a2ce65e1dcbfa8e8e",
+      "check": "digest of a receipt envelope = sha256 over its RFC 8785 JCS bytes; canonicalize(envelope) must equal expected_canonical_utf8 and its sha256 must equal expected_sha256_hex"
+    },
+    {
+      "id": "k01-chain-valid",
+      "kind": "receipt_chain",
+      "chain": {
+        "schema": "uibc-core/receipt-chain@1",
+        "receipts": [
+          {
+            "envelope": {
+              "receipt_id": "r-0001",
+              "issued_at": "2026-11-17T08:11:35Z",
+              "agent_id": "agent-0001",
+              "verdict": "PASS"
+            },
+            "previous_receipt_hash": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          {
+            "envelope": {
+              "receipt_id": "r-0002",
+              "issued_at": "2026-11-17T09:02:11Z",
+              "agent_id": "agent-0001",
+              "verdict": "HOLD",
+              "policy_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "previous_receipt_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+              "counts": {
+                "events": 12,
+                "failures": 1
+              }
+            },
+            "previous_receipt_hash": "48b911f67cb565b2e9c7dcc8e7b707855dcd9d1a7db7d642ad6faddbf1ab933e"
+          },
+          {
+            "envelope": {
+              "receipt_id": "r-0003",
+              "issued_at": "2026-11-17T10:00:00Z",
+              "agent_id": "张三的 agent",
+              "note": "边界检查 —— 不转义"
+            },
+            "previous_receipt_hash": "9ed65765c6098e69305a91481f26138e26296aa4489721780b2480eb79d77769"
+          }
+        ]
+      },
+      "expected_verdict": "valid",
+      "expected_digests": [
+        "48b911f67cb565b2e9c7dcc8e7b707855dcd9d1a7db7d642ad6faddbf1ab933e",
+        "9ed65765c6098e69305a91481f26138e26296aa4489721780b2480eb79d77769",
+        "9dd852a5783f102c0614fef76e1738664cf4bfa67f7c3f5a2ce65e1dcbfa8e8e"
+      ],
+      "check": "recompute each envelope digest; receipt[0].previous_receipt_hash must be 64 zeros; receipt[i].previous_receipt_hash must equal digest of receipt[i-1].envelope; verdict valid"
+    },
+    {
+      "id": "k02-chain-broken-link",
+      "kind": "receipt_chain",
+      "chain": {
+        "schema": "uibc-core/receipt-chain@1",
+        "receipts": [
+          {
+            "envelope": {
+              "receipt_id": "r-0001",
+              "issued_at": "2026-11-17T08:11:35Z",
+              "agent_id": "agent-0001",
+              "verdict": "PASS"
+            },
+            "previous_receipt_hash": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          {
+            "envelope": {
+              "receipt_id": "r-0002",
+              "issued_at": "2026-11-17T09:02:11Z",
+              "agent_id": "agent-0001",
+              "verdict": "HOLD",
+              "policy_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "previous_receipt_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+              "counts": {
+                "events": 12,
+                "failures": 1
+              }
+            },
+            "previous_receipt_hash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+          },
+          {
+            "envelope": {
+              "receipt_id": "r-0003",
+              "issued_at": "2026-11-17T10:00:00Z",
+              "agent_id": "张三的 agent",
+              "note": "边界检查 —— 不转义"
+            },
+            "previous_receipt_hash": "9ed65765c6098e69305a91481f26138e26296aa4489721780b2480eb79d77769"
+          }
+        ]
+      },
+      "expected_verdict": "invalid",
+      "expected_reason": "previous_receipt_hash_mismatch",
+      "expected_digests": [
+        "48b911f67cb565b2e9c7dcc8e7b707855dcd9d1a7db7d642ad6faddbf1ab933e",
+        "9ed65765c6098e69305a91481f26138e26296aa4489721780b2480eb79d77769",
+        "9dd852a5783f102c0614fef76e1738664cf4bfa67f7c3f5a2ce65e1dcbfa8e8e"
+      ],
+      "check": "the same chain with receipt[1].previous_receipt_hash replaced: the envelopes are untouched, so only the link is wrong; verdict invalid"
+    },
+    {
+      "id": "k03-chain-nonzero-genesis",
+      "kind": "receipt_chain",
+      "chain": {
+        "schema": "uibc-core/receipt-chain@1",
+        "receipts": [
+          {
+            "envelope": {
+              "receipt_id": "r-0001",
+              "issued_at": "2026-11-17T08:11:35Z",
+              "agent_id": "agent-0001",
+              "verdict": "PASS"
+            },
+            "previous_receipt_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "envelope": {
+              "receipt_id": "r-0002",
+              "issued_at": "2026-11-17T09:02:11Z",
+              "agent_id": "agent-0001",
+              "verdict": "HOLD",
+              "policy_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "previous_receipt_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+              "counts": {
+                "events": 12,
+                "failures": 1
+              }
+            },
+            "previous_receipt_hash": "48b911f67cb565b2e9c7dcc8e7b707855dcd9d1a7db7d642ad6faddbf1ab933e"
+          },
+          {
+            "envelope": {
+              "receipt_id": "r-0003",
+              "issued_at": "2026-11-17T10:00:00Z",
+              "agent_id": "张三的 agent",
+              "note": "边界检查 —— 不转义"
+            },
+            "previous_receipt_hash": "9ed65765c6098e69305a91481f26138e26296aa4489721780b2480eb79d77769"
+          }
+        ]
+      },
+      "expected_verdict": "invalid",
+      "expected_reason": "genesis_not_64_zeros",
+      "expected_digests": [
+        "48b911f67cb565b2e9c7dcc8e7b707855dcd9d1a7db7d642ad6faddbf1ab933e",
+        "9ed65765c6098e69305a91481f26138e26296aa4489721780b2480eb79d77769",
+        "9dd852a5783f102c0614fef76e1738664cf4bfa67f7c3f5a2ce65e1dcbfa8e8e"
+      ],
+      "check": "receipt[0] declares a predecessor it cannot have: a chain whose first link is not 64 zeros must be rejected"
+    },
+    {
+      "id": "a01-anchor-binds-the-shipped-file",
+      "kind": "anchor_binding",
+      "token_path": "tests/fixtures/anchor/freetsa.tsr",
+      "artifact_path": "tests/fixtures/anchor/anchored_head.json",
+      "expected_artifact_sha256_hex": "4ad23d9153c33c77253b23e1f5938249cb6877de93eb7593dea26fa5f7fd6e98",
+      "expected_verdict": "bound",
+      "check": "sha256 of artifact_path must equal expected_artifact_sha256_hex and the token's messageImprint must equal the same digest; parse the token with any ASN.1/RFC 3161 library"
+    },
+    {
+      "id": "a02-anchor-does-not-bind-another-file",
+      "kind": "anchor_binding",
+      "token_path": "tests/fixtures/anchor/freetsa.tsr",
+      "artifact_path": "tests/fixtures/anchor/ots_head.ots",
+      "expected_artifact_sha256_hex": null,
+      "expected_verdict": "not_bound",
+      "check": "the same token against a different file: the digests must disagree, and a verifier must say not_bound rather than bound"
     }
   ]
 }

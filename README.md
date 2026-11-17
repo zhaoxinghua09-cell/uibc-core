@@ -31,7 +31,7 @@
 > **Verifiable today** — every artifact is independently checkable: Sigstore Rekor transparency log
 > (logIndex 2883389783), concept DOI 10.5281/zenodo.22456647, SWHID
 > `swh:1:ori:819530c8be2adf6da901256ce9fd28063f8f1296` (ISO/IEC 18670).
-> Reproduce: `python -m unittest discover tests` (164 tests) · `python independent_verifier/cross_check.py`.
+> Reproduce: `python -m unittest discover tests` (174 tests) · `python independent_verifier/cross_check.py`.
 > **Honest boundary** — no third-party quality review to date; any operational use is self-reported
 > (see ENDORSEMENTS.md: 存证 ≠ 参与 ≠ 认可). Context: [FG-TIDA themes #27](https://github.com/FG-TIDA/themes/issues/27).
 
@@ -51,6 +51,39 @@ UIBC Core 参考实现 v0.3.0 —— Agent 生命周期证据包与验证器：�
 > 🔏 发布产物已进入 Sigstore Rekor 公共透明日志（logIndex 2883389783，见 `dist/*.cosign.bundle`）；
 > Zenodo DOI 与 Software Heritage SWHID 见 CITATION.cff。
 > 以上均为**存证**，非质量认可。
+
+## The claim we make (and the claim we refuse to make) · 窄声明
+
+> **A uibc PASS means: within the observed evidence boundary, no violation was detected.
+> It does **not** claim the agent was correct, safe, or wise; that the recorded inputs were
+> true or complete; or that any real-world outcome followed.**
+
+中文：uibc 的 PASS 只表示"在观测到的证据边界内未发现违规"，不表示 agent 正确、安全、明智，
+不表示记录的输入为真或完整，也不表示任何现实结果已经发生。本仓库任何位置出现的数字，
+都不得被读成"可信度"或"通过率"。
+
+## Terminology alignment · 术语与上游对齐
+
+本项目**不自造词**。下列术语与已有草案是同名或上下位关系，写清楚是为了让评审方一眼判断
+哪些是我们的增量、哪些是复用。完整映射见 `docs/TERMINOLOGY.md`。
+
+| uibc 用词 | 上游用词（出处） | 关系 |
+|---|---|---|
+| 证据包 / package + manifest + 离线验证 | Package Digest（`draft-raskar-scitt-agent-provenance-00`）；AIVS bundle（`draft-stone-aivs-01`） | **同形态**。我们不加新格式，只在包上给出一个裁决 |
+| 三值裁决 PASS / FAIL / INCONCLUSIVE | EP-AEC-02 五档 `admissible / missing_evidence / stale / conflicted / unverifiable` | **粗化投影**：我们的 INCONCLUSIVE 覆盖后四档中的"判不了"，不细分 |
+| （不做）决策结果 | GAR-08 `governance_decision` = ALLOW / DENY / ESCALATE / SUSPEND | **正交两维**：GAR 给"放不放行"，我们给"验不验得清"。我们不输出决策 |
+| `trust_level` = anchored / unanchored / unattested | 1F916 `witnessed`（独立见证人联署） | **子集**：`witnessed ⊃ anchored ⊃ unanchored`。我们没有见证人，故**永远不声称** witnessed |
+| `checkpoint_head`（S8 / S9） | RFC 6962 STH；1F916 5 分钟 checkpoint | **同类不同强度**：我们是"生命周期 head + 证据根 + 索引元数据 + 条数"的单哈希，无 Merkle 树、无一致性证明 |
+| 生命周期状态机（5 态） | 无直接对应 | 设备/agent 的生命周期状态；与 EP-AEC 的**证据分级**不是同一对象 |
+| `principal_type`、`sequence_number`、`policy_hash` | noa-01 逐字枚举；GAR-08 `cap_profile_hash` | **逐字复用**，一字段同时满足两家 |
+| 门禁 ALLOW / HOLD / DENY | APort(OAP) 的 pre-action authorization；COGITATOR 的 phantom entry | 同目的（执行前拦），我们的判据是"PASS + anchored 才放行" |
+
+**明确不做**：不自建 `uibc://` URI scheme；不自造生命周期事件名（复用 GAR 的 ALE 六类）；
+不复刻 OTel 命名空间（只加 `uibc.verdict` / `uibc.rule_id`）；不做单一评分。
+
+规范标识：`SPEC_VERSION` 为字面常量，另给 `SPEC_ID = <version>@<12 hex>`（对本包全部模块
+内容取 sha256），使"版本号相同、字节不同"无法冒充。`python -c "import uibc_core as u; print(u.spec_id())"`。
+
 
 ## 安装 · Install
 
@@ -97,7 +130,7 @@ uibc verify demo.uibc                   # 开放模式：仅完整性检查
 ## 运行测试（外人复现三件套）
 
 ```bash
-python -m unittest discover tests           # 全量 164 用例（实测 `Ran 164 tests, OK`；MCP／Registry／A2A／runtime 合并计入；stress 7 场景单跑，见下条）
+python -m unittest discover tests           # 全量 174 用例（实测 `Ran 174 tests, OK`；MCP／Registry／A2A／runtime 合并计入；stress 7 场景单跑，见下条）
 python -m unittest tests.stress_test        # 压力 7 场景
 python independent_verifier/cross_check.py  # 独立第二实现交叉核验（70 项，0 分歧）
 ```

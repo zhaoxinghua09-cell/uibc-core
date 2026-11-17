@@ -1,0 +1,16 @@
+{
+  "schema": "uibc-core/0.3.0-proposal",
+  "events": [
+    {
+      "event_id": "f750eb62-0b6b-45d5-9cc5-825422e5a600",
+      "sequence_number": 1,
+      "event_type": "ACTIVATE",
+      "agent_id": "mb-agent-001",
+      "timestamp": "2026-11-17T05:54:58Z",
+      "actor": "mb-owner",
+      "payload_hash": null,
+      "previous_event": "77960ce9-d0c4-455c-a41e-e22042f13e7f",
+      "signature": null
+    }
+  ]
+}

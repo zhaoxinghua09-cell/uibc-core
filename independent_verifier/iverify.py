@@ -21,6 +21,7 @@ import base64
 import hashlib
 import hmac
 import json
+import math
 import os
 
 REQUIRED = ["manifest.json", "identity.json", "lifecycle.json", "evidence/index.json"]
@@ -33,10 +34,67 @@ KNOWN_EVIDENCE_TYPES = {
 }
 
 
+def _jcs_number_str(x):
+    """ECMAScript Number::toString (RFC 8785 number rule), restated."""
+    if isinstance(x, bool):
+        raise TypeError("bool is not a JSON number")
+    if isinstance(x, int):
+        if not (-(2 ** 53) + 1 <= x <= 2 ** 53 - 1):
+            raise ValueError("JCS: integer %r outside safe double range" % (x,))
+        return str(x)
+    if isinstance(x, float):
+        if math.isnan(x) or math.isinf(x):
+            raise ValueError("JCS: NaN/Infinity are not valid JSON numbers")
+        if x == 0.0:
+            return "0"
+        s = json.dumps(x)
+        if "e" in s or "E" in s:
+            # Python uses exponent for 1e20..; ECMAScript keeps the fixed form
+            # for whole numbers with <= 21 integer digits. Normalise that edge.
+            if x.is_integer():
+                iv = int(x)
+                if 1 <= len(str(iv)) <= 21:
+                    return str(iv)
+            return s
+        if s.endswith(".0"):
+            return s[:-2]
+        return s
+    raise TypeError("JCS: unsupported number type %r" % (type(x),))
+
+
+def _jcs_scalar(v):
+    if v is None:
+        return "null"
+    if v is True:
+        return "true"
+    if v is False:
+        return "false"
+    if isinstance(v, bool):
+        return "true" if v else "false"
+    if isinstance(v, (int, float)):
+        return _jcs_number_str(v)
+    if isinstance(v, str):
+        # json.dumps(ensure_ascii=False) is a faithful JCS string serializer.
+        return json.dumps(v, ensure_ascii=False)
+    raise TypeError("JCS: unsupported scalar type %r" % (type(v),))
+
+
+def _jcs_value(v) -> str:
+    """Recursive JCS serializer. Structured independently of uibc_core so that
+    agreement is a determinism signal, not code reuse."""
+    if isinstance(v, dict):
+        parts = [json.dumps(k, ensure_ascii=False) + ":" + _jcs_value(v[k])
+                 for k in sorted(v.keys(), key=lambda s: s.encode("utf-16-be"))]
+        return "{" + ",".join(parts) + "}"
+    if isinstance(v, list):
+        return "[" + ",".join(_jcs_value(e) for e in v) + "]"
+    return _jcs_scalar(v)
+
+
 def canon_bytes(obj) -> bytes:
-    """Canonical serialization (provisional): sorted keys, tight separators."""
-    return json.dumps(obj, sort_keys=True, separators=(",", ":"),
-                      ensure_ascii=False).encode("utf-8")
+    """RFC 8785 (JCS) canonical serialization - written from the SPEC, not from
+    uibc_core.canonical. The two must agree only because JCS is deterministic."""
+    return _jcs_value(obj).encode("utf-8")
 
 
 def sha256_file(path) -> str:
@@ -161,6 +219,20 @@ def check_seal(key: bytes, package_dir: str) -> str:
         identity = json.load(f)
     with open(os.path.join(package_dir, "manifest.json"), encoding="utf-8") as f:
         manifest = json.load(f)
+    # v1.1: the seal may cover the lifecycle log as well. The coverage is
+    # declared in the seal itself ("signed"), so a verifier never has to guess.
+    lifecycle = {}
+    lc_path = os.path.join(package_dir, "lifecycle.json")
+    if os.path.isfile(lc_path):
+        with open(lc_path, encoding="utf-8") as f:
+            lifecycle = json.load(f)
+
+    def _payload():
+        doc = {"identity": identity, "manifest": manifest}
+        if "lifecycle" in str(seal.get("signed", "")):
+            doc["lifecycle"] = lifecycle
+        return canon_bytes(doc)
+
     if seal.get("algorithm") == "Ed25519":
         if key is not None:
             return "FAIL"  # an HMAC owner key cannot check a public seal
@@ -171,7 +243,7 @@ def check_seal(key: bytes, package_dir: str) -> str:
             return "FAIL"
         if len(pub) != 32 or seal.get("key_id") != hashlib.sha256(pub).hexdigest():
             return "FAIL"
-        payload = canon_bytes({"identity": identity, "manifest": manifest})
+        payload = _payload()
         return "PASS" if _ed25519_verify(pub, payload, sig) else "FAIL"
     if key is None:
         return "INCONCLUSIVE"
@@ -183,7 +255,7 @@ def check_seal(key: bytes, package_dir: str) -> str:
         sig = base64.b64decode(seal.get("signature", ""), validate=True)
     except Exception:
         return "FAIL"
-    payload = canon_bytes({"identity": identity, "manifest": manifest})
+    payload = _payload()
     expected = hmac.new(key, payload, hashlib.sha256).digest()
     return "PASS" if hmac.compare_digest(expected, sig) else "FAIL"
 

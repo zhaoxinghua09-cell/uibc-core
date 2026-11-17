@@ -17,5 +17,35 @@ a PASS means "no violation detected within the observed evidence boundary".
 """
 
 __version__ = "0.3.0"
+# A version string that is a literal, not a lookup. A clean `git clone` with
+# no installed distribution must still report the same identifier; deriving it
+# from installed package metadata made an outsider see "0.0.0-proposal"
+# (pre-release review blocker P0-2).
 SPEC_VERSION = "uibc-core/0.3.0-proposal"
 VERIFIER_ID = "uibc-core-verifier"
+
+
+def impl_digest() -> str:
+    """sha256 over every module of this package, sorted by name.
+
+    Muse asked for an *immutable* identifier: a version string alone can be
+    reused across different bytes. SPEC_ID pins the label to the code, so a
+    verifier's report can never claim a provenance it did not execute.
+    """
+    import hashlib
+    import os
+    d = os.path.dirname(os.path.abspath(__file__))
+    h = hashlib.sha256()
+    for name in sorted(os.listdir(d)):
+        if not name.endswith(".py"):
+            continue
+        with open(os.path.join(d, name), "rb") as f:
+            body = f.read()
+        h.update(name.encode("utf-8") + b"\0" + hashlib.sha256(body).digest())
+    return h.hexdigest()
+
+
+def spec_id() -> str:
+    """`<version>@<12 hex>` — the label plus the bytes it names."""
+    return "%s@%s" % (SPEC_VERSION, impl_digest()[:12])
+

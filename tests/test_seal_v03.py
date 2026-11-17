@@ -28,6 +28,8 @@ import uibc_core.cli as ucli  # noqa: E402
 from uibc_core import ed25519  # noqa: E402
 from uibc_core.canonical import evidence_root, hash_file  # noqa: E402
 from uibc_core.signing import ed_generate_seed, ed_public_key, ed_seal_sign  # noqa: E402
+from uibc_core.canonical import (checkpoint_head, evidence_root, hash_file,
+                               index_metadata_digest, lifecycle_head)
 from uibc_core.verify import verify  # noqa: E402
 
 # RFC 8032 section 7.1, verbatim.
@@ -116,6 +118,18 @@ class SealV03Case(unittest.TestCase):
         man_path = os.path.join(self.pkg, "manifest.json")
         man = json.load(open(man_path, encoding="utf-8"))
         man["evidence_root"] = evidence_root([e["content_hash"] for e in idx["entries"]])
+        # A competent forger also refreshes the state commitments: the head
+        # fields live in an unsigned manifest, so anyone who can rewrite the
+        # evidence can recompute them. S8 is there to catch the LAZY case (a
+        # shortened log with the manifest left alone), not to do the signature's
+        # job - see tools/mutation_benchmark.py M21.
+        lc_path = os.path.join(self.pkg, "lifecycle.json")
+        lc = json.load(open(lc_path, encoding="utf-8"))
+        man["evidence_index_digest"] = index_metadata_digest(idx)
+        man["lifecycle_head"] = lifecycle_head(lc["events"])
+        man["checkpoint_head"] = checkpoint_head(
+            man["lifecycle_head"], man["evidence_root"],
+            man["evidence_index_digest"], len(idx["entries"]))
         json.dump(man, open(man_path, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
         return man
 

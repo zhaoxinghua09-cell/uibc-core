@@ -62,9 +62,35 @@ class TestCanonical(unittest.TestCase):
                 f.write(b"line1\r\nline2\r\n")
             self.assertNotEqual(hash_file(p1), hash_file(p2))
 
-    def test_known_limitation_float_forms(self):
-        # PROVISIONAL (pre-RFC8785): 1 vs 1.0 serialize differently - documented.
-        self.assertNotEqual(hash_obj({"a": 1}), hash_obj({"a": 1.0}))
+    def test_jcs_int_and_float_one_are_equivalent(self):
+        # RFC 8785 (JCS): 1 and 1.0 serialize identically - the provisional
+        # "1 != 1.0" limitation is gone, which is what makes UIBC hashes
+        # interoperable with every standard JCS tool.
+        self.assertEqual(hash_obj({"a": 1}), hash_obj({"a": 1.0}))
+
+
+    def test_rfc8785_sample_vector(self):
+        # Exact RFC 8785 sample object; validates key order, number forms
+        # (incl. 1e+30 / 1e-27 exponent and 4.5 / 0.002 fixed) and escaping.
+        obj = {"literals": [None, True, False],
+               "numbers": [333333333.3333333, 1e30, 4.5, 0.002, 1e-27],
+               "string": "€$\x0f\nA'B\"\\/"}
+        expected = ('{"literals":[null,true,false],'
+                    '"numbers":[333333333.3333333,1e+30,4.5,0.002,1e-27],'
+                    '"string":"€$\\u000f\\nA\'B\\"\\\\/"}')
+        self.assertEqual(canonicalize(obj).decode("utf-8"), expected)
+
+    def test_independent_canonical_matches(self):
+        # Determinism signal: the independently-written verifier's canonical
+        # bytes must equal the reference implementation's on varied inputs.
+        from independent_verifier.iverify import canon_bytes as i_canon
+        samples = [
+            {"a": 1, "b": [None, True, "x"], "c": {"z": 1, "a": 2}},
+            {"note": "有籍·有证·有门禁", "n": 1.5},
+            {"k": ["aa", "bb", "cc"]},
+        ]
+        for s in samples:
+            self.assertEqual(canonicalize(s), i_canon(s))
 
 
 class TestLifecycle(unittest.TestCase):

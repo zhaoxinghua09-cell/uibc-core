@@ -8,6 +8,7 @@ import sys
 import uuid
 from datetime import datetime, timezone
 
+import hashlib
 from .canonical import hash_file
 from .signing import (ALGORITHM, ALGORITHM_ED25519, ed_generate_seed,
                       ed_key_id, ed_public_key, ed_seal_sign, generate_key,
@@ -50,6 +51,8 @@ def cmd_register(args):
     now = _now()
     reg_event = {
         "event_id": str(uuid.uuid4()),
+        "sequence_number": 0,      # v1.1: contiguous from 0; a gap is a
+                                   # suppression indicator (GAR -08 6.2)
         "event_type": "REGISTER",
         "agent_id": agent_id,
         "timestamp": now,
@@ -58,7 +61,7 @@ def cmd_register(args):
         "previous_event": None,
         "signature": None,   # signing not ratified in v0.1
     }
-    _write(os.path.join(pkg, "identity.json"), {
+    ident = {
         "schema": SPEC_VERSION,
         "agent_id": agent_id,
         "agent_type": args.agent_type,
@@ -66,7 +69,14 @@ def cmd_register(args):
         "created_at": now,
         "status": "REGISTERED",
         "version": args.version,
-    })
+    }
+    # v1.1 optional fields, only written when supplied, so older packages
+    # stay readable and unchanged.
+    for field in ("principal_type", "logical_agent_id", "run_id", "key_custody"):
+        value = getattr(args, field, None)
+        if value:
+            ident[field] = value
+    _write(os.path.join(pkg, "identity.json"), ident)
     _write(os.path.join(pkg, "lifecycle.json"), {"schema": SPEC_VERSION, "events": [reg_event]})
     print(f"registered agent '{agent_id}' (owner: {args.owner}) at {now}")
 
@@ -75,12 +85,20 @@ def cmd_event(args):
     pkg = os.path.abspath(args.path)
     lc = _read(os.path.join(pkg, "lifecycle.json"))
     events = lc["events"]
+    # v1.1: default the actor to the identity owner instead of the literal
+    # string "owner" - the verifier now checks actors against the recorded
+    # principal set (L10), so a meaningless placeholder would be rejected.
+    actor = args.actor
+    if actor is None:
+        identity = _read(os.path.join(pkg, "identity.json"))
+        actor = identity.get("owner") or events[0].get("agent_id")
     events.append({
         "event_id": str(uuid.uuid4()),
+        "sequence_number": len(events),
         "event_type": args.type,
         "agent_id": events[0]["agent_id"],
         "timestamp": _now(),
-        "actor": args.actor,
+        "actor": actor,
         "payload_hash": None,
         "previous_event": events[-1]["event_id"],
         "signature": None,
@@ -199,7 +217,8 @@ def cmd_submit(args):
     hashes = []
     for e in idx["entries"]:
         hashes.append(hash_file(os.path.join(pkg, "evidence", e["path"])))
-    from .canonical import evidence_root
+    from .canonical import (checkpoint_head, evidence_root, index_metadata_digest,
+                       lifecycle_head)
     root = evidence_root(hashes)
     manifest = {
         "schema": SPEC_VERSION,
@@ -210,21 +229,45 @@ def cmd_submit(args):
         "evidence_root": root,
         "status": "SUBMITTED",
     }
+    # v1.1: optional policy identity. Maps to noa-00's reserved policyHash and
+    # to GAR -08's cap_profile_hash, so one field serves both alignments.
+    if getattr(args, "policy_hash", None):
+        manifest["policy_hash"] = args.policy_hash
+    # v1.1: bind the evidence INDEX METADATA, not just the file contents.
+    # Without this, an entry's type/note/action_digest could be rewritten while
+    # every content hash still matched and every check still passed (the gap
+    # this repo's own mutation benchmark missed until M19 was added).
+    manifest["evidence_index_digest"] = index_metadata_digest(idx)
+    # v1.1: head commitment over the lifecycle log, so a silently shortened log
+    # is visible even when the package is unsigned, and so a verifier can pin
+    # the head out-of-band to catch whole-package rollback (check S9).
+    lc_events = _read(os.path.join(pkg, "lifecycle.json")).get("events", [])
+    lc_head = lifecycle_head(lc_events)
+    manifest["lifecycle_head"] = lc_head
+    manifest["checkpoint_head"] = checkpoint_head(
+        lc_head, root, manifest["evidence_index_digest"], len(idx["entries"]))
     _write(os.path.join(pkg, "manifest.json"), manifest)
     msg = f"submission sealed: agent={identity['agent_id']} evidence={len(idx['entries'])} root={root}"
     if getattr(args, "key", None):
         kind, secret = _load_seal_key(args.key)
         sig_dir = os.path.join(pkg, "signatures")
         os.makedirs(sig_dir, exist_ok=True)
+        # v1.1: fold the lifecycle log into the signed payload so event
+        # timestamps / actors / appended events cannot be rewritten without
+        # breaking the seal (see tools/mutation_benchmark.py).
+        lc_path = os.path.join(pkg, "lifecycle.json")
+        lifecycle_payload = _read(lc_path) if os.path.isfile(lc_path) else None
+        signed_label = ("identity+manifest+lifecycle" if lifecycle_payload is not None
+                        else "identity+manifest")
         if kind == "ed25519":
-            sig, pub_b64 = ed_seal_sign(secret, identity, manifest)
+            sig, pub_b64 = ed_seal_sign(secret, identity, manifest, lifecycle_payload)
             pub = ed_public_key(secret)
             _write(os.path.join(sig_dir, "seal.json"), {
                 "schema": SPEC_VERSION,
                 "algorithm": ALGORITHM_ED25519,
                 "key_id": ed_key_id(pub),
                 "public_key": pub_b64,
-                "signed": "identity+manifest",
+                "signed": signed_label,
                 "signature": sig,
                 "created_at": _now(),
             })
@@ -234,8 +277,8 @@ def cmd_submit(args):
                 "schema": SPEC_VERSION,
                 "algorithm": ALGORITHM,
                 "key_id": key_id(secret),
-                "signed": "identity+manifest",
-                "signature": seal_sign(secret, identity, manifest),
+                "signed": signed_label,
+                "signature": seal_sign(secret, identity, manifest, lifecycle_payload),
                 "created_at": _now(),
             })
             msg += " | seal signed (key_id %s...)" % key_id(secret)[:16]
@@ -288,7 +331,8 @@ def cmd_demo(args):
     for e in idx["entries"]:
         e["content_hash"] = hash_file(os.path.join(forge, "evidence", e["path"]))
     _write(os.path.join(forge, "evidence", "index.json"), idx)
-    from .canonical import evidence_root
+    from .canonical import (checkpoint_head, evidence_root, index_metadata_digest,
+                       lifecycle_head)
     man = _read(os.path.join(forge, "manifest.json"))
     man["evidence_root"] = evidence_root([e["content_hash"] for e in idx["entries"]])
     _write(os.path.join(forge, "manifest.json"), man)
@@ -359,7 +403,8 @@ def cmd_verify(args):
         sys.exit(f"error: package dir not found: {pkg}")
     key = _load_key(args.key) if args.key else None
     pubkey = _load_pubkey(args.pubkey) if getattr(args, "pubkey", None) else None
-    report = verify(pkg, key=key, pubkey=pubkey)
+    report = verify(pkg, key=key, pubkey=pubkey,
+                    expect_head=getattr(args, "expect_head", None))
     print(json.dumps(report, ensure_ascii=False, indent=2))
     sys.exit(0 if report["result"] == "PASS" else 1)
 
@@ -387,10 +432,22 @@ def main():
     p = sub.add_parser("register", help="register agent (writes identity + REGISTER event)")
     p.add_argument("path"); p.add_argument("--agent-id", required=True)
     p.add_argument("--owner", required=True); p.add_argument("--agent-type", default="software-agent")
-    p.add_argument("--version", default="0.1.0"); p.set_defaults(func=cmd_register)
+    p.add_argument("--version", default="0.1.0")
+    # v1.1 identity fields (noa-00 compatible principal vocabulary, and the
+    # long-term-identity / single-run separation)
+    p.add_argument("--principal-type", dest="principal_type", default=None,
+                   choices=["HUMAN", "SERVICE", "POLICY", "SANDBOX_SIM"])
+    p.add_argument("--logical-agent-id", dest="logical_agent_id", default=None)
+    p.add_argument("--run-id", dest="run_id", default=None)
+    # 1F916 Section 3.1: custody disclosure travels with the signature, because
+    # a signature proves exactly what its custody permits it to prove.
+    p.add_argument("--key-custody", dest="key_custody", default=None,
+                   choices=["self_held", "platform_held", "household_held",
+                            "threshold", "kms", "hsm", "session_delegated"])
+    p.set_defaults(func=cmd_register)
 
     p = sub.add_parser("event", help="append lifecycle event")
-    p.add_argument("path"); p.add_argument("--type", required=True); p.add_argument("--actor", default="owner")
+    p.add_argument("path"); p.add_argument("--type", required=True); p.add_argument("--actor", default=None)
     p.set_defaults(func=cmd_event)
 
     p = sub.add_parser("evidence", help="add evidence file (hash recorded)")
@@ -412,6 +469,10 @@ def main():
     p.add_argument("--pubkey", default=None, metavar="PUBFILE",
                    help="pinned Ed25519 public key (hex file): the seal's recorded "
                         "public key must match it, else S6 FAILS")
+    p.add_argument("--expect-head", dest="expect_head", default=None, metavar="HEAD",
+                   help="pin the package checkpoint_head observed elsewhere: a "
+                        "mismatch FAILS S9, which is the only way to catch a rollback "
+                        "to an older but self-consistent package")
     p.set_defaults(func=cmd_verify)
 
     p = sub.add_parser("keygen", help="generate a 256-bit seal key (hex file)")

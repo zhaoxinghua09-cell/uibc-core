@@ -1,0 +1,119 @@
+{
+  "cases": {
+    "A_action_bound_admissible": {
+      "outcome": "ALLOW",
+      "grade": "admissible",
+      "components": [
+        {
+          "type": "uibc-package",
+          "grade": "admissible",
+          "bound": true,
+          "satisfied": true,
+          "reason": null
+        }
+      ],
+      "requirement_source": "relying_party",
+      "requirement_evaluated": "uibc-package"
+    },
+    "B_no_action_binding_unverifiable": {
+      "outcome": "DENY",
+      "grade": "unverifiable",
+      "components": [
+        {
+          "type": "uibc-package",
+          "grade": "unverifiable",
+          "bound": false,
+          "satisfied": false,
+          "reason": "package binds a package, not an action: no action_digest recorded in the evidence index"
+        }
+      ],
+      "requirement_source": "relying_party",
+      "requirement_evaluated": "uibc-package"
+    },
+    "C_tampered_conflicted": {
+      "outcome": "DENY",
+      "grade": "conflicted",
+      "components": [
+        {
+          "type": "uibc-package",
+          "grade": "conflicted",
+          "bound": false,
+          "satisfied": false,
+          "reason": "failed checks: S4,S8"
+        }
+      ],
+      "requirement_source": "relying_party",
+      "requirement_evaluated": "uibc-package"
+    },
+    "D_unsealed_unverifiable": {
+      "outcome": "DENY",
+      "grade": "unverifiable",
+      "components": [
+        {
+          "type": "uibc-package",
+          "grade": "unverifiable",
+          "bound": false,
+          "satisfied": false,
+          "reason": "check unresolved: S6"
+        }
+      ],
+      "requirement_source": "relying_party",
+      "requirement_evaluated": "uibc-package"
+    },
+    "E_relying_party_bar": {
+      "outcome": "DENY",
+      "grade": "admissible",
+      "components": [
+        {
+          "type": "uibc-package",
+          "grade": "admissible",
+          "bound": true,
+          "satisfied": true,
+          "reason": null
+        }
+      ],
+      "requirement_source": "relying_party",
+      "requirement_evaluated": "uibc-package AND policy-permit"
+    },
+    "E_presenter_bar": {
+      "outcome": "ALLOW",
+      "grade": "admissible",
+      "components": [
+        {
+          "type": "uibc-package",
+          "grade": "admissible",
+          "bound": true,
+          "satisfied": true,
+          "reason": null
+        }
+      ],
+      "requirement_source": "presenter",
+      "requirement_evaluated": "uibc-package"
+    }
+  },
+  "summary": {
+    "outcomes": {
+      "A_action_bound_admissible": "ALLOW",
+      "B_no_action_binding_unverifiable": "DENY",
+      "C_tampered_conflicted": "DENY",
+      "D_unsealed_unverifiable": "DENY",
+      "E_relying_party_bar": "DENY",
+      "E_presenter_bar": "ALLOW"
+    },
+    "grades": {
+      "A_action_bound_admissible": "admissible",
+      "B_no_action_binding_unverifiable": "unverifiable",
+      "C_tampered_conflicted": "conflicted",
+      "D_unsealed_unverifiable": "unverifiable",
+      "E_relying_party_bar": "admissible",
+      "E_presenter_bar": "admissible"
+    },
+    "expectations_met": true,
+    "action_digest": "sha256:0ddfc62a30868ee1128af1084789d6fa4454f2639a7bd7beff8ca8fd231ed767",
+    "requirement_note": {
+      "presenter": "uibc-package",
+      "relying_party": "uibc-package AND policy-permit"
+    },
+    "ep_aec_version": "EP-AEC-v1 (draft-schrock-ep-authorization-evidence-chain, -02; latest -08)"
+  }
+}

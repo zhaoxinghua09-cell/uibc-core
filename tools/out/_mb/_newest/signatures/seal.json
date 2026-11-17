@@ -1,9 +1,0 @@
-{
-  "schema": "uibc-core/0.3.0-proposal",
-  "algorithm": "Ed25519",
-  "key_id": "56475aa75463474c0285df5dbf2bcab73da651358839e9b77481b2eab107708c",
-  "public_key": "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg=",
-  "signed": "identity+manifest+lifecycle",
-  "signature": "aNMl6ipymfRpO+eirxadkxmVcu30s0a8d3Sswej3RX2OQNL19wY7Vz1bMiNTvo8UC1VIx+Ya4FRu39s8C28FAQ==",
-  "created_at": "2026-11-17T05:54:59Z"
-}

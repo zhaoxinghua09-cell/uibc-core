@@ -49,6 +49,15 @@ python3 tools/anchor_chain_head.py --package fixtures/clean.uibc \
 - **真实提交次数：0。** 代码路径用本地 mock 日历端到端跑通（断言 body 恰为 32 字节、路径 `/digests`、证明落盘、魔数通过），但**没有任何一个字节真的发到公共日历**。按约定，向第三方公共服务提交属于对外动作，需要你点头。
 - 因此在这一格里，AAC 和 AER-1 SDK 仍然领先我们——他们有真实锚定记录，我们只有能跑的实现。
 
+## 5b. 第二个后端：Nostr（同日补上）
+
+一个日历就是一个审查点，AER-1 SDK 的做法正是多 relay + 日历。所以补了 `tools/nostr_anchor.py`：零依赖实现 secp256k1 与 BIP-340 Schnorr，NIP-01 事件构造与验证。
+
+- 官方 BIP-340 向量 **19/19**（签名复现 + 判定复现，含 5 个必须为 false 的负例）
+- 与 libsecp256k1（`coincurve`）同 aux 签名**逐字节相同**，双向互验通过
+- 与 `pynostr` 独立算出的 NIP-01 **event id 完全一致**
+- 发布未实现（WebSocket 需依赖），见 [`NOSTR-ANCHOR.md`](NOSTR-ANCHOR.md)
+
 ## 6. 真提交要做什么（一条命令）
 
 ```bash

@@ -25,6 +25,12 @@ if _TOOLS not in sys.path:
     sys.path.insert(0, _TOOLS)
 
 
+def _tree_version():
+    import tomllib
+    with open(os.path.join(_REPO, "pyproject.toml"), "rb") as f:
+        return tomllib.load(f)["project"]["version"]
+
+
 def _load(name):
     with open(os.path.join(_REPO, "docs", name), encoding="utf-8") as f:
         return json.load(f)
@@ -44,7 +50,7 @@ def build():
         "package (pip)": {"version": published["version"],
                           "checks": published["checks"],
                           "source": "PyPI sdist"},
-        "repository": {"version": "unreleased",
+        "repository": {"version": _tree_version() + "（未发布）",
                        "checks": list(current),
                        "source": "main"},
     }

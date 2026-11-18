@@ -157,6 +157,11 @@ jobs:
           mkdir -p /tmp/isolated && cd /tmp/isolated
           python /tmp/uibc.pyz explain "$GITHUB_WORKSPACE/fixtures/clean.uibc" | head -3
 
+      - name: A stale anchor has to be distinguishable from a current one
+        # Six refusals and one STALE: gap, replay, rewritten predecessor, a
+        # first anchor claiming a predecessor, withheld anchors, rollback.
+        run: python -m pytest tests/test_anchor_chain.py -q
+
       - name: The publisher check, done twice
         # anchor_check.py and verify-js/anchor.mjs must reach the same verdict
         # on the same bundle - agreement is the only reason to believe either.

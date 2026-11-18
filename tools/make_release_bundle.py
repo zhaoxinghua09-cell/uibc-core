@@ -77,7 +77,7 @@ def head_of(pkg):
                            index_metadata_digest(index), len(index["entries"]))
 
 
-def build(out_dir, seed, tsa_token=None, tsa_cabundle=None):
+def build(out_dir, seed, tsa_token=None, tsa_cabundle=None, prev_anchor=None):
     pkg = os.path.join(out_dir, "package")
     if os.path.isdir(out_dir):
         shutil.rmtree(out_dir)
@@ -118,6 +118,11 @@ def build(out_dir, seed, tsa_token=None, tsa_cabundle=None):
         # Fill after stamping anchor_digest (printed below) with a public TSA;
         # an anchor without one pins a key and a head but not a moment.
         "tsa": None,
+        # The position in the line, and the digest of whatever came before.
+        # A seq with no predecessor is a first anchor; a seq that reuses one
+        # is a replay. See docs/ANCHOR-CHAIN.md.
+        "seq": (prev_anchor.get("seq", 0) + 1) if prev_anchor else 1,
+        "prev_anchor_digest": (anchor_digest(prev_anchor) if prev_anchor else None),
         "note": ("Publish this file somewhere the package cannot reach: a release "
                  "asset, a DNS TXT record, a transparency log. A verifier that "
                  "reads it out of the bundle is back to trusting the bundle."),
@@ -139,17 +144,22 @@ def main():
     seed = DEMO_SEED
     if "--out" in args:
         out = args[args.index("--out") + 1]
+    prev_path = args[args.index("--prev-anchor") + 1] if "--prev-anchor" in args else None
+    prev_anchor = json.load(open(prev_path, encoding="utf-8")) if prev_path else None
     tsa_token = args[args.index("--tsa-token") + 1] if "--tsa-token" in args else None
     tsa_cabundle = args[args.index("--tsa-cabundle") + 1] if "--tsa-cabundle" in args else None
     if "--seed-hex" in args:
         seed = bytes.fromhex(args[args.index("--seed-hex") + 1])
         if len(seed) != 32:
             raise SystemExit("--seed-hex must be 32 bytes (64 hex characters)")
-    out, anchor = build(out, seed, tsa_token=tsa_token, tsa_cabundle=tsa_cabundle)
+    out, anchor = build(out, seed, tsa_token=tsa_token, tsa_cabundle=tsa_cabundle,
+                         prev_anchor=prev_anchor)
     print("bundle   %s/package" % out)
     print("anchor   %s/anchor.json" % out)
     print("key_id   %s" % anchor["key_id"])
     print("head     %s" % anchor["checkpoint_head"])
+    print("seq            %d%s" % (anchor["seq"], "" if anchor["prev_anchor_digest"] is None
+                                     else "  (follows %s...)" % anchor["prev_anchor_digest"][:16]))
     print("anchor_digest  %s" % anchor_digest(anchor))
     if anchor.get("tsa"):
         print("timestamp      embedded (RFC 3161, covers anchor_digest)")

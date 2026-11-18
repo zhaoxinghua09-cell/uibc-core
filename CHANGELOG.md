@@ -15,6 +15,29 @@ Nothing here is a ratified standard.
 
 ## [Unreleased]
 
+### A forgery that agrees with itself (2026-11-19)
+
+- **`tools/composed_forgery.py`**: every previous audit measures a *change this
+  project can see*. This one performs the attack: rewrite one evidence file, then
+  repair the content hash, the evidence root, the index digest and the checkpoint
+  head - all of them arithmetic on bytes the attacker owns.
+- **Six attacks, measured.** Undeclared rewrite -> FAIL (S4). Repaired rewrite ->
+  INCONCLUSIVE (the owner's seal cannot be checked). Repaired and re-signed with
+  a key of the attacker's own -> **PASS, `unanchored`**. Same with the publisher's
+  key pinned -> FAIL (S6). Same with a published head pinned -> FAIL (S9).
+  Seal deleted -> INCONCLUSIVE, never better.
+- **The point is row three**, and it is written into the tests rather than the
+  pitch: a stranger with no publisher key produces a clean verdict, and the
+  verdict says `unanchored` because that is exactly what it can support. PASS
+  there means *this key signed these bytes*, not *the publisher wrote them*.
+- **`docs/FORGERY-ENVELOPE.md`** prints the six rows, names why each one stops
+  where it does, and lists the three things that actually close the gap:
+  publish the key (`--pubkey`), publish the head (`--expect-head`), anchor the
+  head to an external timestamp or receipt.
+- **`tests/test_composed_forgery.py`** freezes all six outcomes, row three
+  included, so the boundary cannot drift into a stronger claim later.
+
+
 ### Two defects at once (2026-11-19)
 
 - **`tools/check_combinations.py`**: every other audit here asks about one

@@ -27,6 +27,11 @@ BASELINE = os.path.join(HERE, "docs", "COMPETITORS.json")
 
 OURS_PYPI = "uibc-core"
 THEIRS_PYPI = "agent-action-capsule"
+# Only the release shape can change a conclusion. Stars, forks and pushed_at
+# move for reasons that have nothing to do with the comparison - including our
+# own pushes - and a monitor that fires on those is noise.
+DRIFT_FIELDS = ("pypi_latest", "pypi_releases", "pypi_last_upload")
+
 OURS_REPO = "zhaoxinghua09-cell/uibc-core"
 THEIRS_REPO = "action-state-group/agent-action-capsule"
 
@@ -96,12 +101,24 @@ def _own_tests():
 
 
 def drift(baseline, now):
+    """Field-by-field, but silence is not a change.
+
+    Without a token GitHub answers 403 and every GitHub field comes back None.
+    Reporting stars: 11 -> None as drift would be a false alarm every time
+    somebody runs this without credentials, and a tool that cries wolf on its
+    own normal use is a tool people stop running. An endpoint that did not
+    answer is unmeasured; the note line says so.
+    """
     changes = []
     for side in ("ours", "peer"):
+        now_side = now.get(side) or {}
+        unmeasured = ("github_error" in now_side or "pypi_error" in now_side)
         for key, was in (baseline.get(side) or {}).items():
-            if was is None:
+            if key not in DRIFT_FIELDS or was is None:
                 continue
-            got = (now.get(side) or {}).get(key)
+            got = now_side.get(key)
+            if got is None and unmeasured:
+                continue
             if got != was:
                 changes.append({"side": side, "field": key, "was": was, "now": got})
     return changes

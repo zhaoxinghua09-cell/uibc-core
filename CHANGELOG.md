@@ -15,6 +15,21 @@ Nothing here is a ratified standard.
 
 ## [Unreleased]
 
+### Every check, and something that breaks it (2026-11-19)
+
+- **`tools/check_falsifiability.py`** asks what a verifier project rarely asks
+  itself: for each of the nineteen checks, is there a published artefact that
+  makes it say FAIL? It collects the answer from the thirty-six exported
+  conformance cases (seventeen checks) and from `tools/outsider_audit.py`
+  (S16: a real FreeTSA token and four mutations; S9: a pinned head and a
+  rollback only the pin can see).
+- **Measured: 19 of 19, zero holes.** The tool exits non-zero if that stops
+  being true, and CI runs it in the second-implementation job, after the suite
+  is exported.
+- **`docs/FALSIFIABILITY.md`** records the matrix and the uneven column: five
+  checks (S1, S2, S3, S7, S11) rest on a single artefact, which proves they
+  are not decoration but not that they catch every shape of forgery.
+
 ### Three optimisations on 20,000 files, all reverted (2026-11-19)
 
 - **Profiled the 1.1 s** it takes to verify 20,000 entries: S12 semantics 0.354 s,

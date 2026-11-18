@@ -55,6 +55,9 @@ BASIS = {
             "note": "收据与摘要"},
     "S18": {"class": "direct", "citation": "draft-marques-asqav-compliance-receipts-01 §4.2.4",
             "note": "摘要须可解析"},
+    "S19": {"class": "related", "citation": "draft-bailey-scitt-agent-session-receipt",
+            "note": "新鲜度只能由外部状态判定，签名不蕴含时间顺序；"
+                    "高水位记忆机制为本项目自定"},
 }
 
 CLASSES = ("direct", "related", "none")

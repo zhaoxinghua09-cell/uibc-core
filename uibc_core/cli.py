@@ -546,7 +546,7 @@ def main():
                    help="fail any file under evidence/ that the index never declared "
                         "(the structural members the format places there are exempt)")
     p.add_argument("--state-file", dest="state_file", default=None, metavar="JSON",
-                   help="remember the last accepted head here (S10). Compared on the "
+                   help="remember the last accepted head here (S19). Compared on the "
                         "next run, so a rollback is refused without the caller "
                         "supplying --expect-head every time. First observation is "
                         "INCONCLUSIVE, not PASS")

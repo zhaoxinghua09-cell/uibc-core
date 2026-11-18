@@ -1,4 +1,4 @@
-"""S10 freshness state: what a verifier may and may not conclude.
+"""S19 freshness state: what a verifier may and may not conclude.
 
 These tests pin the three answers that matter, and one that matters most:
 a first observation is INCONCLUSIVE. A verifier that reports PASS on its first
@@ -118,13 +118,13 @@ class TestVerifierIntegration(unittest.TestCase):
         state = os.path.join(tempfile.mkdtemp(), "s.json")
 
         first = verify(pkg, state_file=state)
-        s10 = [c for c in first["checks"] if c["id"] == "S10"]
+        s10 = [c for c in first["checks"] if c["id"] == "S19"]
         self.assertEqual(len(s10), 1)
         self.assertEqual(s10[0]["result"], "INCONCLUSIVE")
         self.assertTrue(os.path.exists(state), "first observation should be remembered")
 
         second = verify(pkg, state_file=state)
-        s10b = [c for c in second["checks"] if c["id"] == "S10"]
+        s10b = [c for c in second["checks"] if c["id"] == "S19"]
         self.assertEqual(s10b[0]["result"], "PASS")
 
     def test_no_state_file_leaves_verdict_untouched(self):
@@ -133,8 +133,8 @@ class TestVerifierIntegration(unittest.TestCase):
         pkg = self._demo_package()
         with_state_ids = {c["id"] for c in verify(pkg, state_file=os.path.join(tempfile.mkdtemp(), "s.json"))["checks"]}
         without = {c["id"] for c in verify(pkg)["checks"]}
-        self.assertIn("S10", with_state_ids)
-        self.assertNotIn("S10", without)
+        self.assertIn("S19", with_state_ids)
+        self.assertNotIn("S19", without)
 
 
 if __name__ == "__main__":

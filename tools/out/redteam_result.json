@@ -1,7 +1,7 @@
 {
   "meta": {
     "probe": "redteam",
-    "generated_at_utc": "2026-11-17T14:47:38Z"
+    "generated_at_utc": "2026-11-18T23:31:28Z"
   },
   "cases": [
     {
@@ -60,7 +60,7 @@
       "expect": "FAIL 或干净报错（不得崩溃/放行）",
       "result": "FAIL",
       "failed_checks": [
-        "S0"
+        "S11"
       ],
       "note": "trust=unattested"
     },
@@ -70,9 +70,10 @@
       "expect": "FAIL（重复条目应被拒）",
       "result": "FAIL",
       "failed_checks": [
+        "S4",
+        "S12",
         "S7",
-        "S8",
-        "S5"
+        "S8"
       ],
       "note": "trust=unanchored"
     },
@@ -82,7 +83,7 @@
       "expect": "PASS 且耗时线性可接受",
       "result": "PASS",
       "failed_checks": [],
-      "note": "trust=unanchored elapsed=170.1ms"
+      "note": "trust=unanchored elapsed=47.0ms"
     },
     {
       "id": "RT09",
@@ -154,6 +155,16 @@
         "S6"
       ],
       "note": "trust=unattested"
+    },
+    {
+      "id": "RT16",
+      "case": "重放旧包并自洽声明更老的序号",
+      "expect": "FAIL（S19 回滚）",
+      "result": "FAIL",
+      "failed_checks": [
+        "S19"
+      ],
+      "note": "trust=unanchored"
     }
   ]
 }

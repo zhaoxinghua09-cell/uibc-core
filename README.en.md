@@ -54,7 +54,7 @@ uibc verify demo.uibc                   # open mode: integrity checks only
 ## Running the tests (the outsider reproduction kit)
 
 ```bash
-python -m unittest discover tests           # full suite, 553 cases (verified: `Ran 553 tests, OK (skipped=2)` with `.[verify,interop]`; `skipped=16` without it, see `docs/SKIPPED.md`)
+python -m unittest discover tests           # full suite, 566 cases (verified: `Ran 566 tests, OK (skipped=2)` with `.[verify,interop]`; `skipped=16` without it, see `docs/SKIPPED.md`)
 python -m unittest tests.stress_test        # stress suite, 7 scenarios
 python independent_verifier/cross_check.py  # independent second implementation, 70 checks, 0 mismatches
 ```

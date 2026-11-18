@@ -922,7 +922,7 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
                            "result": "PASS",
                            "detail": "checkpoint matches the out-of-band pinned value"})
 
-    # S10 freshness state (opt-in). S9 needs the caller to know the head every
+    # S19 freshness state (opt-in). S9 needs the caller to know the head every
     # time; this remembers it instead. Deliberately narrow: it says nothing
     # about authenticity (that is S6) and nothing about correctness (that is
     # S1-S5 and S8). A first observation is INCONCLUSIVE, never PASS - there is
@@ -943,7 +943,7 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
             # Nothing to key a high-water mark on. Saying so is the only honest
             # answer: guessing a subject would let two unrelated agents share
             # one watermark.
-            checks.append({"id": "S10", "name": "freshness state",
+            checks.append({"id": "S19", "name": "freshness state",
                            "result": "INCONCLUSIVE",
                            "detail": "no agent_id or freshness_head.subject: a "
                                      "high-water mark cannot be keyed to anything"})
@@ -952,7 +952,7 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
                 state = freshness.load(state_file)
             except Exception as exc:  # an unreadable state is not a verdict either
                 ok = False
-                checks.append({"id": "S10", "name": "freshness state",
+                checks.append({"id": "S19", "name": "freshness state",
                                "result": "FAIL",
                                "detail": f"state file unreadable: {exc}"})
         if state is not None:
@@ -960,7 +960,7 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
                 state, subject, actual_ckpt, sequence=sequence, prev_head=prev_head)
             if verdict10 == "FAIL":
                 ok = False
-            checks.append({"id": "S10", "name": "freshness state",
+            checks.append({"id": "S19", "name": "freshness state",
                            "result": verdict10, "detail": detail10})
             if verdict10 == "PASS" or (verdict10 == "INCONCLUSIVE"
                                         and subject not in state.get("subjects", {})):
@@ -971,7 +971,7 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
                     freshness.record(state_file, subject, actual_ckpt, sequence=sequence)
                 except Exception as exc:
                     ok = False
-                    checks.append({"id": "S10", "name": "freshness state",
+                    checks.append({"id": "S19", "name": "freshness state",
                                    "result": "FAIL",
                                    "detail": f"state file not writable: {exc}"})
 

@@ -15,6 +15,27 @@ Nothing here is a ratified standard.
 
 ## [Unreleased]
 
+### Scale, and a semantic disagreement between the two implementations (2026-11-19)
+
+- **`docs/SCALE.md` + `docs/SCALE.json` + `docs/SCALE.svg`**: verification cost
+  measured at 100 / 1,000 / 5,000 / 20,000 evidence files. Python: 0.007 / 0.055 /
+  0.282 / 1.104 s, 23.6 / 25.1 / 31.2 / 60.3 MiB peak. Linear at about 55 us and
+  1.9 KiB per file.
+- **Found by the scale run:** the JavaScript verifier reported **FAIL** for an
+  unsigned package where Python reported **INCONCLUSIVE**, both on the same bytes.  The
+  absence of a signature is a missing attestation, not a violation; three-valued
+  adjudication is this project's claim, and the second implementation was
+  contradicting it in the one place the 36/36 conformance agreement never looked,
+  because every conformance case carries some seal.
+- **Fixed** in `tools/verify-js/verify.mjs`, with a regression test pinning both
+  implementations to one answer: `test_an_unsigned_package_is_inconclusive_in_both_languages`.
+- Also recorded: S12 refused a first synthetic build whose `created_at` was eight
+  hours in the future (`26306 s in the future`) - an unplanned demonstration that
+  the check fires.
+- `docs/COMPETITORS.md` keeps the missing item: no same-size comparison against the
+  peer has been run, because the package formats differ and that would compare
+  two different kinds of work.
+
 ### 0.4.0 dry run: the package now checks itself (2026-11-19)
 
 - **The sdist could not run its own tests.** First build collected 290 of 526

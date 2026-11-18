@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "measured_at": "2026-11-19",
+    "host": "Linux, Python 3.12, Node 22.23.4",
+    "package": "synthetic packages built from fixtures/clean.uibc: N evidence files, correct hashes, correct evidence_root, signatures/ removed so the result is INCONCLUSIVE rather than PASS",
+    "toolchain": "uibc_core.verify.verify (Python) / tools/verify-js/verify.mjs (JavaScript)"
+  },
+  "python": [
+    {"n": 100, "secs": 0.007, "rss_mib": 23.6},
+    {"n": 1000, "secs": 0.055, "rss_mib": 25.1},
+    {"n": 5000, "secs": 0.282, "rss_mib": 31.2},
+    {"n": 20000, "secs": 1.104, "rss_mib": 60.3}
+  ],
+  "javascript": [
+    {"n": 1000, "secs": 0.204, "rss_mib": 70.3},
+    {"n": 5000, "secs": 0.303, "rss_mib": 104.1},
+    {"n": 20000, "secs": 0.829, "rss_mib": 221.7}
+  ],
+  "note": "JavaScript figures include Node process start-up, which the Python figures do not; they are comparable as wall-clock costs of a command a person would type, not as in-process kernel times."
+}

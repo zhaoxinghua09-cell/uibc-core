@@ -10,13 +10,13 @@
 | S3 | lifecycle state machine + semantics | 是 | 8 | 1 | 14 |
 | S4 | evidence integrity | 是 | 12 | 3 | 24 |
 | S5 | evidence root | 是 | 9 | 3 | 21 |
-| S6 | seal signature | 是 | 16 | 1 | 24 |
+| S6 | seal signature | 是 | 16 | 1 | 25 |
 | S7 | evidence index metadata | 否 | 5 | 1 | 10 |
 | S8 | package checkpoint head | 否 | 6 | 2 | 15 |
 | S9 | head pinned out-of-band | 否 | 6 | 1 | 16 |
 | S10 | attestation closure declared | 否 | 5 | 2 | 6 |
 | S11 | strict serialization | 是 | 5 | 1 | 13 |
-| S12 | timestamp and identifier strictness | 是 | 6 | 2 | 12 |
+| S12 | timestamp and identifier strictness | 是 | 6 | 2 | 13 |
 | S13 | merkle inclusion proofs | 否 | 8 | 4 | 9 |
 | S14 | strict base64 | 否 | 4 | 2 | 5 |
 | S15 | anchor event resolution | 否 | 6 | 4 | 8 |

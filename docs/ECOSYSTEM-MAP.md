@@ -22,6 +22,13 @@ performed. Our own verdict has one meaning only, and it is narrower:
 It does not claim the agent was correct, safe, or wise; that the recorded inputs were
 true or complete; or that any real-world outcome followed."
 
+## Adoption: the part local tests cannot reach
+
+`docs/IMPLEMENTATION-STATUS.md` records this project in the RFC 7942 four-bucket
+format, and all four buckets are empty. `docs/UPSTREAM-SUBMISSION-PLAN.md` says
+what each route would cost. Neither is a criticism of the code; both are facts
+about where the code has been.
+
 ## Head-to-head with the nearest peer
 
 `agent-action-capsule` 0.17.0 is measured against this project in

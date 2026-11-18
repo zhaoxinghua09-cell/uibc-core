@@ -127,6 +127,12 @@ jobs:
         # nobody can make fail is decoration; this step refuses decoration.
         run: python tools/check_falsifiability.py
 
+      - name: Two defects at once must not explain each other away
+        # One mutation at a time is measured everywhere else. Two together is a
+        # different question: a second change can supply exactly the consistency
+        # the first one broke. Fourteen mutations, every pair and every triple.
+        run: python tools/check_combinations.py --triples
+
       - name: The second implementation must not drift
         # A verifier written from the spec in another language, sharing no code
         # with the first, is only worth something while it keeps agreeing. This

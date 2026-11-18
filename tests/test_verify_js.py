@@ -31,7 +31,7 @@ def cases_root():
     with zipfile.ZipFile(_ZIP) as z:
         z.extractall(tmp)
     return os.path.join(tmp, "cases")
-COVERED = ("S1", "S2", "S4", "S5", "S6", "S7", "S8", "S9", "S10", "S11", "S12", "S13",
+COVERED = ("S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8", "S9", "S10", "S11", "S12", "S13",
            "S14", "S15", "S16", "S17", "S18")
 
 
@@ -51,9 +51,13 @@ class TestJavaScriptVerifier(unittest.TestCase):
         self.assertEqual(report["result"], "INCONCLUSIVE")
         self.assertEqual(failed(report), set())
         self.assertIn("not checked here", report["note"])
-        self.assertEqual(sorted(report["covered"] if "covered" in report else
-                                [c["id"] for c in report["checks"]]),
-                         ["S1", "S11", "S12", "S2", "S4", "S5", "S6", "S7"])
+        # A clean package carries no tree, no chain, no anchors and no policy
+        # artefacts, so the checks that judge those never appear: a check that
+        # has nothing to look at must not report a verdict either way. S6 is
+        # here and INCONCLUSIVE, because the package has an HMAC seal and we
+        # hold no key - "could not check" is the honest answer.
+        self.assertEqual(sorted(c["id"] for c in report["checks"]),
+                         ["S1", "S11", "S12", "S2", "S3", "S4", "S5", "S6", "S7"])
 
     def test_a_real_rfc3161_token_is_verified_and_every_mutation_is_refused(self):
         """The one witness we cannot mint.
@@ -149,7 +153,7 @@ class TestJavaScriptVerifier(unittest.TestCase):
     def test_it_catches_a_changed_byte_and_the_root(self):
         case = os.path.join(cases_root(), "06-flip-one-byte-in-evidence")
         self.assertIn("S4", failed(js(case)))
-        case = os.path.join(cases_root(), "09-edit-the-evidence-root")
+        case = os.path.join(cases_root(), "10-edit-the-evidence-root")
         self.assertIn("S5", failed(js(case)))
 
     def test_it_names_the_check_python_names(self):
@@ -189,3 +193,24 @@ class TestJavaScriptVerifier(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+    def test_the_two_implementations_agree_on_every_package(self):
+        """Not "each names an expected check" - the same set of failing checks.
+
+        The weaker assertion in tools/assert_second_impl.py asks whether each
+        refusal names one of the checks the case expects. This one asks the
+        harder question: on all 36 packages, do the two implementations fail
+        exactly the same checks? They were five apart until the S5 skip rule
+        and the evidence_count rule were brought into line; the number that
+        matters is 36 of 36.
+        """
+        import tools.cross_impl_check as cic
+
+        cic.ensure_cases()
+        rows = cic.main(emit=False) if False else None
+        report = json.loads(subprocess.run(
+            ["python3", os.path.join(_REPO, "tools", "cross_impl_check.py"), "--json"],
+            capture_output=True, text=True, cwd=_REPO).stdout)
+        self.assertEqual(report["agree_with_python"], report["cases"],
+                         "disagreements: " + str([(r["id"], r["js_failed"], r["py_failed"])
+                                                  for r in report["rows"] if not r["agree"]]))

@@ -168,6 +168,12 @@ function verify(pkg, opts = {}) {
   const warnings = [];
   const note = (id, name, ok, detail) =>
     checks.push({ id, name, result: ok ? "PASS" : "FAIL", detail });
+  // The third verdict. A check whose input is itself untrustworthy has found
+  // out nothing, and "nothing was found wrong" is not the same statement as
+  // "the package is sound". Collapsing that into FAIL blames one root cause
+  // twice; collapsing it into PASS asserts what was never checked.
+  const inconclusive = (id, name, detail) =>
+    checks.push({ id, name, result: "INCONCLUSIVE", detail });
 
   // S1 package structure, including files nobody declared
   {
@@ -243,8 +249,140 @@ function verify(pkg, opts = {}) {
     note("S2", "identity consistency", ok, detail);
   }
 
+  // S3 lifecycle state machine and its semantic layer.
+  //
+  // Two families of rules, both from the specification and neither dependent on
+  // the Python implementation:
+  //
+  //   L1-L7  the state machine: one REGISTER first, a chain of event_ids that
+  //          reaches back exactly one step each time, RESUME only after SUSPEND,
+  //          nothing after a terminal event.
+  //   L8-L12 the semantics the bare state machine cannot see: timestamps that
+  //          parse, do not run backwards, do not sit in the future or before
+  //          1970; actors that are actually principals of this agent; ACTIVATE
+  //          exactly once; a sequence_number that is contiguous from 0, because
+  //          a gap in a sealed log is how a suppressed event looks.
+  //
+  // Lifetimes are compared as instants, not strings: "2026-02-30" is a string
+  // that sorts fine and a date that does not exist.
+  {
+    const problems = [];
+    const EVENTS = new Set(["REGISTER", "ACTIVATE", "UPDATE", "TRANSFER", "DELEGATE",
+                            "MIGRATE", "SUSPEND", "RESUME", "REVOKE", "RETIRE"]);
+    const TERMINAL = new Set(["REVOKE", "RETIRE"]);
+    const ONCE_ONLY = new Set(["ACTIVATE"]);
+
+    // A timestamp is usable here only if it names a real instant: ISO-8601 with
+    // a zone, whose calendar fields exist. Anything else is L8, not a crash.
+    const parseStamp = (value) => {
+      if (typeof value !== "string") return null;
+      const text = value.trim();
+      const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.\d+)?(Z|[+-]\d{2}:\d{2})$/
+        .exec(text);
+      if (!m) return null;
+      if (!realDate(text)) return null;
+      const ms = Date.parse(text);
+      return Number.isNaN(ms) ? null : ms;
+    };
+
+    let events = [];
+    let manifest = {}, identity = {};
+    try { events = readJson(join(pkg, "lifecycle.json")).events || []; }
+    catch (err) { problems.push("lifecycle.json is not readable: " + err.message); }
+    try { manifest = readJson(join(pkg, "manifest.json")); } catch { /* S1 reports it */ }
+    try { identity = readJson(join(pkg, "identity.json")); } catch { /* S1 reports it */ }
+
+    const allowedActors = new Set([identity.owner, identity.agent_id].filter((x) => x !== undefined && x !== null));
+    const createdMs = parseStamp(String(manifest.created_at || identity.created_at || ""));
+    const ceiling = createdMs === null ? null : createdMs + 86400 * 1000;
+
+    const seenIds = new Set();
+    let prevId = null, prevType = null, registered = false, prevMs = null;
+    const counts = {};
+
+    if (!Array.isArray(events)) {
+      problems.push("lifecycle.events is not an array");
+    } else {
+      events.forEach((ev, i) => {
+        if (typeof ev !== "object" || ev === null || Array.isArray(ev)) {
+          problems.push("L8 event " + i + " is not an object");
+          return;
+        }
+        const etype = ev.event_type;
+        const eid = ev.event_id;
+
+        if (!EVENTS.has(etype)) problems.push("L3 unknown event_type '" + String(etype) + "' at position " + i);
+        if (seenIds.has(eid)) problems.push("L5 duplicate event_id '" + String(eid) + "' at position " + i);
+        seenIds.add(eid);
+
+        if ((ev.previous_event ?? null) !== prevId) {
+          problems.push("L4 previous_event chain broken at position " + i +
+                        " (expected " + String(prevId) + ", got " + String(ev.previous_event) + ")");
+        }
+        if (i === 0) {
+          if (etype !== "REGISTER") problems.push("L1 first event must be REGISTER");
+        } else if (!registered) {
+          problems.push("L1 event before REGISTER at position " + i);
+        } else if (etype === "REGISTER") {
+          problems.push("L2 duplicate REGISTER at position " + i);
+        }
+        if (etype === "REGISTER") registered = true;
+        if (etype === "RESUME" && prevType !== "SUSPEND") {
+          problems.push("L6 RESUME at position " + i + " not preceded by SUSPEND");
+        }
+        if (i > 0 && TERMINAL.has(prevType)) {
+          problems.push("L7 event after terminal event at position " + i);
+        }
+
+        const ms = parseStamp(ev.timestamp);
+        if (ms === null) {
+          problems.push("L8 event " + i + " has no parsible ISO-8601 timestamp ('" + String(ev.timestamp) + "')");
+        } else {
+          if (new Date(ms).getUTCFullYear() < 1970) problems.push("L9 event " + i + " timestamp predates 1970");
+          if (prevMs !== null && ms < prevMs) {
+            problems.push("L8 event " + i + " timestamp goes backwards (" + String(ev.timestamp) + " < previous)");
+          }
+          prevMs = ms;
+          if (ceiling !== null && ms > ceiling) {
+            problems.push("L9 event " + i + " timestamp " + String(ev.timestamp) +
+                          " is later than manifest.created_at + 86400s (implausible: the log is sealed at creation time)");
+          }
+        }
+
+        if (allowedActors.size && !allowedActors.has(ev.actor)) {
+          problems.push("L10 event " + i + " actor '" + String(ev.actor) +
+                        "' is not an authorised principal [" + [...allowedActors].join(", ") + "]");
+        }
+
+        counts[etype] = (counts[etype] || 0) + 1;
+        if (ONCE_ONLY.has(etype) && counts[etype] > 1) {
+          problems.push("L11 duplicate " + String(etype) + " at position " + i +
+                        " (" + counts[etype] + " occurrences of a once-only event)");
+        }
+
+        if ("sequence_number" in ev) {
+          const seq = ev.sequence_number;
+          if (typeof seq !== "number" || !Number.isInteger(seq)) {
+            problems.push("L12 event " + i + " sequence_number is not an integer (" + String(seq) + ")");
+          } else if (seq !== i) {
+            problems.push("L12 event " + i + " sequence_number=" + seq +
+                          " breaks contiguity (expected " + i + "): a gap in a sealed log indicates a suppressed event");
+          }
+        }
+
+        prevId = eid;
+        prevType = etype;
+      });
+    }
+
+    note("S3", "lifecycle state machine + semantics", problems.length === 0,
+         problems.slice(0, 4).join("; ") ||
+           (events.length + " events, chain valid, timestamps monotonic, actors authorised"));
+  }
+
   // S4 evidence integrity
   const hashes = [];
+  let s4Failed = false;
   {
     const problems = [];
     try {
@@ -265,11 +403,20 @@ function verify(pkg, opts = {}) {
         else hashes.push(got);
       }
     } catch (err) { problems.push("unreadable index: " + err.message); }
+    s4Failed = problems.length !== 0;
     note("S4", "evidence integrity", problems.length === 0, problems.slice(0, 4).join("; ") || "ok");
   }
 
   // S5 evidence root
-  {
+  //
+  // Rooting a set of hashes that S4 has just shown to be wrong would score one
+  // root cause twice: the file is not what the index promised, and therefore
+  // the root derived from it is not the root the manifest promises either.
+  // The second statement is not a second finding, it is the same finding.
+  // When S4 fails the root is INCONCLUSIVE, matching the Python verifier.
+  if (s4Failed) {
+    inconclusive("S5", "evidence root", "skipped: evidence missing or S4 failed");
+  } else {
     let ok = false, detail = "no hashes to root";
     try {
       const manifest = readJson(join(pkg, "manifest.json"));

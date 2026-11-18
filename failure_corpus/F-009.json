@@ -1,0 +1,11 @@
+{
+  "id": "F-009",
+  "date": "2026-11-19",
+  "category": "code",
+  "summary": "evidence_id was read by no check for presence or uniqueness: two entries could share an id, or carry none, and S4 said the evidence was intact",
+  "root_cause": "The index is read by position everywhere (entries[0], entries[1]), so identity of an entry was never needed for the checks that exist. docs/FIELD-COVERAGE.md stated 'duplicates are not checked - stated rather than implied'; stating a gap is not the same as closing it.",
+  "detection": "The field-coverage audit listed both evidence_id fields as silent to a change of value. Probing the other direction - making two entries share an id, or emptying one - showed no check moved either.",
+  "fix": "S4 now requires each entry to carry a non-empty evidence_id and rejects duplicates, in Python and JavaScript. tests/test_field_coverage.py covers both directions.",
+  "lesson": "A field being silent to a *changed* value is not the same as being silent to a *repeated* or *absent* value. When a field is an identifier, the interesting mutations are the ones that break identity, not the ones that change it.",
+  "fixture_ref": "tests/test_field_coverage.py (two cases), tools/check_field_coverage.py"
+}

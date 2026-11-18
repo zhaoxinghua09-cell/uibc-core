@@ -23,7 +23,7 @@ A silent field is not automatically a hole. What would be a hole is a silent fie
 
 **Descriptive.** Changes the text, changes no verdict, and should not: the schema tag, a version string, an agent type, a media type, a human note.
 
-**Unreferenced.** A value nothing else points at: the chain's last event id (no successor cites it), the evidence ids (the index is read by position, and duplicates are not checked - stated here rather than implied).
+**Unreferenced, but now identified.** The chain's last event id has no successor to cite it, and a value swap changes nothing. `evidence_id` is the same for a swap - and different for a repeat or an absence, which `S4` now rejects: two entries may not share an id, and none may be empty. A field can be silent to substitution and loud to duplication, so this tool alone cannot call it covered.
 
 **Undecidable without material the package does not carry.** Per-event signatures the format defines no payload for, and an HMAC seal whose secret the verifier does not hold: `S6` reports INCONCLUSIVE, which is the correct answer, not a miss.
 

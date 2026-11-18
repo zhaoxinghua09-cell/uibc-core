@@ -8,7 +8,7 @@
 | S1 | package structure | 是 | 8 | 1 | 25 |
 | S2 | identity consistency | 是 | 7 | 1 | 18 |
 | S3 | lifecycle state machine + semantics | 是 | 9 | 1 | 16 |
-| S4 | evidence integrity | 是 | 12 | 3 | 27 |
+| S4 | evidence integrity | 是 | 13 | 3 | 27 |
 | S5 | evidence root | 是 | 9 | 3 | 23 |
 | S6 | seal signature | 是 | 16 | 1 | 27 |
 | S7 | evidence index metadata | 否 | 5 | 1 | 12 |

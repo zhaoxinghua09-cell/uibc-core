@@ -535,6 +535,19 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
             s4_failures.append(f"hash mismatch on {e.get('path')!r}")
         if e.get("type") not in EVIDENCE_TYPES:
             s4_failures.append(f"unknown evidence type {e.get('type')!r}")
+    # evidence_id: the index is read by position everywhere else, so a duplicate
+    # or a missing identifier costs nothing until somebody cites an id. The
+    # field-coverage audit listed this as unchecked; it is checked now.
+    _ids = [e.get("evidence_id") for e in entries]
+    for _i, _eid in enumerate(_ids):
+        if not (isinstance(_eid, str) and _eid.strip()):
+            s4_failures.append(f"entry {_i} has no evidence_id")
+    _seen = set()
+    for _eid in _ids:
+        if isinstance(_eid, str) and _eid.strip():
+            if _eid in _seen:
+                s4_failures.append(f"duplicate evidence_id {_eid!r}")
+            _seen.add(_eid)
     record("S4", "evidence integrity", not s4_failures,
            f"{len(entries)} entries checked; " + ("; ".join(s4_failures) if s4_failures else "all hashes match"))
 

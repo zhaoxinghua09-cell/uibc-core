@@ -115,14 +115,26 @@ class TestOutsiderAudit(unittest.TestCase):
         for cid in ("S14", "S15", "S18"):
             self.assertIn(cid, caught, "%s never fired in stage 3" % cid)
 
-    def test_the_one_we_cannot_construct_is_named(self):
-        """S16 cannot be red-teamed from inside: the token is signed by a key we
-        do not hold. It must be declared, not quietly omitted."""
-        ext = self.result["stage_redteam_ext"]
-        names = [u["check"] for u in ext["unconstructible"]]
-        self.assertEqual(len(names), 1)
-        self.assertIn("S16", names[0])
-        self.assertIn("TSA key", ext["unconstructible"][0]["why"])
+    def test_s16_is_exercised_on_a_real_third_party_token(self):
+        """S16 must be judged on bytes we did not sign. Four ways to make a real
+        FreeTSA token stop being a witness."""
+        s16 = self.result["stage_redteam_s16"]
+        self.assertEqual(s16["count"], 4)
+        self.assertTrue(s16["ok"], "failed: %s" % s16["failed"])
+        for r in s16["rows"]:
+            self.assertTrue(r["ok"], "%s -> %s (%s)"
+                            % (r["name"], r["got"], r["expectation_note"]))
+            self.assertIn("S16", r["failed_checks"],
+                          "%s was not caught by S16" % r["name"])
+
+    def test_a_real_token_is_not_an_external_witness_of_this_package(self):
+        """The distinction must stay visible: the token dates a repo fixture,
+        not this package's head."""
+        notes = self.result["stage_redteam_s16"]["not_externally_witnessed"]
+        self.assertEqual(len(notes), 1)
+        self.assertIn("anchr", notes[0]["why"].replace("anchored_head", "anchr"))
+        self.assertIn("no third party has timestamped this package",
+                      notes[0]["why"])
 
     def test_skip_is_not_a_pass(self):
         it = self.result["stage_interop"]

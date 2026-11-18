@@ -36,7 +36,79 @@ _REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if _REPO not in sys.path:
     sys.path.insert(0, _REPO)
 
+# Where the judgment comes from matters as much as what it says.
+#
+# An auditor that imports the verifier from wherever PYTHONPATH points can be
+# handed a `uibc_core` that answers PASS to everything, and its verdict then
+# describes the attacker's code rather than the package. Inserting _REPO at
+# position 0 is the first line of defence; this is the second: refuse to run
+# unless the verifier actually loaded from this repo.
+import hashlib  # noqa: E402
+
+from uibc_core import verify as _verify_mod  # noqa: E402
 from uibc_core.verify import verify  # noqa: E402
+
+
+def _norm(path):
+    return os.path.normcase(os.path.abspath(path)).replace("\\\\", "/")
+
+
+def trust_root():
+    """The verifier we judge with, and whether it really came from this repo."""
+    where = os.path.abspath(_verify_mod.__file__)
+    repo_norm = _norm(_REPO).rstrip("/")
+    inside = _norm(where).startswith(repo_norm + "/")
+    with open(where, "rb") as f:
+        digest = hashlib.sha256(f.read()).hexdigest()
+    return {"path": where, "sha256": digest, "in_repo": inside}
+
+
+def behavior_self_test():
+    """Judge the judge: a verifier that passes junk is not a verifier.
+
+    Path checks cannot settle this. Put the tool and a `uibc_core` that
+    answers PASS next to each other and `in_repo` is satisfied. So ask the
+    loaded verifier two questions whose answers we already know: a path that
+    does not exist and an empty directory must both come back not-PASS, and
+    the report must carry an S1 row. A stub fails here.
+    """
+    problems = []
+    empty = tempfile.mkdtemp()
+    try:
+        cases = [("a path that does not exist",
+                  os.path.join(empty, "no-such-package")),
+                 ("an empty directory", empty)]
+        for label, path in cases:
+            try:
+                r = verify(path)
+            except Exception as exc:  # a verifier that raises has not judged
+                problems.append("%s: raised %r" % (label, exc))
+                continue
+            if str((r or {}).get("result", "")).upper() == "PASS":
+                problems.append("%s: reported PASS" % label)
+            if "S1" not in [c.get("id") for c in (r or {}).get("checks") or []]:
+                problems.append("%s: no S1 row in the report" % label)
+    finally:
+        shutil.rmtree(empty, ignore_errors=True)
+    return problems
+
+
+_TRUST = trust_root()
+_BEHAVIOR = behavior_self_test()
+if not _TRUST["in_repo"]:
+    sys.stderr.write(
+        "refusing to run: the verifier came from %s\n"
+        "which is outside this repository (%s).\n"
+        "An audit must be judged by this repo's code, not by whatever "
+        "PYTHONPATH supplied.\n" % (_TRUST["path"], _REPO))
+    sys.exit(2)
+if _BEHAVIOR:
+    sys.stderr.write(
+        "refusing to run: the loaded verifier failed its own self-test.\n"
+        + "".join("  - %s\n" % p for p in _BEHAVIOR)
+        + "A verifier that passes things it has never looked at is not a "
+          "verifier, and its audit would only describe itself.\n")
+    sys.exit(2)
 
 DEFAULT_PACKAGE = os.path.join(_REPO, "fixtures", "clean.uibc")
 
@@ -787,6 +859,8 @@ def run_all(package, kit):
         "stage_redteam_s16": s16,
         "stage_interop": interop,
         "ok": overall_ok,
+        "trust": _TRUST,
+        "self_test": [],
         "note": "interop SKIPPED is not counted as a pass",
     }
 
@@ -851,6 +925,11 @@ def _print_human(result):
         for c in it["checks"]:
             print("  %-38s exit=%d %s" % (c["name"], c["exit"], "ok" if c["ok"] else "FAILED"))
     print()
+    t = result.get("trust")
+    if t:
+        print("verifier   : %s" % os.path.basename(t["path"]))
+        print("             sha256 %s o  (from this repo: %s)"
+              % (t["sha256"][:16], t["in_repo"]))
     print("VERDICT    : %s" % ("OK" if result["ok"] else "FAILED"))
 
 

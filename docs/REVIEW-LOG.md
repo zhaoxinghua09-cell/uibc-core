@@ -247,3 +247,50 @@ Windows caveat worth keeping: the corpus tool crashes printing its report path w
 suite runs from a `D:` directory (`ValueError: path is on mount 'D:', start on mount 'C:'`).
 Run it from a `C:` directory with `PYTHONPATH` pointing at the checkout; the verdicts are
 unaffected.
+---
+
+## Round 34 — the same verdicts from a different machine, a different OS, a different egress
+
+Everything in Rounds 30–33 was produced on one Windows box, through one network egress. That
+is the exact weakness a skeptical reader names first: "you ran it in your own environment."
+This round re-ran the two central claims from scratch on a Linux host with a different public
+IP, an anonymous clone (no token), a fresh dependency install, and a different Python minor
+version (3.12.11 vs 3.13 locally).
+
+| check | local (Windows, 3.13) | second egress (Linux, 3.12.11) |
+|---|---|---|
+| anonymous `git clone` | n/a (working copy) | success, `main` = `816e69f`, 4.7 MB |
+| `docs/conformance/vectors.json` bytes | 23178 B, sha256 `51494762…66d043` | **HTTP 200, 23178 B, sha256 `51494762…66d043`** — byte-identical |
+| independent checker over the 29 vectors | `29/29 vectors reproduced` | `29/29 vectors reproduced by a non-uibc implementation` |
+| full test suite | `OK (skipped=7)` | `OK (skipped=10)` (platform-specific skips, no failures) |
+| external corpus, 288 vectors | 288 pass / 0 fail | **288 pass / 0 fail**; `rail: external`; 288 of 288; `suiteRefusals 0`; `reasonParityMismatch 0` |
+
+Commands, so a third party can redo it (Linux):
+
+```bash
+git clone --depth 1 https://github.com/zhaoxinghua09-cell/uibc-core.git && cd uibc-core
+python3 tools/conformance_check.py                      # 29/29
+python3 -m unittest discover -s tests -p "test_*.py"   # OK
+pip install "agent-evidence-vectors==0.37.0"
+PYTHONPATH=$PWD agent-evidence-vectors --verifier "python3 -m uibc_core.aee"   # 288/288
+```
+
+What this settles: the verdicts are not an artifact of one machine, one OS or one Python
+build; a stranger who follows the four commands gets the same numbers.
+What it does **not** settle: independence of authorship. The 29-vector checker is still
+written by this repo's author, and the cross-egress run used our own code. It is a portability
+and reproducibility claim, not an independence claim.
+
+### Ownership note added this round
+
+AER-1 is not ours. The corpus our crosswalk consumes is `https://zambo.dev/aer1/corpus.json`
+(fetched 2026-11-18: HTTP 200, 15706 bytes, `aer1-evaluated-corpus/1`, `kit_version 1.5.7`,
+`draft: draft-zambo-aer1-26`, 143 vectors / 146 checks, `base_corpus_digest
+sha256:b9a740e7…ceb87`), defined by Zambo. `docs/AER1-CROSSWALK-RESULT.md` maps to their
+*categories*; it is not a vector-level conformance run and must never be described as
+"passing AER-1".
+
+Also fixed here: `docs/EXTERNAL-NODE-KIT.md` said strict base64 and Merkle inclusion had no
+equivalent implementation in this repository. They do (`uibc_core/aee.py::_b64decode_strict`,
+`uibc_core/merkle.py::verify_inclusion`); the honest remaining limitation is that we have not
+executed AER-1 vector-by-vector.

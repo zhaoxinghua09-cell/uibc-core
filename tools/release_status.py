@@ -16,7 +16,7 @@ import time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "tools", "out", "release_status.json")
-BRANCH = "release/v1.1-precheck"
+BRANCH = "main"
 
 
 def git(*args, timeout=25):

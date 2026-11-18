@@ -18,7 +18,8 @@
 | S14 strict base64 | yes | pad bits, missing padding, stray characters |
 | S13 Merkle inclusion | yes | RFC 6962, recomputed from the files |
 | S15, S16, S17, S18 | **no** | anchors, RFC 3161, receipt chain, policies |
-| S8, S9 | **no** | checkpoint head, out-of-band pin |
+| S8 package checkpoint | yes | one hash over lifecycle head, root, index digest, count |
+| S9 out-of-band pin | **no** | needs an observation made elsewhere |
 
 
 Because it cannot attest a signature, **it never returns `PASS`**. A structurally sound package comes back `INCONCLUSIVE`, and that sentence is the honest one: nothing was found wrong, and nothing was proven either.
@@ -30,18 +31,18 @@ node tools/verify-js/verify.mjs conformance/cases/01-the-shipped-package-untouch
 ```
 
 ```
-strict 27/36   refused 30/36      (tools/run_conformance.py --verify "node ... {pkg}")
+strict 28/36   refused 30/36      (tools/run_conformance.py --verify "node ... {pkg}")
 ```
 
 | | value | reading |
 |---|---|---|
-| packages in scope | 27 of 36 | 6 correct + 21 whose expected check is among the eleven |
-| out of scope | 9 | the ones needing Ed25519, RFC 3161 or the tree |
-| identical FAIL set to Python | 21 | the second implementation reaches the same verdict for the same reason |
-| named an expected check | 21 (+6 positives) | what the suite scores |
+| packages in scope | 28 of 36 | 6 correct + 22 whose expected check is among the twelve |
+| out of scope | 8 | the ones needing Ed25519, RFC 3161 or the tree |
+| identical FAIL set to Python | 23 | the second implementation reaches the same verdict for the same reason |
+| named an expected check | 22 (+6 positives) | what the suite scores |
 | refusals | 30 of 36 | the 30 mutated packages, and none of the correct ones |
 
-The number that matters is **identical FAIL set to Python: 21**, plus 21 cases where it names the same expected check Python does. Two implementations built from the spec, with no shared code, agreeing on which packages are broken and why, is the difference between "we have tests" and "anyone can check".
+The number that matters is **identical FAIL set to Python: 23**, plus 22 cases where it names the same expected check Python does. Two implementations built from the spec, with no shared code, agreeing on which packages are broken and why, is the difference between "we have tests" and "anyone can check".
 
 ## Two bugs this exercise found in its own work
 

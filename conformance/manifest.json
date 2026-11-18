@@ -68,7 +68,7 @@
       "expected_result": "INCONCLUSIVE",
       "expected_checks": [],
       "path": "cases/05-a-package-with-one-more-declared-evidence-file",
-      "sha256": "676978e29547fa2ba4f4ae900c8b18abba6f71ab2c134eabbdbca0dd7ff9a8ca"
+      "sha256": "2302685229bc74d5104577b67ed27f68189623a2c9c5e19b70cc405041b8a7b7"
     },
     {
       "id": "06",
@@ -80,7 +80,7 @@
       "expected_result": "PASS",
       "expected_checks": [],
       "path": "cases/06-a-package-sealed-with-ed25519",
-      "sha256": "480cfa0f530f031de07382f6f0dc29376e37926845f5c85ac51618a69abbc9e1"
+      "sha256": "0338537729f32734bd728e500200900fcd1f5720d0a5a4a04f9cbf97c8fdb3ab"
     },
     {
       "id": "07",
@@ -472,7 +472,7 @@
         "S6"
       ],
       "path": "cases/36-flip-one-bit-in-an-ed25519-signature",
-      "sha256": "2feb8103408ca7699c136b0afb1811bc9d62a13eda67b934ff96a242c5df5c76"
+      "sha256": "882139383fd7f5937c1bfbacb05f6560bf5f3d4b1855fd2891ac585bf1613e94"
     }
   ],
   "skipped": [],

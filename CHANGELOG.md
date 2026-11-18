@@ -32,9 +32,22 @@ Nothing here is a ratified standard.
 ### Measured
 
 - Python: `strict 36/36   refused 30/36`
-- JavaScript: `strict 27/36   refused 30/36`
-- Identical FAIL set to Python: 21 of 36; named an expected check: 21 (+6 positives)
-- Out of scope: 9 packages (S8, S9, S15-S18)
+- JavaScript: `strict 28/36   refused 30/36`
+- Identical FAIL set to Python: 23 of 36; named an expected check: 22 (+6 positives)
+- Out of scope: 8 packages (S9, S15-S18)
+
+### Added (S8)
+
+- **The JavaScript verifier recomputes the package checkpoint.** One value
+  committing to the whole state: lifecycle head, evidence root, index metadata
+  digest, evidence count. A lifecycle-only head was not enough -- adding
+  evidence changes the root but leaves the log untouched, so two different
+  states shared one head. Truncation, rollback and post-seal replacement inside
+  one package are what this detects. A whole-store rollback still needs an
+  observation made elsewhere, which is S9 and stays out of scope.
+- Both S8 vectors now fail on S8: a rewritten index with content untouched
+  (also S7), and a truncated lifecycle log. Packages without a checkpoint_head
+  are not examined, exactly as the Python verifier behaves. Twelve of nineteen.
 
 ### Added (S13)
 

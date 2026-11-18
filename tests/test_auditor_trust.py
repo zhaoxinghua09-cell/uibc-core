@@ -54,6 +54,20 @@ class AuditorTrustTests(unittest.TestCase):
             self.assertEqual(out["stage_baseline"]["got"]["result"],
                              "INCONCLUSIVE")
 
+    def test_norm_normalizes_platform_separators(self):
+        """A repo-internal path must match the repo prefix on Windows too.
+
+        Earlier `_norm` only collapsed doubled backslashes, so a single-separator
+        Windows path never matched the forward-slash repo prefix and the trust
+        root refused to run code that was actually inside the repo.
+        """
+        sys.path.insert(0, os.path.join(REPO, "tools"))
+        import outsider_audit as oa
+        inside = oa._norm(os.path.join(REPO, "uibc_core", "verify.py"))
+        root = oa._norm(REPO)
+        self.assertNotIn("\\", inside)
+        self.assertTrue(inside.startswith(root + "/"), "%s not under %s" % (inside, root))
+
     def test_a_borrowed_auditor_refuses_to_run(self):
         """Tool plus a same-directory liar: a path check would be satisfied,
         so the behaviour self-test has to be what stops it."""

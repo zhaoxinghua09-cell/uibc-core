@@ -71,6 +71,20 @@ python benchmarks/run_benchmarks.py --out benchmarks/submissions/<name>.json \
 One line of output, one record file. The record embeds every case row, so a reader can
 re-derive the totals rather than trust them.
 
+## Calibration — does the ruler actually read?
+
+Before believing any score, the harness is calibrated against two degenerate verifiers:
+
+| verifier | expected | recorded |
+|---|---|---|
+| always accepts (`cmd /c exit 0`) | 21/21 false accepts, 100% | [`calibration/always-accept.json`](calibration/always-accept.json) |
+| always refuses (`cmd /c exit 1`) | 0/21 false accepts **but** `base_accepted=false`, so the rate is flagged as meaningless | run it yourself; the runner returns exit 3 |
+
+A benchmark that cannot fail a rubber stamp measures nothing. The 100% row is the evidence
+that this one can, and it is kept in the repository rather than described in prose.
+
+`calibration/` is not a leaderboard entry: nothing there is an implementation anyone would ship.
+
 ## Measure a verifier you did not write
 
 `run_external.py` feeds the same mutant bytes to any command, so a competitor or a downstream

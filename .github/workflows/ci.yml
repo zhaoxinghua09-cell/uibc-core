@@ -48,6 +48,19 @@ jobs:
       - name: Export the conformance suite
         run: python tools/export_conformance.py
 
+      - name: Hostile input is a verdict, not a traceback
+        # Ten inputs that are not packages: not JSON, a NaN literal, 4000
+        # levels of nesting, invalid UTF-8, a path climbing out of the package,
+        # a symlink to the host, an empty directory, an 8 MB manifest. Both
+        # implementations must answer, and both must refuse. A crash is not a
+        # verdict, and "could not tell" about bytes nobody judged is the one
+        # wrong answer that looks honest.
+        run: python tools/redteam_robustness.py
+
+      - name: Two implementations, one set of failing checks
+        # Not the weaker "names an expected check": the same set, on all 36.
+        run: python tools/cross_impl_check.py --json | python3 -c "import json,sys; d=json.load(sys.stdin); assert d['agree_with_python']==d['cases'], d; print('agree', d['agree_with_python'], 'of', d['cases'])"
+
       - name: The second implementation must not drift
         # A verifier written from the spec in another language, sharing no code
         # with the first, is only worth something while it keeps agreeing. This

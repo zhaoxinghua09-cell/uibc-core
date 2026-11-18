@@ -2,14 +2,14 @@
 
 同一批六种破坏，分别施加到本仓库的包与竞品的 capsule。比的是**同一个 FAIL 之后的信息量**：能不能说出哪一项、哪个对象、期望什么。
 
-| 攻击 | 我们：判定 | 我们：检查项 | 我们：一句原因 | 他们：判定 | 他们：错误码 | 他们：一句原因 |
-|---|---|---|---|---|---|---|
-| flip one byte in evidence | FAIL | S4, S13, S15, S8 | 2 entries checked; hash mismatch on 'files/action-log.txt' | FAIL | capsule_id_mismatch | capsule_id_mismatch: recomputed bb33a44ce57cdb781ac500022f9d7f8c84677d73f8abfbecad2ea4ef01 |
-| delete one evidence file | FAIL | S4, S13, S8 | 2 entries checked; missing file 'files/action-log.txt' | n/a | — | 该格式没有证据文件集，只有一个 capsule |
-| add an undeclared file | INCONCLUSIVE | — | No violation was detected, but verification is incomplete: at least one check could not be | n/a | — | 该格式没有可另加的成员集合，未声明字段即被 capsule_id 掩盖 |
-| impossible date (2026-02-30) | FAIL | S3, S12 | L8 event 0 has no parsible ISO-8601 timestamp ('2026-02-30T00:00:00Z') | FAIL | capsule_id_mismatch | capsule_id_mismatch: recomputed ce991259bc9dd8cc80cf17b174098ad163421ccf2efd2cf2dcb882b00c |
-| edit index metadata | FAIL | S7, S8 | evidence/index.json metadata does not match the sealed evidence_index_digest (expected sha | FAIL | capsule_id_mismatch | capsule_id_mismatch: recomputed b6a2252bbb879212bff8774c9bb1db0624c79631d10c7f04adcd29a362 |
-| drop the last index entry | FAIL | S13, S15, S7, S8, S5 | declared size 2 != 1 evidence leaves; declared root does not match recomputed root; inclus | FAIL | missing_required_field, capsule_id_mismatch | missing_required_field: operator is REQUIRED (§5.1) |
+| 攻击 | 我们：判定 | 我们：检查项 | 我们：依据 | 我们：一句原因 | 他们：判定 | 他们：错误码 | 他们：一句原因 |
+|---|---|---|---|---|---|---|---|
+| flip one byte in evidence | FAIL | S4, S13, S15, S8 | RFC 6962, draft-maintainer-1f916-agent-record-01 | 2 entries checked; hash mismatch on 'files/action-log.txt' | FAIL | capsule_id_mismatch | capsule_id_mismatch: recomputed bb33a44ce57cdb781ac500022f9d7f8c84677d73f8abfbecad2ea4ef01 |
+| delete one evidence file | FAIL | S4, S13, S8 | RFC 6962, draft-maintainer-1f916-agent-record-01 | 2 entries checked; missing file 'files/action-log.txt' | n/a | — | 该格式没有证据文件集，只有一个 capsule |
+| add an undeclared file | INCONCLUSIVE | — | （自定，无依据可引） | No violation was detected, but verification is incomplete: at least one check co | n/a | — | 该格式没有可另加的成员集合，未声明字段即被 capsule_id 掩盖 |
+| impossible date (2026-02-30) | FAIL | S3, S12 | draft-maintainer-1f916-agent-record-01 | L8 event 0 has no parsible ISO-8601 timestamp ('2026-02-30T00:00:00Z') | FAIL | capsule_id_mismatch | capsule_id_mismatch: recomputed ce991259bc9dd8cc80cf17b174098ad163421ccf2efd2cf2dcb882b00c |
+| edit index metadata | FAIL | S7, S8 | draft-maintainer-1f916-agent-record-01, draft-sharif-agent-audit-trail-03 | evidence/index.json metadata does not match the sealed evidence_index_digest (ex | FAIL | capsule_id_mismatch | capsule_id_mismatch: recomputed b6a2252bbb879212bff8774c9bb1db0624c79631d10c7f04adcd29a362 |
+| drop the last index entry | FAIL | S13, S15, S7, S8, S5 | RFC 6962, draft-maintainer-1f916-agent-record-01, draft-sharif-agent-audit-trail-03 | declared size 2 != 1 evidence leaves; declared root does not match recomputed ro | FAIL | missing_required_field, capsule_id_mismatch | missing_required_field: operator is REQUIRED (§5.1) |
 
 在双方语义都成立的 4 类攻击下，我们共报出 **13** 条具体原因，他们报出 **5** 条。
 
@@ -20,6 +20,6 @@
 ## 这份对比不能说明什么
 
 - 两种格式不同，六个攻击只是语义对齐，不是逐字节等价。
-- 竞品的条款引用（§5.1）是他们比我们强的地方：我们的 `detail` 说「哪一项、期望什么」，但没有说「依据哪条」。写论文时这点要照实写。
+- 竞品在每一条 finding 里都写 `§5.1` 这样的条款号；我们现在每条失败原因也带 `basis`（`direct`/`related` 有引文，`none` 明确留空），但**只在结构化字段里**，人眼睛看到的那句话仍然没有条款号。这是还差的半步，写论文时照实写。
 - 次数多不等于更好；一条能定位到字节的原因，胜过十条泛泛的拒绝。
 

@@ -104,12 +104,14 @@ def _uibc_cases(pkg):
         try:
             fn(dst)
             r = verify(dst)
-            failed = [(c["id"], c["detail"]) for c in r["checks"]
-                      if c["result"] == "FAIL"]
+            failed = [(c["id"], c["detail"], c.get("basis") or {})
+                      for c in r["checks"] if c["result"] == "FAIL"]
+            cites = sorted({(b.get("citation") or "").strip()
+                            for _, _, b in failed if b.get("citation")})
             yield {"attack": name, "verdict": r["result"],
-                   "ids": [i for i, _ in failed],
+                   "ids": [i for i, _, _ in failed],
                    "first": failed[0][1] if failed else r.get("statement", ""),
-                   "n_reasons": len(failed)}
+                   "n_reasons": len(failed), "citations": cites}
         finally:
             shutil.rmtree(tmp, ignore_errors=True)
 
@@ -205,13 +207,15 @@ def render(d):
     out = ["# 判定之外，它还说了什么", "",
            "同一批六种破坏，分别施加到本仓库的包与竞品的 capsule。"
            "比的是**同一个 FAIL 之后的信息量**：能不能说出哪一项、哪个对象、期望什么。", ""]
-    out += ["| 攻击 | 我们：判定 | 我们：检查项 | 我们：一句原因 | 他们：判定 | 他们：错误码 | 他们：一句原因 |",
-            "|---|---|---|---|---|---|---|"]
+    out += ["| 攻击 | 我们：判定 | 我们：检查项 | 我们：依据 | 我们：一句原因 | 他们：判定 | 他们：错误码 | 他们：一句原因 |",
+            "|---|---|---|---|---|---|---|---|"]
     theirs = {c["attack"]: c for c in d["theirs"]["cases"]}
     for c in d["ours"]["cases"]:
         t = theirs.get(c["attack"])
-        row = ["%s | %s | %s | %s" % (c["attack"], c["verdict"],
-                 ", ".join(c["ids"]) or "—", (c["first"] or "").replace("|", "/")[:90])]
+        cite = ", ".join(c.get("citations") or []) or "（自定，无依据可引）"
+        row = ["%s | %s | %s | %s | %s" % (c["attack"], c["verdict"],
+                 ", ".join(c["ids"]) or "—", cite,
+                 (c["first"] or "").replace("|", "/")[:80])]
         if t and t["verdict"] == "n/a":
             row.append("n/a | — | %s" % (t["first"] or "")[:90])
         elif t:
@@ -242,8 +246,10 @@ def render(d):
                "**这是我们已知的缺口，不是对比的胜利**。\n")
     out.append("## 这份对比不能说明什么\n")
     out.append("- 两种格式不同，六个攻击只是语义对齐，不是逐字节等价。")
-    out.append("- 竞品的条款引用（§5.1）是他们比我们强的地方：我们的 `detail` 说"
-               "「哪一项、期望什么」，但没有说「依据哪条」。写论文时这点要照实写。")
+    out.append("- 竞品在每一条 finding 里都写 `§5.1` 这样的条款号；我们现在每条"
+               "失败原因也带 `basis`（`direct`/`related` 有引文，`none` 明确留空），"
+               "但**只在结构化字段里**，人眼睛看到的那句话仍然没有条款号。这是"
+               "还差的半步，写论文时照实写。")
     out.append("- 次数多不等于更好；一条能定位到字节的原因，胜过十条泛泛的拒绝。")
     return "\n".join(out) + "\n"
 

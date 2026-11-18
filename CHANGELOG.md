@@ -61,6 +61,14 @@ carrying the fields they inspect, so 0.4.0 is a major-looking bump under a
 
 ### Fixed
 
+- **The package reported its own version as 0.3.3 while shipping as 0.4.0.**
+  `uibc_core/__init__.py` held a literal that had not moved with
+  `pyproject.toml`, so every verification report stamped the wrong version. `tools/version_gate.py` now also reads that literal, making it a fourth
+  place the gate compares rather than a fourth place to drift.
+- **S15 lost its import during this work** and raised
+  `NameError: _mk2 is not defined` on any package carrying an anchor; caught by
+  the audit builder's own "a correct package must pass" assertion before it
+  reached a commit.
 - **S13 raised `IndexError` when an evidence file was deleted.** The declared
   order still listed the missing evidence, so `leaves[i]` ran past the end of
   the list the filesystem actually produced, and the exception was caught by
@@ -70,6 +78,16 @@ carrying the fields they inspect, so 0.4.0 is a major-looking bump under a
   is absent`.
 
 ### Added
+
+- **Every check now carries its basis.** `uibc_core/basis.py` holds, for each
+  check, whether a draft or RFC states the requirement (`direct`), the
+  mechanism is borrowed from one (`related`), or this project defines it with
+  nothing to point at (`none`) - and a citation for the first two, an empty
+  string for the third. Rendered into every report as
+  `checks[].basis = {class, citation, note}`.
+- **`tests/test_basis.py`** -- 6 tests: only documented classes carry a
+  citation, `none` never does, an unknown id borrows nothing, and the shipped
+  report matches the module.
 
 - **`tools/compare_diagnostics.py` → `docs/DIAGNOSTICS.md`.** The same six
   kinds of damage applied to our package and to `agent-action-capsule` 0.17.0,

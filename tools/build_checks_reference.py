@@ -41,37 +41,25 @@ QUESTIONS = {
 }
 
 
-# The nearest draft mention within 30 lines is a heuristic, not a mapping. These
-# are the human judgements used instead, in three classes that must not be
-# mixed in a thesis: a draft that says the thing, a document the mechanism is
-# borrowed from, and nothing at all.
-OVERRIDES = {
-    "S1": ("direct", "draft-noa-scitt-ai-agent-receipt-00（回执包的结构与成员）"),
-    "S2": ("direct", "draft-noa-scitt-ai-agent-receipt-00（主体标识）"),
-    "S3": ("related", "生命周期状态机为本项目自定；事件类型集合参照 "
-                      "draft-maintainer-1f916-agent-record-01"),
-    "S4": ("none", "内容哈希是通用做法，无可指的具体草案；符号链接围栏"
-                    "（不得指向证据目录外）为本项目自定的安全加固"),
-    "S5": ("related", "Merkle 根的思想参照 RFC 6962；本包的根构造为本项目自定"),
-    "S6": ("related", "Ed25519 签名本身见 RFC 8032；「签名必须覆盖当前内容」"
-                      "的组合检查为本项目自定"),
-    "S7": ("direct", "draft-sharif-agent-audit-trail-03（被审计对象的元数据）"),
-    "S8": ("related", "checkpoint 概念参照 draft-maintainer-1f916-agent-record-01；"
-                      "本包的整状态提交为本项目自定"),
-    "S9": ("related", "链头需在外部被观察，参照 "
-                      "draft-bailey-scitt-agent-session-receipt；具体 pin 机制自定"),
-    "S10": ("direct", "draft-sharif-agent-audit-trail-03 §13.6（证明闭包六成分）"),
-    "S11": ("related", "严格序列化参照 RFC 8785（JCS）；重复成员名拒收为本项目加固"),
-    "S12": ("none", "本项目自定（时间戳与标识符的都按不可能值拒收）"),
-    "S13": ("related", "包含证明的构造参照 RFC 6962；本包的证明格式自定"),
-    "S14": ("related", "严格 base64 见 RFC 4648 §4（不得缺填充、不得混入杂字符）"),
-    "S15": ("none", "本项目自定（锚定事件的解析与根重算）"),
-    "S16": ("direct", "RFC 3161（时间戳协议）；「第三方时间戳必须覆盖本包链头」"
-                      "的判定为本项目自定"),
-    "S17": ("direct", "draft-marques-asqav-compliance-receipts-01（收据与摘要）"),
-    "S18": ("direct", "draft-marques-asqav-compliance-receipts-01 §4.2.4（摘要须可解析）"),
-    "S0": ("none", "本项目自定（异常时也必须给出判定，不得崩溃）"),
-}
+# The basis table lives in the package, not in this tool: the verifier ships the
+# same claims in every report, and two copies would drift. This tool only
+# renders it.
+_REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if _REPO not in sys.path:
+    sys.path.insert(0, _REPO)
+from uibc_core.basis import BASIS as OVERRIDES_RAW, CLASS_LABEL  # noqa: E402
+
+
+def _override(cid):
+    rec = OVERRIDES_RAW.get(cid)
+    if not rec:
+        return ("none", "未登记依据；按自定处理")
+    note = rec["note"]
+    if rec["citation"]:
+        note = "%s（%s）" % (note, rec["citation"])
+    return (rec["class"], note)
+
+
 CLASS_LABEL = {"direct": "草案明文规定", "related": "思想来源（非直接规定）",
                "none": "无"}
 
@@ -120,8 +108,8 @@ def build():
             "line": line_no,
             "question": QUESTIONS.get(cid, ""),
             "basis": sorted(set(drafts)) or [],
-            "basis_class": OVERRIDES.get(cid, ("none", ""))[0],
-            "basis_note": OVERRIDES.get(cid, ("none", ""))[1],
+            "basis_class": _override(cid)[0],
+            "basis_note": _override(cid)[1],
             "first_failure_text": detail,
         }
     return [found[k] for k in sorted(found, key=lambda c: int(c[1:]))]

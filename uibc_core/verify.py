@@ -16,6 +16,7 @@ from .lifecycle import validate_lifecycle, validate_lifecycle_strict
 from .signing import (ALGORITHM, ALGORITHM_ED25519, b64decode_strict,
                       ed_key_id, ed_seal_verify_scoped, key_id, seal_verify)
 from . import SPEC_VERSION, VERIFIER_ID, __version__, spec_id
+from . import basis as _basis
 
 # Computed once per process: the label plus the bytes it names (see
 # __init__.spec_id). Reported so a reader can tell two builds of the same
@@ -242,7 +243,11 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
 
     def record(cid, name, passed, detail=""):
         nonlocal ok
-        checks.append({"id": cid, "name": name, "result": "PASS" if passed else "FAIL", "detail": detail})
+        # Every check carries the basis it is allowed to claim, so a caller can
+        # tell "this rule is in a draft" from "this rule is ours" without
+        # consulting a second document.
+        checks.append({"id": cid, "name": name, "result": "PASS" if passed else "FAIL",
+                       "detail": detail, "basis": _basis.for_check(cid)})
         if not passed:
             ok = False
 
@@ -950,8 +955,14 @@ def verify(package_dir: str, key: bytes = None, pubkey: bytes = None,
     crash the verifier can also choose which inputs never get reported.
     """
     try:
-        return _verify_impl(package_dir, key=key, pubkey=pubkey,
-                            expect_head=expect_head)
+        result = _verify_impl(package_dir, key=key, pubkey=pubkey,
+                              expect_head=expect_head)
+        # Some checks are appended from a dozen hand-written branches (S6 alone
+        # has fourteen). Rather than touch each one and still miss a path, the
+        # basis is filled in once, here, for every check that lacks it.
+        for c in result.get("checks", []):
+            c.setdefault("basis", _basis.for_check(c.get("id", "")))
+        return result
     except Exception as e:  # noqa: BLE001 - hostile input of any shape
         return {
             "verifier_id": VERIFIER_ID,
@@ -966,7 +977,8 @@ def verify(package_dir: str, key: bytes = None, pubkey: bytes = None,
                         "result": "FAIL",
                         "detail": f"{type(e).__name__}: {str(e)[:120]} - the package "
                                   "could not be processed; treated as a violation, "
-                                  "never as a pass"}],
+                                  "never as a pass",
+                        "basis": _basis.for_check("S0")}],
             "root_algorithm": "sha256(canonical-json(sorted(content_hashes))) v0.1-provisional",
             "assurance": "unattested",
             "scope": "Verifier robustness only: the package could not be processed.",

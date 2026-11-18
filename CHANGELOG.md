@@ -67,12 +67,6 @@ carrying the fields they inspect, so 0.4.0 is a major-looking bump under a
 
 ### Added
 
-- **Five positive vectors in the conformance suite**, so it now measures correctness instead of pessimism. The suite had twenty-nine packages that must be refused and nothing that must be accepted, which means a verifier that refused every package scored 29/29 -- a perfect score for being useless. It is now **29 refused + 5 accepted**: the shipped package untouched, and the tree-and-chain, extended-evidence and checkpoint shapes appended correctly, plus one case where an extra evidence file is added *and declared in the index* (so S1 must not fail). Expected verdicts come from this repo's measured run, never from theory.
-- **The positive cases immediately found a real gap.** The archived v0.2.1 verifier refuses all 34 -- including the five correct packages. It cannot read the tree-and-chain or extended shapes at all, so its blanket refusal was hiding a forward-compatibility hole. That is a property of the old release, not of the suite, and the suite is how it became visible.
-- **`tests/test_conformance.py`** gained the assertion that matters for the new half: a verifier that refuses everything must fail every positive case. Measured: always-PASS 5/34, always-FAIL naming S1 1/34, current 34/34.
-
-### Added
-
 - **`docs/REPRODUCE.md` and `tools/build_reproduce.py`** -- ten rows: the figure in the paper, the command a reader types, and the output recorded when the generator ran it. Every row has its own reader (JSON field, tail line, or regex) because six of the tools print progress before their figure, and taking the first line reported `{` for three of them. Latency here reads 1.367 ms against the paper's 1.225 ms, and the sheet says so rather than smoothing it: a figure from another host is another measurement.
 - **`tests/test_reproduce.py`** -- 5 tests, including one that runs a real claim end to end and one that refuses placeholder output anywhere in the sheet.
 - The published test count moved 508 -> 513 across README, README.en, AGENTS and the paper, as `check_doc_facts` requires.

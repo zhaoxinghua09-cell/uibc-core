@@ -59,6 +59,12 @@ carrying the fields they inspect, so 0.4.0 is a major-looking bump under a
 
 ## [Unreleased]
 
+### Added
+
+- **`docs/REPRODUCE.md` and `tools/build_reproduce.py`** -- ten rows: the figure in the paper, the command a reader types, and the output recorded when the generator ran it. Every row has its own reader (JSON field, tail line, or regex) because six of the tools print progress before their figure, and taking the first line reported `{` for three of them. Latency here reads 1.367 ms against the paper's 1.225 ms, and the sheet says so rather than smoothing it: a figure from another host is another measurement.
+- **`tests/test_reproduce.py`** -- 5 tests, including one that runs a real claim end to end and one that refuses placeholder output anywhere in the sheet.
+- The published test count moved 508 -> 513 across README, README.en, AGENTS and the paper, as `check_doc_facts` requires.
+
 ### Fixed
 
 - **The paper's own numbers were wrong in three places.** `paper/paper.md` claimed 122 tests (507 run), "three modules" within 24 files (25), and "zero-dependency (stdlib only)" when `[verify]` pulls in `cryptography` and `asn1crypto`. Rewritten to state the stdlib-only core, the optional extra, the INCONCLUSIVE-on-absence behaviour, 507 tests, and 25 modules. The skipped count is described rather than pinned, because it moves between 16 and 17.

@@ -1,0 +1,141 @@
+{
+ "schema": "uibc-bench/1",
+ "kind": "external-verifier",
+ "implementation": "calibration-always-accept",
+ "submitter": "self-check",
+ "commit": "n/a",
+ "run_at_utc": "2026-11-18T17:43:37+00:00",
+ "machine": {
+  "system": "Windows",
+  "release": "11",
+  "python": "3.13.18"
+ },
+ "verifier_command": "cmd /c exit 0",
+ "base_accepted": true,
+ "base_detail": "exit=0",
+ "mutations": {
+  "total": 21,
+  "accepted": 21,
+  "false_accept_rate": 100.0,
+  "cases": [
+   {
+    "id": "m_M01",
+    "accepted": true,
+    "detail": "exit=0"
+   },
+   {
+    "id": "m_M02",
+    "accepted": true,
+    "detail": "exit=0"
+   },
+   {
+    "id": "m_M03",
+    "accepted": true,
+    "detail": "exit=0"
+   },
+   {
+    "id": "m_M04",
+    "accepted": true,
+    "detail": "exit=0"
+   },
+   {
+    "id": "m_M05",
+    "accepted": true,
+    "detail": "exit=0"
+   },
+   {
+    "id": "m_M06",
+    "accepted": true,
+    "detail": "exit=0"
+   },
+   {
+    "id": "m_M07",
+    "accepted": true,
+    "detail": "exit=0"
+   },
+   {
+    "id": "m_M08",
+    "accepted": true,
+    "detail": "exit=0"
+   },
+   {
+    "id": "m_M09",
+    "accepted": true,
+    "detail": "exit=0"
+   },
+   {
+    "id": "m_M10",
+    "accepted": true,
+    "detail": "exit=0"
+   },
+   {
+    "id": "m_M11",
+    "accepted": true,
+    "detail": "exit=0"
+   },
+   {
+    "id": "m_M12",
+    "accepted": true,
+    "detail": "exit=0"
+   },
+   {
+    "id": "m_M13",
+    "accepted": true,
+    "detail": "exit=0"
+   },
+   {
+    "id": "m_M14",
+    "accepted": true,
+    "detail": "exit=0"
+   },
+   {
+    "id": "m_M15",
+    "accepted": true,
+    "detail": "exit=0"
+   },
+   {
+    "id": "m_M16",
+    "accepted": true,
+    "detail": "exit=0"
+   },
+   {
+    "id": "m_M17",
+    "accepted": true,
+    "detail": "exit=0"
+   },
+   {
+    "id": "m_M18",
+    "accepted": true,
+    "detail": "exit=0"
+   },
+   {
+    "id": "m_M19",
+    "accepted": true,
+    "detail": "exit=0"
+   },
+   {
+    "id": "m_M20",
+    "accepted": true,
+    "detail": "exit=0"
+   },
+   {
+    "id": "m_M21",
+    "accepted": true,
+    "detail": "exit=0"
+   }
+  ]
+ },
+ "notes": [
+  "exit 0 means the verifier accepted the package; a false accept is an accept of a mutated package",
+  "base_accepted=false means the verifier refuses the clean baseline too, so its rate is not meaningful",
+  "mutants are the same bytes every implementation is given: produced by tools/mutation_benchmark.py"
+ ],
+ "claim": {
+  "boundary_sentence": "A uibc PASS means: within the observed evidence boundary, no violation was detected. It does not claim the agent was correct, safe, or wise; that the recorded inputs were true or complete; or that any real-world outcome followed.",
+  "not_claimed": [
+   "that acceptance by exit code reflects the same decision the verifier's API would return",
+   "that these 21 mutations cover the ways a package can be altered",
+   "that a low rate makes an implementation better than one that scored differently"
+  ]
+ }
+}

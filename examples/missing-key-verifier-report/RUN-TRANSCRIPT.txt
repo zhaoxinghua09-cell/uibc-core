@@ -1,0 +1,347 @@
+MISSING-KEY WORKED EXAMPLE - RUN TRANSCRIPT
+===========================================
+Environment: Python 3.12.3, uibc-core 0.3.3 from PyPI
+  python3 -m venv venv && venv/bin/pip install uibc-core==0.3.3
+  (every command below is the released CLI: venv/bin/uibc ...)
+First run: 2026-11-18. Verify outputs are deterministic: the report
+carries no timestamp, so re-running the verify section reproduces
+the shipped report-*.json files byte for byte.
+
+-------------------------------------------------------------------
+PART 1 - BUILD THE SEALED PACKAGE (in scratch dir rebuild/)
+-------------------------------------------------------------------
+$ # Demo keys are fixed and published so the example is reproducible.
+$ # They are derived from stated strings (sha256 hex) - DEMO ONLY.
+$ python3 -c "...sha256(b\"uibc demo owner key - joe example 2026-11-18\")..." > keys/demo-owner.key
+$ python3 -c "...sha256(b\"uibc WRONG key - joe example 2026-11-18\")..." > keys/wrong.key
+$ cat keys/demo-owner.key
+08b56deb66b812126d37883769a1b7bf8dbbf1d3860cd3509de6a0cf9a457490
+$ cat keys/wrong.key
+659eb2e4fe95d48386a65e2352de422855851f2fe41c4e34beccdf63c5968648
+$ uibc init rebuild
+initialized package skeleton at /home/hatch/workspace/joe-example-20261118/example/rebuild
+next: uibc register /home/hatch/workspace/joe-example-20261118/example/rebuild --agent-id <id> --owner <owner>
+$ uibc register rebuild --agent-id demo-agent-joe-001 --owner "Demo Owner (fictional)"
+registered agent 'demo-agent-joe-001' (owner: Demo Owner (fictional)) at 2026-11-18T04:09:41Z
+$ uibc evidence rebuild --type INPUT --file rebuild-src/input.txt
+evidence added: INPUT files/input.txt (hash recorded)
+$ uibc evidence rebuild --type EVALUATION --file rebuild-src/evaluation.txt
+evidence added: EVALUATION files/evaluation.txt (hash recorded)
+$ uibc submit rebuild --key keys/demo-owner.key
+submission sealed: agent=demo-agent-joe-001 evidence=2 root=d0867fbdc13a05d882f9662ea5b4a071ce7007537fa44444ad3acf15bb3b6cb5 | seal signed (key_id 6c8c0643b033b0ba...)
+exit code: 0
+$ find rebuild -type f | sort
+rebuild/evidence/files/evaluation.txt
+rebuild/evidence/files/input.txt
+rebuild/evidence/index.json
+rebuild/identity.json
+rebuild/lifecycle.json
+rebuild/manifest.json
+rebuild/signatures/seal.json
+
+-------------------------------------------------------------------
+PART 2 - THE FOUR VERIFY RUNS (against the rebuilt package; the
+shipped package/ gives byte-identical reports)
+-------------------------------------------------------------------
+
+### RUN A - MISSING KEY (the case this example exists for)
+$ uibc verify rebuild
+{
+  "verifier_id": "uibc-core-verifier",
+  "verifier_version": "0.3.3",
+  "spec_version": "uibc-core/0.3.3-proposal",
+  "result": "INCONCLUSIVE",
+  "subject": "demo-agent-joe-001",
+  "checks": [
+    {
+      "id": "S1",
+      "name": "package structure",
+      "result": "PASS",
+      "detail": "all required files present"
+    },
+    {
+      "id": "S2",
+      "name": "identity consistency",
+      "result": "PASS",
+      "detail": "identity.agent_id='demo-agent-joe-001', manifest.agent_id='demo-agent-joe-001'"
+    },
+    {
+      "id": "S3",
+      "name": "lifecycle state machine",
+      "result": "PASS",
+      "detail": "1 events, chain valid"
+    },
+    {
+      "id": "S4",
+      "name": "evidence integrity",
+      "result": "PASS",
+      "detail": "2 entries checked; all hashes match"
+    },
+    {
+      "id": "S5",
+      "name": "evidence root",
+      "result": "PASS",
+      "detail": "computed=d0867fbdc13a05d882f9662ea5b4a071ce7007537fa44444ad3acf15bb3b6cb5, manifest=d0867fbdc13a05d882f9662ea5b4a071ce7007537fa44444ad3acf15bb3b6cb5"
+    },
+    {
+      "id": "S6",
+      "name": "seal signature",
+      "result": "INCONCLUSIVE",
+      "detail": "HMAC seal present but no verification key provided (--key); symmetric seals cannot be checked publicly - an Ed25519 seal can"
+    }
+  ],
+  "root_algorithm": "sha256(canonical-json(sorted(content_hashes))) v0.1-provisional",
+  "assurance": "unattested",
+  "scope": "Structure, identity consistency, lifecycle state machine, evidence content hashes, evidence root, and the seal signature of this submission package only. Ed25519 seals are verified publicly in every mode; HMAC seals only in strict --key mode.",
+  "limitations": [
+    "HMAC-SHA256 seals (v0.2) are symmetric: verification requires the owner key. Ed25519 seals (v0.3) are third-party verifiable with the public key recorded in the seal.",
+    "Key substitution is detectable only when verifying with the owner key (--key), a pinned public key (--pubkey), or out-of-band key pinning.",
+    "Evidence Root algorithm is provisional (pending canonical serialization ratification).",
+    "Timestamps are not independently anchored.",
+    "Lifecycle event signatures (event.signature) are not ratified and not verified.",
+    "No behavioral evaluation is performed (Evaluation is out of verifier scope, archive SS15)."
+  ],
+  "checked": [
+    "structure",
+    "identity",
+    "lifecycle",
+    "evidence hashes",
+    "evidence root",
+    "seal signature"
+  ],
+  "not_checked": [
+    "lifecycle event signatures",
+    "external timestamp anchoring",
+    "behavioral evaluation",
+    "memory fidelity/continuity"
+  ],
+  "statement": "No violation was detected, but verification is incomplete: at least one check could not be resolved within the observed evidence boundary."
+}
+exit code: 1
+
+### RUN B - CONTROL: correct key presented
+$ uibc verify rebuild --key keys/demo-owner.key
+{
+  "verifier_id": "uibc-core-verifier",
+  "verifier_version": "0.3.3",
+  "spec_version": "uibc-core/0.3.3-proposal",
+  "result": "PASS",
+  "subject": "demo-agent-joe-001",
+  "checks": [
+    {
+      "id": "S1",
+      "name": "package structure",
+      "result": "PASS",
+      "detail": "all required files present"
+    },
+    {
+      "id": "S2",
+      "name": "identity consistency",
+      "result": "PASS",
+      "detail": "identity.agent_id='demo-agent-joe-001', manifest.agent_id='demo-agent-joe-001'"
+    },
+    {
+      "id": "S3",
+      "name": "lifecycle state machine",
+      "result": "PASS",
+      "detail": "1 events, chain valid"
+    },
+    {
+      "id": "S4",
+      "name": "evidence integrity",
+      "result": "PASS",
+      "detail": "2 entries checked; all hashes match"
+    },
+    {
+      "id": "S5",
+      "name": "evidence root",
+      "result": "PASS",
+      "detail": "computed=d0867fbdc13a05d882f9662ea5b4a071ce7007537fa44444ad3acf15bb3b6cb5, manifest=d0867fbdc13a05d882f9662ea5b4a071ce7007537fa44444ad3acf15bb3b6cb5"
+    },
+    {
+      "id": "S6",
+      "name": "seal signature",
+      "result": "PASS",
+      "detail": "HMAC-SHA256 seal valid (key_id 6c8c0643b033b0ba...)"
+    }
+  ],
+  "root_algorithm": "sha256(canonical-json(sorted(content_hashes))) v0.1-provisional",
+  "assurance": "owner-key",
+  "scope": "Structure, identity consistency, lifecycle state machine, evidence content hashes, evidence root, and the seal signature of this submission package only. Ed25519 seals are verified publicly in every mode; HMAC seals only in strict --key mode.",
+  "limitations": [
+    "HMAC-SHA256 seals (v0.2) are symmetric: verification requires the owner key. Ed25519 seals (v0.3) are third-party verifiable with the public key recorded in the seal.",
+    "Key substitution is detectable only when verifying with the owner key (--key), a pinned public key (--pubkey), or out-of-band key pinning.",
+    "Evidence Root algorithm is provisional (pending canonical serialization ratification).",
+    "Timestamps are not independently anchored.",
+    "Lifecycle event signatures (event.signature) are not ratified and not verified.",
+    "No behavioral evaluation is performed (Evaluation is out of verifier scope, archive SS15)."
+  ],
+  "checked": [
+    "structure",
+    "identity",
+    "lifecycle",
+    "evidence hashes",
+    "evidence root",
+    "seal signature"
+  ],
+  "not_checked": [
+    "lifecycle event signatures",
+    "external timestamp anchoring",
+    "behavioral evaluation",
+    "memory fidelity/continuity"
+  ],
+  "statement": "No violation was detected within the observed evidence boundary."
+}
+exit code: 0
+
+### RUN C - CONTROL: evidence altered after sealing, correct key
+$ cp -r rebuild rebuild-tampered
+$ echo "One extra sentence, added after the fact." >> rebuild-tampered/evidence/files/evaluation.txt
+$ uibc verify rebuild-tampered --key keys/demo-owner.key
+{
+  "verifier_id": "uibc-core-verifier",
+  "verifier_version": "0.3.3",
+  "spec_version": "uibc-core/0.3.3-proposal",
+  "result": "FAIL",
+  "subject": "demo-agent-joe-001",
+  "checks": [
+    {
+      "id": "S1",
+      "name": "package structure",
+      "result": "PASS",
+      "detail": "all required files present"
+    },
+    {
+      "id": "S2",
+      "name": "identity consistency",
+      "result": "PASS",
+      "detail": "identity.agent_id='demo-agent-joe-001', manifest.agent_id='demo-agent-joe-001'"
+    },
+    {
+      "id": "S3",
+      "name": "lifecycle state machine",
+      "result": "PASS",
+      "detail": "1 events, chain valid"
+    },
+    {
+      "id": "S4",
+      "name": "evidence integrity",
+      "result": "FAIL",
+      "detail": "2 entries checked; hash mismatch on 'files/evaluation.txt'"
+    },
+    {
+      "id": "S5",
+      "name": "evidence root",
+      "result": "INCONCLUSIVE",
+      "detail": "skipped: evidence missing or S4 failed"
+    },
+    {
+      "id": "S6",
+      "name": "seal signature",
+      "result": "PASS",
+      "detail": "HMAC-SHA256 seal valid (key_id 6c8c0643b033b0ba...)"
+    }
+  ],
+  "root_algorithm": "sha256(canonical-json(sorted(content_hashes))) v0.1-provisional",
+  "assurance": "owner-key",
+  "scope": "Structure, identity consistency, lifecycle state machine, evidence content hashes, evidence root, and the seal signature of this submission package only. Ed25519 seals are verified publicly in every mode; HMAC seals only in strict --key mode.",
+  "limitations": [
+    "HMAC-SHA256 seals (v0.2) are symmetric: verification requires the owner key. Ed25519 seals (v0.3) are third-party verifiable with the public key recorded in the seal.",
+    "Key substitution is detectable only when verifying with the owner key (--key), a pinned public key (--pubkey), or out-of-band key pinning.",
+    "Evidence Root algorithm is provisional (pending canonical serialization ratification).",
+    "Timestamps are not independently anchored.",
+    "Lifecycle event signatures (event.signature) are not ratified and not verified.",
+    "No behavioral evaluation is performed (Evaluation is out of verifier scope, archive SS15)."
+  ],
+  "checked": [
+    "structure",
+    "identity",
+    "lifecycle",
+    "evidence hashes",
+    "evidence root",
+    "seal signature"
+  ],
+  "not_checked": [
+    "lifecycle event signatures",
+    "external timestamp anchoring",
+    "behavioral evaluation",
+    "memory fidelity/continuity"
+  ],
+  "statement": "Violations were detected within the observed evidence boundary."
+}
+exit code: 1
+
+### RUN D - BONUS CONTRAST: a wrong key is presented
+$ uibc verify rebuild --key keys/wrong.key
+{
+  "verifier_id": "uibc-core-verifier",
+  "verifier_version": "0.3.3",
+  "spec_version": "uibc-core/0.3.3-proposal",
+  "result": "FAIL",
+  "subject": "demo-agent-joe-001",
+  "checks": [
+    {
+      "id": "S1",
+      "name": "package structure",
+      "result": "PASS",
+      "detail": "all required files present"
+    },
+    {
+      "id": "S2",
+      "name": "identity consistency",
+      "result": "PASS",
+      "detail": "identity.agent_id='demo-agent-joe-001', manifest.agent_id='demo-agent-joe-001'"
+    },
+    {
+      "id": "S3",
+      "name": "lifecycle state machine",
+      "result": "PASS",
+      "detail": "1 events, chain valid"
+    },
+    {
+      "id": "S4",
+      "name": "evidence integrity",
+      "result": "PASS",
+      "detail": "2 entries checked; all hashes match"
+    },
+    {
+      "id": "S5",
+      "name": "evidence root",
+      "result": "PASS",
+      "detail": "computed=d0867fbdc13a05d882f9662ea5b4a071ce7007537fa44444ad3acf15bb3b6cb5, manifest=d0867fbdc13a05d882f9662ea5b4a071ce7007537fa44444ad3acf15bb3b6cb5"
+    },
+    {
+      "id": "S6",
+      "name": "seal signature",
+      "result": "FAIL",
+      "detail": "key mismatch: seal was not created by this key (possible key substitution or wrong key)"
+    }
+  ],
+  "root_algorithm": "sha256(canonical-json(sorted(content_hashes))) v0.1-provisional",
+  "assurance": "unattested",
+  "scope": "Structure, identity consistency, lifecycle state machine, evidence content hashes, evidence root, and the seal signature of this submission package only. Ed25519 seals are verified publicly in every mode; HMAC seals only in strict --key mode.",
+  "limitations": [
+    "HMAC-SHA256 seals (v0.2) are symmetric: verification requires the owner key. Ed25519 seals (v0.3) are third-party verifiable with the public key recorded in the seal.",
+    "Key substitution is detectable only when verifying with the owner key (--key), a pinned public key (--pubkey), or out-of-band key pinning.",
+    "Evidence Root algorithm is provisional (pending canonical serialization ratification).",
+    "Timestamps are not independently anchored.",
+    "Lifecycle event signatures (event.signature) are not ratified and not verified.",
+    "No behavioral evaluation is performed (Evaluation is out of verifier scope, archive SS15)."
+  ],
+  "checked": [
+    "structure",
+    "identity",
+    "lifecycle",
+    "evidence hashes",
+    "evidence root",
+    "seal signature"
+  ],
+  "not_checked": [
+    "lifecycle event signatures",
+    "external timestamp anchoring",
+    "behavioral evaluation",
+    "memory fidelity/continuity"
+  ],
+  "statement": "Violations were detected within the observed evidence boundary."
+}
+exit code: 1

@@ -1,0 +1,15 @@
+{
+  "schema": "uibc-core/0.3.3-proposal",
+  "events": [
+    {
+      "event_id": "f7c16c8a-5668-40da-86f5-27117495af5d",
+      "event_type": "REGISTER",
+      "agent_id": "demo-agent-joe-001",
+      "timestamp": "2026-11-18T04:08:30Z",
+      "actor": "Demo Owner (fictional)",
+      "payload_hash": null,
+      "previous_event": null,
+      "signature": null
+    }
+  ]
+}

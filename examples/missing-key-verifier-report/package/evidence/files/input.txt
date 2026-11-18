@@ -1,0 +1,2 @@
+DEMO INPUT (fictional). Task given to the agent: summarise the attached
+handover note and file the summary in the team log. No real data.

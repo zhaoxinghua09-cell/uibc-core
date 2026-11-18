@@ -1,0 +1,22 @@
+{
+  "entries": [
+    {
+      "evidence_id": "5f30ecde-531c-4a9b-9048-025731c61735",
+      "type": "INPUT",
+      "path": "files/input.txt",
+      "content_hash": "1f5d0d651aff9a5e675e90a55a290a3ddc168e0688f57c0205313aff0ed7a2c4",
+      "created_at": "2026-11-18T04:08:30Z",
+      "media_type": "text/plain",
+      "note": ""
+    },
+    {
+      "evidence_id": "a68584af-3702-400f-98b9-adb907af1c05",
+      "type": "EVALUATION",
+      "path": "files/evaluation.txt",
+      "content_hash": "7095650483d99c262a86ce14f7f415f968a66f137e49ed0a9a05769c6d80242f",
+      "created_at": "2026-11-18T04:08:30Z",
+      "media_type": "text/plain",
+      "note": ""
+    }
+  ]
+}

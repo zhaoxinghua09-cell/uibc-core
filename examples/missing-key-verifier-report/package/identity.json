@@ -1,0 +1,9 @@
+{
+  "schema": "uibc-core/0.3.3-proposal",
+  "agent_id": "demo-agent-joe-001",
+  "agent_type": "software-agent",
+  "owner": "Demo Owner (fictional)",
+  "created_at": "2026-11-18T04:08:30Z",
+  "status": "REGISTERED",
+  "version": "0.1.0"
+}

@@ -1,0 +1,71 @@
+{
+  "verifier_id": "uibc-core-verifier",
+  "verifier_version": "0.3.3",
+  "spec_version": "uibc-core/0.3.3-proposal",
+  "result": "FAIL",
+  "subject": "demo-agent-joe-001",
+  "checks": [
+    {
+      "id": "S1",
+      "name": "package structure",
+      "result": "PASS",
+      "detail": "all required files present"
+    },
+    {
+      "id": "S2",
+      "name": "identity consistency",
+      "result": "PASS",
+      "detail": "identity.agent_id='demo-agent-joe-001', manifest.agent_id='demo-agent-joe-001'"
+    },
+    {
+      "id": "S3",
+      "name": "lifecycle state machine",
+      "result": "PASS",
+      "detail": "1 events, chain valid"
+    },
+    {
+      "id": "S4",
+      "name": "evidence integrity",
+      "result": "FAIL",
+      "detail": "2 entries checked; hash mismatch on 'files/evaluation.txt'"
+    },
+    {
+      "id": "S5",
+      "name": "evidence root",
+      "result": "INCONCLUSIVE",
+      "detail": "skipped: evidence missing or S4 failed"
+    },
+    {
+      "id": "S6",
+      "name": "seal signature",
+      "result": "PASS",
+      "detail": "HMAC-SHA256 seal valid (key_id 6c8c0643b033b0ba...)"
+    }
+  ],
+  "root_algorithm": "sha256(canonical-json(sorted(content_hashes))) v0.1-provisional",
+  "assurance": "owner-key",
+  "scope": "Structure, identity consistency, lifecycle state machine, evidence content hashes, evidence root, and the seal signature of this submission package only. Ed25519 seals are verified publicly in every mode; HMAC seals only in strict --key mode.",
+  "limitations": [
+    "HMAC-SHA256 seals (v0.2) are symmetric: verification requires the owner key. Ed25519 seals (v0.3) are third-party verifiable with the public key recorded in the seal.",
+    "Key substitution is detectable only when verifying with the owner key (--key), a pinned public key (--pubkey), or out-of-band key pinning.",
+    "Evidence Root algorithm is provisional (pending canonical serialization ratification).",
+    "Timestamps are not independently anchored.",
+    "Lifecycle event signatures (event.signature) are not ratified and not verified.",
+    "No behavioral evaluation is performed (Evaluation is out of verifier scope, archive SS15)."
+  ],
+  "checked": [
+    "structure",
+    "identity",
+    "lifecycle",
+    "evidence hashes",
+    "evidence root",
+    "seal signature"
+  ],
+  "not_checked": [
+    "lifecycle event signatures",
+    "external timestamp anchoring",
+    "behavioral evaluation",
+    "memory fidelity/continuity"
+  ],
+  "statement": "Violations were detected within the observed evidence boundary."
+}

@@ -15,6 +15,21 @@ Nothing here is a ratified standard.
 
 ## [Unreleased]
 
+### The neighbourhood, surveyed rather than admired (2026-11-19)
+
+- **`docs/PEER-SURVEY.md` + `docs/PEERS.json`**: six neighbouring projects measured
+  from one PyPI JSON and one GitHub REST request each, with no figure quoted from
+  a README. Three are the same problem answered differently; three are adjacent
+  infrastructure and are used as a maturity bar, not as opponents.
+- **The honest split:** last of the seven on distribution (4 releases against
+  23-78, 11 stars against 2-1,056) and first, by a wide margin, on
+  re-checkability (second implementation, CI agreement assertion at 36/36,
+  one-command stranger audit, hostile-input suite, public conformance corpus,
+  cost measured to 20,000 evidence files). The second implementation is the
+  strongest asset and, by the peer's own RFC 7942 rule, not independence.
+- The page states what this changes: the next gain is not another check, it is
+  the first row in the adoption table.
+
 ### Scale, and a semantic disagreement between the two implementations (2026-11-19)
 
 - **`docs/SCALE.md` + `docs/SCALE.json` + `docs/SCALE.svg`**: verification cost

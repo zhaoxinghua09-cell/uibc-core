@@ -1,0 +1,105 @@
+{
+ "pypi": {
+  "agent-action-capsule": {
+   "version": "0.17.0",
+   "releases": 23,
+   "last_upload": "2026-11-18T05:03:39.825175Z",
+   "requires_python": ">=3.9",
+   "license": "",
+   "summary": "Reference verifier for the Agent Action Capsule SCITT profile (draft-mih-scitt-agent-action-capsule), with the typed Cap"
+  },
+  "sigstore": {
+   "version": "4.5.1",
+   "releases": 67,
+   "last_upload": "2026-10-20T15:12:50.021025Z",
+   "requires_python": ">=3.10",
+   "license": "",
+   "summary": "A tool for signing Python package distributions"
+  },
+  "in-toto": {
+   "version": "3.1.0",
+   "releases": 31,
+   "last_upload": "2026-04-25T20:39:36.202370Z",
+   "requires_python": ">=3.9",
+   "license": "",
+   "summary": "A framework to define and secure the integrity of software supply chains"
+  },
+  "c2pa-python": {
+   "version": "0.39.0",
+   "releases": 78,
+   "last_upload": "2026-11-12T18:33:08.778441Z",
+   "requires_python": ">=3.10",
+   "license": "MIT OR Apache-2.0",
+   "summary": "Python bindings for the C2PA Content Authenticity Initiative (CAI) library"
+  },
+  "agent-evidence-vectors": {
+   "version": "0.37.0",
+   "releases": 43,
+   "last_upload": "2026-11-15T23:03:01.620331Z",
+   "requires_python": ">=3.11",
+   "license": "Apache-2.0",
+   "summary": "Conformance corpora and reference verifiers for agent evidence records"
+  }
+ },
+ "github": {
+  "agent-action-capsule": {
+   "repo": "action-state-group/agent-action-capsule",
+   "stars": 2,
+   "forks": 6,
+   "created": "2026-06-13",
+   "pushed": "2026-11-18",
+   "license": "BSD-3-Clause",
+   "open_issues": 66
+  },
+  "sigstore": {
+   "repo": "sigstore/sigstore-python",
+   "stars": 340,
+   "forks": 107,
+   "created": "2022-01-13",
+   "pushed": "2026-11-18",
+   "license": "NOASSERTION",
+   "open_issues": 58
+  },
+  "in-toto": {
+   "repo": "in-toto/in-toto",
+   "stars": 1056,
+   "forks": 176,
+   "created": "2016-05-24",
+   "pushed": "2026-08-27",
+   "license": "NOASSERTION",
+   "open_issues": 61
+  },
+  "c2pa": {
+   "repo": "contentauth/c2pa-python",
+   "stars": 109,
+   "forks": 40,
+   "created": "2023-09-28",
+   "pushed": "2026-11-18",
+   "license": "Apache-2.0",
+   "open_issues": 13
+  },
+  "uibc": {
+   "repo": "zhaoxinghua09-cell/uibc-core",
+   "stars": 11,
+   "forks": 2,
+   "created": "2026-09-17",
+   "pushed": "2026-11-18",
+   "license": "Apache-2.0",
+   "open_issues": 5
+  },
+  "slsa": {
+   "repo": "slsa-framework/slsa-github-generator",
+   "stars": 611,
+   "forks": 190,
+   "created": "2022-03-28",
+   "pushed": "2026-08-07",
+   "license": "Apache-2.0",
+   "open_issues": 297
+  }
+ },
+ "meta": {
+  "measured_at": "2026-11-19",
+  "source": "PyPI JSON API and GitHub REST API, one request each, no hand-typed numbers",
+  "note": "Snapshot. docs/check_competitors.py watches the one same-domain peer; the others are here for context and are not tracked."
+ }
+}

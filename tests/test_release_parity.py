@@ -54,6 +54,19 @@ class TestReleaseParity(unittest.TestCase):
         self.assertIn("S16", d["repository_result"]["checks"])
         self.assertEqual(d["repository_result"]["result"], "INCONCLUSIVE")
 
+    def test_the_release_was_byte_identical_to_its_tag(self):
+        """Both baselines carry a tag whose verifier matches the artifact,
+        which is why the problem is a stalled release rather than a dishonest
+        one -- and why an earlier claim of 'no tags at all' had to be
+        corrected."""
+        for name in ("ARCHIVE-BASELINE.json", "PUBLISHED-BASELINE.json"):
+            with open(os.path.join(_REPO, "docs", name), encoding="utf-8") as f:
+                d = json.load(f)
+            self.assertIn("git_tag", d, name)
+            self.assertEqual(len(d["git_tag"]["verify_py_sha256"]), 64, name)
+            self.assertIn("f5d7b29b", d["git_tag"]["commit"]) if "ARCHIVE" in name \
+                else self.assertIn("251b10b3", d["git_tag"]["commit"])
+
     def test_the_baseline_records_a_hash_and_a_limit(self):
         self.assertEqual(len(self.pub["verify_py_sha256"]), 64)
         self.assertEqual(len(self.pub["sdist_sha256"]), 64)

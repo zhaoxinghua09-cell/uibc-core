@@ -20,5 +20,12 @@
     "It measures the verifier's CHECK IDS, not the package lifecycle, the auditor, the red-team stages or the interoperability exports.",
     "None of tools/outsider_audit.py, the outside kit, the verify endpoint or the AAC export existed at that revision.",
     "A count of ids is not a count of behaviour: S1-S6 at that revision also had less coverage than S1-S6 today."
-  ]
+  ],
+  "git_tag": {
+    "name": "v0.2.1",
+    "commit": "f5d7b29b55ff4288effb18031e70bc7826efc48b",
+    "verify_py_sha256": "78cc6439333d08c0baf7db906f0556d4572d66e5ba15ef64303b8cf55fb2ded5",
+    "matches_this_baseline": true,
+    "note": "the tag points at a different commit from the archived snapshot, but the verifier the two carry is byte-identical; the archive is therefore rebuildable from git"
+  }
 }

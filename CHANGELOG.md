@@ -13,6 +13,50 @@ Nothing here is a ratified standard.
 
 ---
 
+## [0.4.0] - 2026-11-18
+
+This is the release that makes the eighteen checks reachable. Everything below
+that concerns S7-S18 exists in the tree and in no earlier artifact: the
+published `0.3.3` verifier reports six checks on the same package that the tree
+reports seventeen on (docs/RELEASE-PARITY.md records the measurement).
+
+### Added
+
+- **Twelve checks beyond `0.3.3`:** S7 index metadata, S8 whole-state
+  checkpoint, S9 out-of-band pin, S10 attestation closure, S13 merkle proofs,
+  S14 strict base64, S15 anchor resolution, S16 RFC 3161, S17 receipt chain,
+  S18 policy artefacts, plus the S0 crash fallback and the S11/S12 strictness
+  checks in their current form. `python3 tools/check_release_parity.py` prints
+  the three-channel comparison.
+- **`tools/outsider_audit.py`** -- five red-team stages over one command, with an
+  auditor self-test (path gate + behaviour gate) and `--json` output.
+- **`tools/build_evidence_index.py`** -- every check mapped to its tests, its
+  red-team cover and its docs, measured by running the audit rather than grepping
+  the source (`docs/EVIDENCE-INDEX.md`).
+- **`tools/build_checks_reference.py`** -- the eighteen checks with the question
+  each answers and an explicit three-way classification of their external basis
+  (`docs/CHECKS-REFERENCE.md`).
+- **`tools/build_outside_kit.py`** -- a whitelisted 43-file audit kit, runnable
+  by someone who will not clone the repository.
+- **`tools/serve_verify.py`** -- a verify endpoint that accepts bytes and
+  refuses hostile archives.
+- **`tools/emit_aac_capsule.py`** -- export to the Agent Action Capsule format,
+  recomputing the capsule id under JCS and asking their verifier.
+- **`tools/check_citation_scope.py`, `tools/preflight_release.py`** -- the two
+  gates that stop a claim from outrunning the artifact.
+
+### Changed
+
+- **`pyproject.toml`:** version 0.4.0; the description no longer carries a
+  version number, which had drifted from the field beside it.
+
+### Notes on compatibility
+
+Per this project's own rule, any change to what produces which verdict is a
+breaking change. Twelve new checks necessarily change verdicts for packages
+carrying the fields they inspect, so 0.4.0 is a major-looking bump under a
+0.3.x series rather than a patch.
+
 ## [Unreleased]
 
 ### Added

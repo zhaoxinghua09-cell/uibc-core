@@ -18,6 +18,7 @@ import json
 import os
 import shutil
 import sys
+import subprocess
 import tempfile
 import zipfile
 
@@ -83,17 +84,17 @@ def build_positive(name, fn, why, index):
         if fn:
             fn(pkg)
         if name.endswith("declared evidence file"):
-            body = b"declared, therefore legitimate\n"
-            with open(os.path.join(pkg, "evidence", "extra-declared.txt"), "wb") as fh:
-                fh.write(body)
-            p = os.path.join(pkg, "evidence", "index.json")
-            with open(p, encoding="utf-8") as fh:
-                doc = json.load(fh)
-            doc.setdefault("files", []).append(
-                {"path": "extra-declared.txt", "sha256": hashlib.sha256(body).hexdigest(),
-                 "kind": "ACTION", "bytes": len(body)})
-            with open(p, "w", encoding="utf-8") as fh:
-                json.dump(doc, fh, ensure_ascii=False)
+            # Added through the shipped CLI, not by hand: the case is "grow the
+            # package the way an owner would", and hand-writing the index got
+            # the member name wrong once already.
+            body = os.path.join(tmp, "extra-declared.txt")
+            with open(body, "w", encoding="utf-8") as fh:
+                fh.write("declared, therefore legitimate\n")
+            subprocess.run([sys.executable, "-m", "uibc_core.cli", "evidence", pkg,
+                            "--type", "ACTION", "--file", body],
+                           check=True, cwd=_REPO, capture_output=True)
+            subprocess.run([sys.executable, "-m", "uibc_core.cli", "submit", pkg],
+                           check=True, cwd=_REPO, capture_output=True)
         rep = oa._verdict(pkg)
         if "FAIL" in rep["result"] or rep["failed_checks"]:
             return None, "a package meant to be accepted was refused: %s" % rep

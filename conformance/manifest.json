@@ -68,7 +68,7 @@
       "expected_result": "INCONCLUSIVE",
       "expected_checks": [],
       "path": "cases/05-a-package-with-one-more-declared-evidence-file",
-      "sha256": "00ea3a6f667299f2bb688db10ae3adea4c45637eb3b0a113af073727c1fa9e33"
+      "sha256": "7c3ceb326bb2302cbd0f8cfa119a0b6c562fa6e97d858d51f19a7b7689553120"
     },
     {
       "id": "06",

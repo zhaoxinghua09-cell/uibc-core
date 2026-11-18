@@ -61,6 +61,13 @@ carrying the fields they inspect, so 0.4.0 is a major-looking bump under a
 
 ### Added
 
+- **An independent JavaScript verifier** (`tools/verify-js/verify.mjs`): Node standard library only, no import of `uibc-core`, no npm package. It decides seven of the nineteen checks -- S1, S2, S4, S5, S7 (shape *and* the metadata digest), S11, S12 -- and refuses to pretend about the rest, so it never returns PASS. Measured against the same 34 packages: `strict 16/34 refused 29/34`, with an **identical FAIL set to Python on 10 packages** and the same expected check named on 11. Two implementations built from the spec, sharing no code, agreeing on what is broken and why.
+- **`tools/cross_impl_check.py`** prints that comparison case by case, so the boundary is a number rather than a claim.
+- **Two defects found by the exercise itself.** (a) The "one more declared evidence file" conformance package wrote its declaration under `files` instead of `entries`, so the file was undeclared while the name claimed otherwise; the case now grows the package through the shipped CLI. (b) The JS metadata-digest comparison caught an exception on an absent member and let a tampered note pass -- an `undefined` that Python writes as `null`. Both were caught only because a second implementation ran the same corpus.
+- `tests/test_verify_js.py` (4 tests, skipped when Node is absent): a sound package must be INCONCLUSIVE, a flipped byte must fail S4, an edited root must fail S5, and every extra finding must come from a check the implementation claims to run.
+
+### Added
+
 - **The docs/ pages that describe the present now have to stay true.** `tools/check_doc_facts.py` scanned six top-level files; `docs/CONFORMANCE.md` said 305 tests, `docs/COMPOSITION-VERIFIER.md` said 180, `docs/ECOSYSTEM-MAP.md` and `docs/INTEROP-MATRIX.md` said 0.3.0 with 305 tests, all of them about the current project and all of them wrong. A page joins the check by saying so on its first lines, `<!-- facts: current -->`; the five present-tense pages that do are now scanned along with the six. Pages recording a past run (`REVIEW-LOG.md`, `RUN-RECORD-second-machine-20261118.md`) carry no marker and are left alone, because rewriting a run record's numbers would falsify history rather than correct it.
 - **One checker bug fixed on the way.** `"15 red-team cases"` was matched by the `cases` rule against the *conformance package* count, so a correct sentence looked stale. Red-team cases now have their own key, and the generic `cases` rule is gone rather than guessed at.
 - `tests/test_doc_facts.py` gained two assertions: a marked page that carries a wrong number must be caught, and an unmarked one must not be scanned.

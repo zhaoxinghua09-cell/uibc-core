@@ -15,6 +15,27 @@ Nothing here is a ratified standard.
 
 ## [Unreleased]
 
+### Two defects at once (2026-11-19)
+
+- **`tools/check_combinations.py`**: every other audit here asks about one
+  change. This asks about two, which is the question a composed forgery poses -
+  a second defect that supplies exactly the consistency the first one broke.
+  Fourteen independent mutations, each caught alone; then all 91 pairs and all
+  364 triples.
+- **Measured: 91 of 91 pairs and 364 of 364 triples fail somewhere.** Zero
+  combinations are silent, and zero show the cancelled pattern (both halves
+  caught alone, the combination caught nowhere). Under a second, so it is a CI
+  step and a test, not a ceremony.
+- **The probe corrected itself once:** the undeclared file first went into
+  `evidence/files/`, where the format deliberately keeps structural members and
+  resolves each by its own check, so nothing moved. The same mutation at the
+  package root - where a note that contradicts the evidence has no owner - made
+  S1 fail at once. Same defect, two positions, two correct verdicts.
+- **`docs/COMBINATIONS.md`** carries the matrix and states the limit plainly:
+  three at a time is not "any number", and the family is single-field defects,
+  not a chained forgery.
+
+
 ### Two identifier fields that identified nothing (2026-11-19)
 
 - **`evidence_id` was read by no check** for presence or uniqueness. Two entries

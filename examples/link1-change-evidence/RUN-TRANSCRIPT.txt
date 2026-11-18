@@ -1,0 +1,56 @@
+CHANGE-EVIDENCE DEMO (Link 1) - verification transcript
+Fictional data throughout: Meridian Medical / CardioPatch CP-2
+Spec: spec-link1-change-package.md (2026-11-10); run 2026-11-18
+Built and verified with uibc-core 0.3.3 from /tmp/pccp-coldtest/lib/python3.12/site-packages
+==================================================================
+
+--- 1. change-approved, open verification
+    overall result: PASS  trust_level: (field absent in this version)
+    S4: PASS - 4 entries checked; all hashes match
+    S6: PASS - Ed25519 seal valid (key_id b62e867fa2f33afe...) - third-party verifiable, no secret involved
+
+--- 2. change-approved, receiver pins the R&D public key
+    overall result: PASS  trust_level: (field absent in this version)
+    S4: PASS - 4 entries checked; all hashes match
+    S6: PASS - Ed25519 seal valid (key_id b62e867fa2f33afe...) - third-party verifiable, no secret involved
+
+--- 3. change-swapped (evaluation report replaced after sealing)
+    overall result: FAIL  trust_level: (field absent in this version)
+    S4: FAIL - 4 entries checked; hash mismatch on 'files/evaluation-report.md'
+    S6: PASS - Ed25519 seal valid (key_id b62e867fa2f33afe...) - third-party verifiable, no secret involved
+
+--- 4. change-unsigned (same files, never sealed)
+    overall result: INCONCLUSIVE  trust_level: (field absent in this version)
+    S4: PASS - 4 entries checked; all hashes match
+    S6: INCONCLUSIVE - package unsigned: evidence chain is internally consistent but provenance is unattested
+
+--- gate decisions (uibc gate)
+    change-approved (pinned): exit=0 :: decision=ALLOW reason=verify PASS, no revocation, no dispute
+    change-swapped: exit=2 :: decision=DENY reason=verifier FAIL: S4
+    change-unsigned: exit=3 :: decision=HOLD reason=verifier INCONCLUSIVE components present
+
+--- reproducibility: full verify set, second run
+    approved=PASS swapped=FAIL unsigned=INCONCLUSIVE
+
+--- spec expectations vs actual
+    approved open      expected PASS          got PASS          MATCH
+    approved pinned    expected PASS          got PASS          MATCH
+    swapped            expected FAIL          got FAIL          MATCH
+    unsigned           expected INCONCLUSIVE  got INCONCLUSIVE  MATCH
+    verdicts reproduced on second run: True
+    ALL SPEC EXPECTATIONS MET: True
+
+--- compatibility note (found by cold test, 2026-11-18)
+The packages above were built with the RELEASED uibc-core 0.3.3
+(PyPI), and the full expectation set was re-verified from a clean
+virtualenv installed from PyPI: approved PASS, swapped FAIL (S4 names
+files/evaluation-report.md), unsigned INCONCLUSIVE, gate HOLD.
+
+An earlier build of the same packs, sealed with the current repo main
+(still labelled 0.3.3), FAILS S6 under the released 0.3.3 verifier
+("Ed25519 signature invalid"): the seal payload moved after the
+release without a version bump. The direction is one-way — the repo
+main verifier accepts the 0.3.3-sealed pack as PASS with
+coverage=legacy. Standing rule for handbook packs until a release
+restores one numbering: build with the released code, so the path a
+stranger actually installs reproduces every verdict.

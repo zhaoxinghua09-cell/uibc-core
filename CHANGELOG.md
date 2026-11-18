@@ -17,6 +17,16 @@ Nothing here is a ratified standard.
 
 ### Added
 
+- **Change-evidence worked example (`examples/link1-change-evidence/`):**
+  the Link-1 handbook pack — a fictional device AI model update
+  (v1.1 -> v1.2) handed downstream as a sealed four-file evidence set,
+  in three states (sealed / evaluation report swapped after sealing /
+  submitted unsealed) with verdicts PASS / FAIL (S4 names the swapped
+  file) / INCONCLUSIVE and gate decisions ALLOW / DENY / HOLD. Built
+  with the released 0.3.3 so the `pip install uibc-core` path
+  reproduces every verdict; includes a plain-language verify guide
+  (EN + Chinese) and the recorded run transcript.
+
 - **AEE rail (`uibc_core/aee.py`): an external verifier for the
   Adversarial Execution Evidence in-toto predicate v0.7**, so the
   `agent-evidence-vectors` conformance corpus (288 vectors) can run

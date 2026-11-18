@@ -1,5 +1,10 @@
 # 请帮我做一次独立复跑（约 3 分钟，零安装）
 
+## 不想 clone？
+
+用 `tools/build_outside_kit.py` 打出来的压缩包（`docs/OUTSIDE-KIT.md`）：解压即跑，不联网、不装依赖。源码与声明仍以本仓库为准。
+
+
 > 中文完整版（含四件事说明与已知边界）：[`docs/EXTERNAL-NODE-KIT.md`](EXTERNAL-NODE-KIT.md)
 
 > **一条命令版（推荐先跑这个）**：`python3 tools/outsider_audit.py`

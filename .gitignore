@@ -13,3 +13,6 @@ gcm-diagnose.log
 .secrets/
 external_node_result.json
 tools/out/rekor_ec_key.pem
+
+# built outside-kit archives
+dist/

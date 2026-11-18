@@ -16,7 +16,7 @@
 | S11 strict serialization | yes | duplicate members, control characters, UTF-8 |
 | S12 timestamps and counts | yes | calendar arithmetic |
 | S14 strict base64 | yes | pad bits, missing padding, stray characters |
-| S13 Merkle / inclusion | **no** | needs the v1.1 tree |
+| S13 Merkle inclusion | yes | RFC 6962, recomputed from the files |
 | S15, S16, S17, S18 | **no** | anchors, RFC 3161, receipt chain, policies |
 | S8, S9 | **no** | checkpoint head, out-of-band pin |
 
@@ -30,18 +30,18 @@ node tools/verify-js/verify.mjs conformance/cases/01-the-shipped-package-untouch
 ```
 
 ```
-strict 23/36   refused 30/36      (tools/run_conformance.py --verify "node ... {pkg}")
+strict 27/36   refused 30/36      (tools/run_conformance.py --verify "node ... {pkg}")
 ```
 
 | | value | reading |
 |---|---|---|
-| packages in scope | 23 of 36 | 6 correct + 17 whose expected check is among the ten |
-| out of scope | 13 | the ones needing Ed25519, RFC 3161 or the tree |
-| identical FAIL set to Python | 17 | the second implementation reaches the same verdict for the same reason |
-| named an expected check | 17 (+6 positives) | what the suite scores |
+| packages in scope | 27 of 36 | 6 correct + 21 whose expected check is among the eleven |
+| out of scope | 9 | the ones needing Ed25519, RFC 3161 or the tree |
+| identical FAIL set to Python | 21 | the second implementation reaches the same verdict for the same reason |
+| named an expected check | 21 (+6 positives) | what the suite scores |
 | refusals | 30 of 36 | the 30 mutated packages, and none of the correct ones |
 
-The number that matters is **identical FAIL set to Python: 17**, plus 17 cases where it names the same expected check Python does. Two implementations built from the spec, with no shared code, agreeing on which packages are broken and why, is the difference between "we have tests" and "anyone can check".
+The number that matters is **identical FAIL set to Python: 21**, plus 21 cases where it names the same expected check Python does. Two implementations built from the spec, with no shared code, agreeing on which packages are broken and why, is the difference between "we have tests" and "anyone can check".
 
 ## Two bugs this exercise found in its own work
 

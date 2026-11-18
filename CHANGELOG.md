@@ -32,9 +32,21 @@ Nothing here is a ratified standard.
 ### Measured
 
 - Python: `strict 36/36   refused 30/36`
-- JavaScript: `strict 23/36   refused 30/36`
-- Identical FAIL set to Python: 17 of 36; named an expected check: 17 (+6 positives)
-- Out of scope: 13 packages (S8, S9, S13, S15-S18)
+- JavaScript: `strict 27/36   refused 30/36`
+- Identical FAIL set to Python: 21 of 36; named an expected check: 21 (+6 positives)
+- Out of scope: 9 packages (S8, S9, S15-S18)
+
+### Added (S13)
+
+- **The JavaScript verifier recomputes Merkle inclusion proofs (RFC 6962).**
+  Leaf = SHA-256(0x00 || data), node = SHA-256(0x01 || l || r), an unbalanced
+  tail is promoted rather than duplicated -- duplicating it would let two
+  different trees share a root. It checks the declared algorithm, the declared
+  size against the leaves it computed, the root, each proof's index against the
+  order it recomputed, hex shape, and the path itself. All four S13 vectors
+  (replaced root, inflated size, corrupted proof, swapped index) now fail on
+  S13 rather than on something incidental. A package with no tree is still not
+  penalised: eleven of nineteen covered.
 
 ---
 

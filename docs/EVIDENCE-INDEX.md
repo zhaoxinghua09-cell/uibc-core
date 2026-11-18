@@ -17,7 +17,7 @@
 | S10 | attestation closure declared | 否 | 5 | 2 | 6 |
 | S11 | strict serialization | 是 | 4 | 1 | 9 |
 | S12 | timestamp and identifier strictness | 是 | 6 | 1 | 8 |
-| S13 | merkle inclusion proofs | 否 | 7 | 4 | 9 |
+| S13 | merkle inclusion proofs | 否 | 8 | 4 | 9 |
 | S14 | strict base64 | 否 | 4 | 2 | 5 |
 | S15 | anchor event resolution | 否 | 5 | 4 | 7 |
 | S16 | external timestamp (RFC 3161) | 否 | 6 | 4 | 8 |

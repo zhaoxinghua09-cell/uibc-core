@@ -90,7 +90,6 @@ def main():
     out.append('<text x="%d" y="39" font-size="12" fill="%s">peer</text>' % (W - 90, INK))
 
     rows = _rows(_baseline())
-    peak = max(max(o, p) for _, o, p, _ in rows) or 1
     for i, (label, ours, peer, note) in enumerate(rows):
         y = TOP + i * ROW_H
         out.append('<text x="40" y="%d" font-size="13.5" fill="%s">%s</text>'
@@ -98,8 +97,12 @@ def main():
         if note:
             out.append('<text x="40" y="%d" font-size="10.5" fill="%s">%s</text>'
                        % (y + 31, MUTED, esc(note)))
+        # Each row is scaled to its own larger value. A shared axis would make
+        # the small counts - 4 releases against 23 - two-pixel slivers, and the
+        # point of these rows is the ratio, not the absolute height.
+        peak = max(ours, peer) or 1
         for j, (val, colour) in enumerate(((ours, OURS), (peer, PEER))):
-            length = max(2, int(val / peak * BAR_MAX))
+            length = max(3, int(val / peak * BAR_MAX))
             by = y + 2 + j * 16
             out.append('<rect x="%d" y="%d" width="%d" height="13" fill="%s" rx="2"/>'
                        % (BAR_X, by, length, colour))

@@ -59,6 +59,15 @@ carrying the fields they inspect, so 0.4.0 is a major-looking bump under a
 
 ## [Unreleased]
 
+### Fixed
+
+- **The README's test count was 328; the suite runs 507.** Corrected in `README.md`, `README.en.md`, `AGENTS.md`, together with the skipped count (6 -> 16) and the recorded runtime.
+
+### Added
+
+- **`tools/check_doc_facts.py`** -- measures tests, checks, audit attacks, red-team cases and conformance vectors, then reads the documents a reader treats as current and reports every number that disagrees. Dated records under `docs/` are excluded on purpose: they are findings from a moment, and rewriting them would falsify a record rather than correct a claim. `--json` and `--files` supported.
+- **`tests/test_doc_facts.py`** -- 4 tests: every fact is measurable, no published number is stale, a planted wrong number must be caught, and the two attack counts (36 audit / 15 red-team) must stay distinguishable. Adding a test without updating the README now turns CI red.
+
 ### Added
 
 - **Rate limiting on the verify endpoint.** A token bucket per caller, `--rate`/`--burst`, `429` with `Retry-After`, and the limit advertised on `/health`. `X-Forwarded-For` is ignored unless `--trust-forwarded` is passed, because a bucket keyed on a caller-controlled header is not a bucket. Measured at burst 10: 11 of 320 calls under 16 concurrent clients succeeded, 309 refused.

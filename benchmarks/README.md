@@ -85,6 +85,37 @@ that this one can, and it is kept in the repository rather than described in pro
 
 `calibration/` is not a leaderboard entry: nothing there is an implementation anyone would ship.
 
+## Reproduction from a public clone, on a machine that is not the author's
+
+Run on 2026-11-19 from an anonymous `git clone --depth 1 --branch feat/benchmarks` at
+`e2b0512`, on Linux 6.6.95.bck, Python 3.12.11, working only out of the clone (no editable
+install, `PYTHONPATH` pointing at the clone):
+
+    python3 benchmarks/run_benchmarks.py --commit e2b0512
+    # mutation 2/21 open, 1/21 pinned, 0/21 head-pinned
+    # redteam refused 12/15 (by design 2, skipped 0)
+    # accepted mutations: M17 keyswap, M20 whole-package rollback
+
+The per-case accepted set and the three mode totals are field-for-field identical to the
+record committed from Windows at the same commit. The only platform difference is RT03,
+as documented above.
+
+The third-party measurement path reproduced on that machine too, against a verifier cloned
+from a different repository (`uibc-iverify@158a82d`, Apache-2.0):
+
+    python3 benchmarks/run_external.py --verifier "python3 /tmp/iv/ivcli.py {pkg}"
+    # base accepted=True
+    # 2/21 accepted (9.5%), accepted: m_M17, m_M20
+
+Same two misses as on Windows, which is the point: the accepted pair follows the mutation,
+not the platform.
+
+**One trap worth writing down, because we walked into it.** That verifier's CLI takes a bare
+package directory, not a `verify` subcommand. Invoked as `ivcli.py verify <pkg>` it exits 3 on
+every package, and the runner then reports `0/21`, a perfect score that is pure artefact.
+The run still prints `base accepted=False` and exits 3, so a mis-invocation is flagged instead
+of ranked first. Read `base_accepted` before reading any percentage.
+
 ## Measure a verifier you did not write
 
 `run_external.py` feeds the same mutant bytes to any command, so a competitor or a downstream

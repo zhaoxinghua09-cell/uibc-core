@@ -29,6 +29,31 @@ jobs:
       - name: Run test suite
         run: python -m pytest tests -q
 
+  # Measured 2026-11-19: 15 of the 16 skipped tests were skipping for one reason only -
+  # `.[verify]` does not carry agent-action-capsule, langchain-core, opentimestamps-client,
+  # pynostr or coincurve, so the interop, live-agent, anchor and RFC 3161-proof checks had
+  # never run in CI at all. They pass once those packages are present. This job installs
+  # them and fails if any skip still says "not installed", so a green matrix can no longer
+  # mean "the hard half was skipped".
+  test-with-extras:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: "3.13"
+
+      - name: Install the suite with every optional dependency present
+        run: python -m pip install --upgrade pip && pip install pytest ".[verify,interop,conformance]"
+
+      - name: Run the whole suite and refuse a dependency-shaped skip
+        run: |
+          set -o pipefail
+          python -m pytest tests -q -rs | tee /tmp/pytest.txt
+          ! grep -E "not installed|pip install agent-action-capsule" /tmp/pytest.txt
+
   # Measured 2026-11-19: the first 0.4.0 sdist carried tests/ but not the
   # data they read. Unpacked, it collected 290 of 526 tests with 6 failures and
   # 97 errors, every one of them "no such file". "526 tests green" was true of
@@ -95,6 +120,12 @@ jobs:
       - name: Two implementations, one set of failing checks
         # Not the weaker "names an expected check": the same set, on all 36.
         run: python tools/cross_impl_check.py --json | python3 -c "import json,sys; d=json.load(sys.stdin); assert d['agree_with_python']==d['cases'], d; print('agree', d['agree_with_python'], 'of', d['cases'])"
+
+      - name: Every check has an artefact that makes it fail
+        # Nineteen checks, and for each one a package (or, for S9 and S16, a
+        # mutation run by outsider_audit) that drives it to FAIL. A check
+        # nobody can make fail is decoration; this step refuses decoration.
+        run: python tools/check_falsifiability.py
 
       - name: The second implementation must not drift
         # A verifier written from the spec in another language, sharing no code

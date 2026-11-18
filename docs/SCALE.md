@@ -3,6 +3,9 @@
 **2026-11-19.** Every number below was measured on this host, not estimated.
 Data: `docs/SCALE.json`. Command: `tools/build_scale_svg.py`.
 
+Where the 1.1 s goes, and three optimisations we measured and reverted:
+`docs/PERF-LOG.md`.
+
 Most of this repository's evidence is about *what* a verifier refuses. This
 page is about *what it costs* — because a verifier that is right but unusable at
 size is a specification, not a product, and the first question a reviewer asks

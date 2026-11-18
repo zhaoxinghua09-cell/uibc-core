@@ -434,6 +434,21 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
                           ("evidence/index.json", index)):
         for problem in _semantic_problems(doc, now=_now_utc()):
             s12_problems.append("%s: %s" % (doc_name, problem))
+
+    # A declared count that disagrees with the index is a contradiction inside
+    # the package: `evidence_count` is the number of entries a reader will
+    # find, and nothing else. This was missing until the JavaScript verifier
+    # reported it on a case the Python one passed -- the second implementation
+    # finding a hole in the first, which is the whole point of having one.
+    declared_count = manifest.get("evidence_count")
+    if declared_count is not None:
+        actual_count = len(entries)
+        if not isinstance(declared_count, int) or isinstance(declared_count, bool):
+            s12_problems.append("manifest.json: evidence_count=%r is not an integer"
+                               % (declared_count,))
+        elif declared_count != actual_count:
+            s12_problems.append("manifest.json: evidence_count says %d, index holds %d"
+                               % (declared_count, actual_count))
     record("S12", "timestamp and identifier strictness", not s12_problems,
            "; ".join(s12_problems[:4]) if s12_problems else
            "timestamps are RFC 3339 with a zone; UUIDs are lowercase and non-nil")

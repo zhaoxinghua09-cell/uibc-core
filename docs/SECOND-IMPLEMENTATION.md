@@ -10,7 +10,10 @@ an inconvenience.
 
 ## What it decides
 
-Seventeen of the nineteen checks: S1 structure, S2 identity, S4 evidence integrity,
+Eighteen of the nineteen checks: S1 structure, S2 identity, **S3 the lifecycle
+state machine** (L1-L7) **and its semantic layer** (L8-L12: timestamps that
+parse and do not run backwards, actors that are principals of this agent,
+ACTIVATE once, a contiguous sequence_number), S4 evidence integrity,
 S5 evidence root, S6 the seal (for Ed25519, where the public key is in the
 package; an HMAC seal is INCONCLUSIVE because it needs the owner's key), S7
 index metadata (shape **and** the digest carried in the manifest), S8 the
@@ -21,8 +24,9 @@ from the files), S14 strict base64, S15 anchor resolution, **S16 external
 timestamps** (RFC 3161, verified with Node's own crypto - no npm package, no
 shared code), S17 the receipt chain and S18 policy artefacts.
 
-S3 has no checker of its own here: its semantics are exercised through S12's
-cases, and a package that fails S3 fails those too.
+The one check not here is S0, which is not a check of the package but of the
+verifier: it appears only when something throws, so a sound package has no S0
+line to compare.
 
 It therefore **never returns PASS** for a sound unsigned package: INCONCLUSIVE,
 because nothing was found wrong and nothing was proven either.
@@ -66,14 +70,14 @@ strict 36/36   refused 30/36
 |---|---|
 | packages in scope | 36 of 36 (6 correct + 30 whose expected check is among the fifteen) |
 | out of scope | 0 |
-| identical FAIL set to Python | 31 |
+| identical FAIL set to Python | 36 |
 | named the same expected check | 30 (+6 positives) |
 
 Two implementations written from the specification, sharing no code, agreeing
 on which packages are broken and for which reason — that is the difference
 between "we have tests" and "anyone can check".
 
-## Two bugs the exercise found in its own work
+## Four bugs the exercise found in its own work
 
 1. **A mislabelled case.** The "one more declared evidence file" package wrote
    its declaration under the wrong member name, so the file was undeclared
@@ -84,11 +88,26 @@ between "we have tests" and "anyone can check".
    note look fine. Fixed by mapping absent members to `null`, which is what the
    Python side writes.
 
-Neither was hypothetical: both came from running a second implementation
-against the same corpus. That is the only way this kind of defect surfaces.
+3. **One root cause scored twice.** This verifier computed the evidence root
+   from hashes it had just shown to be wrong and reported S5 as a second
+   failure. The Python one skipped S5 when S4 failed, which is the right
+   semantics: the second statement is not a second finding, it is the same
+   finding. S5 now reports INCONCLUSIVE in that case, on both sides.
+4. **A hole in the first implementation.** The Python verifier never compared
+   `manifest.evidence_count` with the number of index entries, so a package
+   claiming two entries and shipping one passed it. The JavaScript one did
+   compare them, the disagreement showed up in the cross-check, and the fix
+   went into Python - a hole found by the implementation that was built to
+   check it, which is precisely what a second implementation is for.
+
+All four were hypothetical until they were measured, and all four came from
+running a second implementation against the same corpus. That is the only way
+this kind of defect surfaces.
 
 ## What it is not
 
-- Not a replacement: 12 of 19 checks still have no second implementation.
+- Not a replacement: this is one implementation, not a standard. One check
+  (S0) has no second opinion, and agreement between our two implementations is
+  convergence, not corroboration by an outsider.
 - Not a ratification: agreeing with ourselves is not third-party witnessing.
   The external witness count is still zero, and this document does not change it.

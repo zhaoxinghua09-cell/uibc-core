@@ -15,6 +15,25 @@ Nothing here is a ratified standard.
 
 ## [Unreleased]
 
+### The two implementations now agree on every package (2026-11-18)
+
+- **S3 in JavaScript**, both families of rules: the L1-L7 state machine and the
+  L8-L12 semantic layer. Coverage 18 of 19; the only check absent is S0, which
+  exists only when the verifier itself throws.
+- **`agree_with_python: 36 of 36`.** The cross-implementation check no longer
+  asks only "does it name an expected check" - the same set of failing checks
+  now comes out on every package. It was five apart.
+- **A hole found in the Python verifier by the JavaScript one.**
+  `manifest.evidence_count` was never compared with the number of index entries,
+  so a package declaring two entries and shipping one passed. Fixed.
+- **One root cause scored twice.** The JavaScript verifier derived the evidence
+  root from hashes S4 had just shown to be wrong, reporting S5 as a second
+  failure. S5 is now INCONCLUSIVE when S4 fails, matching Python: it is the
+  same finding, not a second one.
+- A test that had been naming a case directory that no longer exists
+  (`09-edit-the-evidence-root`; the case is `10-...`) was corrected - it had
+  been passing against a stale unpacked fixture rather than the shipped suite.
+
 ### The second implementation verifies a stranger's timestamp (2026-11-18)
 
 - **S16 in JavaScript, with no dependency and no shared code.** `tools/verify-js/rfc3161.mjs`

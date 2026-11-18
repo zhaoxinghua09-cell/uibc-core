@@ -1,5 +1,8 @@
 # Composition verifier · 组合裁决器（对外唯一口径）
 
+<!-- facts: current -->
+
+
 > One sentence: **uibc takes several records produced by different parties under
 > different profiles and returns one recomputable three-valued verdict — PASS, FAIL,
 > or INCONCLUSIVE — and never turns "could not decide" into "passed".**
@@ -43,7 +46,7 @@ Verification is offline and does not call the issuer. The whole claim is reprodu
 ```bash
 python -m uibc_core.cli demo          # build, seal, verify, tamper, catch
 python benchmark/run.py               # 21-class benchmark, undocumented acceptance = 0
-python -m unittest discover -s tests  # 180 tests
+python -m unittest discover -s tests  # 516 tests
 ```
 
 ## 3. What we do NOT claim (the part that keeps us honest)

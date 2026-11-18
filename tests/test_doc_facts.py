@@ -18,6 +18,33 @@ import check_doc_facts as cdf  # noqa: E402
 
 
 class TestDocFacts(unittest.TestCase):
+    def test_a_marked_docs_page_is_actually_checked(self):
+        """The marker is a promise; a page that carries it must be scanned."""
+        marked = cdf.marked_docs()
+        self.assertGreaterEqual(len(marked), 5, marked)
+        targets = cdf.all_targets()
+        for path in marked:
+            self.assertIn(path, targets)
+        import tempfile, os, shutil
+        tmp = tempfile.mkdtemp()
+        try:
+            f = os.path.join(tmp, "x.md")
+            with open(f, "w", encoding="utf-8") as fh:
+                fh.write("<!-- facts: current -->\n\n999 tests\n")
+            bad = cdf.check(cdf.measure(), [f])
+            self.assertTrue(bad, "a wrong number in a marked page was not caught")
+        finally:
+            shutil.rmtree(tmp)
+
+    def test_an_unmarked_docs_page_is_left_alone(self):
+        """History is not rewritten: only pages that claim to be current are checked."""
+        unmarked = [p for p in os.listdir("docs") if p.endswith(".md")
+                    and p not in [x.split("/")[-1] for x in cdf.marked_docs()]]
+        self.assertTrue(unmarked)
+        targets = cdf.all_targets()
+        for name in ("REVIEW-LOG.md", "RUN-RECORD-second-machine-20261118.md"):
+            self.assertNotIn("docs/" + name, targets)
+
     def test_every_fact_can_be_measured(self):
         facts = cdf.measure()
         for key in ("tests", "checks", "modules", "attacks", "redteam_attacks", "cases"):

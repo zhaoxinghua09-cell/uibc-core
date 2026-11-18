@@ -23,7 +23,7 @@ It prints `CONSISTENT` only when **both** hold: a second, independently written 
 
 > A uibc PASS means: within the observed evidence boundary, no violation was detected. It does not claim the agent was correct, safe, or wise; that the recorded inputs were true or complete; or that any real-world outcome followed.
 
-**Current state, including what we are short of:** 514 tests green on Linux / Python 3.12 (16 skipped); the CI matrix runs the same suite on 3.10-3.13 · the verifier needs no third-party package (Ed25519 is implemented in-repo) · **external verification nodes: 0** — we publish the number we do not have; running the command above and sending back `external_node_result.json` makes it 1. Zero means the independence of this repository's verification rests entirely on two implementations written by the same author; it is not evidence of a third party having reproduced anything.
+**Current state, including what we are short of:** 516 tests green on Linux / Python 3.12 (16 skipped); the CI matrix runs the same suite on 3.10-3.13 · the verifier needs no third-party package (Ed25519 is implemented in-repo) · **external verification nodes: 0** — we publish the number we do not have; running the command above and sending back `external_node_result.json` makes it 1. Zero means the independence of this repository's verification rests entirely on two implementations written by the same author; it is not evidence of a third party having reproduced anything.
 
 Citation metadata (`CITATION.cff`, `CITATION.bib`, `codemeta.json`) pins the archived **0.2.1** snapshot of 2026-09-17; this section describes the current implementation (**v0.3.3**). Cite the snapshot, run the current code.
 
@@ -32,7 +32,7 @@ Citation metadata (`CITATION.cff`, `CITATION.bib`, `codemeta.json`) pins the arc
 | item | value |
 |---|---|
 | corpus | [`probityai/agent-evidence-vectors`](https://github.com/probityai/agent-evidence-vectors) 0.37.0, suiteRevision 32 |
-| corpus digest | `bf3e5befd71640757ff1b3f0af63514364b823b5e3f9059678f72f64a46e11c1` |
+| corpus digest | `bf3e5befd71640757ff1b3f0af63516364b823b5e3f9059678f72f64a46e11c1` |
 | command | `uv tool run "agent-evidence-vectors==0.37.0" --verifier "python -m uibc_core.aee"` |
 | result | **288 vectors, 288 pass, 0 fail** · `rail: external` · `vectorsExecuted 288 of 288` · `suiteRefusals 0` · `reasonParityMismatch 0` |
 
@@ -45,7 +45,7 @@ repository's own node result.
 **Three more commands, if you want to see the failure paths rather than the green ones:**
 
 ```bash
-python -m unittest discover -s tests -p "test_*.py"        # 514 tests (Linux / Python 3.12, 16 skipped)
+python -m unittest discover -s tests -p "test_*.py"        # 516 tests (Linux / Python 3.12, 16 skipped)
 python tools/emit_receipts.py --package fixtures/clean.uibc --count 3   # 3 chained receipts
 python tools/redteam_suite.py                              # 15 attacks, expected vs actual
 ```
@@ -101,11 +101,11 @@ the right thing. Run it yourself; the whole demo leaves nothing behind but a tem
 |---|---|---|
 | RFC 3161 external timestamp (Free TSA) | verified | `python tools/anchor_tsa.py --verify tests/fixtures/anchor/freetsa.tsr --data tests/fixtures/anchor/anchored_head.json --cabundle tests/fixtures/anchor/freetsa_ca.pem` — token, its CA bundle and the anchored file are all in the repo, so no network and no account |
 | OpenTimestamps second anchor | **pending calendar only — not a Bitcoin anchor** | `python tools/anchor_ots.py --verify tests/fixtures/anchor/anchored_head.json --proof tests/fixtures/anchor/ots_head.ots` prints `pending_calendar` and never a Bitcoin claim; a block attestation would have to appear in the proof for it to be an anchor |
-| Rekor entry + SET signature | written and verified | `rekor-cli get --log-index 3944456514 --rekor_server https://rekor.sigstore.dev`, then check the SET with the log public key published in `tests/fixtures/anchor/rekor_log_pub.pem` — the verification needs only that public key, never Sigstore's private infrastructure |
+| Rekor entry + SET signature | written and verified | `rekor-cli get --log-index 3944456516 --rekor_server https://rekor.sigstore.dev`, then check the SET with the log public key published in `tests/fixtures/anchor/rekor_log_pub.pem` — the verification needs only that public key, never Sigstore's private infrastructure |
 | Rekor **inclusion proof** | **does not verify** — ours and a third-party implementation both fail; published as-is | `python tools/anchor_rekor.py --verify tests/fixtures/anchor/rekor_entry.json --artifact …`; `python -m unittest tests.test_v13_rekor -v` shows the SET check passing and the inclusion proof not overclaimed. The failure is a defect we have not fixed, not a design choice |
 
 The two Rekor indices are different objects and must not be conflated: `2883389783` is the
-entry for the earlier release bundle in `dist/`, `3944456514` is the entry for the anchor of
+entry for the earlier release bundle in `dist/`, `3944456516` is the entry for the anchor of
 this repository's head digest. Each is distinct within the log; neither is a claim that the
 other exists.
 
@@ -143,7 +143,7 @@ other exists.
 > **Verifiable today** — every artifact is independently checkable: Sigstore Rekor transparency log
 > (logIndex 2883389783), concept DOI 10.5281/zenodo.22456647, SWHID
 > `swh:1:ori:819530c8be2adf6da901256ce9fd28063f8f1296` (ISO/IEC 18670).
-> Reproduce: `python -m unittest discover -s tests -p "test_*.py"` (514 tests, Linux / Python 3.12) · `python independent_verifier/cross_check.py`.
+> Reproduce: `python -m unittest discover -s tests -p "test_*.py"` (516 tests, Linux / Python 3.12) · `python independent_verifier/cross_check.py`.
 > **Honest boundary** — no third-party quality review to date; any operational use is self-reported
 > (see ENDORSEMENTS.md: 存证 ≠ 参与 ≠ 认可). Context: [FG-TIDA themes #27](https://github.com/FG-TIDA/themes/issues/27).
 
@@ -163,7 +163,7 @@ UIBC Core 参考实现 v0.3.3 —— Agent 生命周期证据包与验证器：�
 > PASS 仅表示"在观测到的证据边界内未发现违规"，不声称绝对可信。
 
 > 🔏 发布产物已进入 Sigstore Rekor 公共透明日志（条目 `2883389783` 属早期发布产物 `dist/*.cosign.bundle`；另有条目
-> `3944456514` 记录本仓 head 摘要的外部锚，见 `docs/EXTERNAL-ANCHOR.md`）。
+> `3944456516` 记录本仓 head 摘要的外部锚，见 `docs/EXTERNAL-ANCHOR.md`）。
 > **包含证明（inclusion proof）目前验不过**：我们的 RFC 6962 走法与第三方库 `rekor_log_verifier` 同时失败，如实记在文档里。
 > Zenodo **概念 DOI** `10.5281/zenodo.22456647` 属 LGD 理论本体；**本包 0.3.0 的单独 DOI 尚未分配**（存缴包已备，需本人登录上传）。
 > Software Heritage SWHID 见 `CITATION.cff`。
@@ -252,7 +252,7 @@ uibc verify demo.uibc                   # 开放模式：仅完整性检查
 ## 运行测试（外人复现三件套）
 
 ```bash
-python -m unittest discover -s tests -p "test_*.py"   # 全量 514 用例（实测 `Ran 514 tests in ~60s, OK (skipped=16)`，Linux / Python 3.12.11；6 项跳过是未安装 opentimestamps 时的旁证检查，不是失败；stress 7 场景单跑，见下条）
+python -m unittest discover -s tests -p "test_*.py"   # 全量 516 用例（实测 `Ran 516 tests in ~60s, OK (skipped=16)`，Linux / Python 3.12.11；6 项跳过是未安装 opentimestamps 时的旁证检查，不是失败；stress 7 场景单跑，见下条）
 python -m unittest tests.stress_test        # 压力 7 场景
 python independent_verifier/cross_check.py  # 独立第二实现交叉核验（70 项，0 分歧）
 ```

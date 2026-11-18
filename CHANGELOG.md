@@ -61,6 +61,12 @@ carrying the fields they inspect, so 0.4.0 is a major-looking bump under a
 
 ### Added
 
+- **The docs/ pages that describe the present now have to stay true.** `tools/check_doc_facts.py` scanned six top-level files; `docs/CONFORMANCE.md` said 305 tests, `docs/COMPOSITION-VERIFIER.md` said 180, `docs/ECOSYSTEM-MAP.md` and `docs/INTEROP-MATRIX.md` said 0.3.0 with 305 tests, all of them about the current project and all of them wrong. A page joins the check by saying so on its first lines, `<!-- facts: current -->`; the five present-tense pages that do are now scanned along with the six. Pages recording a past run (`REVIEW-LOG.md`, `RUN-RECORD-second-machine-20261118.md`) carry no marker and are left alone, because rewriting a run record's numbers would falsify history rather than correct it.
+- **One checker bug fixed on the way.** `"15 red-team cases"` was matched by the `cases` rule against the *conformance package* count, so a correct sentence looked stale. Red-team cases now have their own key, and the generic `cases` rule is gone rather than guessed at.
+- `tests/test_doc_facts.py` gained two assertions: a marked page that carries a wrong number must be caught, and an unmarked one must not be scanned.
+
+### Added
+
 - **Five positive vectors in the conformance suite**, so it measures correctness instead of pessimism. Twenty-nine packages had to be refused and nothing had to be accepted, which meant a verifier that refused everything scored 29/29 -- full marks for being useless. Now **29 refused + 5 accepted**: the shipped package untouched, the tree-and-chain / extended-evidence / checkpoint shapes appended correctly, and one case where an extra evidence file is added *and declared in the index* so S1 must not fail. Expected verdicts come from this repo's measured run.
 - **The positive cases found a real gap at once.** Archived v0.2.1 refuses all 34, the five correct ones included: it cannot read the newer shapes, so its blanket refusal was hiding a forward-compatibility hole. A property of that older release, made visible by the suite.
 - `tests/test_conformance.py` asserts that a verifier refusing everything fails every positive case. Measured: always-PASS 5/34, always-FAIL naming S1 1/34, current 34/34 (refused 29/34). Test count 513 -> 514; `docs/REPRODUCE.md` regenerated so its conformance row reads `strict 34/34 refused 29/34`.

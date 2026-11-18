@@ -31,6 +31,12 @@ for p in (_REPO, os.path.join(_REPO, "tools")):
 
 # Documents a reader is meant to trust as current. Dated findings under docs/
 # and CHANGELOG entries describe a moment and are not checked.
+# Documents that describe the project as it is NOW. A file under docs/ joins this
+# list only when it says so on its first lines: `<!-- facts: current -->`.
+# Without the marker a docs/ page is a record of a past run, and rewriting its
+# numbers would falsify history instead of correcting it.
+MARKER = "facts: current"
+
 TARGETS = ["README.md", "README.en.md", "QUICKSTART.md", "INSTALL.md", "AGENTS.md",
            # The paper is an academic record: a stale number there is worse than
            # a stale number in a README, because a paper is what gets cited.
@@ -42,7 +48,9 @@ CLAIMS = (
     ("tests", re.compile(r"(\d{2,4})\s+用例"), 1),
     ("checks", re.compile(r"(\d{2,3})\s+checks\b(?!\s*[)]?[^\n]{0,40}independent)"), 1),
     ("attacks", re.compile(r"(\d{2,3})\s+attacks\b"), 1),
-    ("cases", re.compile(r"(\d{2,3})\s+red-team cases\b"), 1),
+    # "red-team cases" is the red-team suite's case count, not the conformance
+    # package count. Conflating them made a correct sentence look wrong.
+    ("redteam", re.compile(r"(\d{2,3})\s+red-team cases\b"), 1),
     ("modules", re.compile(r"(\d{2,3})\s+modules\b"), 1),
 )
 
@@ -64,6 +72,7 @@ def measure():
         facts["redteam_attacks"] = len(getattr(redteam_suite, "CASES", []))
     except Exception:
         facts["redteam_attacks"] = None
+    facts["redteam"] = facts.get("redteam_attacks")
     try:
         man = json.load(open(os.path.join(_REPO, "conformance", "manifest.json"),
                              encoding="utf-8"))
@@ -99,9 +108,27 @@ def scan(paths):
     return findings
 
 
-def check(facts, paths=TARGETS):
+def marked_docs(root="docs"):
+    """docs/*.md that carry the marker and therefore must not go stale."""
+    out = []
+    for name in sorted(os.listdir(root)):
+        if not name.endswith(".md"):
+            continue
+        path = os.path.join(root, name)
+        with open(path, encoding="utf-8") as fh:
+            head = fh.read(600)
+        if MARKER in head:
+            out.append(path)
+    return out
+
+
+def all_targets():
+    return list(TARGETS) + marked_docs()
+
+
+def check(facts, paths=None):
     bad = []
-    for f in scan(paths):
+    for f in scan(paths or all_targets()):
         actual = facts.get(f["kind"])
         if actual is None or f["claimed"] == actual:
             continue

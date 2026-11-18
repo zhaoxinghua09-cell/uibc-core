@@ -50,7 +50,9 @@ from uibc_core.verify import verify  # noqa: E402
 
 
 def _norm(path):
-    return os.path.normcase(os.path.abspath(path)).replace("\\\\", "/")
+    # Windows: abspath yields single backslashes, so the separator must be
+    # normalised one-for-one. ("\\\\" is a two-character string and never matches.)
+    return os.path.normcase(os.path.abspath(path)).replace("\\", "/")
 
 
 def trust_root():

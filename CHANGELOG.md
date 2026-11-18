@@ -15,6 +15,22 @@ Nothing here is a ratified standard.
 
 ## [Unreleased]
 
+### 0.4.0 dry run: the package now checks itself (2026-11-19)
+
+- **The sdist could not run its own tests.** First build collected 290 of 526
+  tests and produced 6 failures + 97 errors, all of them missing fixtures and
+  tools. Fixed in three measured passes (290 -> 475 -> 482 -> 526) by grafting
+  every top-level directory instead of guessing which ones tests read.
+- **`MANIFEST.in`** now carries everything the suite reads, with the
+  measurements and the reasoning written into the file.
+- **Wheel verified:** `pip install` of the built 0.4.0 wheel reports 0.4.0 and
+  the same eight checks as `main` on the clean package, including S11 and S12
+  that 0.3.3 lacked.
+- **CI guard:** a new `sdist-self-check` job builds an sdist and runs the suite
+  from the unpacked archive, so a directory missing from `MANIFEST.in` fails on
+  the pull request rather than in a stranger's hands.
+- **`docs/RELEASE-DRY-RUN.md`** records the whole run with commands and timings.
+
 ### A stranger's ten minutes, measured (2026-11-19)
 
 - **`docs/STRANGER-TRIAL.md`** records a first run in a directory that had never

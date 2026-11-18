@@ -55,9 +55,14 @@ def collect():
     dg = _run_json("compare_diagnostics.py")
     # Names, not case objects: the sums below match on `attack`, and a list of
     # dicts would match nothing while still printing a plausible length.
+    theirs_cases = dg["theirs"]["cases"]
+    # Where the competitor cannot represent the attack at all, it does not count
+    # as a comparison. On a machine without their package installed there is
+    # nothing to compare against, and that has to read as "not measured" rather
+    # than as a zero.
     common = [c["attack"] for c in dg["ours"]["cases"]
               if any(t["attack"] == c["attack"] and t["verdict"] != "n/a"
-                     for t in dg["theirs"]["cases"])]
+                     for t in theirs_cases)]
     ours_reasons = sum(c["n_reasons"] for c in dg["ours"]["cases"]
                        if c["attack"] in common)
     theirs_reasons = sum(c["n_reasons"] for c in dg["theirs"]["cases"]
@@ -66,6 +71,7 @@ def collect():
     bc = basis.counts()
     return {"channels": channels, "basis": bc,
             "common": len(common), "ours": ours_reasons, "theirs": theirs_reasons,
+            "compared": bool(common),
             "facts": facts(), "n_checks": len(basis.BASIS)}
 
 
@@ -129,7 +135,9 @@ def render(d):
 
     # panel 3: reasons under equal attacks (left half only)
     py2 = 330
-    out.append(_label(40, py2, "同样 %d 类攻击，各报出几条具体原因" % d["common"], 16, INK, "bold"))
+    out.append(_label(40, py2, ("同样 %d 类攻击，各报出几条具体原因" % d["common"])
+                      if d.get("compared", True) else "同等攻击对比：本机未安装竞品包，此项未测",
+                      16, INK, "bold"))
     vmax2 = max(d["ours"], d["theirs"]) or 1
     out.append(_label(40, py2 + 34, "uibc-core", 13, MUTED))
     out.append(_bar(250, py2 + 20, 280, 24, d["ours"], vmax2, OURS))

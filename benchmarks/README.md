@@ -116,6 +116,26 @@ every package, and the runner then reports `0/21`, a perfect score that is pure 
 The run still prints `base accepted=False` and exits 3, so a mis-invocation is flagged instead
 of ranked first. Read `base_accepted` before reading any percentage.
 
+## What each anchor buys, and what it does not
+
+`attack_anchor_matrix.py` reads the submission records and renders two views of the same 21 verdicts
+([`anchors.md`](anchors.md), [`anchors.html`](anchors.html)). Measured on `uibc-core@0.4.0`:
+
+| anchor given to the verifier | cases still accepted | which |
+|---|---|---|
+| none (open) | 2 | keyswap, whole-package rollback |
+| signer key pinned | 1 | whole-package rollback |
+| key + expected head pinned | 0 | — |
+
+Read as capability rather than score: 19 of 21 mutations are self-contained integrity failures that need
+no anchor at all. A **trust anchor** buys exactly one case, because a re-signed package no longer matches the
+pinned key. A **freshness anchor** buys exactly one case, because a validly signed package from an earlier
+point in time is still validly signed; only an expected-head comparison rejects it.
+
+So: key pinning does not buy freshness, and freshness does not buy authenticity. If a deployment pins a key
+and stops there, rollback remains available to anyone who kept the old package — that is the single most
+useful sentence in this directory, and it costs 21 rows of measurement to say it with evidence.
+
 ## Measure a verifier you did not write
 
 `run_external.py` feeds the same mutant bytes to any command, so a competitor or a downstream

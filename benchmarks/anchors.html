@@ -1,0 +1,49 @@
+<!doctype html><meta charset="utf-8">
+<title>Anchor dependency of the mutation suite</title>
+<style>
+body{font:14px/1.5 -apple-system,Segoe UI,sans-serif;margin:40px;color:#111}
+h1{font-size:20px;font-weight:600;margin:0 0 4px}
+.sub{color:#666;margin-bottom:20px}
+table{border-collapse:collapse;width:100%;max-width:860px}
+th,td{padding:6px 10px;border-bottom:1px solid #eee;text-align:center}
+th{background:#f7f7f7;font-weight:600;font-size:13px}
+.m{text-align:left} .n{color:#999;width:34px}
+.acc{background:#fdecec;color:#b3261e;font-weight:600}
+.rej{color:#2e7d32}
+.note{max-width:860px;margin-top:22px;font-size:13px;color:#333}
+.note b{font-weight:600}
+</style>
+<h1>Anchor dependency of the mutation suite</h1>
+<div class=sub>commit 21f3abd · 21 mutations × 3 anchor modes · cells read from submissions/uibc-core@0.4.0.json</div>
+<table><thead><tr><th>#</th><th class=m>mutation</th><th>open<br><span style="font-weight:400;color:#777">no anchor</span></th>
+<th>pinned<br><span style="font-weight:400;color:#777">trust anchor</span></th>
+<th>head-pinned<br><span style="font-weight:400;color:#777">trust + freshness</span></th></tr></thead>
+<tbody><tr><td class=n>1</td><td class=m>M01 manifest.agent_id</td><td class="rej">R</td><td class="rej">R</td><td class="rej">R</td></tr>
+<tr><td class=n>2</td><td class=m>M02 manifest.evidence_root</td><td class="rej">R</td><td class="rej">R</td><td class="rej">R</td></tr>
+<tr><td class=n>3</td><td class=m>M03 manifest.agent_version</td><td class="rej">R</td><td class="rej">R</td><td class="rej">R</td></tr>
+<tr><td class=n>4</td><td class=m>M04 manifest.status</td><td class="rej">R</td><td class="rej">R</td><td class="rej">R</td></tr>
+<tr><td class=n>5</td><td class=m>M05 manifest 增字段</td><td class="rej">R</td><td class="rej">R</td><td class="rej">R</td></tr>
+<tr><td class=n>6</td><td class=m>M06 identity.owner</td><td class="rej">R</td><td class="rej">R</td><td class="rej">R</td></tr>
+<tr><td class=n>7</td><td class=m>M07 identity.agent_type</td><td class="rej">R</td><td class="rej">R</td><td class="rej">R</td></tr>
+<tr><td class=n>8</td><td class=m>M08 lifecycle 时间戳</td><td class="rej">R</td><td class="rej">R</td><td class="rej">R</td></tr>
+<tr><td class=n>9</td><td class=m>M09 lifecycle actor</td><td class="rej">R</td><td class="rej">R</td><td class="rej">R</td></tr>
+<tr><td class=n>10</td><td class=m>M10 lifecycle 删首事件</td><td class="rej">R</td><td class="rej">R</td><td class="rej">R</td></tr>
+<tr><td class=n>11</td><td class=m>M11 lifecycle 插入事件</td><td class="rej">R</td><td class="rej">R</td><td class="rej">R</td></tr>
+<tr><td class=n>12</td><td class=m>M12 证据内容改 1 字节</td><td class="rej">R</td><td class="rej">R</td><td class="rej">R</td></tr>
+<tr><td class=n>13</td><td class=m>M13 证据扩表</td><td class="rej">R</td><td class="rej">R</td><td class="rej">R</td></tr>
+<tr><td class=n>14</td><td class=m>M14 证据删条</td><td class="rej">R</td><td class="rej">R</td><td class="rej">R</td></tr>
+<tr><td class=n>15</td><td class=m>M15 证据删文件</td><td class="rej">R</td><td class="rej">R</td><td class="rej">R</td></tr>
+<tr><td class=n>16</td><td class=m>M16 封签改 1 字节</td><td class="rej">R</td><td class="rej">R</td><td class="rej">R</td></tr>
+<tr><td class=n>17</td><td class=m>M17 换钥重签（keyswap）</td><td class="acc">A</td><td class="rej">R</td><td class="rej">R</td></tr>
+<tr><td class=n>18</td><td class=m>M18 包内外挂文件</td><td class="rej">R</td><td class="rej">R</td><td class="rej">R</td></tr>
+<tr><td class=n>19</td><td class=m>M19 索引元数据</td><td class="rej">R</td><td class="rej">R</td><td class="rej">R</td></tr>
+<tr><td class=n>20</td><td class=m>M20 整包回滚（装在旧包）</td><td class="acc">A</td><td class="acc">A</td><td class="rej">R</td></tr>
+<tr><td class=n>21</td><td class=m>M21 未封签包截断尾部</td><td class="rej">R</td><td class="rej">R</td><td class="rej">R</td></tr></tbody></table>
+<div class=note>
+<p><b>A</b> = accepted (the attack succeeded), <b>R</b> = rejected.</p>
+<p><b>19 of 21</b> cases need no anchor: they are self-contained integrity failures.<br>
+<b>Trust anchor buys 1</b> — M17 换钥重签（keyswap）.<br>
+<b>Freshness anchor buys 1</b> — M20 整包回滚（装在旧包）.</p>
+<p>An anchor buys exactly the attack class it names, one case each, and nothing else. Key pinning does not buy
+freshness; freshness does not buy authenticity.</p>
+</div>

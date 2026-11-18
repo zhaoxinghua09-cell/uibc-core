@@ -29,6 +29,41 @@ jobs:
       - name: Run test suite
         run: python -m pytest tests -q
 
+  # Measured 2026-11-19: the first 0.4.0 sdist carried tests/ but not the
+  # data they read. Unpacked, it collected 290 of 526 tests with 6 failures and
+  # 97 errors, every one of them "no such file". "526 tests green" was true of
+  # a git clone and false of the package an installer receives. This job makes
+  # a missing directory in MANIFEST.in fail the pull request instead.
+  sdist-self-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: "3.13"
+
+      - name: Build an sdist
+        run: python -m pip install --upgrade pip build && python -m build --sdist
+
+      - name: Run the suite from the unpacked archive
+        run: |
+          mkdir -p /tmp/sd
+          tar xzf dist/uibc_core-*.tar.gz -C /tmp/sd
+          cd /tmp/sd/uibc_core-*
+          pip install pytest ".[verify]"
+          python -m pytest tests -q
+
+      - name: Assert the archive carried the whole suite
+        # A suite that silently collected fewer tests would still be green.
+        run: |
+          cd /tmp/sd/uibc_core-*
+          python -m pytest tests --collect-only -q > /tmp/collected.txt 2>&1 || true
+          n=$(grep -c "::" /tmp/collected.txt || true)
+          echo "collected: $n"
+          test "$n" -ge 500
+
   second-implementation:
     runs-on: ubuntu-latest
     steps:

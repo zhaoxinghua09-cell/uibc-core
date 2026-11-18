@@ -12,19 +12,19 @@
 
 ## 2. 五个对象
 
-| 对象 | 性质 | 规范 | 语料 | 独立 runner | 双实现 | 独立第三方 | 一条命令自证 |
-|---|---|---|---|---|---|---|---|
-| **uibc-core**（我们） | 本项目 | 自有 `docs/` | fixtures + 143 向量复现 | 我们两个独立实现 | 与发布方双向验收 | **0** | 有 |
-| **AER-1 / zambo** | 第三方规范，我们对标对象 | IETF draft-26，正文 139,318 B / 3,024 行 | 143 向量，公开可下载（index 15,706 B） | `base/conformance.py` 1,595 行 | — | 未知 | 部分 |
-| **Agent Action Capsule (AAC)** | 竞品 | 13 个 IETF drafts（`draft-mih-*`） | 12 例 commitment 向量 + 向量已贡献进 `ietf-wg-scitt/examples` | `reference_verifier.py` | Python + Go | **2**（EMILIA Protocol、GlyphZero） | 部分 |
-| **ARC**（arc-protocol 1.1.4） | 竞品 | GitHub 自述 | **包内无**（`grep -ril 'test.?vector\|conformance'` 为空） | 无独立套件 | — | — | 否 |
-| **AgentRust** | 竞品 | 站点称 spec pre-1.0、SDK 0.30.0 | 站点称 "97 portable conformance vectors"，**本体未取得**（`/conformance`、`/vectors` 均 404/503） | 未取得 | — | — | 未取得 |
+| 对象 | 性质 | 规范 | 语料 | 独立 runner | 双实现 | 独立第三方 | 外部锚定 | 一条命令自证 |
+|---|---|---|---|---|---|---|---|---|
+| **uibc-core**（我们） | 本项目 | 自有 `docs/` | fixtures + 143 向量复现 | 我们两个独立实现 | 与发布方双向验收 | **0** | OTS 客户端已实现（零依赖），**真实提交 0 次** | 有 |
+| **AER-1 / zambo** | 第三方规范，我们对标对象 | IETF draft-26，正文 139,318 B / 3,024 行 | 143 向量，公开可下载（index 15,706 B） | `base/conformance.py` 1,595 行 | — | 未知 | 官方 SDK：Nostr 多 relay + OTS（源码级） | 部分 |
+| **Agent Action Capsule (AAC)** | 竞品 | 13 个 IETF drafts（`draft-mih-*`） | 12 例 commitment 向量 + 向量已贡献进 `ietf-wg-scitt/examples` | `reference_verifier.py` | Python + Go | **2**（EMILIA Protocol、GlyphZero） | 自家 SCITT TS + digest 端点（GET 405 存活） | 部分 |
+| **ARC**（arc-protocol 1.1.4） | 竞品 | GitHub 自述 | **包内无**（`grep -ril 'test.?vector\|conformance'` 为空） | 无独立套件 | — | — | 未取得 | 否 |
+| **AgentRust** | 竞品 | 站点称 spec pre-1.0、SDK 0.30.0 | 站点称 "97 portable conformance vectors"，**本体未取得**（`/conformance`、`/vectors` 均 404/503） | 未取得 | — | — | 未取得 | 未取得 |
 
 ## 3. 体量实测
 
 | 仓库 | 文件 | 测试文件 | 备注 |
 |---|---|---|---|
-| uibc-core | 504 | 41（350 个测试用例） | Python 23,322 行 |
+| uibc-core | 510 | 42（365 个测试用例） | Python 23,322 行（不含新增适配器与锚定工具） |
 | agent-action-capsule | 1,977 | 386 | 含 `INTEROP.md`、`IMPLEMENTATIONS.md` |
 | capsule-emit | 1,078 | 629 | 382 个 JSON，含 `commitment-conformance-vectors` |
 | ietf-wg-scitt/examples | 39 | — | `test-vectors/`、`receipts/` |
@@ -43,6 +43,8 @@
 - 更窄：**独立第三方节点 0**，而 AAC 的 `INTEROP.md` 已登记两家（EMILIA Protocol 三家独立计算、GlyphZero 双向 `ran & verified`）。规范侧 AAC 有 13 个 IETF drafts，我们只有自有 docs。生态侧 AAC 有 14 个框架适配器。
 
 差距最大的一格是第三方，而且它**不在我们能单方面补上的范围内**——那需要真实的人把邀请包接过去跑。
+
+外部锚定这一格，我们刚从 0 走到"实现可跑、真实提交 0 次"。AAC 与 AER-1 SDK 都有真实锚定记录，这里仍是他们领先，见 `docs/ANCHORING.md`。
 
 ## 6. 下一格怎么补（按性价比）
 

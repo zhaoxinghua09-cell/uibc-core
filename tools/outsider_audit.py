@@ -208,6 +208,133 @@ RED_TEAM = [
     ("tamper the seal", m_tamper_seal, "NOT_PASS", "S6 must not pass a broken seal"),
 ]
 
+# --------------------------------------------------------------------------
+# Stage 2: attacks the S1-S12 package shape cannot carry.
+#
+# The fixture in fixtures/ has no tree and no receipt chain, so S13 (Merkle
+# inclusion) and S17 (linear receipt link) never run on it. That left the
+# honest boundary "red team covers one package shape" in OUTSIDER-AUDIT.md.
+# These cases build a package that *does* carry both -- correct first -- and
+# then attack them. A correct build that still fails would make every attack
+# below meaningless, so the build is verified before it is attacked.
+# --------------------------------------------------------------------------
+
+def build_v11(pkg):
+    """Add a correct Merkle tree and receipt chain. Raises if either is wrong."""
+    from uibc_core import merkle as mk
+    from uibc_core.canonical import hash_obj
+
+    path, raw, entries = _index(pkg)
+    order = sorted(entries, key=lambda e: e.get("path", ""))
+    leaves = []
+    for e in order:
+        fp = os.path.join(pkg, "evidence", e["path"])
+        leaves.append(mk.leaf_hash(_read(fp)))
+    root = mk.root_hash(leaves)
+    proofs = [{"index": i, "path": e["path"],
+               "proof": list(mk.build_proof(leaves, i))}
+              for i, e in enumerate(order)]
+    _dump(os.path.join(pkg, "evidence", "merkle.json"),
+          {"algorithm": "rfc6962-sha256", "size": len(leaves),
+           "root": root.hex(), "proofs": proofs})
+
+    env1 = {"receipt": "r1", "at": "2026-11-18T00:00:00Z"}
+    env2 = {"receipt": "r2", "at": "2026-11-18T00:01:00Z"}
+    _dump(os.path.join(pkg, "evidence", "chain.json"),
+          {"schema": "uibc-core/receipt-chain/0",
+           "receipts": [{"envelope": env1, "previous_receipt_hash": "0" * 64},
+                        {"envelope": env2, "previous_receipt_hash": hash_obj(env1)}]})
+
+    checks = {c["id"]: c for c in verify(pkg)["checks"]}
+    for cid in ("S13", "S17"):
+        if cid not in checks or checks[cid]["result"] != "PASS":
+            raise AssertionError("a correct %s does not pass; attacks below "
+                                 "would prove nothing" % cid)
+
+
+def _needs_v11(fn):
+    def wrapper(pkg):
+        build_v11(pkg)
+        fn(pkg)
+    wrapper.__name__ = fn.__name__
+    return wrapper
+
+
+@_needs_v11
+def m13_merkle_root(pkg):
+    _dump(os.path.join(pkg, "evidence", "merkle.json"),
+          dict(_json(os.path.join(pkg, "evidence", "merkle.json")),
+               root="0" * 64))
+
+
+@_needs_v11
+def m13_merkle_size(pkg):
+    doc = _json(os.path.join(pkg, "evidence", "merkle.json"))
+    doc["size"] = doc["size"] + 1
+    _dump(os.path.join(pkg, "evidence", "merkle.json"), doc)
+
+
+@_needs_v11
+def m13_merkle_proof(pkg):
+    """One sibling hash changed: the root still matches the leaves, only the
+    proof is wrong -- the case a "root matches" shortcut would wave through."""
+    doc = _json(os.path.join(pkg, "evidence", "merkle.json"))
+    assert doc["proofs"] and doc["proofs"][0]["proof"], "no proof to break"
+    doc["proofs"][0]["proof"][0] = "0" * 64
+    _dump(os.path.join(pkg, "evidence", "merkle.json"), doc)
+
+
+@_needs_v11
+def m13_merkle_index(pkg):
+    doc = _json(os.path.join(pkg, "evidence", "merkle.json"))
+    doc["proofs"][0]["index"] = 1 - (doc["proofs"][0]["index"] or 0)
+    _dump(os.path.join(pkg, "evidence", "merkle.json"), doc)
+
+
+@_needs_v11
+def m17_receipt_body(pkg):
+    """Change the FIRST receipt's body, leaving the second's link alone.
+
+    Only the first receipt can carry this attack: its successor recomputes a
+    digest over it, so the edit breaks the link. Editing the LAST receipt
+    breaks nothing that exists -- see X17_TAIL_BODY below, which is recorded
+    as a known gap rather than counted as a catch."""
+    doc = _json(os.path.join(pkg, "evidence", "chain.json"))
+    doc["receipts"][0]["envelope"]["at"] = "2026-11-18T00:02:00Z"
+    _dump(os.path.join(pkg, "evidence", "chain.json"), doc)
+
+
+@_needs_v11
+def x17_tail_receipt_body(pkg):
+    """The last receipt has no successor, so no digest covers it."""
+    doc = _json(os.path.join(pkg, "evidence", "chain.json"))
+    doc["receipts"][-1]["envelope"]["at"] = "2026-11-18T00:02:00Z"
+    _dump(os.path.join(pkg, "evidence", "chain.json"), doc)
+
+
+@_needs_v11
+def m17_genesis(pkg):
+    doc = _json(os.path.join(pkg, "evidence", "chain.json"))
+    doc["receipts"][0]["previous_receipt_hash"] = "1" * 64
+    _dump(os.path.join(pkg, "evidence", "chain.json"), doc)
+
+
+# Attacks we ran and the package does NOT catch. Recorded so they cannot be
+# mistaken for coverage: each is a real limitation, not a pass.
+V11_KNOWN_GAPS = [
+    ("edit the last receipt's body", x17_tail_receipt_body,
+     "no successor commits it; only an external anchor over the chain head can"),
+]
+
+V11_RED_TEAM = [
+    ("replace merkle root", m13_merkle_root, "FAIL", "S13 recomputes the root"),
+    ("inflate merkle size", m13_merkle_size, "FAIL", "declared size vs leaves"),
+    ("corrupt one inclusion proof", m13_merkle_proof, "FAIL", "proof must verify"),
+    ("swap a proof index", m13_merkle_index, "FAIL", "index is recomputed"),
+    ("edit a receipt body", m17_receipt_body, "FAIL", "S17 recomputes the link"),
+    ("claim a genesis predecessor", m17_genesis, "FAIL", "genesis is 64 zeros"),
+]
+
 CONTROLS = [
     ("reorder index entries", c_reorder_index, "SAME", "root commits sorted hashes"),
     ("copy untouched", c_noop, "SAME", "the harness must not perturb"),
@@ -351,18 +478,45 @@ def _run(argv):
     return p.returncode
 
 
+def run_red_team_v11(package, baseline_verdict):
+    rows = [_one(package, name, fn, expectation, why, baseline_verdict)
+            for name, fn, expectation, why in V11_RED_TEAM]
+    gaps = []
+    for name, fn, why in V11_KNOWN_GAPS:
+        r = _one(package, name, fn, "NOT_PASS", why, baseline_verdict)
+        # "caught" means the verdict got worse (FAIL). INCONCLUSIVE equal to
+        # the baseline means the edit went unnoticed -- which is the point of
+        # listing it here.
+        gaps.append({"name": name, "why": why, "got": r["got"],
+                     "caught": r["got"] == "FAIL"})
+    ok = all(r["ok"] for r in rows)
+    return {
+        "stage": "red-team-v11",
+        "rows": rows,
+        "ok": ok,
+        "failed": [r["name"] for r in rows if not r["ok"]],
+        "count": len(rows),
+        "known_gaps": gaps,
+        "note": "package carries a correct tree and chain first; each case "
+                "breaks one of them. Known gaps are listed, not counted as "
+                "catches.",
+    }
+
+
 def run_all(package, kit):
     baseline = run_baseline(package)
     red = run_red_team(package, baseline["got"])
+    red11 = run_red_team_v11(package, baseline["got"])
     interop = run_interop(kit)
     # A skip of a stage that requires a corpus is not a pass, but it is not a
     # failure of our code either: it is reported as SKIPPED and the exit code
     # stays 0 only if the caller did not ask for that stage.
-    overall_ok = baseline["ok"] and red["ok"]
+    overall_ok = baseline["ok"] and red["ok"] and red11["ok"]
     return {
         "package": package,
         "stage_baseline": baseline,
         "stage_redteam": red,
+        "stage_redteam_v11": red11,
         "stage_interop": interop,
         "ok": overall_ok,
         "note": "interop SKIPPED is not counted as a pass",
@@ -384,6 +538,19 @@ def _print_human(result):
                  "ok" if r["ok"] else "FAILED: " + r["expectation_note"]))
         if r["failed_checks"]:
             print("       caught by: %s" % ", ".join(r["failed_checks"]))
+    print()
+    v11 = result.get("stage_redteam_v11")
+    if v11:
+        print("red team v11: %d cases (%s)" % (v11["count"], v11["note"]))
+        for r in v11["rows"]:
+            print("  %-4s %-40s %-9s -> %-12s %s"
+                  % ("atk", r["name"], r["expectation"], r["got"],
+                     "ok" if r["ok"] else "FAILED: " + r["expectation_note"]))
+            if r["failed_checks"]:
+                print("       caught by: %s" % ", ".join(r["failed_checks"]))
+        for g in v11.get("known_gaps") or []:
+            print("  gap  %-40s -> %-12s %s" % (g["name"], g["got"],
+                  "CAUGHT (update the note)" if g["caught"] else "not caught: " + g["why"]))
     print()
     it = result["stage_interop"]
     if it["status"] == "SKIPPED":

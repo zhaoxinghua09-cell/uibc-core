@@ -77,6 +77,31 @@ class TestOutsiderAudit(unittest.TestCase):
                                      "reordering must not be a forgery: the root "
                                      "commits sorted hashes, not file order")
 
+    def test_the_tree_and_the_chain_are_attacked_too(self):
+        """The old red team only attacked a package with no tree and no chain,
+        so S13 and S17 never ran. Six new cases build both correctly and break
+        one at a time."""
+        v11 = self.result["stage_redteam_v11"]
+        self.assertEqual(v11["count"], 6)
+        self.assertTrue(v11["ok"], "failed: %s" % v11["failed"])
+        caught = set()
+        for r in v11["rows"]:
+            self.assertTrue(r["ok"], "%s -> %s (%s)"
+                            % (r["name"], r["got"], r["expectation_note"]))
+            caught.update(r["failed_checks"])
+        self.assertIn("S13", caught, "the Merkle cases must be caught by S13")
+        self.assertIn("S17", caught, "the chain cases must be caught by S17")
+
+    def test_the_untested_tail_is_declared_not_hidden(self):
+        """Editing the LAST receipt breaks no existing link, so the package
+        cannot catch it. It is listed as a known gap, not as a catch -- and if
+        it ever becomes caught, this test says to update the note."""
+        gaps = self.result["stage_redteam_v11"]["known_gaps"]
+        self.assertEqual(len(gaps), 1)
+        self.assertEqual(gaps[0]["got"], "INCONCLUSIVE")
+        self.assertFalse(gaps[0]["caught"],
+                         "this gap is now caught; update the note and the docs")
+
     def test_skip_is_not_a_pass(self):
         it = self.result["stage_interop"]
         self.assertEqual(it["status"], "SKIPPED")

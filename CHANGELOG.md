@@ -61,6 +61,11 @@ carrying the fields they inspect, so 0.4.0 is a major-looking bump under a
 
 ### Added
 
+- **Conformance suite.** 29 packages, each correct and then broken in exactly one way, with the checks a verifier must report. `tools/run_conformance.py --verify "<cmd>"` runs them against any implementation. Expectations come from the audit's measured run, so the suite cannot drift from the report. Measured: current implementation 29/29; archived v0.2.1 (6 checks) 0/29 while still refusing all 29; a verifier that refuses nothing scores 0. See `conformance/README.md`.
+- **`tests/test_conformance.py`** -- 6 tests, including the archive-vs-manifest digest check and the rubber-stamp check.
+
+### Added
+
 - **`--strict` mode for S1.** `verify(pkg, strict=True)` and `uibc verify <pkg> --strict` fail any file under `evidence/` that the index never declared, while exempting the five structural members the format places there (`merkle.json`, `chain.json`, `anchors.json`, `policies.json`, `policies/*`). The default stays lenient, because a tightening that invalidates every existing package is a version change, not a fix. See `docs/STRICT-MODE.md`.
 - **`tests/test_strict_mode.py`** -- 5 tests covering lenient, strict, exempt, clean, and the real CLI exit code.
 

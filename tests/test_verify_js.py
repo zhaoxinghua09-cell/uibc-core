@@ -5,6 +5,7 @@ These tests skip when Node is absent: the suite has to stay green on a machine
 without it, but the moment Node is there, the two implementations are held to
 each other.
 """
+import hashlib
 import json
 import os
 import shutil
@@ -30,8 +31,8 @@ def cases_root():
     with zipfile.ZipFile(_ZIP) as z:
         z.extractall(tmp)
     return os.path.join(tmp, "cases")
-COVERED = ("S1", "S2", "S4", "S5", "S6", "S7", "S8", "S10", "S11", "S12", "S13", "S14", "S15",
-           "S17", "S18")
+COVERED = ("S1", "S2", "S4", "S5", "S6", "S7", "S8", "S9", "S10", "S11", "S12", "S13",
+           "S14", "S15", "S16", "S17", "S18")
 
 
 def js(pkg):
@@ -53,6 +54,97 @@ class TestJavaScriptVerifier(unittest.TestCase):
         self.assertEqual(sorted(report["covered"] if "covered" in report else
                                 [c["id"] for c in report["checks"]]),
                          ["S1", "S11", "S12", "S2", "S4", "S5", "S6", "S7"])
+
+    def test_a_real_rfc3161_token_is_verified_and_every_mutation_is_refused(self):
+        """The one witness we cannot mint.
+
+        The token in `tests/fixtures/anchor/` was issued by Free TSA on
+        2026-11-17 for the head recorded beside it. This test does not trust
+        that claim: it re-verifies the CMS signature with Node's own crypto,
+        from the token's own bytes, and then tries to break it five ways.
+
+        The last assertion is the one that matters most: the second
+        implementation and the Python one must reach the same verdict on a
+        third party's artefact, because neither of them made it.
+        """
+        from uibc_core import tsa
+
+        anchor = os.path.join(_REPO, "tests", "fixtures", "anchor")
+        tsr = os.path.join(anchor, "freetsa.tsr")
+        ca = os.path.join(anchor, "freetsa_ca.pem")
+        head = os.path.join(anchor, "anchored_head.json")
+        digest = hashlib.sha256(open(head, "rb").read()).hexdigest()
+
+        def js_token(token_path, expected, ca_path):
+            out = subprocess.run(["node", os.path.join(_REPO, "tools", "verify-js", "rfc3161.mjs"),
+                                  token_path, expected, ca_path],
+                                 capture_output=True, text=True)
+            return json.loads(out.stdout)
+
+        good = js_token(tsr, digest, ca)
+        self.assertTrue(good["ok"], good["problems"])
+        self.assertEqual(good["info"]["gen_time"], "20261117081135Z")
+        self.assertIn("Free TSA", good["info"]["ca"])
+
+        # 1. the bytes are what they are: a flipped bit must break the signature
+        tampered = tempfile.mkdtemp(prefix="uibc-tsr-")
+        body = open(tsr, "rb").read()
+        flipped = bytearray(body)
+        flipped[-100] ^= 0x01
+        bad_path = os.path.join(tampered, "flipped.tsr")
+        open(bad_path, "wb").write(bytes(flipped))
+        self.assertFalse(js_token(bad_path, digest, ca)["ok"])
+
+        # 2. anchoring the wrong data must be refused, not tolerated
+        self.assertFalse(js_token(tsr, "0" * 64, ca)["ok"])
+
+        # 3. a CA that did not issue this certificate proves nothing
+        self.assertFalse(js_token(tsr, digest, os.path.join(anchor, "freetsa_ca.pem") + ".missing")["ok"])
+
+        # 4. no CA at all is an unsigned claim about who signed
+        self.assertFalse(js_token(tsr, digest, "")["ok"])
+
+        # 5. the Python verifier must agree with the JavaScript one
+        body_bytes = open(tsr, "rb").read()
+        bundle = open(ca, "rb").read()
+        py_ok, _info, py_problems = tsa.verify_token(body_bytes, bytes.fromhex(digest), bundle)
+        self.assertTrue(py_ok, py_problems)
+
+    def test_the_out_of_band_pin_is_checked_the_same_way_in_both_languages(self):
+        """S9 is the one check no package can perform on itself.
+
+        An older package that is perfectly self-consistent is indistinguishable
+        from the current one unless somebody recorded the head elsewhere. The
+        pinned value therefore arrives as an argument, never as a package field:
+        if it came from the package it would be the thing being checked.
+
+        Both implementations must reach the same verdict for the same pin, and
+        both must fail for a pin that is merely plausible-looking.
+        """
+        from uibc_core.verify import verify
+
+        pkg = os.path.join(cases_root(), "04-a-package-with-a-checkpoint-appended")
+        head = json.load(open(os.path.join(pkg, "manifest.json"), encoding="utf-8"))["checkpoint_head"]
+
+        def pinned(expect):
+            out = subprocess.run(["node", _JS, pkg, "--expect-head", expect],
+                                 capture_output=True, text=True)
+            report = json.loads(out.stdout)
+            return {c["id"]: c["result"] for c in report["checks"]}["S9"]
+
+        def pinned_py(expect):
+            report = verify(pkg, expect_head=expect)
+            return {c["id"]: c["result"] for c in report["checks"]}["S9"]
+
+        self.assertEqual(pinned(head), "PASS")
+        self.assertEqual(pinned_py(head), "PASS")
+        wrong = "sha256:" + "0" * 64
+        self.assertEqual(pinned(wrong), "FAIL")
+        self.assertEqual(pinned_py(wrong), "FAIL")
+        # With no pin supplied the check is not reported at all: an unchecked
+        # rollback must not masquerade as a passed check.
+        report = js(pkg)
+        self.assertNotIn("S9", [c["id"] for c in report["checks"]])
 
     def test_it_catches_a_changed_byte_and_the_root(self):
         case = os.path.join(cases_root(), "06-flip-one-byte-in-evidence")

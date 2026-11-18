@@ -10,23 +10,26 @@ an inconvenience.
 
 ## What it decides
 
-Fifteen of the nineteen checks: S1 structure, S2 identity, S4 evidence integrity,
+Seventeen of the nineteen checks: S1 structure, S2 identity, S4 evidence integrity,
 S5 evidence root, S6 the seal (for Ed25519, where the public key is in the
 package; an HMAC seal is INCONCLUSIVE because it needs the owner's key), S7
-index metadata (shape **and** the digest carried in the manifest), S10 the
-closure declaration, S11 strict serialization, S12 timestamps and counts, S8 the package checkpoint, S13 Merkle inclusion proofs (RFC 6962, recomputed
-from the files), S14 strict base64, S15 anchor resolution, S17 the receipt chain and S18 policy
-artefacts.
+index metadata (shape **and** the digest carried in the manifest), S8 the
+package checkpoint, **S9 the out-of-band pin** (supplied as `--expect-head`, never
+read from the package), S10 the closure declaration, S11 strict serialization,
+S12 timestamps and counts, S13 Merkle inclusion proofs (RFC 6962, recomputed
+from the files), S14 strict base64, S15 anchor resolution, **S16 external
+timestamps** (RFC 3161, verified with Node's own crypto - no npm package, no
+shared code), S17 the receipt chain and S18 policy artefacts.
 
-**Not** S9 and S16, and for a single reason: both need something this checker
-does not hold. S9 needs an observation made outside the package; S16 needs an
-RFC 3161 token signed by a key we do not have. It therefore **never returns PASS**: a
-sound package is INCONCLUSIVE, because nothing was found wrong and nothing was
-proven either.
+S3 has no checker of its own here: its semantics are exercised through S12's
+cases, and a package that fails S3 fails those too.
+
+It therefore **never returns PASS** for a sound unsigned package: INCONCLUSIVE,
+because nothing was found wrong and nothing was proven either.
 
 ### This is now enforced, not asserted
 
-Until `tools/assert_second_impl.py` existed, "fifteen of nineteen" was a
+Until `tools/assert_second_impl.py` existed, "seventeen of nineteen" was a
 sentence in a document. Nothing stopped it from becoming false the moment
 somebody edited `uibc_core/verify.py` without touching
 `tools/verify-js/verify.mjs`. The CI job `second-implementation` now runs that

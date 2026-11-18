@@ -19,6 +19,7 @@
 // Usage:  node tools/verify-js/verify.mjs <package-dir>
 
 import { createHash, createPublicKey, verify as cryptoVerify } from "node:crypto";
+import { verifyToken as verifyRfc3161 } from "./rfc3161.mjs";
 import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
 import { join, normalize, sep } from "node:path";
 
@@ -160,8 +161,11 @@ const STRUCTURAL = new Set(["evidence/index.json", "evidence/merkle.json",
                             "evidence/policies.json"]);
 
 // --- checks ---------------------------------------------------------------
-function verify(pkg) {
+function verify(pkg, opts = {}) {
+  const expectHead = opts.expectHead ?? null;
+  const strict = opts.strict === true;
   const checks = [];
+  const warnings = [];
   const note = (id, name, ok, detail) =>
     checks.push({ id, name, result: ok ? "PASS" : "FAIL", detail });
 
@@ -183,6 +187,24 @@ function verify(pkg) {
       const index = readJson(join(pkg, "evidence/index.json"));
       declared = new Set((index.entries || []).map((e) => "evidence/" + String(e.path)));
     } catch { /* S4 reports the index */ }
+    // Undeclared files split into three cases, and only one of them fails:
+    //
+    //   * a stray file at the package ROOT can contradict the evidence beside
+    //     it, so it fails;
+    //   * a file under evidence/ that the index never promised is a NOTE by
+    //     default and a failure under --strict -- this format itself places
+    //     structural members there (the anchor set, the receipt chain, the
+    //     policy artefacts), and each is resolved by the check that owns it;
+    //   * anything else outside evidence/ is auxiliary and stays a note.
+    //
+    // A previous version of this file failed every undeclared file under
+    // evidence/, which made it stricter than the Python verifier's default. A
+    // second implementation that is silently stricter is worse than one that
+    // is lax: it refuses valid packages, and the difference only shows up on
+    // packages nobody put in the suite.
+    const rootExtras = [];
+    const evidenceExtras = [];
+    const auxExtras = [];
     for (const rel of listFiles(pkg)) {
       if (rel === "manifest.json" || rel === "identity.json" || rel === "lifecycle.json") continue;
       if (rel.startsWith("signatures/")) continue;
@@ -190,8 +212,21 @@ function verify(pkg) {
       // Lock and backup files are how a writer protects a package, not
       // evidence. Anything hidden is machinery.
       if (rel.split("/").pop().startsWith(".")) continue;
-      if (!declared.has(rel)) problems.push("undeclared file: " + rel);
+      if (declared.has(rel)) continue;
+      if (rel.includes("/")) {
+        if (rel.startsWith("evidence/")) evidenceExtras.push(rel);
+        else auxExtras.push(rel);
+      } else {
+        rootExtras.push(rel);
+      }
     }
+    if (rootExtras.length) problems.push("undeclared files at package root: " + rootExtras.join(", "));
+    if (evidenceExtras.length) {
+      if (opts.strict) problems.push("uncommitted files under evidence/: " + evidenceExtras.join(", "));
+      else warnings.push("note (lenient mode): " + evidenceExtras.join(", ") +
+                         " under evidence/ are structural or uncommitted; pass --strict to fail uncommitted ones");
+    }
+    if (auxExtras.length) warnings.push("note: " + auxExtras.join(", ") + " outside evidence/, not covered by the evidence root");
     note("S1", "package structure", problems.length === 0, problems.slice(0, 4).join("; ") || "ok");
   }
 
@@ -572,6 +607,26 @@ function verify(pkg) {
       note("S8", "package checkpoint head", problems.length === 0,
            problems.length ? problems.slice(0, 2).join("; ")
                            : "checkpoint matches");
+
+      // S9 head pinned out-of-band. This is the one check nothing inside the
+      // package can perform: an older package that is perfectly self-consistent
+      // is indistinguishable from the current one unless somebody recorded the
+      // head elsewhere and compares it here. The value is passed in, never read
+      // from the package, or it would be the thing being checked.
+      if (expectHead !== null && expectHead !== undefined) {
+        if (state === null) {
+          note("S9", "head pinned out-of-band", false,
+               "the package state cannot be recomputed, so the pin cannot be compared");
+        } else if (String(state) !== String(expectHead)) {
+          note("S9", "head pinned out-of-band", false,
+               "package checkpoint does not match the pinned value (" +
+               String(expectHead).slice(0, 20) + "...) - a rollback to an older " +
+               "self-consistent package, or a wrong pin");
+        } else {
+          note("S9", "head pinned out-of-band", true,
+               "checkpoint matches the out-of-band pinned value");
+        }
+      }
     }
   }
 
@@ -674,6 +729,53 @@ function verify(pkg) {
       note("S15", "anchor event resolution", problems.length === 0,
            problems.length ? problems.slice(0, 3).join("; ")
                            : resolved + " anchor(s) resolved against the evidence Merkle root");
+    }
+  }
+
+  // S16 external timestamp (RFC 3161). Everything above is witnessed by parties
+  // we choose: our tree, our head, our pin. An RFC 3161 token is the one witness
+  // we cannot mint - it dates a digest with a key held by somebody else, and the
+  // check is that its signature verifies against a CA we were given. An
+  // unjudgeable token is INCONCLUSIVE, never PASS: a timestamp nobody verified
+  // is not a timestamp.
+  {
+    const extPath = join(pkg, "evidence", "external_anchor.json");
+    if (existsSync(extPath)) {
+      const problems = [];
+      let summary = null;
+      try {
+        const ext = readJson(extPath);
+        const relData = ext.digest_of || "manifest.json";
+        const dataPath = join(pkg, relData);
+        let dataBytes = null;
+        try { dataBytes = readFileSync(dataPath); }
+        catch { problems.push("cannot read anchored file " + JSON.stringify(relData)); }
+        let body = null;
+        try { body = readFileSync(join(pkg, String(ext.tsr || ""))); }
+        catch { problems.push("cannot read token " + JSON.stringify(ext.tsr)); }
+        let caPem = "";
+        try { caPem = readFileSync(join(pkg, String(ext.cabundle || "")), "utf8"); }
+        catch { problems.push("cannot read CA bundle " + JSON.stringify(ext.cabundle)); }
+        if (body && ext.tsr_sha256) {
+          const h = sha256(body);
+          if (h !== ext.tsr_sha256) {
+            problems.push("token digest is not the declared tsr_sha256 (declared " +
+                          String(ext.tsr_sha256).slice(0, 16) + "..., actual " + h.slice(0, 16) + "...)");
+          }
+        }
+        if (!problems.length && body && dataBytes) {
+          const r = verifyRfc3161(body, sha256(dataBytes), caPem);
+          summary = r.info;
+          if (!r.ok) problems.push(...r.problems);
+        }
+      } catch (err) {
+        problems.push("external_anchor.json is not readable: " + err.message);
+      }
+      note("S16", "external timestamp (RFC 3161)", problems.length === 0,
+           problems.length ? problems.slice(0, 3).join("; ")
+                           : "token verified: " + (summary && summary.gen_time ? "stamped " + summary.gen_time + ", " : "") +
+                             "TSA " + (summary && summary.tsa && summary.tsa.subject
+                               ? String(summary.tsa.subject).split(",")[0] : "unknown"));
     }
   }
 
@@ -862,6 +964,7 @@ function verify(pkg) {
     trust_level: failed.length ? "FAIL" : "INCONCLUSIVE",
     failed_checks: failed.length,
     checks,
+    warnings,
     note: "structural verifier: signatures, Merkle proofs, external timestamps and " +
           "the receipt chain are not checked here, so a sound package is " +
           "INCONCLUSIVE rather than PASS",
@@ -869,13 +972,26 @@ function verify(pkg) {
   };
 }
 
-const target = process.argv[2];
+const argv = process.argv.slice(2);
+let target = null;
+let expectHead = null;
+let strict = false;
+for (let i = 0; i < argv.length; i += 1) {
+  if (argv[i] === "--expect-head") {
+    expectHead = argv[i + 1] ?? null;
+    i += 1;
+  } else if (argv[i] === "--strict") {
+    strict = true;
+  } else if (target === null) {
+    target = argv[i];
+  }
+}
 if (!target) {
-  console.error("usage: node tools/verify-js/verify.mjs <package-dir>");
+  console.error("usage: node tools/verify-js/verify.mjs <package-dir> [--strict] [--expect-head <head>]");
   process.exit(2);
 }
 try {
-  process.stdout.write(JSON.stringify(verify(target), null, 2) + "\n");
+  process.stdout.write(JSON.stringify(verify(target, { expectHead, strict }), null, 2) + "\n");
 } catch (err) {
   process.stdout.write(JSON.stringify({
     result: "FAIL", trust_level: "FAIL", failed_checks: 1,

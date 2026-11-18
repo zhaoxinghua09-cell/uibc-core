@@ -638,6 +638,110 @@ S16_RED_TEAM = [
      "an unchained signature is not verified"),
 ]
 
+# --------------------------------------------------------------------------
+# Stage 5: checkpoint and closure (S7, S8, S9, S10).
+#
+# These four were the ones the evidence index found with no attack pointed at
+# them. S7 guards index METADATA (type/note), which a content hash cannot see.
+# S8 guards the whole-state checkpoint, which catches a log shortened while the
+# manifest still describes the longer one. S9 is unpinnable from inside: only an
+# observation made elsewhere can catch a rollback to an older self-consistent
+# package. S10 guards that six closure components were DECLARED -- not that they
+# match what ran, which no package can show.
+# --------------------------------------------------------------------------
+
+_CKPT_HEAD = {"value": None}
+
+def build_ckpt(pkg):
+    """Add the four sealed fields, then refuse to continue unless they pass."""
+    from uibc_core.canonical import (checkpoint_head, evidence_root,
+                                     index_metadata_digest, lifecycle_head)
+    from uibc_core.canonical import hash_file
+    from uibc_core.verify import CLOSURE_FIELDS, verify as _v
+    import hashlib as _h
+
+    manifest = _json(os.path.join(pkg, "manifest.json"))
+    index = _json(os.path.join(pkg, "evidence", "index.json"))
+    entries = index["entries"] if isinstance(index, dict) else index
+    index_obj = index if isinstance(index, dict) else {"entries": entries}
+    lc = _json(os.path.join(pkg, "lifecycle.json"))
+
+    hashes = [_h.sha256(_read(os.path.join(pkg, "evidence", e["path"]))).hexdigest()
+              for e in entries]
+    imd = index_metadata_digest(index_obj)
+    head = checkpoint_head(lifecycle_head(lc["events"]),
+                           evidence_root(hashes), imd, len(entries))
+
+    manifest["evidence_index_digest"] = imd
+    manifest["closure"] = {k: "b" * 64 for k in CLOSURE_FIELDS}
+    manifest["checkpoint_head"] = head
+    _dump(os.path.join(pkg, "manifest.json"), manifest)
+    _CKPT_HEAD["value"] = head
+
+    checks = {c["id"]: c for c in _v(pkg)["checks"]}
+    for cid in ("S7", "S8", "S10"):
+        if checks.get(cid, {}).get("result") != "PASS":
+            raise AssertionError("baseline %s is %r, not PASS"
+                                 % (cid, checks.get(cid)))
+
+
+def _needs_ckpt(fn):
+    def wrapper(pkg):
+        build_ckpt(pkg)
+        fn(pkg)
+    wrapper.__name__ = fn.__name__
+    return wrapper
+
+
+@_needs_ckpt
+def m_ckpt_rewrite_index_note(pkg):
+    """Content is untouched; only the index's own metadata is rewritten."""
+    path = os.path.join(pkg, "evidence", "index.json")
+    index = _json(path)
+    entries = index["entries"] if isinstance(index, dict) else index
+    entries[0]["note"] = "reviewed and approved by nobody"
+    _dump(path, index)
+
+
+@_needs_ckpt
+def m_ckpt_drop_closure_component(pkg):
+    """AAT's point: a component outside the attested set is a forgery channel."""
+    path = os.path.join(pkg, "manifest.json")
+    manifest = _json(path)
+    manifest["closure"].pop("engine_build", None)
+    _dump(path, manifest)
+
+
+@_needs_ckpt
+def m_ckpt_truncate_the_log(pkg):
+    """The last events are simply gone. The shorter chain is still self-valid;
+    only the checkpoint over the whole state notices."""
+    path = os.path.join(pkg, "lifecycle.json")
+    lc = _json(path)
+    lc["events"] = lc["events"][:-1]
+    _dump(path, lc)
+
+
+@_needs_ckpt
+def m_ckpt_repoint_closure_digest(pkg):
+    """Declared, but to a value that is not a SHA-256."""
+    path = os.path.join(pkg, "manifest.json")
+    manifest = _json(path)
+    manifest["closure"]["model_weights"] = "not-a-digest"
+    _dump(path, manifest)
+
+
+CKPT_RED_TEAM = [
+    ("rewrite index metadata, content untouched", m_ckpt_rewrite_index_note, "FAIL",
+     "S7: a content hash cannot see a rewritten note"),
+    ("drop engine_build from the closure", m_ckpt_drop_closure_component, "FAIL",
+     "S10: five of six declared is not declared"),
+    ("truncate the lifecycle log", m_ckpt_truncate_the_log, "FAIL",
+     "S8: the shortened chain is still internally valid"),
+    ("declare a closure digest that is not a digest", m_ckpt_repoint_closure_digest, "FAIL",
+     "S10: a declaration with a malformed value is no declaration"),
+]
+
 CONTROLS = [
     ("reorder index entries", c_reorder_index, "SAME", "root commits sorted hashes"),
     ("copy untouched", c_noop, "SAME", "the harness must not perturb"),
@@ -821,6 +925,99 @@ def run_red_team_ext(package, baseline_verdict):
     }
 
 
+def run_red_team_ckpt(package, baseline_verdict):
+    rows = [_one(package, name, fn, expectation, why, baseline_verdict)
+            for name, fn, expectation, why in CKPT_RED_TEAM]
+    ok = all(r["ok"] for r in rows)
+    return {
+        "stage": "red-team-ckpt",
+        "rows": rows,
+        "ok": ok,
+        "failed": [r["name"] for r in rows if not r["ok"]],
+        "count": len(rows),
+        "note": "S7/S8/S10 cannot be reached by the shipped package (no sealed "
+                "fields); this stage adds them, then attacks them",
+    }
+
+
+def run_pinned(package, baseline_verdict):
+    """S9 is not reachable from inside the package at all.
+
+    Nothing a package contains can tell a fresh copy from a rollback to an older
+    but perfectly self-consistent one: both verify identically. Only a value
+    observed elsewhere can. So this stage does the two things a holder of such
+    a value would do: run with the right pin, then run a rolled-back package
+    against it.
+    """
+    from uibc_core.verify import verify as _v
+    import tempfile
+    rows = []
+
+    # control: the true head must satisfy the pin
+    tmp = tempfile.mkdtemp()
+    try:
+        pkg = _prepare(package, tmp)
+        build_ckpt(pkg)
+        pinned = _CKPT_HEAD["value"]
+        checks = {c["id"]: c for c in _v(pkg, expect_head=pinned)["checks"]}
+        got = checks.get("S9", {}).get("result")
+        rows.append({"name": "the true head against its own pin",
+                     "expectation": "PASS", "got": got,
+                     "failed_checks": ["S9"] if got != "PASS" else [],
+                     "ok": got == "PASS", "expectation_note": "",
+                     "why": "the control: a pin that matches must be satisfied"})
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+    # attack: roll the package back, then check it against the old pin
+    tmp = tempfile.mkdtemp()
+    try:
+        pkg = _prepare(package, tmp)
+        build_ckpt(pkg)
+        pinned = _CKPT_HEAD["value"]
+        # roll back: drop the tail event AND reseal the checkpoint so the
+        # package is again internally consistent -- the exact shape S9 exists
+        # for
+        from uibc_core.canonical import (checkpoint_head, evidence_root,
+                                         index_metadata_digest, lifecycle_head)
+        import hashlib as _h
+        lc_path = os.path.join(pkg, "lifecycle.json")
+        lc = _json(lc_path)
+        lc["events"] = lc["events"][:-1]
+        _dump(lc_path, lc)
+        manifest = _json(os.path.join(pkg, "manifest.json"))
+        index = _json(os.path.join(pkg, "evidence", "index.json"))
+        entries = index["entries"] if isinstance(index, dict) else index
+        index_obj = index if isinstance(index, dict) else {"entries": entries}
+        hashes = [_h.sha256(_read(os.path.join(pkg, "evidence", e["path"]))).hexdigest()
+                  for e in entries]
+        new_head = checkpoint_head(lifecycle_head(lc["events"]),
+                                   evidence_root(hashes),
+                                   index_metadata_digest(index_obj), len(entries))
+        manifest["checkpoint_head"] = new_head
+        _dump(os.path.join(pkg, "manifest.json"), manifest)
+        checks = {c["id"]: c for c in _v(pkg, expect_head=pinned)["checks"]}
+        got = checks.get("S9", {}).get("result")
+        rows.append({"name": "a rolled-back package against the old pin",
+                     "expectation": "FAIL", "got": got,
+                     "failed_checks": ["S9"] if got == "FAIL" else [],
+                     "ok": got == "FAIL", "expectation_note": "",
+                     "why": "S9: the rolled-back copy is self-consistent, so only "
+                            "the outside pin can see it"})
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+    return {
+        "stage": "red-team-pinned",
+        "rows": rows,
+        "ok": all(r["ok"] for r in rows),
+        "failed": [r["name"] for r in rows if not r["ok"]],
+        "count": len(rows),
+        "note": "S9 is unreachable from inside; this stage supplies the outside "
+                "observation and then tries the rollback it exists for",
+    }
+
+
 def run_red_team_s16(package, baseline_verdict):
     rows = [_one(package, name, fn, expectation, why, baseline_verdict)
             for name, fn, expectation, why in S16_RED_TEAM]
@@ -844,12 +1041,14 @@ def run_all(package, kit):
     red11 = run_red_team_v11(package, baseline["got"])
     ext = run_red_team_ext(package, baseline["got"])
     s16 = run_red_team_s16(package, baseline["got"])
+    ckpt = run_red_team_ckpt(package, baseline["got"])
+    pinned = run_pinned(package, baseline["got"])
     interop = run_interop(kit)
     # A skip of a stage that requires a corpus is not a pass, but it is not a
     # failure of our code either: it is reported as SKIPPED and the exit code
     # stays 0 only if the caller did not ask for that stage.
     overall_ok = (baseline["ok"] and red["ok"] and red11["ok"] and ext["ok"]
-                  and s16["ok"])
+                  and s16["ok"] and ckpt["ok"] and pinned["ok"])
     return {
         "package": package,
         "stage_baseline": baseline,
@@ -857,6 +1056,8 @@ def run_all(package, kit):
         "stage_redteam_v11": red11,
         "stage_redteam_ext": ext,
         "stage_redteam_s16": s16,
+        "stage_redteam_ckpt": ckpt,
+        "stage_redteam_pinned": pinned,
         "stage_interop": interop,
         "ok": overall_ok,
         "trust": _TRUST,
@@ -900,6 +1101,19 @@ def _print_human(result):
         for r in ext["rows"]:
             print("  %-4s %-40s %-9s -> %-12s %s"
                   % ("atk", r["name"], r["expectation"], r["got"],
+                     "ok" if r["ok"] else "FAILED: " + r["expectation_note"]))
+            if r["failed_checks"]:
+                print("       caught by: %s" % ", ".join(r["failed_checks"]))
+    print()
+    for key, label in (("stage_redteam_ckpt", "checkpoint & closure"),
+                       ("stage_redteam_pinned", "out-of-band pin")):
+        stage = result.get(key)
+        if not stage:
+            continue
+        print("red team %s: %d cases" % (label, stage["count"]))
+        for r in stage["rows"]:
+            print("  %-4s %-42s %-9s -> %-12s %s"
+                  % ("atk", r["name"][:42], r["expectation"], r["got"],
                      "ok" if r["ok"] else "FAILED: " + r["expectation_note"]))
             if r["failed_checks"]:
                 print("       caught by: %s" % ", ".join(r["failed_checks"]))

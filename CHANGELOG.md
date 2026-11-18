@@ -15,6 +15,28 @@ Nothing here is a ratified standard.
 
 ## [Unreleased]
 
+### Two identifier fields that identified nothing (2026-11-19)
+
+- **`evidence_id` was read by no check** for presence or uniqueness. Two entries
+  could share an id, or one could carry none, and S4 still called the evidence
+  intact - the index is read by position everywhere, so identity was never
+  needed. `S4` now requires a non-empty, unique `evidence_id` per entry, in
+  Python and JavaScript (F-009).
+- **A gap stated is not a gap closed.** `docs/FIELD-COVERAGE.md` had said
+  "duplicates are not checked - stated rather than implied". That was honest
+  about the hole and still left it open; this closes it, and the document says
+  which mutations the new check does and does not catch.
+- **The lesson worth keeping:** a field silent to a *changed* value is not
+  silent to a *repeated* or *absent* one. For identifiers, the interesting
+  mutation breaks identity rather than alters it - which is exactly what a
+  value-swapping probe cannot see.
+- **One rule attempted and withdrawn in the same PR:** `identity.status` was
+  compared against the state the lifecycle reaches, and the clean fixture failed
+  - `REGISTERED` against a chain that ends `ACTIVATED` - because the two fields
+  describe different things. Withdrawn rather than re-tuned until green; the gap
+  stays listed in `docs/FIELD-COVERAGE.md` as a known gap.
+
+
 ### Every field, and who notices when you change it (2026-11-19)
 
 - **`tools/check_field_coverage.py`** asks the F-007 question by measurement:

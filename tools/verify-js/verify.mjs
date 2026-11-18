@@ -505,6 +505,21 @@ function verify(pkg, opts = {}) {
         if (got !== e.content_hash) problems.push("content hash mismatch: " + e.path);
         else hashes.push(got);
       }
+      // evidence_id: present, and not repeated. The index is read by position
+      // everywhere else, so an id costs nothing until somebody cites one.
+      const ids = entries.map((e) => e.evidence_id);
+      for (let i = 0; i < ids.length; i++) {
+        if (!(typeof ids[i] === "string" && ids[i].trim())) {
+          problems.push("entry " + i + " has no evidence_id");
+        }
+      }
+      const seen = new Set();
+      for (const id of ids) {
+        if (typeof id === "string" && id.trim()) {
+          if (seen.has(id)) problems.push("duplicate evidence_id " + JSON.stringify(id));
+          seen.add(id);
+        }
+      }
     } catch (err) { problems.push("unreadable index: " + err.message); }
     s4Failed = problems.length !== 0;
     note("S4", "evidence integrity", problems.length === 0, problems.slice(0, 4).join("; ") || "ok");

@@ -76,6 +76,29 @@ class TestFieldCoverage(unittest.TestCase):
                          "listed as silent but a check now notices: "
                          + ", ".join(sorted(stale)))
 
+    def _with_index_edit(self, fn):
+        tmp = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, tmp, True)
+        pkg = os.path.join(tmp, "pkg")
+        shutil.copytree(BASE, pkg)
+        path = os.path.join(pkg, "evidence/index.json")
+        doc = json.load(open(path, encoding="utf-8"))
+        fn(doc)
+        json.dump(doc, open(path, "w", encoding="utf-8"), ensure_ascii=False)
+        return {c["id"]: c for c in verify(pkg)["checks"]}
+
+    def test_a_repeated_evidence_id_fails_integrity(self):
+        checks = self._with_index_edit(
+            lambda d: d["entries"][1].__setitem__("evidence_id",
+                                                  d["entries"][0]["evidence_id"]))
+        self.assertEqual(checks["S4"]["result"], "FAIL", checks["S4"]["detail"])
+        self.assertIn("duplicate evidence_id", checks["S4"]["detail"])
+
+    def test_an_empty_evidence_id_fails_integrity(self):
+        checks = self._with_index_edit(
+            lambda d: d["entries"][0].__setitem__("evidence_id", ""))
+        self.assertEqual(checks["S4"]["result"], "FAIL", checks["S4"]["detail"])
+
     def test_a_declared_payload_hash_has_a_shape(self):
         tmp = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, tmp, True)

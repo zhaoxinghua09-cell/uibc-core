@@ -59,6 +59,8 @@ carrying the fields they inspect, so 0.4.0 is a major-looking bump under a
 
 ## [Unreleased]
 
+- **`tools/build_thesis_tables.py` -> `docs/THESIS-CH5-TABLES.md`.** The six tables a chapter-5 could cite (checks and their basis, basis distribution, attack incidence summary, the two-implementation comparison, the three-channel coverage, the hot-path latency), each generated from the tools' JSON with a "how to regenerate" line beneath it, and an explicit section listing what the chapter must not claim.
+- **`tests/test_thesis_tables.py`** -- 6 tests tying each table to the tool it reads.
 ### Added
 
 - **`tools/check_matrix.py` -> `docs/CHECK-MATRIX.md` and `docs/CHECK-MATRIX.svg`.** Reads the audit's own JSON and prints which attacks move which checks. Two numbers fall out: 32 of 36 attacks isolate exactly one check, and no check is unreachable. The two attacks that move two checks (an impossible date also trips the lifecycle state machine; rewritten index metadata also moves the checkpoint head) are recorded rather than smoothed over.

@@ -335,6 +335,149 @@ V11_RED_TEAM = [
     ("claim a genesis predecessor", m17_genesis, "FAIL", "genesis is 64 zeros"),
 ]
 
+# --------------------------------------------------------------------------
+# Stage 3: S14 (strict base64), S15 (anchor events), S18 (policy artefacts).
+#
+# Same discipline as stage 2: build each one correctly, refuse to proceed if
+# the build does not pass, then break exactly one thing at a time.
+#
+# S16 (RFC 3161 external timestamp) is deliberately absent. Its whole value is
+# that we cannot mint the token ourselves -- it is signed by a TSA key we do
+# not hold, over a digest of a file we ship. A self-built "correct" token
+# would prove nothing, so there is no honest way to red-team it from inside
+# this repo.
+# --------------------------------------------------------------------------
+
+import base64 as _b64
+
+def build_ext(pkg):
+    """Add canonical base64, a resolvable anchor, and a resolvable policy."""
+    from uibc_core import merkle as mk
+    from uibc_core.canonical import hash_obj
+
+    ident_path = os.path.join(pkg, "identity.json")
+    ident = _json(ident_path)
+    ident["note_b64"] = _b64.b64encode(b"hello").decode("ascii")
+    _dump(ident_path, ident)
+
+    _, _, ents = _index(pkg)
+    order = sorted(ents, key=lambda e: e.get("path", ""))
+    leaves = [mk.leaf_hash(_read(os.path.join(pkg, "evidence", e["path"])))
+              for e in order]
+    root = mk.root_hash(leaves)
+    _dump(os.path.join(pkg, "evidence", "anchors.json"),
+          {"resolver": "evidence-merkle",
+           "anchors": [{"id": "anchor-001", "version": 1,
+                        "leaf_hash": leaves[0].hex(),
+                        "anchored_at": "2026-11-17T08:00:00Z",
+                        "root": root.hex(), "size": len(leaves), "index": 0,
+                        "proof": list(mk.build_proof(leaves, 0))}]})
+
+    artefact = {"policy": "retention", "days": 90}
+    adir = os.path.join(pkg, "evidence", "policies")
+    os.makedirs(adir, exist_ok=True)
+    with open(os.path.join(adir, "retention.json"), "w", encoding="utf-8") as fh:
+        json.dump(artefact, fh, sort_keys=True, separators=(",", ":"))
+    _dump(os.path.join(pkg, "evidence", "policies.json"),
+          {"policies": [{"path": "evidence/policies/retention.json",
+                         "digest": "sha256:" + hash_obj(artefact)}]})
+
+    checks = {c["id"]: c for c in verify(pkg)["checks"]}
+    for cid in ("S14", "S15", "S18"):
+        if cid not in checks or checks[cid]["result"] != "PASS":
+            raise AssertionError("a correct %s does not pass; attacks below "
+                                 "would prove nothing" % cid)
+
+
+def _needs_ext(fn):
+    def wrapper(pkg):
+        build_ext(pkg)
+        fn(pkg)
+    wrapper.__name__ = fn.__name__
+    return wrapper
+
+
+@_needs_ext
+def m14_base64_padding(pkg):
+    ident = _json(os.path.join(pkg, "identity.json"))
+    ident["note_b64"] = "aGVsbG8"          # 7 chars: padding stripped
+    _dump(os.path.join(pkg, "identity.json"), ident)
+
+
+@_needs_ext
+def m14_base64_chars(pkg):
+    ident = _json(os.path.join(pkg, "identity.json"))
+    ident["note_b64"] = "aGVs*bG8="        # '*' is not in the alphabet
+    _dump(os.path.join(pkg, "identity.json"), ident)
+
+
+@_needs_ext
+def m15_bad_proof(pkg):
+    doc = _json(os.path.join(pkg, "evidence", "anchors.json"))
+    doc["anchors"][0]["proof"][0] = "0" * 64
+    _dump(os.path.join(pkg, "evidence", "anchors.json"), doc)
+
+
+@_needs_ext
+def m15_bad_leaf(pkg):
+    doc = _json(os.path.join(pkg, "evidence", "anchors.json"))
+    doc["anchors"][0]["leaf_hash"] = "not-a-digest"
+    _dump(os.path.join(pkg, "evidence", "anchors.json"), doc)
+
+
+@_needs_ext
+def m15_bad_time(pkg):
+    doc = _json(os.path.join(pkg, "evidence", "anchors.json"))
+    doc["anchors"][0]["anchored_at"] = "2026-02-30T00:00:00Z"
+    _dump(os.path.join(pkg, "evidence", "anchors.json"), doc)
+
+
+@_needs_ext
+def m15_unresolvable_root(pkg):
+    doc = _json(os.path.join(pkg, "evidence", "anchors.json"))
+    doc["anchors"][0]["root"] = "0" * 64
+    _dump(os.path.join(pkg, "evidence", "anchors.json"), doc)
+
+
+@_needs_ext
+def m18_edited_artefact(pkg):
+    """The policy file changes, the declared digest does not."""
+    path = os.path.join(pkg, "evidence", "policies", "retention.json")
+    _write(path, b'{"days":30,"policy":"retention"}')
+
+
+@_needs_ext
+def m18_dangling_digest(pkg):
+    doc = _json(os.path.join(pkg, "evidence", "policies.json"))
+    doc["policies"][0]["digest"] = "sha256:" + "f" * 64
+    _dump(os.path.join(pkg, "evidence", "policies.json"), doc)
+
+
+EXT_RED_TEAM = [
+    ("strip base64 padding", m14_base64_padding, "FAIL", "S14 decodes strictly"),
+    ("put a stray character in base64", m14_base64_chars, "FAIL",
+     "S14 rejects non-alphabet bytes"),
+    ("corrupt an anchor inclusion proof", m15_bad_proof, "FAIL",
+     "S15 re-verifies the proof"),
+    ("make a leaf hash a non-digest", m15_bad_leaf, "FAIL",
+     "S15 judges values, not just structure"),
+    ("date an anchor 30 February", m15_bad_time, "FAIL",
+     "a legal time is required"),
+    ("anchor to a root we cannot recompute", m15_unresolvable_root, "FAIL",
+     "resolvable, not merely present"),
+    ("edit a policy artefact", m18_edited_artefact, "FAIL",
+     "S18 recomputes SHA-256 over JCS"),
+    ("point a policy digest at nothing", m18_dangling_digest, "FAIL",
+     "an unresolvable digest is FAIL"),
+]
+
+# Not "not caught": not constructible here. Stated so the gap is visible.
+UNCONSTRUCTIBLE = [
+    ("S16 external timestamp (RFC 3161)",
+     "the token must be signed by a TSA key we do not hold, over a digest of "
+     "a file we ship; a self-minted token would prove nothing"),
+]
+
 CONTROLS = [
     ("reorder index entries", c_reorder_index, "SAME", "root commits sorted hashes"),
     ("copy untouched", c_noop, "SAME", "the harness must not perturb"),
@@ -503,20 +646,38 @@ def run_red_team_v11(package, baseline_verdict):
     }
 
 
+def run_red_team_ext(package, baseline_verdict):
+    rows = [_one(package, name, fn, expectation, why, baseline_verdict)
+            for name, fn, expectation, why in EXT_RED_TEAM]
+    ok = all(r["ok"] for r in rows)
+    return {
+        "stage": "red-team-ext",
+        "rows": rows,
+        "ok": ok,
+        "failed": [r["name"] for r in rows if not r["ok"]],
+        "count": len(rows),
+        "unconstructible": [{"check": c, "why": w} for c, w in UNCONSTRUCTIBLE],
+        "note": "S14/S15/S18 built correctly first, then broken one at a time; "
+                "S16 cannot be self-tested and is declared, not skipped quietly",
+    }
+
+
 def run_all(package, kit):
     baseline = run_baseline(package)
     red = run_red_team(package, baseline["got"])
     red11 = run_red_team_v11(package, baseline["got"])
+    ext = run_red_team_ext(package, baseline["got"])
     interop = run_interop(kit)
     # A skip of a stage that requires a corpus is not a pass, but it is not a
     # failure of our code either: it is reported as SKIPPED and the exit code
     # stays 0 only if the caller did not ask for that stage.
-    overall_ok = baseline["ok"] and red["ok"] and red11["ok"]
+    overall_ok = baseline["ok"] and red["ok"] and red11["ok"] and ext["ok"]
     return {
         "package": package,
         "stage_baseline": baseline,
         "stage_redteam": red,
         "stage_redteam_v11": red11,
+        "stage_redteam_ext": ext,
         "stage_interop": interop,
         "ok": overall_ok,
         "note": "interop SKIPPED is not counted as a pass",
@@ -551,6 +712,19 @@ def _print_human(result):
         for g in v11.get("known_gaps") or []:
             print("  gap  %-40s -> %-12s %s" % (g["name"], g["got"],
                   "CAUGHT (update the note)" if g["caught"] else "not caught: " + g["why"]))
+    print()
+    ext = result.get("stage_redteam_ext")
+    if ext:
+        print("red team ext: %d cases (S14/S15/S18)" % ext["count"])
+        for r in ext["rows"]:
+            print("  %-4s %-40s %-9s -> %-12s %s"
+                  % ("atk", r["name"], r["expectation"], r["got"],
+                     "ok" if r["ok"] else "FAILED: " + r["expectation_note"]))
+            if r["failed_checks"]:
+                print("       caught by: %s" % ", ".join(r["failed_checks"]))
+        for u in ext.get("unconstructible") or []:
+            print("  n/a  %s" % u["check"])
+            print("       %s" % u["why"])
     print()
     it = result["stage_interop"]
     if it["status"] == "SKIPPED":

@@ -102,6 +102,28 @@ class TestOutsiderAudit(unittest.TestCase):
         self.assertFalse(gaps[0]["caught"],
                          "this gap is now caught; update the note and the docs")
 
+    def test_strict_base64_anchors_and_policies_are_attacked(self):
+        """S14, S15 and S18 each get a correct build first, then one break."""
+        ext = self.result["stage_redteam_ext"]
+        self.assertEqual(ext["count"], 8)
+        self.assertTrue(ext["ok"], "failed: %s" % ext["failed"])
+        caught = set()
+        for r in ext["rows"]:
+            self.assertTrue(r["ok"], "%s -> %s (%s)"
+                            % (r["name"], r["got"], r["expectation_note"]))
+            caught.update(r["failed_checks"])
+        for cid in ("S14", "S15", "S18"):
+            self.assertIn(cid, caught, "%s never fired in stage 3" % cid)
+
+    def test_the_one_we_cannot_construct_is_named(self):
+        """S16 cannot be red-teamed from inside: the token is signed by a key we
+        do not hold. It must be declared, not quietly omitted."""
+        ext = self.result["stage_redteam_ext"]
+        names = [u["check"] for u in ext["unconstructible"]]
+        self.assertEqual(len(names), 1)
+        self.assertIn("S16", names[0])
+        self.assertIn("TSA key", ext["unconstructible"][0]["why"])
+
     def test_skip_is_not_a_pass(self):
         it = self.result["stage_interop"]
         self.assertEqual(it["status"], "SKIPPED")

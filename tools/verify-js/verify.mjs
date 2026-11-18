@@ -333,8 +333,20 @@ function verify(pkg, opts = {}) {
     try {
       const id = readJson(join(pkg, "identity.json"));
       const manifest = readJson(join(pkg, "manifest.json"));
+      const lcPath = join(pkg, "lifecycle.json");
+      let foreignEvent = null;
+      if (existsSync(lcPath)) {
+        const lc = readJson(lcPath);
+        for (const ev of (lc.events || [])) {
+          if (ev.agent_id && manifest.agent_id && ev.agent_id !== manifest.agent_id) {
+            foreignEvent = ev;
+            break;
+          }
+        }
+      }
       ok = !!id.agent_id && id.agent_id === manifest.agent_id &&
-           typeof id.owner === "string" && id.owner.length > 0;
+           typeof id.owner === "string" && id.owner.length > 0 &&
+           foreignEvent === null;
       detail = ok ? "ok" : "agent_id or owner does not line up with the manifest";
     } catch { /* detail already set */ }
     note("S2", "identity consistency", ok, detail);

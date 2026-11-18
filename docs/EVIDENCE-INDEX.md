@@ -6,8 +6,8 @@
 |---|---|---|---|---|---|
 | S0 | verifier robustness | 否 | 4 | 0 | 9 |
 | S1 | package structure | 是 | 8 | 1 | 25 |
-| S2 | identity consistency | 是 | 6 | 1 | 17 |
-| S3 | lifecycle state machine + semantics | 是 | 8 | 1 | 15 |
+| S2 | identity consistency | 是 | 7 | 1 | 17 |
+| S3 | lifecycle state machine + semantics | 是 | 9 | 1 | 15 |
 | S4 | evidence integrity | 是 | 12 | 3 | 26 |
 | S5 | evidence root | 是 | 9 | 3 | 22 |
 | S6 | seal signature | 是 | 16 | 1 | 26 |

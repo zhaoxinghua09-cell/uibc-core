@@ -38,7 +38,45 @@ ResourceWarning: unclosed file <_io.BufferedReader name='...\evidence\index.json
 
 第一次只打了 `uibc_core/adapters/tests/fixtures/tools`，Windows 上全量跑出 22 ERROR + 4 FAIL，追下去全是缺 `benchmark/corpus/base`、`docs/conformance/vectors.json` 这类路径——**测试跑到一半找不到夹具**，不是产品缺陷。
 
-所以本文只声称跑过这两套（并发与审计），**不声称 Windows 上全量 393 项都通过**——那需要完整包在 Windows 上重跑一次，本轮没做。
+所以第一次只声称跑过那两套。
+
+## 补跑：完整包全量
+
+把 `benchmark/`、`docs/`、`pyproject.toml` 和根目录文件全部打进包（843 个文件、1.0 MB），在 Windows 上重跑：
+
+```
+Ran 393 tests in 48.234s
+
+OK (skipped=15)
+```
+
+**Windows 全量 393 项通过。** Linux 是 `skipped=14`，差的那 1 项是：
+
+```
+test_evidence_symlink_outside_the_package_fails_s4
+  skipped 'this platform does not allow creating symlinks'
+```
+
+Windows 默认不给普通用户创建符号链接的特权，所以 S4 那一格被跳过了——**不是失败，但是也没被测到**。
+
+## 用 junction 把那格补上
+
+Windows 有另一种目录链接：**junction（目录联接）**，普通用户就能创建，不需要开发者模式。
+
+做法：复制干净包，把 `evidence/files` 整个移动到包外，再用 `cmd /c mklink /J` 在原来的位置建一个目录联接指向它——文件字节完全相同，只有"它其实在包外"这一点不同。
+
+结果：
+
+| 检查 | 结果 |
+|---|---|
+| junction 创建 | 成功（exit 0，无特权） |
+| `os.path.islink()` | **False** ← 它看不见 junction |
+| `os.path.realpath()` | 正确解析到包外 |
+| **S4** | **FAIL**：`2 entries checked; evidence file 'files/action-log.txt' resolves outside the evidence root` |
+
+这一格值得单独记下来：**如果 S4 用 `islink()` 来判断，Windows 上的 junction 会完全绕过它**。它没绕过，是因为 S4 判的是 `realpath` 是否落在证据根之内——判"最终落在哪"，而不是"看起来像不像链接"。
+
+`islink() == False` 而 `realpath()` 指向包外，这个组合就是为什么"判解析结果"比"判链接类型"更可靠。
 
 ## 现在的边界表
 
@@ -46,7 +84,8 @@ ResourceWarning: unclosed file <_io.BufferedReader name='...\evidence\index.json
 |---|---|
 | Linux 全量 393 项 | **OK (skipped=14)** |
 | Windows 并发 + 审计（8 项） | **OK**，msvcrt 分支已实走 |
-| Windows 全量 393 项 | **未跑**（缺完整夹具，未声称） |
+| Windows 全量 393 项 | **OK (skipped=15)**，完整包实测 |
+| Windows S4 目录联接（junction）逃逸 | **已测**，S4 FAIL 抓住（`islink=False` 仍被抓） |
 | macOS | **未跑** |
 | 跨进程（同一机器） | 已测，200/200 |
 | 跨机器 / 网络挂载 | 未测，且 flock 在部分 NFS 上不生效 |

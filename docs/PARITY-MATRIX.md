@@ -19,7 +19,7 @@
 | 10 | 结果词表（八值 disposition） | capsule / bilateral-attestation | 未定义，但决定**直接复用** | 对齐（定义层） | `docs/TERMINOLOGY.md` |
 | 11 | 性能 | CCS 亚毫秒/次调用 | **23 ms/包**（median，50 次；p95 45 ms） | **口径不同**：单位是包，不是调用 | `tools/out/latency.json` |
 | 12 | 独立见证人联署 | 1F916、Sello | **无** | **弱（结构受限）** | 需第三方，自己不能发给自己 |
-| 13 | 透明日志 / 外部锚 | 1F916、RFC 9162 | 只到 `anchored`（人工带外 head） | **弱（结构受限）** | S9 依赖你保存 head |
+| 13 | 透明日志 / 外部锚 | 1F916、RFC 9162、AAC 自建 SCITT TS | **两个后端已实现**：OTS 日历（3 个）+ Nostr relay（BIP-340/NIP-01），零依赖，密码学经官方向量与 libsecp256k1/pynostr 互验；**真实提交 0 次** | **实现对齐，记录为 0** | `tools/anchor_chain_head.py`、`tools/nostr_anchor.py` |
 | 14 | 生产部署 | 1F916 称已在产 | 无 | **弱（事实差距）** | 不可用文档弥补 |
 | 15 | 集成广度（IDE/CLI/框架/MCP/CI） | APort 已接 Claude Code/Cursor/Goose/Codex/Gemini CLI | CLI + MCP server + A2A 适配器 + **框架钩子**（LangChain 形状 / OpenAI function 描述符 / MCP 结果，零依赖） | **部分对齐（形状兼容，未在真实框架栈内实测）** | `adapters/frameworks/`、7 项测试 |
 | 16 | 单一评分/排名 | GAR、ERC-8004、ATEP | 明确不做 | **不做** | 两家都禁止压成单分 |

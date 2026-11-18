@@ -14,7 +14,7 @@
 
 | 对象 | 性质 | 规范 | 语料 | 独立 runner | 双实现 | 独立第三方 | 一条命令自证 |
 |---|---|---|---|---|---|---|---|
-| **uibc-core**（我们） | 本项目 | 自有 `docs/` | fixtures + 143 向量复现 | 我们两个独立实现 | 与发布方双向验收 | **0** | 有 |
+| **uibc-core**（我们） | 本项目 | 自有 `docs/` + I-D 形状本地草稿（`drafts/`，**未提交**） | fixtures + 143 向量复现 | 我们两个独立实现 | 与发布方双向验收 | **0** | 有 |
 | **AER-1 / zambo** | 第三方规范，我们对标对象 | IETF draft-26，正文 139,318 B / 3,024 行 | 143 向量，公开可下载（index 15,706 B） | `base/conformance.py` 1,595 行 | — | 未知 | 部分 |
 | **Agent Action Capsule (AAC)** | 竞品 | 13 个 IETF drafts（`draft-mih-*`） | 12 例 commitment 向量 + 向量已贡献进 `ietf-wg-scitt/examples` | `reference_verifier.py` | Python + Go | **2**（EMILIA Protocol、GlyphZero） | 部分 |
 | **ARC**（arc-protocol 1.1.4） | 竞品 | GitHub 自述 | **包内无**（`grep -ril 'test.?vector\|conformance'` 为空） | 无独立套件 | — | — | 否 |

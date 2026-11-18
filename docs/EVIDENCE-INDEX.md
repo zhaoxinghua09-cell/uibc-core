@@ -4,22 +4,22 @@
 
 | 检查 | 名称 | 出厂包是否走到 | 测试 | 红队 | 文档 |
 |---|---|---|---|---|---|
-| S0 | verifier robustness | 否 | 3 | 0 | 4 |
-| S1 | package structure | 是 | 5 | 1 | 15 |
+| S0 | verifier robustness | 否 | 4 | 0 | 4 |
+| S1 | package structure | 是 | 5 | 1 | 16 |
 | S2 | identity consistency | 是 | 5 | 1 | 10 |
-| S3 | lifecycle state machine + semantics | 是 | 7 | 1 | 7 |
-| S4 | evidence integrity | 是 | 11 | 3 | 17 |
-| S5 | evidence root | 是 | 8 | 3 | 13 |
+| S3 | lifecycle state machine + semantics | 是 | 7 | 1 | 8 |
+| S4 | evidence integrity | 是 | 11 | 3 | 18 |
+| S5 | evidence root | 是 | 8 | 3 | 14 |
 | S6 | seal signature | 是 | 15 | 1 | 19 |
-| S7 | evidence index metadata | 否 | 4 | 1 | 6 |
-| S8 | package checkpoint head | 否 | 5 | 2 | 11 |
+| S7 | evidence index metadata | 否 | 4 | 1 | 7 |
+| S8 | package checkpoint head | 否 | 5 | 2 | 12 |
 | S9 | head pinned out-of-band | 否 | 5 | 1 | 13 |
 | S10 | attestation closure declared | 否 | 4 | 2 | 3 |
 | S11 | strict serialization | 是 | 3 | 1 | 6 |
-| S12 | timestamp and identifier strictness | 是 | 5 | 1 | 4 |
-| S13 | merkle inclusion proofs | 否 | 6 | 4 | 4 |
+| S12 | timestamp and identifier strictness | 是 | 5 | 1 | 5 |
+| S13 | merkle inclusion proofs | 否 | 7 | 4 | 5 |
 | S14 | strict base64 | 否 | 3 | 2 | 2 |
-| S15 | anchor event resolution | 否 | 5 | 4 | 2 |
+| S15 | anchor event resolution | 否 | 5 | 4 | 3 |
 | S16 | external timestamp (RFC 3161) | 否 | 6 | 4 | 5 |
 | S17 | linear receipt chain | 否 | 5 | 2 | 7 |
 | S18 | policy artefact resolution | 否 | 6 | 2 | 11 |

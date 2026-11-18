@@ -15,6 +15,28 @@ Nothing here is a ratified standard.
 
 ## [Unreleased]
 
+### The sixteen tests that were skipping (2026-11-19)
+
+- **Audited `OK (skipped=16)`.** Fifteen of the sixteen were skipping for one
+  reason: `.[verify]` does not carry `opentimestamps-client`, `langchain-core`,
+  `coincurve`, `pynostr` or `agent-action-capsule`. CI installs the same extra,
+  so the interop check against the peer, the live-LangChain measurement, the OTS
+  proof check and both Nostr anchors had **never run in CI**. They were in the
+  suite, counted in the total, and executed nowhere.
+- **They all pass once installed** (`527 OK (skipped=2)`, 42.4 s). Nothing in
+  the tests needed fixing, which is the finding: the code was right and the
+  gate was hollow.
+- **New extra `interop`**, and a new CI job `test-with-extras` that runs the
+  full suite with it and then fails on any skip whose reason contains
+  "not installed". Green can no longer mean "the hard half was skipped".
+- **`docs/SKIPPED.md`** records the list, the categories, and the two skips that
+  remain (both deliberate).
+- **The new gate caught a second category on its first run:** five
+  `test_aee_rail.py` tests were skipping on "agent_evidence_vectors corpus not
+  installed" — the rail that reads somebody else's conformance corpus had never
+  run in CI either. `conformance` existed as an extra; no job installed it.
+  `test-with-extras` now installs `.[verify,interop,conformance]`.
+
 ### The neighbourhood, surveyed rather than admired (2026-11-19)
 
 - **`docs/PEER-SURVEY.md` + `docs/PEERS.json`**: six neighbouring projects measured

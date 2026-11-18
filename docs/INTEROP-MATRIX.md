@@ -1,5 +1,8 @@
 # Interop matrix: can we verify their receipts, can they verify ours?
 
+<!-- facts: current -->
+
+
 Status 2026-11-17. Method, stated first because it bounds every cell:
 
 * every peer row is built from **their published specification text**, not from a
@@ -63,7 +66,7 @@ did not run their vectors.
 3. **Vaara is ahead on**: policy enforcement at the call site and EU AI Act
    Article 12 framing. Behind on: cryptographic structure of the record.
 4. **We are ahead on**: a public repository an outsider can clone and run
-   (305 tests, 15 red-team cases, all re-run from a fresh anonymous clone), a
+   (516 tests, 15 red-team scenarios, 36 attacks, all re-run from a fresh anonymous clone), a
    published crosswalk to an IETF draft with the failing cells written down, and
    a habit of publishing our own failed verification attempts (Rekor inclusion
    proof) with the third-party cross-check that also failed.

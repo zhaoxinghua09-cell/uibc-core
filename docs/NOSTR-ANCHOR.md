@@ -1,5 +1,8 @@
 # 第二个锚定后端：Nostr（BIP-340 + NIP-01），零依赖
 
+<!-- facts: current -->
+
+
 日期 2026-11-18 ｜ 工具 `tools/nostr_anchor.py` ｜ 测试 `tests/test_nostr_anchor.py`
 
 ## 为什么要第二个后端
@@ -22,7 +25,7 @@
 | 4 | 与 `pynostr` 独立计算的 **NIP-01 event id** | **完全一致** |
 | 5 | 篡改 content / 换签名 → 必须失败 | 必拒 |
 
-裸环境跑：`10 tests OK (skipped=2)`（两个交叉项因未装库而跳过）。装了交叉库的环境：`10 tests, OK`（0 skip）。
+裸环境跑：`10 项全通过（skipped=2）`（两个交叉项因未装库而跳过）。装了交叉库的环境：`10 项全通过`（0 skip）。
 
 **注意第 1 条不可跳过**：复现不了官方向量的密码学实现就是错的，"skip" 不是答案。
 

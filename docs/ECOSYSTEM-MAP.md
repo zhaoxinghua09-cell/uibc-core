@@ -1,5 +1,8 @@
 # Ecosystem map: who is building agent evidence, and what each one actually finished
 
+<!-- facts: current -->
+
+
 Compiled 2026-11-17. Every row was read from the project's own published text on
 that date. "Stage" is the project's own word for itself where it gives one;
 where it does not, the stage is inferred from what is published and marked so.
@@ -31,7 +34,7 @@ true or complete; or that any real-world outcome followed."
 | **fact0** — [fact0.io](https://fact0.io/) | **experimental**, MIT, self-hosted | hash-chained audit records | none | none | signed export files verified against a separately trusted key; ZIP itself not signed | replay; honest "capture gaps remain visible" is the same stance we take |
 | **Attested Logs** — [paper](https://pys8vc40ox3z7qxp.public.blob.vercel-storage.com/files/2277477cbbe69000-554a6703-fac0-4715-84a6-d6613c72cda3-Attested-Multi-Agent-Conversation-Logs.pdf) | research library, AutoGen + LangGraph integrations | Ed25519 per message, SHA-256 chain | none | none (Merkle checkpoints planned) | "20+ passing tests", offline self-contained verification | framework integration breadth |
 | **Vaara** — [PyPI](https://pypi.org/project/vaara/) | **2.17.0**, AGPL-3.0, installed and CLI inspected | hash chain, export signature | `trail verify-anchor` for external time anchor | `trail publish-head` to a public transparency log (opt-in) | offline verify of signed trail zip; `attest verify` per tool call | call-site policy depth; permissive licensing for bundling (AGPL) |
-| **us** — `uibc-core` | 0.3.0, Apache-2.0, public repo | Ed25519 over DSSE PAE of JCS payload | RFC 3161 verified + OTS pending calendar | Rekor entry written; inclusion **not verified** | **one Python implementation**, public anonymous clone + 305 tests + 15 red-team cases | second verifier; witnesses; replay; call-site interception |
+| **us** — `uibc-core` | 0.4.0, Apache-2.0, public repo | Ed25519 over DSSE PAE of JCS payload | RFC 3161 verified + OTS pending calendar | Rekor entry written; inclusion **not verified** | **one Python implementation**, public anonymous clone + 516 tests, 15 red-team scenarios, 36 attacks | second verifier; witnesses; replay; call-site interception |
 
 ## Measured on this machine (Windows, Python 3.13, 2026-11-17)
 

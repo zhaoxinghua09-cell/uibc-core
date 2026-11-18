@@ -2,6 +2,11 @@
 
 > 中文完整版（含四件事说明与已知边界）：[`docs/EXTERNAL-NODE-KIT.md`](EXTERNAL-NODE-KIT.md)
 
+> **一条命令版（推荐先跑这个）**：`python3 tools/outsider_audit.py`
+> 它会跑基线判定 + 11 条红队变异 + 2 条反假阳性对照，并如实报告哪一项检查抓住了哪一种篡改；
+> 有 AER-1 语料时加 `--kit <path>` 连互操作一起跑。任何 SKIPPED 都不计入通过。
+> 记录见 [`docs/OUTSIDER-AUDIT.md`](OUTSIDER-AUDIT.md)。
+
 # Run it once on your machine — about 3 minutes, nothing to install
 
 ---

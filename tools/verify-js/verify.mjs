@@ -6,10 +6,11 @@
 // integrity (S4), evidence root (S5), Ed25519 seals (S6), index metadata (S7),
 // the package checkpoint (S8), the closure declaration (S10), strict
 // serialization (S11), timestamp and identifier strictness (S12), Merkle
-// inclusion (S13) and strict base64 (S14).
+// inclusion (S13), strict base64 (S14) and anchor resolution (S15).
 //
 // Not covered, on purpose: external timestamps (S16), the receipt chain (S17),
-// policy artefact resolution (S18) and the out-of-band pin (S9). Those need
+// policy artefact resolution (S18) and the out-of-band pin (S9) -- the last of
+// which needs an observation made outside this package. Those need
 // RFC 3161 and an observation made outside this package. A checker that claimed them without implementing them would be worse
 // than one that says it cannot.
 // Because it cannot attest signatures, it never returns PASS.
@@ -570,6 +571,108 @@ function verify(pkg) {
       note("S8", "package checkpoint head", problems.length === 0,
            problems.length ? problems.slice(0, 2).join("; ")
                            : "checkpoint matches");
+    }
+  }
+
+  // S15 anchor resolution. A checkpoint head says "this is where my log was";
+  // an anchor says "and here is evidence somebody outside my log saw it at
+  // time T". Resolving against OUR OWN evidence root proves the anchor was
+  // built from this package. It does NOT prove a third party saw it -- an
+  // anchor naming an external log stays unresolved rather than being counted
+  // as checked, because "I could not verify" is not "OK".
+  {
+    const anchorsPath = join(pkg, "evidence", "anchors.json");
+    if (existsSync(anchorsPath)) {
+      const problems = [];
+      let resolved = 0;
+      try {
+        const adoc = readJson(anchorsPath);
+        const idx = existsSync(join(pkg, "evidence/index.json"))
+          ? readJson(join(pkg, "evidence/index.json")) : { entries: [] };
+        const order = (idx.entries || []).slice().sort((a, b) =>
+          String(a.path) < String(b.path) ? -1 : String(a.path) > String(b.path) ? 1 : 0);
+        const leaves = [];
+        for (const e of order) {
+          try { leaves.push(leafHash(readFileSync(join(pkg, "evidence", String(e.path))))); }
+          catch { /* S4 reports it; the anchor is then unresolvable */ }
+        }
+        const root = merkleRoot(leaves);
+        if (!adoc || typeof adoc !== "object") {
+          problems.push("anchors.json is not an object");
+        } else if (adoc.resolver !== "evidence-merkle") {
+          problems.push("resolver " + JSON.stringify(adoc.resolver) +
+                        " is not one we can resolve offline (supported: evidence-merkle)");
+        } else if (!Array.isArray(adoc.anchors) || !adoc.anchors.length) {
+          problems.push("anchors list is missing or empty");
+        } else {
+          const HEX = /^[0-9a-f]{64}$/;
+          const TS = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(\.\d+)?(Z|[+-]\d{2}:\d{2})$/;
+          const calendarOk = (y, mo, d) => {
+            if (!(mo >= 1 && mo <= 12 && d >= 1 && d <= 31)) return false;
+            const days = [31, (y % 4 === 0 && (y % 100 !== 0 || y % 400 === 0)) ? 29 : 28,
+                          31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+            return d <= days[mo - 1];
+          };
+          const tsProblem = (v) => {
+            if (typeof v !== "string") return "anchored_at is not a string";
+            const m = TS.exec(v);
+            if (!m) return "anchored_at is not RFC 3339 with a zone";
+            if (!calendarOk(+m[1], +m[2], +m[3])) return "anchored_at is not a real calendar date";
+            if (+m[6] > 59) return "anchored_at carries a leap second";
+            const off = m[8];
+            if (off !== "Z") {
+              const hh = +off.slice(1, 3), mm = +off.slice(4, 6);
+              if (hh > 14 || mm > 59) return "anchored_at has an out-of-range UTC offset";
+            }
+            return null;
+          };
+          adoc.anchors.forEach((a, i) => {
+            const probs = [];
+            const aid = a && a.id;
+            if (typeof aid !== "string" || !aid.trim()) probs.push("anchor id is missing or empty");
+            if (!Number.isInteger(a && a.version) || a.version < 1) probs.push("anchor version must be an integer >= 1");
+            if (typeof a.leaf_hash !== "string" || !HEX.test(a.leaf_hash)) probs.push("leaf_hash is not 64 lowercase hex characters");
+            const tp = tsProblem(a.anchored_at);
+            if (tp) probs.push(tp);
+            const declared = a.root;
+            if (typeof declared !== "string" || !HEX.test(declared)) probs.push("root is not 64 lowercase hex characters");
+            if (!Number.isInteger(a.index)) probs.push("index is not an integer");
+            if (!Number.isInteger(a.size) || a.size < 1) probs.push("size is not a positive integer");
+            if (!Array.isArray(a.proof) || !a.proof.length) probs.push("proof is missing or empty");
+            if (typeof declared === "string" && declared !== root.toString("hex")) {
+              probs.push("declared root is not the root this package resolves to");
+            }
+            if (!probs.length && Number.isInteger(a.index) && a.index >= 0 && a.index < leaves.length) {
+              if (a.leaf_hash !== leaves[a.index].toString("hex")) {
+                probs.push("leaf_hash does not match the evidence leaf at that index");
+              }
+            }
+            if (!Number.isInteger(a.index) || a.index < 0 || a.index >= leaves.length) {
+              probs.push("anchor index is outside the evidence set");
+            }
+            if (!probs.length) {
+              const sib = [];
+              let bad = false;
+              for (const h of (a.proof || [])) {
+                if (!/^[0-9a-fA-F]{64}$/.test(String(h))) { bad = true; break; }
+                sib.push(Buffer.from(String(h), "hex"));
+              }
+              if (bad) probs.push("proof contains a non-hex sibling");
+              else if (!verifyInclusion(Buffer.from(a.leaf_hash, "hex"), a.index, a.size, sib,
+                                        Buffer.from(a.root, "hex"))) {
+                probs.push("inclusion proof does not verify against the declared root");
+              }
+            }
+            if (probs.length) problems.push("anchor[" + i + "] " + String(aid || "?") + ": " + probs.join("; "));
+            else resolved += 1;
+          });
+        }
+      } catch (err) {
+        problems.push("anchors.json is not readable: " + err.message);
+      }
+      note("S15", "anchor event resolution", problems.length === 0,
+           problems.length ? problems.slice(0, 3).join("; ")
+                           : resolved + " anchor(s) resolved against the evidence Merkle root");
     }
   }
 

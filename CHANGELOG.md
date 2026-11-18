@@ -61,6 +61,11 @@ carrying the fields they inspect, so 0.4.0 is a major-looking bump under a
 
 ### Fixed
 
+- **The paper's own numbers were wrong in three places.** `paper/paper.md` claimed 122 tests (507 run), "three modules" within 24 files (25), and "zero-dependency (stdlib only)" when `[verify]` pulls in `cryptography` and `asn1crypto`. Rewritten to state the stdlib-only core, the optional extra, the INCONCLUSIVE-on-absence behaviour, 507 tests, and 25 modules. The skipped count is described rather than pinned, because it moves between 16 and 17.
+- **`tools/check_doc_facts.py` now covers the paper and module counts.** `paper/paper.md` is a target, and `modules` is a measured fact, so a stale count there fails CI too.
+
+### Fixed
+
 - **The README's test count was 328; the suite runs 507.** Corrected in `README.md`, `README.en.md`, `AGENTS.md`, together with the skipped count (6 -> 16) and the recorded runtime.
 
 ### Added

@@ -20,7 +20,7 @@ import check_doc_facts as cdf  # noqa: E402
 class TestDocFacts(unittest.TestCase):
     def test_every_fact_can_be_measured(self):
         facts = cdf.measure()
-        for key in ("tests", "checks", "attacks", "redteam_attacks", "cases"):
+        for key in ("tests", "checks", "modules", "attacks", "redteam_attacks", "cases"):
             self.assertIsNotNone(facts.get(key), "%s could not be measured, so a "
                                                 "claim about it is unchecked" % key)
         self.assertGreater(facts["tests"], 100)
@@ -42,6 +42,10 @@ class TestDocFacts(unittest.TestCase):
         bad = cdf.check(facts, [path])
         self.assertEqual(len(bad), 1)
         self.assertEqual(bad[0]["claimed"], 12)
+
+    def test_the_paper_is_checked_too(self):
+        """A paper is cited; a stale number there outlives every README."""
+        self.assertIn("paper/paper.md", cdf.TARGETS)
 
     def test_it_does_not_confuse_two_tools_with_the_same_word(self):
         facts = cdf.measure()

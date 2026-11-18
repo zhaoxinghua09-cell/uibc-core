@@ -31,7 +31,10 @@ for p in (_REPO, os.path.join(_REPO, "tools")):
 
 # Documents a reader is meant to trust as current. Dated findings under docs/
 # and CHANGELOG entries describe a moment and are not checked.
-TARGETS = ["README.md", "README.en.md", "QUICKSTART.md", "INSTALL.md", "AGENTS.md"]
+TARGETS = ["README.md", "README.en.md", "QUICKSTART.md", "INSTALL.md", "AGENTS.md",
+           # The paper is an academic record: a stale number there is worse than
+           # a stale number in a README, because a paper is what gets cited.
+           "paper/paper.md"]
 
 CLAIMS = (
     # (label, regex, group that holds the number)
@@ -40,6 +43,7 @@ CLAIMS = (
     ("checks", re.compile(r"(\d{2,3})\s+checks\b(?!\s*[)]?[^\n]{0,40}independent)"), 1),
     ("attacks", re.compile(r"(\d{2,3})\s+attacks\b"), 1),
     ("cases", re.compile(r"(\d{2,3})\s+red-team cases\b"), 1),
+    ("modules", re.compile(r"(\d{2,3})\s+modules\b"), 1),
 )
 
 
@@ -47,7 +51,9 @@ def measure():
     loader = unittest.TestLoader()
     suite = loader.discover(os.path.join(_REPO, "tests"), pattern="test_*.py")
     from uibc_core.basis import BASIS
-    facts = {"tests": suite.countTestCases(), "checks": len(BASIS)}
+    facts = {"tests": suite.countTestCases(), "checks": len(BASIS),
+             "modules": len([f for f in os.listdir(os.path.join(_REPO, "uibc_core"))
+                             if f.endswith(".py")])}
     try:
         import check_matrix
         facts["attacks"] = check_matrix.build(check_matrix.audit())["n_attacks"]

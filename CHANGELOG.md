@@ -59,6 +59,11 @@ carrying the fields they inspect, so 0.4.0 is a major-looking bump under a
 
 ## [Unreleased]
 
+### Added
+
+- **`tools/check_matrix.py` -> `docs/CHECK-MATRIX.md` and `docs/CHECK-MATRIX.svg`.** Reads the audit's own JSON and prints which attacks move which checks. Two numbers fall out: 32 of 36 attacks isolate exactly one check, and no check is unreachable. The two attacks that move two checks (an impossible date also trips the lifecycle state machine; rewritten index metadata also moves the checkpoint head) are recorded rather than smoothed over.
+- **`tests/test_check_matrix.py`** -- 6 tests holding those two claims.
+
 ### Fixed
 
 - **The package reported its own version as 0.3.3 while shipping as 0.4.0.**

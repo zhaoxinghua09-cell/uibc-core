@@ -54,6 +54,25 @@ imports nothing from this project reproduces all 29, verifying signatures with t
 What it does **not** prove: that a second implementation of the whole receipt exists —
 it does not (see [`docs/CONFORMANCE.md`](docs/CONFORMANCE.md)).
 
+**Verify someone else's receipt, offline** — a receipt we did not issue, digested by our own code:
+
+| item | value |
+|---|---|
+| sample | [Zambo](https://zambo.dev/run/5f908958-6c31-4293-b239-b2122699e14b) (AER-1, `draft-zambo-aer1-26`), fetched 2026-11-18 |
+| canonical bytes | 678 B, `receipt_schema_version` `0.4` |
+| their published digest | `sha256:b08808742328c65f1bb0b8e9c050f55aed3f4626e852043fa6d7b1428c3c82bc` |
+| our `canonicalize()` output | **same 678 bytes, same digest** |
+| `side_effects.declaration_hash` | `45aad38f…1bfee` — recomputes |
+| envelope signature | **none**; the page itself states issuer authentication is not checked |
+
+`python tools/zambo_interop_check.py` prints `DIGEST_BINDS_BYTES (issuer NOT authenticated)`.
+What this proves: two independent implementations canonicalize the same receipt to the same
+bytes, so a digest can travel between them. What it does **not** prove: that the issuer is
+who it says (there is no signature to check), that we conform to AER-1's 143-vector suite
+(we do not), or that offline anchoring beats published-relay anchoring — different
+questions, kept apart in [`docs/INTEROP-ZAMBO.md`](docs/INTEROP-ZAMBO.md).
+
+
 **Verified vs not verified, in one place** (full detail in [`docs/EXTERNAL-ANCHOR.md`](docs/EXTERNAL-ANCHOR.md)):
 
 | item | state | how you check it yourself |

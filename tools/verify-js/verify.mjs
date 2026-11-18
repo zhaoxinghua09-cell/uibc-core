@@ -4,13 +4,13 @@
 //
 // Covered here: package structure (S1), identity consistency (S2), evidence
 // integrity (S4), evidence root (S5), Ed25519 seals (S6), index metadata (S7),
-// the closure declaration (S10), strict serialization (S11), timestamp and
-// identifier strictness (S12), Merkle inclusion (S13) and strict base64 (S14).
+// the package checkpoint (S8), the closure declaration (S10), strict
+// serialization (S11), timestamp and identifier strictness (S12), Merkle
+// inclusion (S13) and strict base64 (S14).
 //
 // Not covered, on purpose: external timestamps (S16), the receipt chain (S17),
-// policy artefact resolution (S18), the package checkpoint (S8) and the
-// out-of-band pin (S9). Those need RFC 3161 and state this checker does not
-// hold. A checker that claimed them without implementing them would be worse
+// policy artefact resolution (S18) and the out-of-band pin (S9). Those need
+// RFC 3161 and an observation made outside this package. A checker that claimed them without implementing them would be worse
 // than one that says it cannot.
 // Because it cannot attest signatures, it never returns PASS.
 //
@@ -511,6 +511,65 @@ function verify(pkg) {
                            : "root " + root.toString("hex").slice(0, 16) +
                              "... over " + leaves.length + " leaves; " +
                              proofs.length + " inclusion proof(s) verified");
+    }
+  }
+
+  // S8 package checkpoint head. One value committing to the WHOLE package
+  // state: the lifecycle head, the evidence root, the index metadata digest and
+  // the evidence count. A lifecycle-only head was not enough -- adding evidence
+  // changes the root but leaves the log untouched, so two different states
+  // shared one head. Truncation, rollback and post-seal replacement are what
+  // this detects, and only inside this package; a rollback of the whole
+  // store needs an observation made somewhere else (S9, not checkable here).
+  {
+    const mp = join(pkg, "manifest.json");
+    const m = existsSync(mp) ? readJson(mp) : null;
+    if (m && m.checkpoint_head !== undefined && m.checkpoint_head !== null) {
+      const problems = [];
+      let state = null;
+      try {
+        const idx = existsSync(join(pkg, "evidence/index.json"))
+          ? readJson(join(pkg, "evidence/index.json")) : { entries: [] };
+        const entries = idx.entries || [];
+        const hs = [];
+        for (const e of entries) {
+          try { hs.push(sha256(readFileSync(join(pkg, "evidence", String(e.path))))); }
+          catch { /* S4 reports the missing file; the count still stands */ }
+        }
+        const root = sha256(canonicalBytes(hs.slice().sort()));
+        const meta = entries.map((e) => ({
+          path: String(e.path || ""), type: e.type, note: e.note,
+          action_digest: e.action_digest ?? null,
+        }));
+        meta.sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0));
+        const indexDigest = "sha256:" + sha256(canonicalBytes(meta));
+        const lcPath = join(pkg, "lifecycle.json");
+        const lc = existsSync(lcPath) ? readJson(lcPath) : {};
+        const events = lc.events || [];
+        const last = events.length ? events[events.length - 1] : null;
+        const lcHead = "sha256:" + sha256(canonicalBytes({
+          count: events.length,
+          last_sequence_number: last ? (last.sequence_number ?? null) : null,
+          last_event_digest: last ? sha256(canonicalBytes(last)) : null,
+        }));
+        state = "sha256:" + sha256(canonicalBytes({
+          lifecycle_head: lcHead,
+          evidence_root: root,
+          evidence_index_digest: indexDigest,
+          evidence_count: entries.length,
+        }));
+        if (state !== String(m.checkpoint_head)) {
+          problems.push("state does not match the sealed checkpoint_head (manifest " +
+                        String(m.checkpoint_head).slice(0, 20) + "..., disk " +
+                        state.slice(0, 20) + "...) - state truncated, rolled back, " +
+                        "or replaced after sealing");
+        }
+      } catch (err) {
+        problems.push("state is not canonicalizable: " + err.message);
+      }
+      note("S8", "package checkpoint head", problems.length === 0,
+           problems.length ? problems.slice(0, 2).join("; ")
+                           : "checkpoint matches");
     }
   }
 

@@ -81,7 +81,8 @@ def _strict_scan(path):
         return dict(pairs)
 
     try:
-        raw = open(path, "rb").read()
+        with open(path, "rb") as fh:
+            raw = fh.read()
     except OSError:
         return problems
     try:
@@ -412,7 +413,8 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
         for e in order:
             p = os.path.join(package_dir, "evidence", e.get("path", ""))
             try:
-                leaves.append(_mk.leaf_hash(open(p, "rb").read()))
+                with open(p, "rb") as fh:
+                    leaves.append(_mk.leaf_hash(fh.read()))
             except OSError:
                 s13_problems.append("cannot read evidence file %r" % e.get("path"))
         root = _mk.root_hash(leaves)

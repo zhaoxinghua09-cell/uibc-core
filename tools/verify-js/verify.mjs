@@ -315,6 +315,94 @@ function verify(pkg) {
     }
   }
 
+  // S14 strict base64. A canonical encoding admits exactly one string per
+  // byte sequence; pad bits, missing padding and stray characters all decode
+  // permissively, so two decoders can disagree about what was signed. Only
+  // fields the package itself marks as base64 are examined -- a schema that
+  // does not use base64 cannot be false-flagged.
+  {
+    const docOf = (rel) => {
+      const p = join(pkg, rel);
+      return existsSync(p) ? readJson(p) : null;
+    };
+    const manifestD = docOf("manifest.json");
+    const identityD = docOf("identity.json");
+    const lifecycleD = docOf("lifecycle.json");
+    const indexD = docOf("evidence/index.json");
+    const b64Fields = [];
+    const walk = (node, path) => {
+      if (Array.isArray(node)) {
+        node.forEach((v, i) => walk(v, path + "[" + i + "]"));
+      } else if (node && typeof node === "object") {
+        for (const [k, v] of Object.entries(node)) {
+          const child = path ? path + "/" + k : k;
+          if (typeof v === "string" &&
+              (k.endsWith("_b64") || k.endsWith("_base64") || k === "base64")) {
+            b64Fields.push([child, v, k === "base64_url"]);
+          } else {
+            walk(v, child);
+          }
+        }
+      }
+    };
+    for (const [name, doc] of [["manifest.json", manifestD], ["identity.json", identityD],
+                               ["lifecycle.json", lifecycleD],
+                               ["evidence/index.json", indexD]]) {
+      if (doc) walk(doc, name);
+    }
+    if (b64Fields.length) {
+      const problems = [];
+      const STD = /^[A-Za-z0-9+/=]+$/, URL = /^[A-Za-z0-9-_=]+$/;
+      for (const [field, value, urlsafe] of b64Fields) {
+        const why = (() => {
+          if (!value) return "empty";
+          if (!(urlsafe ? URL : STD).test(value)) return "character outside the base64 alphabet";
+          const core = value.replace(/=+$/, "");
+          if (core.length % 4 === 1) return "length cannot be base64";
+          if (!value.endsWith("=") && value.length % 4 !== 0) return "unpadded input";
+          if (value.endsWith("=") && value.length % 4 !== 0) return "padded length is not a multiple of 4";
+          const buf = Buffer.from(value, "base64");
+          const back = buf.toString("base64");
+          if (value.endsWith("=") && back !== value) return "non-canonical: pad bits are not zero";
+          if (!urlsafe && value !== value.replace(/-/g, "+").replace(/_/g, "/")) return "urlsafe characters in standard base64";
+          return null;
+        })();
+        if (why) problems.push(field + ": " + why);
+      }
+      note("S14", "strict base64", problems.length === 0,
+           problems.length ? problems.slice(0, 4).join("; ")
+                           : b64Fields.length + " declared base64 field(s) are canonical");
+    }
+  }
+
+  // S10 attestation closure. Whether the six digests correspond to what
+  // actually ran is NOT decidable from a package; this check asks only that
+  // all six are declared and look like digests. Saying more would be the
+  // overclaim this project refuses elsewhere.
+  {
+    const mp = join(pkg, "manifest.json");
+    const m = existsSync(mp) ? readJson(mp) : null;
+  if (m && m.closure !== undefined && m.closure !== null) {
+    const CLOSURE_FIELDS = ["model_weights", "tokenizer", "chat_template",
+                            "engine_build", "decoding", "numeric_env"];
+    const SHA = /^(sha256:)?[0-9a-f]{64}$/;
+    const closure = m.closure;
+    const missing = [];
+    if (typeof closure !== "object" || Array.isArray(closure)) {
+      missing.push("closure is not an object");
+    } else {
+      for (const k of CLOSURE_FIELDS) {
+        const v = closure[k];
+        if (typeof v !== "string" || !SHA.test(v)) missing.push(k);
+      }
+    }
+    note("S10", "attestation closure declared", missing.length === 0,
+         missing.length ? "closure is incomplete or malformed: " + missing.join(", ")
+                        : "all 6 closure components declared with digests " +
+                          "(declaration only, contents are not verified)");
+  }
+  }
+
   // S12 timestamps, identifiers and the counts that must agree with them
   {
     const problems = [];

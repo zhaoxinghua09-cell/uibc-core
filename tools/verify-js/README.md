@@ -10,13 +10,16 @@
 | S2 identity consistency | yes | two JSON documents compared |
 | S4 evidence integrity | yes | SHA-256 over each file |
 | S5 evidence root | yes | RFC 8785 + one hash |
-| S7 index metadata | yes | field shapes and identifier syntax |
+| S6 seal signature | **Ed25519 only** | the public key is in the package, so a stranger can check it; an HMAC seal needs the owner's key and is reported INCONCLUSIVE |
+| S7 index metadata | yes | field shapes, identifier syntax, and the digest carried in the manifest |
+| S10 closure declared | yes | six components present and shaped like digests (declaration only) |
 | S11 strict serialization | yes | duplicate members, control characters, UTF-8 |
 | S12 timestamps and counts | yes | calendar arithmetic |
-| S6 seal signature | **no** | needs Ed25519 |
+| S14 strict base64 | yes | pad bits, missing padding, stray characters |
 | S13 Merkle / inclusion | **no** | needs the v1.1 tree |
-| S14, S15, S16, S17, S18 | **no** | base64 strictness, anchors, RFC 3161, receipt chain, policies |
-| S8, S10 | **no** | checkpoint head, closure declaration |
+| S15, S16, S17, S18 | **no** | anchors, RFC 3161, receipt chain, policies |
+| S8, S9 | **no** | checkpoint head, out-of-band pin |
+
 
 Because it cannot attest a signature, **it never returns `PASS`**. A structurally sound package comes back `INCONCLUSIVE`, and that sentence is the honest one: nothing was found wrong, and nothing was proven either.
 
@@ -27,18 +30,18 @@ node tools/verify-js/verify.mjs conformance/cases/01-the-shipped-package-untouch
 ```
 
 ```
-strict 19/36   refused 30/36      (tools/run_conformance.py --verify "node ... {pkg}")
+strict 23/36   refused 30/36      (tools/run_conformance.py --verify "node ... {pkg}")
 ```
 
 | | value | reading |
 |---|---|---|
-| packages in scope | 19 of 36 | 6 correct + 13 whose expected check is among the eight |
-| out of scope | 17 | the ones needing Ed25519, RFC 3161 or the tree |
-| identical FAIL set to Python | 13 | the second implementation reaches the same verdict for the same reason |
-| named an expected check | 13 (+6 positives) | what the suite scores |
+| packages in scope | 23 of 36 | 6 correct + 17 whose expected check is among the ten |
+| out of scope | 13 | the ones needing Ed25519, RFC 3161 or the tree |
+| identical FAIL set to Python | 17 | the second implementation reaches the same verdict for the same reason |
+| named an expected check | 17 (+6 positives) | what the suite scores |
 | refusals | 30 of 36 | the 30 mutated packages, and none of the correct ones |
 
-The number that matters is **identical FAIL set to Python: 13**, plus 13 cases where it names the same expected check Python does. Two implementations built from the spec, with no shared code, agreeing on which packages are broken and why, is the difference between "we have tests" and "anyone can check".
+The number that matters is **identical FAIL set to Python: 17**, plus 17 cases where it names the same expected check Python does. Two implementations built from the spec, with no shared code, agreeing on which packages are broken and why, is the difference between "we have tests" and "anyone can check".
 
 ## Two bugs this exercise found in its own work
 

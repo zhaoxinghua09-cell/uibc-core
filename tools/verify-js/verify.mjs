@@ -6,11 +6,12 @@
 // integrity (S4), evidence root (S5), Ed25519 seals (S6), index metadata (S7),
 // the package checkpoint (S8), the closure declaration (S10), strict
 // serialization (S11), timestamp and identifier strictness (S12), Merkle
-// inclusion (S13), strict base64 (S14) and anchor resolution (S15).
+// inclusion (S13), strict base64 (S14), anchor resolution (S15), the linear
+// receipt chain (S17) and policy artefact resolution (S18).
 //
-// Not covered, on purpose: external timestamps (S16), the receipt chain (S17),
-// policy artefact resolution (S18) and the out-of-band pin (S9) -- the last of
-// which needs an observation made outside this package. Those need
+// Not covered, on purpose: external timestamps (S16) and the out-of-band pin
+// (S9) -- both need something this checker does not hold: a token signed by a
+// key we do not have, and an observation made outside this package. Those need
 // RFC 3161 and an observation made outside this package. A checker that claimed them without implementing them would be worse
 // than one that says it cannot.
 // Because it cannot attest signatures, it never returns PASS.
@@ -673,6 +674,157 @@ function verify(pkg) {
       note("S15", "anchor event resolution", problems.length === 0,
            problems.length ? problems.slice(0, 3).join("; ")
                            : resolved + " anchor(s) resolved against the evidence Merkle root");
+    }
+  }
+
+  // S17 linear receipt chain. S8/S9/S13 all commit a TREE. None of them answers
+  // "is this record the successor of that record" -- the question a regulator
+  // asks when one receipt is pulled out of the middle of a stream. The link is
+  // previousReceiptHash = SHA-256 over the JCS of the predecessor's signed
+  // envelope, and the first receipt carries 64 zeros. A value JCS cannot encode
+  // is a FAIL, not a skip: an unjudgeable link is not an intact link.
+  {
+    const chainPath = join(pkg, "evidence", "chain.json");
+    if (existsSync(chainPath)) {
+      const GENESIS = "0".repeat(64);
+      const HEX64 = /^[0-9a-f]{64}$/;
+      const problems = [];
+      let checked = 0;
+      try {
+        const cdoc = readJson(chainPath);
+        const receipts = (cdoc && cdoc.receipts);
+        if (!cdoc || typeof cdoc !== "object") {
+          problems.push("chain document is not an object");
+        } else if (!Array.isArray(receipts) || !receipts.length) {
+          problems.push("chain document carries no receipts");
+        } else {
+          let prev = null;
+          for (let i = 0; i < receipts.length; i += 1) {
+            const item = receipts[i];
+            if (!item || typeof item !== "object") {
+              problems.push("receipt " + i + " is not an object");
+              continue;
+            }
+            const env = item.envelope;
+            const declared = item.previous_receipt_hash;
+            if (!env || typeof env !== "object") {
+              problems.push("receipt " + i + " carries no envelope object");
+              continue;
+            }
+            if (typeof declared !== "string" || !HEX64.test(declared)) {
+              problems.push("receipt " + i + ": previous_receipt_hash is not 64 lowercase hex characters");
+              continue;
+            }
+            if (i === 0 && declared !== GENESIS) {
+              problems.push("receipt 0: previous_receipt_hash is " + declared.slice(0, 12) +
+                            "..., but the first receipt of a chain must carry 64 zeros");
+            } else if (i > 0 && declared !== prev) {
+              problems.push("receipt " + i + ": previous_receipt_hash is " + declared.slice(0, 12) +
+                            "..., but the predecessor's digest is " + String(prev).slice(0, 12) + "...");
+            }
+            try {
+              prev = createHash("sha256").update(canonicalBytes(env)).digest("hex");
+            } catch (err) {
+              problems.push("receipt " + i + ": envelope cannot be canonicalized (" + err.message +
+                            "); a chain is FAIL rather than inconclusive because the value is unjudgeable, not merely absent");
+              prev = null;
+              continue;
+            }
+            checked += 1;
+          }
+        }
+      } catch (err) {
+        problems.push("chain.json is not readable: " + err.message);
+      }
+      note("S17", "linear receipt chain", problems.length === 0,
+           problems.length ? problems.slice(0, 3).join("; ")
+                           : checked + " receipt(s) linked by previousReceiptHash over JCS; genesis is 64 zeros");
+    }
+  }
+
+  // S18 policy artefact resolution. A policy_digest nobody can resolve is a
+  // number, not evidence. Every digest listed must match the artefact shipped
+  // next to it, and every digest a receipt declares must resolve in that map.
+  // The artefact has to be JSON: the digest is defined over its JCS encoding,
+  // so a PDF policy needs a JSON projection alongside -- a constraint of the
+  // draft, not of this implementation.
+  {
+    const policiesPath = join(pkg, "evidence", "policies.json");
+    if (existsSync(policiesPath)) {
+      const HEX64 = /^[0-9a-f]{64}$/;
+      const parseDigest = (v) => {
+        if (typeof v !== "string") return null;
+        let t = v.trim();
+        if (t.startsWith("sha256:")) t = t.slice(7);
+        return HEX64.test(t) ? t : null;
+      };
+      const required = [];
+      const chainPath2 = join(pkg, "evidence", "chain.json");
+      if (existsSync(chainPath2)) {
+        try {
+          const cdoc = readJson(chainPath2);
+          for (const item of (cdoc.receipts || [])) {
+            const env = item && item.envelope;
+            if (env && typeof env === "object" && typeof env.policy_digest === "string" && env.policy_digest) {
+              required.push(env.policy_digest);
+            }
+          }
+        } catch { /* S17 reports an unreadable chain */ }
+      }
+      const problems = [];
+      const known = new Set();
+      let resolved = 0;
+      try {
+        const pdoc = readJson(policiesPath);
+        const items = (pdoc && pdoc.policies);
+        if (!pdoc || typeof pdoc !== "object") {
+          problems.push("policies document is not an object");
+        } else if (!Array.isArray(items) || !items.length) {
+          problems.push("policies document lists no artefacts");
+        } else {
+          items.forEach((item, i) => {
+            if (!item || typeof item !== "object") { problems.push("policy " + i + " is not an object"); return; }
+            const declared = parseDigest(item.digest);
+            if (!declared) { problems.push("policy " + i + ": digest is not sha256:<64 hex>"); return; }
+            const rel = item.path;
+            if (typeof rel !== "string" || !rel) { problems.push("policy " + i + ": no path"); return; }
+            let body;
+            try {
+              body = readJson(join(pkg, rel));
+            } catch (err) {
+              problems.push("cannot read policy artefact " + JSON.stringify(rel) + " (" + err.message + "); " +
+                            "the draft's digest is defined over its JCS encoding, so a non-JSON artefact needs a JSON projection shipped alongside");
+              return;
+            }
+            let actual;
+            try {
+              actual = createHash("sha256").update(canonicalBytes(body)).digest("hex");
+            } catch (err) {
+              problems.push("policy " + i + ": artefact is not JCS-serializable (" + err.message + ")");
+              return;
+            }
+            if (actual !== declared) {
+              problems.push("policy " + i + ": declared digest " + declared.slice(0, 12) +
+                            "... but the artefact hashes to " + actual.slice(0, 12) + "...");
+              return;
+            }
+            known.add(declared);
+            resolved += 1;
+          });
+        }
+      } catch (err) {
+        problems.push("policies.json is not readable: " + err.message);
+      }
+      for (const digest of required) {
+        const d = parseDigest(digest);
+        if (d === null) problems.push("a receipt declares a malformed policy_digest " + JSON.stringify(digest));
+        else if (!known.has(d)) problems.push("receipt declares policy_digest " + d.slice(0, 12) +
+                                              "... which does not resolve in the package");
+      }
+      note("S18", "policy artefact resolution", problems.length === 0,
+           problems.length ? problems.slice(0, 3).join("; ")
+                           : resolved + " policy artefact(s) resolve to their declared SHA-256 over JCS; " +
+                             required.length + " digest(s) referenced by receipts resolved");
     }
   }
 

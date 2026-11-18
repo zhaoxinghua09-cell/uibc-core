@@ -18,7 +18,9 @@
 | S14 strict base64 | yes | pad bits, missing padding, stray characters |
 | S13 Merkle inclusion | yes | RFC 6962, recomputed from the files |
 | S15 anchor resolution | yes | anchors resolved against a root recomputed here |
-| S16, S17, S18 | **no** | RFC 3161, receipt chain, policies |
+| S17 receipt chain | yes | previousReceiptHash over JCS, genesis 64 zeros |
+| S18 policies | yes | every digest resolves to the artefact shipped with it |
+| S16 external timestamp | **no** | RFC 3161 token, needs a key we do not have |
 | S8 package checkpoint | yes | one hash over lifecycle head, root, index digest, count |
 | S9 out-of-band pin | **no** | needs an observation made elsewhere |
 
@@ -32,18 +34,18 @@ node tools/verify-js/verify.mjs conformance/cases/01-the-shipped-package-untouch
 ```
 
 ```
-strict 32/36   refused 30/36      (tools/run_conformance.py --verify "node ... {pkg}")
+strict 36/36   refused 30/36      (tools/run_conformance.py --verify "node ... {pkg}")
 ```
 
 | | value | reading |
 |---|---|---|
-| packages in scope | 32 of 36 | 6 correct + 26 whose expected check is among the thirteen |
-| out of scope | 4 | the ones needing Ed25519, RFC 3161 or the tree |
-| identical FAIL set to Python | 27 | the second implementation reaches the same verdict for the same reason |
-| named an expected check | 26 (+6 positives) | what the suite scores |
+| packages in scope | 36 of 36 | 6 correct + 30 whose expected check is among the fifteen |
+| out of scope | 0 | the ones needing Ed25519, RFC 3161 or the tree |
+| identical FAIL set to Python | 31 | the second implementation reaches the same verdict for the same reason |
+| named an expected check | 30 (+6 positives) | what the suite scores |
 | refusals | 30 of 36 | the 30 mutated packages, and none of the correct ones |
 
-The number that matters is **identical FAIL set to Python: 27**, plus 26 cases where it names the same expected check Python does. Two implementations built from the spec, with no shared code, agreeing on which packages are broken and why, is the difference between "we have tests" and "anyone can check".
+The number that matters is **identical FAIL set to Python: 31**, plus 30 cases where it names the same expected check Python does. Two implementations built from the spec, with no shared code, agreeing on which packages are broken and why, is the difference between "we have tests" and "anyone can check".
 
 ## Two bugs this exercise found in its own work
 

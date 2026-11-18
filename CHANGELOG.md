@@ -32,9 +32,26 @@ Nothing here is a ratified standard.
 ### Measured
 
 - Python: `strict 36/36   refused 30/36`
-- JavaScript: `strict 32/36   refused 30/36`
-- Identical FAIL set to Python: 27 of 36; named an expected check: 26 (+6 positives)
-- Out of scope: 4 packages (S9, S16-S18)
+- JavaScript: `strict 36/36   refused 30/36`
+- Identical FAIL set to Python: 31 of 36; named an expected check: 30 (+6 positives)
+- Out of scope: 0 packages -- the JavaScript verifier now agrees on all 36
+
+### Added (S17, S18)
+
+- **The second implementation now agrees with the first on all 36 packages.**
+  S17 recomputes `previousReceiptHash` over the JCS of the predecessor's signed
+  envelope and insists the first receipt of a chain carries 64 zeros. S18
+  resolves every `policy_digest` to the artefact shipped next to it, and rejects
+  one a receipt declares that resolves nowhere. A tree answers "was this byte
+  changed"; only the linear link answers "is this record the successor of that
+  record".
+- Fifteen of nineteen checks now have two independent implementations. The
+  four without one are S0 and S3 (not modelled as separate checks on this side),
+  and S9/S16, which need an observation or a key this checker does not hold.
+- Measured honestly: the FAIL *sets* still differ on 5 of 30 vectors -- the
+  JavaScript side reports a superset (an edited byte also moves the root,
+  S4 and S5). Same verdict, finer diagnosis. `named an expected check` is 30
+  of 30.
 
 ### Added (S15)
 

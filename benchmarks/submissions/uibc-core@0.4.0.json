@@ -2,8 +2,8 @@
  "schema": "uibc-bench/1",
  "submitter": "zhaoxinghua09-cell",
  "implementation": "uibc-core",
- "commit": "2c49558",
- "run_at_utc": "2026-11-18T17:22:29+00:00",
+ "commit": "21f3abd",
+ "run_at_utc": "2026-11-18T17:36:34+00:00",
  "machine": {
   "system": "Windows",
   "release": "11",
@@ -587,7 +587,7 @@
      "expect": "PASS 且耗时线性可接受",
      "result": "PASS",
      "failed_checks": [],
-     "note": "trust=unanchored elapsed=45.6ms"
+     "note": "trust=unanchored elapsed=46.4ms"
     },
     {
      "id": "RT09",

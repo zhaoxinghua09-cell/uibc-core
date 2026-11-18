@@ -19,6 +19,19 @@ A mutation that is **accepted** is a false accept. A hostile input that is **ref
 the case is documented as pass-by-design (for example an unanchored seal verifying under
 `open`, which proves provenance and not authorship).
 
+## 跨机器复现（本仓首次双机实测）
+
+同一 commit（`21f3abd`）在本机 Windows 与一台 Linux 云主机各跑一次，两份记录并列在
+[`leaderboard.md`](leaderboard.md)：
+
+- **变异基准三档完全一致**：open 2/21、pinned 1/21、head-pinned 0/21 —— 这一层是确定的，
+  不随机器漂移。
+- **红队差一例**：`RT03`（证据文件换成指向外部的符号链接）在 Linux 判 `FAIL`；Windows 上
+  无法构造该情形（`skipped=1`）。差异来自平台能力，不是实现差异。
+
+这正是记录里 `machine` 与 `skipped` 两列必须存在的理由：**9.5% 是可跨机复算的，
+不是某台机器上的偶得。**
+
 ## Record shape
 
 ```json

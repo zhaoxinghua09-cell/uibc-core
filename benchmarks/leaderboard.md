@@ -6,7 +6,8 @@ measured commit and machine so a reader can tell whether two rows are even compa
 
 | implementation | commit | mutation open (false accepts) | pinned | head-pinned | redteam refused | skipped | machine |
 |---|---|---|---|---|---|---|---|
-| uibc-core | `2c49558` | 2/21 (9.5%) | 1/21 (4.8%) | 0/21 | 11/15 | 1 | Windows py3.13.18 |
+| uibc-core | `21f3abd` | 2/21 (9.5%) | 1/21 (4.8%) | 0/21 | 12/15 | 0 | Linux py3.12.11 |
+| uibc-core | `21f3abd` | 2/21 (9.5%) | 1/21 (4.8%) | 0/21 | 11/15 | 1 | Windows py3.13.18 |
 
 `false accepts` counts mutations the verifier accepted, i.e. it believed a mutated package was
 intact. `refused` counts hostile inputs rejected as expected. `skipped` counts cases that could

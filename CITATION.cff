@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-message: "If you use uibc-core or UIBC in academic work, please cite it as below."
+message: "If you use uibc-core or UIBC in academic work, please cite it as below. This entry pins the archived 0.2.1 snapshot (2026-09-17); the current implementation is at v0.3.3 — see README for current state."
 type: software
 title: "uibc-core: Verifiable Evidence Packages for Autonomous AI Agents"
 abstract: >-

@@ -24,6 +24,35 @@ RFC 3161 token signed by a key we do not have. It therefore **never returns PASS
 sound package is INCONCLUSIVE, because nothing was found wrong and nothing was
 proven either.
 
+### This is now enforced, not asserted
+
+Until `tools/assert_second_impl.py` existed, "fifteen of nineteen" was a
+sentence in a document. Nothing stopped it from becoming false the moment
+somebody edited `uibc_core/verify.py` without touching
+`tools/verify-js/verify.mjs`. The CI job `second-implementation` now runs that
+script on every push and pull request, and it fails the build when:
+
+* a package the suite expects to accept is rejected by the second
+  implementation (a verifier that cries wolf teaches people to ignore it);
+* a package expected to be refused fails for a reason none of its expected
+  checks name (coincidence is not coverage);
+* a package expects a check the second implementation does not claim to
+  cover -- a check the Python side gained and the JavaScript side never carried.
+
+It deliberately does **not** require the identical FAIL set. The two
+implementations legitimately differ: on a corrupted evidence file JavaScript
+reports S5 as well as S4, and both are true about that package. Demanding
+set equality would force one of them to under-report in order to match the
+other, which is the opposite of what a cross-check is for. Five of the
+thirty-six packages currently differ this way, listed as measured rows in
+`tools/cross_impl_check.py --json`.
+
+The script was verified the only way that counts: by breaking the second
+implementation on purpose. With S15's verdict forced to pass, it reports the
+four anchor packages by name and exits 1; with S15 removed from the covered
+set, it reports the same four as out of scope and exits 1. Both restored runs
+print `36/36` and exit 0.
+
 ## Measured
 
 ```

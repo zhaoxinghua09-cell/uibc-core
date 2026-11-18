@@ -17,6 +17,18 @@ Nothing here is a ratified standard.
 
 ### Added
 
+- **CI now fails when the second implementation drifts.** `tools/assert_second_impl.py`
+  asserts that every package the suite accepts is accepted, every package it
+  refuses fails for a reason one of its expected checks names, and no package
+  expects a check the JavaScript side does not carry. Verified by breaking it
+  on purpose: with S15 forced to pass it names the four anchor packages and
+  exits 1; with S15 removed from the covered set it does the same. The new
+  `second-implementation` job runs it on every push and pull request. Set
+  equality is not required, because the two implementations legitimately
+  differ on five packages and forcing equality would make one of them lie.
+
+### Added
+
 - **The JavaScript verifier covers ten of nineteen checks, up from eight.**
   S14 strict base64: pad bits set, missing padding and stray characters all
   decode permissively, so two decoders can disagree about what was signed.

@@ -28,3 +28,30 @@ jobs:
 
       - name: Run test suite
         run: python -m pytest tests -q
+
+  second-implementation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: "3.13"
+
+      - name: Install test deps
+        run: python -m pip install --upgrade pip && pip install pytest ".[verify]"
+
+      - name: Node the runner already ships is enough
+        run: node --version
+
+      - name: Export the conformance suite
+        run: python tools/export_conformance.py
+
+      - name: The second implementation must not drift
+        # A verifier written from the spec in another language, sharing no code
+        # with the first, is only worth something while it keeps agreeing. This
+        # step fails the build when it stops: an accepted package it rejects, a
+        # refused package it fails for an unrelated reason, or a check the
+        # Python side gained that the JavaScript side never carried.
+        run: python tools/assert_second_impl.py

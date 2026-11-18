@@ -10,7 +10,7 @@
 | S3 | lifecycle state machine + semantics | 是 | 7 | 1 | 10 |
 | S4 | evidence integrity | 是 | 12 | 3 | 21 |
 | S5 | evidence root | 是 | 9 | 3 | 17 |
-| S6 | seal signature | 是 | 15 | 1 | 22 |
+| S6 | seal signature | 是 | 16 | 1 | 22 |
 | S7 | evidence index metadata | 否 | 5 | 1 | 10 |
 | S8 | package checkpoint head | 否 | 5 | 2 | 15 |
 | S9 | head pinned out-of-band | 否 | 5 | 1 | 15 |

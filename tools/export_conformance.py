@@ -34,6 +34,42 @@ from uibc_core.verify import verify  # noqa: E402
 CLEAN = os.path.join(_REPO, "fixtures", "clean.uibc")
 OUT = os.path.join(_REPO, "conformance")
 
+# --- Ed25519 sealing -------------------------------------------------------
+# The suite's own seals are HMAC, which no one without the owner's key can
+# check. An asymmetric seal is the one a stranger can verify -- so one case
+# seals with Ed25519 using a fixed seed (reproducible), and one flips a bit in
+# that signature.
+_ED_SEED = "5f" * 32
+
+
+def _seal_with_ed25519(pkg, tmp=None):
+    seed_path = tmp or os.path.join(tempfile.mkdtemp(prefix="uibc-seed-"), "ed.seed")
+    with open(seed_path, "w", encoding="ascii") as fh:
+        fh.write("ed25519:" + _ED_SEED)
+    subprocess.run([sys.executable, "-m", "uibc_core.cli", "submit", pkg,
+                    "--key", seed_path], check=True, cwd=_REPO, capture_output=True)
+
+
+def seal_ed25519(pkg):
+    _seal_with_ed25519(pkg)
+
+
+def flip_ed25519_signature(pkg):
+    _seal_with_ed25519(pkg)
+    path = os.path.join(pkg, "signatures", "seal.json")
+    with open(path, encoding="utf-8") as fh:
+        seal = json.load(fh)
+    sig = seal["signature"]
+    seal["signature"] = ("A" if sig[0] != "A" else "B") + sig[1:]
+    with open(path, "w", encoding="utf-8") as fh:
+        json.dump(seal, fh, ensure_ascii=False, indent=2)
+
+
+SEAL_GROUP = (
+    ("seal", [("flip one bit in an Ed25519 signature", flip_ed25519_signature,
+               "FAIL", "S6 verifies against the recorded public key")]),
+)
+
 POSITIVE = (
     ("the shipped package, untouched", None,
      "no mutation at all: refusing this means the verifier rejects a correct package"),
@@ -45,7 +81,10 @@ POSITIVE = (
      "checkpoint head added correctly; S8 must pass"),
     ("a package with one more declared evidence file", None,
      "the extra file is added AND declared in the index, so S1 must not fail"),
+    ("a package sealed with Ed25519", seal_ed25519,
+     "an asymmetric seal a stranger can verify with no secret at all"),
 )
+
 
 GROUPS = (
     ("core", oa.RED_TEAM),
@@ -53,6 +92,7 @@ GROUPS = (
     ("extended", oa.EXT_RED_TEAM),
     ("checkpoint", oa.CKPT_RED_TEAM),
 )
+GROUPS = GROUPS + SEAL_GROUP
 
 
 def slug(name):

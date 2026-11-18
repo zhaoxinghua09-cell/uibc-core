@@ -13,6 +13,33 @@ Nothing here is a ratified standard.
 
 ---
 
+## [Unreleased]
+
+### Added
+
+- **The second implementation verifies Ed25519 seals, not just structure.**
+  `tools/verify-js/verify.mjs` now checks S6 for asymmetric seals: it re-derives
+  the canonical payload (identity + manifest, plus lifecycle when the seal says
+  so), builds an Ed25519 public key from the one recorded in the package, and
+  verifies the signature with Node's own crypto. Coverage goes from seven checks
+  to eight of nineteen. An HMAC seal is reported as INCONCLUSIVE, because it
+  cannot be checked without the owner's key -- the verifier says so rather than
+  guessing.
+- **The suite now contains an asymmetric seal.** Two cases: "a package sealed with
+  Ed25519" (must be accepted) and "flip one bit in an Ed25519 signature" (must
+  fail S6). Until now every case carried an HMAC seal, so the property the
+  project keeps claiming -- *a stranger verifies provenance with no secret* --
+  had no vector. The seed is fixed, so the case is reproducible byte for byte.
+
+### Measured
+
+- Python: `strict 36/36   refused 30/36`
+- JavaScript: `strict 19/36   refused 30/36`
+- Identical FAIL set to Python: 13 of 36; named an expected check: 13 (+6 positives)
+- `tests/test_conformance.py` no longer hard-codes "5 positives": the counts are
+  read from the manifest, so the next case does not break the tests that guard
+  the suite.
+
 ## [0.4.0] - 2026-11-18
 
 This is the release that makes the eighteen checks reachable. Everything below

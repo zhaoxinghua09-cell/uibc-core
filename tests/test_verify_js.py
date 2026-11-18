@@ -30,7 +30,7 @@ def cases_root():
     with zipfile.ZipFile(_ZIP) as z:
         z.extractall(tmp)
     return os.path.join(tmp, "cases")
-COVERED = ("S1", "S2", "S4", "S5", "S7", "S11", "S12")
+COVERED = ("S1", "S2", "S4", "S5", "S6", "S7", "S11", "S12")
 
 
 def js(pkg):
@@ -51,7 +51,7 @@ class TestJavaScriptVerifier(unittest.TestCase):
         self.assertIn("not checked here", report["note"])
         self.assertEqual(sorted(report["covered"] if "covered" in report else
                                 [c["id"] for c in report["checks"]]),
-                         ["S1", "S11", "S12", "S2", "S4", "S5", "S7"])
+                         ["S1", "S11", "S12", "S2", "S4", "S5", "S6", "S7"])
 
     def test_it_catches_a_changed_byte_and_the_root(self):
         case = os.path.join(cases_root(), "06-flip-one-byte-in-evidence")

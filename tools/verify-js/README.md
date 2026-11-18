@@ -27,18 +27,18 @@ node tools/verify-js/verify.mjs conformance/cases/01-the-shipped-package-untouch
 ```
 
 ```
-strict 16/34   refused 29/34      (tools/run_conformance.py --verify "node ... {pkg}")
+strict 19/36   refused 30/36      (tools/run_conformance.py --verify "node ... {pkg}")
 ```
 
 | | value | reading |
 |---|---|---|
-| packages in scope | 16 of 34 | 5 correct + 11 whose expected check is in the seven |
-| out of scope | 18 | the ones needing Ed25519, RFC 3161 or the tree |
-| identical FAIL set to Python | 10 | the second implementation reaches the same verdict for the same reason |
-| named an expected check | 11 (+5 positives) | what the suite scores |
-| refusals | 29 of 34 | the 29 mutated packages, and none of the correct ones |
+| packages in scope | 19 of 36 | 6 correct + 13 whose expected check is among the eight |
+| out of scope | 17 | the ones needing Ed25519, RFC 3161 or the tree |
+| identical FAIL set to Python | 13 | the second implementation reaches the same verdict for the same reason |
+| named an expected check | 13 (+6 positives) | what the suite scores |
+| refusals | 30 of 36 | the 30 mutated packages, and none of the correct ones |
 
-The number that matters is **identical FAIL set to Python: 10**, plus 11 cases where it names the same expected check Python does. Two implementations built from the spec, with no shared code, agreeing on which packages are broken and why, is the difference between "we have tests" and "anyone can check".
+The number that matters is **identical FAIL set to Python: 13**, plus 13 cases where it names the same expected check Python does. Two implementations built from the spec, with no shared code, agreeing on which packages are broken and why, is the difference between "we have tests" and "anyone can check".
 
 ## Two bugs this exercise found in its own work
 

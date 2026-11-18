@@ -35,7 +35,7 @@ class TestConformanceSuite(unittest.TestCase):
         self.assertEqual(man["skipped"], [])
         mutated = [c for c in man["cases"] if c.get("expect") != "accept"]
         positive = [c for c in man["cases"] if c.get("expect") == "accept"]
-        self.assertEqual(len(positive), 5, "the suite needs both halves")
+        self.assertGreaterEqual(len(positive), 5, "the suite needs both halves")
         for case in positive:
             self.assertEqual(case["expected_checks"], [])
         for case in mutated:
@@ -72,11 +72,14 @@ class TestConformanceSuite(unittest.TestCase):
         """A verifier that refuses nothing must not pass the suite."""
         def always_pass(_pkg):
             return {"result": "PASS", "checks": []}
+        man = load()
+        n_pos = len([c for c in man["cases"] if c.get("expect") == "accept"])
         res = rc.run_all(always_pass)
-        # It clears the five positive cases by never refusing anything, and
-        # fails every mutated one. More than five means the suite lost its teeth.
-        self.assertEqual(res["passed"], 5)
-        self.assertEqual(res["cases"], 34)
+        # It clears every positive case by never refusing anything, and fails
+        # the mutated ones. Clearing more than the positives means the suite
+        # lost its teeth.
+        self.assertEqual(res["passed"], n_pos)
+        self.assertEqual(res["cases"], len(man["cases"]))
 
     def test_a_verifier_that_refuses_everything_fails_every_positive(self):
         """The half the suite was missing: blanket refusal must not be rewarded."""
@@ -85,7 +88,8 @@ class TestConformanceSuite(unittest.TestCase):
         res = rc.run_all(always_fail)
         self.assertLess(res["passed"], res["cases"])
         positives = [r for r in res["rows"] if not r["expected"]]
-        self.assertEqual(len(positives), 5)
+        self.assertEqual(len(positives), len([c for c in load()["cases"]
+                                              if c.get("expect") == "accept"]))
         for row in positives:
             self.assertFalse(row["ok"], row["attack"])
             self.assertIn("correct", row["note"])

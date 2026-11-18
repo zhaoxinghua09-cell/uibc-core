@@ -5,7 +5,7 @@
 | 检查 | 名称 | 出厂包是否走到 | 测试 | 红队 | 文档 |
 |---|---|---|---|---|---|
 | S0 | verifier robustness | 否 | 4 | 0 | 5 |
-| S1 | package structure | 是 | 5 | 1 | 18 |
+| S1 | package structure | 是 | 6 | 1 | 19 |
 | S2 | identity consistency | 是 | 5 | 1 | 12 |
 | S3 | lifecycle state machine + semantics | 是 | 7 | 1 | 10 |
 | S4 | evidence integrity | 是 | 11 | 3 | 20 |
@@ -17,12 +17,12 @@
 | S10 | attestation closure declared | 否 | 4 | 2 | 5 |
 | S11 | strict serialization | 是 | 3 | 1 | 8 |
 | S12 | timestamp and identifier strictness | 是 | 5 | 1 | 7 |
-| S13 | merkle inclusion proofs | 否 | 7 | 4 | 7 |
+| S13 | merkle inclusion proofs | 否 | 7 | 4 | 8 |
 | S14 | strict base64 | 否 | 3 | 2 | 4 |
-| S15 | anchor event resolution | 否 | 5 | 4 | 5 |
+| S15 | anchor event resolution | 否 | 5 | 4 | 6 |
 | S16 | external timestamp (RFC 3161) | 否 | 6 | 4 | 7 |
-| S17 | linear receipt chain | 否 | 5 | 2 | 9 |
-| S18 | policy artefact resolution | 否 | 6 | 2 | 13 |
+| S17 | linear receipt chain | 否 | 5 | 2 | 10 |
+| S18 | policy artefact resolution | 否 | 6 | 2 | 14 |
 
 出厂包判定：`INCONCLUSIVE`，走到 8/19 项（未签名的包停在 S6，后面不越过去）。
 

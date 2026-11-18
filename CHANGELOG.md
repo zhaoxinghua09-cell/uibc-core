@@ -32,9 +32,22 @@ Nothing here is a ratified standard.
 ### Measured
 
 - Python: `strict 36/36   refused 30/36`
-- JavaScript: `strict 28/36   refused 30/36`
-- Identical FAIL set to Python: 23 of 36; named an expected check: 22 (+6 positives)
-- Out of scope: 8 packages (S9, S15-S18)
+- JavaScript: `strict 32/36   refused 30/36`
+- Identical FAIL set to Python: 27 of 36; named an expected check: 26 (+6 positives)
+- Out of scope: 4 packages (S9, S16-S18)
+
+### Added (S15)
+
+- **The JavaScript verifier resolves anchors.** Four vectors, one code path:
+  a corrupt inclusion proof, a leaf hash that is not a digest, 30 February,
+  and a root this package cannot recompute. The lesson from the Python side
+  carries over: the claimed leaf must be the leaf that actually sits at that
+  index, or the proof is being checked against a subject the set does not
+  contain at that position. Resolving against our own root proves the anchor
+  was built from this package; it does not prove a third party saw it, and an
+  anchor naming an external log stays unresolved rather than counted.
+- Thirteen of nineteen checks now have two independent implementations. The
+  four packages still out of scope are S9 (out-of-band pin) and S16/S17/S18.
 
 ### Added (S8)
 

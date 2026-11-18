@@ -17,7 +17,7 @@ REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 JS = os.path.join(REPO, "tools", "verify-js", "verify.mjs")
 MANIFEST = os.path.join(REPO, "conformance", "manifest.json")
 
-COVERED = ("S1", "S2", "S4", "S5", "S6", "S7", "S8", "S10", "S11", "S12", "S13", "S14")
+COVERED = ("S1", "S2", "S4", "S5", "S6", "S7", "S8", "S10", "S11", "S12", "S13", "S14", "S15")
 
 
 def run_js(pkg):

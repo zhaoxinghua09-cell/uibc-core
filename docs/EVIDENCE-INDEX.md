@@ -19,7 +19,7 @@
 | S12 | timestamp and identifier strictness | 是 | 6 | 1 | 8 |
 | S13 | merkle inclusion proofs | 否 | 8 | 4 | 9 |
 | S14 | strict base64 | 否 | 4 | 2 | 5 |
-| S15 | anchor event resolution | 否 | 5 | 4 | 7 |
+| S15 | anchor event resolution | 否 | 6 | 4 | 7 |
 | S16 | external timestamp (RFC 3161) | 否 | 6 | 4 | 8 |
 | S17 | linear receipt chain | 否 | 5 | 2 | 11 |
 | S18 | policy artefact resolution | 否 | 6 | 2 | 15 |

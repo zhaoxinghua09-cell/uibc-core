@@ -1,0 +1,88 @@
+{
+  "schema": "cdp-1",
+  "subject": {
+    "name": "agent-action-capsule (AAC)",
+    "version": "0.17.0",
+    "commit": null,
+    "measured_at": "2026-11-19T06:45:00+08:00"
+  },
+  "entries": [
+    {
+      "id": "AAC1", "kind": "REQUIREMENT",
+      "statement": "A reference verifier exists as an installable Python package.",
+      "statement_sha256": null, "status": "EXERCISED",
+      "tests": ["pip install agent-action-capsule==0.17.0"],
+      "evidence": ["https://pypi.org/pypi/agent-action-capsule/json"],
+      "owner": null, "review_by": null, "reason": null
+    },
+    {
+      "id": "AAC2", "kind": "REQUIREMENT",
+      "statement": "A second implementation exists in a different language (Rust).",
+      "statement_sha256": null, "status": "EXERCISED",
+      "tests": ["capsule-emit 0.0.13 published 2026-11-17"],
+      "evidence": ["https://api.github.com/repos/action-state-group/capsule-emit"],
+      "owner": null, "review_by": null, "reason": null
+    },
+    {
+      "id": "AAC3", "kind": "REQUIREMENT",
+      "statement": "The second implementation is maintained by a separate entity, not the specification author.",
+      "statement_sha256": null, "status": "NOT_PUBLIC",
+      "tests": [], "evidence": ["same GitHub org: action-state-group"],
+      "owner": null, "review_by": null,
+      "reason": "both implementations sit under one organisation; independence is asserted by neither, and is not publicly documented"
+    },
+    {
+      "id": "AAC4", "kind": "REQUIREMENT",
+      "statement": "Malformed input is refused with a message that names the limit, not a stack trace.",
+      "statement_sha256": null, "status": "EXERCISED",
+      "tests": ["four hostile inputs measured 2026-11-18: notjson/nan/deep/badutf"],
+      "evidence": ["docs/COMPETITORS.md (our measurement record)"],
+      "owner": null, "review_by": null, "reason": null
+    },
+    {
+      "id": "AAC5", "kind": "REQUIREMENT",
+      "statement": "A false-accept rate under mutation is published and reproducible.",
+      "statement_sha256": null, "status": "NOT_PUBLIC",
+      "tests": [], "evidence": ["no mutation benchmark found in repo or PyPI metadata"],
+      "owner": null, "review_by": null,
+      "reason": "no published mutation corpus or false-accept number was found as of the measurement date; absence of a publication is recorded as such"
+    },
+    {
+      "id": "AAC6", "kind": "REQUIREMENT",
+      "statement": "The project publishes a coverage ledger naming requirements it has not tested.",
+      "statement_sha256": null, "status": "NOT_PUBLIC",
+      "tests": [], "evidence": ["no cdp-1 ledger in repository or release artefacts"],
+      "owner": null, "review_by": null,
+      "reason": "no machine-readable statement of untested requirements exists; this is the axis this ledger is meant to measure"
+    },
+    {
+      "id": "AAC7", "kind": "REQUIREMENT",
+      "statement": "The format has a registered Internet-Draft.",
+      "statement_sha256": null, "status": "EXERCISED",
+      "tests": ["datatracker API rev=05"],
+      "evidence": ["https://datatracker.ietf.org/api/v1/doc/document/?name=draft-mih-scitt-agent-action-capsule"],
+      "owner": null, "review_by": null, "reason": null
+    },
+    {
+      "id": "AAC8", "kind": "REQUIREMENT",
+      "statement": "Third parties have run the verifier and left public records.",
+      "statement_sha256": null, "status": "EXERCISED",
+      "tests": ["13 listed, 10 marked ran and verified with links"],
+      "evidence": ["agent-action-capsule/INTEROP.md", "docs/COMPETITIVE-STATE.md (our measurement record)"],
+      "owner": null, "review_by": null, "reason": null
+    },
+    {
+      "id": "AAC9", "kind": "REQUIREMENT",
+      "statement": "An append-only transparency log with checkpoints is public.",
+      "statement_sha256": null, "status": "EXERCISED",
+      "tests": ["anchor.agentactioncapsule.org: 15,134 entries, checkpoint 2026-10-31"],
+      "evidence": ["https://anchor.agentactioncapsule.org"],
+      "owner": null, "review_by": null, "reason": null
+    }
+  ],
+  "summary": {
+    "total": 9, "exercised": 6, "untested": 0, "exempt": 0, "not_public": 3,
+    "disclosure_completeness": 0.6667, "named_gap_ratio": 1.0
+  },
+  "signature": null
+}

@@ -9,6 +9,8 @@ and it is unrelated to the UIBCDF computational-biology organisation.
 > **有人验过吗？先看 [EVIDENCE-INDEX.md](EVIDENCE-INDEX.md)** — 按 L1 自我复现／L2 异体审查／L3 第二实现／L3.5 外部语料／L4 外部节点分级；外部节点当前为 0，表内如实标注。
 >
 > **不知道从哪进？先看 [STRUCTURE.md](STRUCTURE.md)** — 五层地图（规范／实现／工具／验证／存证）与三条阅读路线。
+>
+> **我们没测什么，也写在文件里** — [`coverage/`](coverage/README.md) 是一份 CDP-1 覆盖账本：20 条条目逐条给状态，缺口必须写原因、责任人和复核日期。当前 `20` 条中 `19` 条有执行测试，唯一未执行的一条是"规范中每条 MUST 是否都已逐条枚举"——我们自己把这个缺口点名。校验：`python tools/coverage_ledger.py --check`。榜单里没有账本的实现标 `UNDISCLOSED`，不参与排名。
 
 ## Verify it yourself — one command, no install, no account
 

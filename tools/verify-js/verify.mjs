@@ -1182,6 +1182,9 @@ function verify(pkg, opts = {}) {
       for (const ev of events) {
         const at = ev.at || ev.created_at || ev.timestamp;
         if (!realDate(at)) { problems.push("lifecycle event without a real time"); break; }
+        if (ev.payload_hash != null && !/^[0-9a-f]{64}$/.test(String(ev.payload_hash))) {
+          problems.push("lifecycle event payload_hash is not 64 lowercase hex"); break;
+        }
         if (last && Date.parse(at) < Date.parse(last)) {
           problems.push("lifecycle time goes backwards"); break;
         }

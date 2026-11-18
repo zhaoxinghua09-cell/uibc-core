@@ -562,6 +562,20 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
         elif declared_count != actual_count:
             s12_problems.append("manifest.json: evidence_count says %d, index holds %d"
                                % (declared_count, actual_count))
+    # payload_hash is written by every event and was read by no check (F-008,
+    # found by tools/check_field_coverage.py on 2026-11-19: replace the null with
+    # any string and every check still said what it said before). A declared hash
+    # is a claim; the shape of the claim is checkable even when the payload it
+    # names is not shipped. Saying so is weaker than checking it, and stronger
+    # than pretending the field does not exist.
+    _payload_hash_re = re.compile(r"\A[0-9a-f]{64}\Z")
+    for _i, _ev in enumerate(lifecycle.get("events") or []):
+        _ph = _ev.get("payload_hash")
+        if _ph is not None and not (isinstance(_ph, str) and _payload_hash_re.match(_ph)):
+            s12_problems.append(
+                "lifecycle.json: events[%d].payload_hash=%r is not 64 lowercase hex"
+                % (_i, _ph))
+
     record("S12", "timestamp and identifier strictness", not s12_problems,
            "; ".join(s12_problems[:4]) if s12_problems else
            "timestamps are RFC 3339 with a zone; UUIDs are lowercase and non-nil")

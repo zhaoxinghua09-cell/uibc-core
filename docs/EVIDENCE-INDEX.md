@@ -6,17 +6,17 @@
 |---|---|---|---|---|---|
 | S0 | verifier robustness | 否 | 4 | 0 | 9 |
 | S1 | package structure | 是 | 8 | 1 | 25 |
-| S2 | identity consistency | 是 | 7 | 1 | 17 |
-| S3 | lifecycle state machine + semantics | 是 | 9 | 1 | 15 |
-| S4 | evidence integrity | 是 | 12 | 3 | 26 |
-| S5 | evidence root | 是 | 9 | 3 | 22 |
-| S6 | seal signature | 是 | 16 | 1 | 26 |
+| S2 | identity consistency | 是 | 7 | 1 | 18 |
+| S3 | lifecycle state machine + semantics | 是 | 9 | 1 | 16 |
+| S4 | evidence integrity | 是 | 12 | 3 | 27 |
+| S5 | evidence root | 是 | 9 | 3 | 23 |
+| S6 | seal signature | 是 | 16 | 1 | 27 |
 | S7 | evidence index metadata | 否 | 5 | 1 | 12 |
 | S8 | package checkpoint head | 否 | 6 | 2 | 16 |
 | S9 | head pinned out-of-band | 否 | 6 | 1 | 17 |
 | S10 | attestation closure declared | 否 | 5 | 2 | 7 |
 | S11 | strict serialization | 是 | 5 | 1 | 15 |
-| S12 | timestamp and identifier strictness | 是 | 6 | 2 | 15 |
+| S12 | timestamp and identifier strictness | 是 | 7 | 2 | 16 |
 | S13 | merkle inclusion proofs | 否 | 8 | 4 | 10 |
 | S14 | strict base64 | 否 | 4 | 2 | 6 |
 | S15 | anchor event resolution | 否 | 6 | 4 | 9 |

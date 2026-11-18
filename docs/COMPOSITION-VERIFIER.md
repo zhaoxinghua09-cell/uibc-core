@@ -46,7 +46,7 @@ Verification is offline and does not call the issuer. The whole claim is reprodu
 ```bash
 python -m uibc_core.cli demo          # build, seal, verify, tamper, catch
 python benchmark/run.py               # 21-class benchmark, undocumented acceptance = 0
-python -m unittest discover -s tests  # 529 tests
+python -m unittest discover -s tests  # 531 tests
 ```
 
 ## 3. What we do NOT claim (the part that keeps us honest)

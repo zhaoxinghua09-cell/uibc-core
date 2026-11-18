@@ -15,6 +15,31 @@ Nothing here is a ratified standard.
 
 ## [Unreleased]
 
+### Every field, and who notices when you change it (2026-11-19)
+
+- **`tools/check_field_coverage.py`** asks the F-007 question by measurement:
+  for each of the 59 leaf fields a package writes, replace the value with a
+  different one of the same shape, run verify, and record every check whose
+  result moved - in either direction, not only to FAIL. 36 alterations move
+  something; 23 move nothing.
+- **The 23 are not a list of holes, they are a list of reasons**, and every one
+  is written down: descriptive fields (schema tag, version, media type, note),
+  unreferenced values (the chain's last event id, evidence ids, whose uniqueness
+  is not checked - stated rather than implied), undecidable ones (per-event
+  signatures the format defines no payload for; an HMAC seal whose secret the
+  verifier does not hold, where INCONCLUSIVE is the correct answer), and two
+  enums nothing validates yet.
+- **One real hole, fixed:** `payload_hash` was written by every lifecycle event
+  and read by nothing - replace the `null` with any string and every check said
+  what it said before (F-008). `S12` now requires 64 lowercase hex when the field
+  is declared, in both implementations. This checks the shape of the claim, not
+  its correspondence to a payload the package does not ship.
+- **Frozen gate:** `tests/test_field_coverage.py` fails if a field becomes
+  silent without a reason on record, and also fails if a listed one stops being
+  silent (both directions, so the document cannot quietly rot).
+- **`docs/FIELD-COVERAGE.md`** carries the full 59-row matrix.
+
+
 ### A field that existed and nobody read (2026-11-19)
 
 - **Second shapes for the five single-sample checks.** Writing them found a

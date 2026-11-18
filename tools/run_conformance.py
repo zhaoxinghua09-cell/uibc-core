@@ -55,10 +55,22 @@ def external(command):
     return run
 
 
+def reported_failures(got):
+    return {c.get("id") for c in got.get("checks", [])
+            if str(c.get("result", "")).upper() == "FAIL"}
+
+
 def judge(case, got):
     verdict = (got.get("result") or "").upper()
-    reported = {c.get("id") for c in got.get("checks", [])
-                if str(c.get("result", "")).upper() == "FAIL"}
+    if case.get("expect") == "accept":
+        # The other half: a correct package must not be refused. Without these,
+        # a verifier that refuses everything scores full marks.
+        ok = verdict not in ("FAIL",) and not reported_failures(got)
+        return {"id": case["id"], "attack": case["attack"], "ok": ok,
+                "refused": verdict == "FAIL", "verdict": verdict,
+                "reported": [], "expected": [],
+                "note": "" if ok else "refused a package that is correct"}
+    reported = reported_failures(got)
     named = bool(reported & set(case["expected_checks"]))
     refused = verdict in ("FAIL", "INCONCLUSIVE")
     return {"id": case["id"], "attack": case["attack"],

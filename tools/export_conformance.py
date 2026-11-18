@@ -33,6 +33,19 @@ from uibc_core.verify import verify  # noqa: E402
 CLEAN = os.path.join(_REPO, "fixtures", "clean.uibc")
 OUT = os.path.join(_REPO, "conformance")
 
+POSITIVE = (
+    ("the shipped package, untouched", None,
+     "no mutation at all: refusing this means the verifier rejects a correct package"),
+    ("a package with its tree and chain appended", oa.build_v11,
+     "tree and chain added correctly; S13 and S17 must pass"),
+    ("a package with extended evidence appended", oa.build_ext,
+     "base64, anchors and policies added correctly; S14, S15 and S18 must pass"),
+    ("a package with a checkpoint appended", oa.build_ckpt,
+     "checkpoint head added correctly; S8 must pass"),
+    ("a package with one more declared evidence file", None,
+     "the extra file is added AND declared in the index, so S1 must not fail"),
+)
+
 GROUPS = (
     ("core", oa.RED_TEAM),
     ("tree-and-chain", oa.V11_RED_TEAM),
@@ -60,6 +73,41 @@ def digest(pkg):
             with open(full, "rb") as fh:
                 h.update(fh.read())
     return h.hexdigest()
+
+
+def build_positive(name, fn, why, index):
+    """A package that must not be refused, with the verdict it really produced."""
+    tmp = tempfile.mkdtemp(prefix="uibc-cc-pos-")
+    try:
+        pkg = oa._prepare(CLEAN, tmp)
+        if fn:
+            fn(pkg)
+        if name.endswith("declared evidence file"):
+            body = b"declared, therefore legitimate\n"
+            with open(os.path.join(pkg, "evidence", "extra-declared.txt"), "wb") as fh:
+                fh.write(body)
+            p = os.path.join(pkg, "evidence", "index.json")
+            with open(p, encoding="utf-8") as fh:
+                doc = json.load(fh)
+            doc.setdefault("files", []).append(
+                {"path": "extra-declared.txt", "sha256": hashlib.sha256(body).hexdigest(),
+                 "kind": "ACTION", "bytes": len(body)})
+            with open(p, "w", encoding="utf-8") as fh:
+                json.dump(doc, fh, ensure_ascii=False)
+        rep = oa._verdict(pkg)
+        if "FAIL" in rep["result"] or rep["failed_checks"]:
+            return None, "a package meant to be accepted was refused: %s" % rep
+        dest = os.path.join(OUT, "cases", "%02d-%s" % (index, slug(name)))
+        if os.path.isdir(dest):
+            shutil.rmtree(dest)
+        shutil.copytree(pkg, dest)
+        return {"id": "%02d" % index, "group": "positive", "attack": name,
+                "why": why, "expectation": "must be accepted", "expect": "accept",
+                "expected_result": rep["result"], "expected_checks": [],
+                "path": "cases/%02d-%s" % (index, slug(name)),
+                "sha256": digest(dest)}, None
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
 
 
 def build_case(name, fn, expectation, why, group, index):
@@ -97,6 +145,14 @@ def export():
         shutil.rmtree(os.path.join(OUT, "cases"))
     os.makedirs(os.path.join(OUT, "cases"))
     cases, skipped, index = [], [], 0
+    for name, fn, why in POSITIVE:
+        index += 1
+        rec, why_not = build_positive(name, fn, why, index)
+        if rec:
+            cases.append(rec)
+        else:
+            index -= 1
+            skipped.append({"attack": name, "reason": why_not})
     for group, table in GROUPS:
         for name, fn, expectation, why in table:
             index += 1
@@ -116,8 +172,10 @@ def export():
             "one of expected_checks.",
             "Reporting FAIL for a case in this suite is the requirement; the "
             "exact reason strings are not testable across implementations.",
-            "Every case started from a correct package and then broke exactly "
-            "one thing.",
+            "A case with \"expect\": \"accept\" must not be refused; a verifier "
+            "that refuses everything fails those.",
+            "Every mutated case started from a correct package and then broke "
+            "exactly one thing.",
         ],
         "cases": cases,
         "skipped": skipped,

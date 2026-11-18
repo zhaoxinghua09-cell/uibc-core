@@ -31,9 +31,14 @@ def load():
 class TestConformanceSuite(unittest.TestCase):
     def test_manifest_has_cases_and_no_gaps(self):
         man = load()
-        self.assertGreaterEqual(len(man["cases"]), 29)
+        self.assertGreaterEqual(len(man["cases"]), 34)
         self.assertEqual(man["skipped"], [])
-        for case in man["cases"]:
+        mutated = [c for c in man["cases"] if c.get("expect") != "accept"]
+        positive = [c for c in man["cases"] if c.get("expect") == "accept"]
+        self.assertEqual(len(positive), 5, "the suite needs both halves")
+        for case in positive:
+            self.assertEqual(case["expected_checks"], [])
+        for case in mutated:
             self.assertTrue(case["expected_checks"], case["attack"])
             self.assertIn(case["expected_result"], ("FAIL", "INCONCLUSIVE"))
 
@@ -68,7 +73,22 @@ class TestConformanceSuite(unittest.TestCase):
         def always_pass(_pkg):
             return {"result": "PASS", "checks": []}
         res = rc.run_all(always_pass)
-        self.assertEqual(res["passed"], 0)
+        # It clears the five positive cases by never refusing anything, and
+        # fails every mutated one. More than five means the suite lost its teeth.
+        self.assertEqual(res["passed"], 5)
+        self.assertEqual(res["cases"], 34)
+
+    def test_a_verifier_that_refuses_everything_fails_every_positive(self):
+        """The half the suite was missing: blanket refusal must not be rewarded."""
+        def always_fail(_pkg):
+            return {"result": "FAIL", "checks": [{"id": "S1", "result": "FAIL"}]}
+        res = rc.run_all(always_fail)
+        self.assertLess(res["passed"], res["cases"])
+        positives = [r for r in res["rows"] if not r["expected"]]
+        self.assertEqual(len(positives), 5)
+        for row in positives:
+            self.assertFalse(row["ok"], row["attack"])
+            self.assertIn("correct", row["note"])
 
     def test_the_positive_control_is_not_refused(self):
         """Every case is broken; the clean package must still be accepted."""

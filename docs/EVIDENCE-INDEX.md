@@ -21,8 +21,8 @@
 | S14 | strict base64 | 否 | 4 | 2 | 5 |
 | S15 | anchor event resolution | 否 | 6 | 4 | 7 |
 | S16 | external timestamp (RFC 3161) | 否 | 6 | 4 | 8 |
-| S17 | linear receipt chain | 否 | 5 | 2 | 11 |
-| S18 | policy artefact resolution | 否 | 6 | 2 | 15 |
+| S17 | linear receipt chain | 否 | 6 | 2 | 11 |
+| S18 | policy artefact resolution | 否 | 7 | 2 | 15 |
 
 出厂包判定：`INCONCLUSIVE`，走到 8/19 项（未签名的包停在 S6，后面不越过去）。
 

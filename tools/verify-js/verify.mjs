@@ -92,6 +92,40 @@ const canonicalBytes = (value) => Buffer.from(jcs(value), "utf8");
 // --- duplicate member detection -------------------------------------------
 // JSON.parse keeps the last duplicate silently, so a document with a repeated
 // key survives parsing. Scanning the raw text is the only way to see it.
+// A reader that recurses without a limit is a reader an attacker can kill with
+// a file. 4000 levels of "[" ends in a stack exhaustion, and a stack exhaustion
+// is not a verdict: the JSON.parse below is wrapped, but the throw arrives with
+// no check attached and the run lands on S0 - "the verifier broke" - which is a
+// statement about us, not about the input. A ceiling turns it back into a
+// verdict. 512 levels is far above any package and far below any stack.
+const MAX_NESTING = 512;
+
+function nestingTooDeep(text, limit = MAX_NESTING) {
+  let depth = 0;
+  let deepest = 0;
+  let inString = false;
+  let escaped = false;
+  for (const ch of text) {
+    if (inString) {
+      if (escaped) escaped = false;
+      else if (ch === "\\") escaped = true;
+      else if (ch === '"') inString = false;
+      continue;
+    }
+    if (ch === '"') inString = true;
+    else if (ch === "[" || ch === "{") {
+      depth += 1;
+      if (depth > deepest) {
+        deepest = depth;
+        if (deepest > limit) return deepest;
+      }
+    } else if (ch === "]" || ch === "}") {
+      if (depth > 0) depth -= 1;
+    }
+  }
+  return 0;
+}
+
 function duplicateKeys(raw) {
   const stack = [];
   const hits = [];
@@ -207,13 +241,20 @@ function verify(pkg, opts = {}) {
       // about what a permissive reader happens to tolerate. Without it a
       // manifest with a bare NaN reached the later checks and the package came
       // out INCONCLUSIVE - "nothing found wrong" about bytes nobody had judged.
+      const reached = nestingTooDeep(text);
+      if (reached) {
+        problems.push(rel + ": nested deeper than " + MAX_NESTING +
+                      " levels (reached " + reached + "), refusing to parse");
+        continue;
+      }
       try {
         JSON.parse(text);
       } catch (e) {
         problems.push(rel + ": not parseable JSON (" + e.message.slice(0, 60) + ")");
       }
     }
-        s11Unparseable = problems.some((x) => x.includes("not parseable JSON"));
+        s11Unparseable = problems.some((x) =>
+          x.includes("not parseable JSON") || x.includes("nested deeper than"));
     note("S11", "strict serialization", problems.length === 0, problems.slice(0, 4).join("; ") || "ok");
   }
   if (s11Unparseable) {

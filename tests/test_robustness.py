@@ -45,6 +45,10 @@ class TestHostileInput(unittest.TestCase):
         for name, row in rows.items():
             self.assertTrue(row["js"].startswith("FAIL"), name)
             self.assertTrue(row["py"].startswith("FAIL"), name)
+        # A depth ceiling, not a stack ending: 4000 levels is a verdict on the
+        # input, not a report about the verifier.
+        for impl in ("js", "py"):
+            self.assertIn("S11", rows["deep-nesting"][impl])
 
     def test_a_bare_nan_is_not_json_to_either_implementation(self):
         """The specific hole: a parser more permissive than the format.

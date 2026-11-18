@@ -22,6 +22,13 @@ performed. Our own verdict has one meaning only, and it is narrower:
 It does not claim the agent was correct, safe, or wise; that the recorded inputs were
 true or complete; or that any real-world outcome followed."
 
+## Head-to-head with the nearest peer
+
+`agent-action-capsule` 0.17.0 is measured against this project in
+[COMPETITORS.md](COMPETITORS.md): same day, same hostile inputs, every number
+with its command. Short version: it has the Internet-Draft and 23 releases, we
+have the second implementation and the shippable suite.
+
 ## The field is crowded, and several entries are further along than we are
 
 | project | stage (their word) | signature / canonicalization | time | log / anchoring | independent verification | what we do not have |

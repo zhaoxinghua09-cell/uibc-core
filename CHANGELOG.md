@@ -85,7 +85,11 @@ carrying the fields they inspect, so 0.4.0 is a major-looking bump under a
   nothing to point at (`none`) - and a citation for the first two, an empty
   string for the third. Rendered into every report as
   `checks[].basis = {class, citation, note}`.
-- **`tests/test_basis.py`** -- 6 tests: only documented classes carry a
+- **`uibc explain <pkg>`** -- the same verifier, printed for a person: one line
+  per check, then its class and citation, then the failure text. `verify` keeps
+  emitting JSON unchanged, because scripts parse that and a citation four
+  levels down in a JSON blob is not readable.
+- **`tests/test_basis.py`** -- 8 tests: only documented classes carry a
   citation, `none` never does, an unknown id borrows nothing, and the shipped
   report matches the module.
 

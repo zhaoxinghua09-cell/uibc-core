@@ -64,7 +64,24 @@ python3 tools/emit_aer1_receipts.py \
 
 同理，这也不等于"我们的收据可以在他们的生产系统里被公开解析"——那需要一个稳定的公开 URL 与他们的解析端点，我们没做。
 
-## 6. 复跑
+## 6. 一条命令自证
+
+外人不必读这份文档就能自己判。把语料目录传进去，它会跑完上面全部三件事：
+
+```bash
+python3 tools/aer1_interop_demo.py --kit /path/to/aer1/kit --json /tmp/demo.json
+```
+
+输出是两列判定加两类**性质完全不同**的分歧：
+
+| 统计项 | 含义 | 实测 |
+|---|---|---|
+| `cross-implementation divergence` | 我们和对方对同一份收据结论不同——那意味着有一方错了 | **none** |
+| `default-vs-strict divergence` | 我们自己两种模式不同——那是规范与语料的冲突，不是谁错 | `drop metadata_hash (PASS vs FAIL)` |
+
+把这两类分开计数是有意的：第一类为零才说明互操作真的成立；第二类不为零，说明矛盾在规范里，而且我们两边都如实报了出来。退出码 0 表示一切符合文档所述。
+
+## 7. 复跑
 
 ```bash
 python3 -m unittest tests.test_emit_aer1_receipts -v      # 11 项，零外部依赖

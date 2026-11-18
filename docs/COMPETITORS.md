@@ -21,7 +21,7 @@ verifier that refuses malformed input).
 | Licence | Apache-2.0 | BSD-3-Clause |
 | Language of the verifier | Python (first) **and JavaScript (second, independent)** | Python only |
 | Verifier modules | 25 | 40 |
-| Test files / test functions | 30 / 524 | 95 / 1189 |
+| Test files / test functions | 30 / 526 | 95 / 1189 |
 | Conformance material | 36 packages (6 positive, 30 mutations), shipped as its own zip | `vectors/` in the repo, referenced by tests, not in the sdist |
 | Second implementation is a **CI gate** | Yes — `second-implementation` job, 18 of 19 checks, 36/36 identical FAIL sets | No second implementation to gate |
 | Hostile-input suite | `tools/redteam_robustness.py`, 10 cases, table in `docs/ROBUSTNESS.md` | `tests/test_json_nesting_vectors.py`, `tests/test_verify_bounds.py`, `tests/test_parse.py` |
@@ -33,7 +33,7 @@ verifier that refuses malformed input).
 Re-run the machine-checkable half:
 
 ```
-python3 tools/check_doc_facts.py            # ours: 524 tests, 19 checks, 36 cases
+python3 tools/check_doc_facts.py            # ours: 526 tests, 19 checks, 36 cases
 python3 tools/redteam_robustness.py         # ours: 10 of 10 refused
 python3 tools/cross_impl_check.py --json    # ours: 36 of 36 identical
 ```
@@ -55,6 +55,28 @@ project did until today**, which recursed until the stack ended and reported S0
 survive. The lesson was taken: `MAX_NESTING = 512`, counted outside string
 literals, refused as S11 on both sides, and the same treatment for a manifest
 that parses as an array (it used to reach `.get()` and raise).
+
+## This comparison re-checks itself
+
+A table written once is a claim that decays. The numbers a public endpoint
+answers are recorded in `docs/COMPETITORS.json` and re-fetched by:
+
+```
+python3 tools/check_competitors.py           # measures, diffs, exits non-zero on drift
+python3 tools/check_competitors.py --json    # the same, machine-readable
+python3 tools/build_competitors_svg.py > docs/COMPETITORS.svg
+```
+
+Two endpoints are read: PyPI's JSON (version, release count, last upload) and
+GitHub's repository record (stars, forks, licence, last push). `GITHUB_TOKEN`
+is optional; without it GitHub answers 403 from this host and the field is
+reported as unmeasured rather than estimated.
+
+Four rows cannot come from an endpoint - test functions, modules, number of
+implementations, whether a specification was submitted. Those are the ones
+measured by hand on the date at the top of this page, and the picture says so.
+
+![The two projects side by side](COMPETITORS.svg)
 
 ## Where this project is behind, stated plainly
 

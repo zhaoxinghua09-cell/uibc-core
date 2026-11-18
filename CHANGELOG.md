@@ -15,6 +15,20 @@ Nothing here is a ratified standard.
 
 ## [Unreleased]
 
+### The comparison now re-checks itself (2026-11-18)
+
+- **`tools/check_competitors.py`** re-fetches what a stranger can fetch (PyPI
+  JSON, GitHub repo record) for both projects, diffs it against
+  `docs/COMPETITORS.json`, and exits non-zero when the world has moved. An
+  endpoint that fails to answer is recorded as unmeasured, not estimated.
+- **`docs/COMPETITORS.svg`**, built by `tools/build_competitors_svg.py` from the
+  recorded baseline, so the picture cannot go stale on its own. Four of its six
+  rows point their way; the two that point ours are the two a test count cannot
+  buy.
+- **`tests/test_competitors.py`** holds the offline half: the baseline is
+  complete, and the picture states the same numbers. The network half is
+  deliberately not in CI - a flaky gate teaches people to ignore gates.
+
 ### A depth ceiling, and a measured peer (2026-11-18)
 
 - **Nesting ceiling, both implementations.** 4000 levels of `[` used to end in a

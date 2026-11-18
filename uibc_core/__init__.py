@@ -38,13 +38,35 @@ def impl_digest() -> str:
     import os
     d = os.path.dirname(os.path.abspath(__file__))
     h = hashlib.sha256()
-    for name in sorted(os.listdir(d)):
-        if not name.endswith(".py"):
-            continue
-        with open(os.path.join(d, name), "rb") as f:
-            body = f.read()
+    for name, body in _module_bodies(d):
         h.update(name.encode("utf-8") + b"\0" + hashlib.sha256(body).digest())
     return h.hexdigest()
+
+
+def _module_bodies(directory):
+    """(name, bytes) for every module of this package, sorted by name.
+
+    A zipapp puts the package inside an archive, so `__file__` names a path that
+    is not a directory. Reading through the archive keeps SPEC_ID identical to
+    the checkout it was built from - a verifier that reports a different
+    provenance depending on how it was packaged would be reporting the
+    packaging rather than the code.
+    """
+    import os
+    try:
+        names = sorted(n for n in os.listdir(directory) if n.endswith(".py"))
+        return [(n, open(os.path.join(directory, n), "rb").read()) for n in names]
+    except OSError:
+        import zipfile
+        archive = os.path.dirname(directory)
+        prefix = os.path.basename(directory) + "/"
+        with zipfile.ZipFile(archive) as z:
+            out = []
+            for name in sorted(z.namelist()):
+                if (name.startswith(prefix) and name.endswith(".py")
+                        and "/" not in name[len(prefix):]):
+                    out.append((name[len(prefix):], z.read(name)))
+            return out
 
 
 def spec_id() -> str:

@@ -42,6 +42,9 @@ REPO = os.path.dirname(HERE)
 BASE = os.path.join(REPO, "fixtures", "clean.uibc")
 sys.path.insert(0, REPO)
 
+sys.path.insert(0, HERE)
+
+from anchor_check import anchor_digest  # noqa: E402
 from uibc_core.canonical import checkpoint_head, evidence_root  # noqa: E402
 from uibc_core.canonical import index_metadata_digest, lifecycle_head  # noqa: E402
 from uibc_core.signing import (ALGORITHM_ED25519, ed_generate_seed,  # noqa: E402
@@ -74,7 +77,7 @@ def head_of(pkg):
                            index_metadata_digest(index), len(index["entries"]))
 
 
-def build(out_dir, seed):
+def build(out_dir, seed, tsa_token=None, tsa_cabundle=None):
     pkg = os.path.join(out_dir, "package")
     if os.path.isdir(out_dir):
         shutil.rmtree(out_dir)
@@ -112,10 +115,20 @@ def build(out_dir, seed):
         "checkpoint_head": head,
         "evidence_count": manifest.get("evidence_count"),
         "published_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        # Fill after stamping anchor_digest (printed below) with a public TSA;
+        # an anchor without one pins a key and a head but not a moment.
+        "tsa": None,
         "note": ("Publish this file somewhere the package cannot reach: a release "
                  "asset, a DNS TXT record, a transparency log. A verifier that "
                  "reads it out of the bundle is back to trusting the bundle."),
     }
+    if tsa_token and tsa_cabundle:
+        anchor["tsa"] = {
+            "authority": "RFC 3161 (see gen_time)",
+            "covers": "anchor_digest",
+            "token_b64": base64.b64encode(open(tsa_token, "rb").read()).decode("ascii"),
+            "cabundle_b64": base64.b64encode(open(tsa_cabundle, "rb").read()).decode("ascii"),
+        }
     _jdump(os.path.join(out_dir, "anchor.json"), anchor)
     return out_dir, anchor
 
@@ -126,15 +139,23 @@ def main():
     seed = DEMO_SEED
     if "--out" in args:
         out = args[args.index("--out") + 1]
+    tsa_token = args[args.index("--tsa-token") + 1] if "--tsa-token" in args else None
+    tsa_cabundle = args[args.index("--tsa-cabundle") + 1] if "--tsa-cabundle" in args else None
     if "--seed-hex" in args:
         seed = bytes.fromhex(args[args.index("--seed-hex") + 1])
         if len(seed) != 32:
             raise SystemExit("--seed-hex must be 32 bytes (64 hex characters)")
-    out, anchor = build(out, seed)
+    out, anchor = build(out, seed, tsa_token=tsa_token, tsa_cabundle=tsa_cabundle)
     print("bundle   %s/package" % out)
     print("anchor   %s/anchor.json" % out)
     print("key_id   %s" % anchor["key_id"])
     print("head     %s" % anchor["checkpoint_head"])
+    print("anchor_digest  %s" % anchor_digest(anchor))
+    if anchor.get("tsa"):
+        print("timestamp      embedded (RFC 3161, covers anchor_digest)")
+    else:
+        print("timestamp      none - stamp anchor_digest with a public TSA, then")
+        print("               pass --tsa-token/--tsa-cabundle to attach it")
     print("")
     print("hand the anchor out over a channel the package cannot reach, then:")
     print("  python3 tools/anchor_check.py %s" % out)

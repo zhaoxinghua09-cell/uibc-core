@@ -54,6 +54,69 @@ def _resolve(bundle_dir, anchor_path):
     return pkg, _jload(anchor_path)
 
 
+def anchor_digest(anchor):
+    """The four values an RFC 3161 token should cover, canonically.
+
+    A timestamp over the bundle's own bytes would prove the bundle existed;
+    what has to be pinned is the *claim* - this agent, this key, this head.
+    """
+    import hashlib
+    from uibc_core.canonical import canonicalize
+    core = {k: anchor.get(k) for k in
+            ("agent_id", "key_id", "pubkey_b64", "checkpoint_head")}
+    return hashlib.sha256(canonicalize(core)).hexdigest()
+
+
+def _check_tsa(anchor):
+    """Judge the optional RFC 3161 block. Offline: token against the CA in the anchor.
+
+    Two modes, and the difference is stated rather than smoothed over:
+
+      covers="anchor_digest"  the token covers the four pinned values, so it
+                              proves *this claim* existed at that time
+      covers="file"           the token covers whatever data_sha256 names - a
+                              release-status file, say - and proves only that
+                              some bytes existed; binding is reported as
+                              "unbound" for exactly that reason
+    """
+    import base64
+    tsa = anchor.get("tsa")
+    if not tsa:
+        return {"present": False}
+    tok = tsa.get("token_b64")
+    cab = tsa.get("cabundle_b64")
+    if not tok or not cab:
+        return {"present": True, "ok": False, "binding": None,
+                "why": "tsa block lacks token_b64 and/or cabundle_b64 - "
+                       "an unchecked timestamp is not a timestamp"}
+    try:
+        tsr = base64.b64decode(tok.encode("ascii"), validate=True)
+        cabundle = base64.b64decode(cab.encode("ascii"), validate=True)
+    except Exception:
+        return {"present": True, "ok": False, "binding": None,
+                "why": "tsa token_b64/cabundle_b64 is not valid base64"}
+    covers = tsa.get("covers", "anchor_digest")
+    if covers == "anchor_digest":
+        digest = bytes.fromhex(anchor_digest(anchor))
+        binding = "anchor_digest"
+    elif covers == "file":
+        d = tsa.get("data_sha256") or ""
+        if len(d) != 64:
+            return {"present": True, "ok": False, "binding": "unbound",
+                    "why": "covers=file needs a 64-hex data_sha256"}
+        digest = bytes.fromhex(d)
+        binding = "unbound"
+    else:
+        return {"present": True, "ok": False, "binding": covers,
+                "why": "unknown tsa.covers %r" % (covers,)}
+
+    from uibc_core.tsa import verify_token
+    ok, info, probs = verify_token(tsr, digest, cabundle)
+    gen = (info or {}).get("gen_time") if isinstance(info, dict) else None
+    return {"present": True, "ok": bool(ok), "binding": binding,
+            "gen_time": gen, "why": "; ".join(probs) if probs else ""}
+
+
 def check(pkg, anchor):
     """Return a dict: anchored, verdict, reasons."""
     reasons = []
@@ -80,14 +143,20 @@ def check(pkg, anchor):
     for c in fails:
         reasons.append("%s %s: %s" % (c["id"], c["name"], c.get("detail", "")))
 
+    tsa = _check_tsa(anchor)
+    if tsa.get("present") and not tsa.get("ok"):
+        reasons.append("tsa: %s" % (tsa.get("why") or "token does not verify"))
+
     anchored = (v["result"] == "PASS" and v.get("trust_level") == "anchored"
-                and not fails)
+                and not fails and not (tsa.get("present") and not tsa.get("ok")))
     if v["result"] != "PASS" and not fails:
         reasons.append("verification incomplete: %s unresolved"
                        % ", ".join(c["id"] for c in inc))
     return {"anchored": anchored,
             "verdict": "ANCHORED" if anchored else
-                       ("FAILED" if fails else "NOT ANCHORED"),
+                       ("FAILED" if fails or (tsa.get("present") and not tsa.get("ok"))
+                        else "NOT ANCHORED"),
+            "tsa": tsa,
             "trust_level": v.get("trust_level"),
             "result": v["result"],
             "reasons": reasons,
@@ -107,6 +176,13 @@ def main():
     print("VERDICT: %s" % r["verdict"])
     if r.get("trust_level"):
         print("trust_level: %s   result: %s" % (r["trust_level"], r["result"]))
+    tsa = r.get("tsa") or {}
+    if tsa.get("present"):
+        print("timestamp: %s (%s)%s" % ("valid" if tsa.get("ok") else "INVALID",
+                                        tsa.get("binding") or "?",
+                                        (" at " + tsa["gen_time"]) if tsa.get("gen_time") else ""))
+    elif tsa is not None:
+        print("timestamp: none - the anchor pins a key and a head, not a moment")
     for reason in r["reasons"]:
         print("  - %s" % reason)
     if r["verdict"] == "NOT ANCHORED":

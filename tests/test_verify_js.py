@@ -30,7 +30,7 @@ def cases_root():
     with zipfile.ZipFile(_ZIP) as z:
         z.extractall(tmp)
     return os.path.join(tmp, "cases")
-COVERED = ("S1", "S2", "S4", "S5", "S6", "S7", "S11", "S12")
+COVERED = ("S1", "S2", "S4", "S5", "S6", "S7", "S10", "S11", "S12", "S14")
 
 
 def js(pkg):

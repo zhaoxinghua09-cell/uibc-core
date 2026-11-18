@@ -17,6 +17,31 @@ Nothing here is a ratified standard.
 
 ### Added
 
+- **The JavaScript verifier covers ten of nineteen checks, up from eight.**
+  S14 strict base64: pad bits set, missing padding and stray characters all
+  decode permissively, so two decoders can disagree about what was signed.
+  Only fields the package itself marks as base64 are examined, so a schema
+  that does not use base64 cannot be false-flagged. S10 the closure
+  declaration: six components must be present and shaped like digests --
+  declaration only, because whether those digests match what actually ran is
+  not decidable from a package.
+- Both checks are silent on a package that declares neither, exactly as the
+  Python verifier is: the correct package's report still shows eight checks,
+  not ten.
+
+### Measured
+
+- Python: `strict 36/36   refused 30/36`
+- JavaScript: `strict 23/36   refused 30/36`
+- Identical FAIL set to Python: 17 of 36; named an expected check: 17 (+6 positives)
+- Out of scope: 13 packages (S8, S9, S13, S15-S18)
+
+---
+
+## [0.4.1] - 2026-11-18 (the second implementation grows)
+
+### Added
+
 - **The second implementation verifies Ed25519 seals, not just structure.**
   `tools/verify-js/verify.mjs` now checks S6 for asymmetric seals: it re-derives
   the canonical payload (identity + manifest, plus lifecycle when the seal says

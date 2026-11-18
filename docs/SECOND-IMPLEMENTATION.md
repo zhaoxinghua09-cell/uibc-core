@@ -10,11 +10,14 @@ an inconvenience.
 
 ## What it decides
 
-Seven of the nineteen checks: S1 structure, S2 identity, S4 evidence integrity,
-S5 evidence root, S7 index metadata (shape **and** the metadata digest carried
-in the manifest), S11 strict serialization, S12 timestamps and counts.
+Ten of the nineteen checks: S1 structure, S2 identity, S4 evidence integrity,
+S5 evidence root, S6 the seal (for Ed25519, where the public key is in the
+package; an HMAC seal is INCONCLUSIVE because it needs the owner's key), S7
+index metadata (shape **and** the digest carried in the manifest), S10 the
+closure declaration, S11 strict serialization, S12 timestamps and counts, and
+S14 strict base64.
 
-**Not** S6 signatures, S13 Merkle proofs, S14/S15/S16/S17/S18, S8, S10 — those
+**Not** S13 Merkle proofs, S15/S16/S17/S18, S8, S9 — those
 need Ed25519, RFC 3161 and the v1.1 tree. It therefore **never returns PASS**: a
 sound package is INCONCLUSIVE, because nothing was found wrong and nothing was
 proven either.
@@ -22,15 +25,15 @@ proven either.
 ## Measured
 
 ```
-strict 19/36   refused 30/36
+strict 23/36   refused 30/36
 ```
 
 | | value |
 |---|---|
-| packages in scope | 19 of 36 (6 correct + 13 whose expected check is among the eight) |
-| out of scope | 17 |
-| identical FAIL set to Python | 13 |
-| named the same expected check | 13 (+6 positives) |
+| packages in scope | 23 of 36 (6 correct + 17 whose expected check is among the ten) |
+| out of scope | 13 |
+| identical FAIL set to Python | 17 |
+| named the same expected check | 17 (+6 positives) |
 
 Two implementations written from the specification, sharing no code, agreeing
 on which packages are broken and for which reason — that is the difference

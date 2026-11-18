@@ -20,7 +20,7 @@
 | 11 | 性能 | CCS 亚毫秒/次调用 | **两个口径都测**：**1.22 ms/次调用**（median，300 次，含索引重写与写盘；p95 1.93 ms）＋ 23 ms/包（median，50 次） | **同量级（1 ms vs 亚毫秒），不宣称领先** | `tools/latency_per_call.py`、`tools/out/latency.json` |
 | 12 | 独立见证人联署 | 1F916、Sello | **无** | **弱（结构受限）** | 需第三方，自己不能发给自己 |
 | 13 | 透明日志 / 外部锚 | 1F916、RFC 9162、AAC 自建 SCITT TS | **两个后端已实现**：OTS 日历（3 个）+ Nostr relay（BIP-340/NIP-01），零依赖，密码学经官方向量与 libsecp256k1/pynostr 互验；**真实提交 0 次** | **实现对齐，记录为 0** | `tools/anchor_chain_head.py`、`tools/nostr_anchor.py` |
-| 14 | 生产部署 | 1F916 称已在产 | 无 | **弱（事实差距）** | 不可用文档弥补 |
+| 14 | 生产部署 | 1F916 称已在产 | 无真实部署；**并发写入正确性已修**（8 线程 200/200，锁 + 原子写；`docs/CONCURRENCY.md`） | **弱（事实差距）；并发不在其中** | `tests/test_concurrency_and_build.py` |
 | 15 | 集成广度（IDE/CLI/框架/MCP/CI） | APort 已接 Claude Code/Cursor/Goose/Codex/Gemini CLI | CLI + MCP server + A2A 适配器 + 框架钩子（三形状零依赖）＋ **真 LangChain 栈内实测**：`BaseCallbackHandler` 子类，langchain-core 1.8.2 跑通 6 项 | **对齐（框架已实测；IDE 插件仍缺）** | `adapters/frameworks/langchain_callback.py`、`docs/LIVE-INTEGRATION.md` |
 | 16 | 单一评分/排名 | GAR、ERC-8004、ATEP | 明确不做 | **不做** | 两家都禁止压成单分 |
 | 17 | 决策结果（ALLOW/DENY/ESCALATE/SUSPEND） | GAR-08 | 明确不做（正交维） | **不做** | 我们答"验不验得清" |

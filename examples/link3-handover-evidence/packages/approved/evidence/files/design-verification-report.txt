@@ -1,0 +1,5 @@
+DESIGN VERIFICATION REPORT - CardioPatch CP-2 (FICTIONAL)
+Document: DVR-CP2-004  Revision: C  Status: APPROVED
+Device: CardioPatch CP-2 ambulatory ECG monitor (fictional)
+Result: all 42 verification cases passed; 0 deviations open.
+Approved by: Design Review Board, 2026-09-18.

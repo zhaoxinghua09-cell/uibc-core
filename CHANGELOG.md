@@ -17,6 +17,17 @@ Nothing here is a ratified standard.
 
 ### Added
 
+- **Handover worked example (`examples/link3-handover-evidence/`):**
+  the Link-3 handbook pack — the receiving-side check of a fictional
+  device evidence set, in five runs (approved open PASS / approved
+  pinned PASS / report swapped after sealing FAIL / rebuilt and
+  re-sealed under a substitute key PASS unpinned / same pack FAIL
+  pinned). Rebuilt with the released 0.3.3 so the `pip install`
+  path reproduces every verdict; the folder README states the
+  coverage=legacy scope of these seals in the verifier's own terms.
+  Includes the plain-language verify guide (EN + Chinese) and the
+  recorded run transcript.
+
 - **Change-evidence worked example (`examples/link1-change-evidence/`):**
   the Link-1 handbook pack — a fictional device AI model update
   (v1.1 -> v1.2) handed downstream as a sealed four-file evidence set,

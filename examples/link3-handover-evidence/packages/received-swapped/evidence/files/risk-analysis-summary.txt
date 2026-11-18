@@ -1,0 +1,3 @@
+RISK ANALYSIS SUMMARY - CardioPatch CP-2 (FICTIONAL)
+Document: RAS-CP2-002  Revision: 3  Status: APPROVED
+Hazards: 17 identified; residual risk acceptable per ISO 14971 process.

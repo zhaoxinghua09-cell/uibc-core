@@ -68,6 +68,7 @@ code.
 - Ecosystem portal: https://zhaoxinghua09-cell.github.io/lgd-hub/
 - Companion failure-mode catalogue: https://github.com/zhaoxinghua09-cell/silent-failure-catalog
 
-Companion handbook packs are being published link by link; the Link-3
-handover pack (the same evidence set leaving the manufacturer) is the
-previous act in the chain.
+Companion handbook packs are being published link by link. The next
+act in the chain — the evidence set leaving the manufacturer and being
+checked at the receiving side — is the Link-3 handover pack:
+`examples/link3-handover-evidence/` in this repository.

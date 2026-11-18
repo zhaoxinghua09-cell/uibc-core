@@ -139,6 +139,15 @@ jobs:
         # PASS beside unanchored, never PASS alone.
         run: python tools/composed_forgery.py
 
+      - name: An anchor must arrive from outside the bundle
+        # Build a publisher bundle, then check it the way a stranger would. The
+        # same package verified against its own key is PASS/unanchored; the anchor
+        # is what turns it into ANCHORED, so this step fails if either half stops
+        # mattering.
+        run: |
+          python tools/make_release_bundle.py --out /tmp/anchor-demo
+          python tools/anchor_check.py /tmp/anchor-demo
+
       - name: The second implementation must not drift
         # A verifier written from the spec in another language, sharing no code
         # with the first, is only worth something while it keeps agreeing. This

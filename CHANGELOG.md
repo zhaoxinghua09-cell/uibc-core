@@ -15,6 +15,31 @@ Nothing here is a ratified standard.
 
 ## [Unreleased]
 
+### Anchoring the publisher (2026-11-19)
+
+- **`tools/make_release_bundle.py`**: a publisher bundle = the sealed package plus
+  `anchor.json` (public key, key_id, checkpoint head). The head goes into the
+  manifest *before* signing - a signed manifest edited afterwards is exactly the
+  forgery that row A catches and row B repairs.
+- **`tools/anchor_check.py`**: the one command a stranger runs.
+  `VERDICT: ANCHORED` only when the signature matches the anchor's key *and* the
+  state matches the anchor's head; `NOT ANCHORED` when verification fell back to
+  a key the package supplied; refuses to run without an anchor file, because an
+  anchor read out of the bundle is the bundle vouching for itself.
+- **Measured contrast, now a test:** a repaired, re-signed forgery (row C of
+  `docs/FORGERY-ENVELOPE.md`) still verifies `PASS, unanchored` on its own, and
+  fails S6 the moment the publisher's anchor is applied. The anchor is the
+  only thing that changes the answer, which is why it has to travel separately.
+- **`docs/PUBLISHER-IDENTITY.md`**: the five-step release procedure, why the
+  key and the head must leave through a channel the package cannot reach, and
+  the three things this does not do. Status stated plainly: no release in this
+  repository has published an anchor, so every verdict here today is at best
+  `PASS, unanchored`.
+- **`tests/test_anchor_check.py`** freezes: own bundle anchored; wrong head
+  refused (S9); wrong pinned key refused (S6); forgery refused against a real
+  anchor while still clean without one; anchor without a key refused.
+
+
 ### A forgery that agrees with itself (2026-11-19)
 
 - **`tools/composed_forgery.py`**: every previous audit measures a *change this

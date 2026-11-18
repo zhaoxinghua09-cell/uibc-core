@@ -474,6 +474,19 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
     if custody is not None and custody not in KEY_CUSTODY:
         s2_problems.append(f"identity.key_custody={custody!r} not in "
                            f"{sorted(KEY_CUSTODY)}")
+    # Measured 2026-11-19: an event claiming a different agent_id was
+    # accepted (verdict INCONCLUSIVE, S2 and S3 both PASS). Nothing compared
+    # the events' own agent_id with the package identity, so a package could
+    # attribute its lifecycle to somebody else's agent and still be
+    # "consistent". S2 now reads the field it never read.
+    pkg_agent = str(manifest.get("agent_id") or identity.get("agent_id") or "")
+    for _ev in (lifecycle.get("events") or []):
+        _ev_agent = _ev.get("agent_id")
+        if _ev_agent is not None and pkg_agent and str(_ev_agent) != pkg_agent:
+            s2_problems.append(
+                "lifecycle event %r belongs to agent %r, not %r"
+                % (_ev.get("event_id"), _ev_agent, pkg_agent))
+
     record("S2", "identity consistency", not s2_problems,
            "; ".join(s2_problems) if s2_problems else
            f"agent_id={identity.get('agent_id')!r} consistent"

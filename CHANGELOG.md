@@ -15,6 +15,27 @@ Nothing here is a ratified standard.
 
 ## [Unreleased]
 
+### A field that existed and nobody read (2026-11-19)
+
+- **Second shapes for the five single-sample checks.** Writing them found a
+  defect instead of a confirmation. Changing `lifecycle.events[0].agent_id`
+  to another agent produced verdict `INCONCLUSIVE` with **S2 PASS and S3 PASS**:
+  the identity check compared `identity.json` with `manifest.json` and never
+  read the `agent_id` the events themselves carry, so a package could attribute
+  its whole lifecycle to somebody else's agent and still be called consistent.
+- **S2 now reads it**, in Python and in the JavaScript implementation, and
+  reports the event id and both agent ids. The forged package fails S2 and only
+  S2 (S3 stays PASS, so the report is not merely "something is wrong").
+- **`failure_corpus/F-007.json`** records the finding; regression test
+  `tests/test_identity_in_lifecycle.py` asserts both directions.
+- **Matrix after the fix:** S1, S2, S3, S11 each have two independent shapes;
+  S7 keeps one, because it only runs when the package declares an index
+  metadata digest and the fixture does not — a package that makes no claim
+  cannot be caught lying about it.
+- **529 tests green** (2 skipped), `check_doc_facts` 0 mismatches, second
+  implementation agrees on 36/36 cases with 30 named.
+
+
 ### Every check, and something that breaks it (2026-11-19)
 
 - **`tools/check_falsifiability.py`** asks what a verifier project rarely asks

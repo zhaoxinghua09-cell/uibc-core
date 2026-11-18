@@ -471,11 +471,99 @@ EXT_RED_TEAM = [
      "an unresolvable digest is FAIL"),
 ]
 
-# Not "not caught": not constructible here. Stated so the gap is visible.
-UNCONSTRUCTIBLE = [
-    ("S16 external timestamp (RFC 3161)",
-     "the token must be signed by a TSA key we do not hold, over a digest of "
-     "a file we ship; a self-minted token would prove nothing"),
+# S16 can be exercised, but not witnessed: the token in tests/fixtures/anchor
+# is a real FreeTSA signature over a file we keep in the repo. That proves the
+# verification path works on bytes we did not sign. It does NOT mean a third
+# party has seen THIS package's head -- that would need a token requested for
+# this package after it was sealed.
+NOT_EXTERNALLY_WITNESSED = [
+    ("S16 verification path exercised with a real FreeTSA token",
+     "the token dates tests/fixtures/anchor/anchored_head.json, a file kept in "
+     "the repo; no third party has timestamped this package's head"),
+]
+
+# --------------------------------------------------------------------------
+# Stage 4: S16 with a REAL RFC 3161 token.
+#
+# The token in tests/fixtures/anchor is a FreeTSA signature over the digest of
+# anchored_head.json, taken 2026-11-17T08:11:35Z. Using it means the PASS path
+# runs on bytes we did not sign -- which is the only way to show the check is
+# not a mock we designed to pass.
+# --------------------------------------------------------------------------
+
+_FIXTURE_ANCHOR = os.path.join(_REPO, "tests", "fixtures", "anchor")
+
+def build_s16(pkg):
+    """Place the real token so S16 can judge it; refuse if it does not pass."""
+    import hashlib
+    tsdir = os.path.join(pkg, "timestamps")
+    os.makedirs(tsdir, exist_ok=True)
+    shutil.copy(os.path.join(_FIXTURE_ANCHOR, "anchored_head.json"),
+                os.path.join(tsdir, "anchored_head.json"))
+    shutil.copy(os.path.join(_FIXTURE_ANCHOR, "freetsa.tsr"),
+                os.path.join(tsdir, "freetsa.tsr"))
+    shutil.copy(os.path.join(_FIXTURE_ANCHOR, "freetsa_ca.pem"),
+                os.path.join(tsdir, "freetsa_ca.pem"))
+    body = _read(os.path.join(tsdir, "freetsa.tsr"))
+    _dump(os.path.join(pkg, "evidence", "external_anchor.json"),
+          {"digest_of": "timestamps/anchored_head.json",
+           "tsr": "timestamps/freetsa.tsr",
+           "cabundle": "timestamps/freetsa_ca.pem",
+           "tsr_sha256": hashlib.sha256(body).hexdigest()})
+
+    checks = {c["id"]: c for c in verify(pkg)["checks"]}
+    if "S16" not in checks or checks["S16"]["result"] != "PASS":
+        raise AssertionError("S16 does not pass on a real FreeTSA token: %r"
+                             % (checks.get("S16"),))
+
+
+def _needs_s16(fn):
+    def wrapper(pkg):
+        build_s16(pkg)
+        fn(pkg)
+    wrapper.__name__ = fn.__name__
+    return wrapper
+
+
+@_needs_s16
+def m16_point_at_another_file(pkg):
+    """The token dates anchored_head.json; claim it dates the manifest."""
+    doc = _json(os.path.join(pkg, "evidence", "external_anchor.json"))
+    doc["digest_of"] = "manifest.json"
+    _dump(os.path.join(pkg, "evidence", "external_anchor.json"), doc)
+
+
+@_needs_s16
+def m16_wrong_tsr_digest(pkg):
+    doc = _json(os.path.join(pkg, "evidence", "external_anchor.json"))
+    doc["tsr_sha256"] = "0" * 64
+    _dump(os.path.join(pkg, "evidence", "external_anchor.json"), doc)
+
+
+@_needs_s16
+def m16_flip_token_byte(pkg):
+    path = os.path.join(pkg, "timestamps", "freetsa.tsr")
+    data = bytearray(_read(path))
+    data[len(data) // 2] ^= 0xFF
+    _write(path, bytes(data))
+
+
+@_needs_s16
+def m16_no_ca(pkg):
+    doc = _json(os.path.join(pkg, "evidence", "external_anchor.json"))
+    doc["cabundle"] = "timestamps/absent.pem"
+    _dump(os.path.join(pkg, "evidence", "external_anchor.json"), doc)
+
+
+S16_RED_TEAM = [
+    ("claim the token dates another file", m16_point_at_another_file, "FAIL",
+     "messageImprint must match the declared file"),
+    ("misdeclare the token digest", m16_wrong_tsr_digest, "FAIL",
+     "tsr_sha256 must be the token we read"),
+    ("flip one byte in the token", m16_flip_token_byte, "FAIL",
+     "a broken token is not a witness"),
+    ("drop the CA bundle", m16_no_ca, "FAIL",
+     "an unchained signature is not verified"),
 ]
 
 CONTROLS = [
@@ -656,9 +744,25 @@ def run_red_team_ext(package, baseline_verdict):
         "ok": ok,
         "failed": [r["name"] for r in rows if not r["ok"]],
         "count": len(rows),
-        "unconstructible": [{"check": c, "why": w} for c, w in UNCONSTRUCTIBLE],
         "note": "S14/S15/S18 built correctly first, then broken one at a time; "
-                "S16 cannot be self-tested and is declared, not skipped quietly",
+                "S16 has its own stage, on a real token",
+    }
+
+
+def run_red_team_s16(package, baseline_verdict):
+    rows = [_one(package, name, fn, expectation, why, baseline_verdict)
+            for name, fn, expectation, why in S16_RED_TEAM]
+    ok = all(r["ok"] for r in rows)
+    return {
+        "stage": "red-team-s16",
+        "rows": rows,
+        "ok": ok,
+        "failed": [r["name"] for r in rows if not r["ok"]],
+        "count": len(rows),
+        "not_externally_witnessed": [{"what": w, "why": y}
+                                     for w, y in NOT_EXTERNALLY_WITNESSED],
+        "note": "a real FreeTSA token, over a file we did not sign; four ways "
+                "to make it stop being a witness",
     }
 
 
@@ -667,17 +771,20 @@ def run_all(package, kit):
     red = run_red_team(package, baseline["got"])
     red11 = run_red_team_v11(package, baseline["got"])
     ext = run_red_team_ext(package, baseline["got"])
+    s16 = run_red_team_s16(package, baseline["got"])
     interop = run_interop(kit)
     # A skip of a stage that requires a corpus is not a pass, but it is not a
     # failure of our code either: it is reported as SKIPPED and the exit code
     # stays 0 only if the caller did not ask for that stage.
-    overall_ok = baseline["ok"] and red["ok"] and red11["ok"] and ext["ok"]
+    overall_ok = (baseline["ok"] and red["ok"] and red11["ok"] and ext["ok"]
+                  and s16["ok"])
     return {
         "package": package,
         "stage_baseline": baseline,
         "stage_redteam": red,
         "stage_redteam_v11": red11,
         "stage_redteam_ext": ext,
+        "stage_redteam_s16": s16,
         "stage_interop": interop,
         "ok": overall_ok,
         "note": "interop SKIPPED is not counted as a pass",
@@ -722,9 +829,19 @@ def _print_human(result):
                      "ok" if r["ok"] else "FAILED: " + r["expectation_note"]))
             if r["failed_checks"]:
                 print("       caught by: %s" % ", ".join(r["failed_checks"]))
-        for u in ext.get("unconstructible") or []:
-            print("  n/a  %s" % u["check"])
-            print("       %s" % u["why"])
+    print()
+    s16 = result.get("stage_redteam_s16")
+    if s16:
+        print("red team s16: %d cases (real FreeTSA token)" % s16["count"])
+        for r in s16["rows"]:
+            print("  %-4s %-40s %-9s -> %-12s %s"
+                  % ("atk", r["name"], r["expectation"], r["got"],
+                     "ok" if r["ok"] else "FAILED: " + r["expectation_note"]))
+            if r["failed_checks"]:
+                print("       caught by: %s" % ", ".join(r["failed_checks"]))
+        for n in s16.get("not_externally_witnessed") or []:
+            print("  n/a  %s" % n["what"])
+            print("       %s" % n["why"])
     print()
     it = result["stage_interop"]
     if it["status"] == "SKIPPED":

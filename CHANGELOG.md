@@ -15,6 +15,20 @@ Nothing here is a ratified standard.
 
 ## [Unreleased]
 
+### A stranger's ten minutes, measured (2026-11-19)
+
+- **`docs/STRANGER-TRIAL.md`** records a first run in a directory that had never
+  seen this project: clone in 2.3 s, `tools/outsider_audit.py` in 0.3 s, `VERDICT:
+  OK` — two commands, no credentials, no dependencies.
+- **The same trial found the sentence that stops adoption.** `pip install
+  uibc-core` gives 0.3.3, which reports **six** checks on the clean package;
+  `main` is 0.4.0 and reports **eight**. The code is better than the package,
+  and the package is what a stranger gets.
+- **README now states the three version numbers** (`0.4.0` unreleased / `0.3.3`
+  on PyPI / `0.2.1` archived) and which one an installer actually receives, with
+  a link to the measurement. The previous line called 0.3.3 "the current
+  implementation", which stopped being true when 0.4.0 work began.
+
 ### Adoption, measured the peer's own way (2026-11-18)
 
 - **`docs/COMPETITORS.md` gains an adoption table**, each merged claim checked

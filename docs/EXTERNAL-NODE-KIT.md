@@ -1,5 +1,7 @@
 # 外部验证节点接入包（30 分钟，一条命令）
 
+> English version: [`docs/OUTSIDER-RUN.md`](OUTSIDER-RUN.md)
+
 > 目的：让**不是我们的人**在自己的机器上得出与我们相同的结论，并把这一个结果文件发回来。这件事比再加十个功能重要——它是"可复算"从主张变成事实的唯一方式。
 >
 > 当前状态：**外部节点 = 0**。你跑一次并回传 `external_node_result.json`，这个数就变成 1。
@@ -13,7 +15,7 @@
 ## 2. 三条命令（约 3 分钟，不含下载）
 
 ```bash
-git clone --depth 1 --branch release/v1.1-precheck https://github.com/zhaoxinghua09-cell/uibc-core.git
+git clone --depth 1 https://github.com/zhaoxinghua09-cell/uibc-core.git
 cd uibc-core
 python tools/external_node_check.py --out external_node_result.json
 ```
@@ -54,7 +56,7 @@ RESULT_JSON=.../external_node_result.json
 ## 6. 可选的深一步（约 25 分钟）
 
 ```bash
-python -m unittest discover -s tests -p "test_*.py"    # 全量 208 项
+python -m unittest discover -s tests -p "test_*.py"    # 全量 328 项
 python tools/compose_demo.py                            # K1-K8 七个组合场景
 python tools/pccp_case.py --prev benchmark/corpus/base --curr tools/out/_mb/m_M17
 ```

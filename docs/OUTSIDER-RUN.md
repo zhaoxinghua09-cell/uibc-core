@@ -1,5 +1,7 @@
 # 请帮我做一次独立复跑（约 3 分钟，零安装）
 
+> 中文完整版（含四件事说明与已知边界）：[`docs/EXTERNAL-NODE-KIT.md`](EXTERNAL-NODE-KIT.md)
+
 # Run it once on your machine — about 3 minutes, nothing to install
 
 ---

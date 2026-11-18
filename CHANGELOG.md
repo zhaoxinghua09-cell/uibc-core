@@ -26,6 +26,12 @@ Nothing here is a ratified standard.
   `second-implementation` job runs it on every push and pull request. Set
   equality is not required, because the two implementations legitimately
   differ on five packages and forcing equality would make one of them lie.
+- **The gate was tested against itself, in the pipeline.** Pull request #134
+  removed `S15` from `COVERED` while four packages still expected it: the
+  `second-implementation` job failed, `mergeable_state` stayed `blocked` for
+  thirty consecutive samples, and the pull request was closed unmerged. The
+  required checks on `main` are now `test (3.13)` and `second-implementation`,
+  with `strict` and `enforce_admins` on. Recorded in `docs/NEGATIVE-CONTROL.md`.
 
 ### Added
 

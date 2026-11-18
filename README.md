@@ -78,6 +78,22 @@ who it says (there is no signature to check), that we conform to AER-1's 143-vec
 (we do not), or that offline anchoring beats published-relay anchoring — different
 questions, kept apart in [`docs/INTEROP-ZAMBO.md`](docs/INTEROP-ZAMBO.md).
 
+**What the demo catches that a digest cannot** — `python -m uibc_core.cli demo`, 8 steps, exit 0, measured 2026-11-18:
+
+| step | scene | verdict |
+|---|---|---|
+| 5 | a stranger verifies with the published seal only — no key, no permission | `PASS` (assurance: `public-key`) |
+| 6 | evidence edited behind the owner's back | `FAIL` (tampered content) |
+| 7 | attacker recomputes **every** hash and re-seals with the attacker's **own** key | `PASS` — a substituted key verifies against itself |
+| 8 | the same forged package, verified **pinned** to the owner's public key | `FAIL` (key substitution caught) |
+
+Steps 7–8 are the pair we have not seen demonstrated by the receipt projects we compared
+against: a forgery that looks entirely valid passes until the verifier pins a key, and
+pinning is what turns it into a `FAIL`. Digest-level agreement (the section above) cannot
+show this — it only shows two implementations agree on bytes, not that a verifier refuses
+the right thing. Run it yourself; the whole demo leaves nothing behind but a temp dir.
+
+
 
 **Verified vs not verified, in one place** (full detail in [`docs/EXTERNAL-ANCHOR.md`](docs/EXTERNAL-ANCHOR.md)):
 

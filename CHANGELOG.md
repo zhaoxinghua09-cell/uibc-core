@@ -15,6 +15,23 @@ Nothing here is a ratified standard.
 
 ## [Unreleased]
 
+### Anchors that name their predecessor (2026-11-19)
+
+- **`anchor.json` gains `seq` and `prev_anchor_digest`.** A single anchor cannot
+  distinguish "current" from "yesterday's, still perfectly self-consistent"; a
+  line of anchors that each name the digest before them can.
+- **`tools/anchor_chain.py`** judges a directory of anchors: gap, replayed
+  position, rewritten predecessor, and a first anchor claiming a predecessor are
+  all CHAIN BROKEN; a chain shorter than what the caller already knows is
+  **STALE** (exit 5), because "absent" and "withheld" are the same danger.
+- **`make_release_bundle.py --prev-anchor`** fills `seq+1` and the predecessor
+  digest; **`anchor_check.py --prev`** refuses a rollback by comparing the two.
+- **Eight frozen scenarios** in `tests/test_anchor_chain.py`.
+- **What it cannot do, stated:** withholding cannot be countered by arithmetic
+  here - only by where the anchors are published - and seq 1 has no way to
+  prove itself current without an outside record.
+- **No real chain exists yet**; `docs/IMPLEMENTATION-STATUS.md` still reads zero.
+
 ### The publisher check, done twice (2026-11-19)
 
 - **`tools/verify-js/anchor.mjs`**: the anchor verdict with node:crypto and

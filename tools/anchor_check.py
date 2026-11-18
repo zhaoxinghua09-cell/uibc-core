@@ -117,6 +117,33 @@ def _check_tsa(anchor):
             "gen_time": gen, "why": "; ".join(probs) if probs else ""}
 
 
+def check_chain_position(anchor, prev):
+    """Is this anchor the next one, or a replay of an earlier position?"""
+    problems = []
+    seq = anchor.get("seq")
+    if not isinstance(seq, int) or seq < 1:
+        return ["anchor carries no positive integer seq - it cannot be placed "
+                "in the line, and an unplaceable anchor can always be replayed"]
+    if seq == 1:
+        if anchor.get("prev_anchor_digest") is not None:
+            problems.append("seq 1 declares a predecessor")
+        if prev is not None and prev.get("seq") != 1:
+            problems.append("this is the first anchor of the line, but the caller "
+                            "already holds seq %s - an older line was handed over"
+                            % (prev.get("seq"),))
+        return problems
+    if prev is None:
+        problems.append("seq %d has no predecessor supplied; the anchor names %s... "
+                        "and that cannot be checked without it"
+                        % (seq, str(anchor.get("prev_anchor_digest"))[:16]))
+        return problems
+    if not isinstance(prev.get("seq"), int) or prev["seq"] != seq - 1:
+        problems.append("seq %d follows a supplied anchor at seq %s" % (seq, prev.get("seq")))
+    elif anchor.get("prev_anchor_digest") != anchor_digest(prev):
+        problems.append("prev_anchor_digest does not match the supplied predecessor")
+    return problems
+
+
 def check(pkg, anchor):
     """Return a dict: anchored, verdict, reasons."""
     reasons = []
@@ -171,8 +198,20 @@ def main():
     anchor_path = None
     if "--anchor" in sys.argv:
         anchor_path = sys.argv[sys.argv.index("--anchor") + 1]
+    prev_path = None
+    if "--prev" in sys.argv:
+        prev_path = sys.argv[sys.argv.index("--prev") + 1]
     pkg, anchor = _resolve(args[0], anchor_path)
+    prev = _jload(prev_path) if prev_path else None
     r = check(pkg, anchor)
+    chain_problems = check_chain_position(anchor, prev) if prev_path else []
+    if chain_problems:
+        r = dict(r, verdict="FAILED", anchored=False,
+                 reasons=list(r.get("reasons", [])) + ["chain: " + p for p in chain_problems])
+    if anchor.get("seq") is not None:
+        print("seq: %s%s" % (anchor.get("seq"),
+                             "" if anchor.get("prev_anchor_digest") is None
+                             else "  follows %s..." % anchor["prev_anchor_digest"][:16]))
     print("VERDICT: %s" % r["verdict"])
     if r.get("trust_level"):
         print("trust_level: %s   result: %s" % (r["trust_level"], r["result"]))

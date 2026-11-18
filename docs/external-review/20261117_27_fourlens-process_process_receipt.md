@@ -60,7 +60,7 @@ python tools/emit_receipts.py --package fixtures/clean.uibc --count 3   # 3 chai
 python tools/redteam_suite.py                              # 15 attacks, expected vs actual
 ```
 
-**Verified vs not verified, in one place** (full detail in [`docs/EXTERNAL-ANCHOR.md`](docs/EXTERNAL-ANCHOR.md)):
+**Verified vs not verified, in one place** (full detail in [`docs/EXTERNAL-ANCHOR.md`](../EXTERNAL-ANCHOR.md)):
 
 | item | state |
 |---|---|

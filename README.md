@@ -23,7 +23,7 @@ It prints `CONSISTENT` only when **both** hold: a second, independently written 
 
 > A uibc PASS means: within the observed evidence boundary, no violation was detected. It does not claim the agent was correct, safe, or wise; that the recorded inputs were true or complete; or that any real-world outcome followed.
 
-**Current state, including what we are short of:** 549 tests green on Linux / Python 3.12 (2 skipped with `.[verify,interop]`; it was 16 before that extra existed — see `docs/SKIPPED.md`); the CI matrix runs the same suite on 3.10-3.13 · the verifier needs no third-party package (Ed25519 is implemented in-repo) · **external verification nodes: 0** — we publish the number we do not have; running the command above and sending back `external_node_result.json` makes it 1. Zero means the independence of this repository's verification rests entirely on two implementations written by the same author; it is not evidence of a third party having reproduced anything.
+**Current state, including what we are short of:** 553 tests green on Linux / Python 3.12 (2 skipped with `.[verify,interop]`; it was 16 before that extra existed — see `docs/SKIPPED.md`); the CI matrix runs the same suite on 3.10-3.13 · the verifier needs no third-party package (Ed25519 is implemented in-repo) · **external verification nodes: 0** — we publish the number we do not have; running the command above and sending back `external_node_result.json` makes it 1. Zero means the independence of this repository's verification rests entirely on two implementations written by the same author; it is not evidence of a third party having reproduced anything.
 
 **Three version numbers, and they disagree — read this before installing:** `main` is **0.4.0**, unreleased. PyPI carries **0.3.3** (2026-11-15). The archived citation snapshot is **0.2.1** (2026-09-17). If you `pip install uibc-core` you get the 0.3.3 verifier, which reports six checks on the clean package where `main` reports eight — S11 (strict serialization) and S12 (identifier strictness, `evidence_count`) came after that release. The measurement, with commands and timings, is in [docs/STRANGER-TRIAL.md](docs/STRANGER-TRIAL.md). Cite the snapshot, run `main`, and do not assume the PyPI build is the one these documents describe.
 
@@ -45,7 +45,7 @@ repository's own node result.
 **Three more commands, if you want to see the failure paths rather than the green ones:**
 
 ```bash
-python -m unittest discover -s tests -p "test_*.py"        # 549 tests (Linux / Python 3.12, 2 skipped with .[verify,interop])
+python -m unittest discover -s tests -p "test_*.py"        # 553 tests (Linux / Python 3.12, 2 skipped with .[verify,interop])
 python tools/emit_receipts.py --package fixtures/clean.uibc --count 3   # 3 chained receipts
 python tools/redteam_suite.py                              # 15 attacks, expected vs actual
 ```
@@ -143,7 +143,7 @@ other exists.
 > **Verifiable today** — every artifact is independently checkable: Sigstore Rekor transparency log
 > (logIndex 2883389783), concept DOI 10.5281/zenodo.22456647, SWHID
 > `swh:1:ori:819530c8be2adf6da901256ce9fd28063f8f1296` (ISO/IEC 18670).
-> Reproduce: `python -m unittest discover -s tests -p "test_*.py"` (549 tests, Linux / Python 3.12) · `python independent_verifier/cross_check.py`.
+> Reproduce: `python -m unittest discover -s tests -p "test_*.py"` (553 tests, Linux / Python 3.12) · `python independent_verifier/cross_check.py`.
 > **Honest boundary** — no third-party quality review to date; any operational use is self-reported
 > (see ENDORSEMENTS.md: 存证 ≠ 参与 ≠ 认可). Context: [FG-TIDA themes #27](https://github.com/FG-TIDA/themes/issues/27).
 
@@ -252,7 +252,7 @@ uibc verify demo.uibc                   # 开放模式：仅完整性检查
 ## 运行测试（外人复现三件套）
 
 ```bash
-python -m unittest discover -s tests -p "test_*.py"   # 全量 549 用例（实测 `Ran 549 tests in ~42s, OK (skipped=2)`，Linux / Python 3.12.11，已装 `.[verify,interop]`；未装该 extra 时为 `skipped=16`，逐步查清见 `docs/SKIPPED.md`；stress 7 场景单跑，见下条）
+python -m unittest discover -s tests -p "test_*.py"   # 全量 553 用例（实测 `Ran 553 tests in ~42s, OK (skipped=2)`，Linux / Python 3.12.11，已装 `.[verify,interop]`；未装该 extra 时为 `skipped=16`，逐步查清见 `docs/SKIPPED.md`；stress 7 场景单跑，见下条）
 python -m unittest tests.stress_test        # 压力 7 场景
 python independent_verifier/cross_check.py  # 独立第二实现交叉核验（70 项，0 分歧）
 ```

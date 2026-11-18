@@ -148,6 +148,15 @@ jobs:
           python tools/make_release_bundle.py --out /tmp/anchor-demo
           python tools/anchor_check.py /tmp/anchor-demo
 
+      - name: One file, no install
+        # Build the zipapp, strip the path, and run it from an empty directory.
+        # "No install required" is a claim a stranger should be able to check,
+        # so CI checks it rather than the README asserting it.
+        run: |
+          python tools/build_zipapp.py --out /tmp/uibc.pyz
+          mkdir -p /tmp/isolated && cd /tmp/isolated
+          python /tmp/uibc.pyz explain "$GITHUB_WORKSPACE/fixtures/clean.uibc" | head -3
+
       - name: The second implementation must not drift
         # A verifier written from the spec in another language, sharing no code
         # with the first, is only worth something while it keeps agreeing. This

@@ -15,6 +15,23 @@ Nothing here is a ratified standard.
 
 ## [Unreleased]
 
+### One file, no install (2026-11-19)
+
+- **`tools/build_zipapp.py`** builds `dist/uibc.pyz`: the verifier, the CLI and
+  the anchor check in one standard-library file. `verify`, `explain` and `anchor`
+  work with no pip, no network and no checkout.
+- **`uibc_core/__init__.py`** reads its own modules through the archive when the
+  package sits inside a zipapp, so `SPEC_ID` stays equal to the checkout it was
+  built from. A packaged verifier that reported a different provenance than its
+  source would be reporting the packaging.
+- **`tests/test_zipapp.py`** runs the zipapp from an empty directory with
+  `PYTHONPATH` stripped: verify works, `spec_id` matches, `anchor` returns
+  ANCHORED on a publisher bundle and exit 1 on a bundle with one byte changed.
+- **`docs/ZERO-INSTALL.md`** also records what this does not solve: we build the
+  zipapp, it carries no anchor, and it is not signed. It is a different point on
+  the convenience axis than a hosted endpoint, not a better one everywhere.
+
+
 ### Anchoring the publisher (2026-11-19)
 
 - **`tools/make_release_bundle.py`**: a publisher bundle = the sealed package plus

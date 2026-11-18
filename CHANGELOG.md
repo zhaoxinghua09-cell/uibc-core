@@ -15,6 +15,23 @@ Nothing here is a ratified standard.
 
 ## [Unreleased]
 
+### A depth ceiling, and a measured peer (2026-11-18)
+
+- **Nesting ceiling, both implementations.** 4000 levels of `[` used to end in a
+  stack exhaustion reported as S0 - "the verifier broke", a statement about us
+  and not about the input. `MAX_NESTING = 512`, counted outside string literals,
+  refuses it as S11. Taken from `agent-action-capsule`, which refuses at 128 with
+  a message naming the limit.
+- **A manifest that parses as an array** used to reach `.get()` on the Python
+  side and raise `AttributeError`, again landing on S0. S1 now reports it.
+- **Both sides stop when the bytes never became JSON**: invalid UTF-8, a repeated
+  member name, a document past the ceiling, unparseable bytes. Nothing downstream
+  is claimed about bytes nobody read.
+- **`docs/COMPETITORS.md`** measures `agent-action-capsule` 0.17.0 and this
+  project on the same day, with the command for each number, and states plainly
+  where this project is behind (specification standing, release cadence, surface
+  area, test count) as well as ahead (a second implementation, gated in CI).
+
 ### Hostile input: ten cases, ten verdicts, no crashes (2026-11-18)
 
 - **`tools/redteam_robustness.py`** builds ten packages that are not packages:

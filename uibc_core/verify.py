@@ -68,6 +68,46 @@ _S11_FILES = ("manifest.json", "identity.json", "lifecycle.json",
               "evidence/index.json")
 
 
+# A reader that recurses without a limit is a reader an attacker can kill with
+# a file. json.loads on 4000 levels of "[" raises RecursionError, and a
+# RecursionError is not a verdict: the caller learns nothing about the package.
+# A depth ceiling turns it back into one. Bounded input is not a hole in the
+# format; it is the format's own nesting being smaller than any real package.
+MAX_NESTING = 512
+
+
+def _nesting_too_deep(text, limit=MAX_NESTING):
+    """Return the depth reached if it exceeds the limit, else 0.
+
+    Counts braces outside string literals, so a brace inside a value does not
+    count and a 500-level package of strings is not refused for its strings.
+    """
+    depth = deepest = 0
+    in_string = False
+    escaped = False
+    for ch in text:
+        if in_string:
+            if escaped:
+                escaped = False
+            elif ch == "\\":
+                escaped = True
+            elif ch == '"':
+                in_string = False
+            continue
+        if ch == '"':
+            in_string = True
+        elif ch in "[{":
+            depth += 1
+            if depth > deepest:
+                deepest = depth
+                if deepest > limit:
+                    return deepest
+        elif ch in "]}":
+            if depth > 0:
+                depth -= 1
+    return 0
+
+
 def _strict_scan(path):
     """Return a list of problems found by re-reading the file as bytes."""
     problems = []
@@ -90,6 +130,10 @@ def _strict_scan(path):
         text = raw.decode("utf-8")
     except UnicodeDecodeError:
         return ["not valid UTF-8"]
+    reached = _nesting_too_deep(text)
+    if reached:
+        return ["nested deeper than %d levels (reached %d), refusing to parse"
+                % (MAX_NESTING, reached)]
     # RFC 8259 has no NaN, Infinity or -Infinity literal. Python's json module
     # accepts all three by default, which made a manifest carrying NaN pass S11
     # and land on INCONCLUSIVE: the package was not found wrong because the
@@ -272,6 +316,31 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
            "; ".join(s11_problems[:4]) if s11_problems else
            "UTF-8, no duplicate member names, no raw control characters")
 
+    # Bytes that never became JSON, or that are nested past any package, cannot
+    # be judged by a single later check. Continuing used to mean the manifest
+    # arrived as a list and S1 called .get() on it, which the fail-closed
+    # wrapper turned into S0 - "the verifier broke" - hiding the check that did
+    # have an answer, and the answer was the right one. Stop here instead, with
+    # the one verdict that is true, and say why no other check appears.
+    _fatal = ("not valid UTF-8", "not parseable JSON", "nested deeper than",
+              "repeated member name")
+    if s11_problems and any(k in p for p in s11_problems for k in _fatal):
+        return {
+            "verifier_id": VERIFIER_ID,
+            "verifier_version": __version__,
+            "spec_version": SPEC_VERSION,
+            "spec_id": _SPEC_ID,
+            "result": "FAIL",
+            "trust_level": "unattested",
+            "key_custody": None,
+            "subject": None,
+            "checks": checks,
+            "failed_checks": 1,
+            "warnings": [],
+            "note": "the bytes are not a readable package, so no other "
+                    "check could be judged",
+        }
+
     def _safe_load(rel):
         try:
             return _load_json(os.path.join(package_dir, rel))
@@ -288,6 +357,29 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
     identity = _safe_load("identity.json") if not missing else {}
     lifecycle = _safe_load("lifecycle.json") if not missing else {}
     index = (_safe_load("evidence/index.json") if not missing else {"entries": []}) or {"entries": []}
+
+    # A manifest that parsed as an array is not a package with a missing field;
+    # it is a file of the wrong kind. Calling .get() on it raised AttributeError
+    # and the wrapper reported S0, which says the verifier broke - the wrong
+    # party. S1 is the check that owns "the structure is not the structure".
+    if not missing and not isinstance(manifest, dict):
+        record("S1", "package structure", False,
+               "manifest.json parsed as a %s, not a JSON object" % type(manifest).__name__)
+        return {
+            "verifier_id": VERIFIER_ID,
+            "verifier_version": __version__,
+            "spec_version": SPEC_VERSION,
+            "spec_id": _SPEC_ID,
+            "result": "FAIL",
+            "trust_level": "unattested",
+            "key_custody": None,
+            "subject": None,
+            "checks": checks,
+            "failed_checks": 1,
+            "warnings": [],
+            "note": "manifest.json is not a JSON object, so no other check "
+                    "could be judged",
+        }
 
     declared = set(REQUIRED_FILES) | {"signatures/seal.json"}
     for e in index.get("entries", []):

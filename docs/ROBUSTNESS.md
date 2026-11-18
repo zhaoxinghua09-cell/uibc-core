@@ -29,12 +29,12 @@ Two properties, neither negotiable:
 
 | input | JavaScript | Python |
 |---|---|---|
-| `{oops` | FAIL S11 | FAIL S11, S2, S5 |
-| `manifest.json` is an array | FAIL S1, S2, S5, S12 | FAIL S0 |
+| `{oops` | FAIL S11 | FAIL S11 |
+| `manifest.json` is an array | FAIL S1, S2, S5, S12 | FAIL S1 |
 | duplicate member name | FAIL S11 | FAIL S11 |
 | a bare `NaN` literal | FAIL S11 | FAIL S11 |
-| 4000 levels of nesting | FAIL S0 | FAIL S0 |
-| invalid UTF-8 in identity | FAIL S11, S2, S3 | FAIL S11, S2 |
+| 4000 levels of nesting | FAIL S11 | FAIL S11 |
+| invalid UTF-8 in identity | FAIL S11, S2, S3 | FAIL S11 |
 | evidence path `../../etc/passwd` | FAIL S4 | FAIL S4 |
 | symlink to `/etc/hostname` in evidence | FAIL S4, S12 | FAIL S4, S12 |
 | an empty directory | FAIL S1, S2, S3, S4 | FAIL S1, S2 |
@@ -44,23 +44,30 @@ Two properties, neither negotiable:
 
 ## Why the verdicts are not identical
 
-The two implementations put different names on different layers, and this is
-visible only when a package fails early:
+Four of the ten are byte-level failures that stop both readers at the same
+place. The other six fail later and cascade differently:
 
-- **JavaScript stops at S11 when the bytes are not JSON.** Nothing below can be
-  judged, so it returns immediately with the one check that can say what
-  happened. Before this was fixed it fell through to S0, which means "the
-  verifier broke" - the wrong statement about who is at fault, and it hid the
-  check that had the answer.
-- **Python continues**, so a later check also reports its own missing input
-  (S2 for an unreadable manifest, S5 for a root it cannot compute). A cascade is
-  noisy but not wrong; each line is true.
-- **Deep nesting lands on S0 on both sides.** Neither reader is built to
-  recurse 4000 levels, so both fail closed and say so. S0 is precisely the
-  check for "the verifier could not finish", and it is the honest answer here.
+- **Both implementations now stop when the bytes never became JSON.** S11 runs
+  first and returns early on invalid UTF-8, a repeated member name, a document
+  past the nesting ceiling, or bytes that do not parse. Nothing downstream can
+  be judged from bytes nobody read, so nothing downstream is claimed.
+- **JavaScript keeps going on two cases** (an array manifest, an 8 MB manifest)
+  and reports the later checks that also lost their input, because in JavaScript
+  those checks degrade to a report rather than an exception. Every extra line is
+  true; a cascade is noisy, not wrong.
+- **Deep nesting is now S11 on both sides.** Until 2026-11-18 it was S0 on both:
+  the reader recursed 4000 levels and the stack ended. That was reported as "the
+  verifier broke", which is a statement about us, not about the input. A
+  ceiling of 512 levels, counted outside string literals, makes it a verdict.
+  The idea came from `agent-action-capsule`, which refuses at 128 levels with a
+  message that names the limit; see [COMPETITORS.md](COMPETITORS.md).
+- **A manifest that parses as an array used to reach `.get()` on Python** and
+  raise `AttributeError`, again landing on S0. S1 owns "the structure is not the
+  structure", so S1 is what reports it now.
 
 The rule for the future is not "make the two lists identical" - it is "never
-call bytes unjudged and then report INCONCLUSIVE".
+call bytes unjudged and then report INCONCLUSIVE", and "never report a
+predictable input shape as a broken verifier".
 
 ## The hole this found
 

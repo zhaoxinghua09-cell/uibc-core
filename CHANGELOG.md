@@ -15,6 +15,22 @@ Nothing here is a ratified standard.
 
 ## [Unreleased]
 
+### Adoption, measured the peer's own way (2026-11-18)
+
+- **`docs/COMPETITORS.md` gains an adoption table**, each merged claim checked
+  against GitHub rather than taken from the peer's page: a contribution merged
+  into the IETF SCITT working group's shared repository, a third-party product
+  shipping their verifier, an independent draft building on theirs, a public log
+  with 15134 entries. Ours: zero rows.
+- **`docs/IMPLEMENTATION-STATUS.md`** records that in the RFC 7942 four-bucket
+  format they use. All four buckets are empty, and the page says so in their
+  words rather than in ours.
+- **`docs/UPSTREAM-SUBMISSION-PLAN.md`** lists what each external route would
+  cost and in what order they have to happen. Nothing in it has been sent.
+- The distinction this round makes explicit: a second implementation written
+  here is *internal* evidence, however independent it is in code. Only someone
+  else running it is external evidence.
+
 ### The comparison now re-checks itself (2026-11-18)
 
 - **`tools/check_competitors.py`** re-fetches what a stranger can fetch (PyPI

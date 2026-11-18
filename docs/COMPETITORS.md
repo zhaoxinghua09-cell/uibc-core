@@ -80,15 +80,46 @@ measured by hand on the date at the top of this page, and the picture says so.
 
 ## Where this project is behind, stated plainly
 
-1. **Specification standing.** AAC's format has an Internet-Draft. `uibc-core`'s
-   has a draft in this repo and no submission. This is the single largest
-   difference in external credibility, and no amount of local testing closes it.
-2. **Release cadence.** 23 releases against 4. AAC ships weekly; this project
+1. **Specification standing.** AAC's format has an Internet-Draft at -05
+   (2026-09-26). `uibc-core`'s has a draft in this repo and no submission. This
+   is the single largest difference in external credibility, and no amount of
+   local testing closes it.
+2. **Adoption and transparency.** They have a merged contribution in the SCITT
+   working group's repository, a third-party product shipping their verifier, an
+   independent draft building on theirs, and a public log with 15134 entries. We
+   have none of these; see the table above.
+3. **Release cadence.** 23 releases against 4. AAC ships weekly; this project
    tags when a chapter of work closes.
-3. **Surface area.** 40 modules against 25. AAC covers COSE/CBOR carriers,
+4. **Surface area.** 40 modules against 25. AAC covers COSE/CBOR carriers,
    bilateral flows, ERC-8183 and x402 adapters, an anchor client, witness
    records. This project covers one format and one verifier, and says so.
-4. **Test count.** 1189 against 524.
+5. **Test count.** 1189 against 526.
+
+## Adoption, measured the peer's own way
+
+Their `IMPLEMENTATIONS.md` groups evidence by strength, following RFC 7942, and
+states the rule that makes it worth reading: an entry owned by an author of the
+specification is not independent, however it is worded. I checked each merged
+claim against GitHub on 2026-11-18 rather than taking the page's word for it:
+
+| evidence | where | verified |
+|---|---|---|
+| test vectors merged into the IETF SCITT working group's shared repository | [ietf-wg-scitt/examples#3](https://github.com/ietf-wg-scitt/examples/pull/3) | merged 2026-06-26 |
+| a third party's product shipped their verifier | [projnanda/nandatown#197](https://github.com/projnanda/nandatown/pull/197) | merged 2026-07-15, by a NANDA maintainer, not them |
+| the same product added CCF write-receipt anchoring | [projnanda/nandatown#200](https://github.com/projnanda/nandatown/pull/200) | merged 2026-07-15 |
+| an independent Internet-Draft builds on their extension points | draft-rampalli-scitt-capsule-provenance-binding-00 | active, sole author not a contributor |
+| a live public CT-style log for capsule checkpoints | anchor.agentactioncapsule.org | 15134 entries, checkpoint 2026-10-31 |
+| Microsoft maintainer pins their vectors in an open PR | microsoft/scitt-ccf-ledger#424 | open, not merged (they say so) |
+
+**Ours: zero rows in the same table.** No merged upstream contribution, no third
+party shipping this verifier, no independent draft citing it, no public log,
+because nothing has been sent out yet. `docs/IMPLEMENTATION-STATUS.md` records
+that honestly in their format rather than leaving it implied.
+
+This is the difference the local tests cannot touch. Two implementations
+agreeing with each other is a fact about this repository; a third party shipping
+the verifier is a fact about the world, and only the second one is what a degree
+committee, a standards reader or a customer treats as evidence.
 
 ## Where this project is ahead, also stated plainly
 

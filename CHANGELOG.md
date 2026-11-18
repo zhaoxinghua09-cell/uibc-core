@@ -15,6 +15,59 @@ Nothing here is a ratified standard.
 
 ## [Unreleased]
 
+### Every check, and something that breaks it (2026-11-19)
+
+- **`tools/check_falsifiability.py`** asks what a verifier project rarely asks
+  itself: for each of the nineteen checks, is there a published artefact that
+  makes it say FAIL? It collects the answer from the thirty-six exported
+  conformance cases (seventeen checks) and from `tools/outsider_audit.py`
+  (S16: a real FreeTSA token and four mutations; S9: a pinned head and a
+  rollback only the pin can see).
+- **Measured: 19 of 19, zero holes.** The tool exits non-zero if that stops
+  being true, and CI runs it in the second-implementation job, after the suite
+  is exported.
+- **`docs/FALSIFIABILITY.md`** records the matrix and the uneven column: five
+  checks (S1, S2, S3, S7, S11) rest on a single artefact, which proves they
+  are not decoration but not that they catch every shape of forgery.
+
+### Three optimisations on 20,000 files, all reverted (2026-11-19)
+
+- **Profiled the 1.1 s** it takes to verify 20,000 entries: S12 semantics 0.354 s,
+  S11 byte scan 0.278 s (0.117 of it the depth walk), JCS canonicalisation 0.154 s,
+  SHA-256 of the evidence 0.152 s. Hashing all 20,003 files on its own is 0.170 s
+  (8.5 us a file), so I/O is not the bottleneck and never was.
+- **Caching `realpath` per directory:** 1.104 s -> 1.093 s, 1%. The OS already
+  caches those lookups; the profile was showing time the workload does not pay twice.
+- **Stripping string literals with a regex before the depth scan:** 1.146 s. Two
+  passes over ten megabytes cost more than the loop they replace.
+- **Skipping `fromisoformat` for clearly-past timestamps:** rejected before
+  writing it - it only fires on old evidence, and honest benchmarks are near now.
+- **All three reverted.** `verify.py` is unchanged; the containment test stays
+  one step. `docs/PERF-LOG.md` records the attempts and the floor: 54 us per
+  entry, nineteen checks, 60 MiB at 20,000.
+
+### The sixteen tests that were skipping (2026-11-19)
+
+- **Audited `OK (skipped=16)`.** Fifteen of the sixteen were skipping for one
+  reason: `.[verify]` does not carry `opentimestamps-client`, `langchain-core`,
+  `coincurve`, `pynostr` or `agent-action-capsule`. CI installs the same extra,
+  so the interop check against the peer, the live-LangChain measurement, the OTS
+  proof check and both Nostr anchors had **never run in CI**. They were in the
+  suite, counted in the total, and executed nowhere.
+- **They all pass once installed** (`527 OK (skipped=2)`, 42.4 s). Nothing in
+  the tests needed fixing, which is the finding: the code was right and the
+  gate was hollow.
+- **New extra `interop`**, and a new CI job `test-with-extras` that runs the
+  full suite with it and then fails on any skip whose reason contains
+  "not installed". Green can no longer mean "the hard half was skipped".
+- **`docs/SKIPPED.md`** records the list, the categories, and the two skips that
+  remain (both deliberate).
+- **The new gate caught a second category on its first run:** five
+  `test_aee_rail.py` tests were skipping on "agent_evidence_vectors corpus not
+  installed" — the rail that reads somebody else's conformance corpus had never
+  run in CI either. `conformance` existed as an extra; no job installed it.
+  `test-with-extras` now installs `.[verify,interop,conformance]`.
+
 ### The neighbourhood, surveyed rather than admired (2026-11-19)
 
 - **`docs/PEER-SURVEY.md` + `docs/PEERS.json`**: six neighbouring projects measured

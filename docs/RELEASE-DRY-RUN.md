@@ -23,7 +23,7 @@ it and running the suite in place:
 
 | build | tests collected | result |
 |---|---|---|
-| clone of `main` (reference) | 526 | OK, 16 skipped |
+| clone of `main` (reference) | 526 | OK, 16 skipped (measured before `.[verify,interop]` existed) |
 | sdist, first build (no `MANIFEST.in`) | **290** | **6 failures, 97 errors** |
 | sdist, after listing fixtures/tools/conformance | 475 | 13 failures, 57 errors |
 | sdist, after adding everything `tests/` reads under `tests/` | 482 | 3 failures, 35 errors |

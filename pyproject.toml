@@ -33,6 +33,18 @@ verify = ["cryptography>=41", "asn1crypto>=1.5"]
 # dependency: CI installs this extra to run the corpus harness against the
 # uibc_core.aee rail; the rail itself is stdlib-only.
 conformance = ["agent-evidence-vectors==0.36.3"]
+# Measured 2026-11-19: 15 of the 16 tests that CI was skipping were skipping only
+# because this extra was not installed. Installing it turns "527 OK (skipped=16)" into
+# "527 OK (skipped=2)", and the two that remain are deliberate (a self-seeding path that
+# is not taken when the corpus already exists, and a bare-environment control that is
+# skipped once langchain-core is present). CI runs this extra in `test-with-extras`.
+interop = [
+  "agent-action-capsule==0.17.0",
+  "langchain-core>=0.3",
+  "opentimestamps-client>=0.7",
+  "pynostr>=0.6",
+  "coincurve>=18",
+]
 
 [build-system]
 requires = ["setuptools>=61"]

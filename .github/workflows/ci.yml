@@ -157,6 +157,11 @@ jobs:
           mkdir -p /tmp/isolated && cd /tmp/isolated
           python /tmp/uibc.pyz explain "$GITHUB_WORKSPACE/fixtures/clean.uibc" | head -3
 
+      - name: The publisher check, done twice
+        # anchor_check.py and verify-js/anchor.mjs must reach the same verdict
+        # on the same bundle - agreement is the only reason to believe either.
+        run: python -m pytest tests/test_anchor_second_impl.py -q
+
       - name: An anchor can carry a moment, and must not lie about it
         # Offline against a real FreeTSA token shipped as a fixture; the four
         # refusals (wrong bytes, no CA, wrong cover mode, missing half) are what

@@ -127,6 +127,27 @@ jobs:
         # nobody can make fail is decoration; this step refuses decoration.
         run: python tools/check_falsifiability.py
 
+      - name: Two defects at once must not explain each other away
+        # One mutation at a time is measured everywhere else. Two together is a
+        # different question: a second change can supply exactly the consistency
+        # the first one broke. Fourteen mutations, every pair and every triple.
+        run: python tools/check_combinations.py --triples
+
+      - name: A forgery that agrees with itself
+        # Repairing a rewrite is arithmetic; a stranger can do it and sign with
+        # their own key. What has to survive is the sentence the verdict makes:
+        # PASS beside unanchored, never PASS alone.
+        run: python tools/composed_forgery.py
+
+      - name: An anchor must arrive from outside the bundle
+        # Build a publisher bundle, then check it the way a stranger would. The
+        # same package verified against its own key is PASS/unanchored; the anchor
+        # is what turns it into ANCHORED, so this step fails if either half stops
+        # mattering.
+        run: |
+          python tools/make_release_bundle.py --out /tmp/anchor-demo
+          python tools/anchor_check.py /tmp/anchor-demo
+
       - name: The second implementation must not drift
         # A verifier written from the spec in another language, sharing no code
         # with the first, is only worth something while it keeps agreeing. This

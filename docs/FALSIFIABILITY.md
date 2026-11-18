@@ -27,7 +27,7 @@ as measured on 2026-11-19:
 | check | artefacts that force FAIL | first artefact |
 |---|---|---|
 | S1 | 1 | `11-add-an-undeclared-file` |
-| S2 | 1 | `14-mismatch-agent-identity` |
+| S2 | 2 | `14-mismatch-agent-identity` + deep: an event naming another agent |
 | S3 | 1 | `13-impossible-calendar-date` |
 | S4 | 3 | `07-flip-one-byte-in-evidence` |
 | S5 | 3 | `10-edit-the-evidence-root` |
@@ -36,7 +36,7 @@ as measured on 2026-11-19:
 | S8 | 2 | `32-rewrite-index-metadata-content-untouched` |
 | S9 | 1 | outsider_audit: a rolled-back package against the old pin |
 | S10 | 2 | `33-drop-engine-build-from-the-closure` |
-| S11 | 1 | `12-duplicate-a-json-member-name` |
+| S11 | 2 | `12-duplicate-a-json-member-name` + deep: a byte-order mark |
 | S12 | 2 | `13-impossible-calendar-date` |
 | S13 | 4 | `18-replace-merkle-root` |
 | S14 | 2 | `24-strip-base64-padding` |
@@ -51,11 +51,17 @@ the suite is already exported.
 
 ## What the uneven column says
 
-Five checks rest on a **single** artefact: S1, S2, S3, S7, S11. One sample is
-enough to prove the check is not decoration, but not enough to trust it against
-a clever forgery — a mutation that happens to be caught by one code path says
-nothing about the others. S13 and S15 have four each, precisely because they
-were the ones a previous audit found under-tested.
+One check still rests on a **single** artefact: S7. Where the five
+single-sample checks used to be, four now have a second, differently shaped
+mutation, and writing those second shapes found a real defect rather than a
+second confirmation: an event naming another `agent_id` passed both S2 and S3
+(F-007, fixed here, regression test `tests/test_identity_in_lifecycle.py`).
+
+S7's second shape did not produce a fail, and that is not a hole in the check:
+S7 only runs when the package carries an index metadata digest to compare
+against, and the clean fixture does not, so the mutation has nothing to
+contradict. A package that makes no claim cannot be caught lying about it. The
+single S7 sample is the case where the claim exists and the bytes disagree.
 
 This is the honest reading of the table: it certifies that every check *can*
 fail, not that every check fails for *every* shape of attack. The next

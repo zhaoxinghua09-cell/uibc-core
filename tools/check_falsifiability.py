@@ -95,6 +95,76 @@ def s9_reachable():
     return ok
 
 
+def _mut_s1_drop_required(pkg):
+    """S1, second shape: a declared file removed, rather than an extra one added."""
+    os.remove(os.path.join(pkg, "identity.json"))
+
+
+def _mut_s2_lifecycle_identity(pkg):
+    """S2, second shape: the lifecycle disagrees, not the identity document."""
+    path = os.path.join(pkg, "lifecycle.json")
+    doc = json.load(open(path, encoding="utf-8"))
+    doc["events"][0]["agent_id"] = "fx-agent-002"
+    json.dump(doc, open(path, "w", encoding="utf-8"), ensure_ascii=False)
+
+
+def _mut_s3_illegal_first_event(pkg):
+    """S3, second shape: a legal date, an illegal transition into the machine."""
+    path = os.path.join(pkg, "lifecycle.json")
+    doc = json.load(open(path, encoding="utf-8"))
+    doc["events"][0]["event_type"] = "ACTIVATE"
+    json.dump(doc, open(path, "w", encoding="utf-8"), ensure_ascii=False)
+
+
+def _mut_s7_media_type(pkg):
+    """S7, second shape: a different metadata field than the note."""
+    path = os.path.join(pkg, "evidence", "index.json")
+    doc = json.load(open(path, encoding="utf-8"))
+    doc["entries"][0]["media_type"] = "text/markdown"
+    json.dump(doc, open(path, "w", encoding="utf-8"), ensure_ascii=False)
+
+
+def _mut_s11_bom(pkg):
+    """S11, second shape: bytes that are not JSON because of a byte-order mark."""
+    path = os.path.join(pkg, "manifest.json")
+    raw = open(path, "rb").read()
+    open(path, "wb").write(b"\xef\xbb\xbf" + raw)
+
+
+DEEP_MUTATIONS = [
+    ("S1", "a declared file removed", _mut_s1_drop_required),
+    ("S2", "the lifecycle disagrees with the identity", _mut_s2_lifecycle_identity),
+    ("S3", "a legal timestamp, an illegal transition", _mut_s3_illegal_first_event),
+    ("S7", "a different metadata field rewritten", _mut_s7_media_type),
+    ("S11", "a byte-order mark in front of the manifest", _mut_s11_bom),
+]
+
+
+def deep_mutations():
+    """Second shapes for the five checks that rested on a single artefact."""
+    import outsider_audit as oa
+
+    got = {}
+    for cid, label, fn in DEEP_MUTATIONS:
+        tmp = tempfile.mkdtemp()
+        try:
+            pkg = oa._prepare(BASE, tmp)
+            fn(pkg)
+            checks = {c["id"]: c for c in verify(pkg)["checks"]}
+            res = checks.get(cid, {}).get("result")
+            if res == "FAIL":
+                got.setdefault(cid, []).append("deep: " + label)
+            else:
+                print("  deep mutation for %s (%s) gave %r, expected FAIL"
+                      % (cid, label, res), file=sys.stderr)
+        except Exception as e:  # noqa: BLE001
+            print("  deep mutation for %s (%s) raised %s: %s"
+                  % (cid, label, type(e).__name__, e), file=sys.stderr)
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+    return got
+
+
 def main():
     print("collecting from conformance/cases ...")
     hits = suite_hits()
@@ -105,6 +175,13 @@ def main():
             extra["S16"] = ["outsider_audit: " + s for s in s16]
     except Exception as e:  # noqa: BLE001
         print("  S16 mutations unavailable: %s: %s" % (type(e).__name__, e),
+              file=sys.stderr)
+    try:
+        deep = deep_mutations()
+        for cid, labels in deep.items():
+            extra.setdefault(cid, []).extend(labels)
+    except Exception as e:  # noqa: BLE001
+        print("  deep mutations unavailable: %s: %s" % (type(e).__name__, e),
               file=sys.stderr)
     try:
         s9 = s9_reachable()

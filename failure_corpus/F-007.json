@@ -1,0 +1,11 @@
+{
+  "id": "F-007",
+  "date": "2026-11-19",
+  "category": "code",
+  "summary": "S2 compared identity.json with manifest.json and never read the agent_id carried by lifecycle events, so a package could attribute its whole lifecycle to another agent and still verify as INCONCLUSIVE with S2 and S3 both PASS",
+  "root_cause": "The identity check was written against the two documents that declare who the package is, on the assumption that the events inherit that identity by virtue of being in the same package. Nothing enforced the inheritance. S3 authorised the actor field but not the agent_id field, so no check looked at it: a field that exists in the schema and is judged by nobody.",
+  "detection": "A falsifiability audit: for each of the nineteen checks, is there a published artefact that makes it fail? S2 had exactly one (a mismatched identity document). Writing a second, differently shaped mutation - change lifecycle.events[0].agent_id - produced verdict INCONCLUSIVE with S2 PASS and S3 PASS, i.e. a package carrying another agent's events that the report called consistent.",
+  "fix": "S2 now compares every lifecycle event's agent_id with the package agent_id (Python and JavaScript both), reporting the event id and both agent ids. Regression test tests/test_identity_in_lifecycle.py asserts both directions: the forged package fails S2 specifically (S3 stays PASS, so the diagnosis is not merely 'something is wrong'), and the honest fixture still passes.",
+  "lesson": "A check named 'identity consistency' is only as strong as the set of places it reads. Enumerate every field in the schema that names the subject, and ask of each one: which check reads this? A field nobody reads is not covered by the check that sounds like it covers it.",
+  "fixture_ref": "tests/test_identity_in_lifecycle.py, tools/check_falsifiability.py (deep mutation for S2)"
+}

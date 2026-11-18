@@ -15,6 +15,143 @@ Nothing here is a ratified standard.
 
 ## [Unreleased]
 
+### Anchoring the publisher (2026-11-19)
+
+- **`tools/make_release_bundle.py`**: a publisher bundle = the sealed package plus
+  `anchor.json` (public key, key_id, checkpoint head). The head goes into the
+  manifest *before* signing - a signed manifest edited afterwards is exactly the
+  forgery that row A catches and row B repairs.
+- **`tools/anchor_check.py`**: the one command a stranger runs.
+  `VERDICT: ANCHORED` only when the signature matches the anchor's key *and* the
+  state matches the anchor's head; `NOT ANCHORED` when verification fell back to
+  a key the package supplied; refuses to run without an anchor file, because an
+  anchor read out of the bundle is the bundle vouching for itself.
+- **Measured contrast, now a test:** a repaired, re-signed forgery (row C of
+  `docs/FORGERY-ENVELOPE.md`) still verifies `PASS, unanchored` on its own, and
+  fails S6 the moment the publisher's anchor is applied. The anchor is the
+  only thing that changes the answer, which is why it has to travel separately.
+- **`docs/PUBLISHER-IDENTITY.md`**: the five-step release procedure, why the
+  key and the head must leave through a channel the package cannot reach, and
+  the three things this does not do. Status stated plainly: no release in this
+  repository has published an anchor, so every verdict here today is at best
+  `PASS, unanchored`.
+- **`tests/test_anchor_check.py`** freezes: own bundle anchored; wrong head
+  refused (S9); wrong pinned key refused (S6); forgery refused against a real
+  anchor while still clean without one; anchor without a key refused.
+
+
+### A forgery that agrees with itself (2026-11-19)
+
+- **`tools/composed_forgery.py`**: every previous audit measures a *change this
+  project can see*. This one performs the attack: rewrite one evidence file, then
+  repair the content hash, the evidence root, the index digest and the checkpoint
+  head - all of them arithmetic on bytes the attacker owns.
+- **Six attacks, measured.** Undeclared rewrite -> FAIL (S4). Repaired rewrite ->
+  INCONCLUSIVE (the owner's seal cannot be checked). Repaired and re-signed with
+  a key of the attacker's own -> **PASS, `unanchored`**. Same with the publisher's
+  key pinned -> FAIL (S6). Same with a published head pinned -> FAIL (S9).
+  Seal deleted -> INCONCLUSIVE, never better.
+- **The point is row three**, and it is written into the tests rather than the
+  pitch: a stranger with no publisher key produces a clean verdict, and the
+  verdict says `unanchored` because that is exactly what it can support. PASS
+  there means *this key signed these bytes*, not *the publisher wrote them*.
+- **`docs/FORGERY-ENVELOPE.md`** prints the six rows, names why each one stops
+  where it does, and lists the three things that actually close the gap:
+  publish the key (`--pubkey`), publish the head (`--expect-head`), anchor the
+  head to an external timestamp or receipt.
+- **`tests/test_composed_forgery.py`** freezes all six outcomes, row three
+  included, so the boundary cannot drift into a stronger claim later.
+
+
+### Two defects at once (2026-11-19)
+
+- **`tools/check_combinations.py`**: every other audit here asks about one
+  change. This asks about two, which is the question a composed forgery poses -
+  a second defect that supplies exactly the consistency the first one broke.
+  Fourteen independent mutations, each caught alone; then all 91 pairs and all
+  364 triples.
+- **Measured: 91 of 91 pairs and 364 of 364 triples fail somewhere.** Zero
+  combinations are silent, and zero show the cancelled pattern (both halves
+  caught alone, the combination caught nowhere). Under a second, so it is a CI
+  step and a test, not a ceremony.
+- **The probe corrected itself once:** the undeclared file first went into
+  `evidence/files/`, where the format deliberately keeps structural members and
+  resolves each by its own check, so nothing moved. The same mutation at the
+  package root - where a note that contradicts the evidence has no owner - made
+  S1 fail at once. Same defect, two positions, two correct verdicts.
+- **`docs/COMBINATIONS.md`** carries the matrix and states the limit plainly:
+  three at a time is not "any number", and the family is single-field defects,
+  not a chained forgery.
+
+
+### Two identifier fields that identified nothing (2026-11-19)
+
+- **`evidence_id` was read by no check** for presence or uniqueness. Two entries
+  could share an id, or one could carry none, and S4 still called the evidence
+  intact - the index is read by position everywhere, so identity was never
+  needed. `S4` now requires a non-empty, unique `evidence_id` per entry, in
+  Python and JavaScript (F-009).
+- **A gap stated is not a gap closed.** `docs/FIELD-COVERAGE.md` had said
+  "duplicates are not checked - stated rather than implied". That was honest
+  about the hole and still left it open; this closes it, and the document says
+  which mutations the new check does and does not catch.
+- **The lesson worth keeping:** a field silent to a *changed* value is not
+  silent to a *repeated* or *absent* one. For identifiers, the interesting
+  mutation breaks identity rather than alters it - which is exactly what a
+  value-swapping probe cannot see.
+- **One rule attempted and withdrawn in the same PR:** `identity.status` was
+  compared against the state the lifecycle reaches, and the clean fixture failed
+  - `REGISTERED` against a chain that ends `ACTIVATED` - because the two fields
+  describe different things. Withdrawn rather than re-tuned until green; the gap
+  stays listed in `docs/FIELD-COVERAGE.md` as a known gap.
+
+
+### Every field, and who notices when you change it (2026-11-19)
+
+- **`tools/check_field_coverage.py`** asks the F-007 question by measurement:
+  for each of the 59 leaf fields a package writes, replace the value with a
+  different one of the same shape, run verify, and record every check whose
+  result moved - in either direction, not only to FAIL. 36 alterations move
+  something; 23 move nothing.
+- **The 23 are not a list of holes, they are a list of reasons**, and every one
+  is written down: descriptive fields (schema tag, version, media type, note),
+  unreferenced values (the chain's last event id, evidence ids, whose uniqueness
+  is not checked - stated rather than implied), undecidable ones (per-event
+  signatures the format defines no payload for; an HMAC seal whose secret the
+  verifier does not hold, where INCONCLUSIVE is the correct answer), and two
+  enums nothing validates yet.
+- **One real hole, fixed:** `payload_hash` was written by every lifecycle event
+  and read by nothing - replace the `null` with any string and every check said
+  what it said before (F-008). `S12` now requires 64 lowercase hex when the field
+  is declared, in both implementations. This checks the shape of the claim, not
+  its correspondence to a payload the package does not ship.
+- **Frozen gate:** `tests/test_field_coverage.py` fails if a field becomes
+  silent without a reason on record, and also fails if a listed one stops being
+  silent (both directions, so the document cannot quietly rot).
+- **`docs/FIELD-COVERAGE.md`** carries the full 59-row matrix.
+
+
+### A field that existed and nobody read (2026-11-19)
+
+- **Second shapes for the five single-sample checks.** Writing them found a
+  defect instead of a confirmation. Changing `lifecycle.events[0].agent_id`
+  to another agent produced verdict `INCONCLUSIVE` with **S2 PASS and S3 PASS**:
+  the identity check compared `identity.json` with `manifest.json` and never
+  read the `agent_id` the events themselves carry, so a package could attribute
+  its whole lifecycle to somebody else's agent and still be called consistent.
+- **S2 now reads it**, in Python and in the JavaScript implementation, and
+  reports the event id and both agent ids. The forged package fails S2 and only
+  S2 (S3 stays PASS, so the report is not merely "something is wrong").
+- **`failure_corpus/F-007.json`** records the finding; regression test
+  `tests/test_identity_in_lifecycle.py` asserts both directions.
+- **Matrix after the fix:** S1, S2, S3, S11 each have two independent shapes;
+  S7 keeps one, because it only runs when the package declares an index
+  metadata digest and the fixture does not — a package that makes no claim
+  cannot be caught lying about it.
+- **529 tests green** (2 skipped), `check_doc_facts` 0 mismatches, second
+  implementation agrees on 36/36 cases with 30 named.
+
+
 ### Every check, and something that breaks it (2026-11-19)
 
 - **`tools/check_falsifiability.py`** asks what a verifier project rarely asks

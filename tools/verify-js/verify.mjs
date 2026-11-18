@@ -333,8 +333,20 @@ function verify(pkg, opts = {}) {
     try {
       const id = readJson(join(pkg, "identity.json"));
       const manifest = readJson(join(pkg, "manifest.json"));
+      const lcPath = join(pkg, "lifecycle.json");
+      let foreignEvent = null;
+      if (existsSync(lcPath)) {
+        const lc = readJson(lcPath);
+        for (const ev of (lc.events || [])) {
+          if (ev.agent_id && manifest.agent_id && ev.agent_id !== manifest.agent_id) {
+            foreignEvent = ev;
+            break;
+          }
+        }
+      }
       ok = !!id.agent_id && id.agent_id === manifest.agent_id &&
-           typeof id.owner === "string" && id.owner.length > 0;
+           typeof id.owner === "string" && id.owner.length > 0 &&
+           foreignEvent === null;
       detail = ok ? "ok" : "agent_id or owner does not line up with the manifest";
     } catch { /* detail already set */ }
     note("S2", "identity consistency", ok, detail);
@@ -492,6 +504,21 @@ function verify(pkg, opts = {}) {
         const got = sha256(body);
         if (got !== e.content_hash) problems.push("content hash mismatch: " + e.path);
         else hashes.push(got);
+      }
+      // evidence_id: present, and not repeated. The index is read by position
+      // everywhere else, so an id costs nothing until somebody cites one.
+      const ids = entries.map((e) => e.evidence_id);
+      for (let i = 0; i < ids.length; i++) {
+        if (!(typeof ids[i] === "string" && ids[i].trim())) {
+          problems.push("entry " + i + " has no evidence_id");
+        }
+      }
+      const seen = new Set();
+      for (const id of ids) {
+        if (typeof id === "string" && id.trim()) {
+          if (seen.has(id)) problems.push("duplicate evidence_id " + JSON.stringify(id));
+          seen.add(id);
+        }
       }
     } catch (err) { problems.push("unreadable index: " + err.message); }
     s4Failed = problems.length !== 0;
@@ -1170,6 +1197,9 @@ function verify(pkg, opts = {}) {
       for (const ev of events) {
         const at = ev.at || ev.created_at || ev.timestamp;
         if (!realDate(at)) { problems.push("lifecycle event without a real time"); break; }
+        if (ev.payload_hash != null && !/^[0-9a-f]{64}$/.test(String(ev.payload_hash))) {
+          problems.push("lifecycle event payload_hash is not 64 lowercase hex"); break;
+        }
         if (last && Date.parse(at) < Date.parse(last)) {
           problems.push("lifecycle time goes backwards"); break;
         }

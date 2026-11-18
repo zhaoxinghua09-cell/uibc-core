@@ -474,6 +474,19 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
     if custody is not None and custody not in KEY_CUSTODY:
         s2_problems.append(f"identity.key_custody={custody!r} not in "
                            f"{sorted(KEY_CUSTODY)}")
+    # Measured 2026-11-19: an event claiming a different agent_id was
+    # accepted (verdict INCONCLUSIVE, S2 and S3 both PASS). Nothing compared
+    # the events' own agent_id with the package identity, so a package could
+    # attribute its lifecycle to somebody else's agent and still be
+    # "consistent". S2 now reads the field it never read.
+    pkg_agent = str(manifest.get("agent_id") or identity.get("agent_id") or "")
+    for _ev in (lifecycle.get("events") or []):
+        _ev_agent = _ev.get("agent_id")
+        if _ev_agent is not None and pkg_agent and str(_ev_agent) != pkg_agent:
+            s2_problems.append(
+                "lifecycle event %r belongs to agent %r, not %r"
+                % (_ev.get("event_id"), _ev_agent, pkg_agent))
+
     record("S2", "identity consistency", not s2_problems,
            "; ".join(s2_problems) if s2_problems else
            f"agent_id={identity.get('agent_id')!r} consistent"
@@ -522,6 +535,19 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
             s4_failures.append(f"hash mismatch on {e.get('path')!r}")
         if e.get("type") not in EVIDENCE_TYPES:
             s4_failures.append(f"unknown evidence type {e.get('type')!r}")
+    # evidence_id: the index is read by position everywhere else, so a duplicate
+    # or a missing identifier costs nothing until somebody cites an id. The
+    # field-coverage audit listed this as unchecked; it is checked now.
+    _ids = [e.get("evidence_id") for e in entries]
+    for _i, _eid in enumerate(_ids):
+        if not (isinstance(_eid, str) and _eid.strip()):
+            s4_failures.append(f"entry {_i} has no evidence_id")
+    _seen = set()
+    for _eid in _ids:
+        if isinstance(_eid, str) and _eid.strip():
+            if _eid in _seen:
+                s4_failures.append(f"duplicate evidence_id {_eid!r}")
+            _seen.add(_eid)
     record("S4", "evidence integrity", not s4_failures,
            f"{len(entries)} entries checked; " + ("; ".join(s4_failures) if s4_failures else "all hashes match"))
 
@@ -549,6 +575,20 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
         elif declared_count != actual_count:
             s12_problems.append("manifest.json: evidence_count says %d, index holds %d"
                                % (declared_count, actual_count))
+    # payload_hash is written by every event and was read by no check (F-008,
+    # found by tools/check_field_coverage.py on 2026-11-19: replace the null with
+    # any string and every check still said what it said before). A declared hash
+    # is a claim; the shape of the claim is checkable even when the payload it
+    # names is not shipped. Saying so is weaker than checking it, and stronger
+    # than pretending the field does not exist.
+    _payload_hash_re = re.compile(r"\A[0-9a-f]{64}\Z")
+    for _i, _ev in enumerate(lifecycle.get("events") or []):
+        _ph = _ev.get("payload_hash")
+        if _ph is not None and not (isinstance(_ph, str) and _payload_hash_re.match(_ph)):
+            s12_problems.append(
+                "lifecycle.json: events[%d].payload_hash=%r is not 64 lowercase hex"
+                % (_i, _ph))
+
     record("S12", "timestamp and identifier strictness", not s12_problems,
            "; ".join(s12_problems[:4]) if s12_problems else
            "timestamps are RFC 3339 with a zone; UUIDs are lowercase and non-nil")

@@ -1,0 +1,12 @@
+{
+  "id": "F-008",
+  "date": "2026-11-19",
+  "category": "code",
+  "summary": "payload_hash was written into every lifecycle event and read by no check: replacing its null with an arbitrary string moved no check, in either direction",
+  "root_cause": "Same shape as F-007, found the same week by a different method. The field is part of the event schema and appears in every package the format produces, but the verifier never referenced the name. Nobody noticed because nothing fails when the field is silently wrong: the package still describes itself consistently, and the binding between an event and the action it claims to describe was never checked in the first place.",
+  "detection": "tools/check_field_coverage.py: for each of 59 leaf fields, copy the fixture, replace the value with a different one of the same shape, run verify, and record every check whose result moved - in either direction. All three payload_hash fields moved nothing.",
+  "fix": "S12 now requires a declared payload_hash to be 64 lowercase hex, in Python and in JavaScript. tests/test_field_coverage.py asserts the shape check fires, and freezes the set of silent fields in both directions so a new silent field fails the build.",
+  "residual": "The shape of the claim is checked; its correspondence to a payload is not, because the package does not ship the payload. This is weaker than verifying and stronger than silence, and the document says so in those words rather than implying verification.",
+  "lesson": "A field that is always null in the fixtures is a field nobody has ever had to read. Ask of every leaf: is this null in the fixture, and if so, what does a non-null value mean to the verifier? The answer for payload_hash was: nothing.",
+  "fixture_ref": "tools/check_field_coverage.py, tests/test_field_coverage.py, docs/FIELD-COVERAGE.md"
+}

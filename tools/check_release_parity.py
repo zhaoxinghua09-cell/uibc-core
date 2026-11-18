@@ -26,9 +26,16 @@ if _TOOLS not in sys.path:
 
 
 def _tree_version():
-    import tomllib
-    with open(os.path.join(_REPO, "pyproject.toml"), "rb") as f:
-        return tomllib.load(f)["project"]["version"]
+    """Read the version without tomllib: this project supports Python 3.10, and
+    tomllib only arrived in 3.11. The gate on CI is `test (3.10)`, so a 3.11-only
+    import is a real failure, not a local quirk."""
+    import re
+    with open(os.path.join(_REPO, "pyproject.toml"), encoding="utf-8") as f:
+        text = f.read()
+    m = re.search(r'^version\s*=\s*"([^"]+)"', text, re.M)
+    if not m:
+        raise RuntimeError("no version line in pyproject.toml")
+    return m.group(1)
 
 
 def _load(name):

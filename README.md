@@ -25,7 +25,7 @@ It prints `CONSISTENT` only when **both** hold: a second, independently written 
 
 **Current state, including what we are short of:** 526 tests green on Linux / Python 3.12 (16 skipped); the CI matrix runs the same suite on 3.10-3.13 · the verifier needs no third-party package (Ed25519 is implemented in-repo) · **external verification nodes: 0** — we publish the number we do not have; running the command above and sending back `external_node_result.json` makes it 1. Zero means the independence of this repository's verification rests entirely on two implementations written by the same author; it is not evidence of a third party having reproduced anything.
 
-Citation metadata (`CITATION.cff`, `CITATION.bib`, `codemeta.json`) pins the archived **0.2.1** snapshot of 2026-09-17; this section describes the current implementation (**v0.3.3**). Cite the snapshot, run the current code.
+**Three version numbers, and they disagree — read this before installing:** `main` is **0.4.0**, unreleased. PyPI carries **0.3.3** (2026-11-15). The archived citation snapshot is **0.2.1** (2026-09-17). If you `pip install uibc-core` you get the 0.3.3 verifier, which reports six checks on the clean package where `main` reports eight — S11 (strict serialization) and S12 (identifier strictness, `evidence_count`) came after that release. The measurement, with commands and timings, is in [docs/STRANGER-TRIAL.md](docs/STRANGER-TRIAL.md). Cite the snapshot, run `main`, and do not assume the PyPI build is the one these documents describe.
 
 **External conformance, measured against someone else's corpus** — a different number from the one above, and a different kind of claim:
 

@@ -434,7 +434,8 @@ def cmd_verify(args):
     key = _load_key(args.key) if args.key else None
     pubkey = _load_pubkey(args.pubkey) if getattr(args, "pubkey", None) else None
     report = verify(pkg, key=key, pubkey=pubkey,
-                    expect_head=getattr(args, "expect_head", None))
+                    expect_head=getattr(args, "expect_head", None),
+                    strict=getattr(args, "strict", False))
     print(json.dumps(report, ensure_ascii=False, indent=2))
     sys.exit(0 if report["result"] == "PASS" else 1)
 
@@ -540,6 +541,9 @@ def main():
                    help="pin the package checkpoint_head observed elsewhere: a "
                         "mismatch FAILS S9, which is the only way to catch a rollback "
                         "to an older but self-consistent package")
+    p.add_argument("--strict", action="store_true",
+                   help="fail any file under evidence/ that the index never declared "
+                        "(the structural members the format places there are exempt)")
     p.set_defaults(func=cmd_verify)
 
     p = sub.add_parser("explain", help="verify and print why, one check per line")

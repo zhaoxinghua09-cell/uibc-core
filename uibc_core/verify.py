@@ -219,7 +219,7 @@ def _semantic_problems(obj, path="", now=None, future_skew_s=300):
 
 
 def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
-                expect_head: str = None) -> dict:
+                 expect_head: str = None, strict: bool = False) -> dict:
     """Verify a submission.uibc package directory. Returns a report dict.
     Seal v0.3 verdict semantics (docs/verdict-and-seal-semantics.md):
 
@@ -311,7 +311,16 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
     # the check that owns it. Whether an uncommitted file in evidence/ should
     # fail outright is a question for a format version, not a patch: tightening
     # it here made every existing package fail.
-    evidence_extras = []
+    evidence_extras = [u for u in nested_extras if u.startswith("evidence/")]
+    # Files the format itself places under evidence/ and resolves by their own
+    # check: the tree, the receipt chain, the anchor set, the policy artefacts.
+    _EVIDENCE_STRUCTURAL = {"evidence/merkle.json", "evidence/chain.json",
+                            "evidence/anchors.json", "evidence/policies.json"}
+    uncommitted = []
+    if strict:
+        uncommitted = [u for u in evidence_extras
+                       if u not in _EVIDENCE_STRUCTURAL
+                       and not u.startswith("evidence/policies/")]
     aux_extras = [u for u in nested_extras if not u.startswith("evidence/")]
     s1_detail = []
     if missing:
@@ -319,10 +328,21 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
     if root_extras:
         s1_detail.append(f"undeclared files at package root: {sorted(root_extras)}")
 
+    if uncommitted:
+        s1_detail.append(f"uncommitted files under evidence/: {sorted(uncommitted)}")
+    elif evidence_extras:
+        if strict:
+            s1_detail.append(f"structural members under evidence/: "
+                             f"{sorted(evidence_extras)} (exempt by format)")
+        else:
+            s1_detail.append(f"note (lenient mode): {sorted(evidence_extras)} under "
+                             f"evidence/ are structural or uncommitted; pass --strict "
+                             f"to fail uncommitted ones")
     if aux_extras:
         s1_detail.append(f"note: {sorted(aux_extras)} outside evidence/, not covered "
                          f"by the evidence root")
-    record("S1", "package structure", not missing and not root_extras,
+    record("S1", "package structure",
+           not missing and not root_extras and not uncommitted,
            "; ".join(s1_detail) if s1_detail
            else f"all required files present, no undeclared files "
                 f"({len(declared)} declared)")
@@ -946,7 +966,7 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
 
 
 def verify(package_dir: str, key: bytes = None, pubkey: bytes = None,
-           expect_head: str = None) -> dict:
+           expect_head: str = None, strict: bool = False) -> dict:
     """Fail-closed wrapper: a verifier must return a verdict, never crash.
 
     Red-team RT06 put a NaN into manifest.json. json accepts NaN, RFC 8785 does
@@ -956,7 +976,8 @@ def verify(package_dir: str, key: bytes = None, pubkey: bytes = None,
     """
     try:
         result = _verify_impl(package_dir, key=key, pubkey=pubkey,
-                              expect_head=expect_head)
+                              expect_head=expect_head, strict=strict)
+        result["strict"] = bool(strict)
         # Some checks are appended from a dozen hand-written branches (S6 alone
         # has fourteen). Rather than touch each one and still miss a path, the
         # basis is filled in once, here, for every check that lacks it.

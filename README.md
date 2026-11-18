@@ -287,6 +287,20 @@ python independent_verifier/cross_check.py  # 独立第二实现交叉核验（7
 每份验证报告必须包含：`scope`（范围）、`limitations`（局限）、`checked`（查了什么）、`not_checked`（没查什么）。
 明确不查：生命周期事件签名（封签只覆盖 identity+manifest）、外部时间戳锚定、行为评估、记忆忠实性/连续性。非对称/第三方签名已于 v0.3 落地（Ed25519，纯标准库实现，RFC 8032 向量锁定）。
 
+## 鲁棒性基准 · Robustness benchmark
+
+变异基准与红队套件已经可以直接跑分、并对第三方开放提交记录：
+
+```bash
+python benchmarks/run_benchmarks.py --out benchmarks/submissions/<name>.json \
+    --submitter "<org/team>" --implementation "<verifier name>"
+```
+
+一条命令产出 `uibc-bench/1` 记录（含每例明细、机器与实测 commit）。排行榜由记录文件现读生成，
+不手打数字：[`benchmarks/leaderboard.md`](benchmarks/leaderboard.md)。格式与规则见
+[`benchmarks/README.md`](benchmarks/README.md)。**这不是 conformance 套件，也不是安全审计**：
+21 个变异与 15 个敌意输入是下限，`skipped` 单列、不并入通过。
+
 ## 已知边界（诚实清单）
 
 - **HMAC 封签（v0.2 保留）为对称方案**：验证需持有密钥、无第三方可验证性、无不可否认性——这些缺口已由 v0.3 的 Ed25519 公开封签化解；HMAC 模式仅建议用于业主自验场景。注：v0.3 的 Ed25519 为纯 Python 实现（非恒定时间），大批量签名场景应替换为原生实现（接口不变）。

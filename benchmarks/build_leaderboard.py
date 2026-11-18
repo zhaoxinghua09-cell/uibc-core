@@ -18,8 +18,18 @@ Generated from `benchmarks/submissions/*.json` by `benchmarks/build_leaderboard.
 Re-run `python benchmarks/run_benchmarks.py` to reproduce a row; the record carries the
 measured commit and machine so a reader can tell whether two rows are even comparable.
 
+**Suite runs**
+
 | implementation | commit | mutation open (false accepts) | pinned | head-pinned | redteam refused | skipped | machine |
 |---|---|---|---|---|---|---|---|
+"""
+
+EXTERNAL_HEADER = """
+**External verifiers measured by `benchmarks/run_external.py`** (same mutant bytes, submitted
+command, exit 0 = accept)
+
+| implementation | commit | false accepts | base accepted | verifier command |
+|---|---|---|---|---|
 """
 
 FOOTER = """
@@ -34,10 +44,20 @@ are shown beside every rate.
 
 
 def main() -> int:
-    rows = []
+    rows, ext = [], []
     for path in sorted(glob.glob(os.path.join(SUBS, "*.json"))):
         with open(path, encoding="utf-8") as fh:
             d = json.load(fh)
+        if d.get("kind") == "external-verifier":
+            m = d["mutations"]
+            ext.append(
+                "| {impl} | `{commit}` | {a}/{t} ({r}%) | {base} | `{cmd}` |".format(
+                    impl=d.get("implementation", "?"), commit=d.get("commit", "?"),
+                    a=m.get("accepted"), t=m.get("total"), r=m.get("false_accept_rate"),
+                    base=d.get("base_accepted"), cmd=d.get("verifier_command", "?"),
+                )
+            )
+            continue
         m = d["suites"]["mutation"]
         r = d["suites"]["redteam"]
         mo = m["modes"]["open"]
@@ -54,9 +74,11 @@ def main() -> int:
             )
         )
     text = HEADER + "\n".join(rows) + "\n" + FOOTER
+    if ext:
+        text = HEADER + "\n".join(rows) + "\n" + EXTERNAL_HEADER + "\n".join(ext) + "\n" + FOOTER
     with open(OUT, "w", encoding="utf-8", newline="\n") as fh:
         fh.write(text)
-    print("wrote", OUT, "rows:", len(rows))
+    print("wrote", OUT, "suite rows:", len(rows), "external rows:", len(ext))
     return 0
 
 

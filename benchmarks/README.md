@@ -71,6 +71,27 @@ python benchmarks/run_benchmarks.py --out benchmarks/submissions/<name>.json \
 One line of output, one record file. The record embeds every case row, so a reader can
 re-derive the totals rather than trust them.
 
+## Measure a verifier you did not write
+
+`run_external.py` feeds the same mutant bytes to any command, so a competitor or a downstream
+integrator can be scored on identical inputs rather than on their own test suite:
+
+```bash
+python tools/mutation_benchmark.py          # refresh the mutants
+python benchmarks/run_external.py \
+    --verifier "python ivcli.py {pkg}" \
+    --implementation "your-verifier" --commit <sha> --out benchmarks/submissions/you.json
+```
+
+Contract: `<command> <package-dir>`, **exit 0 = accepts**, any other exit = refuses
+(FAIL, INCONCLUSIVE, crash, or missing binary all count as refuse). A verifier that refuses
+everything scores 0% and is flagged, because `base_accepted` is reported separately.
+
+First cross-implementation result: the independent verifier
+(`github.com/zhaoxinghua09-cell/uibc-iverify`) accepts the **same two mutants** as the
+reference implementation — M17 (key swap) and M20 (rollback) — not merely the same total.
+Case-by-case agreement is the claim; a matching percentage alone is not.
+
 ## Submit
 
 Add `benchmarks/submissions/<name>.json` in a pull request, plus one sentence saying which

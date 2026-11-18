@@ -439,6 +439,43 @@ def cmd_verify(args):
     sys.exit(0 if report["result"] == "PASS" else 1)
 
 
+def cmd_explain(args):
+    """The same verifier, printed for a person.
+
+    `verify` emits JSON because scripts parse it. A JSON verdict is a poor way
+    to read a failure: the field that matters (`checks[].basis.citation`) sits
+    four levels down. This prints one line per check with its class and - where
+    one exists - the document that lets the rule claim anything at all.
+    """
+    from .basis import CLASS_LABEL
+    pkg = os.path.abspath(args.path)
+    if not os.path.isdir(pkg):
+        sys.exit(f"error: package dir not found: {pkg}")
+    key = _load_key(args.key) if getattr(args, "key", None) else None
+    pubkey = _load_pubkey(args.pubkey) if getattr(args, "pubkey", None) else None
+    report = verify(pkg, key=key, pubkey=pubkey,
+                    expect_head=getattr(args, "expect_head", None))
+    print(f"result: {report['result']}   verifier: {report['verifier_id']} "
+          f"{report['verifier_version']}")
+    print()
+    for c in report["checks"]:
+        b = c.get("basis") or {}
+        mark = "PASS" if c["result"] == "PASS" else c["result"]
+        cite = b.get("citation") or ""
+        src = ("[%s] %s" % (CLASS_LABEL.get(b.get("class", "none"), "无"), cite)
+               if cite else
+               "[%s] 本项目自定" % CLASS_LABEL.get(b.get("class", "none"), "无"))
+        print(f"{c['id']:<4} {mark:<12} {c['name']}")
+        print(f"     {src}")
+        if mark != "PASS":
+            print(f"     -> {c['detail']}")
+    print()
+    out = report.get("statement") or ""
+    if out:
+        print(out)
+    sys.exit(0 if report["result"] == "PASS" else 1)
+
+
 def cmd_inspect(args):
     pkg = os.path.abspath(args.path)
     manifest = _read(os.path.join(pkg, "manifest.json"))
@@ -504,6 +541,13 @@ def main():
                         "mismatch FAILS S9, which is the only way to catch a rollback "
                         "to an older but self-consistent package")
     p.set_defaults(func=cmd_verify)
+
+    p = sub.add_parser("explain", help="verify and print why, one check per line")
+    p.add_argument("path")
+    p.add_argument("--key", default=None, metavar="KEYFILE")
+    p.add_argument("--pubkey", default=None, metavar="PUBFILE")
+    p.add_argument("--expect-head", dest="expect_head", default=None, metavar="HEAD")
+    p.set_defaults(func=cmd_explain)
 
     p = sub.add_parser("keygen", help="generate a 256-bit seal key (hex file)")
     p.add_argument("--out", required=True, metavar="KEYFILE")

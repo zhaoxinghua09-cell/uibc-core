@@ -49,5 +49,33 @@ class TestBasis(unittest.TestCase):
             self.assertEqual(c["basis"]["class"], basis.for_check(c["id"])["class"], c["id"])
 
 
+class TestExplainOutput(unittest.TestCase):
+    """The human-facing view must carry the same citation the JSON field does,
+    or the half-step this closed would reopen quietly."""
+
+    def test_explain_prints_the_citation(self):
+        import subprocess
+        out = subprocess.run(
+            [sys.executable, "-m", "uibc_core.cli", "explain",
+             os.path.join(_REPO, "fixtures", "clean.uibc")],
+            capture_output=True, text=True, cwd=_REPO, timeout=120)
+        text = out.stdout
+        self.assertIn("draft-noa-scitt-ai-agent-receipt-00", text)
+        self.assertIn("本项目自定", text)
+        self.assertIn("RFC 8785", text)
+
+    def test_the_sentence_and_the_field_agree(self):
+        import subprocess
+        out = subprocess.run(
+            [sys.executable, "-m", "uibc_core.cli", "verify",
+             os.path.join(_REPO, "fixtures", "clean.uibc")],
+            capture_output=True, text=True, cwd=_REPO, timeout=120)
+        import json as _json
+        report = _json.loads(out.stdout)
+        for c in report["checks"]:
+            if c["basis"]["class"] == "none":
+                self.assertEqual(c["basis"]["citation"], "", c["id"])
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -1,5 +1,13 @@
 cff-version: 1.2.0
-message: "If you use uibc-core or UIBC in academic work, please cite it as below. This entry pins the archived 0.2.1 snapshot (2026-09-17); the current implementation is at v0.3.3 — see README for current state."
+message: >-
+  If you use uibc-core or UIBC in academic work, please cite the entry below.
+  SCOPE, stated because it is easy to get wrong: this entry pins the archived
+  0.2.1 snapshot (2026-09-17), whose verifier implements six checks, S1-S6.
+  The current repository implements eighteen, S1-S18, and not one of S7-S18
+  exists in any archived artifact. A reader who follows this DOI therefore
+  cannot reproduce any claim about S7-S18 -- those may be cited only against
+  the repository state. docs/ARCHIVE-GAP.md records the measurement, and
+  tools/check_citation_scope.py recomputes it.
 type: software
 title: "uibc-core: Verifiable Evidence Packages for Autonomous AI Agents"
 abstract: >-
@@ -8,6 +16,9 @@ abstract: >-
   of Registry, Evidence and Gates. Every agent action can be sealed into a
   submission.uibc package (identity + lifecycle events + content-hashed evidence +
   evidence root + optional seal), then verified offline.
+  Scope of this archived version: six checks (S1-S6); the repository
+  has since grown to eighteen, and none of S7-S18 is in an archived
+  artifact.
 version: "0.2.1"
 date-released: "2026-09-17"
 doi: "10.5281/zenodo.22821835"

@@ -61,6 +61,13 @@ carrying the fields they inspect, so 0.4.0 is a major-looking bump under a
 
 ### Added
 
+- **Rate limiting on the verify endpoint.** A token bucket per caller, `--rate`/`--burst`, `429` with `Retry-After`, and the limit advertised on `/health`. `X-Forwarded-For` is ignored unless `--trust-forwarded` is passed, because a bucket keyed on a caller-controlled header is not a bucket. Measured at burst 10: 11 of 320 calls under 16 concurrent clients succeeded, 309 refused.
+- **`tools/stress_verify.py`** -- concurrency measurement, unlimited and limited in one run.
+- **`deploy/`** -- a Dockerfile and instructions so a stranger can run their own endpoint; the image is untested here (no Docker on this machine) and the README says so.
+- **`tests/test_rate_limit.py`** -- 8 tests, including the spoofed-header test.
+
+### Added
+
 - **Conformance suite.** 29 packages, each correct and then broken in exactly one way, with the checks a verifier must report. `tools/run_conformance.py --verify "<cmd>"` runs them against any implementation. Expectations come from the audit's measured run, so the suite cannot drift from the report. Measured: current implementation 29/29; archived v0.2.1 (6 checks) 0/29 while still refusing all 29; a verifier that refuses nothing scores 0. See `conformance/README.md`.
 - **`tests/test_conformance.py`** -- 6 tests, including the archive-vs-manifest digest check and the rubber-stamp check.
 

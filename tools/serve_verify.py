@@ -34,6 +34,8 @@ import os
 import shutil
 import sys
 import tempfile
+import threading
+import time
 import zipfile
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
@@ -46,6 +48,51 @@ from uibc_core.verify import verify as verify_package  # noqa: E402
 MAX_BODY = 8 * 1024 * 1024       # a package is kilobytes; 8 MB is generous
 MAX_MEMBERS = 5000
 MAX_UNPACKED = 64 * 1024 * 1024
+
+
+class RateLimiter:
+    """A token bucket per caller, because an endpoint without one is a way to
+    make someone else's CPU bill your problem.
+
+    Defaults are deliberately low: this is a public verifier for packages of a
+    few kilobytes, so sixty calls a minute per address is generous for a human
+    and useless for a loop. `0` disables it, which is what a local run wants.
+    """
+
+    def __init__(self, per_minute=60, burst=10, max_callers=4096,
+                 trust_forwarded=False):
+        # A bucket keyed on a header the caller controls is not a limiter: one
+        # forged X-Forwarded-For per request and the bucket never fills. So the
+        # header is ignored unless the operator says a proxy strips it first.
+        self.trust_forwarded = trust_forwarded
+        self.per_minute = per_minute
+        self.burst = max(1, burst)
+        self.rate = per_minute / 60.0
+        self.max_callers = max_callers
+        self._state = {}
+        self._lock = threading.Lock()
+
+    def take(self, key):
+        """Return (allowed, retry_after_seconds)."""
+        if self.per_minute <= 0:
+            return True, 0.0
+        now = time.monotonic()
+        with self._lock:
+            tokens, last = self._state.get(key, (float(self.burst), now))
+            tokens = min(float(self.burst), tokens + (now - last) * self.rate)
+            if len(self._state) > self.max_callers:
+                # Drop the stalest quarter rather than grow without bound.
+                for k in sorted(self._state, key=lambda k: self._state[k][1],
+                                reverse=True)[: self.max_callers // 4]:
+                    self._state.pop(k, None)
+            if tokens < 1.0:
+                self._state[key] = (tokens, now)
+                return False, (1.0 - tokens) / self.rate if self.rate else 60.0
+            self._state[key] = (tokens - 1.0, now)
+            return True, 0.0
+
+
+LIMITER = RateLimiter(per_minute=0, burst=10)   # off unless configured
 
 
 class Rejected(Exception):
@@ -138,13 +185,22 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _key(self):
+        if LIMITER.trust_forwarded:
+            forwarded = self.headers.get("X-Forwarded-For")
+            if forwarded:
+                return forwarded.split(",")[0].strip()
+        return self.client_address[0] if self.client_address else "unknown"
+
     def do_GET(self):
         if self.path in ("/health", "/"):
             self._json(200, {"ok": True, "service": "uibc-verify",
                              "accepts": "POST /verify with a package zip",
                              "limits": {"body_bytes": MAX_BODY,
                                         "members": MAX_MEMBERS,
-                                        "unpacked_bytes": MAX_UNPACKED}})
+                                        "unpacked_bytes": MAX_UNPACKED,
+                                        "requests_per_minute": LIMITER.per_minute,
+                                        "burst": LIMITER.burst}})
             return
         self._json(404, {"error": "no such route"})
 
@@ -159,6 +215,18 @@ class Handler(BaseHTTPRequestHandler):
         if length > MAX_BODY:
             self._json(413, {"error": "body exceeds %d bytes" % MAX_BODY})
             return
+        allowed, retry_after = LIMITER.take(self._key())
+        if not allowed:
+            self.send_response(429)
+            body = json.dumps({"error": "rate limited",
+                               "retry_after_seconds": round(retry_after, 2)},
+                              indent=2).encode()
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.send_header("Retry-After", str(int(retry_after) + 1))
+            self.end_headers()
+            self.wfile.write(body)
+            return
         blob = self.rfile.read(length)
         try:
             self._json(200, verdict_for(blob))
@@ -171,7 +239,11 @@ class Handler(BaseHTTPRequestHandler):
         sys.stderr.write("%s - %s\n" % (self.address_string(), fmt % args))
 
 
-def serve(host="127.0.0.1", port=8770):
+def serve(host="127.0.0.1", port=8770, per_minute=0, burst=10,
+          trust_forwarded=False):
+    global LIMITER
+    LIMITER = RateLimiter(per_minute=per_minute, burst=burst,
+                          trust_forwarded=trust_forwarded)
     httpd = ThreadingHTTPServer((host, port), Handler)
     return httpd
 
@@ -181,9 +253,18 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--host", default="127.0.0.1")
     ap.add_argument("--port", type=int, default=8770)
+    ap.add_argument("--rate", type=int, default=0,
+                    help="requests per minute per caller; 0 disables the limit")
+    ap.add_argument("--burst", type=int, default=10)
+    ap.add_argument("--trust-forwarded", action="store_true",
+                    help="key the limiter on X-Forwarded-For; only behind a "
+                         "proxy that overwrites the header")
     args = ap.parse_args()
-    httpd = serve(args.host, args.port)
-    print("listening on http://%s:%d  (POST /verify)" % (args.host, args.port))
+    httpd = serve(args.host, args.port, args.rate, args.burst,
+                  args.trust_forwarded)
+    print("listening on http://%s:%d  (POST /verify, %s)"
+          % (args.host, args.port,
+             "unlimited" if args.rate <= 0 else "%d req/min per caller" % args.rate))
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:

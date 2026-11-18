@@ -121,6 +121,12 @@ jobs:
         # Not the weaker "names an expected check": the same set, on all 36.
         run: python tools/cross_impl_check.py --json | python3 -c "import json,sys; d=json.load(sys.stdin); assert d['agree_with_python']==d['cases'], d; print('agree', d['agree_with_python'], 'of', d['cases'])"
 
+      - name: Every check has an artefact that makes it fail
+        # Nineteen checks, and for each one a package (or, for S9 and S16, a
+        # mutation run by outsider_audit) that drives it to FAIL. A check
+        # nobody can make fail is decoration; this step refuses decoration.
+        run: python tools/check_falsifiability.py
+
       - name: The second implementation must not drift
         # A verifier written from the spec in another language, sharing no code
         # with the first, is only worth something while it keeps agreeing. This

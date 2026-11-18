@@ -13,7 +13,7 @@
 
 > **Status:** PROPOSED test scenario (self-held recovery of an FG-TIDA themes discussion item; developed independently by the author, no third-party content reproduced).
 > **License:** This document is specification/methodology material — **© 2026 赵兴华 (Steven Zhao·China). All rights reserved.** Not covered by the Apache-2.0 code license of this repository. Quoting with attribution for standards discussion is welcome; redistribution of the full text requires permission.
-> **Verifiable pointer:** spec PROPOSAL `docs/SPEC-PROPOSAL-v0.1.md` · reference implementation `src/uibc` · `python -m unittest discover tests` → 151 tests, OK (latest full run).
+> **Verifiable pointer:** spec PROPOSAL `docs/SPEC-PROPOSAL-v0.1.md` · reference implementation `src/uibc` · `python -m unittest discover tests` → 313 tests, OK (latest full run).
 
 ## 1. What is being tested
 

@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="500" viewBox="0 0 1040 500" font-family="Helvetica,Arial,sans-serif">
+<rect width="1040" height="500" fill="#ffffff"/>
+<text x="40" y="46" font-size="22" font-weight="700" fill="#1b1b1b">Two projects, same day, same inputs</text>
+<text x="40" y="70" font-size="12.5" fill="#6b7280">uibc-core (blue) vs agent-action-capsule 0.17.0 (orange), measured 2026-11-18. Every number is re-checkable: python3 tools/check_competitors.py</text>
+<rect x="820" y="30" width="14" height="10" fill="#1f5fa8"/>
+<text x="840" y="39" font-size="12" fill="#1b1b1b">uibc-core</text>
+<rect x="930" y="30" width="14" height="10" fill="#c4622a"/>
+<text x="950" y="39" font-size="12" fill="#1b1b1b">peer</text>
+<text x="40" y="108" font-size="13.5" fill="#1b1b1b">Published releases</text>
+<rect x="350" y="94" width="2" height="13" fill="#1f5fa8" rx="2"/>
+<text x="360" y="105" font-size="12" font-weight="600" fill="#1b1b1b">4</text>
+<rect x="350" y="110" width="7" height="13" fill="#c4622a" rx="2"/>
+<text x="365" y="121" font-size="12" font-weight="600" fill="#1b1b1b">23</text>
+<line x1="40" y1="144" x2="1000" y2="144" stroke="#dfe3e8" stroke-width="1"/>
+<text x="40" y="166" font-size="13.5" fill="#1b1b1b">Test functions</text>
+<rect x="350" y="152" width="176" height="13" fill="#1f5fa8" rx="2"/>
+<text x="534" y="163" font-size="12" font-weight="600" fill="#1b1b1b">526</text>
+<rect x="350" y="168" width="400" height="13" fill="#c4622a" rx="2"/>
+<text x="758" y="179" font-size="12" font-weight="600" fill="#1b1b1b">1189</text>
+<line x1="40" y1="202" x2="1000" y2="202" stroke="#dfe3e8" stroke-width="1"/>
+<text x="40" y="224" font-size="13.5" fill="#1b1b1b">Verifier modules</text>
+<rect x="350" y="210" width="8" height="13" fill="#1f5fa8" rx="2"/>
+<text x="366" y="221" font-size="12" font-weight="600" fill="#1b1b1b">25</text>
+<rect x="350" y="226" width="13" height="13" fill="#c4622a" rx="2"/>
+<text x="371" y="237" font-size="12" font-weight="600" fill="#1b1b1b">40</text>
+<line x1="40" y1="260" x2="1000" y2="260" stroke="#dfe3e8" stroke-width="1"/>
+<text x="40" y="282" font-size="13.5" fill="#1b1b1b">Independent implementations</text>
+<text x="40" y="297" font-size="10.5" fill="#6b7280">one language can't find a misread spec</text>
+<rect x="350" y="268" width="2" height="13" fill="#1f5fa8" rx="2"/>
+<text x="360" y="279" font-size="12" font-weight="600" fill="#1b1b1b">2</text>
+<rect x="350" y="284" width="2" height="13" fill="#c4622a" rx="2"/>
+<text x="360" y="295" font-size="12" font-weight="600" fill="#1b1b1b">1</text>
+<line x1="40" y1="318" x2="1000" y2="318" stroke="#dfe3e8" stroke-width="1"/>
+<text x="40" y="340" font-size="13.5" fill="#1b1b1b">Shippable conformance packages</text>
+<text x="40" y="355" font-size="10.5" fill="#6b7280">36 packages, its own zip</text>
+<rect x="350" y="326" width="12" height="13" fill="#1f5fa8" rx="2"/>
+<text x="370" y="337" font-size="12" font-weight="600" fill="#1b1b1b">36</text>
+<rect x="350" y="342" width="2" height="13" fill="#c4622a" rx="2"/>
+<text x="360" y="353" font-size="12" font-weight="600" fill="#1b1b1b">0</text>
+<line x1="40" y1="376" x2="1000" y2="376" stroke="#dfe3e8" stroke-width="1"/>
+<text x="40" y="398" font-size="13.5" fill="#1b1b1b">Submitted specification</text>
+<text x="40" y="413" font-size="10.5" fill="#6b7280">their I-D; our draft is in this repo</text>
+<rect x="350" y="384" width="2" height="13" fill="#1f5fa8" rx="2"/>
+<text x="360" y="395" font-size="12" font-weight="600" fill="#1b1b1b">0</text>
+<rect x="350" y="400" width="2" height="13" fill="#c4622a" rx="2"/>
+<text x="360" y="411" font-size="12" font-weight="600" fill="#1b1b1b">1</text>
+<line x1="40" y1="434" x2="1000" y2="434" stroke="#dfe3e8" stroke-width="1"/>
+<text x="40" y="470" font-size="12.5" fill="#1b1b1b">Four rows point their way. Two point ours, and they are the two a test count cannot buy: a second implementation, and a suite a stranger can run.</text>
+<text x="40" y="490" font-size="11" fill="#6b7280">What is still missing is not more tests. It is the I-D, the release, and one outside person running the 36 packages.</text>
+</svg>

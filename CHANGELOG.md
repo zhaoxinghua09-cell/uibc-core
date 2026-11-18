@@ -15,6 +15,29 @@ Nothing here is a ratified standard.
 
 ## [Unreleased]
 
+### A timestamp inside the anchor (2026-11-19)
+
+- **`anchor.json` gains an optional `tsa` block**: an RFC 3161 token plus the CA
+  bundle it is checked against, so a stranger can date the anchor offline.
+- **Two cover modes, and the difference is printed rather than smoothed over:**
+  `covers="anchor_digest"` proves *this claim existed at that time* (token over
+  JCS of agent_id/key_id/pubkey/head); `covers="file"` proves some bytes existed
+  and is reported as `unbound`, because it dates a publication, not the claim.
+- **Four refusals, all tested:** token over other bytes, token without a CA
+  bundle ("an unchecked timestamp is not a timestamp"), an unknown cover mode,
+  and `anchor_digest` mode given a token that covers something else.
+- **The positive path is a real FreeTSA signature** (`tests/fixtures/anchor/
+  freetsa.tsr`, 2026-11-17T08:11:35Z), verified offline against the shipped CA -
+  a TSA we do not control on bytes we did not design. It covers a release-status
+  file, so it exercises `covers=file`; the `anchor_digest` path has full negative
+  coverage and needs a live stamp for a positive one.
+- **`make_release_bundle.py`** prints the `anchor_digest` to stamp and accepts
+  `--tsa-token/--tsa-cabundle` to attach it. A live stamp is a network call to a
+  third party, so CI does not perform one.
+- **`docs/TIMESTAMP-IN-ANCHOR.md`** states the remaining status plainly: no
+  published anchor carries a timestamp yet.
+
+
 ### One file, no install (2026-11-19)
 
 - **`tools/build_zipapp.py`** builds `dist/uibc.pyz`: the verifier, the CLI and

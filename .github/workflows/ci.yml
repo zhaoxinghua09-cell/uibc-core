@@ -157,6 +157,12 @@ jobs:
           mkdir -p /tmp/isolated && cd /tmp/isolated
           python /tmp/uibc.pyz explain "$GITHUB_WORKSPACE/fixtures/clean.uibc" | head -3
 
+      - name: An anchor can carry a moment, and must not lie about it
+        # Offline against a real FreeTSA token shipped as a fixture; the four
+        # refusals (wrong bytes, no CA, wrong cover mode, missing half) are what
+        # make the optional block worth anything.
+        run: python -m pytest tests/test_anchor_check.py -q
+
       - name: The second implementation must not drift
         # A verifier written from the spec in another language, sharing no code
         # with the first, is only worth something while it keeps agreeing. This

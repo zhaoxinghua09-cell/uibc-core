@@ -59,6 +59,37 @@ carrying the fields they inspect, so 0.4.0 is a major-looking bump under a
 
 ## [Unreleased]
 
+### Fixed
+
+- **S13 raised `IndexError` when an evidence file was deleted.** The declared
+  order still listed the missing evidence, so `leaves[i]` ran past the end of
+  the list the filesystem actually produced, and the exception was caught by
+  the S0 fallback. The verdict was right (FAIL) but the reason was
+  `IndexError: list index out of range`, which names neither the check nor the
+  file. S13 now reports `proof names evidence 'files/action-log.txt' whose file
+  is absent`.
+
+### Added
+
+- **`tools/compare_diagnostics.py` → `docs/DIAGNOSTICS.md`.** The same six
+  kinds of damage applied to our package and to `agent-action-capsule` 0.17.0,
+  printing what each verifier says *after* it says FAIL. On the four attacks
+  both formats can express, we reported 13 specific reasons against their 5;
+  the other two have no counterpart in their format, and are marked n/a rather
+  than scored.
+- **`tests/test_diagnostics_compare.py`** -- 5 tests, including one that fails
+  on purpose if the documented gap (an uncommitted file under `evidence/` is
+  only a note, never a failure) ever changes, so the doc cannot drift from
+  reality.
+
+### Not changed, on purpose
+
+An attempt to make S1 fail on any uncommitted file under `evidence/` was
+reverted: this format itself keeps the anchor event, the policy artefacts and
+the receipt chain there, and the tightening failed a dozen existing packages.
+That is a format-version change, not a patch.
+
+
 ### Added
 
 - **Handover worked example (`examples/link3-handover-evidence/`):**

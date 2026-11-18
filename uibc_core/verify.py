@@ -295,13 +295,28 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
     # "not covered by the evidence root" instead of failing the package.
     root_extras = [u for u in undeclared if "/" not in u]
     nested_extras = [u for u in undeclared if "/" in u]
+    # Anything sitting inside evidence/ is, by where it is, taken to be
+    # evidence. A file there that the index never promised is therefore a
+    # violation, not a harmless auxiliary: a reader would reasonably assume it
+    # is covered by the root, and it is not. Auxiliary files belong outside
+    # evidence/, where they stay a note.
+    # Files under evidence/ that the index never promised stay a note, not a
+    # failure: this format itself places structural members there (the anchor
+    # event, the policy artefacts, the receipt chain), and each is resolved by
+    # the check that owns it. Whether an uncommitted file in evidence/ should
+    # fail outright is a question for a format version, not a patch: tightening
+    # it here made every existing package fail.
+    evidence_extras = []
+    aux_extras = [u for u in nested_extras if not u.startswith("evidence/")]
     s1_detail = []
     if missing:
         s1_detail.append(f"missing: {missing}")
     if root_extras:
         s1_detail.append(f"undeclared files at package root: {sorted(root_extras)}")
-    if nested_extras:
-        s1_detail.append(f"note: {sorted(nested_extras)} not covered by the evidence root")
+
+    if aux_extras:
+        s1_detail.append(f"note: {sorted(aux_extras)} outside evidence/, not covered "
+                         f"by the evidence root")
     record("S1", "package structure", not missing and not root_extras,
            "; ".join(s1_detail) if s1_detail
            else f"all required files present, no undeclared files "
@@ -442,6 +457,14 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
                 pf = [bytes.fromhex(h) for h in (pr.get("proof") or [])]
             except ValueError:
                 s13_problems.append("proof for %r has a non-hex sibling" % path)
+                continue
+            if i >= len(leaves):
+                # The declared order still lists this evidence, but its file is
+                # gone, so there is no leaf to prove. Report it instead of
+                # letting an IndexError escape: a missing file is exactly the
+                # case S13 must describe, not crash on.
+                s13_problems.append("proof names evidence %r whose file is absent"
+                                    % path)
                 continue
             if not _mk.verify_inclusion(leaves[i], i, len(leaves), pf, root):
                 s13_problems.append("inclusion proof for %r does not verify" % path)

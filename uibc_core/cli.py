@@ -9,7 +9,8 @@ import uuid
 from datetime import datetime, timezone
 
 import hashlib
-from .canonical import hash_file
+from . import locking
+from .canonical import evidence_root, hash_file
 from .signing import (ALGORITHM, ALGORITHM_ED25519, ed_generate_seed,
                       ed_key_id, ed_public_key, ed_seal_sign, generate_key,
                       key_id, seal_sign)
@@ -76,8 +77,27 @@ def cmd_register(args):
         value = getattr(args, field, None)
         if value:
             ident[field] = value
-    _write(os.path.join(pkg, "identity.json"), ident)
-    _write(os.path.join(pkg, "lifecycle.json"), {"schema": SPEC_VERSION, "events": [reg_event]})
+    # The manifest is what S2 and S5 read. `register` used to write only
+    # identity and lifecycle, so a freshly built package verified S2=FAIL and
+    # S5=FAIL while printing "registered agent ..." -- measured, and hidden by
+    # every test that ran against a finished fixture. Write it here, under the
+    # package lock, with the root the empty index actually has.
+    with locking.package_lock(pkg):
+        index = _read(os.path.join(pkg, "evidence", "index.json"))
+        entries = index["entries"] if isinstance(index, dict) else index
+        content_hashes = [e["content_hash"] for e in entries]
+        manifest = {
+            "schema": SPEC_VERSION,
+            "agent_id": agent_id,
+            "agent_version": args.version,
+            "created_at": now,
+            "evidence_count": len(entries),
+            "evidence_root": evidence_root(content_hashes),
+            "status": "REGISTERED",
+        }
+        _write(os.path.join(pkg, "identity.json"), ident)
+        _write(os.path.join(pkg, "lifecycle.json"), {"schema": SPEC_VERSION, "events": [reg_event]})
+        locking.atomic_write_json(os.path.join(pkg, "manifest.json"), manifest)
     print(f"registered agent '{agent_id}' (owner: {args.owner}) at {now}")
 
 
@@ -112,25 +132,35 @@ def cmd_evidence(args):
     src = os.path.abspath(args.file)
     if not os.path.isfile(src):
         sys.exit(f"error: file not found: {src}")
-    idx = _read(os.path.join(pkg, "evidence", "index.json"))
-    fname = os.path.basename(src)
-    rel = os.path.join("files", fname)
-    dst = os.path.join(pkg, "evidence", rel)
-    if os.path.exists(dst):
-        fname = f"{uuid.uuid4().hex[:8]}_{fname}"
+    # Read, copy, append and write as one critical section. Without this,
+    # two concurrent records both read the same index and the later write
+    # silently discards the earlier entry -- measured: 200 calls, 28 entries,
+    # 69 decode errors, package no longer verifies. See docs/CONCURRENCY.md.
+    with locking.package_lock(pkg):
+        idx = _read(os.path.join(pkg, "evidence", "index.json"))
+        entries = idx["entries"] if isinstance(idx, dict) else idx
+        fname = os.path.basename(src)
         rel = os.path.join("files", fname)
         dst = os.path.join(pkg, "evidence", rel)
-    shutil.copy2(src, dst)
-    idx["entries"].append({
-        "evidence_id": str(uuid.uuid4()),
-        "type": args.type,
-        "path": rel.replace("\\", "/"),
-        "content_hash": hash_file(dst),
-        "created_at": _now(),
-        "media_type": args.media_type,
-        "note": args.note or "",
-    })
-    _write(os.path.join(pkg, "evidence", "index.json"), idx)
+        while os.path.exists(dst):
+            fname = f"{uuid.uuid4().hex[:8]}_{fname}"
+            rel = os.path.join("files", fname)
+            dst = os.path.join(pkg, "evidence", rel)
+        shutil.copy2(src, dst)
+        entries.append({
+            "evidence_id": str(uuid.uuid4()),
+            "type": args.type,
+            "path": rel.replace("\\", "/"),
+            "content_hash": hash_file(dst),
+            "created_at": _now(),
+            "media_type": args.media_type,
+            "note": args.note or "",
+        })
+        if isinstance(idx, dict):
+            idx["entries"] = entries
+            locking.atomic_write_json(os.path.join(pkg, "evidence", "index.json"), idx)
+        else:
+            locking.atomic_write_json(os.path.join(pkg, "evidence", "index.json"), entries)
     print(f"evidence added: {args.type} {rel} (hash recorded)")
 
 

@@ -15,6 +15,22 @@ Nothing here is a ratified standard.
 
 ## [Unreleased]
 
+### The publisher check, done twice (2026-11-19)
+
+- **`tools/verify-js/anchor.mjs`**: the anchor verdict with node:crypto and
+  `verify.mjs` - no shared code with `anchor_check.py`, no call into it. Seal
+  verified under the anchor's key, `checkpoint_head` compared via
+  `--expect-head`, exit 0 only for ANCHORED.
+- **The Node path refuses to judge the RFC 3161 block** and says so
+  (`timestamp: not judged here`) rather than borrowing the other
+  implementation's answer.
+- **Four frozen scenarios** (`tests/test_anchor_second_impl.py`): baseline
+  ANCHORED on both; a zeroed head, a swapped key and a missing anchor all
+  refused by both. Exit-code conventions differ deliberately; the verdict word
+  is what gets frozen.
+- **`docs/ANCHOR-SECOND-IMPL.md`** states what agreement does not buy: both
+  read the same bytes, and no external anchor exists yet.
+
 ### A timestamp inside the anchor (2026-11-19)
 
 - **`anchor.json` gains an optional `tsa` block**: an RFC 3161 token plus the CA

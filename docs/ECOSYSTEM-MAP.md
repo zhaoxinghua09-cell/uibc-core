@@ -22,6 +22,8 @@ performed. Our own verdict has one meaning only, and it is narrower:
 It does not claim the agent was correct, safe, or wise; that the recorded inputs were
 true or complete; or that any real-world outcome followed."
 
+(Six projects, measured rather than described: `docs/PEER-SURVEY.md`.)
+
 ## Adoption: the part local tests cannot reach
 
 `docs/IMPLEMENTATION-STATUS.md` records this project in the RFC 7942 four-bucket

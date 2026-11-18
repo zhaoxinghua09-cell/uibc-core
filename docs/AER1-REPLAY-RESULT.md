@@ -1,5 +1,7 @@
 # AER-1 语料：逐向量复现结果（第一批，49 个向量）
 
+> 全语料（143/143）的总表与规范差异清单见 [`AER1-REPLAY-FULL.md`](AER1-REPLAY-FULL.md)。本篇只记第一批：merkle / unicode / 两代 chain。
+
 - 日期：2026-11-18
 - 语料：`draft-zambo-aer1-26`，kit 1.5.7，源 `https://zambo.dev/aer1/corpus/v1.5.7/`
 - 工具：`tools/aer1_vector_replay.py`

@@ -68,5 +68,6 @@ python tools/pccp_case.py --prev benchmark/corpus/base --curr tools/out/_mb/m_M1
 - 整包回滚：仅靠包内信息无法发现，需包外记录的 head（S9）；
 - 若证据不是我们自己采集，"证据为真"永远不会被这份报告证明；
 - AER-1 语料的 **strict base64** 与 **Merkle 包含证明**已有对等实现（`uibc_core/aee.py` 的 `_b64decode_strict`、`uibc_core/merkle.py` 的 `verify_inclusion`）。
-- **逐向量执行**：`tools/aer1_vector_replay.py` 用独立实现（不 import `uibc_core`）复现了 4 个向量文件共 **49 个向量，49/49**，其中 32 个是"必须失败/必须不等"的用例；语料本身按官方 `index.json` 逐个校验 SHA-256，重算摘要与发布值一致（见 [`docs/AER1-REPLAY-RESULT.md`](AER1-REPLAY-RESULT.md)）。
-- 仍未执行：其余 94 个向量（anchor 8、commitment 8、id-binding 6、workflow-root 7 及大量小文件）。那部分仍只有分类级映射（`docs/AER1-CROSSWALK-RESULT.md`）。
+- **全语料逐向量执行**：`tools/aer1_vector_replay.py`（49 个）+ `tools/aer1_receipt_verifier.py`（94 个）两个独立实现（都不 import `uibc_core`，也不 import 发布方 runner）复现 **143/143 个向量 / 146 项检查**。语料本身按官方 `index.json` 逐个校验 SHA-256（77 文件全对），重算 `evaluated_set_digest` 与发布值一致（见 [`docs/AER1-REPLAY-FULL.md`](AER1-REPLAY-FULL.md)、[`docs/AER1-REPLAY-RESULT.md`](AER1-REPLAY-RESULT.md)）。
+- **语料与规范不一致的三处**（我们实测撞到的，不是我们的 bug）：① §6 要求 0.4 收据必带并重算 `metadata_hash`，而 `valid/` 里 10 份 0.4 收据都没有它、官方 runner 也不检查——照规范写会在这 10 个向量上失败，照语料写会漏掉一条 MUST（我们两种模式都提供：默认随语料，`--strict-metadata` 随规范）；② `entry_count` 写 `1.0` 被向量判为 invalid，而 `seq` 写 `1.0` 必须接受，同一份规范对整数型浮点态度相反；③ 尾部换行必须拒，但 Python 的 `$` 默认放过，需锚定串尾。
+- 仍未做：**收据格式互操作**（我们的收据交给他们的 verifier、或反过来），以及真实外部锚定（离线语料的"可解析"是按 RFC 2606 域构造判定的，没有真连 Nostr relay 或 OTS 日历）。

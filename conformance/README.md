@@ -1,6 +1,6 @@
 # uibc-core conformance suite
 
-34 packages. **29 must be refused** -- each began correct and then had exactly one thing broken, with the checks a verifier must report recorded in the manifest. **5 must be accepted** -- correct packages, unmutated or grown in a legitimate way, which a verifier must not refuse.
+36 packages. **30 must be refused** -- each began correct and then had exactly one thing broken, with the checks a verifier must report recorded in the manifest. **6 must be accepted** -- correct packages, unmutated or grown in a legitimate way, which a verifier must not refuse.
 
 Both halves matter. A suite of only broken packages gives full marks to a verifier that refuses everything, which is worthless.
 
@@ -45,21 +45,23 @@ The suite is paired with a positive control: `fixtures/clean.uibc` must **not** 
 
 ## Measured on three verifiers
 
-| verifier | passed (of 34) | refused (of 34) |
+| verifier | passed (of 36) | refused (of 36) |
 |---|---|---|
-| this repo, current | **34 / 34** | 29 / 34 |
-| this repo, archived v0.2.1 (6 checks) | **0 / 34** | 34 / 34 |
-| always returns PASS | 5 / 34 | 0 / 34 |
-| always returns FAIL naming S1 | 1 / 34 | 34 / 34 |
+| this repo, current | **36 / 36** | 30 / 36 |
+| this repo, archived v0.2.1 (6 checks) ¹ | **0 / 34** | 34 / 34 |
+| always returns PASS | 6 / 36 | 0 / 36 |
+| always returns FAIL naming S1 | 1 / 36 | 36 / 36 |
 
 Four readings worth separating:
 
 - **current refuses exactly the 29 mutated packages** and accepts all five correct ones.
-- **archived v0.2.1 refuses all 34**, the five correct ones included: it cannot read the tree-and-chain or extended shapes, so its blanket refusal was hiding a forward-compatibility hole. That is a property of the old release, not a defect in the suite; the suite is how it became visible.
+- **archived v0.2.1 refuses all 34**, the correct ones included: it cannot read the tree-and-chain or extended shapes, so its blanket refusal was hiding a forward-compatibility hole. That is a property of the old release, not a defect in the suite; the suite is how it became visible.
 - **always-PASS gets 5** -- it clears the positive cases by never refusing, and fails every mutated one.
 - **always-FAIL gets 1** -- a blanket refusal buys exactly the one case whose expected check happens to be S1.
 
 The middle row is why the naming rule exists: the archived version says no to every package but never on the right grounds.
+
+¹ measured against the 34-package suite it shipped with; the two cases added since are a positive Ed25519 seal and a flipped signature, and a verifier that cannot parse a package refuses it either way.
 
 ## Regenerating
 

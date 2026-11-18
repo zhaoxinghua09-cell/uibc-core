@@ -15,7 +15,7 @@
 //
 // Usage:  node tools/verify-js/verify.mjs <package-dir>
 
-import { createHash } from "node:crypto";
+import { createHash, createPublicKey, verify as cryptoVerify } from "node:crypto";
 import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
 import { join, normalize, sep } from "node:path";
 
@@ -268,6 +268,51 @@ function verify(pkg) {
         }
       }
     } catch { /* S7 already reported what it could read */ }
+  }
+
+  // S6 seal signature. Ed25519 can be checked here because the package
+  // records the public key: that is the whole point of an asymmetric seal --
+  // a stranger verifies provenance with no secret at all. An HMAC seal cannot
+  // be checked without the owner's key, and this verifier says so instead of
+  // guessing.
+  {
+    const sealPath = join(pkg, "signatures", "seal.json");
+    if (!existsSync(sealPath)) {
+      note("S6", "seal signature", false, "package is unsigned; provenance is not attested");
+    } else {
+      let verdict = "inconclusive", detail = "";
+      try {
+        const seal = readJson(sealPath);
+        const identity = readJson(join(pkg, "identity.json"));
+        const manifest = readJson(join(pkg, "manifest.json"));
+        if (seal.algorithm !== "Ed25519") {
+          detail = "seal uses " + seal.algorithm +
+                   "; an HMAC seal cannot be verified without the owner's key";
+        } else {
+          const lifecycle = readJson(join(pkg, "lifecycle.json"));
+          const signed = String(seal.signed || "");
+          const doc = { identity, manifest };
+          if (signed.includes("lifecycle")) doc.lifecycle = lifecycle;
+          const msg = canonicalBytes(doc);
+          const pub = Buffer.from(String(seal.public_key), "base64");
+          const sig = Buffer.from(String(seal.signature), "base64");
+          const x = pub.toString("base64url");
+          const key = createPublicKey({ key: { kty: "OKP", crv: "Ed25519", x }, format: "jwk" });
+          const ok = cryptoVerify(null, msg, key, sig);
+          verdict = ok ? "pass" : "fail";
+          detail = ok ? "ok (verified with the public key recorded in the package)"
+                      : "signature does not verify against the recorded public key";
+        }
+      } catch (err) {
+        verdict = "fail";
+        detail = "seal is not readable: " + err.message;
+      }
+      if (verdict === "inconclusive") {
+        checks.push({ id: "S6", name: "seal signature", result: "INCONCLUSIVE", detail });
+      } else {
+        note("S6", "seal signature", verdict === "pass", detail);
+      }
+    }
   }
 
   // S12 timestamps, identifiers and the counts that must agree with them

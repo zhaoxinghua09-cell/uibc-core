@@ -22,15 +22,15 @@ proven either.
 ## Measured
 
 ```
-strict 16/34   refused 29/34
+strict 19/36   refused 30/36
 ```
 
 | | value |
 |---|---|
-| packages in scope | 16 of 34 (5 correct + 11 whose expected check is among the seven) |
-| out of scope | 18 |
-| identical FAIL set to Python | 10 |
-| named the same expected check | 11 (+5 positives) |
+| packages in scope | 19 of 36 (6 correct + 13 whose expected check is among the eight) |
+| out of scope | 17 |
+| identical FAIL set to Python | 13 |
+| named the same expected check | 13 (+6 positives) |
 
 Two implementations written from the specification, sharing no code, agreeing
 on which packages are broken and for which reason — that is the difference

@@ -15,6 +15,22 @@ Nothing here is a ratified standard.
 
 ## [Unreleased]
 
+### Three optimisations on 20,000 files, all reverted (2026-11-19)
+
+- **Profiled the 1.1 s** it takes to verify 20,000 entries: S12 semantics 0.354 s,
+  S11 byte scan 0.278 s (0.117 of it the depth walk), JCS canonicalisation 0.154 s,
+  SHA-256 of the evidence 0.152 s. Hashing all 20,003 files on its own is 0.170 s
+  (8.5 us a file), so I/O is not the bottleneck and never was.
+- **Caching `realpath` per directory:** 1.104 s -> 1.093 s, 1%. The OS already
+  caches those lookups; the profile was showing time the workload does not pay twice.
+- **Stripping string literals with a regex before the depth scan:** 1.146 s. Two
+  passes over ten megabytes cost more than the loop they replace.
+- **Skipping `fromisoformat` for clearly-past timestamps:** rejected before
+  writing it - it only fires on old evidence, and honest benchmarks are near now.
+- **All three reverted.** `verify.py` is unchanged; the containment test stays
+  one step. `docs/PERF-LOG.md` records the attempts and the floor: 54 us per
+  entry, nineteen checks, 60 MiB at 20,000.
+
 ### The sixteen tests that were skipping (2026-11-19)
 
 - **Audited `OK (skipped=16)`.** Fifteen of the sixteen were skipping for one

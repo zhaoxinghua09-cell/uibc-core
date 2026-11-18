@@ -15,6 +15,30 @@ Nothing here is a ratified standard.
 
 ## [Unreleased]
 
+### The second implementation verifies a stranger's timestamp (2026-11-18)
+
+- **S16 in JavaScript, with no dependency and no shared code.** `tools/verify-js/rfc3161.mjs`
+  reads an RFC 3161 token with a minimal DER reader built from `node:crypto` alone, checks
+  the CMS signature over `signedAttrs` (encoded as `SET OF`, not `SEQUENCE` — the tag that
+  catches naive implementations), locates the ESS `signingCertificate` certHash by walking
+  the subtree, and proves the signing certificate was issued by a supplied CA and was valid
+  at its stamping time. A real Free TSA token for the head in `tests/fixtures/anchor/`
+  verifies: `stamped 20261117081135Z, TSA O=Free TSA`.
+- **This is the one witness the project cannot mint.** Every other check is witnessed by
+  parties we choose: our tree, our head, our pin. A token is dated by somebody else's key,
+  and now two implementations built from the spec — with no shared code — reach the same
+  verdict on it, in both the accept and the refuse direction.
+- **Red team, seven of seven:** the token as received is accepted; a flipped signature bit,
+  a wrong anchored digest, a CA that did not issue it, no CA at all, one mutated digit inside
+  a signed attribute, and a truncated token are each refused with a distinct reason.
+- **S9 in JavaScript.** `--expect-head <head>` supplies the observation made outside the
+  package and compares it with the checkpoint state. The pin is never read from the package;
+  without it S9 does not appear, because an unchecked rollback must not look like a pass.
+- `node tools/verify-js/rfc3161.mjs <token.tsr> <digest-hex> <ca.pem>` is a standalone entry
+  point: anyone with Node can reproduce the token verdict without installing anything.
+- **Coverage: seventeen of nineteen checks** in the second implementation; `--strict` and
+  lenient modes now agree with the Python verifier's defaults.
+
 ### Added
 
 - **CI now fails when the second implementation drifts.** `tools/assert_second_impl.py`

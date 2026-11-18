@@ -39,8 +39,8 @@ strict 36/36   refused 30/36      (tools/run_conformance.py --verify "node ... {
 
 | | value | reading |
 |---|---|---|
-| packages in scope | 36 of 36 | 6 correct + 30 whose expected check is among the fifteen |
-| out of scope | 0 | the ones needing Ed25519, RFC 3161 or the tree |
+| packages in scope | 36 of 36 | 6 correct + 30 whose expected check is among the seventeen |
+| out of scope | 0 | every package the suite ships is decided here |
 | identical FAIL set to Python | 31 | the second implementation reaches the same verdict for the same reason |
 | named an expected check | 30 (+6 positives) | what the suite scores |
 | refusals | 30 of 36 | the 30 mutated packages, and none of the correct ones |

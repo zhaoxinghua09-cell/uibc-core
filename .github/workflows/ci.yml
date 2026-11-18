@@ -133,6 +133,12 @@ jobs:
         # the first one broke. Fourteen mutations, every pair and every triple.
         run: python tools/check_combinations.py --triples
 
+      - name: A forgery that agrees with itself
+        # Repairing a rewrite is arithmetic; a stranger can do it and sign with
+        # their own key. What has to survive is the sentence the verdict makes:
+        # PASS beside unanchored, never PASS alone.
+        run: python tools/composed_forgery.py
+
       - name: The second implementation must not drift
         # A verifier written from the spec in another language, sharing no code
         # with the first, is only worth something while it keeps agreeing. This

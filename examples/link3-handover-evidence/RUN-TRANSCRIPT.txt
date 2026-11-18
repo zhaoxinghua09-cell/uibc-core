@@ -1,0 +1,393 @@
+HANDOVER DEMO - verification transcript (fictional data)
+==============================================================
+
+1. Approved package, open verification
+  $ uibc verify approved
+  {
+    "verifier_id": "uibc-core-verifier",
+    "verifier_version": "0.3.3",
+    "spec_version": "uibc-core/0.3.3-proposal",
+    "result": "PASS",
+    "subject": "cardiopatch-cp2-evidence-set",
+    "checks": [
+      {
+        "id": "S1",
+        "name": "package structure",
+        "result": "PASS",
+        "detail": "all required files present"
+      },
+      {
+        "id": "S2",
+        "name": "identity consistency",
+        "result": "PASS",
+        "detail": "identity.agent_id='cardiopatch-cp2-evidence-set', manifest.agent_id='cardiopatch-cp2-evidence-set'"
+      },
+      {
+        "id": "S3",
+        "name": "lifecycle state machine",
+        "result": "PASS",
+        "detail": "2 events, chain valid"
+      },
+      {
+        "id": "S4",
+        "name": "evidence integrity",
+        "result": "PASS",
+        "detail": "4 entries checked; all hashes match"
+      },
+      {
+        "id": "S5",
+        "name": "evidence root",
+        "result": "PASS",
+        "detail": "computed=9a6aaa01f973cb7e6a438d189804fdac5dde692f71bfed9c185408c07848b14b, manifest=9a6aaa01f973cb7e6a438d189804fdac5dde692f71bfed9c185408c07848b14b"
+      },
+      {
+        "id": "S6",
+        "name": "seal signature",
+        "result": "PASS",
+        "detail": "Ed25519 seal valid (key_id fe812c12f3ab4ce6...) - third-party verifiable, no secret involved"
+      }
+    ],
+    "root_algorithm": "sha256(canonical-json(sorted(content_hashes))) v0.1-provisional",
+    "assurance": "public-key",
+    "scope": "Structure, identity consistency, lifecycle state machine, evidence content hashes, evidence root, and the seal signature of this submission package only. Ed25519 seals are verified publicly in every mode; HMAC seals only in strict --key mode.",
+    "limitations": [
+      "HMAC-SHA256 seals (v0.2) are symmetric: verification requires the owner key. Ed25519 seals (v0.3) are third-party verifiable with the public key recorded in the seal.",
+      "Key substitution is detectable only when verifying with the owner key (--key), a pinned public key (--pubkey), or out-of-band key pinning.",
+      "Evidence Root algorithm is provisional (pending canonical serialization ratification).",
+      "Timestamps are not independently anchored.",
+      "Lifecycle event signatures (event.signature) are not ratified and not verified.",
+      "No behavioral evaluation is performed (Evaluation is out of verifier scope, archive SS15)."
+    ],
+    "checked": [
+      "structure",
+      "identity",
+      "lifecycle",
+      "evidence hashes",
+      "evidence root",
+      "seal signature"
+    ],
+    "not_checked": [
+      "lifecycle event signatures",
+      "external timestamp anchoring",
+      "behavioral evaluation",
+      "memory fidelity/continuity"
+    ],
+    "statement": "No violation was detected within the observed evidence boundary."
+  }
+  exit code: 0
+
+2. Approved package, receiver pins the OEM public key
+  $ uibc verify --pubkey /tmp/handover-script-test/meridian-owner.pub approved
+  {
+    "verifier_id": "uibc-core-verifier",
+    "verifier_version": "0.3.3",
+    "spec_version": "uibc-core/0.3.3-proposal",
+    "result": "PASS",
+    "subject": "cardiopatch-cp2-evidence-set",
+    "checks": [
+      {
+        "id": "S1",
+        "name": "package structure",
+        "result": "PASS",
+        "detail": "all required files present"
+      },
+      {
+        "id": "S2",
+        "name": "identity consistency",
+        "result": "PASS",
+        "detail": "identity.agent_id='cardiopatch-cp2-evidence-set', manifest.agent_id='cardiopatch-cp2-evidence-set'"
+      },
+      {
+        "id": "S3",
+        "name": "lifecycle state machine",
+        "result": "PASS",
+        "detail": "2 events, chain valid"
+      },
+      {
+        "id": "S4",
+        "name": "evidence integrity",
+        "result": "PASS",
+        "detail": "4 entries checked; all hashes match"
+      },
+      {
+        "id": "S5",
+        "name": "evidence root",
+        "result": "PASS",
+        "detail": "computed=9a6aaa01f973cb7e6a438d189804fdac5dde692f71bfed9c185408c07848b14b, manifest=9a6aaa01f973cb7e6a438d189804fdac5dde692f71bfed9c185408c07848b14b"
+      },
+      {
+        "id": "S6",
+        "name": "seal signature",
+        "result": "PASS",
+        "detail": "Ed25519 seal valid (key_id fe812c12f3ab4ce6...) - third-party verifiable, no secret involved"
+      }
+    ],
+    "root_algorithm": "sha256(canonical-json(sorted(content_hashes))) v0.1-provisional",
+    "assurance": "public-key",
+    "scope": "Structure, identity consistency, lifecycle state machine, evidence content hashes, evidence root, and the seal signature of this submission package only. Ed25519 seals are verified publicly in every mode; HMAC seals only in strict --key mode.",
+    "limitations": [
+      "HMAC-SHA256 seals (v0.2) are symmetric: verification requires the owner key. Ed25519 seals (v0.3) are third-party verifiable with the public key recorded in the seal.",
+      "Key substitution is detectable only when verifying with the owner key (--key), a pinned public key (--pubkey), or out-of-band key pinning.",
+      "Evidence Root algorithm is provisional (pending canonical serialization ratification).",
+      "Timestamps are not independently anchored.",
+      "Lifecycle event signatures (event.signature) are not ratified and not verified.",
+      "No behavioral evaluation is performed (Evaluation is out of verifier scope, archive SS15)."
+    ],
+    "checked": [
+      "structure",
+      "identity",
+      "lifecycle",
+      "evidence hashes",
+      "evidence root",
+      "seal signature"
+    ],
+    "not_checked": [
+      "lifecycle event signatures",
+      "external timestamp anchoring",
+      "behavioral evaluation",
+      "memory fidelity/continuity"
+    ],
+    "statement": "No violation was detected within the observed evidence boundary."
+  }
+  exit code: 0
+
+3. Received package: report silently replaced by Rev B
+  $ uibc verify received-swapped
+  {
+    "verifier_id": "uibc-core-verifier",
+    "verifier_version": "0.3.3",
+    "spec_version": "uibc-core/0.3.3-proposal",
+    "result": "FAIL",
+    "subject": "cardiopatch-cp2-evidence-set",
+    "checks": [
+      {
+        "id": "S1",
+        "name": "package structure",
+        "result": "PASS",
+        "detail": "all required files present"
+      },
+      {
+        "id": "S2",
+        "name": "identity consistency",
+        "result": "PASS",
+        "detail": "identity.agent_id='cardiopatch-cp2-evidence-set', manifest.agent_id='cardiopatch-cp2-evidence-set'"
+      },
+      {
+        "id": "S3",
+        "name": "lifecycle state machine",
+        "result": "PASS",
+        "detail": "2 events, chain valid"
+      },
+      {
+        "id": "S4",
+        "name": "evidence integrity",
+        "result": "FAIL",
+        "detail": "4 entries checked; hash mismatch on 'files/design-verification-report.txt'"
+      },
+      {
+        "id": "S5",
+        "name": "evidence root",
+        "result": "INCONCLUSIVE",
+        "detail": "skipped: evidence missing or S4 failed"
+      },
+      {
+        "id": "S6",
+        "name": "seal signature",
+        "result": "PASS",
+        "detail": "Ed25519 seal valid (key_id fe812c12f3ab4ce6...) - third-party verifiable, no secret involved"
+      }
+    ],
+    "root_algorithm": "sha256(canonical-json(sorted(content_hashes))) v0.1-provisional",
+    "assurance": "public-key",
+    "scope": "Structure, identity consistency, lifecycle state machine, evidence content hashes, evidence root, and the seal signature of this submission package only. Ed25519 seals are verified publicly in every mode; HMAC seals only in strict --key mode.",
+    "limitations": [
+      "HMAC-SHA256 seals (v0.2) are symmetric: verification requires the owner key. Ed25519 seals (v0.3) are third-party verifiable with the public key recorded in the seal.",
+      "Key substitution is detectable only when verifying with the owner key (--key), a pinned public key (--pubkey), or out-of-band key pinning.",
+      "Evidence Root algorithm is provisional (pending canonical serialization ratification).",
+      "Timestamps are not independently anchored.",
+      "Lifecycle event signatures (event.signature) are not ratified and not verified.",
+      "No behavioral evaluation is performed (Evaluation is out of verifier scope, archive SS15)."
+    ],
+    "checked": [
+      "structure",
+      "identity",
+      "lifecycle",
+      "evidence hashes",
+      "evidence root",
+      "seal signature"
+    ],
+    "not_checked": [
+      "lifecycle event signatures",
+      "external timestamp anchoring",
+      "behavioral evaluation",
+      "memory fidelity/continuity"
+    ],
+    "statement": "Violations were detected within the observed evidence boundary."
+  }
+  exit code: 1
+
+4. Rebuilt package (Rev B) sealed with a substitute key, open verification
+  $ uibc verify received-resealed
+  {
+    "verifier_id": "uibc-core-verifier",
+    "verifier_version": "0.3.3",
+    "spec_version": "uibc-core/0.3.3-proposal",
+    "result": "PASS",
+    "subject": "cardiopatch-cp2-evidence-set",
+    "checks": [
+      {
+        "id": "S1",
+        "name": "package structure",
+        "result": "PASS",
+        "detail": "all required files present"
+      },
+      {
+        "id": "S2",
+        "name": "identity consistency",
+        "result": "PASS",
+        "detail": "identity.agent_id='cardiopatch-cp2-evidence-set', manifest.agent_id='cardiopatch-cp2-evidence-set'"
+      },
+      {
+        "id": "S3",
+        "name": "lifecycle state machine",
+        "result": "PASS",
+        "detail": "2 events, chain valid"
+      },
+      {
+        "id": "S4",
+        "name": "evidence integrity",
+        "result": "PASS",
+        "detail": "4 entries checked; all hashes match"
+      },
+      {
+        "id": "S5",
+        "name": "evidence root",
+        "result": "PASS",
+        "detail": "computed=14029250806e3c633172bd8245277af30db5463cc04fd3d7905ee0793cd158ad, manifest=14029250806e3c633172bd8245277af30db5463cc04fd3d7905ee0793cd158ad"
+      },
+      {
+        "id": "S6",
+        "name": "seal signature",
+        "result": "PASS",
+        "detail": "Ed25519 seal valid (key_id dbc298251c51321b...) - third-party verifiable, no secret involved"
+      }
+    ],
+    "root_algorithm": "sha256(canonical-json(sorted(content_hashes))) v0.1-provisional",
+    "assurance": "public-key",
+    "scope": "Structure, identity consistency, lifecycle state machine, evidence content hashes, evidence root, and the seal signature of this submission package only. Ed25519 seals are verified publicly in every mode; HMAC seals only in strict --key mode.",
+    "limitations": [
+      "HMAC-SHA256 seals (v0.2) are symmetric: verification requires the owner key. Ed25519 seals (v0.3) are third-party verifiable with the public key recorded in the seal.",
+      "Key substitution is detectable only when verifying with the owner key (--key), a pinned public key (--pubkey), or out-of-band key pinning.",
+      "Evidence Root algorithm is provisional (pending canonical serialization ratification).",
+      "Timestamps are not independently anchored.",
+      "Lifecycle event signatures (event.signature) are not ratified and not verified.",
+      "No behavioral evaluation is performed (Evaluation is out of verifier scope, archive SS15)."
+    ],
+    "checked": [
+      "structure",
+      "identity",
+      "lifecycle",
+      "evidence hashes",
+      "evidence root",
+      "seal signature"
+    ],
+    "not_checked": [
+      "lifecycle event signatures",
+      "external timestamp anchoring",
+      "behavioral evaluation",
+      "memory fidelity/continuity"
+    ],
+    "statement": "No violation was detected within the observed evidence boundary."
+  }
+  exit code: 0
+
+5. Same rebuilt package, receiver pins the OEM public key
+  $ uibc verify --pubkey /tmp/handover-script-test/meridian-owner.pub received-resealed
+  {
+    "verifier_id": "uibc-core-verifier",
+    "verifier_version": "0.3.3",
+    "spec_version": "uibc-core/0.3.3-proposal",
+    "result": "FAIL",
+    "subject": "cardiopatch-cp2-evidence-set",
+    "checks": [
+      {
+        "id": "S1",
+        "name": "package structure",
+        "result": "PASS",
+        "detail": "all required files present"
+      },
+      {
+        "id": "S2",
+        "name": "identity consistency",
+        "result": "PASS",
+        "detail": "identity.agent_id='cardiopatch-cp2-evidence-set', manifest.agent_id='cardiopatch-cp2-evidence-set'"
+      },
+      {
+        "id": "S3",
+        "name": "lifecycle state machine",
+        "result": "PASS",
+        "detail": "2 events, chain valid"
+      },
+      {
+        "id": "S4",
+        "name": "evidence integrity",
+        "result": "PASS",
+        "detail": "4 entries checked; all hashes match"
+      },
+      {
+        "id": "S5",
+        "name": "evidence root",
+        "result": "PASS",
+        "detail": "computed=14029250806e3c633172bd8245277af30db5463cc04fd3d7905ee0793cd158ad, manifest=14029250806e3c633172bd8245277af30db5463cc04fd3d7905ee0793cd158ad"
+      },
+      {
+        "id": "S6",
+        "name": "seal signature",
+        "result": "FAIL",
+        "detail": "public key does not match the pinned --pubkey (possible key substitution or wrong pin)"
+      }
+    ],
+    "root_algorithm": "sha256(canonical-json(sorted(content_hashes))) v0.1-provisional",
+    "assurance": "unattested",
+    "scope": "Structure, identity consistency, lifecycle state machine, evidence content hashes, evidence root, and the seal signature of this submission package only. Ed25519 seals are verified publicly in every mode; HMAC seals only in strict --key mode.",
+    "limitations": [
+      "HMAC-SHA256 seals (v0.2) are symmetric: verification requires the owner key. Ed25519 seals (v0.3) are third-party verifiable with the public key recorded in the seal.",
+      "Key substitution is detectable only when verifying with the owner key (--key), a pinned public key (--pubkey), or out-of-band key pinning.",
+      "Evidence Root algorithm is provisional (pending canonical serialization ratification).",
+      "Timestamps are not independently anchored.",
+      "Lifecycle event signatures (event.signature) are not ratified and not verified.",
+      "No behavioral evaluation is performed (Evaluation is out of verifier scope, archive SS15)."
+    ],
+    "checked": [
+      "structure",
+      "identity",
+      "lifecycle",
+      "evidence hashes",
+      "evidence root",
+      "seal signature"
+    ],
+    "not_checked": [
+      "lifecycle event signatures",
+      "external timestamp anchoring",
+      "behavioral evaluation",
+      "memory fidelity/continuity"
+    ],
+    "statement": "Violations were detected within the observed evidence boundary."
+  }
+  exit code: 1
+
+--- publication note (2026-11-18)
+These are the packs committed at examples/link3-handover-evidence/ in
+the uibc-core repo, rebuilt with build_demo.py under the RELEASED
+uibc-core 0.3.3 (the version `pip install uibc-core` gives you) and
+re-verified from a clean PyPI install: the five verdicts above
+reproduce exactly (PASS / PASS pinned / FAIL / PASS unpinned /
+FAIL pinned). The current repo main verifier returns the same five
+verdicts; its S6 line additionally labels these seals
+coverage=legacy — the seal covers identity+manifest, and the
+lifecycle chain is guarded by the S3 check, not by the seal. That
+label is the verifier's own wording and is repeated in the folder
+README rather than hidden. The original 2026-11-10 sample packs
+(0.3.0-proposal build) return the same five verdicts under both
+verifiers; the released-code rebuild is what is published, per the
+handbook rule that public packs are built with the released code.

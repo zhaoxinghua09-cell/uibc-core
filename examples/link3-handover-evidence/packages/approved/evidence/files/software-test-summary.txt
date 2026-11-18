@@ -1,0 +1,3 @@
+SOFTWARE TEST SUMMARY - CardioPatch CP-2 (FICTIONAL)
+Document: STS-CP2-011  Revision: 2  Status: APPROVED
+Unit + integration: 318 cases, 318 passed. Static analysis: 0 critical.

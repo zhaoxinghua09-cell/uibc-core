@@ -16,6 +16,10 @@ import unittest
 import zipfile
 
 _REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if _REPO not in sys.path:
+    sys.path.insert(0, _REPO)
+
+from uibc_core.verify import verify as python_verify  # noqa: E402
 _JS = os.path.join(_REPO, "tools", "verify-js", "verify.mjs")
 _ZIP = os.path.join(_REPO, "conformance", "uibc-conformance-0.4.0.zip")
 
@@ -58,6 +62,31 @@ class TestJavaScriptVerifier(unittest.TestCase):
         # hold no key - "could not check" is the honest answer.
         self.assertEqual(sorted(c["id"] for c in report["checks"]),
                          ["S1", "S11", "S12", "S2", "S3", "S4", "S5", "S6", "S7"])
+
+    def test_an_unsigned_package_is_inconclusive_in_both_languages(self):
+        """Measured 2026-11-19: on a synthetic 1000-evidence package with no
+        signatures/, the Python verifier said INCONCLUSIVE and the JavaScript one
+        said FAIL for the same bytes. Three-valued adjudication is this
+        project's claim, and "nobody signed it" is not a violation -- it is a
+        missing attestation. This test pins both implementations to the same
+        answer, so the disagreement cannot come back quietly.
+        """
+        tmp = tempfile.mkdtemp(prefix="uibc-unsigned-")
+        try:
+            pkg = os.path.join(tmp, "unsigned.uibc")
+            shutil.copytree(os.path.join(_REPO, "fixtures", "clean.uibc"), pkg)
+            shutil.rmtree(os.path.join(pkg, "signatures"), ignore_errors=True)
+
+            py_report = python_verify(pkg)
+            js_report = js(pkg)
+
+            self.assertEqual(py_report["result"], "INCONCLUSIVE")
+            self.assertEqual(js_report["result"], "INCONCLUSIVE")
+            self.assertEqual(failed(js_report), set())
+            s6 = [c for c in js_report["checks"] if c["id"] == "S6"]
+            self.assertTrue(s6 and s6[0]["result"].upper() == "INCONCLUSIVE")
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
 
     def test_a_real_rfc3161_token_is_verified_and_every_mutation_is_refused(self):
         """The one witness we cannot mint.

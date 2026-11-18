@@ -571,7 +571,15 @@ function verify(pkg, opts = {}) {
   {
     const sealPath = join(pkg, "signatures", "seal.json");
     if (!existsSync(sealPath)) {
-      note("S6", "seal signature", false, "package is unsigned; provenance is not attested");
+      // An unsigned package is not a failure. Measured 2026-11-19 on a
+      // 1000-evidence synthetic package: this line reported FAIL while the
+      // Python implementation reported INCONCLUSIVE for the same bytes. The
+      // three-valued verdict is this project's whole claim -- "no violation
+      // within the evidence boundary" is neither a pass nor a conviction.
+      checks.push({
+        id: "S6", name: "seal signature", result: "INCONCLUSIVE",
+        detail: "package is unsigned; provenance is not attested",
+      });
     } else {
       let verdict = "inconclusive", detail = "";
       try {

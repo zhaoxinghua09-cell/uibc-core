@@ -21,7 +21,7 @@ verifier that refuses malformed input).
 | Licence | Apache-2.0 | BSD-3-Clause |
 | Language of the verifier | Python (first) **and JavaScript (second, independent)** | Python only |
 | Verifier modules | 25 | 40 |
-| Test files / test functions | 30 / 526 | 95 / 1189 |
+| Test files / test functions | 30 / 527 | 95 / 1189 |
 | Conformance material | 36 packages (6 positive, 30 mutations), shipped as its own zip | `vectors/` in the repo, referenced by tests, not in the sdist |
 | Second implementation is a **CI gate** | Yes — `second-implementation` job, 18 of 19 checks, 36/36 identical FAIL sets | No second implementation to gate |
 | Hostile-input suite | `tools/redteam_robustness.py`, 10 cases, table in `docs/ROBUSTNESS.md` | `tests/test_json_nesting_vectors.py`, `tests/test_verify_bounds.py`, `tests/test_parse.py` |
@@ -33,7 +33,7 @@ verifier that refuses malformed input).
 Re-run the machine-checkable half:
 
 ```
-python3 tools/check_doc_facts.py            # ours: 526 tests, 19 checks, 36 cases
+python3 tools/check_doc_facts.py            # ours: 527 tests, 19 checks, 36 cases
 python3 tools/redteam_robustness.py         # ours: 10 of 10 refused
 python3 tools/cross_impl_check.py --json    # ours: 36 of 36 identical
 ```
@@ -93,7 +93,7 @@ measured by hand on the date at the top of this page, and the picture says so.
 4. **Surface area.** 40 modules against 25. AAC covers COSE/CBOR carriers,
    bilateral flows, ERC-8183 and x402 adapters, an anchor client, witness
    records. This project covers one format and one verifier, and says so.
-5. **Test count.** 1189 against 526.
+5. **Test count.** 1189 against 527.
 
 ## Adoption, measured the peer's own way
 

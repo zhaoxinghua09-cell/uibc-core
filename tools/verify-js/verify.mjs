@@ -3,14 +3,15 @@
 // with no dependency on uibc-core and no third-party packages.
 //
 // Covered here: package structure (S1), identity consistency (S2), evidence
-// integrity (S4), evidence root (S5), index metadata shape (S7), strict
-// serialization (S11), timestamp and identifier strictness (S12).
+// integrity (S4), evidence root (S5), Ed25519 seals (S6), index metadata (S7),
+// the closure declaration (S10), strict serialization (S11), timestamp and
+// identifier strictness (S12), Merkle inclusion (S13) and strict base64 (S14).
 //
-// Not covered, on purpose: seal signatures (S6), Merkle inclusion proofs
-// (S13), external timestamps (S16), the receipt chain (S17), policy artefact
-// resolution (S18), closure declaration (S10) and the package checkpoint (S8).
-// Those need Ed25519, RFC 3161 and the v1.1 tree. A checker that claimed them
-// without implementing them would be worse than one that says it cannot.
+// Not covered, on purpose: external timestamps (S16), the receipt chain (S17),
+// policy artefact resolution (S18), the package checkpoint (S8) and the
+// out-of-band pin (S9). Those need RFC 3161 and state this checker does not
+// hold. A checker that claimed them without implementing them would be worse
+// than one that says it cannot.
 // Because it cannot attest signatures, it never returns PASS.
 //
 // Usage:  node tools/verify-js/verify.mjs <package-dir>
@@ -22,6 +23,47 @@ import { join, normalize, sep } from "node:path";
 const sha256 = (buf) => createHash("sha256").update(buf).digest("hex");
 
 // --- RFC 8785 (JCS) -------------------------------------------------------
+
+// RFC 6962 Merkle tree: leaf = SHA-256(0x00 || data), node = SHA-256(0x01 || l || r).
+// An unbalanced tail is promoted, not duplicated: duplicating it lets two
+// different trees share a root, which is the classic mistake.
+const LEAF_PREFIX = Buffer.from([0x00]);
+const NODE_PREFIX = Buffer.from([0x01]);
+
+function leafHash(data) {
+  return createHash("sha256").update(Buffer.concat([LEAF_PREFIX, data])).digest();
+}
+
+function nodeHash(left, right) {
+  return createHash("sha256").update(Buffer.concat([NODE_PREFIX, left, right])).digest();
+}
+
+function merkleRoot(leaves) {
+  if (leaves.length === 0) return Buffer.alloc(32);
+  if (leaves.length === 1) return leaves[0];
+  let k = 1;
+  while (k * 2 < leaves.length) k *= 2;
+  return nodeHash(merkleRoot(leaves.slice(0, k)), merkleRoot(leaves.slice(k)));
+}
+
+function verifyInclusion(leaf, index, size, proof, root) {
+  if (!Number.isInteger(size) || size <= 0) return false;
+  if (!Number.isInteger(index) || index < 0 || index >= size) return false;
+  let fn = index, sn = size - 1, r = leaf;
+  for (const sibling of proof) {
+    if (!Buffer.isBuffer(sibling) || sibling.length !== 32) return false;
+    if (fn % 2 === 1 || fn === sn) {
+      r = nodeHash(sibling, r);
+      while (fn % 2 === 0 && fn !== 0) { fn /= 2; sn /= 2; }
+    } else {
+      r = nodeHash(r, sibling);
+    }
+    fn = Math.floor(fn / 2);
+    sn = Math.floor(sn / 2);
+  }
+  return r.equals(root) && sn === 0;
+}
+
 function jcs(value) {
   if (value === null) return "null";
   if (typeof value === "number") {
@@ -401,6 +443,75 @@ function verify(pkg) {
                         : "all 6 closure components declared with digests " +
                           "(declaration only, contents are not verified)");
   }
+  }
+
+  // S13 Merkle inclusion (RFC 6962). A hash chain answers "was file N
+  // changed?"; a Merkle tree answers "is this one file inside a set of size N
+  // that the manifest committed to, without handing over all N files?" Runs
+  // only when the package carries evidence/merkle.json -- a package with no
+  // tree is not penalised for it.
+  {
+    const merklePath = join(pkg, "evidence", "merkle.json");
+    if (existsSync(merklePath)) {
+      const problems = [];
+      const mdoc = readJson(merklePath);
+      const idx = existsSync(join(pkg, "evidence/index.json"))
+        ? readJson(join(pkg, "evidence/index.json")) : { entries: [] };
+      const order = (idx.entries || []).slice().sort((a, b) =>
+        String(a.path) < String(b.path) ? -1 : String(a.path) > String(b.path) ? 1 : 0);
+      const leaves = [];
+      for (const e of order) {
+        try {
+          leaves.push(leafHash(readFileSync(join(pkg, "evidence", String(e.path)))));
+        } catch (err) {
+          problems.push("cannot read evidence file " + JSON.stringify(e.path));
+        }
+      }
+      const root = merkleRoot(leaves);
+      if (mdoc.algorithm !== "rfc6962-sha256") {
+        problems.push("algorithm " + JSON.stringify(mdoc.algorithm) + " is not rfc6962-sha256");
+      }
+      if (mdoc.size !== leaves.length) {
+        problems.push("declared size " + JSON.stringify(mdoc.size) + " != " +
+                      leaves.length + " evidence leaves");
+      }
+      if (String(mdoc.root || "").toLowerCase() !== root.toString("hex")) {
+        problems.push("declared root does not match recomputed root");
+      }
+      const proofs = mdoc.proofs || [];
+      for (const pr of proofs) {
+        const p = String(pr.path);
+        const at = order.findIndex((e) => String(e.path) === p);
+        if (at < 0) {
+          problems.push("proof names unknown evidence " + JSON.stringify(p));
+          continue;
+        }
+        if (pr.index !== undefined && pr.index !== at) {
+          problems.push("proof index for " + JSON.stringify(p) + " is " +
+                        JSON.stringify(pr.index) + ", recomputed " + at);
+        }
+        const siblings = [];
+        let bad = false;
+        for (const h of (pr.proof || [])) {
+          const hex = String(h);
+          if (!/^[0-9a-fA-F]{64}$/.test(hex)) { bad = true; break; }
+          siblings.push(Buffer.from(hex, "hex"));
+        }
+        if (bad) { problems.push("proof for " + JSON.stringify(p) + " has a non-hex sibling"); continue; }
+        if (at >= leaves.length) {
+          problems.push("proof names evidence " + JSON.stringify(p) + " whose file is absent");
+          continue;
+        }
+        if (!verifyInclusion(leaves[at], at, leaves.length, siblings, root)) {
+          problems.push("inclusion proof for " + JSON.stringify(p) + " does not verify");
+        }
+      }
+      note("S13", "merkle inclusion proofs", problems.length === 0,
+           problems.length ? problems.slice(0, 4).join("; ")
+                           : "root " + root.toString("hex").slice(0, 16) +
+                             "... over " + leaves.length + " leaves; " +
+                             proofs.length + " inclusion proof(s) verified");
+    }
   }
 
   // S12 timestamps, identifiers and the counts that must agree with them

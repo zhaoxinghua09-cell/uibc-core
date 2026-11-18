@@ -15,6 +15,24 @@ Nothing here is a ratified standard.
 
 ## [Unreleased]
 
+### Hostile input: ten cases, ten verdicts, no crashes (2026-11-18)
+
+- **`tools/redteam_robustness.py`** builds ten packages that are not packages:
+  not JSON, an array where an object belongs, duplicate member names, a bare
+  `NaN`, 4000 levels of nesting, invalid UTF-8, a path that climbs out of the
+  package, a symlink to the host, an empty directory, an 8 MB manifest. All
+  ten are answered by both implementations and refused by both.
+- **A real hole, closed:** Python's `json` module accepts `NaN` by default.
+  A manifest carrying `"remark":NaN` used to parse, pass every element check,
+  and come out **INCONCLUSIVE** - an honest-looking answer about bytes that
+  are not JSON. S11 now refuses it, on both sides: Python via
+  `parse_constant`, JavaScript via `JSON.parse` inside S11.
+- **S11 moved first in the JavaScript verifier, with an early return.** Bytes
+  that are not JSON cannot be judged by any later check; falling through
+  reported S0 ("the verifier broke") and hid the check that had the answer.
+- `docs/ROBUSTNESS.md` records the table and explains why the two verdict lists
+  differ on early failures without being inconsistent.
+
 ### The two implementations now agree on every package (2026-11-18)
 
 - **S3 in JavaScript**, both families of rules: the L1-L7 state machine and the

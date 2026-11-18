@@ -104,6 +104,19 @@ All four were hypothetical until they were measured, and all four came from
 running a second implementation against the same corpus. That is the only way
 this kind of defect surfaces.
 
+## Hostile input, measured separately
+
+The conformance suite measures attacks someone thought of. `tools/redteam_robustness.py`
+measures the bytes nobody did: ten mutated inputs, both implementations, three
+properties - no crash, a verdict, and a refusal. All ten are answered and refused;
+see [ROBUSTNESS.md](ROBUSTNESS.md).
+
+The one that mattered: Python's `json` module accepts `NaN`, so a manifest
+carrying `"remark":NaN` parsed and the package came out INCONCLUSIVE. The
+JavaScript side refused it. Both now refuse it, in S11, for the same reason:
+RFC 8259 has no such literal, and a parser more permissive than the format
+cannot refuse the format's violations.
+
 ## What it is not
 
 - Not a replacement: this is one implementation, not a standard. One check

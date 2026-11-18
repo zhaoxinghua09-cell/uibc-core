@@ -90,8 +90,16 @@ def _strict_scan(path):
         text = raw.decode("utf-8")
     except UnicodeDecodeError:
         return ["not valid UTF-8"]
+    # RFC 8259 has no NaN, Infinity or -Infinity literal. Python's json module
+    # accepts all three by default, which made a manifest carrying NaN pass S11
+    # and land on INCONCLUSIVE: the package was not found wrong because the
+    # bytes were never judged as JSON at all. A parser that is more permissive
+    # than the format is a parser that cannot refuse the format's violations.
+    def _no_constants(value):
+        raise ValueError("%s is not a JSON number (RFC 8259 has no such literal)" % value)
+
     try:
-        json.loads(text, object_pairs_hook=hook)
+        json.loads(text, object_pairs_hook=hook, parse_constant=_no_constants)
     except ValueError as e:
         problems.append("not parseable JSON (%s)" % e)
     for name in dups:

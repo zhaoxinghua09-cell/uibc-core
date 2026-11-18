@@ -175,6 +175,56 @@ function verify(pkg, opts = {}) {
   const inconclusive = (id, name, detail) =>
     checks.push({ id, name, result: "INCONCLUSIVE", detail });
 
+  // S11 runs first and stops the run when the bytes are not JSON at all.
+  // A file nobody can parse is not a package with a broken check, it is
+  // bytes that were never read; letting a later block throw would report
+  // S0 ("the verifier broke"), which is the wrong statement about who is
+  // at fault, and would hide the one check that can say what happened.
+  let s11Unparseable = false;
+  // S11 strict serialization, in the same sense the Python verifier means it:
+  // duplicate member names, raw control characters inside a document, bytes
+  // that are not valid UTF-8. All of these are invisible to JSON.parse and
+  // survive it, which is exactly the two-reader split the check exists for.
+  {
+    const problems = [];
+    const files = ["manifest.json", "identity.json", "lifecycle.json",
+                   "evidence/index.json"];
+    for (const rel of files) {
+      const path = join(pkg, rel);
+      if (!existsSync(path)) continue;
+      const buf = readFileSync(path);
+      const text = buf.toString("utf8");
+      if (Buffer.from(text, "utf8").length !== buf.length || text.includes("\uFFFD")) {
+        problems.push(rel + ": bytes are not valid UTF-8");
+      }
+      const dup = duplicateKeys(text);
+      if (dup.length) problems.push(rel + ": repeated member name " + dup[0]);
+      const ctrl = [...text].find((ch) => ch.codePointAt(0) < 0x20 &&
+                     !("\t\n\r".includes(ch)));
+      if (ctrl) problems.push(rel + ": unescaped control character");
+      // Is it JSON at all? JSON.parse refuses NaN, Infinity and comments, so
+      // this is the one line that makes the check about the format rather than
+      // about what a permissive reader happens to tolerate. Without it a
+      // manifest with a bare NaN reached the later checks and the package came
+      // out INCONCLUSIVE - "nothing found wrong" about bytes nobody had judged.
+      try {
+        JSON.parse(text);
+      } catch (e) {
+        problems.push(rel + ": not parseable JSON (" + e.message.slice(0, 60) + ")");
+      }
+    }
+        s11Unparseable = problems.some((x) => x.includes("not parseable JSON"));
+    note("S11", "strict serialization", problems.length === 0, problems.slice(0, 4).join("; ") || "ok");
+  }
+  if (s11Unparseable) {
+    return {
+      result: "FAIL", trust_level: "FAIL", failed_checks: 1,
+      checks, warnings,
+      note: "the bytes are not JSON, so no other check could be judged",
+      implementation: "verify-js (independent of uibc-core)",
+    };
+  }
+
   // S1 package structure, including files nobody declared
   {
     const problems = [];
@@ -446,30 +496,6 @@ function verify(pkg, opts = {}) {
     note("S7", "evidence index metadata", problems.length === 0, problems.slice(0, 4).join("; ") || "ok");
   }
 
-  // S11 strict serialization, in the same sense the Python verifier means it:
-  // duplicate member names, raw control characters inside a document, bytes
-  // that are not valid UTF-8. All of these are invisible to JSON.parse and
-  // survive it, which is exactly the two-reader split the check exists for.
-  {
-    const problems = [];
-    const files = ["manifest.json", "identity.json", "lifecycle.json",
-                   "evidence/index.json"];
-    for (const rel of files) {
-      const path = join(pkg, rel);
-      if (!existsSync(path)) continue;
-      const buf = readFileSync(path);
-      const text = buf.toString("utf8");
-      if (Buffer.from(text, "utf8").length !== buf.length || text.includes("\uFFFD")) {
-        problems.push(rel + ": bytes are not valid UTF-8");
-      }
-      const dup = duplicateKeys(text);
-      if (dup.length) problems.push(rel + ": repeated member name " + dup[0]);
-      const ctrl = [...text].find((ch) => ch.codePointAt(0) < 0x20 &&
-                     !("\t\n\r".includes(ch)));
-      if (ctrl) problems.push(rel + ": unescaped control character");
-    }
-    note("S11", "strict serialization", problems.length === 0, problems.slice(0, 4).join("; ") || "ok");
-  }
 
   // S7 continued: the index METADATA digest must match the one carried in the
   // manifest. Content hashes are already bound by S4 and S5; what was left

@@ -67,4 +67,6 @@ python tools/pccp_case.py --prev benchmark/corpus/base --curr tools/out/_mb/m_M1
 
 - 整包回滚：仅靠包内信息无法发现，需包外记录的 head（S9）；
 - 若证据不是我们自己采集，"证据为真"永远不会被这份报告证明；
-- AER-1 语料的 **strict base64** 与 **Merkle 包含证明**已有对等实现（`uibc_core/aee.py` 的 `_b64decode_strict`、`uibc_core/merkle.py` 的 `verify_inclusion`）；仍然成立的是更强的那句：我们没有对 AER-1 全语料逐向量执行过，只有分类级映射（见 `docs/AER1-CROSSWALK-RESULT.md`）。
+- AER-1 语料的 **strict base64** 与 **Merkle 包含证明**已有对等实现（`uibc_core/aee.py` 的 `_b64decode_strict`、`uibc_core/merkle.py` 的 `verify_inclusion`）。
+- **逐向量执行**：`tools/aer1_vector_replay.py` 用独立实现（不 import `uibc_core`）复现了 4 个向量文件共 **49 个向量，49/49**，其中 32 个是"必须失败/必须不等"的用例；语料本身按官方 `index.json` 逐个校验 SHA-256，重算摘要与发布值一致（见 [`docs/AER1-REPLAY-RESULT.md`](AER1-REPLAY-RESULT.md)）。
+- 仍未执行：其余 94 个向量（anchor 8、commitment 8、id-binding 6、workflow-root 7 及大量小文件）。那部分仍只有分类级映射（`docs/AER1-CROSSWALK-RESULT.md`）。

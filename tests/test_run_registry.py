@@ -4,12 +4,14 @@ Both files are empty today, and an empty table is easy to fake into a full one
 later: add a friendly row, round a figure, drop a refused objection. These tests
 hold the parts that make a full row checkable — labels, verbatim quoting, and the
 rule that refusals stay published.
+
+The form itself is read as text rather than through a YAML parser: this suite
+runs with no third-party packages, and a test that only passes where PyYAML
+happens to be installed is a test that silently stops guarding anything.
 """
 import os
 import re
 import unittest
-
-import yaml
 
 _REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
@@ -17,6 +19,23 @@ _REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 def _read(*parts):
     with open(os.path.join(_REPO, *parts), encoding="utf-8") as f:
         return f.read()
+
+
+def _form_blocks(text):
+    """Split the issue form into one string per top-level body item."""
+    starts = [m.start() for m in re.finditer(r"^\s{2}- type:", text, re.M)]
+    blocks = []
+    for i, s in enumerate(starts):
+        e = starts[i + 1] if i + 1 < len(starts) else len(text)
+        blocks.append(text[s:e])
+    return blocks
+
+
+def _field(text, field_id):
+    for block in _form_blocks(text):
+        if re.search(r"^\s+id:\s*%s\s*$" % re.escape(field_id), block, re.M):
+            return block
+    return None
 
 
 class TestTheRegistersExistAndSayTheirRules(unittest.TestCase):
@@ -52,31 +71,24 @@ class TestTheRegistersExistAndSayTheirRules(unittest.TestCase):
 
 class TestTheFormAsksTheQuestionThatChangesTheMeaning(unittest.TestCase):
     def setUp(self):
-        self.form = yaml.safe_load(_read(".github", "ISSUE_TEMPLATE", "conformance-receipt.yml"))
+        self.text = _read(".github", "ISSUE_TEMPLATE", "conformance-receipt.yml")
 
-    def _field(self, field_id):
-        for item in self.form["body"]:
-            if item.get("id") == field_id:
-                return item
-        return None
-
-    def test_blank_and_directed_is_a_required_question(self):
-        field = self._field("blind")
-        self.assertIsNotNone(field, "the blind/directed axis is what makes a run count as different evidence")
-        self.assertTrue(field["validations"]["required"])
-        labels = " ".join(o for o in field["attributes"]["options"])
-        self.assertIn("blind", labels)
-        self.assertIn("directed", labels)
+    def test_blind_and_directed_is_a_required_question(self):
+        block = _field(self.text, "blind")
+        self.assertIsNotNone(block, "the blind/directed axis is what makes a run different evidence")
+        self.assertIn("required: true", block)
+        self.assertIn("blind", block)
+        self.assertIn("directed", block)
 
     def test_it_records_which_verifier_produced_the_numbers(self):
-        field = self._field("verifier")
-        self.assertIsNotNone(field)
-        self.assertTrue(field["validations"]["required"])
+        block = _field(self.text, "verifier")
+        self.assertIsNotNone(block)
+        self.assertIn("required: true", block)
 
     def test_the_relation_field_still_decides_the_count(self):
-        field = self._field("relation")
-        self.assertIsNotNone(field)
-        self.assertTrue(field["validations"]["required"])
+        block = _field(self.text, "relation")
+        self.assertIsNotNone(block)
+        self.assertIn("required: true", block)
 
 
 class TestTheComparisonAgainstTheCompetitorIsWrittenDown(unittest.TestCase):

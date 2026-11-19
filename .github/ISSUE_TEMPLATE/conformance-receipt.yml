@@ -1,0 +1,94 @@
+name: Conformance receipt
+description: "You unzipped the conformance archive, ran one command, and got a table. This records it so the number can be quoted with its provenance."
+title: "[conformance receipt] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Before you start:** `python tools/check_outward_receipt.py receipt.json` in the cloned
+        repository refuses a receipt that contradicts itself. Run it first; if it says
+        `NOT ACCEPTABLE`, paste that output here instead of the receipt — that failure is the
+        useful report.
+
+        **What this moves.** A receipt from someone independent of the author is an
+        *external node report* and is the only thing that raises the count in
+        `docs/EVIDENCE-INDEX.md` above 1. A receipt from a contributor, colleague, or paid
+        reviewer is published just as prominently but counted as *self-reproduction*.
+
+        **What it does not mean.** 36/36 does not claim the verifier is right, that the corpus
+        is complete, or that any other implementation agrees. It claims one command produced
+        this table on the machine you name.
+
+  - type: input
+    id: archive_digest
+    attributes:
+      label: "sha256 of the archive you ran"
+      description: "The zip you unzipped, not the files inside it. Compute it before unzipping if you can; otherwise say you did not."
+      placeholder: "711fa82c9f183066cfae6441a4fe3fc27fcc516b25f2a976cad5e0dd61b5135f"
+    validations:
+      required: true
+
+  - type: input
+    id: command
+    attributes:
+      label: "The exact command"
+      description: "Including `--verify` if you pointed it at another implementation, and `--run-by \"Your Name <you@example.org>\"` so the receipt names you itself."
+      placeholder: "python run.py --run-by \"A Stranger <stranger@example.org>\""
+    validations:
+      required: true
+
+  - type: input
+    id: host
+    attributes:
+      label: "Operating system, Python version, and where you got the archive"
+      description: "e.g. Ubuntu 24.04 / Python 3.12 / GitHub release from commit d72c4f9. A local copy changes nothing here, but a reader has to know."
+    validations:
+      required: true
+
+  - type: textarea
+    id: output
+    attributes:
+      label: "The tail of the output, unchanged"
+      description: "At least the `strict N/M` line and the exit code. If it exited 3, say so — by design no receipt is written in that case, and that is an environment result, not a corpus result."
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    id: receipt
+    attributes:
+      label: "receipt.json"
+      description: "Paste it or attach it. If `check_outward_receipt.py` refused it, paste that instead."
+      render: json
+    validations:
+      required: false
+
+  - type: dropdown
+    id: relation
+    attributes:
+      label: "Your relation to the author"
+      options:
+        - "I am independent of the author (external node report)"
+        - "I have contributed code to this repository (self-reproduction)"
+        - "I am in the same organisation or administration as the author (self-reproduction)"
+        - "I was paid or otherwise compensated (self-reproduction, declare under COI.md)"
+    validations:
+      required: true
+
+  - type: textarea
+    id: disagreement
+    attributes:
+      label: "Anything that did not match what the documentation said"
+      description: "Numbers that differ, steps that did not work, wording that overclaims. Negative reports are recorded as prominently as passes."
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: truth
+    attributes:
+      label: "Declaration"
+      options:
+        - label: "Every number above came from the command I pasted, run on the machine I named, and I have not edited the output."
+          required: true
+        - label: "I understand the receipt will be published with my relation stated, and that a failure is a legitimate outcome."
+          required: true

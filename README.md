@@ -6,6 +6,18 @@
 It is **not** the clinical chemistry assay of the same acronym (unsaturated iron binding capacity),
 and it is unrelated to the UIBCDF computational-biology organisation.
 
+**中文导读 · Read this in Chinese** → [`docs/zh-guide.md`](docs/zh-guide.md) — 三律映射、PASS 的确切含义、21 类篡改基准逐类解读，以及本仓现在还差什么。五分钟读完，不需要任何背景。
+
+## Measured, not asserted (2026-11-19)
+
+| What | Number | How to reproduce |
+|---|---|---|
+| Tamper benchmark, 21 single-point mutations × 2 modes | open **9.5%** (2/21) · pinned **4.8%** (1/21) · head-pinned **0%** (0/1) | `python tools/mutation_benchmark.py` (≈1.6 s, no network) |
+| Unexplained accepts | **0 / 0 / 0** | same run |
+| Whole-package verify latency, n=160 | p50 **18.2 ms** · p95 **27.3 ms** · p99 **33.6 ms** | a 160-iteration loop, see `docs/zh-guide.md` §5 |
+
+Two mutations are *not* caught, and we say which and why: **M17** (key swap — undecidable without key pinning) and **M20** (whole-package rollback — needs an external monotonic anchor; our OTS anchor is still `PendingAttestation`). The 9.5% is a boundary of the definition domain, not a hidden defect list.
+
 ## Verify it yourself — one command, no install, no account
 
 ```bash
@@ -322,3 +334,5 @@ both modes + attacker-key column).
 [![Software Heritage](https://archive.softwareheritage.org/badge/origin/save/https://github.com/zhaoxinghua09-cell/uibc-core/)](https://archive.softwareheritage.org/browse/origin/?origin_url=https%3A%2F%2Fgithub.com%2Fzhaoxinghua09-cell%2Fuibc-core%2F)
 
 - **Software Heritage Visit ID**: `2558386` — 本仓已由 Software Heritage 永久存档（不可篡改证据），为该生态资产的长期可引用性提供基础设施级保证。
+
+

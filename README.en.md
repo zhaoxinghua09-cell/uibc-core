@@ -14,6 +14,10 @@ content-hashed evidence with a cryptographic seal / a lifecycle state machine
 plus verification gates.
 
 > ⚠️ Status: PROPOSAL, not a formal standard. Verification results are
+> **中文导读** — 三律映射、PASS 的确切含义、21 类篡改基准逐类解读：[`docs/zh-guide.md`](docs/zh-guide.md)
+>
+> **Measured (2026-11-19):** tamper benchmark 21 mutations × 2 modes → open 9.5% (2/21), pinned 4.8% (1/21), head-pinned 0% (0/1), unexplained accepts 0/0/0 · whole-package verify n=160 → p50 18.2 ms / p99 33.6 ms. Reproduce with `python tools/mutation_benchmark.py`.
+>
 > **scoped proofs**: PASS only means "no violation found within the observed
 > evidence boundary" — it does not claim absolute trust.
 
@@ -146,3 +150,4 @@ both modes + attacker-key column).
 | Failure corpus | `failure_corpus/` | real failures F-001..F-006 with root causes and lessons |
 | Contest package | `contest/` | charter, problems, rubric, submission spec, pilot-run record |
 | AI discovery | `llms.txt` + `ai/` | machine-friendly entry points |
+

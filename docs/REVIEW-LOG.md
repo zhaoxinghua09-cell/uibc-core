@@ -403,3 +403,37 @@ round to be believable.
 
 Still not a strictness claim: 17 families chosen by us, and nobody outside has audited the
 list.
+
+---
+
+## Positioning check, 2026-11-19 (second pass): AER-1 -26 closed part of the space
+
+A re-read of the sources behind the S19 note found two citations out of date and one that
+narrows our claim further. Fetched live from the Datatracker API and the PyPI JSON API on
+2026-11-19; revisions last checked in the log above were correct for the drafts read then,
+not for now.
+
+- `draft-zambo-aer1` has moved from -25 to **-26**. Its Section 13 now says outright that a
+  bare receipt "does not prove the execution belongs to any particular job", and that
+  equivocation is mitigated by comparing against **previously anchored values rather than
+  counts**. Sections 7 and 8 state that a chain or Merkle root alone does not stop truncation
+  and that deployments needing truncation detection MUST anchor the commitment externally and
+  MUST NOT present the chain check as sufficient on its own.
+- `veritrail` has moved from 0.3.0 to **0.3.1**; the mechanism is unchanged (hash chain plus a
+  head hash published to an external witness).
+- `draft-pidlisnyi-aps` (-04), `draft-noa-scitt-ai-agent-receipt` (-01),
+  `draft-schrock-ep-authorization-receipts` (-13), `draft-chang-delta1-settlement` (-00) and
+  `draft-maintainer-1f916-agent-record` (-01) are unchanged since the first positioning pass.
+
+What this means for S19: two of the three ideas the implementation rests on - "comparing a
+sequence number is not by itself freshness" and "without an anchor a shorter history is
+undetectable" - now have explicit counterparts in a published draft's normative text. The
+remaining novel content is narrower than the earlier note implied: the rule is implemented as
+an opt-in check inside an offline package verifier, with all three inconclusive cases written
+into the code and isolated by red-team case RT16. Cite AER-1 -26 rather than -25 from now on.
+
+Sources read on 2026-11-19:
+- https://www.ietf.org/archive/id/draft-zambo-aer1-26.html
+- https://pypi.org/project/veritrail/0.3.1/
+- https://www.ietf.org/archive/id/draft-pidlisnyi-aps-04.html
+- https://www.ietf.org/archive/id/draft-schrock-ep-authorization-receipts-13.html

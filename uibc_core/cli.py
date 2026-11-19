@@ -521,6 +521,10 @@ def cmd_inspect(args):
 
 def main():
     ap = argparse.ArgumentParser(prog="uibc", description="UIBC Core CLI v%s [PROPOSAL]" % __version__)
+    # --version exists so a bundled single-file build can state which version it
+    # is without importing the package: the conformance runner reads it to label
+    # a receipt correctly (run.py, 2026-11-20).
+    ap.add_argument("--version", action="version", version=__version__)
     sub = ap.add_subparsers(dest="cmd", required=True)
 
     p = sub.add_parser("init", help="create submission package skeleton")

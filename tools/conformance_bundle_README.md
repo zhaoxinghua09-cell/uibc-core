@@ -5,16 +5,20 @@ one thing broken. Your verifier has to accept the correct one and refuse the
 rest, naming at least one check that this manifest expects. Refusing everything
 scores nothing — the accept cases fail.
 
-Nothing here needs our repository.
+Nothing here needs our repository, a network, or a package install.
 
-## Run it (two commands)
+## Run it (one command)
 
 ```bash
-python -m pip install uibc-core==0.4.1     # the reference verifier
 python run.py
 ```
 
-Expected tail: `strict 36/36`.
+The archive carries `uibc_core.pyz` — the reference verifier as one file — and
+`run.py` uses it by default. Expected tail: `strict 36/36`, about six seconds,
+writes `receipt.json`.
+
+If you would rather use an installed copy, `python run.py --verify "python -m uibc_core.cli verify {pkg}"`
+after `python -m pip install uibc-core==0.4.1`. Both paths produce the same table.
 
 Testing a different implementation:
 

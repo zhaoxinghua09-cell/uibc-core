@@ -1,0 +1,101 @@
+name: External node report
+description: You ran this suite on your own machine. This records what it printed, and who you are relative to the author.
+title: "[external node] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **What this form is for.** `tools/external_node_check.py` prints `CONSISTENT` only when a second,
+        independently written verifier agrees with the reference one *and* three packages that must be rejected
+        are rejected. Running it and pasting the output here is what turns `external verification nodes: 0` into 1.
+
+        **What it is not.** A PASS does not claim the agent was correct, safe, or wise; that the recorded inputs
+        were true or complete; or that any real-world outcome followed. Writing a number here that you did not
+        measure is worse for the repository than reporting a failure.
+
+        **Which count this moves.** Only reports from someone independent of the author count as L4. If you have
+        written code in this repository, work in the same administration, or were paid for this, say so in the
+        declaration field — such a report is still useful, but it is L1 self-reproduction, not L4, and it will be
+        recorded that way.
+
+  - type: input
+    id: command
+    attributes:
+      label: The command you ran
+      description: Paste it exactly, including any flags or branch name.
+      placeholder: git clone --depth 1 https://github.com/zhaoxinghua09-cell/uibc-core.git && cd uibc-core && python tools/external_node_check.py
+    validations:
+      required: true
+
+  - type: input
+    id: clone_source
+    attributes:
+      label: Where the clone came from
+      description: Public HTTPS clone, your own mirror, an archive file, or a local copy. A local copy changes nothing for uibc, but a reader has to know.
+    validations:
+      required: true
+
+  - type: input
+    id: head
+    attributes:
+      label: The commit you ran
+      description: `git rev-parse --short HEAD`
+    validations:
+      required: true
+
+  - type: input
+    id: host
+    attributes:
+      label: Operating system and Python version
+      description: This matters here: on Windows hosts without symlink privilege one hostile case cannot be built, and the suite reports it as SKIPPED rather than as a pass.
+    validations:
+      required: true
+
+  - type: textarea
+    id: output
+    attributes:
+      label: The exact output
+      description: The whole line (or block), unchanged, including any `skip`, `FAIL`, or `DISCREPANCY` wording.
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    id: result_json
+    attributes:
+      label: external_node_result.json
+      description: The file the run writes next to the clone. Paste it or attach it. If the run failed before writing one, say so instead.
+      render: json
+    validations:
+      required: false
+
+  - type: dropdown
+    id: relation
+    attributes:
+      label: Your relation to the author
+      description: This decides whether the report is recorded as L4 or L1. Answer honestly; either answer is published with the report.
+      options:
+        - I am independent of the author (L4 candidate)
+        - I have contributed code to this repository (L1)
+        - I am in the same organisation / administration as the author (L1)
+        - I was paid or otherwise compensated for this work (L1, and must be declared under COI.md)
+    validations:
+      required: true
+
+  - type: textarea
+    id: dissent
+    attributes:
+      label: What you saw that you think is wrong, or could not make work
+      description: Failures, confusing steps, numbers that did not match the README, wording that overclaims. Negative reports are recorded as prominently as passes.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: truth
+    attributes:
+      label: Declaration
+      options:
+        - label: Every number above was produced on my machine by the command I pasted, and I have not edited the output.
+          required: true
+        - label: I understand that this report will be published with my readback, and that a FAIL is a legitimate outcome.
+          required: true

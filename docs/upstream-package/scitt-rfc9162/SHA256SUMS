@@ -1,0 +1,6 @@
+29d9b19ba568c300c9a4c80bea4e3df0a51d875272dd528f5bb390cb789d44a6  v1/valid-tree4-index0/expected.json
+7e2cea24732841d94f35e9c370e904c70f225c4c58717e12af4881c1a184cd67  v1/fail-tampered-path/expected.json
+9edee83fbdec2ac4a4f96dc86d2471468a0eb6ad39cab930770944b08c414a83  v1/fail-wrong-tree-size/expected.json
+e8a2e0cb06e61a82edbc71f699ef4f054fd2246da5ddb874196d3c0f4e72e530  v1/valid-tree8-index2/expected.json
+ec4e908bbbf686f1c4c68dda809cb0ce79b2233daee16c5669a118450b28f2dd  v1/fail-wrong-leaf-index/expected.json
+f58b589f9ba88466aec33619438c562dfa117b2ae058cde8ad4da22263aef85b  manifest.json

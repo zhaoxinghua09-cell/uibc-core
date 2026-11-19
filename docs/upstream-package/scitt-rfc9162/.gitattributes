@@ -1,0 +1,6 @@
+# Pin vector files as non-normalized so SHA256SUMS reproduces
+# byte-for-byte on any platform, including core.autocrlf=true.
+v1/** -text
+manifest.json -text
+README.md -text
+SHA256SUMS -text

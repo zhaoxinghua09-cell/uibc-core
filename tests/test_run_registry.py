@@ -70,7 +70,13 @@ class TestTheRegistersExistAndSayTheirRules(unittest.TestCase):
 
 
 class TestTheFormAsksTheQuestionThatChangesTheMeaning(unittest.TestCase):
+    """Skipped inside an sdist, which by design ships no .github directory."""
+
+    FORM = os.path.join(_REPO, ".github", "ISSUE_TEMPLATE", "conformance-receipt.yml")
+
     def setUp(self):
+        if not os.path.isfile(self.FORM):
+            self.skipTest("no issue form in this tree (sdist build)")
         self.text = _read(".github", "ISSUE_TEMPLATE", "conformance-receipt.yml")
 
     def test_blind_and_directed_is_a_required_question(self):
@@ -93,6 +99,9 @@ class TestTheFormAsksTheQuestionThatChangesTheMeaning(unittest.TestCase):
 
 class TestTheComparisonAgainstTheCompetitorIsWrittenDown(unittest.TestCase):
     def test_the_page_records_that_we_were_behind_here(self):
+        page = os.path.join(_REPO, "docs", "COMPETITIVE-STATE.md")
+        if not os.path.isfile(page):
+            self.skipTest("no comparison page in this tree (sdist build)")
         text = _read("docs", "COMPETITIVE-STATE.md")
         self.assertIn("probity", text.lower())
         self.assertIn("DISPOSITIONS", text)

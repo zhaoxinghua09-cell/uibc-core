@@ -18,6 +18,7 @@ import os
 import shutil
 import sys
 import tempfile
+import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -644,6 +645,9 @@ def main():
         r_n, i_n, only_ind, only_ref = measure_declared_scope(tmp)
 
         # --- tranche four: legitimate packages must be accepted, not merely "not attacked" ---
+        accept_total = 0
+        accept_ref_alarms = 0
+        accept_ind_alarms = 0
         for name, variant in ORACLE_ACCEPT:
             pkg, key = build_good(tmp, name, variant)
             rep = verify(pkg, key=key)
@@ -656,10 +660,69 @@ def main():
             # the scope guard it says INCONCLUSIVE on packages carrying artefacts it has
             # no rule for, which is the honest answer rather than a green one.
             i_ok = (i_verdict != "FAIL")
+            accept_total += 1
+            accept_ref_alarms += 0 if r_ok else 1
+            accept_ind_alarms += 0 if i_ok else 1
             bad += 0 if r_ok else 1
             bad += 0 if i_ok else 1
             rows.append((name, "PASS", "—", r_verdict, str(r_first),
                          i_verdict, str(i_first), r_ok, i_ok))
+
+    # Computed, not written: how many checks actually produced output across these
+    # packages, and how many of those the second implementation can also speak to.
+    observed = sorted(seen, key=lambda i: int(i[1:]) if i[1:].isdigit() else 0)
+    mapped = sorted(V_TO_S, key=lambda v: int(v[1:]) if v[1:].isdigit() else 0)
+    ind_rules = sorted(IND_RULES, key=lambda v: int(v[1:]) if v[1:].isdigit() else 0)
+
+    verdict = ("PASS" if bad == 0 else "FAIL")
+
+    if "--json" in sys.argv or "--json-out" in sys.argv:
+        report = {
+            "schema": "uibc-differential/1",
+            "generated_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+            "cases": len(rows),
+            "cells_disagreeing_with_the_oracle": bad,
+            "checks_evaluated": observed,
+            "checks_total": len(observed),
+            "exact_pairs": [{"second_implementation_rule": k, "check": V_TO_S[k]} for k in mapped],
+            "exact_pairs_count": len(mapped),
+            "second_implementation_rules": ind_rules,
+            "unmapped_second_implementation_rules": [r for r in ind_rules if r not in V_TO_S],
+            "rule_correspondence": [
+                {"rule": rule, "reference_verdict": ref_v,
+                 "reference_first_failures": ref_f, "independent_verdict": ind_v,
+                 "independent_first_failures": ind_f}
+                for rule, ref_f, ref_v, ind_f, ind_v in corr],
+            "blind_verdict": {"reference": blind_ref, "independent": blind_ind,
+                              "note": "the reference has a rule the second does not; "
+                                      "the second must not answer PASS here"},
+            "hostile": {"total": n_hostile, "false_pass": len(false_pass),
+                        "declined_to_judge": len(declined)},
+            "accept": {"cases": accept_total,
+                       "reference_false_alarms": accept_ref_alarms,
+                       "independent_false_alarms": accept_ind_alarms},
+            "per_case": [
+                {"case": name, "oracle_verdict": ov, "oracle_first": of,
+                 "reference_verdict": rv, "reference_first": rf,
+                 "independent_verdict": iv, "independent_first": iff,
+                 "reference_matches_oracle": rok,
+                 "independent_matches_oracle": (None if iok is None else iok)}
+                for name, ov, of, rv, rf, iv, iff, rok, iok in rows],
+            "verdict": verdict,
+        }
+        payload = json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True)
+        # The build steps inside this tool print progress to stdout, so a report
+        # piped to a JSON consumer would arrive polluted. `--json-out` writes the
+        # report to a file and leaves stdout for nothing but progress text.
+        if "--json-out" in sys.argv:
+            i = sys.argv.index("--json-out")
+            dest = sys.argv[i + 1] if len(sys.argv) > i + 1 else "differential-report.json"
+            with open(dest, "w", encoding="utf-8", newline="\n") as fh:
+                fh.write(payload + "\n")
+            sys.stderr.write("wrote %s\n" % dest)
+        else:
+            print(payload)
+        return 0 if bad == 0 else 1
 
     print(f"{'case':<26}{'oracle':<8}{'o-first':<9}{'ref':<8}{'r-first':<9}"
           f"{'ind':<8}{'i-first':<9}{'ref?':<6}{'ind?'}")
@@ -669,11 +732,6 @@ def main():
         print(f"{name:<26}{ov:<8}{of:<9}{rv:<8}{rf:<9}{iv:<8}{iff:<9}{mark:<6}{imark}")
 
     print(f"\ncases: {len(rows)}, cells disagreeing with the oracle: {bad}")
-    # Computed, not written: how many checks actually produced output across these
-    # packages, and how many of those the second implementation can also speak to.
-    observed = sorted(seen, key=lambda i: int(i[1:]) if i[1:].isdigit() else 0)
-    mapped = sorted(V_TO_S, key=lambda v: int(v[1:]) if v[1:].isdigit() else 0)
-    ind_rules = sorted(IND_RULES, key=lambda v: int(v[1:]) if v[1:].isdigit() else 0)
     print("checks evaluated by the reference across these cases: %d (%s)"
           % (len(observed), ", ".join(observed)))
     print("rules the independent implementation emits: %d (%s)"

@@ -160,6 +160,9 @@ jobs:
       - name: The anchor in the tree still verifies
         run: python -m pytest tests/test_published_anchor.py -q
 
+      - name: The dashboard and the runner agree on seven checks
+        run: python -m pytest tests/test_run_all_evidence.py -q
+
       - name: The 0.4.0 pin is still plain sha256sum
         run: python -m pytest tests/test_release_pin.py -q
 

@@ -26,9 +26,19 @@ class TestOracle(unittest.TestCase):
         spec = importlib.util.spec_from_file_location("oracle_check", TOOL)
         mod = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)
-        self.assertGreaterEqual(len(mod.ORACLE), 5)
+        self.assertGreaterEqual(len(mod.ORACLE) + len(mod.ORACLE_EXT), 19)
         verdicts = {row[2] for row in mod.ORACLE}
         self.assertEqual(verdicts, {"PASS", "FAIL"}, "an oracle of one verdict cannot fail")
+
+    def test_every_extension_case_names_a_check_that_exists(self):
+        """A row pointing at S20 is a typo that silently tests nothing."""
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("oracle_check", TOOL)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        for _name, _pre, _fn, _verdict, first in mod.ORACLE_EXT:
+            self.assertIsNotNone(first, "an extension row must state a first failure")
+            self.assertLessEqual(int(first[1:]), 19)
 
     def test_first_failure_is_ordered_by_check_number(self):
         """Report order is not check order; the tool must not depend on it."""

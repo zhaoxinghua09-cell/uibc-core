@@ -2,7 +2,7 @@
 
 每条检查对应到：验证器里的定义、覆盖它的测试、指向它的红队攻击、以及提到它的文档。**重新生成即可复核**，不会随记忆漂移。
 
-**测试套件：658 个用例**（本页由生成器现数，别处只引用本页，不再抄写这个数字）。
+**测试套件：670 个用例**（本页由生成器现数，别处只引用本页，不再抄写这个数字）。
 
 
 | 检查 | 名称 | 出厂包是否走到 | 测试 | 红队 | 文档 |
@@ -19,7 +19,7 @@
 | S9 | head pinned out-of-band | 否 | 8 | 1 | 24 |
 | S10 | attestation closure declared | 否 | 5 | 2 | 8 |
 | S11 | strict serialization | 是 | 5 | 1 | 17 |
-| S12 | timestamp and identifier strictness | 是 | 9 | 2 | 19 |
+| S12 | timestamp and identifier strictness | 是 | 10 | 2 | 19 |
 | S13 | merkle inclusion proofs | 否 | 8 | 4 | 11 |
 | S14 | strict base64 | 否 | 4 | 2 | 7 |
 | S15 | anchor event resolution | 否 | 6 | 4 | 10 |

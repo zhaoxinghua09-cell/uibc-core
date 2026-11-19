@@ -1,0 +1,67 @@
+{
+  "kind": "uibc-adoption-report-v0",
+  "generated_at": "2026-11-19T23:39:50.866838Z",
+  "verdict": {
+    "state": "zero",
+    "exit": 0,
+    "total": 0,
+    "sentence": "ZERO ADOPTION \u2014 each bucket was asked and each answered zero",
+    "credential": "present"
+  },
+  "buckets": [
+    {
+      "bucket": "another repository",
+      "question": "does any repository outside our account exist under the format's own coinage?",
+      "url": "https://api.github.com/search/repositories?q=uibc-core+in:name,description",
+      "state": "measured",
+      "found": 0,
+      "sample": [],
+      "error": null
+    },
+    {
+      "bucket": "another codebase",
+      "question": "does any code outside our account emit or consume the wire identifier?",
+      "url": "https://api.github.com/search/code?q=%22uibc-anchor/0.1%22%20-user%3Azhaoxinghua09-cell&per_page=20",
+      "state": "measured",
+      "found": 0,
+      "sample": [],
+      "error": null
+    },
+    {
+      "bucket": "a standards body",
+      "question": "has a standards organisation taken up the name?",
+      "url": "https://datatracker.ietf.org/api/v1/doc/document/?name__contains=uibc&format=json",
+      "state": "measured",
+      "found": 0,
+      "sample": [],
+      "error": null
+    },
+    {
+      "bucket": "a neighbouring spec",
+      "question": "does the closest adjacent spec name us in its own metadata?",
+      "url": "https://pypi.org/pypi/agent-action-capsule/json",
+      "state": "measured",
+      "found": 0,
+      "sample": [],
+      "error": null
+    },
+    {
+      "bucket": "package downloads",
+      "question": "how often was the package fetched? (context, not adoption)",
+      "url": "https://pypistats.org/api/packages/uibc-core/recent",
+      "state": "context",
+      "found": 598,
+      "sample": [
+        "last_month=598"
+      ],
+      "error": null
+    }
+  ],
+  "limits": [
+    "a zero is not proof of absence: it is proof that this search, at this time, found nothing",
+    "downloads are not a party: a mirror, a cache and a CI image all download without adopting",
+    "a repository naming the format is not a repository emitting it",
+    "this measures the format's own coinage only, never an acronym other fields already own"
+  ],
+  "how_to_reproduce": "python tools/check_adoption.py --out report.json; set UIBC_ADOPTION_TOKEN to let the code-search bucket be asked"
+}

@@ -50,7 +50,7 @@ have the second implementation and the shippable suite.
 | **fact0** — [fact0.io](https://fact0.io/) | **experimental**, MIT, self-hosted | hash-chained audit records | none | none | signed export files verified against a separately trusted key; ZIP itself not signed | replay; honest "capture gaps remain visible" is the same stance we take |
 | **Attested Logs** — [paper](https://pys8vc40ox3z7qxp.public.blob.vercel-storage.com/files/2277477cbbe69000-554a6703-fac0-4715-84a6-d6613c72cda3-Attested-Multi-Agent-Conversation-Logs.pdf) | research library, AutoGen + LangGraph integrations | Ed25519 per message, SHA-256 chain | none | none (Merkle checkpoints planned) | "20+ passing tests", offline self-contained verification | framework integration breadth |
 | **Vaara** — [PyPI](https://pypi.org/project/vaara/) | **2.17.0**, AGPL-3.0, installed and CLI inspected | hash chain, export signature | `trail verify-anchor` for external time anchor | `trail publish-head` to a public transparency log (opt-in) | offline verify of signed trail zip; `attest verify` per tool call | call-site policy depth; permissive licensing for bundling (AGPL) |
-| **us** — `uibc-core` | 0.4.0, Apache-2.0, public repo | Ed25519 over DSSE PAE of JCS payload | RFC 3161 verified + OTS pending calendar | Rekor entry written; inclusion **not verified** | **two implementations** — Python (19 checks) plus an independent JavaScript checker (18 of 19: structure, Ed25519 seals, Merkle inclusion, anchors, the package checkpoint, the out-of-band pin, RFC 3161 timestamps, the receipt chain, policy artefacts, strict base64, the closure declaration), public anonymous clone, 591 tests, 15 red-team scenarios, 36 attacks | witnesses; the checks the JavaScript verifier does not cover (one: S0, which only exists when the verifier itself throws); replay; call-site interception |
+| **us** — `uibc-core` | 0.4.0, Apache-2.0, public repo | Ed25519 over DSSE PAE of JCS payload | RFC 3161 verified + OTS pending calendar | Rekor entry written; inclusion **not verified** | **two implementations** — Python (19 checks) plus an independent JavaScript checker (18 of 19: structure, Ed25519 seals, Merkle inclusion, anchors, the package checkpoint, the out-of-band pin, RFC 3161 timestamps, the receipt chain, policy artefacts, strict base64, the closure declaration), public anonymous clone, 594 tests, 15 red-team scenarios, 36 attacks | witnesses; the checks the JavaScript verifier does not cover (one: S0, which only exists when the verifier itself throws); replay; call-site interception |
 
 ## Measured on this machine (Windows, Python 3.13, 2026-11-17)
 
@@ -77,7 +77,7 @@ Rekor failure - as an observation with a reproduction, never as a verdict on the
    rejection of 33 forgeries; that is the authors' own report, and its verifiers
    were not written by a third party. Note what NovaFabric writes about its own
    format, verbatim: "Neither a second implementation nor that corpus exists yet."
-   [arXiv 2609.12587, Determinism of the signed bytes](https://arxiv.org/html/2609.12587).
+   [arXiv 2609.12594, Determinism of the signed bytes](https://arxiv.org/html/2609.12594).
    So "re-runnable" is no longer ours alone; it is table stakes, and Tracekit holds
    a stronger form of it than we do.
 2. **We are still alone on one thing: publishing a failed verification.** Our Rekor
@@ -142,7 +142,7 @@ first.
 
 * Tracekit paper: <https://arxiv.org/html/2609.35659>
 * Treeship: <https://www.treeship.dev/>
-* NovaFabric site: <https://novafabric.ai/> ; paper: <https://arxiv.org/html/2609.12587>
+* NovaFabric site: <https://novafabric.ai/> ; paper: <https://arxiv.org/html/2609.12594>
 * agent-receipts: <https://www.npmjs.com/package/agent-receipts-cli> ; repo: <https://github.com/agent-viscro/agent-receipts>
 * AIAuditLog: <https://pypi.org/project/aiauditlog/0.1.0a3/>
 * fact0: <https://fact0.io/>

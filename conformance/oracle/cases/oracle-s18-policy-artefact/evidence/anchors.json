@@ -4,13 +4,13 @@
     {
       "id": "anchor-001",
       "version": 1,
-      "leaf_hash": "c819dc5ecc6149b45ee4a059f6a7ff5bf3a7393dfdde5724af32c989c26f4b0f",
+      "leaf_hash": "ae53e9d5ed66683ee2350c9255ff466824d90957162d2bca6467e9cc13a1106a",
       "anchored_at": "2026-11-17T08:00:00Z",
-      "root": "1770e56ed22c4a730e61a982de32a889b2e45b3d9f8022a31073e734d91a868f",
+      "root": "ff6e1487837841e3379c6c709e63f8c4b72aaef3d431265e94f0b5fc780f7d90",
       "size": 2,
       "index": 0,
       "proof": [
-        "c1684a58f751e3d123dde2906e8be518b7a7e421943a3403aa153752c4ddbb07"
+        "a00736781f185a8f0cff247d33efc570f37b25a19f7a7fc962e3dc9cd2c0d5b0"
       ]
     }
   ]

@@ -4,7 +4,7 @@
       "evidence_id": "d7e970a7-3a8f-5b75-a413-505380bc1e9b",
       "type": "ACTION",
       "path": "files/oracle-tampered-0.txt",
-      "content_hash": "20425c7fadbb4db558fcc6ca6eacd3eb435cf5d7603f7cb41e48709fabcce53b",
+      "content_hash": "f9a5dfd8401aef15cf26901becd253941bc3d8f836f094f2ced11d457a5733a8",
       "created_at": "2026-11-15T00:00:00Z",
       "media_type": "text/plain",
       "note": "n0"

@@ -4,10 +4,10 @@
   "agent_version": "1",
   "created_at": "2026-11-15T00:00:00Z",
   "evidence_count": 1,
-  "evidence_root": "12c0a2cdd7ddf661fbe8ce35eebc28da088d50bcc1486858b38bc8be1316df89",
+  "evidence_root": "09b1ec6fe90660af9527e405c3a629b0c444897226b711cf27d272812792fab2",
   "status": "SUBMITTED",
   "evidence_index_digest": "sha256:91387f6c1caf6361b53b199a84b6cce99de904325944a0f2be9cea2b2e6ad5df",
   "lifecycle_head": "sha256:c1ac986223d23108c5f244ba33f525f2979f76ffc89b2a4904536932a331f368",
-  "checkpoint_head": "sha256:147dec905ce7709f463d16ddb219cde10eb4c8f29ea53ad08beaedd8c09ff047",
+  "checkpoint_head": "sha256:5ec6e4b5ee26aee8f97ed6f795bf94a5c850d8c3963979ce266caf527f92a2ae",
   "min_verifier_version": "0.4.1"
 }

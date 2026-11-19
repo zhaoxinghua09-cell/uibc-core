@@ -4,7 +4,7 @@
       "evidence_id": "48344547-3bdb-5f99-ad5b-a815387ffe92",
       "type": "ACTION",
       "path": "files/oracle-deleted-0.txt",
-      "content_hash": "c16bdc6635afb5bbb53cbf60b883b5a11d2e64484e3f4db4d46708ff5e030595",
+      "content_hash": "ad3ebe7e011da468de4a68890eb14a6f8cd86ec4fe80249ab277ebf484946965",
       "created_at": "2026-11-15T00:00:00Z",
       "media_type": "text/plain",
       "note": "n0"

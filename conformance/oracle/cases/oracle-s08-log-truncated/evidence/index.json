@@ -4,7 +4,7 @@
       "evidence_id": "1b94e2f9-dbd1-581f-848b-c42e99790153",
       "type": "ACTION",
       "path": "files/oracle-s08-log-truncated-0.txt",
-      "content_hash": "f6a025bb16d85e05ee2450c5fa5449d38573f8de6aad61a37dc764dc1e833aaf",
+      "content_hash": "258bd26db96b7acde66b0be11afcf445322ce05c3d3a1e00bc650b9d18f995a2",
       "created_at": "2026-11-15T00:00:00Z",
       "media_type": "text/plain",
       "note": "n0"
@@ -13,7 +13,7 @@
       "evidence_id": "5d4b90ed-5700-596f-832d-5f5e517131c6",
       "type": "ACTION",
       "path": "files/oracle-s08-log-truncated-1.txt",
-      "content_hash": "0c41d3be240e7bec6928260561039f0d66a1a3f7024585b01b1f6d0178fdc56a",
+      "content_hash": "effa39326f9e35fc2c548847fc0a5acf8e3cebe76000f718e0fe93008ba7f633",
       "created_at": "2026-11-15T00:00:00Z",
       "media_type": "text/plain",
       "note": "n1"

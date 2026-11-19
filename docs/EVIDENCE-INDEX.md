@@ -2,7 +2,7 @@
 
 每条检查对应到：验证器里的定义、覆盖它的测试、指向它的红队攻击、以及提到它的文档。**重新生成即可复核**，不会随记忆漂移。
 
-**测试套件：679 个用例**（本页由生成器现数，别处只引用本页，不再抄写这个数字）。
+**测试套件：682 个用例**（本页由生成器现数，别处只引用本页，不再抄写这个数字）。
 
 
 | 检查 | 名称 | 出厂包是否走到 | 测试 | 红队 | 文档 |
@@ -25,8 +25,8 @@
 | S15 | anchor event resolution | 否 | 6 | 4 | 10 |
 | S16 | external timestamp (RFC 3161) | 否 | 7 | 4 | 15 |
 | S17 | linear receipt chain | 否 | 6 | 2 | 15 |
-| S18 | policy artefact resolution | 否 | 7 | 2 | 17 |
-| S19 | freshness state | 否 | 3 | 1 | 4 |
+| S18 | policy artefact resolution | 否 | 7 | 2 | 15 |
+| S19 | freshness state | 否 | 3 | 1 | 8 |
 
 出厂包判定：`INCONCLUSIVE`，走到 8/20 项（未签名的包停在 S6，后面不越过去）。
 

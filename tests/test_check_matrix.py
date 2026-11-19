@@ -50,6 +50,25 @@ class TestCheckMatrix(unittest.TestCase):
         self.assertTrue(blank, "the tail-receipt gap should still be listed")
         self.assertIn("not caught", svg)
 
+    def test_the_committed_matrix_is_what_the_tool_renders(self):
+        """docs/CHECK-MATRIX.md drifted once: it had 18 columns while the run
+        reached 19 checks, so the one artifact that proves coverage understated
+        it. Regenerating by hand fixes the file until the next check is added;
+        this test fixes the class of defect."""
+        path = os.path.join(_REPO, "docs", "CHECK-MATRIX.md")
+        with open(path, encoding="utf-8") as fh:
+            on_disk = fh.read().replace("\r\n", "\n").strip()
+        self.assertEqual(on_disk, cm.render_md(self.d).replace("\r\n", "\n").strip(),
+                         "docs/CHECK-MATRIX.md is stale; regenerate with "
+                         "`python tools/check_matrix.py > docs/CHECK-MATRIX.md`")
+
+    def test_no_check_is_missing_from_the_columns(self):
+        with open(os.path.join(_REPO, "docs", "CHECK-MATRIX.md"), encoding="utf-8") as fh:
+            head = next(l for l in fh.read().splitlines() if l.startswith("| attack |"))
+        cols = {c.strip() for c in head.strip("| ").split("|") if c.strip().startswith("S")}
+        self.assertEqual(cols, set(self.d["checks"]),
+                         "a check reached by an attack but absent from the table")
+
 
 if __name__ == "__main__":
     unittest.main()

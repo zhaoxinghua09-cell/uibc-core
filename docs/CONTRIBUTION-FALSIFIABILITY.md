@@ -40,7 +40,7 @@ The accept half exists because without it a verifier that refuses everything
 scores full marks on the refuse half. This is the most common way a
 conformance suite is quietly useless.
 
-Coverage: 18 distinct checks (S1–S18), each violated by at least one package
+Coverage: 19 distinct checks (S1–S19), each violated by at least one package
 whose expected check list is known in advance.
 
 ## How to read your own result

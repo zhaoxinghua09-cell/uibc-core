@@ -330,6 +330,30 @@ and `docs/CHECKS-REFERENCE.md` now reads **5 draft-mandated, 9 borrowed idea, 6 
 list, and a test fails if the two ever disagree. A claim table that lives in two places
 will disagree eventually; the only question is whether anyone notices.
 
+
+## The documents themselves, not just the quotes
+
+	ools/check_grounds.py proves a quote appears in a local file. It cannot prove the
+local file is the publisher's file: an edit here would pass every quote check. So
+docs/spec-sources/MANIFEST.json records, for each cited document, its sha256, its byte
+length and the URL it came from, alongside the sha256 of what the publisher served when
+re-fetched twice.
+
+`
+documents in manifest: 5; local bytes verified: 5
+upstream re-check: done
+clause sources covered by the manifest: 4
+`
+
+Five for five, byte-identical, and the upstream fetch was stable across two requests.
+python tools/check_sources.py re-hashes the local bytes offline; with --upstream it
+re-downloads and compares. 	ests/test_sources.py fails if a document sits in
+docs/spec-sources/ without being described, or if a quoted clause points at a document
+that was never vendored.
+
+An unexamined document is worse than no document: it looks like evidence and answers
+nothing.
+
 ## What this is not
 
 The expectations in `expected.json` were written by this project. That is the weakest link

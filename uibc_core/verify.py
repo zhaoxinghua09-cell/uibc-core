@@ -257,7 +257,11 @@ def _semantic_problems(obj, path="", now=None, future_skew_s=300):
                 # padding space makes two identifiers that print identically
                 # compare differently - the exact cause of the AER-1 corpus
                 # classes the corpus calls id-trailing-newline / provenance-trailing-newline.
-                if v != v.strip() or any(ord(c) < 0x21 for c in v):
+                # Control characters are < 0x20 and DEL (0x7F). The space (0x20)
+                # is not one: "Xinghua Zhao" or "MedXpert Inc" are legitimate
+                # identifiers, and rejecting them is a false FAIL on a correct
+                # package - the mirror image of a silent PASS.
+                if v != v.strip() or any(ord(c) < 0x20 or ord(c) == 0x7F for c in v):
                     problems.append("%s: identifier %r has surrounding whitespace "
                                     "or a control character" % (child, v[:40]))
             problems.extend(_semantic_problems(v, child, now=now,

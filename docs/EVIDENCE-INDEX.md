@@ -16,7 +16,7 @@
 | S9 | head pinned out-of-band | 否 | 8 | 1 | 22 |
 | S10 | attestation closure declared | 否 | 5 | 2 | 7 |
 | S11 | strict serialization | 是 | 5 | 1 | 16 |
-| S12 | timestamp and identifier strictness | 是 | 7 | 2 | 17 |
+| S12 | timestamp and identifier strictness | 是 | 8 | 2 | 17 |
 | S13 | merkle inclusion proofs | 否 | 8 | 4 | 10 |
 | S14 | strict base64 | 否 | 4 | 2 | 6 |
 | S15 | anchor event resolution | 否 | 6 | 4 | 9 |

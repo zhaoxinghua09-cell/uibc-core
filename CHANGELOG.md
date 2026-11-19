@@ -1,3 +1,26 @@
+### The upstream submission is now a package, not a plan
+
+- `tools/build_scitt_vector_package.py` builds and self-verifies a
+  SCITT-shaped vector set at `docs/upstream-package/scitt-rfc9162`: five
+  vectors (two `VALID`, three named failures) covering the **RFC 9162 SHA-256
+  tree and inclusion-path layer only**. Each `expected.json` carries
+  `root_true` and a **computed** `reconstructed_root`, so positives must match
+  and negatives must differ without any code from this repository.
+- Shape copied from the vector set the IETF SCITT WG `examples` repository
+  already merged: `v1/<id>/expected.json`, `manifest.json`, `SHA256SUMS`,
+  `.gitattributes` pinning files as non-normalized. `sha256sum -c` gives 6/6.
+- `docs/UPSTREAM-PR-CHECKLIST.md` closes the three pre-submission checks that
+  were open: format (verified against upstream HEAD `727ee03`, verbatim
+  quotation of their "a mismatch … is exactly the report the authors want"),
+  licensing (both Apache-2.0, SPDX per-directory), and **the one check nobody
+  can do for the author** — IETF Note Well / IPR consent, which needs the
+  author's own account.
+- What the package does not cover is in its README, not an appendix: no
+  COSE_Sign1 bytes (no COSE library here), no log receipts, no witness
+  cosignatures, no TSA. It is narrower than `scitt-cose` and is not a
+  replacement for it.
+- Submission status: **not sent.** Opening the PR is an outbound action.
+
 ### The external-record gap is an order of magnitude, not a tie
 
 - `docs/LANDSCAPE-2026-11.md` §8: the other draft's `INTEROP.md` lists **nine

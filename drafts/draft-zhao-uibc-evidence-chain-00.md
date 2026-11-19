@@ -24,7 +24,7 @@ An autonomous agent leaves a trail of actions, but that trail is normally
 produced, stored and verified by the same party it is supposed to convince.
 This document specifies a portable package that binds an agent's identity,
 lifecycle, and action evidence into one hash-committed structure, gives an
-eighteen-check verification procedure with three-valued outcomes, and
+nineteen-check verification procedure with three-valued outcomes, and
 specifies how to commit the resulting root to backends the operator cannot
 rewrite. The specification is deliberately narrow: it defines what can be
 checked from bytes alone, and it names what it does **not** check.
@@ -113,6 +113,7 @@ single `FAIL` makes the verdict `FAIL`; otherwise any `INCONCLUSIVE` makes it
 | S7 | evidence index metadata | index metadata digest agreement |
 | S8 | package checkpoint head | recomputed checkpoint equals stored |
 | S9 | head pinned out-of-band | only when the verifier was given an external head |
+| S19 | freshness against a remembered head | only when the verifier keeps state: a validly signed package whose sequence went backwards is `FAIL` |
 | S10 | attestation closure declared | declarations are recorded, **not** verified |
 | S5 | evidence root | recomputed root equals `manifest.evidence_root` |
 | S6 | seal signature | Ed25519 verified publicly; HMAC only with the owner key |
@@ -121,6 +122,33 @@ S6 is the reason the outcome set has three values: an unsigned package is
 internally consistent but its provenance is unattested. Reporting that as
 `PASS` would be the single most damaging mistake this document could make, so
 the specification forbids it.
+
+### 5.1 Two-implementation differential reporting
+
+A single implementation reporting `PASS` is a claim about itself. This
+document therefore requires the verification procedure to be **reported** in a
+form that exposes disagreement, and defines two denominators that must travel
+together:
+
+* **disagreement over hostile packages** — of the packages the reference
+  rejects, how many the second implementation calls `PASS`? A rule it does not
+  implement must be answered `INCONCLUSIVE`, never `PASS`.
+* **false alarms over clean packages** — of the legitimate packages the
+  reference accepts, how many the second implementation rejects? Without this
+  denominator, a second implementation could reach a perfect disagreement score
+  by rejecting everything.
+
+Neither number is meaningful alone, which is why they are specified as a pair
+and not as a pass rate. The rules the second implementation emits that do not
+map one-to-one onto a check are reported as **un-mapped** and are **not**
+counted as coverage; a rule that pairs with *part* of a check is not a second
+opinion on the whole check.
+
+The machine-readable form is `uibc-differential/1`, produced by the reference
+implementation's `tools/oracle_check.py --json-out <path>`. It carries the
+per-case verdicts from both implementations, the exact pairs, the un-mapped
+rules, the hostile split and the clean split, so that a reader can recompute
+both denominators instead of trusting a summary.
 
 ## 6. Seal and Key Custody
 

@@ -46,7 +46,7 @@ this repository's own gates.
 
 | property | uibc-core | AAC | agent-evidence-vectors | sigstore | in-toto |
 |---|---|---|---|---|---|
-| verdict is three-valued (pass / fail / **cannot decide**) | yes, 19 checks, INCONCLUSIVE is a distinct outcome | no — `ok: true/false` plus exit codes | no — conformance vectors, binary | mostly binary; transparency log adds ambiguity | binary |
+| verdict is three-valued (pass / fail / **cannot decide**) | yes, 20 checks, INCONCLUSIVE is a distinct outcome | no — `ok: true/false` plus exit codes | no — conformance vectors, binary | mostly binary; transparency log adds ambiguity | binary |
 | a second implementation in another language | yes — JavaScript verifier, shares no code | no (scanned: no `.mjs/.js/.rs/.go`) | vectors are consumable by any implementation, none shipped by them | no in this repo | yes, a Go implementation — in a different, adjacent domain |
 | CI asserts the two implementations agree case by case | yes — 36/36, and a named check for 30 of 36 | — | — | — | — |
 | a stranger's one-command audit, no credentials | yes — `tools/outsider_audit.py`, `VERDICT: OK` in 0.3 s | no equivalent | vectors only | no | no |

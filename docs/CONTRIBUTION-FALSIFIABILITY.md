@@ -64,7 +64,7 @@ Current results, run on 2026-11-19:
 ## The falsifiability matrix
 
 Separate from the 36 packages: 19 single-property mutations, each of which must
-produce a non-zero verdict on a verifier that implements all 19 checks
+produce a non-zero verdict on a verifier that implements all 20 checks
 (`tools/check_falsifiability.py`). A verifier that implements 12 checks should
 report 12, not 19 — the matrix measures what is implemented, and a partial
 implementation is visible rather than scored as "pass".

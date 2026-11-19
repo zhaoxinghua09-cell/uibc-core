@@ -137,6 +137,26 @@ Nothing here is a ratified standard.
 
 ---
 
+## [0.4.1] - 2026-11-19
+
+Released so that the version number, the published artifact and the repository
+HEAD all name the same bytes. `0.4.0` on PyPI was built on 2026-11-18; `main`
+kept moving afterwards (#241, #242), which left the citable artifact behind the
+tree it claimed to be. `0.4.1` is built from `main` and is what the registry
+record carries.
+
+- No intentional behaviour change beyond what is listed under `[Unreleased]`
+  below: the verification path, the twenty checks and the three-valued verdict
+  semantics are the same code. Anyone who needs the 2026-11-18 bytes can still
+  install `0.4.0`; both are pinned.
+- What is different for a reader: `docs/` now carries the external-baseline
+  measurements of 2026-11-19 and the one-click outsider run (#242), so a citable
+  DOI finally points at a tree a reader can also browse.
+- Version strings in `pyproject.toml` and `uibc_core/__init__.py` move together;
+  `SPEC_VERSION` stays `uibc-core/0.3.3-proposal` on purpose - it names the wire
+  format, not this package's release number, and changing it would silently
+  invalidate every package already sealed under it.
+
 ## [Unreleased]
 
 - CI fix: `actions/checkout` now uses `fetch-depth: 0` in `ci.yml`. The test that

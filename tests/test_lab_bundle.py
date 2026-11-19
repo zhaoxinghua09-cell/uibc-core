@@ -7,6 +7,7 @@ break one thing at a time.
 """
 import json
 import os
+import tempfile
 import subprocess
 import sys
 import unittest
@@ -19,9 +20,8 @@ CHK = os.path.join(_REPO, "tools", "check_lab_bundle.py")
 
 
 def _tmpdir():
-    path = os.path.join(os.environ.get("TEMP", "/tmp"), "labtest")
-    os.makedirs(path, exist_ok=True)
-    return path
+    """A fresh directory per call: a shared one lets earlier runs leak into later bundles."""
+    return tempfile.mkdtemp(prefix="labtest_")
 
 
 class TestABuiltBundleIsAcceptable(unittest.TestCase):
@@ -119,6 +119,45 @@ class TestItRefusesTheFourClaimsWhenUnsupported(unittest.TestCase):
     def test_an_archive_that_is_not_on_disk_is_refused(self):
         reasons = self.c.check(self.good, archive=os.path.join(_tmpdir(), "nope.zip"))
         self.assertTrue(any("does not exist" in r for r in reasons), reasons)
+
+
+class TestTheReleaseScriptMeasuresInsteadOfAsserting(unittest.TestCase):
+    """The shipped release bundle must come from measurements, not prose."""
+
+    SCRIPT = os.path.join(_REPO, "tools", "release_lab_bundle.py")
+    ARCHIVE = os.path.join(_REPO, "conformance", "uibc-conformance-0.4.1.zip")
+
+    def test_it_states_what_it_measures(self):
+        text = open(self.SCRIPT, encoding="utf-8").read()
+        for marker in ("Scenario A", "Scenario B", "Scenario C"):
+            self.assertIn(marker, text)
+        self.assertIn("must score far below full", text.lower() + text)
+
+    def test_the_accept_all_stub_really_accepts_everything(self):
+        """If the hostile control were itself broken, its score would mean nothing."""
+        import re
+        src = open(self.SCRIPT, encoding="utf-8").read()
+        block = re.search(r'ACCEPT_ALL = """(.*?)"""', src, re.S).group(1)
+        captured = {}
+        exec(compile(block, "<accept_all>", "exec"),
+             {"json": __import__("json"),
+              "print": lambda s: captured.update(result=json.loads(s)["result"])})
+        self.assertEqual(captured.get("result"), "PASS")
+
+    @unittest.skipUnless(os.environ.get("UIBC_SLOW"), "set UIBC_SLOW=1 to run the full release script")
+    def test_end_to_end_release_bundle(self):
+        if not os.path.isfile(self.ARCHIVE):
+            self.skipTest("no archive in this tree (sdist build)")
+        out = _tmpdir()
+        proc = subprocess.run([sys.executable, self.SCRIPT, "--version", "0.4.1", "--out", out],
+                              capture_output=True, text=True, timeout=600)
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+        with open(os.path.join(out, "uibc-lab-bundle-0.4.1.json"), encoding="utf-8") as f:
+            bundle = json.load(f)
+        total = bundle["controls"]["hostile"]["cases_total"]
+        hostile = int(bundle["controls"]["hostile"]["result"].split("/")[0])
+        self.assertLess(hostile, total, "the hostile control must not pass the corpus")
+        self.assertIn("exit 3", bundle["controls"]["negative"]["result"])
 
 
 if __name__ == "__main__":

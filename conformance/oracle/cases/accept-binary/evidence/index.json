@@ -1,0 +1,13 @@
+{
+  "entries": [
+    {
+      "evidence_id": "14c56b06-a83b-4e94-956d-99a4d696f308",
+      "type": "ACTION",
+      "path": "files/accept-binary-blob.bin",
+      "content_hash": "8650fa3ad33b680c77fdf3067057857d38ade7f3ce31806131530d3a4d027052",
+      "created_at": "2026-11-19T09:15:44Z",
+      "media_type": "text/plain",
+      "note": "blob.bin"
+    }
+  ]
+}

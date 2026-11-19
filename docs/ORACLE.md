@@ -268,6 +268,39 @@ Two things worth noticing in that line:
 Neither list makes a verdict stronger. They make it narrower, which is the only honest
 direction for a list of non-claims.
 
+## The corpus is data now, not a program
+
+Every measurement above runs inside one process, on packages that exist only for the
+duration of a test. That is useful and it is not consumable: an outsider cannot run our
+tooling to check our answers.
+
+`python tools/oracle_check.py --emit conformance/oracle` writes 28 packages, their
+throwaway keys and their expected verdicts to disk — 239 files, 287 KB. Then it
+re-verifies the **written copies**, not the in-memory ones, and refuses to report
+success if the bytes on disk no longer produce the declared answers.
+
+```
+emitted 28 cases to conformance/oracle; round-trip mismatches: 0
+```
+
+It lands in a subdirectory of `conformance/` on purpose: that directory already holds
+a released archive (`uibc-conformance-0.4.0.zip` and its `manifest.json`), which is a
+packaging artifact, not this corpus. Putting the two in one folder invited exactly the
+mistake I made while writing this — overwriting the release to make room for the cases.
+
+`tests/test_conformance_corpus.py` runs the same comparison on every CI run, so the
+committed answers cannot drift away from the committed bytes. A corpus whose answers can
+drift is worse than no corpus, because it certifies something it never checked.
+
+**Two of the thirty oracle cases are not in the corpus.** The S9 and S19 blocks build
+their packages with bespoke steps rather than through the shared builder; they stay
+code-only, and the corpus README says the corpus has 28, not 30.
+
+The README also states what the corpus does not prove, in its own words: these packages
+were produced by this project, pass them and you have shown conformance to this reading
+of the spec — not to a regulator's requirement. Anything a verifier does that is not in
+here is unmeasured, not impossible.
+
 ## What this is not
 
 - **Not independent judgement.** Expectations were drawn from documents this project

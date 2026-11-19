@@ -1,0 +1,13 @@
+{
+  "entries": [
+    {
+      "evidence_id": "e4f8bf51-622d-4a6d-889d-c0c29af63577",
+      "type": "ACTION",
+      "path": "files/oracle-tampered-0.txt",
+      "content_hash": "20425c7fadbb4db558fcc6ca6eacd3eb435cf5d7603f7cb41e48709fabcce53b",
+      "created_at": "2026-11-19T09:15:43Z",
+      "media_type": "text/plain",
+      "note": "n0"
+    }
+  ]
+}

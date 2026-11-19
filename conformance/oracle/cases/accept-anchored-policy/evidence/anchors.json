@@ -1,0 +1,17 @@
+{
+  "resolver": "evidence-merkle",
+  "anchors": [
+    {
+      "id": "anchor-001",
+      "version": 1,
+      "leaf_hash": "fa718e9cb0d50dcbb3dba4a1854556275aa8281559899e27b35a59bc5ba46557",
+      "anchored_at": "2026-11-17T08:00:00Z",
+      "root": "ee9ae5231a04bc70d182e672bc7b8193a2fcd4a9a5c7f2e9c404fdc122cebf64",
+      "size": 2,
+      "index": 0,
+      "proof": [
+        "7051c8e580589a8167f6e80b3e4182c20e260529d0967968f89e9f3dfd432d57"
+      ]
+    }
+  ]
+}

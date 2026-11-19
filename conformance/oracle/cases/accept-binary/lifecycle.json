@@ -1,0 +1,16 @@
+{
+  "schema": "uibc-core/0.3.3-proposal",
+  "events": [
+    {
+      "event_id": "0a2a97f6-b9e3-4b98-94ca-23b383268562",
+      "sequence_number": 0,
+      "event_type": "REGISTER",
+      "agent_id": "accept",
+      "timestamp": "2026-11-19T09:15:44Z",
+      "actor": "accept",
+      "payload_hash": null,
+      "previous_event": null,
+      "signature": null
+    }
+  ]
+}

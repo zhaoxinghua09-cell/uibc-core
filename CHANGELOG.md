@@ -15,6 +15,23 @@ Nothing here is a ratified standard.
 
 ## [Unreleased]
 
+### The suite size is counted in one place (2026-11-19)
+
+- Eight documents carried the literal test count. Every parallel branch rewrote
+  the same eight lines, so every pull request arrived in conflict; this round
+  spent four rebases on it before the cause was obvious.
+- `README.md`, `README.en.md`, `AGENTS.md`, `docs/COMPOSITION-VERIFIER.md`,
+  `docs/CONFORMANCE.md`, `docs/ECOSYSTEM-MAP.md`, `docs/INTEROP-MATRIX.md` and
+  `docs/ONE-COMMAND-AUDIT.md` now cite `docs/EVIDENCE-INDEX.md` instead of
+  typing the count.
+- `tools/build_evidence_index.py` prints what it measured (`641 个用例`); a
+  number a generator counts is a number nobody has to retype.
+- `tools/check_doc_facts.py` reports a typed count anywhere in `TARGETS` as a
+  mismatch even when the number is right: "cite docs/EVIDENCE-INDEX.md instead
+  of typing the count".
+- `tests/test_doc_facts_cite.py` (2 cases): a correct-but-typed count fails, and
+  the index carries the measured number.
+
 ### The signature primitive gets a third-party referee (2026-11-19)
 
 - `tools/external_crypto_check.py`: `uibc_core/ed25519.py` is pure Python, so

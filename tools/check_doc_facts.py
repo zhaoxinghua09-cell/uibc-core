@@ -126,10 +126,22 @@ def all_targets():
     return list(TARGETS) + marked_docs()
 
 
+CITE_INSTEAD = "docs/EVIDENCE-INDEX.md"
+
+
 def check(facts, paths=None):
     bad = []
     for f in scan(paths or all_targets()):
         actual = facts.get(f["kind"])
+        if f["kind"] == "tests":
+            # The suite size is counted in one place and cited everywhere else.
+            # Reason: eight files used to carry the number, so every parallel
+            # branch rewrote the same eight lines and every pull request landed
+            # in conflict. A number that must be retyped in eight places is a
+            # number that will be wrong in seven of them.
+            bad.append(dict(f, actual=actual,
+                            why="cite %s instead of typing the count" % CITE_INSTEAD))
+            continue
         if actual is None or f["claimed"] == actual:
             continue
         # A claim inside a fenced historical quote or a percentage/ratio phrase

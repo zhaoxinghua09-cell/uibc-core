@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="900" height="566" viewBox="0 0 900 566" font-family="Helvetica,Arial,sans-serif">
-<rect width="900" height="566" fill="#ffffff"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="618" viewBox="0 0 900 618" font-family="Helvetica,Arial,sans-serif">
+<rect width="900" height="618" fill="#ffffff"/>
 <text x="40" y="52" font-size="23" font-weight="700" fill="#111">Seven checks, one command, one exit code</text>
 <text x="40" y="78" font-size="12.5" fill="#555">Each row is what a stranger can re-run; a claim in prose without a row here is a claim this repository does not make.</text>
 <text x="40" y="100" font-size="11.5" fill="#777">python3 tools/run_all_evidence.py --online   (offline rows run by default)</text>
@@ -13,37 +13,43 @@
 <text x="74" y="199" font-size="14" font-weight="600" fill="#111">chain of one</text>
 <text x="74" y="217" font-size="11" fill="#666">the same verdict from the Python chain reader</text>
 <text x="860" y="199" font-size="12" fill="#1f7a4d" text-anchor="end">ok</text>
-<text x="860" y="217" font-size="11" fill="#888" text-anchor="end">0.09 s</text>
+<text x="860" y="217" font-size="11" fill="#888" text-anchor="end">0.10 s</text>
 <line x1="40" y1="226" x2="860" y2="226" stroke="#eee"/>
 <circle cx="52" cy="246" r="6" fill="#1f7a4d"/>
 <text x="74" y="251" font-size="14" font-weight="600" fill="#111">the tamper probe fails</text>
 <text x="74" y="269" font-size="11" fill="#666">an edited evidence file is caught by S4/S8/S9</text>
 <text x="860" y="251" font-size="12" fill="#1f7a4d" text-anchor="end">ok</text>
-<text x="860" y="269" font-size="11" fill="#888" text-anchor="end">3.31 s</text>
+<text x="860" y="269" font-size="11" fill="#888" text-anchor="end">3.22 s</text>
 <line x1="40" y1="278" x2="860" y2="278" stroke="#eee"/>
 <circle cx="52" cy="298" r="6" fill="#1f7a4d"/>
 <text x="74" y="303" font-size="14" font-weight="600" fill="#111">conformance, both implementations</text>
 <text x="74" y="321" font-size="11" fill="#666">every accepted package is accepted by both, every refusal names a check</text>
 <text x="860" y="303" font-size="12" fill="#1f7a4d" text-anchor="end">ok</text>
-<text x="860" y="321" font-size="11" fill="#888" text-anchor="end">3.67 s</text>
+<text x="860" y="321" font-size="11" fill="#888" text-anchor="end">3.11 s</text>
 <line x1="40" y1="330" x2="860" y2="330" stroke="#eee"/>
 <circle cx="52" cy="350" r="6" fill="#1f7a4d"/>
 <text x="74" y="355" font-size="14" font-weight="600" fill="#111">witnesses still there</text>
 <text x="74" y="373" font-size="11" fill="#666">Zenodo, Software Heritage and Rekor still hold what we cite</text>
 <text x="860" y="355" font-size="12" fill="#1f7a4d" text-anchor="end">ok</text>
-<text x="860" y="373" font-size="11" fill="#888" text-anchor="end">5.71 s</text>
+<text x="860" y="373" font-size="11" fill="#888" text-anchor="end">10.00 s</text>
 <line x1="40" y1="382" x2="860" y2="382" stroke="#eee"/>
 <circle cx="52" cy="402" r="6" fill="#1f7a4d"/>
 <text x="74" y="407" font-size="14" font-weight="600" fill="#111">anchor channel</text>
 <text x="74" y="425" font-size="11" fill="#666">the release copy and the repository copy are the same anchor</text>
 <text x="860" y="407" font-size="12" fill="#1f7a4d" text-anchor="end">ok</text>
-<text x="860" y="425" font-size="11" fill="#888" text-anchor="end">1.06 s</text>
+<text x="860" y="425" font-size="11" fill="#888" text-anchor="end">1.28 s</text>
 <line x1="40" y1="434" x2="860" y2="434" stroke="#eee"/>
 <circle cx="52" cy="454" r="6" fill="#1f7a4d"/>
 <text x="74" y="459" font-size="14" font-weight="600" fill="#111">release pins</text>
 <text x="74" y="477" font-size="11" fill="#666">pin, index and download agree for 0.4.0</text>
 <text x="860" y="459" font-size="12" fill="#1f7a4d" text-anchor="end">ok</text>
-<text x="860" y="477" font-size="11" fill="#888" text-anchor="end">2.37 s</text>
+<text x="860" y="477" font-size="11" fill="#888" text-anchor="end">2.54 s</text>
 <line x1="40" y1="486" x2="860" y2="486" stroke="#eee"/>
-<text x="40" y="536" font-size="12" fill="#444">7 of 7 ran, including the three network checks</text>
+<circle cx="52" cy="506" r="6" fill="#1f7a4d"/>
+<text x="74" y="511" font-size="14" font-weight="600" fill="#111">crypto cross-checked</text>
+<text x="74" y="529" font-size="11" fill="#666">OpenSSL verifies the same Ed25519 seals we do, and refuses a one-byte edit</text>
+<text x="860" y="511" font-size="12" fill="#1f7a4d" text-anchor="end">ok</text>
+<text x="860" y="529" font-size="11" fill="#888" text-anchor="end">0.15 s</text>
+<line x1="40" y1="538" x2="860" y2="538" stroke="#eee"/>
+<text x="40" y="588" font-size="12" fill="#444">8 of 8 ran, including the three network checks</text>
 </svg>

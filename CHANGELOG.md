@@ -15,6 +15,19 @@ Nothing here is a ratified standard.
 
 ## [Unreleased]
 
+### The signature primitive gets a third-party referee (2026-11-19)
+
+- `tools/external_crypto_check.py`: `uibc_core/ed25519.py` is pure Python, so
+  verifying our own seals with it is self-consistent even if it were wrong.
+  The check verifies the same facts with `cryptography` (OpenSSL): `06` ok/ok and
+  `36` fail/fail, agreeing package by package, plus a negative probe - one byte
+  changed in the payload must be refused by the third party.
+- Eighth item in `tools/run_all_evidence.py`: `--online` runs eight checks
+  (`8 ok, 0 failed, 0 skipped, 20.5 s`); the dashboard regenerates with eight rows.
+- Limit stated in the tool and in `docs/PAPER-EVIDENCE.md` row 8: RFC 8785
+  canonicalisation still uses this repository's JCS implementation and no
+  third-party JCS library is installed here, so that layer is not cross-checked.
+
 ### The recheck, the adoption note, and a test that exhausted the inode table (2026-11-19)
 
 - `docs/LANDSCAPE-2026-11.md` gains a dated recheck. On specification and

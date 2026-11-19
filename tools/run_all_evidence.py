@@ -37,6 +37,8 @@ CHECKS = [
      "the release copy and the repository copy are the same anchor", True),
     ("release pins", ["tools/check_pins.py"], "VERDICT: OK",
      "pin, index and download agree for 0.4.0", True),
+    ("crypto cross-checked", ["tools/external_crypto_check.py"], "VERDICT: CONSISTENT",
+     "OpenSSL verifies the same Ed25519 seals we do, and refuses a one-byte edit", False),
 ]
 
 
@@ -60,7 +62,13 @@ def main():
                          "establishes": establishes, "why": "%s is not in this tree" % cmd[0]})
             continue
         r, dt = run(cmd)
-        ok = needle in (r.stdout + r.stderr)
+        out = r.stdout + r.stderr
+        if "SKIPPED:" in out:
+            rows.append({"label": label, "state": "skipped", "seconds": round(dt, 3),
+                         "establishes": establishes,
+                         "why": out.strip().splitlines()[-1][:120]})
+            continue
+        ok = needle in out
         rows.append({"label": label, "state": "ok" if ok else "FAILED",
                      "seconds": round(dt, 3), "establishes": establishes,
                      "why": "" if ok else "expected %r, got %r" % (needle, (r.stdout + r.stderr)[-160:])})

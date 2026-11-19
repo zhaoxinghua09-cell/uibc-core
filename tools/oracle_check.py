@@ -212,6 +212,43 @@ def measure_decidability(tmp):
     return reachable, decided, never
 
 
+def measure_declared_scope(tmp):
+    """How much each implementation says it did not check, on the same packages.
+
+    A verdict is read as broader than its evidence unless it says otherwise. The reference
+    ships a fixed `not_checked` list, identical on every package; the second implementation
+    declares both its standing non-goals and whatever this run found it had no rule for.
+    """
+    theme = {"merkle": "merkle", "anchor": "anchor", "timestamp": "timestamp",
+             "receipt": "receipt", "polic": "policy", "base64": "base64",
+             "closure": "closure", "duplicate json": "duplicate json",
+             "duplicate evidence": "duplicate evidence",
+             "behavioural": "behavioural", "behavioral": "behavioural",
+             "memory": "memory", "lifecycle event signature": "lifecycle event signature"}
+
+    def keys(items):
+        out = set()
+        for it in items:
+            low = it.lower()
+            for needle, k in theme.items():
+                if needle in low:
+                    out.add(k)
+        return out
+
+    pkg, key = build(tmp, "decl-plain", "none")
+    pkg2, key2 = build(tmp, "decl-ext", "none", nevid=2)
+    oa.build_ckpt(pkg2)
+    reseal(pkg2, key2)
+    ref_items = set()
+    ind_items = set()
+    for target, k in ((pkg, key), (pkg2, key2)):
+        ref_items |= keys(verify(target, key=k).get("not_checked") or [])
+        ind_items |= keys(independent_verify(target, key=k)["not_checked"])
+    only_ind = ind_items - ref_items
+    only_ref = ref_items - ind_items
+    return len(ref_items), len(ind_items), sorted(only_ind), sorted(only_ref)
+
+
 def build_good(tmp, name, variant):
     """A legitimate package. Nothing here is an attack: these are shapes real use produces."""
     pkg = os.path.join(tmp, name)
@@ -497,6 +534,7 @@ def main():
         blind_ref, blind_ind = measure_blind_verdict(tmp)
         n_hostile, false_pass, declined = measure_false_pass(tmp)
         reachable, decided, never = measure_decidability(tmp)
+        r_n, i_n, only_ind, only_ref = measure_declared_scope(tmp)
 
         # --- tranche four: legitimate packages must be accepted, not merely "not attacked" ---
         for name, variant in ORACLE_ACCEPT:
@@ -553,6 +591,11 @@ def main():
           "reaches %d by rule (%s) and can never reach %d (%s)"
           % (len(reachable), len(decided), ",".join(decided),
              len(never), ",".join(never) or "-"))
+    print("measured: things each implementation declares it did NOT check - reference %d, "
+          "second %d; %d of the second's are absent from the reference's list (%s), and "
+          "the reference names %d the second does not (%s)"
+          % (r_n, i_n, len(only_ind), ",".join(only_ind) or "-",
+             len(only_ref), ",".join(only_ref) or "-"))
     print("ORACLE: " + ("PASS - both implementations match the written expectations"
                         if bad == 0 else "FAIL - an implementation disagrees with the oracle"))
     return 0 if bad == 0 else 1

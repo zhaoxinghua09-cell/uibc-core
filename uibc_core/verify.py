@@ -257,7 +257,11 @@ def _semantic_problems(obj, path="", now=None, future_skew_s=300):
                 # padding space makes two identifiers that print identically
                 # compare differently - the exact cause of the AER-1 corpus
                 # classes the corpus calls id-trailing-newline / provenance-trailing-newline.
-                if v != v.strip() or any(ord(c) < 0x21 for c in v):
+                # Control characters are < 0x20 and DEL (0x7F). The space (0x20)
+                # is not one: "Xinghua Zhao" or "MedXpert Inc" are legitimate
+                # identifiers, and rejecting them is a false FAIL on a correct
+                # package - the mirror image of a silent PASS.
+                if v != v.strip() or any(ord(c) < 0x20 or ord(c) == 0x7F for c in v):
                     problems.append("%s: identifier %r has surrounding whitespace "
                                     "or a control character" % (child, v[:40]))
             problems.extend(_semantic_problems(v, child, now=now,
@@ -513,6 +517,7 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
     # S4 evidence integrity: recompute content hashes from files
     entries = index.get("entries", [])
     s4_failures = []
+    s4_unknown = []
     recomputed_hashes = []
     # Containment: an evidence entry must resolve to a real file inside evidence/.
     # Without this a package can put a symlink at evidence/files/x and have us hash
@@ -535,27 +540,51 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
         if actual != e.get("content_hash"):
             s4_failures.append(f"hash mismatch on {e.get('path')!r}")
         if e.get("type") not in EVIDENCE_TYPES:
-            s4_failures.append(f"unknown evidence type {e.get('type')!r}")
+            # Not a failure: 0.3.3 accepted any string for evidence.type (its
+            # --help listed no vocabulary at all), so a package sealed by that
+            # release cannot be said to have violated a rule that did not exist
+            # yet. FAIL asserts "I checked, and this is wrong"; here the honest
+            # report is "I do not know this type". Upgrade must not turn an
+            # honest package into a rejected one.
+            s4_unknown.append(e.get("type"))
     # evidence_id: the index is read by position everywhere else, so a duplicate
     # or a missing identifier costs nothing until somebody cites an id. The
-    # field-coverage audit listed this as unchecked; it is checked now.
+    # field-coverage audit listed this as unchecked; it is checked now - but as a
+    # SEMANTIC problem (S12), not a structural one (S4). Rationale (2026-11-19):
+    # a duplicated entry carries a readable file with a matching hash, so the
+    # evidence root can still be computed and the duplicate is then caught by the
+    # root itself (S5), which is what the corpus expects. Filing it under S4 made
+    # the reference answer INCONCLUSIVE on that fixture while the independent
+    # implementation answered FAIL - two implementations, two answers, one spec.
     _ids = [e.get("evidence_id") for e in entries]
+    id_problems = []
     for _i, _eid in enumerate(_ids):
         if not (isinstance(_eid, str) and _eid.strip()):
-            s4_failures.append(f"entry {_i} has no evidence_id")
+            id_problems.append(f"entry {_i} has no evidence_id")
     _seen = set()
     for _eid in _ids:
         if isinstance(_eid, str) and _eid.strip():
             if _eid in _seen:
-                s4_failures.append(f"duplicate evidence_id {_eid!r}")
+                id_problems.append(f"duplicate evidence_id {_eid!r}")
             _seen.add(_eid)
-    record("S4", "evidence integrity", not s4_failures,
-           f"{len(entries)} entries checked; " + ("; ".join(s4_failures) if s4_failures else "all hashes match"))
+    if s4_failures:
+        record("S4", "evidence integrity", False,
+               f"{len(entries)} entries checked; " + "; ".join(s4_failures))
+    elif s4_unknown:
+        checks.append({"id": "S4", "name": "evidence integrity", "result": "INCONCLUSIVE",
+                       "detail": f"{len(entries)} entries checked, hashes match; unknown "
+                                 f"evidence type(s) {sorted(set(map(str, s4_unknown)))}: "
+                                 f"not a failure - the type vocabulary postdates this "
+                                 f"package, so these entries are not counted as checked"})
+    else:
+        record("S4", "evidence integrity", True,
+               f"{len(entries)} entries checked; all hashes match")
 
     # S12 semantic strictness: timestamps must be real, ordered things and
     # identifiers must be canonical. Runs on the parsed values, so it is
     # deliberately separate from S11 (which runs on the bytes).
     s12_problems = []
+    s12_problems.extend(id_problems)
     for doc_name, doc in (("manifest.json", manifest), ("identity.json", identity),
                           ("lifecycle.json", lifecycle),
                           ("evidence/index.json", index)):

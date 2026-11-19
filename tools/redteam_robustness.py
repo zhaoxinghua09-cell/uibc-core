@@ -54,6 +54,17 @@ def verdict(proc):
     return "%s %s" % (d.get("result"), ",".join(fails[:4])), False
 
 
+class CaseSkipped(Exception):
+    """A case whose hostile condition cannot be constructed on this platform.
+
+    Raised instead of silently returning. A mutation that did nothing and a
+    mutation that the verifier refused look identical from the outside, and
+    reporting the first as the second's failure blames the implementations
+    for a property of the host (e.g. SeCreateSymbolicLinkPrivilege on
+    Windows, which raises WinError 1314).
+    """
+
+
 def build(tmp):
     """Create one directory per hostile input and return a list of cases."""
     cases = []
@@ -66,8 +77,13 @@ def build(tmp):
 
     def add(name, mutate, expect_fail=True, why=""):
         d = fresh(name)
-        mutate(d)
-        cases.append({"name": name, "path": d, "expect_fail": expect_fail, "why": why})
+        skipped = None
+        try:
+            mutate(d)
+        except CaseSkipped as e:
+            skipped = str(e)
+        cases.append({"name": name, "path": d, "expect_fail": expect_fail,
+                      "why": why, "skipped": skipped})
 
     add("not-json", lambda d: open(os.path.join(d, "manifest.json"), "w").write("{oops"),
         why="bytes that are not JSON must be refused, not crashed on")
@@ -115,8 +131,10 @@ def _symlink(d):
     target = os.path.join(d, "evidence", "files", "escaped.txt")
     try:
         os.symlink("/etc/hostname", target)
-    except OSError:
-        return
+    except (OSError, NotImplementedError) as e:
+        raise CaseSkipped("symlink could not be created on this host (%s); "
+                          "the case cannot be judged here"
+                          % (getattr(e, "winerror", None) or getattr(e, "errno", "?")))
     idx["entries"].append({"evidence_id": "11111111-1111-4111-8111-111111111111",
                            "type": "OUTPUT", "path": "files/escaped.txt",
                            "content_hash": hashlib.sha256(b"x").hexdigest(),
@@ -138,8 +156,15 @@ def main():
 
     tmp = tempfile.mkdtemp(prefix="uibc-hostile-")
     cases = build(tmp)
-    rows, bad = [], 0
+    rows, bad, skipped = [], 0, 0
     for c in cases:
+        if c["skipped"]:
+            skipped += 1
+            rows.append({"case": c["name"], "js": "SKIPPED", "py": "SKIPPED",
+                         "ok": True, "skipped": c["skipped"], "why": c["why"]})
+            if not args.json:
+                print("%-18s SKIPPED (%s)" % (c["name"], c["skipped"]))
+            continue
         jv, jcrashed = verdict(run_js(c["path"]))
         pv, pcrashed = verdict(run_py(c["path"]))
         answered = not (jcrashed or pcrashed)
@@ -152,10 +177,12 @@ def main():
             print("%-18s JS=%-24s PY=%-24s %s" % (c["name"], jv, pv, "ok" if ok else "PROBLEM"))
 
     if args.json:
-        print(json.dumps({"cases": rows, "problems": bad}, indent=2))
+        print(json.dumps({"cases": rows, "problems": bad, "skipped": skipped}, indent=2))
     else:
         print("\n%d of %d hostile inputs answered by both implementations and refused"
-              % (len(rows) - bad, len(rows)))
+              % (len(rows) - bad - skipped, len(rows) - skipped))
+        if skipped:
+            print("%d case(s) skipped on this platform - not counted as a pass" % skipped)
     if not args.keep:
         shutil.rmtree(tmp, ignore_errors=True)
     else:

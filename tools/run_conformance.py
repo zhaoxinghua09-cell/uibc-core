@@ -112,9 +112,13 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--verify", default=None,
                     help="external verifier command; use {pkg} for the package path")
+    ap.add_argument("--name", default=None,
+                    help="label for the implementation under test, recorded in the report")
     ap.add_argument("--json", action="store_true")
     a = ap.parse_args()
     res = run_all(external(a.verify) if a.verify else our_verifier)
+    if a.name:
+        res["implementation"] = a.name
     if a.json:
         print(json.dumps(res, ensure_ascii=False, indent=2))
     else:

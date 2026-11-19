@@ -157,6 +157,18 @@ jobs:
           mkdir -p /tmp/isolated && cd /tmp/isolated
           python /tmp/uibc.pyz explain "$GITHUB_WORKSPACE/fixtures/clean.uibc" | head -3
 
+      - name: The anchor in the tree still verifies
+        run: python -m pytest tests/test_published_anchor.py -q
+
+      - name: The dashboard and the runner agree on seven checks
+        run: python -m pytest tests/test_run_all_evidence.py -q
+
+      - name: The 0.4.0 pin is still plain sha256sum
+        run: python -m pytest tests/test_release_pin.py -q
+
+      - name: The anchor channel is named in exactly one place
+        run: python -m pytest tests/test_channel.py -q
+
       - name: The witness constants still match what we cite
         # Offline by design: the live check (tools/check_witnesses.py) needs three
         # third-party services, and their outage must not colour our CI.

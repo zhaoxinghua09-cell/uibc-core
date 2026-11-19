@@ -40,9 +40,13 @@ class TestHostileInput(unittest.TestCase):
         self.assertEqual(report["problems"], 0)
 
         rows = {r["case"]: r for r in report["cases"]}
-        # Ten cases, all of them refused by both implementations.
+        # Ten cases. A case the host cannot construct - no symlink privilege,
+        # for instance - is reported as skipped and is never counted as a pass.
         self.assertEqual(len(rows), 10)
+        self.assertEqual(report.get("skipped", 0), sum(1 for r in rows.values() if r.get("skipped")))
         for name, row in rows.items():
+            if row.get("skipped"):
+                continue
             self.assertTrue(row["js"].startswith("FAIL"), name)
             self.assertTrue(row["py"].startswith("FAIL"), name)
         # A depth ceiling, not a stack ending: 4000 levels is a verdict on the

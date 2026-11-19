@@ -23,7 +23,9 @@ It prints `CONSISTENT` only when **both** hold: a second, independently written 
 
 > A uibc PASS means: within the observed evidence boundary, no violation was detected. It does not claim the agent was correct, safe, or wise; that the recorded inputs were true or complete; or that any real-world outcome followed.
 
-**Current state, including what we are short of:** 593 tests green on Linux / Python 3.12 (2 skipped with `.[verify,interop]`; it was 16 before that extra existed — see `docs/SKIPPED.md`); the CI matrix runs the same suite on 3.10-3.13 · the verifier needs no third-party package (Ed25519 is implemented in-repo) · **external verification nodes: 0** — we publish the number we do not have; running the command above and sending back `external_node_result.json` makes it 1. Zero means the independence of this repository's verification rests entirely on two implementations written by the same author; it is not evidence of a third party having reproduced anything.
+**Current state, including what we are short of:** 619 tests green on Linux / Python 3.12 (2 skipped with `.[verify,interop]`; it was 16 before that extra existed — see `docs/SKIPPED.md`); the CI matrix runs the same suite on 3.10-3.13 · the verifier needs no third-party package (Ed25519 is implemented in-repo) · **external verification nodes: 0** — we publish the number we do not have; running the command above and sending back `external_node_result.json` makes it 1. Zero means the independence of this repository's verification rests entirely on two implementations written by the same author; it is not evidence of a third party having reproduced anything.
+
+**Seven machine reviews do exist, and they are not this number.** `docs/external-review/` holds seven receipts written on 2026-11-17 by an external model (DeepSeek-V3 via SiliconFlow) in four lenses (expert / process / adversary / outsider). Under `INDEPENDENCE.md` those are stage **S3m/S4m** machine reviews: they must be labelled `reviewer_type: machine`, and they may not be described as a third party, because no human and no separate administration stands behind them. Counted by category: human independent reproduction 0; external machine review 7; external document citing this repository 0; adoption by any group 0. Quoting any one of those four as "external 0" without saying which line is meant is the kind of collapse this repository exists to catch.
 
 **Three version numbers, and they disagree — read this before installing:** `main` is **0.4.0**, unreleased. PyPI carries **0.3.3** (2026-11-15). The archived citation snapshot is **0.2.1** (2026-09-17). If you `pip install uibc-core` you get the 0.3.3 verifier, which reports six checks on the clean package where `main` reports eight — S11 (strict serialization) and S12 (identifier strictness, `evidence_count`) came after that release. The measurement, with commands and timings, is in [docs/STRANGER-TRIAL.md](docs/STRANGER-TRIAL.md). Cite the snapshot, run `main`, and do not assume the PyPI build is the one these documents describe.
 
@@ -45,7 +47,7 @@ repository's own node result.
 **Three more commands, if you want to see the failure paths rather than the green ones:**
 
 ```bash
-python -m unittest discover -s tests -p "test_*.py"        # 593 tests (Linux / Python 3.12, 2 skipped with .[verify,interop])
+python -m unittest discover -s tests -p "test_*.py"        # 619 tests (Linux / Python 3.12, 2 skipped with .[verify,interop])
 python tools/emit_receipts.py --package fixtures/clean.uibc --count 3   # 3 chained receipts
 python tools/redteam_suite.py                              # 16 attacks, expected vs actual
 ```
@@ -143,7 +145,7 @@ other exists.
 > **Verifiable today** — every artifact is independently checkable: Sigstore Rekor transparency log
 > (logIndex 2883389783), concept DOI 10.5281/zenodo.22456647, SWHID
 > `swh:1:ori:819530c8be2adf6da901256ce9fd28063f8f1296` (ISO/IEC 18670).
-> Reproduce: `python -m unittest discover -s tests -p "test_*.py"` (593 tests, Linux / Python 3.12) · `python independent_verifier/cross_check.py`.
+> Reproduce: `python -m unittest discover -s tests -p "test_*.py"` (619 tests, Linux / Python 3.12) · `python independent_verifier/cross_check.py`.
 > **Honest boundary** — no third-party quality review to date; any operational use is self-reported
 > (see ENDORSEMENTS.md: 存证 ≠ 参与 ≠ 认可). Context: [FG-TIDA themes #27](https://github.com/FG-TIDA/themes/issues/27).
 
@@ -252,7 +254,7 @@ uibc verify demo.uibc                   # 开放模式：仅完整性检查
 ## 运行测试（外人复现三件套）
 
 ```bash
-python -m unittest discover -s tests -p "test_*.py"   # 全量 593 用例（实测 `Ran 593 tests in ~42s, OK (skipped=2)`，Linux / Python 3.12.11，已装 `.[verify,interop]`；未装该 extra 时为 `skipped=16`，逐步查清见 `docs/SKIPPED.md`；stress 7 场景单跑，见下条）
+python -m unittest discover -s tests -p "test_*.py"   # 全量 619 用例（实测 `Ran 619 tests in ~42s, OK (skipped=2)`，Linux / Python 3.12.11，已装 `.[verify,interop]`；未装该 extra 时为 `skipped=16`，逐步查清见 `docs/SKIPPED.md`；stress 7 场景单跑，见下条）
 python -m unittest tests.stress_test        # 压力 7 场景
 python independent_verifier/cross_check.py  # 独立第二实现交叉核验（70 项，0 分歧）
 ```
@@ -351,7 +353,7 @@ both modes + attacker-key column).
 
 `python fixtures/generate_memory_fixtures.py` —— 22 个具名威胁，打的是可验证
 记忆迁移（M0 输入结构 / M1 条目完整 + 四项 Preservation）：重复、注入、换 id、
-丢失、畸形输入、真空输入、换序、已记录边界、500 条规模。输出
+丢失、畸形输入、真空输入、换序、已记录边界、594 条规模。输出
 `fixtures/MEMORY_EXPECTED.md`，同样门禁。
 
 其中三个 case 是**回归锁**，锁住这套语料挖出的真实缺陷（两者原本都是静默通过）：
@@ -362,4 +364,4 @@ both modes + attacker-key column).
 
 [![Software Heritage](https://archive.softwareheritage.org/badge/origin/save/https://github.com/zhaoxinghua09-cell/uibc-core/)](https://archive.softwareheritage.org/browse/origin/?origin_url=https%3A%2F%2Fgithub.com%2Fzhaoxinghua09-cell%2Fuibc-core%2F)
 
-- **Software Heritage Visit ID**: `2558386` — 本仓已由 Software Heritage 永久存档（不可篡改证据），为该生态资产的长期可引用性提供基础设施级保证。
+- **Software Heritage Visit ID**: `2559486` — 本仓已由 Software Heritage 永久存档（不可篡改证据），为该生态资产的长期可引用性提供基础设施级保证。

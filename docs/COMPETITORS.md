@@ -22,7 +22,7 @@ verifier that refuses malformed input).
 | Language of the verifier | Python (first) **and JavaScript (second, independent)** | Python only |
 | Verifier modules | 25 | 40 |
 | Test files / test functions | 30 / 527 | 95 / 1189 |
-| Conformance material | 36 packages (6 positive, 30 mutations), shipped as its own zip | `vectors/` in the repo, referenced by tests, not in the sdist |
+| Conformance material | 28 packages (18 must-reject, 1 control, 9 must-accept), shipped with per-case `expected.json` and rebuildable byte for byte | 1,952 cases in 55 sets under `vectors/`, referenced by tests, in neither the sdist nor the wheel |
 | Second implementation is a **CI gate** | Yes — `second-implementation` job, 18 of 20 checks, 36/36 identical FAIL sets | No second implementation to gate |
 | Hostile-input suite | `tools/redteam_robustness.py`, 10 cases, table in `docs/ROBUSTNESS.md` | `tests/test_json_nesting_vectors.py`, `tests/test_verify_bounds.py`, `tests/test_parse.py` |
 | Deep-nesting ceiling | **512 levels, both implementations, refuses with S11** | 128 levels, refuses at parse time |
@@ -123,28 +123,31 @@ committee, a standards reader or a customer treats as evidence.
 
 ## Where this project is ahead, also stated plainly
 
-1. **A second implementation that shares no code.** AAC's 1189 tests are all in
-   Python: they can find a bug in the code, never a misreading of the spec. The
-   JavaScript verifier here was written from the prose, and its value is that it
-   disagrees — it found four bugs in the Python side (S12's missing
-   `evidence_count` comparison, S5 scoring a package twice, the NaN hole, the
-   array-manifest crash). Agreement on 36 of 36 packages across two languages is
-   the one claim here that cannot be made by a single-language project at any
-   test count.
-2. **Second implementation enforced by CI, not by intention.** The gate fails the
-   build on any drift. A project that has no second implementation cannot have
-   this gate.
-3. **The conformance suite is a shippable artefact.** 36 packages in their own
-   zip, runnable by anyone, positive and negative, with the mutation recorded in
-   each case's name. It is the thing that can be handed to a third party who
-   wants to check *us*.
-4. **A hostile-input table where each row is a verdict.** Ten cases, both
+1. **Every must-reject case names what it rejects.** AAC's 55 sets say which
+   specification owns them; no case says which sentence of it, so a reader who
+   wants to argue with a verdict has to argue with the behaviour. Here each of the
+   18 reject cases carries a basis, and five carry a clause quote that
+   `tools/check_grounds.py` re-finds in the vendored draft. This is the column
+   where the comparison is not close, and it is the only one.
+2. **The corpus is rebuildable byte for byte.** `SOURCE_DATE_EPOCH=1794700800
+   python tools/oracle_check.py --emit <dir>` reproduces `conformance/oracle`
+   exactly, checked by `tests/test_oracle_reproducible.py` with a control at
+   another epoch. AAC's byte-reproduction tests are tied to a Unix checkout
+   (measured above: 17 of their sets fail on Windows for that reason alone).
+   This is a claim about 28 cases being checkable, not about 28 being much.
+3. **A hostile-input table where each row is a verdict.** Ten cases, both
    implementations, three properties (no crash, a verdict, a refusal), and the
    document explains why the two verdict lists may differ without being
    inconsistent.
-5. **Anchoring checked in both languages, on a real token.** The RFC 3161
+4. **Anchoring checked in both languages, on a real token.** The RFC 3161
    verifier is written in Node with no dependencies, cross-checked against
    Python's `cryptography`, and red-teamed against seven token mutations.
+
+Explicitly **not** ahead, now that the numbers are in: corpus size (1,952 against
+28), number of implementations (AAC runs the same corpus in Python, TypeScript,
+Go and Rust; this project has Python and JavaScript), test count (4,486 executed
+there against 768 here), and specification standing.
+
 
 ## What "ahead" does not mean here
 
@@ -173,7 +176,7 @@ Four columns, each measuring *what is published*, not capability:
 | | cases with expected verdicts | runs offline | second implementation | verdict traceable to a clause |
 |---|---|---|---|---|
 | Tyche / EATF | **13** (5 valid, 8 invalid; README states `5 verified, 8 rejected`) | yes (Python, 3 deps) | TypeScript (not exercised here) | no |
-| Action State Group / AAC | **36** (6 positive, 30 mutations) in `vectors/`, *not in the sdist* | yes (Python) | yes (JavaScript) | no |
+| Action State Group / AAC | **1,952** cases in **55** sets under `vectors/` (its own `scripts/check_vector_index.py` reports "55 vector sets with matching counts"); *not in the sdist or the wheel* | yes (Python; TS/Go/Rust sets listed, not run here) | yes (TypeScript, plus Go and Rust) | no |
 | SCC-1 (Watts) | 0 public; **15** prose obligations; the document says a user-supplied record holds 88 frozen vectors | no verifier found | claims Python/TS agreement | partly |
 | Asqav (Marques) | 0; **8** Cedar templates + **4** worked requests | no (Cedar engine not vendored) | no | partly |
 | AAS-1 | **1** worked example; **12** audit assertions | no | no | partly (ISA/ISAE mapping) |
@@ -181,9 +184,50 @@ Four columns, each measuring *what is published*, not capability:
 
 What the table now supports, and nothing more: **three of the five publish an
 offline-runnable corpus with per-case expected verdicts** (this project 28,
-AAC 36, EATF 13); two publish prose obligations or a plan. On corpus size this
-project is **second of three**, not first — AAC ships more cases and more
-mutations.
+AAC 1,952, EATF 13); two publish prose obligations or a plan. On corpus size this
+project is **third of three**, by a factor of about seventy — see the correction
+below, which replaces an earlier sentence that said "second of three".
+
+### Correction (2026-11-20, later the same day)
+
+This section first said AAC ships **36** cases and that this project was
+therefore second on corpus size. Cloning the repository and running its own
+index checker falsifies both halves: `scripts/check_vector_index.py` prints
+`VECTORS.md lists 55 vector sets with matching counts`, and the per-set counts in
+that table sum to **1,952**. `vectors/` holds 981 files. The 36 could not be
+reproduced from the current repository at all — it is not a subset that any file
+names, and the wheel and sdist carry no vectors. 36 was a number this project
+wrote down and did not check; it is replaced, not footnoted.
+
+So the honest comparison on this ruler is 1,952 against 28, and "we are second"
+was a sentence that made the gap look like a margin. What is actually true:
+
+- AAC's corpus is **larger by two orders of magnitude**, and split across 55
+  sets with their own owning specs, so a reader can see which requirement each
+  case belongs to. This project's 28 cases are one flat list.
+- AAC implements the same corpus in **four languages** (Python, TypeScript, Go,
+  Rust); this project has Python and a JavaScript second implementation.
+- Measured here on Windows, AAC's Python suite gave **4,486 passed, 18 failed,
+  14 skipped**. Every one of the 18 is an environment artefact, not a verdict:
+  17 are "generator reproduces every file byte for byte" tests that compare
+  regenerated bytes against committed ones (platform line endings and path
+  separators), and one needs a POSIX shell (`WinError 2`). With a disclosed
+  `write_text(newline="\n")` shim the set-level runner moved from 15 pass / 34
+  fail to **31 pass / 17 fail** of 55 sets, the remainder still being byte
+  reproduction. In other words: their corpus runs, and its reproducibility
+  checks are tied to a Unix checkout.
+- Their own gap is the one this project can actually close rather than merely
+  claim: **no case names the clause it rests on**. 55 sets say which
+  specification owns them; no case says which sentence of it. This project's
+  reject cases each carry a basis, and `tools/check_grounds.py` re-finds the
+  five verbatim quotes in the vendored drafts.
+
+The one thing this project now has that neither of the other two runnable
+corpora has: the corpus is **rebuildable byte for byte** from the tool
+(`SOURCE_DATE_EPOCH=1794700800 python tools/oracle_check.py --emit <dir>`,
+checked by `tests/test_oracle_reproducible.py`). That is a claim about 28 cases,
+not about being ahead.
+
 
 The distinguishing column is the last one: of the three runnable corpora, this
 project is the only one measured here where every must-reject case names the

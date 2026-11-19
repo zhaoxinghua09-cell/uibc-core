@@ -11,7 +11,9 @@ python tools/aer1_crosswalk.py
 
 语料来源：`https://zambo.dev/aer1/corpus.json`（本地缓存 `tools/out/aer1_corpus_index.json`，15706 B）。
 
-## 实测结果（2026-11-17，本轮重跑）
+## 实测结果（2026-11-19 重述；原表为 2026-11-17）
+
+> 口径说明：2026-11-17 的初版记 **34 类 / 66 向量 / 69 检查全部 COVERED**（Merkle 当时计入 COVERED）。2026-11-19 按 AER-1 作者 Brennan Zambo 的裁定与一次实跑（9 个向量在其 §8.1 构造下 9/9、在我们默认构造下 0/9）把 Merkle 类移出 COVERED，改为 **PARTIAL / partial-with-implementation**，因此本表变成 33 / 57 / 57 + 1 类 PARTIAL。两套数字是**同一次重述的前后**，不是漂移：给 Brennan 的邮件用的是初版 34/66/69，本文用重述后的一版。
 
 | 分类 | 类别数 | 已映射向量 | 已映射检查 |
 |---|---|---|---|

@@ -22,6 +22,13 @@ _REPORT = os.path.join(_REPO, "tools", "out", "differential-report.json")
 class TestDifferentialReport(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        if not os.path.exists(_REPORT):
+            # The report is a repository artifact, not a file shipped in the
+            # sdist: a snapshot inside the package would age against the code
+            # that carries it. A suite run from an unpacked archive has nothing
+            # to check here, and saying so beats a false pass.
+            raise unittest.SkipTest(
+                "tools/out/differential-report.json is not shipped in the sdist")
         with open(_REPORT, encoding="utf-8") as fh:
             cls.d = json.load(fh)
 

@@ -26,7 +26,7 @@ class TestOracle(unittest.TestCase):
         spec = importlib.util.spec_from_file_location("oracle_check", TOOL)
         mod = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)
-        self.assertGreaterEqual(len(mod.ORACLE) + len(mod.ORACLE_EXT), 19)
+        self.assertGreaterEqual(len(mod.ORACLE) + len(mod.ORACLE_EXT) + 2, 21)
         verdicts = {row[2] for row in mod.ORACLE}
         self.assertEqual(verdicts, {"PASS", "FAIL"}, "an oracle of one verdict cannot fail")
 

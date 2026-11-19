@@ -215,6 +215,59 @@ make. The accept side pays for it too: `accept-anchored-policy` now comes back
 anchors it cannot resolve. On the accept side the oracle therefore scores "no false alarm"
 as **not FAIL** — declining to judge is allowed, rejecting is not — and records which it did.
 
+## Per-check decidability — what "6 of 19 exactly paired" was hiding
+
+The pair count is about identifiers. The question a reader actually has is behavioural: on a
+package where the reference fails check S, does the second implementation ever reach `FAIL`?
+
+```
+measured: of 17 checks the hostile corpus exercises, the second implementation
+          reaches 9 by rule (S1,S2,S3,S4,S5,S6,S7,S8,S12)
+          and can never reach 8 (S10,S11,S13,S14,S15,S16,S17,S18)
+```
+
+S9 and S19 do not appear because the corpus contains no package that fails them — they are
+exercised by separate blocks with bespoke construction, and a check that no case reaches is
+indistinguishable from one that does not exist (which is the same lesson as the `19` count
+above).
+
+So the honest description of the second implementation is: **it can decide nine of the
+seventeen checks this corpus exercises, and on the other eight it now says `INCONCLUSIVE`
+instead of `PASS`.** Before the scope guard that same sentence ended with "and on the other
+eight it said PASS", which is why the guard mattered more than any new rule would have.
+
+`S6` and `S12` are partial rather than clean: S6 is detected on one package and declined on
+another (that one also carried an unjudgeable artefact, so the guard answered first), S12 on
+two of three. A per-check number that only counted "ever detected" would call both of them
+covered; the table keeps the split.
+
+## Two verdicts that say what they did not do
+
+A verdict is read as broader than its evidence unless the report says otherwise. So the
+second implementation now emits the same disclosure shape the reference does — `scope`,
+`limitations`, `checked`, `not_checked`, `statement` — alongside its `unjudged` guard list.
+
+```
+measured: things each implementation declares it did NOT check - reference 5, second 11;
+          7 of the second's are absent from the reference's list
+          (base64,closure,duplicate evidence,duplicate json,merkle,policy,receipt),
+          and the reference names 1 the second does not (lifecycle event signature)
+```
+
+Two things worth noticing in that line:
+
+- **The reference's list is a constant.** It names the same five things on every package,
+  because they are standing non-goals of the spec. It does not say what *this run* failed to
+  evaluate. The second implementation's list is built per run: standing non-goals plus
+  whatever the guard found in the package handed to it.
+- **The asymmetry runs both ways.** Seven things only the second implementation admits it
+  skips, and one thing only the reference admits (`lifecycle event signatures`, which the
+  second implementation genuinely does not verify). Declaring more is not the same as being
+  more thorough; it is the same as being more legible.
+
+Neither list makes a verdict stronger. They make it narrower, which is the only honest
+direction for a list of non-claims.
+
 ## What this is not
 
 - **Not independent judgement.** Expectations were drawn from documents this project

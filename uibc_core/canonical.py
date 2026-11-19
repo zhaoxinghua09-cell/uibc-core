@@ -88,8 +88,34 @@ def _jcs_value(v) -> str:
     return _jcs_scalar(v)
 
 
+MAX_NESTING_DEPTH = 128
+
+
+def nesting_depth(obj) -> int:
+    """Deepest object/array nesting; a scalar is 0, `[]` is 1, `[[]]` is 2."""
+    if isinstance(obj, dict):
+        return 1 + max([nesting_depth(v) for v in obj.values()] or [0])
+    if isinstance(obj, list):
+        return 1 + max([nesting_depth(v) for v in obj] or [0])
+    return 0
+
+
+def check_nesting(obj, limit: int = MAX_NESTING_DEPTH) -> None:
+    """Refuse a value nested deeper than `limit`.
+
+    128 is the depth shared by the other implementations of this profile and
+    stated in the draft's Conventions section; see
+    docs/COMPETITIVE-COVERAGE-AAC.md. Refusing here keeps a document from
+    reading one way in a shallow reader and another way in a deep one.
+    """
+    d = nesting_depth(obj)
+    if d > limit:
+        raise ValueError("nesting depth %d exceeds the limit of %d" % (d, limit))
+
+
 def canonicalize(obj) -> bytes:
     """RFC 8785 (JCS) canonical serialization of a JSON-able object."""
+    check_nesting(obj)
     return _jcs_value(obj).encode("utf-8")
 
 

@@ -7,6 +7,14 @@
     "@id": "https://zhaoxinghua09-cell.github.io/lgd-hub/",
     "name": "LGD 生态"
   },
-  "license": "https://spdx.org/licenses/MIT.html",
-  "sameAs": []
+  "license": "https://spdx.org/licenses/Apache-2.0.html",
+  "usageInfo": "Layered: code Apache-2.0 (see LICENSE); theory text, methodology and normative statements All Rights Reserved (see NOTICE.md). The two layers must not be described as one licence.",
+  "copyrightHolder": {
+    "@type": "Person",
+    "name": "Zhao Xinghua (Steven Zhao)",
+    "identifier": "https://orcid.org/0009-0001-0512-1237"
+  },
+  "sameAs": [
+    "https://zhaoxinghua09-cell.github.io/uibc-core/"
+  ]
 }

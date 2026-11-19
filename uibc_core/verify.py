@@ -554,11 +554,34 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
                 "lifecycle event %r belongs to agent %r, not %r"
                 % (_ev.get("event_id"), _ev_agent, pkg_agent))
 
+    # Cross-sink admission (SCC-04, measured 2026-11-20 against
+    # draft-watts-scientific-constitutional-constraints-00 §11):
+    #   "A signed request for sink A is rejected by sink B, including the case
+    #    where every request-internal audience field agrees."
+    # The obligation is about *declared* audience versus the sink that receives
+    # it. Both fields are optional; when neither is present this package says
+    # nothing about sinks and S2 stays as it was. When both are present and
+    # disagree, no amount of internal consistency makes the request deliverable,
+    # because a request cannot widen its own audience by agreeing with itself.
+    _sink = manifest.get("sink_id")
+    _aud = manifest.get("audience")
+    if _sink is not None or _aud is not None:
+        if not isinstance(_sink, str) or not isinstance(_aud, str):
+            s2_problems.append(
+                f"manifest.sink_id={_sink!r} / manifest.audience={_aud!r}: both "
+                f"must be strings when either is present")
+        elif _sink != _aud:
+            s2_problems.append(
+                f"manifest.audience={_aud!r} does not name the receiving sink "
+                f"({_sink!r}); a request signed for another sink must not be "
+                f"deliverable even when its own fields agree with each other")
+
     record("S2", "identity consistency", not s2_problems,
            "; ".join(s2_problems) if s2_problems else
            f"agent_id={identity.get('agent_id')!r} consistent"
            + (f", principal_type={principal}" if principal else "")
-           + (f", policy_hash={str(policy_hash)[:16]}..." if policy_hash else ""))
+           + (f", policy_hash={str(policy_hash)[:16]}..." if policy_hash else "")
+           + (f", sink_id={_sink}" if _sink else ""))
 
     # S3 lifecycle state machine + chain, plus the v1.1 semantic layer
     # (L8 timestamps monotonic & plausible, L10 actor allow-list, L11 once-only

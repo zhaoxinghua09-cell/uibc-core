@@ -15,6 +15,18 @@ Nothing here is a ratified standard.
 
 ## [Unreleased]
 
+### The 0.4.0 bytes, pinned and checked across three sources (2026-11-19)
+
+- **`tools/pin_release.py`**: asks PyPI what it serves, downloads both artefacts,
+  recomputes SHA-256, and writes `anchors/pins/uibc-core-0.4.0.sha256` in plain
+  `sha256sum` format. 1.457 s, both artefacts matched.
+- **`tools/check_pins.py`**: the release asset, the index, and the download must
+  all agree - any two agreeing is not enough. 2.229 s, `VERDICT: OK`.
+- **Release `release-pins-0.4.0`**: the pin published on a channel PyPI cannot
+  rewrite.
+- **0.4.0 itself** was published by the parallel line on 2026-11-18T17:19Z;
+  this entry pins it, it does not claim to have shipped it.
+
 ### The anchor moves to a channel the package cannot reach (2026-11-19)
 
 - **Release `anchor-001`**: the same `anchor.json`, published as a downloadable

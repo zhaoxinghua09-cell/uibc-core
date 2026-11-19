@@ -42,6 +42,27 @@ EVIDENCE_TYPES = {
     "EVALUATION", "HUMAN_DECISION", "VERIFICATION", "INCIDENT", "RETIREMENT",
 }
 
+
+def _version_lt(current, floor):
+    """True when `current` is older than `floor`.
+
+    Numeric dotted comparison only, so the verifier keeps its zero-dependency
+    property: no `packaging` import on the verification path. Both sides here
+    are plain X.Y.Z strings produced by this package itself.
+    """
+    def key(v):
+        out = []
+        for part in str(v).split("."):
+            digits = "".join(ch for ch in part if ch.isdigit())
+            out.append(int(digits) if digits else 0)
+        return out
+
+    a, b = key(current), key(floor)
+    width = max(len(a), len(b))
+    a += [0] * (width - len(a))
+    b += [0] * (width - len(b))
+    return tuple(a) < tuple(b)
+
 # draft-maintainer-1f916-agent-record-01 Section 3.1: a signature proves
 # exactly what its custody disclosure permits it to prove, and verifiers MUST
 # surface custody alongside the signature result. Enum copied verbatim (with
@@ -445,11 +466,29 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
     if aux_extras:
         s1_detail.append(f"note: {sorted(aux_extras)} outside evidence/, not covered "
                          f"by the evidence root")
-    record("S1", "package structure",
-           not missing and not root_extras and not uncommitted,
-           "; ".join(s1_detail) if s1_detail
-           else f"all required files present, no undeclared files "
-                f"({len(declared)} declared)")
+    # Version floor (VERSIONING.md section 8). A package may state the minimum
+    # verifier version able to judge everything it contains. Below that floor we
+    # must not report PASS: 0.3.3 once returned PASS, exit 0, on a package
+    # carrying identity.key_custody="hsm" - a claim it never read (see
+    # docs/MIGRATION-RESULTS.md, M2c). The package is not at fault, so this is
+    # INCONCLUSIVE, not FAIL.
+    floor = manifest.get("min_verifier_version") if isinstance(manifest, dict) else None
+    _floor_ok = True
+    if isinstance(floor, str) and floor.strip() and _version_lt(__version__, floor):
+        _floor_ok = False
+        s1_detail.append(f"this package declares min_verifier_version={floor.strip()!r}; "
+                         f"verifier is {__version__}, below the floor - fields it "
+                         f"carries cannot be judged here")
+    if _floor_ok:
+        record("S1", "package structure",
+               not missing and not root_extras and not uncommitted,
+               "; ".join(s1_detail) if s1_detail
+               else f"all required files present, no undeclared files "
+                    f"({len(declared)} declared)")
+    else:
+        checks.append({"id": "S1", "name": "package structure",
+                       "result": "INCONCLUSIVE", "detail": "; ".join(s1_detail),
+                       "basis": _basis.for_check("S1")})
 
     # S2 identity consistency (+ v1.1 identity fields: principal_type enum
     # aligned to draft-noa-scitt-ai-agent-receipt-00 Section 3, optional

@@ -276,6 +276,13 @@ def cmd_submit(args):
     manifest["lifecycle_head"] = lc_head
     manifest["checkpoint_head"] = checkpoint_head(
         lc_head, root, manifest["evidence_index_digest"], len(idx["entries"]))
+    # Version floor (VERSIONING.md section 8): record the minimum verifier
+    # version able to judge everything this builder wrote. Without it a consumer
+    # cannot tell whether the PASS it just received came from a verifier that
+    # could see all the fields in the package - 0.3.3 certified a key_custody
+    # claim it never read (MIGRATION-RESULTS.md, M2c).
+    from . import __version__ as _builder_version
+    manifest["min_verifier_version"] = _builder_version
     _write(os.path.join(pkg, "manifest.json"), manifest)
     msg = f"submission sealed: agent={identity['agent_id']} evidence={len(idx['entries'])} root={root}"
     if getattr(args, "key", None):

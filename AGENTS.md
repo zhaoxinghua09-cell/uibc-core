@@ -31,7 +31,7 @@ uibc init demo.uibc                       # 建包
 uibc register demo.uibc --agent-id my-agent-001 --owner alice   # 注册 agent（有籍）
 # 生命周期事件 / 签封 / 验证：见 README Quickstart 与 CLI --help
 
-python -m unittest discover tests         # 642 tests，改动必跑（CI ci.yml 同逻辑）
+python -m unittest discover tests         # 全量套件，改动必跑（数量钉在 docs/EVIDENCE-INDEX.md；CI ci.yml 同逻辑）
 python independent_verifier/cross_check.py  # 独立交叉验证（独立验证器路径）
 ```
 

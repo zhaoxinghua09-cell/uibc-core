@@ -151,6 +151,9 @@ def render(index):
     lines.append("# 证据索引（由 `tools/build_evidence_index.py` 生成）\n")
     lines.append("每条检查对应到：验证器里的定义、覆盖它的测试、指向它的红队攻击、以及"
                  "提到它的文档。**重新生成即可复核**，不会随记忆漂移。\n")
+    lines.append("**测试套件：%d 个用例**（本页由生成器现数，别处只引用本页，不再抄写这个数字）。"
+                 "\n" % suite_size())
+    lines.append("")
     lines.append("| 检查 | 名称 | 出厂包是否走到 | 测试 | 红队 | 文档 |")
     lines.append("|---|---|---|---|---|---|")
     for r in index["rows"]:
@@ -184,6 +187,14 @@ def render(index):
     ]:
         lines.append("- " + line)
     return "\n".join(lines) + "\n"
+
+
+def suite_size():
+    """How many test cases the suite actually contains, counted, not typed."""
+    import unittest
+    loader = unittest.TestLoader()
+    suite = loader.discover(os.path.join(_REPO, "tests"), pattern="test_*.py")
+    return suite.countTestCases()
 
 
 def main():

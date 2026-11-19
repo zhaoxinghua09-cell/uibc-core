@@ -51,7 +51,7 @@ class TestDocFacts(unittest.TestCase):
             self.assertIsNotNone(facts.get(key), "%s could not be measured, so a "
                                                 "claim about it is unchecked" % key)
         self.assertGreater(facts["tests"], 100)
-        self.assertEqual(facts["checks"], 19)
+        self.assertEqual(facts["checks"], 20)
 
     def test_no_published_number_is_stale(self):
         facts = cdf.measure()

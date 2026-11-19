@@ -65,6 +65,12 @@ number that is missing.** If your run ends with exit 3, no receipt is written by
 design — that is a statement about your environment, not about the corpus, and
 reporting it as a failure rate would be false.
 
+If you ran on someone else's behalf rather than your own, the receipt is not enough to
+say so: it records who ran, not who was allowed to. That second statement is a
+delegation record, checked by `docs/DELEGATION.md` / `tools/check_delegation.py` — one
+hop, bounded window, scope pinned to the corpus digest, and a caveat you cannot skip:
+a record carrying its own key proves only that it was signed by its author.
+
 ## Sunset, in the other direction
 
 `docs/AUDIT-KIT.md` carries our own commitment: if no unrelated party has run this

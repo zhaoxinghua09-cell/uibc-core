@@ -548,16 +548,23 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
             s4_unknown.append(e.get("type"))
     # evidence_id: the index is read by position everywhere else, so a duplicate
     # or a missing identifier costs nothing until somebody cites an id. The
-    # field-coverage audit listed this as unchecked; it is checked now.
+    # field-coverage audit listed this as unchecked; it is checked now - but as a
+    # SEMANTIC problem (S12), not a structural one (S4). Rationale (2026-11-19):
+    # a duplicated entry carries a readable file with a matching hash, so the
+    # evidence root can still be computed and the duplicate is then caught by the
+    # root itself (S5), which is what the corpus expects. Filing it under S4 made
+    # the reference answer INCONCLUSIVE on that fixture while the independent
+    # implementation answered FAIL - two implementations, two answers, one spec.
     _ids = [e.get("evidence_id") for e in entries]
+    id_problems = []
     for _i, _eid in enumerate(_ids):
         if not (isinstance(_eid, str) and _eid.strip()):
-            s4_failures.append(f"entry {_i} has no evidence_id")
+            id_problems.append(f"entry {_i} has no evidence_id")
     _seen = set()
     for _eid in _ids:
         if isinstance(_eid, str) and _eid.strip():
             if _eid in _seen:
-                s4_failures.append(f"duplicate evidence_id {_eid!r}")
+                id_problems.append(f"duplicate evidence_id {_eid!r}")
             _seen.add(_eid)
     if s4_failures:
         record("S4", "evidence integrity", False,
@@ -576,6 +583,7 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
     # identifiers must be canonical. Runs on the parsed values, so it is
     # deliberately separate from S11 (which runs on the bytes).
     s12_problems = []
+    s12_problems.extend(id_problems)
     for doc_name, doc in (("manifest.json", manifest), ("identity.json", identity),
                           ("lifecycle.json", lifecycle),
                           ("evidence/index.json", index)):

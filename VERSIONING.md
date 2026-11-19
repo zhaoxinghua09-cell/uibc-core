@@ -74,6 +74,23 @@ Three version identities coexist and do not agree:
 
 This is a defect, not a state to be explained. Until the archival record matches the released code, the phrase "current version" refers to the repository and must say so.
 
-## 8. Amendments
+## 8. Version floor (added 2026-11-19, after M2 was actually run)
+
+**A PASS from an older verifier is not a safety signal.** That is not a slogan here; it is a measured result.
+
+Reproduction (`docs/MIGRATION-RESULTS.md`, M2c): a package is sealed by 0.4.0 carrying `identity.key_custody: "hsm"` - a provenance claim meaning the signing key lives in hardware. 0.4.0 judges it and reports PASS with `key_custody: hsm`. 0.3.3 was then used on the same bytes: it has no notion of `key_custody` at all (`Select-String` over its shipped source finds the token zero times), never inspected the claim, and returned **PASS, exit 0**.
+
+So an older verifier will certify a claim it cannot see. This cannot be fixed by editing code: a published release cannot be recalled. Any policy that depends on "our verifier would have caught it" is depending on the newest verifier being the one that actually ran.
+
+What this requires instead:
+
+1. **The artefact carries its floor.** A package declares the minimum verifier version able to judge everything it contains. The builder writes it; it is a field, not a comment.
+2. **The consumer compares.** Registries, gates and CI compare the declared floor with the verifier's own version before treating a PASS as meaningful. A verifier below the floor must not be trusted to PASS, and must not be quoted as having PASSed.
+3. **Unknown stays INCONCLUSIVE.** A verifier that meets the floor but does not recognise a value reports INCONCLUSIVE naming it (`S4` for an unknown evidence type, per #178). PASS is reserved for "I judged everything here and it holds".
+4. **Nobody claims retroactive coverage.** Documents may not say a later check would have caught an earlier artefact. It did not run.
+
+Point 1 is not implemented yet. Until it is, this section records a known hole rather than a closed rule, and forward compatibility stays **partially measured**.
+
+## 9. Amendments
 
 Changes to §1 or §4 follow the seven-step procedure in `GOVERNANCE.md` and require a major version.

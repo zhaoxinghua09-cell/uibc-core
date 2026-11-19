@@ -42,20 +42,24 @@ fields.
 |---|---|---|
 | M2a | only features both releases implement | **PASS** (exit 0) |
 | M2b | `evidence/external_anchor.json` carrying an unreadable token | **INCONCLUSIVE** (S16) |
+| M2c | `identity.key_custody: "hsm"` - a field 0.3.3 does not have at all | **PASS** (exit 0) ← the defect |
 
 Read M2a carefully. `PASS` from an older verifier is the *dangerous* outcome in a
 migration vector - it means the old tool claimed success on something it could
-not have judged. Here it is legitimate, because M2a uses only the commands both
-releases implement, so 0.3.3 really did judge everything in the package.
+not have judged. M2a is benign, because it uses only the commands both releases
+implement, so 0.3.3 really did judge everything in the package.
 
-M2b did not produce a silent PASS either: 0.3.3 already implements S16 and
-reports INCONCLUSIVE without `asn1crypto`.
+**M2c is the defect, and it is conclusive.** `key_custody` is a provenance claim:
+"the signing key lives in hardware". 0.4.0 validates the value against a known
+set and reports PASS with `key_custody: hsm`. 0.3.3 does not contain the token
+`key_custody` anywhere in its shipped source - verified by search, zero hits -
+never inspected the claim, and returned **PASS, exit 0**.
 
-**What M2 has not established:** neither sub-case exercised a feature that is
-genuinely new in 0.4.0 and unknown to 0.3.3. 0.3.3 already knows S16, so the
-"new-only feature" case was not constructed. M2 therefore shows no silent PASS
-in the two shapes tried, and is **not** closed. It stays open, and no forward
-compatibility claim may be made from it.
+So: **an older verifier will certify a claim it cannot see.** This is the
+protocol-level failure the vector was written to catch, and it is not fixable by
+editing this repository: a published release cannot be recalled. The only
+mitigation is a version floor the artefact declares and the consumer compares -
+recorded as `VERSIONING.md` §8, not yet implemented.
 
 ## M3 - key rotation and pinning
 
@@ -66,6 +70,6 @@ Not run. Nothing claimed.
 `VERSIONING.md` forward-compatibility row could previously only be filled with
 intentions. After M1 it can carry one measured fact - a 0.3.3 package verifies
 as PASS under 0.4.0 when it uses the shared vocabulary, and degrades to
-INCONCLUSIVE, not FAIL, when it uses a type 0.4.0 does not know. M2 and M3 are
-still open, so the row is not "verified" - it is "partially measured", and that
-is the word it should carry.
+INCONCLUSIVE, not FAIL, when it uses a type 0.4.0 does not know. M2 produced a conclusive negative and M3 is still
+open, so the row is not "verified" - it is "partially measured", and that is the
+word it should carry.

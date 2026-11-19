@@ -2,6 +2,19 @@
 
 This document exists because "trust us" is not evidence. Everything below runs offline, needs no account, and produces numbers you can compare against ours. If your numbers differ from ours, that is the most useful thing you can send us.
 
+## Zero: the archive that needs no repository
+
+`conformance/uibc-conformance-0.4.1.zip` — sha256 `c232b21fa3400e8c97a2446e05ad5d6dbe40004b55e7fc7267b746403eedd260`, 124,505 bytes. Pin: `anchors/pins/uibc-conformance-0.4.1.sha256`; the build is deterministic, so rebuilding gives the same bytes.
+
+```
+python -m pip install uibc-core==0.4.1
+python run.py
+```
+
+`strict 36/36` on the reference verifier, and a `receipt.json` you can publish. A verifier that answers `PASS` to everything scores **6/36**, so the corpus cannot be passed by refusing nothing. Point it at another implementation with `--verify "cmd {pkg}"`.
+
+What that is not: a self-run. 36/36 here was produced by the maintainer on one machine. It becomes a third-party reproduction only when someone else runs this same hash elsewhere and publishes the receipt.
+
 ## Question 1: can every check be made to fail?
 
 A check nobody can make fail is decoration.

@@ -4,6 +4,10 @@
 
 用 `tools/build_outside_kit.py` 打出来的压缩包（`docs/OUTSIDE-KIT.md`）：解压即跑，不联网、不装依赖。源码与声明仍以本仓库为准。
 
+## 连 clone 都不想？
+
+点一次按钮即可：**Actions → one-click outsider run → Run workflow**，或把仓库开在 Codespaces 里直接看终端那一行。说明见 [`docs/ONE-CLICK.md`](ONE-CLICK.md)。这类运行记作"机器运行"，**不**进 `docs/EXTERNAL-NODES.md` 的人员计数。
+
 
 > 中文完整版（含四件事说明与已知边界）：[`docs/EXTERNAL-NODE-KIT.md`](EXTERNAL-NODE-KIT.md)
 

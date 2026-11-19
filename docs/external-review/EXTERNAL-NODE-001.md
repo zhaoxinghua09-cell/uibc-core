@@ -44,6 +44,31 @@ exit 0** — and noted that the default branch still carried the bug until the f
 That fix is now in `main` as #186 (`cedbfa9`), together with the symbol-link skip repair (#186)
 and a Linux run record (#189).
 
+## Checked on our side (2026-11-19)
+
+Quoting figures nobody here can recompute is the smallest form of hearsay, so
+`tools/verify_external_node_report.py` exports `8a95747` and runs the same two
+commands on hardware we control:
+
+```
+exported 8a95747 (713 files)
+  compared: 70  mismatches: 2  agreement: FAIL - SPEC BUG
+  tests: 605  skipped: 1
+VERDICT: MATCHES THE RECEIPT (605 tests, 2 mismatches)
+```
+
+Both figures match his exactly. The skip count does not: he saw 22, we see 1,
+because skips follow which extras are installed - which is also why no document
+should carry a skip count, and why the suite size is now cited from
+`docs/EVIDENCE-INDEX.md` rather than typed.
+
+What the match establishes: **605 and 2 are properties of that commit, not of
+his machine.** A host with a different Python and a different operating system
+arrived at the same pair because the code produced them.
+
+What it does not establish: that his host behaved like ours, or that his report
+was audited. It is a recomputation, not a review of him.
+
 ## The honest limit on this node
 
 He is a correspondent in the same W3C working group as this project. That makes this

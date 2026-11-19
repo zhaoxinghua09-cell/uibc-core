@@ -12,14 +12,14 @@
 | S2 | identity consistency | 是 | 9 | 1 | 20 |
 | S3 | lifecycle state machine + semantics | 是 | 10 | 1 | 19 |
 | S4 | evidence integrity | 是 | 21 | 3 | 41 |
-| S5 | evidence root | 是 | 12 | 3 | 34 |
+| S5 | evidence root | 是 | 12 | 3 | 33 |
 | S6 | seal signature | 是 | 21 | 1 | 36 |
 | S7 | evidence index metadata | 否 | 6 | 1 | 16 |
 | S8 | package checkpoint head | 否 | 8 | 2 | 24 |
 | S9 | head pinned out-of-band | 否 | 8 | 1 | 28 |
 | S10 | attestation closure declared | 否 | 6 | 2 | 9 |
 | S11 | strict serialization | 是 | 6 | 1 | 18 |
-| S12 | timestamp and identifier strictness | 是 | 11 | 2 | 21 |
+| S12 | timestamp and identifier strictness | 是 | 11 | 2 | 20 |
 | S13 | merkle inclusion proofs | 否 | 9 | 4 | 12 |
 | S14 | strict base64 | 否 | 5 | 2 | 7 |
 | S15 | anchor event resolution | 否 | 7 | 4 | 12 |

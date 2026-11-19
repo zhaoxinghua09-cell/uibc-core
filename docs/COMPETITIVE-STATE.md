@@ -172,3 +172,24 @@ their verifier: ok=True
 **仍然落后**：台账是**空表**（仓库里没有任何 `uibc-change-v0` 记录）；分支保护与 required review 是平台设置，
 不在字节里，外人无法从仓库证明；emilia 把 policy rollout 与 revoke 做成了服务端接口，我们只有文件级记录。
 这三条都记为缺口，不计入对齐。
+
+### 2026-11-20 实测（支付适配）：他们有 15 个案例判"金额是否超授权"，我们连"损失谁担"都没写过
+
+一手读 `probityai/agent-evidence-vectors` 的 `corpora/vectors-agent-payment-mandate/`：`agent-payment-mandate/v1`，
+**15 个案例、11 条规则、11 个变异体逐一被抓**；四样东西绑在一起（用户签的 mandate、agent 出示的凭证、实际扣款、串起它们的回执），
+读者自己重算摘要而不是相信声称摘要的字段。其 README 自述两句边界："它证明扣款停留在用户授权之内；它不证明用户本意如此"，
+"它不说争议中谁承担损失"。
+
+**我们这一维：没有对应物。** 本格式无 mandate、无金额、无商户、无币种，也没有清算链路。
+
+本轮补的是把缺失写成**机器可读**的边界：`docs/SETTLEMENT-BOUNDARY.json` + `tools/settlement_boundary.py`，六问六答：
+Q1 有人在这些确切字节上跑过吗（supported，依据 RECEIPT-FORMAT）；Q2 字节自某日起未改吗（partial——
+签名与 TSA 已实现但**未在已发布 release 上跑过**）；Q3 跑的人被授权代表那方吗（partial——单签、无撤销登记处、
+公钥不带外给出时只给 identity unbound）；Q4 扣款在限额内吗（not_ours，判它的语料在对方那边）；
+Q5 损失谁承担（not_ours）；Q6 能否递给收单方当证据（not_ours）。
+
+检查器拒三类：两个"我们是否处理支付／是否授权扣款"字段改成 true 即否决；`supported`/`partial` 指向不存在的文件即否决；
+`partial` 不写限制即否决（没有限制的 partial 读起来就是 supported）。另扫描 README 与四份文档，出现"guarantees payment"
+一类短语即判 **OVERCLAIM**，退出码 1——这条是为了防"改一个字段就把能绑字节读成能收款"。
+
+**仍然落后**：没有 mandate 语料、没有清算/收单链路、没有法律意见；Q5/Q6 的回答除非有书面法律意见否则不变。三条都记为缺口。

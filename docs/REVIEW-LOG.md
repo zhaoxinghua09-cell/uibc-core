@@ -479,12 +479,33 @@ Three retractions follow from this, all recorded here rather than only in an int
 3. "Per-action freshness has not been written into a specification." It has: the ASQAV
    compliance profile lists it among its extension fields.
 
-What is left is narrower and weaker than in the second pass: the requirement table with
-named untested rows (36 requirements, 11 with an executing test, 25 named and machine
-readable - none of the eight sources read this round carries a comparable list, which is
-absence of evidence, not evidence of absence); the three modes of false-accept rate
-published side by side; and `run_external.py`, which accepts an arbitrary external command
-as the thing being tested. Each of those can be overtaken by one external run or one
+What is left is narrower and weaker than in the second pass: three modes of false-accept
+rate published side by side; `run_external.py`, which accepts an arbitrary external command
+as the thing being tested; and the per-check evidence map described below.
+
+### Correction: the "36 requirements / 11 tested / 25 named gaps" table is not in this repository
+
+The first version of this entry named that table as the leading difference. It should not
+have: the table comes from the thesis framework, not from this repository, and a reader
+cannot regenerate it here. Searching the repository finds no 36-row requirement list, and
+`drafts/draft-zhao-uibc-evidence-chain-00.md` contains no such table. A difference a reader
+cannot check is not a difference; it is the same defect as the "5 of 6" case below, one
+layer up.
+
+What this repository does ship, and what a reader can check in one command, is narrower:
+
+    python3 tools/build_evidence_index.py --json
+
+That emits one row per check (20 rows, S0 through S19), the tests that name each check, the
+red-team mentions, and two explicit lists: `no_test` (checks with no test at all, currently
+0) and `no_red_team_mention` (checks no red-team case reaches, currently 1). It is built by
+scanning `verify.py`, `tests/` and `tools/outsider_audit.py`, so it drifts only if the code
+drifts. The distinguishing property is not the size of a table; it is that the table is
+**generated from the code in the box, and says which rows are empty.**
+
+If that thesis table is to be cited anywhere, it has to be published here first as a
+machine-readable file with the same regenerable property. Until that happens, no entry in
+this log should describe it as something this project ships. Each of those can be overtaken by one external run or one
 citation.
 
 Consequence: stop adding survey, and spend the effort on making those three things

@@ -39,6 +39,8 @@ CHECKS = [
      "pin, index and download agree for 0.4.0", True),
     ("crypto cross-checked", ["tools/external_crypto_check.py"], "VERDICT: CONSISTENT",
      "OpenSSL verifies the same Ed25519 seals we do, and refuses a one-byte edit", False),
+    ("outsider's find stays fixed", ["tools/external_node_regression.py"], "VERDICT: STILL FIXED",
+     "the duplicated-evidence_id divergence external node 001 found is still repaired", False),
 ]
 
 

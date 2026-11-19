@@ -166,5 +166,24 @@ class TestCarriage(unittest.TestCase):
             self.assertEqual(len(head.split(":", 1)[1]), 64)
 
 
+class TestDemo(unittest.TestCase):
+    def test_demo_runs_without_any_corpus(self):
+        """A stranger with no clone must still see both verdicts."""
+        with tempfile.TemporaryDirectory() as tmp:
+            result = sc.run_demo(tmp)
+            self.assertEqual(result["cases"], 4)
+            self.assertEqual(result["verdict"], "CONSISTENT")
+            self.assertEqual(result["uibc_chain_pass"], 4)
+            self.assertEqual(result["tamper"]["after"], "FAIL")
+
+    def test_demo_shows_the_verdicts_pointing_opposite_ways(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            result = sc.run_demo(tmp)
+            edited = [c for c in result["cases_detail"]
+                      if c["case"] == "edited_projection_digest"][0]
+            self.assertEqual(edited["uibc_chain"], "PASS")
+            self.assertFalse(edited["sep2828"]["conforms"])
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -10,6 +10,25 @@ Before this file, the honest answer was: we re-ran their corpus with their
 runner. That is a replay, not a carriage. This closes the carriage gap and
 deliberately leaves the semantics gap open.
 
+## Demo: nothing to clone, five seconds
+
+```bash
+python tools/sep2828_carriage.py --demo
+```
+
+```
+uibc_chain   4/4 PASS
+sep2828      4/4 agree with expected
+tamper       PASS -> FAIL after 1 byte changed
+verdict      CONSISTENT
+```
+
+The demo writes four fixtures of its own (a conforming executed record, a
+refused record with no commitment, one with an edited `projectionDigest`,
+and a non-object), carries each into a real package, and then changes one byte
+after sealing. **They are not the corpus's fixtures** — the corpus belongs to
+its authors and is not vendored here; `--corpus` judges the real ones.
+
 ## Two verdicts, never merged
 
 | Verdict | Question it answers | Where the rules come from |

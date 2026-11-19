@@ -1,0 +1,918 @@
+{
+  "schema": "uibc-aer1-corpus/1",
+  "kit": "D:\\audit-zambo",
+  "directories": {
+    "valid": {
+      "files": 21,
+      "accepted": 21,
+      "rejected": 0,
+      "their_expectation_core": "pass",
+      "their_expectation_in_our_words": "ACCEPTED",
+      "agree": true,
+      "rows": [
+        {
+          "file": "bound-04.json",
+          "our_verdict": "ACCEPTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "deep-nesting.json",
+          "our_verdict": "ACCEPTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "edge-numbers.json",
+          "our_verdict": "ACCEPTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "empty-members.json",
+          "our_verdict": "ACCEPTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "feb29-leap.json",
+          "our_verdict": "ACCEPTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "fraction-one-digit.json",
+          "our_verdict": "ACCEPTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "input-hash-multikey-20.json",
+          "our_verdict": "ACCEPTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "large-payload.json",
+          "our_verdict": "ACCEPTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "legacy-02.json",
+          "our_verdict": "ACCEPTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "legacy-03.json",
+          "our_verdict": "ACCEPTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "legacy-real-2.json",
+          "our_verdict": "ACCEPTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [],
+            "binding": []
+          },
+          "profile_findings": [
+            "reference-producer payload omits the 'inputs' member"
+          ],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "maximum-offset-timestamp.json",
+          "our_verdict": "ACCEPTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "metadata-hash-non-ascii-tool.json",
+          "our_verdict": "ACCEPTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "optional-members-18.json",
+          "our_verdict": "ACCEPTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "real-04.json",
+          "our_verdict": "ACCEPTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "real-1-bare.json",
+          "our_verdict": "ACCEPTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [],
+            "binding": []
+          },
+          "profile_findings": [
+            "reference-producer payload omits the 'inputs' member"
+          ],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "receipt-01.json",
+          "our_verdict": "ACCEPTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "receipt-02.json",
+          "our_verdict": "ACCEPTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "receipt-03-live.json",
+          "our_verdict": "ACCEPTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [],
+            "binding": []
+          },
+          "profile_findings": [
+            "reference-producer payload omits the 'inputs' member"
+          ],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "typographic-unicode.json",
+          "our_verdict": "ACCEPTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "uuid-v1-core.json",
+          "our_verdict": "ACCEPTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "absent"
+        }
+      ]
+    },
+    "invalid": {
+      "files": 36,
+      "accepted": 0,
+      "rejected": 36,
+      "their_expectation_core": "fail",
+      "their_expectation_in_our_words": "REJECTED",
+      "agree": true,
+      "rows": [
+        {
+          "file": "ax-base64-unpadded.json",
+          "our_verdict": "REJECTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [
+              "canonical_bytes is not valid base64"
+            ],
+            "binding": []
+          },
+          "profile_findings": [
+            "canonical payload is not a UTF-8 JSON object"
+          ],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "ax-feb29-1900.json",
+          "our_verdict": "REJECTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [
+              "created_at is not a valid calendar date/time"
+            ],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "ax-feb29-non-leap.json",
+          "our_verdict": "REJECTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [
+              "created_at is not a valid calendar date/time"
+            ],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "ax-tool-empty-scope.json",
+          "our_verdict": "REJECTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [
+              "tool is not an object with name/version/scope strings"
+            ],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "bad-created-at.json",
+          "our_verdict": "REJECTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [
+              "created_at is not RFC 3339"
+            ],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "bad-id.json",
+          "our_verdict": "REJECTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [
+              "id is not a lowercase UUID"
+            ],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "bad-offset-range.json",
+          "our_verdict": "REJECTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [
+              "created_at is not a valid calendar date/time"
+            ],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "bad-provenance.json",
+          "our_verdict": "REJECTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [
+              "provenance_class is not a known class"
+            ],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "bad-verification-status.json",
+          "our_verdict": "REJECTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [
+              "verification_status is not verified"
+            ],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "base64-pad-bit.json",
+          "our_verdict": "REJECTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [
+              "canonical_bytes is not the canonical base64 spelling"
+            ],
+            "binding": []
+          },
+          "profile_findings": [
+            "reference-producer payload omits the 'inputs' member"
+          ],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "base64-unpadded.json",
+          "our_verdict": "REJECTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [
+              "canonical_bytes is not valid base64"
+            ],
+            "binding": []
+          },
+          "profile_findings": [
+            "canonical payload is not a UTF-8 JSON object"
+          ],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "bytes-not-base64.json",
+          "our_verdict": "REJECTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [
+              "canonical_bytes is not valid base64"
+            ],
+            "binding": []
+          },
+          "profile_findings": [
+            "canonical payload is not a UTF-8 JSON object"
+          ],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "duplicate-member-name.json",
+          "our_verdict": "REJECTED",
+          "our_id_verdict": null,
+          "blocking": {
+            "file_checks": [
+              "duplicate member name: output_hash"
+            ],
+            "structural": [],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": null
+        },
+        {
+          "file": "feb29-1900.json",
+          "our_verdict": "REJECTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [
+              "created_at is not a valid calendar date/time"
+            ],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "feb29-non-leap.json",
+          "our_verdict": "REJECTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [
+              "created_at is not a valid calendar date/time"
+            ],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "hash-bad-format.json",
+          "our_verdict": "REJECTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [
+              "output_hash is not sha256: + lowercase hex digest"
+            ],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "hash-mismatch.json",
+          "our_verdict": "REJECTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [
+              "output_hash does not match sha256(canonical_bytes)"
+            ],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "id-trailing-newline.json",
+          "our_verdict": "REJECTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [
+              "id is not a lowercase UUID"
+            ],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "impossible-date.json",
+          "our_verdict": "REJECTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [
+              "created_at is not a valid calendar date/time"
+            ],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "input-hash-key-order-20.json",
+          "our_verdict": "REJECTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [
+              "input_hash does not match sha256(canonical JSON of the recorded inputs)"
+            ],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "input-hash-mismatch.json",
+          "our_verdict": "REJECTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [
+              "input_hash does not match sha256(canonical JSON of the recorded inputs)"
+            ],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "leap-second-created-at.json",
+          "our_verdict": "REJECTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [
+              "created_at is not a valid calendar date/time"
+            ],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "lowercase-timestamp.json",
+          "our_verdict": "REJECTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [
+              "created_at is not RFC 3339"
+            ],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "missing-output-hash.json",
+          "our_verdict": "REJECTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [
+              "missing required member: output_hash"
+            ],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "nil-uuid.json",
+          "our_verdict": "REJECTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [
+              "id is the nil UUID"
+            ],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "non-utf8-bytes.json",
+          "our_verdict": "REJECTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [
+              "canonical_bytes is not valid UTF-8"
+            ],
+            "binding": []
+          },
+          "profile_findings": [
+            "canonical payload is not a UTF-8 JSON object"
+          ],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "payload-is-array.json",
+          "our_verdict": "REJECTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [],
+            "binding": [
+              "receipt_schema_version: one side missing",
+              "provenance binding: canonical payload did not decode to an object"
+            ]
+          },
+          "profile_findings": [
+            "canonical payload is not a JSON object"
+          ],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "payload-omits-issuer-claims.json",
+          "our_verdict": "REJECTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [],
+            "binding": [
+              "provenance binding: one side missing"
+            ]
+          },
+          "profile_findings": [],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "provenance-control-char.json",
+          "our_verdict": "REJECTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [
+              "provenance_class is not a known class"
+            ],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "provenance-trailing-newline.json",
+          "our_verdict": "REJECTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [
+              "provenance_class is not a known class"
+            ],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "tampered-provenance.json",
+          "our_verdict": "REJECTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [],
+            "binding": [
+              "provenance binding: outer does not match committed"
+            ]
+          },
+          "profile_findings": [],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "timestamp-no-timezone.json",
+          "our_verdict": "REJECTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [
+              "created_at is not RFC 3339"
+            ],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "tool-empty-name.json",
+          "our_verdict": "REJECTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [
+              "tool is not an object with name/version/scope strings"
+            ],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "tool-not-object.json",
+          "our_verdict": "REJECTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [
+              "tool is not an object with name/version/scope strings"
+            ],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "uppercase-id.json",
+          "our_verdict": "REJECTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [
+              "id is not a lowercase UUID"
+            ],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "absent"
+        },
+        {
+          "file": "version-downgrade.json",
+          "our_verdict": "REJECTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [],
+            "binding": [
+              "receipt_schema_version: outer does not match committed"
+            ]
+          },
+          "profile_findings": [],
+          "anchor_outcome": "absent"
+        }
+      ]
+    },
+    "invalid-profile": {
+      "files": 1,
+      "accepted": 1,
+      "rejected": 0,
+      "their_expectation_core": "pass",
+      "their_expectation_in_our_words": "ACCEPTED",
+      "agree": true,
+      "rows": [
+        {
+          "file": "missing-inputs.json",
+          "our_verdict": "ACCEPTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [],
+            "binding": []
+          },
+          "profile_findings": [
+            "reference-producer payload omits the 'inputs' member"
+          ],
+          "anchor_outcome": "absent"
+        }
+      ]
+    },
+    "anchored": {
+      "files": 6,
+      "accepted": 6,
+      "rejected": 0,
+      "their_expectation_core": "pass",
+      "their_expectation_in_our_words": "ACCEPTED",
+      "agree": true,
+      "rows": [
+        {
+          "file": "anchored-bad-id-version.json",
+          "our_verdict": "ACCEPTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "verification failed"
+        },
+        {
+          "file": "anchored-bad-leaf-hash.json",
+          "our_verdict": "ACCEPTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "verification failed"
+        },
+        {
+          "file": "anchored-bad-timestamp.json",
+          "our_verdict": "ACCEPTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "verification failed"
+        },
+        {
+          "file": "anchored-missing-proof.json",
+          "our_verdict": "ACCEPTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "verification failed"
+        },
+        {
+          "file": "anchored-unresolvable-anchor.json",
+          "our_verdict": "ACCEPTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "rejected: unresolvable record"
+        },
+        {
+          "file": "anchored-valid.json",
+          "our_verdict": "ACCEPTED",
+          "our_id_verdict": "unverified",
+          "blocking": {
+            "file_checks": [],
+            "structural": [],
+            "binding": []
+          },
+          "profile_findings": [],
+          "anchor_outcome": "verified"
+        }
+      ]
+    }
+  },
+  "agreement": {
+    "valid": true,
+    "invalid": true,
+    "invalid-profile": true,
+    "anchored": true
+  },
+  "notes": [
+    "invalid-profile: AER-1 expects CORE pass with the profile check failing separately. We answered ACCEPTED on 1 of 1 and recorded the profile findings without letting them block - agreement at the core level, divergence only in whether a profile fault blocks. Same bytes, different granularity, not a disagreement about validity."
+  ],
+  "directories_agree": 4,
+  "directories_total": 4
+}

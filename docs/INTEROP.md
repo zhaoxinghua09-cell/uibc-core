@@ -42,3 +42,25 @@
 3. **等他们先动**：这条路最省，但也最慢，且不改变"互不兼容"的事实。
 
 在那之前，对外只能说：**两边都有公开、可离线复跑的语料；两边的容器互不兼容；我方在自己容器内的预期判词是 28 例、逐条带依据，本轮已实测 `exact 22 / declined 6 / wrong 0`。**
+
+## 第一条路已经走了：`tools/aep_to_uibc.py`（2026-11-20 同日）
+
+转换器的语义只有一条：**载荷字节和它被记录的 SHA-256 一起搬过去**。搬完之后：
+
+| 故障类别（他们的 8 个 invalid） | 能不能搬进 UIBC | 参考实现 | 第二实现 |
+|---|---|---|---|
+| `tampered-canonical-bin` | 能（载荷被改） | FAIL | FAIL |
+| `missing-canonical-bin` | 能（载荷缺失） | FAIL | FAIL |
+| `tampered-metadata` | 能（元数据被改） | FAIL | FAIL |
+| `bad-signature-classical` | 不能（签名对象不同） | — | — |
+| `bad-signature-pqc` | 不能（ML-DSA 无对应槽） | — | — |
+| `untrusted-issuer` | 不能（转换后由我方签，无可不信之 issuer） | — | — |
+| `bad-timestamp` | 不能（DER 令牌 vs JSON 信封槽） | — | — |
+| `tampered-overt-receipt` | 不能（OVERT 对象 vs 我方 receipt schema） | — | — |
+
+5 个 valid 全部转换成功，两个实现都回 **PASS**（`python tools/aep_to_uibc.py --measure <test-vectors> <work>` 实测：`5 PASS/PASS`、`3 FAIL/FAIL`、`5 declined`）。
+
+**这条数字的意义要说准**：能搬的 3 类，是两个容器都表达"载荷/哈希不一致"的类别，判对是应有之义；**5 类搬不过去是因为我方没有对应的信封**，不是他们判得比我们细。所以这张表仍然不能用来宣称"更准"。它能说明的只有一句：**一旦把载荷搬进同一容器，两套实现在同一批证据上给出一致判词**——这是第一处真正的同批比较。
+
+**仍缺**：把 RFC 3161 令牌和 OVERT 收据映射成我方信封（需要一份字段对照，本轮未做）。做完之后，8 类故障才能全部同批比较。
+

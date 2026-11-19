@@ -1,0 +1,2462 @@
+
+
+
+
+Internet Engineering Task Force                               R. Sharif
+Internet-Draft                                            CyberSecAI Ltd
+Intended status: Standards Track                       September 5, 2026
+Expires: March 9, 2027
+
+
+   Agent Audit Trail: A Standard Logging Format for Autonomous AI
+                                Systems
+                  draft-sharif-agent-audit-trail-03
+
+Abstract
+
+   This document specifies a standard logging format for autonomous
+   AI agent systems.  The Agent Audit Trail (AAT) defines a
+   JSON-based record structure with mandatory fields for agent
+   identity, action classification, outcome tracking, and trust
+   level reporting.  Records are linked via tamper-evident hash
+   chaining using SHA-256 per RFC 8785, with optional ECDSA
+   signatures for non-repudiation.
+
+   The format addresses requirements from the EU AI Act
+   (Regulation 2024/1689), which mandates automatic recording of
+   events for high-risk AI systems effective August 2026.  It also
+   maps to SOC 2 Trust Services Criteria, ISO/IEC 42001,
+   ISO/IEC 24970, prEN 18229-1, and PCI DSS v4.0.1 logging
+   requirements.
+
+   The design is transport-agnostic and supports export to JSONL,
+   Syslog (RFC 5424), and CSV while preserving chain integrity.
+   Privacy is addressed through input/output hashing, content
+   fingerprinting, and tombstone-based deletion compatible with
+   GDPR Article 17.
+
+   This revision (-01) adds pre-execution recording requirements,
+   recording independence, deny reason codes, replay protection,
+   external timestamp anchoring, and content fingerprinting based
+   on feedback from independent implementers.
+
+   This revision (-02) adds a Decision Reproducibility section
+   (Section 13) that distinguishes record reproducibility,
+   available for any model, from decision reproducibility,
+   available only for open-weight models executed at temperature
+   zero in an attested environment, and defines the associated
+   record fields.
+
+   This revision (-03) adds the Attestation Closure requirement
+   (Section 13.6): the digests recorded for decision
+   reproducibility MUST cover the complete computational closure
+   of the inference function -- model weights, tokenizer, chat
+   template, inference engine build, decoding configuration, and
+   numeric environment -- together with new record fields
+   (tokenizer_digest, chat_template_digest, engine_build_digest)
+   and a minimal-change threat analysis (Section 13.7) showing
+   that any component left outside the attested set is a forgery
+   channel.
+
+Status of This Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF).  Note that other groups may also distribute
+   working documents as Internet-Drafts.  The list of current
+   Internet-Drafts is at https://datatracker.ietf.org/drafts/current/.
+
+   Internet-Drafts are draft documents valid for a maximum of six
+   months and may be updated, replaced, or obsoleted by other
+   documents at any time.  It is inappropriate to use Internet-Drafts
+   as reference material or to cite them other than as "work in
+   progress."
+
+   This Internet-Draft will expire on March 3, 2027.
+
+Copyright Notice
+
+   Copyright (c) 2026 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents
+   (https://trustee.ietf.org/license-info) in effect on the date of
+   publication of this document.  Please review these documents
+   carefully, as they describe your rights and restrictions with
+   respect to this document.  Code Components extracted from this
+   document must include Revised BSD License text as described in
+   Section 4.e of the Trust Legal Provisions and are provided
+   without warranty as described in the Revised BSD License.
+
+Table of Contents
+
+   1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . .  4
+     1.1.  The Problem . . . . . . . . . . . . . . . . . . . . . .  4
+     1.2.  Design Goals  . . . . . . . . . . . . . . . . . . . . .  5
+   2.  Terminology . . . . . . . . . . . . . . . . . . . . . . . .  5
+   3.  Audit Record Format . . . . . . . . . . . . . . . . . . . .  7
+     3.1.  Mandatory Fields  . . . . . . . . . . . . . . . . . . .  7
+     3.2.  Optional Fields . . . . . . . . . . . . . . . . . . . . 10
+     3.3.  Field Constraints . . . . . . . . . . . . . . . . . . . 13
+   4.  Pre-Execution Recording . . . . . . . . . . . . . . . . . . 14
+     4.1.  Record Phase  . . . . . . . . . . . . . . . . . . . . . 14
+     4.2.  Pre-Execution Requirements  . . . . . . . . . . . . . . 15
+     4.3.  High-Risk System Requirements . . . . . . . . . . . . . 15
+   5.  Recording Independence  . . . . . . . . . . . . . . . . . . 16
+     5.1.  Self-Recording  . . . . . . . . . . . . . . . . . . . . 16
+     5.2.  Independent Recording . . . . . . . . . . . . . . . . . 16
+   6.  Tamper-Evident Chaining . . . . . . . . . . . . . . . . . . 17
+     6.1.  Hash Computation  . . . . . . . . . . . . . . . . . . . 17
+     6.2.  Signature Envelope  . . . . . . . . . . . . . . . . . . 18
+     6.3.  Chain Verification  . . . . . . . . . . . . . . . . . . 19
+   7.  Action Type Definitions . . . . . . . . . . . . . . . . . . 19
+     7.1.  tool_call . . . . . . . . . . . . . . . . . . . . . . . 20
+     7.2.  tool_response . . . . . . . . . . . . . . . . . . . . . 20
+     7.3.  decision  . . . . . . . . . . . . . . . . . . . . . . . 21
+     7.4.  delegation  . . . . . . . . . . . . . . . . . . . . . . 21
+     7.5.  escalation  . . . . . . . . . . . . . . . . . . . . . . 22
+     7.6.  error . . . . . . . . . . . . . . . . . . . . . . . . . 22
+     7.7.  lifecycle . . . . . . . . . . . . . . . . . . . . . . . 23
+   8.  Session Structure . . . . . . . . . . . . . . . . . . . . . 23
+     8.1.  Genesis Record  . . . . . . . . . . . . . . . . . . . . 23
+     8.2.  Ordered Chain . . . . . . . . . . . . . . . . . . . . . 24
+     8.3.  Session Close . . . . . . . . . . . . . . . . . . . . . 24
+   9.  Retention Requirements  . . . . . . . . . . . . . . . . . . 25
+     9.1.  High-Risk Systems . . . . . . . . . . . . . . . . . . . 25
+     9.2.  General-Purpose Systems . . . . . . . . . . . . . . . . 26
+     9.3.  Tombstone Records . . . . . . . . . . . . . . . . . . . 26
+   10. Export Formats  . . . . . . . . . . . . . . . . . . . . . . 27
+     10.1. JSONL (Primary) . . . . . . . . . . . . . . . . . . . . 27
+     10.2. Syslog (RFC 5424) . . . . . . . . . . . . . . . . . . . 27
+     10.3. CSV . . . . . . . . . . . . . . . . . . . . . . . . . . 28
+   11. Regulatory Mapping  . . . . . . . . . . . . . . . . . . . . 29
+     11.1. EU AI Act . . . . . . . . . . . . . . . . . . . . . . . 29
+     11.2. SOC 2 . . . . . . . . . . . . . . . . . . . . . . . . . 30
+     11.3. ISO/IEC 42001 . . . . . . . . . . . . . . . . . . . . . 30
+     11.4. ISO/IEC 24970 . . . . . . . . . . . . . . . . . . . . . 31
+     11.5. prEN 18229-1  . . . . . . . . . . . . . . . . . . . . . 31
+     11.6. PCI DSS v4.0.1 . . . . . . . . . . . . . . . . . . . . 31
+   12. Privacy Considerations  . . . . . . . . . . . . . . . . . . 32
+     12.1. Data Minimization . . . . . . . . . . . . . . . . . . . 32
+     12.2. Right to Erasure  . . . . . . . . . . . . . . . . . . . 33
+   13. Decision Reproducibility  . . . . . . . . . . . . . . . . . 33
+     13.1. Two Distinct Properties . . . . . . . . . . . . . . . 33
+     13.2. Conditions for Decision Reproducibility  . . . . . . . 34
+     13.3. Reproducibility Record Fields . . . . . . . . . . . . 34
+     13.4. Verification Procedure  . . . . . . . . . . . . . . . 35
+     13.5. Scope and Limitations . . . . . . . . . . . . . . . . 35
+     13.6. Attestation Closure . . . . . . . . . . . . . . . . . 36
+     13.7. Minimal-Change Threat Model . . . . . . . . . . . . . 36
+   14. Security Considerations . . . . . . . . . . . . . . . . . . 36
+     14.1. Log Tampering . . . . . . . . . . . . . . . . . . . . . 33
+     14.2. Log Injection . . . . . . . . . . . . . . . . . . . . . 34
+     14.3. Timing Attacks  . . . . . . . . . . . . . . . . . . . . 34
+     14.4. Chain Breaks  . . . . . . . . . . . . . . . . . . . . . 35
+     14.5. Replay Attacks  . . . . . . . . . . . . . . . . . . . . 35
+   15. IANA Considerations . . . . . . . . . . . . . . . . . . . . 36
+     15.1. Action Type Registry  . . . . . . . . . . . . . . . . . 36
+     15.2. Outcome Registry  . . . . . . . . . . . . . . . . . . . 36
+   16. References  . . . . . . . . . . . . . . . . . . . . . . . . 37
+     16.1. Normative References  . . . . . . . . . . . . . . . . . 37
+     16.2. Informative References  . . . . . . . . . . . . . . . . 38
+   Appendix A.  Example Audit Trail  . . . . . . . . . . . . . . . 40
+   Appendix B.  EU AI Act Compliance Checklist . . . . . . . . . . 46
+   Appendix C.  Implementation Notes . . . . . . . . . . . . . . . 48
+   Appendix D.  Changes from -00 . . . . . . . . . . . . . . . . . 52
+   Acknowledgments . . . . . . . . . . . . . . . . . . . . . . . . 53
+   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . 53
+
+1.  Introduction
+
+1.1.  The Problem
+
+   The EU Artificial Intelligence Act (Regulation 2024/1689) enters
+   full application on 2 August 2026.  Article 12 requires that
+   high-risk AI systems "shall technically allow for the automatic
+   recording of events ('logs') over the lifetime of the system."
+   Article 12(2) further specifies that logging capabilities shall
+   conform to recognized standards or common specifications.
+
+   Despite this regulatory mandate, no standard exists for HOW
+   autonomous AI agents should log their activities.  Current
+   approaches suffer from several deficiencies:
+
+   o  Proprietary formats that vary across vendors, making cross-
+      system auditing impossible.
+
+   o  No tamper-evidence, allowing post-hoc modification of logs
+      without detection.
+
+   o  Inconsistent action taxonomies that prevent meaningful
+      comparison of agent behavior across implementations.
+
+   o  No linkage between agent identity and logged actions,
+      making attribution unreliable.
+
+   o  No session structure, making it impossible to reconstruct
+      the full sequence of an agent's autonomous decision chain.
+
+   o  No requirement for WHEN a record must be written relative
+      to the action it describes, allowing post-execution logs
+      to masquerade as enforcement evidence.
+
+   This document fills this gap by defining the Agent Audit Trail
+   (AAT), a standard JSON-based logging format with tamper-evident
+   chaining, a defined action taxonomy, pre-execution recording
+   requirements, and explicit regulatory mapping.
+
+1.2.  Design Goals
+
+   The AAT format is designed with the following goals:
+
+   o  Regulatory compliance: Direct mapping to EU AI Act
+      Article 12 requirements and other frameworks.
+
+   o  Tamper evidence: Hash-chained records that make
+      unauthorized modification detectable.
+
+   o  Interoperability: A single format usable across different
+      agent frameworks, model providers, and orchestration
+      systems.
+
+   o  Privacy by design: No raw personal data in records;
+      cryptographic hashes of inputs and outputs instead.
+
+   o  Transport agnostic: Exportable to JSONL, Syslog, and CSV
+      without losing chain integrity.
+
+   o  Incremental adoption: Mandatory fields are minimal;
+      optional fields support progressive enhancement.
+
+   o  Enforcement evidence: Pre-execution recording ensures that
+      audit records prove policy enforcement, not merely
+      observation.
+
+2.  Terminology
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL",
+   "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT
+   RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be
+   interpreted as described in BCP 14 [RFC2119] [RFC8174] when,
+   and only when, they appear in capitalized form, as shown here.
+
+   Agent:  An autonomous software system that uses one or more
+      large language models to make decisions and take actions
+      with limited or no human intervention per action.
+
+   Agent Audit Trail (AAT):  An ordered sequence of audit records
+      produced by an agent during a session, linked by hash
+      chaining.
+
+   Audit Record:  A single JSON object representing one logged
+      event in an agent's operation.
+
+   Session:  A bounded sequence of agent operations that begins
+      with a genesis record and ends with a session close record.
+
+   Genesis Record:  The first record in a session, which has no
+      parent and establishes the chain root.
+
+   Tombstone Record:  A record that replaces a deleted record's
+      content while preserving the hash chain.
+
+   Trust Level:  A classification from L0 (no verification) to
+      L4 (full mutual authentication with revocation checking)
+      as defined in [MCPS].
+
+   Action Type:  A controlled vocabulary value describing the
+      category of agent activity being logged.
+
+   Chain Hash:  The SHA-256 digest of the previous record's
+      canonical JSON representation, linking records into a
+      tamper-evident sequence.
+
+   Pre-Execution Recording:  The practice of writing an audit
+      record BEFORE the action it describes is executed, ensuring
+      that the record serves as evidence of an enforcement
+      decision rather than a post-hoc observation.
+
+   Recording Component:  The software component responsible for
+      writing audit records.  This may be the agent itself, a
+      gateway, middleware, or an external observer.
+
+   Content Fingerprint:  A SHA-256 hash of the full action
+      content computed before any redaction, enabling proof of
+      content existence after the content itself has been erased.
+
+3.  Audit Record Format
+
+   Each audit record is a JSON object.  Fields are divided into
+   mandatory (MUST be present in every record) and optional (MAY
+   be present based on the action type and deployment context).
+
+3.1.  Mandatory Fields
+
+   record_id:  String.  REQUIRED.  A UUID version 4 [RFC9562]
+      uniquely identifying this record.  Implementations MUST
+      generate a fresh UUIDv4 for each record.  Duplicate
+      record_id values within a session indicate a processing
+      error and MUST be flagged by validators.
+
+      Example: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+
+   timestamp:  String.  REQUIRED.  The time at which the event
+      occurred, formatted per RFC 3339 [RFC3339] with mandatory
+      UTC offset.  Implementations SHOULD use UTC (indicated by
+      "Z" suffix).  Millisecond precision is RECOMMENDED.
+      Microsecond precision is OPTIONAL.
+
+      Example: "2026-03-29T14:30:00.123Z"
+
+   agent_id:  String.  REQUIRED.  A URI [RFC3986] uniquely
+      identifying the agent instance.  This SHOULD be a
+      persistent identifier that survives agent restarts.  When
+      used with MCPS [MCPS], this MUST match the agent_id in the
+      Agent Passport.
+
+      Example: "urn:agent:payment-bot.acme.example"
+
+   agent_version:  String.  REQUIRED.  The semantic version
+      [SEMVER] of the agent software.  This allows correlation
+      of behavior changes with software updates.
+
+      Example: "2.1.0"
+
+   session_id:  String.  REQUIRED.  A UUID version 4 identifying
+      the current session.  All records within a single session
+      MUST share the same session_id.
+
+      Example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+
+   action_type:  String.  REQUIRED.  One of the registered
+      action type values defined in Section 7.  The initial
+      registry contains: "tool_call", "tool_response",
+      "decision", "delegation", "escalation", "error",
+      "lifecycle".
+
+   action_detail:  Object.  REQUIRED.  A JSON object containing
+      action-type-specific fields as defined in Section 7.  The
+      structure of this object varies by action_type.  Unknown
+      fields within action_detail SHOULD be preserved by
+      processors.
+
+   outcome:  String.  REQUIRED.  The result of the action.  One
+      of the registered outcome values: "success", "failure",
+      "timeout", "denied", "escalated".  See Section 15.2 for
+      the outcome registry.
+
+      o  "success": The action completed as intended.
+
+      o  "failure": The action did not complete due to an error.
+
+      o  "timeout": The action exceeded its time budget.
+
+      o  "denied": The action was blocked by a policy or
+         authorization check.
+
+      o  "escalated": The action was redirected to a human or
+         higher-authority agent.
+
+   trust_level:  String.  REQUIRED.  The trust level at which
+      the agent was operating when this action occurred.  One of:
+      "L0", "L1", "L2", "L3", "L4".
+
+      o  L0: No verification.  The agent has no cryptographic
+         identity.
+
+      o  L1: Self-signed identity.  The agent possesses a key
+         pair but no external attestation.
+
+      o  L2: Authority-signed identity.  A Trust Authority has
+         issued the agent's passport.
+
+      o  L3: Mutual authentication.  Both parties have verified
+         each other's identity.
+
+      o  L4: Full mutual authentication with revocation
+         checking and continuous monitoring.
+
+   parent_record_id:  String or null.  REQUIRED.  The record_id
+      of the immediately preceding record in the session chain.
+      For genesis records (the first record in a session), this
+      field MUST be null.  For all subsequent records, this MUST
+      contain the record_id of the previous record.
+
+   prev_hash:  String or null.  REQUIRED.  The SHA-256 hash of
+      the canonical JSON representation (per RFC 8785 [RFC8785])
+      of the previous record.  For genesis records, this field
+      MUST be null.  The hash MUST be encoded as a lowercase
+      hexadecimal string (64 characters).
+
+      Example: "a7ffc6f8bf1ed76651c14756a061d662..."
+
+   record_phase:  String.  REQUIRED.  Indicates when this record
+      was written relative to the action it describes.  One of:
+
+      o  "pre_execution": The record was written BEFORE the
+         action was executed.  The outcome field reflects the
+         enforcement decision (e.g., "denied" or "escalated"),
+         not the result of execution.
+
+      o  "post_execution": The record was written AFTER the
+         action completed.  The outcome field reflects the
+         actual result of execution.
+
+      o  "concurrent": The record was written during the
+         execution of the action (e.g., streaming operations
+         or long-running tasks).
+
+      See Section 4 for requirements on when each phase value
+      MUST be used.
+
+3.2.  Optional Fields
+
+   The following fields are OPTIONAL and MAY be included in any
+   audit record:
+
+   human_override:  Object.  Present when a human intervened in
+      or overrode the agent's action.  Contains:
+
+      o  "operator_id": String.  An identifier for the human
+         operator (SHOULD be a pseudonym or role, not a real
+         name, for privacy).
+
+      o  "reason": String.  Free-text explanation of the
+         override.
+
+      o  "original_action": Object.  The action the agent would
+         have taken without intervention.
+
+   risk_score:  Number.  A value between 0.0 and 1.0 indicating
+      the agent's assessed risk of the action.  0.0 indicates
+      minimal risk; 1.0 indicates maximum risk.
+
+   model_id:  String.  The identifier of the language model used
+      for the decision.  Example: "gpt-4o-2025-03-01" or
+      "claude-sonnet-4-20250514".
+
+   input_hash:  String.  The SHA-256 hash of the input provided
+      to the agent for this action, encoded as lowercase
+      hexadecimal.  Used instead of raw input to preserve
+      privacy.
+
+   output_hash:  String.  The SHA-256 hash of the output
+      produced by the agent for this action, encoded as
+      lowercase hexadecimal.
+
+   latency_ms:  Number.  The wall-clock time in milliseconds
+      from action initiation to completion.
+
+   cost_estimate:  Object.  Estimated cost of the action:
+
+      o  "amount": Number.  The monetary amount.
+
+      o  "currency": String.  ISO 4217 currency code.
+
+      o  "breakdown": Object.  Optional sub-costs (e.g.,
+         "compute", "api_calls", "tokens").
+
+   sanctions_check:  Object.  Result of sanctions screening:
+
+      o  "provider": String.  The screening provider.
+
+      o  "checked_at": String.  RFC 3339 timestamp of check.
+
+      o  "result": String.  One of "clear", "match", "error".
+
+      o  "list_version": String.  Version of the sanctions list.
+
+   jurisdiction:  String.  ISO 3166-1 alpha-2 country code
+      indicating the jurisdiction governing this action.
+
+   signature:  String.  An ECDSA P-256 signature over the
+      canonical JSON of this record (excluding the signature
+      field itself), encoded as Base64url per RFC 4648
+      Section 5.  See Section 6.2.
+
+   deny_reasons:  Array of String.  OPTIONAL.  When outcome is
+      "denied", this field captures the specific reasons for
+      denial.  Each entry SHOULD be a machine-readable code
+      from the following list:
+
+      o  "INSUFFICIENT_TRUST_LEVEL": The agent's trust level is
+         below the minimum required for the action.
+
+      o  "CAPABILITY_NOT_GRANTED": The agent does not hold the
+         required capability or permission.
+
+      o  "REPLAY_DETECTED": The action appears to be a replay
+         of a previously executed action.
+
+      o  "NONCE_REUSED": The nonce in the request has already
+         been consumed within this session.
+
+      o  "TIMESTAMP_STALE": The action's timestamp is outside
+         the acceptable freshness window.
+
+      o  "AGENT_REVOKED": The agent's identity or passport has
+         been revoked.
+
+      o  "SANCTIONS_HIT": The action involves a sanctioned
+         entity.
+
+      o  "SEQUENCE_VIOLATION": The action violates the expected
+         sequence of operations.
+
+      o  "ACTION_UNKNOWN": The requested action is not in the
+         agent's registered capability set.
+
+      Implementations MAY define additional reason codes.  Custom
+      codes SHOULD use a prefix identifying the implementation
+      (e.g., "ACME_LIMIT_EXCEEDED").  For deployments at trust
+      level L2 or above, this field is RECOMMENDED when outcome
+      is "denied".
+
+   nonce:  String.  OPTIONAL.  A unique value containing at
+      least 128 bits of entropy, encoded as a lowercase
+      hexadecimal string (minimum 32 characters).  Used for
+      replay protection.  For deployments at trust level L2 or
+      above, this field SHOULD be present.  Verifiers MAY reject
+      records with duplicate nonce values within the same
+      session.  See Section 14.5 for replay protection details.
+
+   external_timestamp:  Object.  OPTIONAL.  An external
+      timestamp anchor from a trusted Time Stamping Authority
+      (TSA) per RFC 3161 [RFC3161].  Contains:
+
+      o  "tsa_url": String.  REQUIRED within this object.  The
+         URL of the Time Stamping Authority that produced the
+         token.
+
+      o  "token": String.  REQUIRED within this object.  The
+         Base64-encoded RFC 3161 timestamp token.
+
+      o  "anchored_at": String.  REQUIRED within this object.
+         The RFC 3339 timestamp returned by the TSA.
+
+      For deployments at trust level L3 or above, external
+      timestamp anchoring is RECOMMENDED.  External timestamps
+      provide independent proof of when a record was created,
+      mitigating clock manipulation attacks (Section 14.3).
+
+   content_fingerprint:  String.  OPTIONAL.  The SHA-256 hash
+      of the full action content (including any input, output,
+      and reasoning data) computed BEFORE any redaction or
+      hashing is applied, encoded as lowercase hexadecimal.
+      This field enables verification that content existed at
+      the time of recording even after the content has been
+      erased pursuant to GDPR Article 17 or similar regulations.
+      The content fingerprint MUST be computed over a
+      deterministic serialization of the full content; JCS
+      (RFC 8785) is RECOMMENDED for this purpose.
+
+   recording_component:  String.  OPTIONAL.  A URI identifying
+      the component that wrote this audit record.  When the
+      recording component differs from the agent (i.e., when a
+      gateway, middleware, or external observer wrote the
+      record), this field MUST be present.  When absent, the
+      agent identified by agent_id is assumed to be the
+      recording component.  See Section 5 for recording
+      independence requirements.
+
+3.3.  Field Constraints
+
+   The following constraints apply to all audit records:
+
+   o  All string fields MUST be valid UTF-8.
+
+   o  The total size of a single audit record SHOULD NOT exceed
+      64 KB when serialized as JSON.  Records exceeding 256 KB
+      MUST be rejected by validators.
+
+   o  Timestamps MUST NOT be backdated.  The timestamp of record
+      N+1 MUST be greater than or equal to the timestamp of
+      record N within the same session.
+
+   o  The action_detail object MUST contain at least one field
+      relevant to the action_type.
+
+   o  Implementations MUST NOT add fields with names beginning
+      with "aat_" to action_detail, as this prefix is reserved
+      for future extensions of this specification.
+
+   o  The record_phase field MUST accurately reflect the
+      temporal relationship between the record and the action.
+      Setting record_phase to "pre_execution" for a record
+      written after the action has completed is a conformance
+      violation.
+
+4.  Pre-Execution Recording
+
+   The -00 revision of this specification did not require that a
+   record be written at the moment of authorisation rather than at
+   the moment of completion.  A post-execution log can be fully
+   conformant to the -00 format while providing no evidence that
+   a policy check actually prevented an action.  This section
+   closes that gap.
+
+4.1.  Record Phase
+
+   The record_phase field (Section 3.1) declares when the record
+   was written.  The three permitted values have distinct
+   evidentiary properties:
+
+   o  "pre_execution": The record exists BEFORE the action runs.
+      If the outcome is "denied", the record proves that the
+      action was evaluated and rejected prior to execution.  If
+      the outcome is "success" (i.e., the action was authorised
+      to proceed), the record proves that an authorisation
+      decision was made before execution.
+
+   o  "post_execution": The record exists AFTER the action has
+      completed.  The record documents what happened but cannot
+      prove that a policy gate existed before the action ran.
+
+   o  "concurrent": The record is written during a long-running
+      or streaming action.  This is appropriate for actions
+      whose outcome is not yet known.
+
+4.2.  Pre-Execution Requirements
+
+   The following pre-execution recording requirements apply:
+
+   o  When action_type is "decision" and outcome is "denied",
+      the record MUST have record_phase set to "pre_execution".
+      A denial that is only logged after execution provides no
+      evidence that the denial was enforced.
+
+   o  When action_type is "decision" and outcome is "escalated",
+      the record MUST have record_phase set to "pre_execution".
+      An escalation record written after the fact does not prove
+      that the agent deferred to a human before acting.
+
+   o  When action_type is "delegation" and outcome is "denied",
+      the record MUST have record_phase set to "pre_execution".
+
+   o  For all other action_type and outcome combinations,
+      record_phase MAY be any of the three permitted values.
+      "post_execution" is RECOMMENDED for "tool_response" and
+      "error" records, as these inherently describe completed
+      events.
+
+4.3.  High-Risk System Requirements
+
+   For systems classified as high-risk under the EU AI Act
+   (Regulation 2024/1689, Annex III), additional pre-execution
+   recording requirements apply:
+
+   o  Any action that modifies external state (e.g., writes to a
+      database, sends a message, updates a configuration) MUST
+      be preceded by a record with record_phase set to
+      "pre_execution" and outcome reflecting the authorisation
+      decision.
+
+   o  Any action that moves money or initiates a financial
+      transaction MUST be preceded by a pre-execution record.
+
+   o  Any delegation to another agent MUST be preceded by a
+      pre-execution record documenting the delegation decision.
+
+   In these cases, two records are expected per action: a
+   pre-execution record documenting the authorisation decision,
+   followed by a post-execution record documenting the outcome.
+   Both records MUST share the same action_detail content (or a
+   reference linking them), and the post-execution record SHOULD
+   reference the pre-execution record's record_id in an
+   "authorization_record_id" field within action_detail.
+
+5.  Recording Independence
+
+   This section specifies requirements for the component that
+   writes audit records, addressing the question of whether an
+   agent may log its own actions.
+
+5.1.  Self-Recording
+
+   At trust levels L0 and L1, the agent itself MAY write its own
+   audit records.  However, when an agent writes its own records,
+   the following declaration requirements apply:
+
+   o  The recording_component field (Section 3.2) MAY be absent
+      (indicating self-recording) or MUST be set to the same
+      URI as the agent_id field.
+
+   o  The genesis record's action_detail SHOULD include a field
+      "recording_mode" with value "self" to declare that the
+      agent is its own recorder.
+
+   Self-recording provides weaker evidentiary guarantees because
+   the agent could, in principle, omit or alter records of its
+   own actions without external detection.
+
+5.2.  Independent Recording
+
+   For deployments at trust level L2 and above, audit records
+   SHOULD be written by a component independent of the agent.
+   Independent recording components include:
+
+   o  An API gateway or reverse proxy that observes agent
+      traffic and writes records before forwarding requests.
+
+   o  A sidecar process or middleware that intercepts agent
+      actions and writes records.
+
+   o  An external monitoring system that receives action
+      notifications and writes records independently.
+
+   When an independent recording component is used:
+
+   o  The recording_component field MUST be present and MUST
+      contain a URI identifying the independent component.
+
+   o  The independent component SHOULD sign records using its
+      own key, distinct from the agent's key, providing
+      independent attestation.
+
+   o  The genesis record's action_detail SHOULD include a field
+      "recording_mode" with value "independent" and a field
+      "recording_component_id" containing the URI of the
+      recording component.
+
+   Independent recording provides stronger evidence that the
+   audit trail faithfully represents the agent's actions, as the
+   recording component has no incentive to omit or alter records.
+
+6.  Tamper-Evident Chaining
+
+6.1.  Hash Computation
+
+   The prev_hash field creates a tamper-evident chain across all
+   records in a session.  The hash is computed as follows:
+
+   1.  Take the complete JSON object of the previous record,
+       INCLUDING all fields (mandatory and optional) that were
+       present in the record as stored.
+
+   2.  Serialize the JSON object using the JSON Canonicalization
+       Scheme (JCS) defined in RFC 8785 [RFC8785].  JCS
+       produces a deterministic byte sequence from any JSON
+       value.
+
+   3.  Compute the SHA-256 hash of the canonical byte sequence.
+
+   4.  Encode the resulting 32-byte hash as a 64-character
+       lowercase hexadecimal string.
+
+   The formula is:
+
+       prev_hash(N) = hex(SHA-256(JCS(record(N-1))))
+
+   For the genesis record (N=0), prev_hash MUST be null.
+
+   Implementations MUST use JCS (RFC 8785) for canonicalization.
+   Alternative canonicalization schemes MUST NOT be used, as they
+   would break chain verification across implementations.
+
+6.2.  Signature Envelope
+
+   When cryptographic non-repudiation is required, records MAY
+   include an ECDSA P-256 signature.  The signing procedure is:
+
+   1.  Construct the complete audit record with all fields
+       EXCEPT the "signature" field.
+
+   2.  Serialize using JCS (RFC 8785).
+
+   3.  Compute SHA-256 of the canonical bytes.
+
+   4.  Sign the hash using ECDSA P-256 with the agent's private
+       key, per FIPS 186-5 [FIPS186-5].
+
+   5.  Encode the signature as Base64url (RFC 4648 Section 5)
+       using IEEE P1363 fixed-length r||s encoding (64 bytes
+       total: 32 bytes r, 32 bytes s).
+
+   6.  Add the "signature" field to the record.
+
+   When verifying, the verifier MUST remove the "signature" field
+   before computing the hash for comparison.
+
+   Note: When both prev_hash and signature are present, prev_hash
+   is computed over the COMPLETE previous record INCLUDING its
+   signature field.  Only the current record's signature is
+   excluded during signing of the current record.
+
+   When used with MCPS [MCPS], the signing key SHOULD be the same
+   key used in the agent's Agent Passport, providing a direct
+   binding between audit records and cryptographic identity.
+
+6.3.  Chain Verification
+
+   To verify a session's audit trail integrity, a verifier MUST:
+
+   1.  Confirm the first record has parent_record_id = null and
+       prev_hash = null.
+
+   2.  For each subsequent record N (where N > 0):
+
+       a.  Compute hex(SHA-256(JCS(record(N-1)))).
+
+       b.  Compare the computed hash with record(N).prev_hash.
+
+       c.  If the values differ, the chain is broken at
+           record N and the trail MUST be flagged as tampered.
+
+   3.  If signatures are present, verify each signature using
+       the agent's public key.
+
+   4.  Verify that timestamps are monotonically non-decreasing.
+
+   5.  Verify that parent_record_id of record N equals the
+       record_id of record N-1.
+
+   6.  Verify that record_phase values are consistent with the
+       requirements in Section 4.2.
+
+   7.  If nonce values are present, verify that no duplicate
+       nonces exist within the session.
+
+   A chain verification failure MUST be reported as a critical
+   integrity error.  Partial chain verification (e.g., verifying
+   only the last K records) is NOT RECOMMENDED but MAY be used
+   for performance reasons if the full chain has been previously
+   verified.
+
+7.  Action Type Definitions
+
+   Each action type defines a specific structure for the
+   action_detail object.
+
+7.1.  tool_call
+
+   Logged when the agent invokes an external tool or API.
+
+   action_detail fields:
+
+   o  "tool_name": String.  REQUIRED.  The name of the tool
+      being called.
+
+   o  "tool_server": String.  OPTIONAL.  URI of the MCP server
+      or API endpoint providing the tool.
+
+   o  "parameters_hash": String.  REQUIRED.  SHA-256 hash of
+      the serialized parameters sent to the tool.
+
+   o  "tool_version": String.  OPTIONAL.  Version of the tool
+      definition.
+
+   o  "authorization": String.  OPTIONAL.  The authorization
+      mechanism used (e.g., "bearer_token", "api_key",
+      "mutual_tls").
+
+7.2.  tool_response
+
+   Logged when the agent receives a response from a tool.
+
+   action_detail fields:
+
+   o  "tool_name": String.  REQUIRED.  The name of the tool
+      that responded.
+
+   o  "response_hash": String.  REQUIRED.  SHA-256 hash of
+      the response payload.
+
+   o  "response_size": Number.  OPTIONAL.  Size of the response
+      in bytes.
+
+   o  "parent_call_id": String.  REQUIRED.  The record_id of
+      the corresponding tool_call record.
+
+7.3.  decision
+
+   Logged when the agent makes an autonomous decision.
+
+   action_detail fields:
+
+   o  "decision_type": String.  REQUIRED.  Category of decision
+      (e.g., "route", "approve", "reject", "classify",
+      "generate").
+
+   o  "reasoning_hash": String.  OPTIONAL.  SHA-256 hash of the
+      agent's reasoning chain or chain-of-thought.
+
+   o  "confidence": Number.  OPTIONAL.  Confidence score between
+      0.0 and 1.0.
+
+   o  "alternatives_considered": Number.  OPTIONAL.  Count of
+      alternative actions the agent evaluated.
+
+   o  "policy_ref": String.  OPTIONAL.  Identifier of the
+      policy or rule that governed this decision.
+
+   o  "authorization_record_id": String.  OPTIONAL.  When this
+      is a post-execution record for a previously authorised
+      action, contains the record_id of the pre-execution
+      record that authorised it.
+
+7.4.  delegation
+
+   Logged when the agent delegates work to another agent.
+
+   action_detail fields:
+
+   o  "delegate_agent_id": String.  REQUIRED.  URI of the agent
+      receiving the delegation.
+
+   o  "delegate_trust_level": String.  REQUIRED.  Trust level
+      of the delegate agent.
+
+   o  "task_description_hash": String.  REQUIRED.  SHA-256 hash
+      of the delegated task description.
+
+   o  "constraints": Array of String.  OPTIONAL.  Constraints
+      imposed on the delegate.
+
+   o  "timeout_ms": Number.  OPTIONAL.  Maximum time allowed
+      for the delegate to complete the task.
+
+7.5.  escalation
+
+   Logged when the agent escalates to a human operator or
+   higher-authority system.
+
+   action_detail fields:
+
+   o  "escalation_reason": String.  REQUIRED.  Why the agent
+      escalated (e.g., "confidence_below_threshold",
+      "policy_requires_human", "risk_score_exceeded",
+      "error_recovery").
+
+   o  "escalation_target": String.  REQUIRED.  Identifier of
+      the human or system receiving the escalation.
+
+   o  "context_hash": String.  OPTIONAL.  SHA-256 hash of the
+      context provided to the escalation target.
+
+   o  "urgency": String.  OPTIONAL.  One of "low", "medium",
+      "high", "critical".
+
+7.6.  error
+
+   Logged when the agent encounters an error condition.
+
+   action_detail fields:
+
+   o  "error_code": String.  REQUIRED.  A machine-readable
+      error code.
+
+   o  "error_message": String.  REQUIRED.  A human-readable
+      error description.
+
+   o  "error_category": String.  REQUIRED.  One of "transport",
+      "authentication", "authorization", "validation",
+      "timeout", "internal", "external".
+
+   o  "recoverable": Boolean.  REQUIRED.  Whether the agent
+      can continue operating after this error.
+
+   o  "stack_hash": String.  OPTIONAL.  SHA-256 hash of the
+      stack trace, for debugging without exposing internals.
+
+7.7.  lifecycle
+
+   Logged for agent lifecycle events (start, stop, pause,
+   configuration changes).
+
+   action_detail fields:
+
+   o  "event": String.  REQUIRED.  One of "session_start",
+      "session_end", "pause", "resume",
+      "configuration_change", "key_rotation",
+      "trust_level_change".
+
+   o  "previous_state": String.  OPTIONAL.  The state before
+      this lifecycle event.
+
+   o  "new_state": String.  OPTIONAL.  The state after this
+      lifecycle event.
+
+   o  "trigger": String.  OPTIONAL.  What caused the lifecycle
+      event (e.g., "scheduled", "manual", "policy",
+      "error_recovery").
+
+8.  Session Structure
+
+8.1.  Genesis Record
+
+   Every session MUST begin with a genesis record.  The genesis
+   record has the following characteristics:
+
+   o  action_type MUST be "lifecycle".
+
+   o  action_detail.event MUST be "session_start".
+
+   o  parent_record_id MUST be null.
+
+   o  prev_hash MUST be null.
+
+   o  record_phase MUST be "concurrent".
+
+   o  The action_detail SHOULD include the agent's configuration
+      hash, enabled tools list, and operating parameters to
+      establish a baseline for the session.
+
+   o  The action_detail SHOULD include "recording_mode" (either
+      "self" or "independent") to declare how records are being
+      written for this session.
+
+   Example genesis action_detail:
+
+       {
+         "event": "session_start",
+         "new_state": "active",
+         "trigger": "scheduled",
+         "config_hash": "b5bb9d8014a0f9b1d6...",
+         "recording_mode": "independent",
+         "recording_component_id":
+           "urn:gateway:enforcement.acme.example",
+         "enabled_tools": [
+           "payment_transfer",
+           "sanctions_check",
+           "balance_query"
+         ]
+       }
+
+8.2.  Ordered Chain
+
+   After the genesis record, all records MUST form a strictly
+   ordered chain:
+
+   o  Each record's parent_record_id MUST equal the previous
+      record's record_id.
+
+   o  Each record's prev_hash MUST equal
+      hex(SHA-256(JCS(previous_record))).
+
+   o  Timestamps MUST be monotonically non-decreasing.
+
+   o  No gaps in the chain are permitted.  If a record cannot
+      be produced (e.g., due to a crash), a recovery record
+      with action_type "error" MUST be inserted to document the
+      gap when the agent resumes.
+
+   Branching (multiple records claiming the same parent) is NOT
+   permitted within a single session.  If an agent forks into
+   parallel execution paths, each path MUST use a separate
+   session_id and the delegation record in the parent session
+   MUST reference the child session_id.
+
+8.3.  Session Close
+
+   Every session SHOULD end with a close record.  The close
+   record has the following characteristics:
+
+   o  action_type MUST be "lifecycle".
+
+   o  action_detail.event MUST be "session_end".
+
+   o  record_phase MUST be "post_execution".
+
+   o  action_detail MUST include a "session_hash" field
+      containing the SHA-256 hash of the concatenation of all
+      record hashes in the session, in order:
+
+       session_hash = hex(SHA-256(
+         prev_hash(1) || prev_hash(2) || ... || prev_hash(N)
+       ))
+
+      where N is the close record itself and prev_hash values
+      are the raw 32-byte digests (not hex-encoded) prior to
+      concatenation.
+
+   o  action_detail SHOULD include "record_count" (integer)
+      and "duration_ms" (number) summarizing the session.
+
+   If an agent terminates abnormally without producing a close
+   record, the session is considered "orphaned."  Monitoring
+   systems SHOULD detect orphaned sessions and produce a
+   synthetic close record with outcome "failure" and
+   action_detail.trigger "crash_recovery".
+
+9.  Retention Requirements
+
+9.1.  High-Risk Systems
+
+   For AI systems classified as high-risk under the EU AI Act
+   (Annex III), audit trail records SHOULD be retained for a
+   minimum of 12 months from the session close timestamp.
+
+   This aligns with Article 12(1) which states that logging
+   capabilities shall be such that logs are kept for a period
+   appropriate to the intended purpose of the high-risk AI
+   system, of at least six months unless provided otherwise in
+   applicable Union or national law.
+
+   The 12-month RECOMMENDATION in this specification exceeds the
+   minimum 6-month requirement to account for audit cycles and
+   incident investigation timelines.
+
+9.2.  General-Purpose Systems
+
+   For AI systems not classified as high-risk, audit trail
+   records SHOULD be retained for a minimum of 6 months from
+   the session close timestamp.
+
+   Deployments subject to financial regulations (e.g., PCI DSS,
+   SOC 2) MAY require longer retention periods as specified by
+   those frameworks.
+
+9.3.  Tombstone Records
+
+   When individual records must be deleted (e.g., pursuant to
+   GDPR Article 17 right to erasure), the record MUST be
+   replaced with a tombstone record that preserves chain
+   integrity.  A tombstone record:
+
+   o  Retains the original record_id, timestamp,
+      parent_record_id, and prev_hash.
+
+   o  Sets action_type to "lifecycle".
+
+   o  Sets action_detail to:
+
+       {
+         "event": "record_deleted",
+         "deletion_reason": "gdpr_art17",
+         "deleted_at": "2026-06-15T10:00:00Z",
+         "original_action_type": "tool_call"
+       }
+
+   o  Sets outcome to "success".
+
+   o  Retains the signature field if originally present.
+
+   The original record's content is destroyed.  Because the
+   tombstone preserves the original record_id and prev_hash,
+   subsequent records in the chain remain verifiable.  However,
+   the prev_hash of the NEXT record will no longer match the
+   tombstone (since the content changed).  To handle this,
+   implementations MUST also store a "tombstone_hash" field in
+   the tombstone record containing the original record's hash,
+   allowing validators to accept the chain break.
+
+   When the content_fingerprint field (Section 3.2) was present
+   in the original record, it SHOULD be retained in the
+   tombstone record.  This allows verification that specific
+   content existed at the time of recording without requiring
+   retention of the content itself.
+
+10.  Export Formats
+
+   Implementations MUST support at least one export format.
+   JSONL is the RECOMMENDED primary format.
+
+10.1.  JSONL (Primary)
+
+   The primary export format is JSON Lines (JSONL), where each
+   line contains exactly one complete audit record serialized
+   as JSON.  Lines are separated by a single newline character
+   (U+000A).
+
+   o  Each line MUST be a valid JSON object.
+
+   o  The order of lines MUST match the chain order
+      (genesis first, close last).
+
+   o  The file SHOULD use UTF-8 encoding without a byte order
+      mark (BOM).
+
+   o  The file extension SHOULD be ".jsonl".
+
+10.2.  Syslog (RFC 5424)
+
+   For integration with existing logging infrastructure, audit
+   records MAY be exported as Syslog messages per RFC 5424
+   [RFC5424].  The mapping is:
+
+   o  FACILITY: local0 (16).
+
+   o  SEVERITY: based on outcome -- success=6 (Informational),
+      failure=3 (Error), timeout=4 (Warning),
+      denied=5 (Notice), escalated=5 (Notice).
+
+   o  APP-NAME: the agent_id (truncated to 48 characters).
+
+   o  MSGID: the action_type.
+
+   o  STRUCTURED-DATA: SD-ID "aat@IANA-PEN" containing
+      record_id, session_id, trust_level, prev_hash,
+      record_phase.
+
+   o  MSG: JSON serialization of the full audit record.
+
+   The prev_hash and chain integrity MUST be preserved in the
+   structured data to enable reconstruction of the chain from
+   Syslog archives.
+
+10.3.  CSV
+
+   For human review and spreadsheet analysis, audit records MAY
+   be exported as CSV per RFC 4180 [RFC4180].  The mapping is:
+
+   o  Header row: record_id, timestamp, agent_id,
+      agent_version, session_id, action_type, outcome,
+      trust_level, record_phase, parent_record_id, prev_hash,
+      action_detail.
+
+   o  The action_detail column contains the JSON serialization
+      of the action_detail object.
+
+   o  CSV export is inherently lossy for optional fields.
+      Implementations SHOULD document which optional fields
+      are included.
+
+   CSV exports MUST NOT be used as the authoritative record.
+   The JSONL format MUST be retained as the source of truth.
+
+11.  Regulatory Mapping
+
+11.1.  EU AI Act
+
+   The following table maps AAT features to EU AI Act articles:
+
+   Article 12 (Record-Keeping):
+      AAT provides automatic recording via the mandatory audit
+      record format (Section 3).  Hash chaining (Section 6)
+      ensures records "allow the tracing back of the AI system's
+      operation."  The session structure (Section 8) provides the
+      "period of each use" required by Art 12(1)(c).
+      Pre-execution recording (Section 4) ensures that records
+      serve as evidence of enforcement, not merely observation.
+
+   Article 13 (Transparency):
+      The action_type taxonomy (Section 7) and decision records
+      (Section 7.3) provide interpretability of agent behavior.
+      The model_id field documents which model was used.
+      The human_override field documents human interventions.
+
+   Article 14 (Human Oversight):
+      The escalation action type (Section 7.5) documents when
+      and why agents escalated to humans.  The human_override
+      optional field (Section 3.2) captures human interventions.
+      Trust levels document the degree of autonomous operation.
+
+   Article 72 (Reporting):
+      The export formats (Section 10) enable provision of logs
+      to national competent authorities.  The session_hash in
+      session close records (Section 8.3) provides a verifiable
+      summary for regulatory reporting.
+
+11.2.  SOC 2
+
+   SOC 2 Trust Services Criteria relevant to AAT:
+
+   o  CC6.1 (Logical Access): trust_level and authorization
+      fields document access controls.
+
+   o  CC7.2 (System Monitoring): Continuous audit trail with
+      tamper-evident chaining satisfies monitoring requirements.
+
+   o  CC8.1 (Change Management): lifecycle action type records
+      document configuration changes.
+
+11.3.  ISO/IEC 42001
+
+   ISO/IEC 42001 (AI Management System) clauses addressed:
+
+   o  Clause 6.1.2 (AI Risk Assessment): risk_score and
+      decision records support risk documentation.
+
+   o  Clause 8.4 (AI System Operation): Full session audit
+      trails document operational behavior.
+
+   o  Clause 9.1 (Monitoring): Continuous logging with chain
+      verification supports monitoring requirements.
+
+11.4.  ISO/IEC 24970
+
+   ISO/IEC 24970 (AI system lifecycle processes) addresses
+   the full lifecycle of AI systems from conception through
+   retirement.  AAT supports the following aspects:
+
+   o  Process outcomes: AAT lifecycle records (Section 7.7)
+      document agent lifecycle transitions that map to
+      ISO/IEC 24970 process outcomes.
+
+   o  Traceability: Hash-chained audit trails provide the
+      traceability required across lifecycle stages.
+
+   o  Verification and validation: Pre-execution recording
+      (Section 4) and recording independence (Section 5)
+      support the verification evidence requirements.
+
+11.5.  prEN 18229-1
+
+   prEN 18229-1 (European standard for AI transparency)
+   establishes transparency requirements for AI systems
+   deployed in the European market.  AAT addresses:
+
+   o  Operational transparency: The action_type taxonomy
+      (Section 7) and decision records provide the
+      operational transparency required by prEN 18229-1.
+
+   o  Explainability support: The reasoning_hash, confidence,
+      and alternatives_considered fields in decision records
+      support explainability documentation.
+
+   o  Record integrity: Tamper-evident chaining (Section 6)
+      meets the record integrity requirements for trustworthy
+      transparency documentation.
+
+11.6.  PCI DSS v4.0.1
+
+   PCI DSS v4.0.1 requirements addressed by AAT:
+
+   o  Requirement 10.2: AAT provides audit logs for all agent
+      actions including tool calls, decisions, and errors.
+
+   o  Requirement 10.3: Record fields (timestamp, agent_id,
+      action_type, outcome) map directly to required audit
+      trail entries.
+
+   o  Requirement 10.5: Hash chaining and optional signatures
+      protect audit trail integrity.
+
+   o  Requirement 10.7: Retention requirements (Section 9)
+      align with PCI DSS retention periods.
+
+12.  Privacy Considerations
+
+12.1.  Data Minimization
+
+   AAT is designed with privacy by default:
+
+   o  Raw input and output data MUST NOT be stored in audit
+      records.  Implementations MUST use the input_hash and
+      output_hash fields instead.
+
+   o  The human_override.operator_id SHOULD be a pseudonymous
+      identifier or role name, not a natural person's name.
+
+   o  The reasoning_hash field in decision records stores a hash
+      of the reasoning chain, not the reasoning itself.
+
+   o  Tool parameters are recorded via parameters_hash, not in
+      cleartext.
+
+   o  Sanctions check results record only "clear", "match", or
+      "error" -- not the details of what was screened.
+
+   o  The content_fingerprint field stores a hash of the full
+      content, not the content itself.  This hash cannot be
+      reversed to recover the original data.
+
+   Implementations that need to retain raw data for debugging
+   MUST store it in a separate system with appropriate access
+   controls, linked to the audit trail via record_id.
+
+12.2.  Right to Erasure
+
+   To support GDPR Article 17 (right to erasure) and similar
+   regulations, AAT uses tombstone records (Section 9.3) rather
+   than record deletion.  This approach:
+
+   o  Removes all personal data from the record.
+
+   o  Preserves chain integrity for regulatory compliance.
+
+   o  Documents the fact and reason for deletion.
+
+   o  Is compatible with the EU AI Act's record-keeping
+      requirements, which do not require retention of personal
+      data but do require retention of operational logs.
+
+   o  When content_fingerprint is retained in the tombstone
+      (Section 9.3), enables proof that the erased content
+      existed without retaining the content itself.
+
+   Data controllers MUST implement a process to identify which
+   audit records contain personal data (even in hashed form) and
+   respond to erasure requests by creating tombstone records
+   within 30 days.
+
+13.  Decision Reproducibility
+
+   Sections 6 and 8 establish the integrity of the RECORD of a
+   decision.  This section addresses a distinct property: the
+   ability to reproduce the DECISION itself.  It distinguishes
+   two properties that are frequently conflated and defines the
+   conditions and record fields required for each.
+
+13.1.  Two Distinct Properties
+
+   This specification distinguishes:
+
+   o  Record reproducibility (traceability): the ability of any
+      party to re-verify the integrity of a recorded decision by
+      recomputing the hash chain (Section 6).  This property is
+      available for ALL agents, regardless of the underlying
+      model, and is the default guarantee of this specification.
+
+   o  Decision reproducibility: the ability of an independent
+      party to re-execute the model computation on the recorded
+      input and obtain a byte-identical output.  This property is
+      available ONLY under the conditions of Section 13.2.
+
+   An implementation MUST NOT represent a decision as reproducible
+   unless all conditions in Section 13.2 are satisfied.  A
+   decision that is only recorded is "reconstructable", not
+   "reproducible".
+
+13.2.  Conditions for Decision Reproducibility
+
+   A decision record MAY be marked reproducible only if ALL of the
+   following conditions hold:
+
+   o  Open weights.  The model weights are obtainable by the
+      verifier, and their cryptographic digest is recorded in the
+      model_weights_digest field (Section 13.3).
+
+   o  Deterministic decoding.  Sampling is disabled: temperature
+      is 0 with greedy selection (top_k = 1); OR an explicitly
+      recorded fixed seed is used together with recorded top_k
+      and top_p values.  The decoding parameters MUST be recorded
+      in the inference_config field.
+
+   o  Attested environment.  The execution environment is pinned
+      and attestable -- inference engine and version, hardware
+      platform, and batch configuration -- such that
+      floating-point reduction order is invariant across runs.
+      Where the platform supports it, a hardware attestation (for
+      example, a TEE quote per [RFC9334]) SHOULD be recorded in
+      the environment_attestation field.
+
+   o  Sealed inputs.  The complete input to the model (prompt,
+      system context, retrieved context, and any tool outputs) is
+      recorded or digested via the content_fingerprint field
+      (Section 3.2), so that the exact input can be reconstructed.
+
+   o  Attestation closure.  The recorded digests cover the
+      complete computational closure of the inference function
+      per Section 13.6, including the tokenizer, the chat
+      template, and the inference engine build.  A decision whose
+      attested set omits any closure component MUST NOT be marked
+      reproducible.
+
+   Setting temperature to 0 alone does NOT satisfy this section.
+   On an inference service that neither exposes weights nor pins
+   the environment (for example, a hosted frontier inference
+   API), request batching and hardware selection remain outside
+   the caller's control and can alter floating-point reduction
+   order, flipping the selection of near-tied tokens.  Such
+   decisions MUST be marked as reconstructable, not reproducible
+   (Section 13.5).
+
+13.3.  Reproducibility Record Fields
+
+   The following OPTIONAL fields MAY appear in a "decision" record
+   (Section 7.3) to support decision reproducibility:
+
+   o  model_weights_digest: String.  The SHA-256 digest of the
+      model weight file(s), encoded as lowercase hexadecimal and
+      prefixed with "sha256:".
+
+   o  tokenizer_digest: String.  The SHA-256 digest of the
+      tokenizer definition (vocabulary, merge rules, and
+      normalization configuration), encoded as lowercase
+      hexadecimal and prefixed with "sha256:".  Where the
+      tokenizer is embedded in the weight file(s) covered by
+      model_weights_digest, this field MAY reference that digest.
+
+   o  chat_template_digest: String.  The SHA-256 digest of the
+      prompt/chat template applied between the recorded input and
+      the token sequence presented to the model, encoded as
+      lowercase hexadecimal and prefixed with "sha256:".  Where
+      the template is embedded in the weight file(s) covered by
+      model_weights_digest, this field MAY reference that digest.
+
+   o  engine_build_digest: String.  The SHA-256 digest of the
+      inference engine binary or container image actually
+      executed (not merely its version string), encoded as
+      lowercase hexadecimal and prefixed with "sha256:".
+
+   o  inference_config: Object.  The decoding parameters used.
+      Contains "temperature" (Number), "top_k" (Number),
+      "top_p" (Number), "seed" (Number or null), and
+      "max_tokens" (Number).
+
+   o  output_digest: String.  The SHA-256 digest of the produced
+      output, computed over a deterministic serialization (JCS
+      [RFC8785] is RECOMMENDED) and encoded as lowercase
+      hexadecimal.
+
+   o  environment: Object.  The pinned execution environment.
+      Contains "engine" (String), "engine_version" (String),
+      "hardware" (String), "batch_size" (Number), and
+      "num_threads" (Number).
+
+   o  environment_attestation: String.  A Base64-encoded hardware
+      attestation (for example, a TEE quote per [RFC9334]) or a
+      URI referencing one, binding the recorded environment to
+      hardware-signed evidence.
+
+   o  reproducibility_class: String.  One of "reproducible" (the
+      decision can be re-executed per Section 13.4) or
+      "reconstructable" (only the record can be re-verified).
+
+13.4.  Verification Procedure
+
+   To verify decision reproducibility, a verifier:
+
+   1.  Confirms that model_weights_digest matches the digest of
+       the obtained weights, and that tokenizer_digest,
+       chat_template_digest, and engine_build_digest (where
+       present) match the corresponding obtained artifacts
+       (Section 13.6).
+
+   2.  Confirms the environment object matches the recorded
+       pinned configuration, and validates
+       environment_attestation if present.
+
+   3.  Re-executes the model on the sealed input using the
+       recorded inference_config.
+
+   4.  Computes the digest of the produced output and compares it
+       to output_digest.  A match confirms the decision was
+       reproduced.  A mismatch indicates environment divergence
+       or tampering and MUST be reported.
+
+13.5.  Scope and Limitations
+
+   Decision reproducibility is achievable only for models
+   executed in an environment the operator can pin and attest --
+   typically an open-weight model run under the operator's
+   control.  It is NOT achievable for models served through
+   interfaces that neither expose weights nor pin the execution
+   environment.
+
+   Records for such decisions MUST set reproducibility_class to
+   "reconstructable".  This does not diminish their evidentiary
+   value for traceability: the record remains tamper-evident
+   (Section 6) and, where signed, non-repudiable (Section 6.2).
+   The distinction is between evidence that a decision was made
+   and recorded (available for all models) and evidence that the
+   decision can be independently re-derived (available only for
+   attested, open-weight execution).
+
+   Decision reproducibility also assumes a frozen model.  A
+   change to the model weights, the inference engine, or the
+   environment invalidates reproduction against the recorded
+   digests; such a change SHOULD be recorded as a "lifecycle"
+   event (Section 7.7).
+
+13.6.  Attestation Closure
+
+   The output of an inference call is determined not by the model
+   weights alone but by the composition of every component on the
+   path from recorded input to produced output:
+
+      output = engine(build, flags, threads)
+               . chat_template
+               . tokenizer
+               . weights (as loaded in memory)
+               . decoding_configuration
+               applied to the sealed input
+
+   This composition is the computational closure of the decision.
+   An attestation is CLOSED when every component of the closure
+   is covered by a recorded digest or by a recorded, pinned
+   configuration value; it is OPEN when any component is not.
+
+   Requirements:
+
+   o  A decision record MUST NOT set reproducibility_class to
+      "reproducible" unless its attestation is closed: the
+      weights, tokenizer, chat template, and engine build are
+      digested (Section 13.3); the complete decoding
+      configuration is recorded in inference_config; the numeric
+      environment (hardware, batch_size, num_threads) is recorded
+      in the environment object; and the input is sealed.
+
+   o  Every decoding parameter that the inference engine exposes
+      MUST either be recorded in inference_config or be fixed at
+      an engine default that is itself covered by
+      engine_build_digest.  An unrecorded parameter that alters
+      the output is a forgery channel (Section 13.7).
+
+   o  The digests in Section 13.3 attest artifacts AT REST.
+      Where the deployment requires binding to the artifacts AS
+      EXECUTED (defending against post-load modification of
+      weights in memory), a runtime attestation (for example, a
+      TEE quote per [RFC9334]) SHOULD be recorded in
+      environment_attestation and SHOULD bind to the same
+      execution that produced the output, not merely to the same
+      platform.
+
+13.7.  Minimal-Change Threat Model
+
+   The closure requirement in Section 13.6 is justified by the
+   following minimal-change analysis: for each component left
+   outside the attested set, a minimal modification exists that
+   changes the produced output while every recorded attestation
+   continues to verify.
+
+   o  Chat template.  A single-character change to the template
+      alters the token sequence presented to the model.  The
+      weights digest, decoding configuration, and input seal all
+      continue to verify.  Mitigated by chat_template_digest.
+
+   o  Tokenizer.  A single added merge rule or a change of
+      Unicode normalization form alters tokenization of the same
+      input bytes.  Mitigated by tokenizer_digest.
+
+   o  Engine build.  A patch-level change to the inference
+      engine can alter kernel selection and floating-point
+      reduction order, flipping near-tied token selections.  A
+      version STRING does not capture build flags; mitigated by
+      engine_build_digest over the executed binary or image.
+
+   o  Decoding configuration.  A change to any sampling or
+      penalty parameter not recorded in inference_config (for
+      example, a repetition penalty) yields a different
+      deterministic function at temperature 0: both functions
+      reproduce individually, but they are not the same
+      function.  This vector has been empirically demonstrated
+      by the author: two temperature-0 executions of the same
+      open-weight model on the same input, differing only in an
+      unrecorded penalty parameter, each self-reproduced
+      byte-identically while producing different outputs.
+      Mitigated by the completeness requirement of
+      Section 13.6.
+
+   o  Numeric environment.  A change to thread or batch count
+      can reorder floating-point reductions.  Whether a given
+      change flips the output depends on whether any decoding
+      step is near-tied; the record MUST pin these values so the
+      question does not arise at verification time.
+
+   o  Weights in memory.  Modification of loaded weights after
+      the at-rest digest is checked (time-of-check/time-of-use)
+      leaves every recorded digest valid.  Mitigated by runtime
+      attestation bound to the execution (Section 13.6).
+
+   o  Input canonicalization.  Two inputs that render
+      identically may differ in bytes (zero-width characters,
+      line-ending conventions, Unicode normalization).  The
+      content_fingerprint is computed over exact bytes; verifiers
+      MUST compare bytes, not rendered text, and SHOULD flag
+      non-canonical or invisible code points in disputed inputs.
+
+   o  Attestation relay.  An attestation quote produced by a
+      clean environment may be presented alongside output
+      produced elsewhere.  Environment attestations SHOULD be
+      cryptographically bound to the specific execution (for
+      example, by including the output_digest or record nonce in
+      the attested report data).
+
+   The general principle: the minimum change that defeats an
+   attestation is one bit in the largest component outside it.
+   Closure (Section 13.6) removes the outside.
+
+14.  Security Considerations
+
+14.1.  Log Tampering
+
+   The primary threat to audit trails is unauthorized
+   modification.  AAT mitigates this through:
+
+   o  Hash chaining: Any modification to a record invalidates
+      all subsequent prev_hash values, making tampering
+      detectable.
+
+   o  Optional signatures: ECDSA P-256 signatures provide
+      non-repudiation and prevent even the log storage system
+      from undetectably modifying records.
+
+   o  Session hashes: The session_hash in close records provides
+      a single value that can be stored externally (e.g., on a
+      blockchain or with a timestamp authority) to anchor the
+      entire session.
+
+   o  Recording independence: When an independent component
+      writes records (Section 5), the agent cannot suppress or
+      alter its own audit trail.
+
+   Implementations SHOULD store session_hash values in a
+   separate, append-only system to provide an independent
+   verification point.
+
+14.2.  Log Injection
+
+   Attackers may attempt to inject false audit records into the
+   trail.  Mitigations include:
+
+   o  Signature verification: When signatures are present, only
+      records signed by the agent's key are valid.
+
+   o  Chain continuity: Injected records would break the hash
+      chain unless the attacker can also modify all subsequent
+      records.
+
+   o  Timestamp monotonicity: Injected records with out-of-
+      order timestamps are detectable.
+
+   o  Record size limits: The 256 KB maximum prevents denial-of-
+      service through oversized records.
+
+   o  Nonce uniqueness: Duplicate nonce values within a session
+      indicate injection or replay.
+
+   Implementations MUST validate all records against the schema
+   before accepting them into the audit trail.
+
+14.3.  Timing Attacks
+
+   Audit record timestamps may be manipulated if the agent
+   controls its own clock.  Mitigations include:
+
+   o  Using NTP-synchronized clocks with drift monitoring.
+
+   o  Cross-referencing timestamps with external systems (e.g.,
+      tool server response timestamps).
+
+   o  Flagging sessions where timestamps show suspicious
+      patterns (e.g., large jumps, regression).
+
+   o  Using external timestamp anchoring (Section 3.2,
+      external_timestamp field) to obtain independent proof
+      of record creation time from a trusted TSA.
+
+   Implementations SHOULD monitor for timestamp anomalies and
+   flag them for human review.
+
+14.4.  Chain Breaks
+
+   Chain breaks can occur due to:
+
+   o  System crashes during record writing.
+
+   o  Storage corruption.
+
+   o  Intentional tampering.
+
+   When a chain break is detected, implementations MUST:
+
+   1.  Flag the break with a severity of "critical".
+
+   2.  Record the break location (which record pair failed
+       verification).
+
+   3.  Preserve both the broken chain and any recovered data.
+
+   4.  If the break is due to crash recovery, insert an error
+       record documenting the gap.
+
+   Chain breaks in high-risk systems MUST trigger an alert to
+   the system operator within 1 hour.
+
+14.5.  Replay Attacks
+
+   An attacker may attempt to replay a previously valid audit
+   record or sequence of records.  AAT mitigates replay attacks
+   through several mechanisms:
+
+   o  Nonce uniqueness: When the nonce field (Section 3.2) is
+      present, verifiers MAY reject records with duplicate
+      nonce values within the same session.  For L2+
+      deployments, the nonce field SHOULD be present and
+      verifiers SHOULD enforce uniqueness.
+
+   o  Hash chaining: Each record's prev_hash binds it to a
+      specific position in the chain.  A replayed record
+      would have an incorrect prev_hash unless the entire
+      chain from that point is also replayed.
+
+   o  Timestamp monotonicity: Replayed records from an earlier
+      time would violate the non-decreasing timestamp
+      requirement.
+
+   o  External timestamp anchoring: When external timestamps
+      are present, replayed records would have a TSA-issued
+      timestamp that does not match the claimed event time.
+
+   Implementations that process records from untrusted sources
+   MUST verify nonce uniqueness within the session scope.
+   Implementations MAY also verify nonce uniqueness across
+   sessions for the same agent to detect cross-session replay
+   attacks.
+
+15.  IANA Considerations
+
+15.1.  Action Type Registry
+
+   This document requests IANA to create the "Agent Audit Trail
+   Action Types" registry.  The registration policy is
+   "Specification Required" per RFC 8126 [RFC8126].
+
+   Initial registry contents:
+
+   +----------------+---------------------------+-----------+
+   | Value          | Description               | Reference |
+   +----------------+---------------------------+-----------+
+   | tool_call      | Agent invokes a tool      | Sec 7.1   |
+   | tool_response  | Agent receives tool reply  | Sec 7.2   |
+   | decision       | Agent makes a decision    | Sec 7.3   |
+   | delegation     | Agent delegates to agent  | Sec 7.4   |
+   | escalation     | Agent escalates to human  | Sec 7.5   |
+   | error          | Agent encounters error    | Sec 7.6   |
+   | lifecycle      | Agent lifecycle event     | Sec 7.7   |
+   +----------------+---------------------------+-----------+
+
+   New entries MUST include a value (lowercase ASCII string,
+   max 32 characters), description, and reference to a published
+   specification.
+
+15.2.  Outcome Registry
+
+   This document requests IANA to create the "Agent Audit Trail
+   Outcomes" registry.  The registration policy is "Specification
+   Required" per RFC 8126.
+
+   Initial registry contents:
+
+   +------------+-------------------------------+-----------+
+   | Value      | Description                   | Reference |
+   +------------+-------------------------------+-----------+
+   | success    | Action completed as intended  | Sec 3.1   |
+   | failure    | Action failed due to error    | Sec 3.1   |
+   | timeout    | Action exceeded time budget   | Sec 3.1   |
+   | denied     | Action blocked by policy      | Sec 3.1   |
+   | escalated  | Action redirected to human    | Sec 3.1   |
+   +------------+-------------------------------+-----------+
+
+16.  References
+
+16.1.  Normative References
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119,
+              DOI 10.17487/RFC2119, March 1997,
+              <https://www.rfc-editor.org/info/rfc2119>.
+
+   [RFC3339]  Klyne, G. and C. Newman, "Date and Time on the
+              Internet: Timestamps", RFC 3339,
+              DOI 10.17487/RFC3339, July 2002,
+              <https://www.rfc-editor.org/info/rfc3339>.
+
+   [RFC3986]  Berners-Lee, T., Fielding, R., and L. Masinter,
+              "Uniform Resource Identifier (URI): Generic Syntax",
+              STD 66, RFC 3986, DOI 10.17487/RFC3986,
+              January 2005,
+              <https://www.rfc-editor.org/info/rfc3986>.
+
+   [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in
+              RFC 2119 Key Words", BCP 14, RFC 8174,
+              DOI 10.17487/RFC8174, May 2017,
+              <https://www.rfc-editor.org/info/rfc8174>.
+
+   [RFC8785]  Rundgren, A., Jordan, B., and S. Erdtman, "JSON
+              Canonicalization Scheme (JCS)", RFC 8785,
+              DOI 10.17487/RFC8785, June 2020,
+              <https://www.rfc-editor.org/info/rfc8785>.
+
+   [RFC9562]  Davis, K., Peabody, B., and P. Leach, "Universally
+              Unique IDentifiers (UUIDs)", RFC 9562,
+              DOI 10.17487/RFC9562, May 2024,
+              <https://www.rfc-editor.org/info/rfc9562>.
+
+   [FIPS186-5]
+              National Institute of Standards and Technology,
+              "Digital Signature Standard (DSS)", FIPS PUB 186-5,
+              DOI 10.6028/NIST.FIPS.186-5, February 2023.
+
+   [RFC8126]  Cotton, M., Leiba, B., and T. Narten, "Guidelines
+              for Writing an IANA Considerations Section in RFCs",
+              BCP 26, RFC 8126, DOI 10.17487/RFC8126, June 2017,
+              <https://www.rfc-editor.org/info/rfc8126>.
+
+   [RFC3161]  Adams, C., Cain, P., Pinkas, D., and R. Zuccherato,
+              "Internet X.509 Public Key Infrastructure Time-Stamp
+              Protocol (TSP)", RFC 3161, DOI 10.17487/RFC3161,
+              August 2001,
+              <https://www.rfc-editor.org/info/rfc3161>.
+
+16.2.  Informative References
+
+   [MCPS]     Sharif, R., "MCPS: Cryptographic Security Layer for
+              the Model Context Protocol",
+              draft-sharif-mcps-secure-mcp-02, March 2026.
+
+   [EU-AI-ACT]
+              European Parliament and Council, "Regulation (EU)
+              2024/1689 laying down harmonised rules on artificial
+              intelligence (Artificial Intelligence Act)",
+              Official Journal of the European Union, L series,
+              2024/1689, August 2024.
+
+   [RFC5424]  Gerhards, R., "The Syslog Protocol", RFC 5424,
+              DOI 10.17487/RFC5424, March 2009,
+              <https://www.rfc-editor.org/info/rfc5424>.
+
+   [RFC4180]  Shafranovich, Y., "Common Format and MIME Type for
+              Comma-Separated Values (CSV) Files", RFC 4180,
+              DOI 10.17487/RFC4180, October 2005,
+              <https://www.rfc-editor.org/info/rfc4180>.
+
+   [RFC4648]  Josefsson, S., "The Base16, Base32, and Base64 Data
+              Encodings", RFC 4648, DOI 10.17487/RFC4648,
+              October 2006,
+              <https://www.rfc-editor.org/info/rfc4648>.
+
+   [RFC9334]  Birkholz, H., Thaler, D., Richardson, M., Smith,
+              N., and W. Pan, "Remote ATtestation procedureS
+              (RATS) Architecture", RFC 9334,
+              DOI 10.17487/RFC9334, January 2023,
+              <https://www.rfc-editor.org/info/rfc9334>.
+
+   [ISO42001] International Organization for Standardization,
+              "Information technology -- Artificial intelligence --
+              Management system", ISO/IEC 42001:2023, December
+              2023.
+
+   [ISO24970] International Organization for Standardization,
+              "Information technology -- Artificial intelligence --
+              AI system life cycle processes", ISO/IEC 24970,
+              2023.
+
+   [prEN18229-1]
+              European Committee for Standardization, "Artificial
+              Intelligence -- Transparency -- Part 1: General
+              requirements", prEN 18229-1, 2024.
+
+   [PCI-DSS]  PCI Security Standards Council, "Payment Card
+              Industry Data Security Standard Version 4.0.1",
+              June 2024.
+
+   [SOC2]     American Institute of Certified Public Accountants,
+              "SOC 2 -- SOC for Service Organizations: Trust
+              Services Criteria", 2017.
+
+   [SEMVER]   Preston-Werner, T., "Semantic Versioning 2.0.0",
+              <https://semver.org/>.
+
+Appendix A.  Example Audit Trail
+
+   The following example shows a complete audit trail for a
+   payment agent session that processes a GBP 500 transfer.
+   The session demonstrates tool calls, decisions, sanctions
+   screening, and successful completion.  prev_hash values are
+   truncated for readability (shown as first 16 hex characters).
+   This example uses the -01 features: record_phase,
+   recording_component, nonce, and pre-execution recording.
+
+   Record 1: Genesis (session start)
+
+   {
+     "record_id": "a1000000-0000-4000-8000-000000000001",
+     "timestamp": "2026-03-29T14:00:00.000Z",
+     "agent_id": "urn:agent:payment-bot.acme.example",
+     "agent_version": "2.1.0",
+     "session_id": "sess-29mar-0001-4000-8000-abcdef123456",
+     "action_type": "lifecycle",
+     "action_detail": {
+       "event": "session_start",
+       "new_state": "active",
+       "trigger": "api_request",
+       "config_hash": "b5bb9d8014a0f9b1...",
+       "recording_mode": "independent",
+       "recording_component_id":
+         "urn:gateway:enforcement.acme.example",
+       "enabled_tools": [
+         "payment_transfer",
+         "sanctions_check",
+         "balance_query"
+       ]
+     },
+     "outcome": "success",
+     "trust_level": "L2",
+     "record_phase": "concurrent",
+     "parent_record_id": null,
+     "prev_hash": null,
+     "recording_component":
+       "urn:gateway:enforcement.acme.example",
+     "nonce": "a3f2b8c9d1e4f6a7b0c3d5e8f1a2b4c7"
+   }
+
+   Record 2: Sanctions screening tool call
+
+   {
+     "record_id": "a1000000-0000-4000-8000-000000000002",
+     "timestamp": "2026-03-29T14:00:00.150Z",
+     "agent_id": "urn:agent:payment-bot.acme.example",
+     "agent_version": "2.1.0",
+     "session_id": "sess-29mar-0001-4000-8000-abcdef123456",
+     "action_type": "tool_call",
+     "action_detail": {
+       "tool_name": "sanctions_check",
+       "tool_server": "https://screening.acme.example/v2",
+       "parameters_hash": "e3b0c44298fc1c14...",
+       "authorization": "mutual_tls"
+     },
+     "outcome": "success",
+     "trust_level": "L2",
+     "record_phase": "pre_execution",
+     "parent_record_id":
+       "a1000000-0000-4000-8000-000000000001",
+     "prev_hash": "7d865e959b2466918a...",
+     "recording_component":
+       "urn:gateway:enforcement.acme.example",
+     "nonce": "b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9",
+     "input_hash": "9f86d081884c7d659a...",
+     "latency_ms": 145
+   }
+
+   Record 3: Sanctions screening response
+
+   {
+     "record_id": "a1000000-0000-4000-8000-000000000003",
+     "timestamp": "2026-03-29T14:00:00.295Z",
+     "agent_id": "urn:agent:payment-bot.acme.example",
+     "agent_version": "2.1.0",
+     "session_id": "sess-29mar-0001-4000-8000-abcdef123456",
+     "action_type": "tool_response",
+     "action_detail": {
+       "tool_name": "sanctions_check",
+       "response_hash": "2cf24dba5fb0a301...",
+       "response_size": 256,
+       "parent_call_id":
+         "a1000000-0000-4000-8000-000000000002"
+     },
+     "outcome": "success",
+     "trust_level": "L2",
+     "record_phase": "post_execution",
+     "parent_record_id":
+       "a1000000-0000-4000-8000-000000000002",
+     "prev_hash": "4e07408562bedb8b6...",
+     "recording_component":
+       "urn:gateway:enforcement.acme.example",
+     "nonce": "c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0",
+     "sanctions_check": {
+       "provider": "acme_screening",
+       "checked_at": "2026-03-29T14:00:00.290Z",
+       "result": "clear",
+       "list_version": "2026-03-29"
+     }
+   }
+
+   Record 4: Pre-execution authorisation decision
+
+   {
+     "record_id": "a1000000-0000-4000-8000-000000000004",
+     "timestamp": "2026-03-29T14:00:00.310Z",
+     "agent_id": "urn:agent:payment-bot.acme.example",
+     "agent_version": "2.1.0",
+     "session_id": "sess-29mar-0001-4000-8000-abcdef123456",
+     "action_type": "decision",
+     "action_detail": {
+       "decision_type": "approve",
+       "reasoning_hash": "6b86b273ff34fce1...",
+       "confidence": 0.97,
+       "alternatives_considered": 2,
+       "policy_ref": "payment-policy-v3.2"
+     },
+     "outcome": "success",
+     "trust_level": "L2",
+     "record_phase": "pre_execution",
+     "parent_record_id":
+       "a1000000-0000-4000-8000-000000000003",
+     "prev_hash": "ef2d127de37b942ba...",
+     "recording_component":
+       "urn:gateway:enforcement.acme.example",
+     "nonce": "d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1",
+     "risk_score": 0.12,
+     "model_id": "claude-sonnet-4-20250514",
+     "cost_estimate": {
+       "amount": 500.00,
+       "currency": "GBP"
+     }
+   }
+
+   Record 5: Payment execution tool call (post-execution)
+
+   {
+     "record_id": "a1000000-0000-4000-8000-000000000005",
+     "timestamp": "2026-03-29T14:00:00.320Z",
+     "agent_id": "urn:agent:payment-bot.acme.example",
+     "agent_version": "2.1.0",
+     "session_id": "sess-29mar-0001-4000-8000-abcdef123456",
+     "action_type": "tool_call",
+     "action_detail": {
+       "tool_name": "payment_transfer",
+       "tool_server": "https://payments.acme.example/v1",
+       "parameters_hash": "d4735e3a265e16ee...",
+       "authorization": "bearer_token",
+       "authorization_record_id":
+         "a1000000-0000-4000-8000-000000000004"
+     },
+     "outcome": "success",
+     "trust_level": "L2",
+     "record_phase": "post_execution",
+     "parent_record_id":
+       "a1000000-0000-4000-8000-000000000004",
+     "prev_hash": "e7f6c011776e8db7c...",
+     "recording_component":
+       "urn:gateway:enforcement.acme.example",
+     "nonce": "e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2",
+     "latency_ms": 890,
+     "jurisdiction": "GB",
+     "content_fingerprint": "f0a1b2c3d4e5f6a7..."
+   }
+
+   Record 6: Session close
+
+   {
+     "record_id": "a1000000-0000-4000-8000-000000000006",
+     "timestamp": "2026-03-29T14:00:01.210Z",
+     "agent_id": "urn:agent:payment-bot.acme.example",
+     "agent_version": "2.1.0",
+     "session_id": "sess-29mar-0001-4000-8000-abcdef123456",
+     "action_type": "lifecycle",
+     "action_detail": {
+       "event": "session_end",
+       "previous_state": "active",
+       "new_state": "closed",
+       "trigger": "task_complete",
+       "session_hash": "9c22ff5f21f0b81b...",
+       "record_count": 6,
+       "duration_ms": 1210
+     },
+     "outcome": "success",
+     "trust_level": "L2",
+     "record_phase": "post_execution",
+     "parent_record_id":
+       "a1000000-0000-4000-8000-000000000005",
+     "prev_hash": "a3a2e67ad1b8d57e2...",
+     "recording_component":
+       "urn:gateway:enforcement.acme.example",
+     "nonce": "f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3"
+   }
+
+Appendix B.  EU AI Act Compliance Checklist
+
+   The following table maps EU AI Act Article 12 sub-requirements
+   to specific AAT features:
+
+   +----------------------------+-------------------------------+
+   | Art 12 Requirement         | AAT Feature                   |
+   +----------------------------+-------------------------------+
+   | 12(1) Automatic recording  | Mandatory audit record format |
+   |                            | (Section 3)                   |
+   +----------------------------+-------------------------------+
+   | 12(1)(a) Recording of      | session_id + ordered chain    |
+   | period of each use         | (Section 8)                   |
+   +----------------------------+-------------------------------+
+   | 12(1)(b) Reference         | agent_id (URI) + agent_version|
+   | database against which     | + model_id (Section 3)        |
+   | input data has been        |                               |
+   | checked                    |                               |
+   +----------------------------+-------------------------------+
+   | 12(1)(c) Input data for    | input_hash field              |
+   | which search has led to    | (Section 3.2)                 |
+   | a match                    |                               |
+   +----------------------------+-------------------------------+
+   | 12(1)(d) Identification    | human_override field with     |
+   | of natural persons         | pseudonymous operator_id      |
+   | involved in verification   | (Section 3.2)                 |
+   +----------------------------+-------------------------------+
+   | 12(2) Conform to           | This specification            |
+   | recognised standards       |                               |
+   +----------------------------+-------------------------------+
+   | 12(3) Appropriate to       | Retention requirements        |
+   | intended purpose, at       | (Section 9): 12 months for    |
+   | least 6 months             | high-risk, 6 months general   |
+   +----------------------------+-------------------------------+
+   | 12(4) Providers of         | Export formats (Section 10)    |
+   | high-risk AI systems       | enable log provision to       |
+   | that are credit            | financial authorities         |
+   | institutions               |                               |
+   +----------------------------+-------------------------------+
+   | Art 13 Transparency        | action_type taxonomy +        |
+   |                            | decision records (Sec 7.3)    |
+   +----------------------------+-------------------------------+
+   | Art 14 Human oversight     | escalation type (Sec 7.5) +   |
+   |                            | human_override (Sec 3.2)      |
+   +----------------------------+-------------------------------+
+   | Art 12 Enforcement         | Pre-execution recording       |
+   | evidence                   | (Section 4) + recording       |
+   |                            | independence (Section 5)      |
+   +----------------------------+-------------------------------+
+
+Appendix C.  Implementation Notes
+
+C.1.  Performance Considerations
+
+   Hash computation adds overhead to each record.  Benchmarks on
+   commodity hardware show:
+
+   o  JCS canonicalization: ~0.1 ms per record (typical size).
+
+   o  SHA-256 hash: ~0.01 ms per record.
+
+   o  ECDSA P-256 signing: ~1-2 ms per record.
+
+   o  Total overhead with signing: ~2 ms per record.
+
+   o  RFC 3161 timestamp request: ~50-200 ms per record
+      (network dependent; batching is RECOMMENDED).
+
+   For high-throughput agents (>1000 actions/second),
+   implementations MAY batch records and compute hashes
+   asynchronously, provided the chain order is preserved.  The
+   timestamp MUST reflect the actual event time, not the time
+   the hash was computed.
+
+   Pre-execution recording (Section 4) adds one additional
+   record per gated action in high-risk deployments.
+   Implementations SHOULD account for this when sizing storage
+   and throughput.
+
+C.2.  Storage Estimates
+
+   A typical audit record (mandatory fields only) is
+   approximately 500-800 bytes when serialized as JSON.  With
+   optional fields, records range from 800-2000 bytes.
+
+   For a high-activity agent producing 10,000 records per day:
+
+   o  Daily storage: ~10-20 MB (JSONL).
+
+   o  Monthly storage: ~300-600 MB.
+
+   o  12-month retention: ~3.6-7.2 GB.
+
+   Implementations SHOULD apply compression (e.g., gzip) to
+   archived sessions.  Typical compression ratios for JSON
+   audit data are 5:1 to 10:1.
+
+C.3.  Clock Synchronization
+
+   Accurate timestamps are critical for audit trail integrity.
+   Implementations MUST:
+
+   o  Use NTP or PTP for clock synchronization.
+
+   o  Monitor clock drift and alert if drift exceeds 100 ms.
+
+   o  Record the clock source in the genesis record's
+      action_detail when available.
+
+   In distributed agent systems where multiple agents contribute
+   to a workflow, each agent maintains its own audit trail with
+   its own clock.  Cross-agent timestamp correlation SHOULD use
+   the delegation record timestamps as synchronization points.
+
+   For deployments requiring stronger timestamp guarantees,
+   external timestamp anchoring (Section 3.2) using RFC 3161
+   provides independent TSA-issued proof of record creation
+   time.
+
+C.4.  Relationship to MCPS
+
+   AAT is designed to complement MCPS
+   [draft-sharif-mcps-secure-mcp].  The relationship is:
+
+   o  MCPS provides cryptographic identity (Agent Passports) and
+      per-message signing for MCP protocol traffic.
+
+   o  AAT provides the audit log format for recording what
+      agents did and why.
+
+   o  The agent_id in AAT records SHOULD match the agent_id in
+      the MCPS Agent Passport.
+
+   o  AAT signatures SHOULD use the same ECDSA P-256 key as the
+      MCPS Agent Passport, providing a single cryptographic
+      identity across both protocol security and audit logging.
+
+   o  MCPS trust levels (L0-L4) are directly referenced in AAT
+      records via the trust_level field.
+
+   Implementations that deploy both MCPS and AAT achieve both
+   real-time protocol security and comprehensive audit logging
+   under a unified cryptographic identity.
+
+C.5.  Validator Implementation
+
+   A conformant AAT validator MUST check:
+
+   1.  Schema validation: All mandatory fields present with
+       correct types, including the record_phase field.
+
+   2.  Chain integrity: prev_hash values match computed hashes.
+
+   3.  Temporal ordering: Timestamps are monotonically
+       non-decreasing.
+
+   4.  Session structure: Genesis record is first, close record
+       is last (if present).
+
+   5.  Referential integrity: parent_record_id values reference
+       existing records.
+
+   6.  Action type conformance: action_detail contains required
+       fields for the declared action_type.
+
+   7.  Record phase conformance: record_phase values comply
+       with the requirements in Section 4.2 (e.g., denied
+       decisions MUST be pre_execution).
+
+   8.  Nonce uniqueness: If nonce values are present, no
+       duplicates exist within the session.
+
+   A validator SHOULD produce a structured report indicating
+   pass/fail for each check, with the specific record_id where
+   failures occurred.
+
+C.6.  Two-Plane Storage
+
+   For deployments requiring strong audit integrity,
+   implementations SHOULD maintain two storage planes:
+
+   o  Queryable plane: A database or search index optimized
+      for operational queries (e.g., "show all denied actions
+      in the last hour").  This plane supports filtering,
+      aggregation, and real-time monitoring.
+
+   o  Append-only plane: An immutable log store (e.g., a
+      write-ahead log, object storage with legal hold, or a
+      ledger database) that accepts records but does not permit
+      modification or deletion (except via tombstone records
+      per Section 9.3).
+
+   The append-only plane SHOULD be operated by a different
+   principal than the agent operator.  For example, the agent
+   operator may control the queryable plane, while a compliance
+   team or third-party auditor controls the append-only plane.
+
+   Cross-checking between the two planes SHOULD occur on a
+   regular cadence (e.g., hourly or daily).  Discrepancies
+   between the planes indicate tampering or data loss and MUST
+   be flagged as critical integrity events.
+
+   This two-plane architecture ensures that even if the
+   queryable plane is compromised, the append-only plane
+   provides an independent source of truth for regulatory
+   audits and forensic investigations.
+
+Appendix D.  Changes from -00
+
+   This section summarizes the changes from
+   draft-sharif-agent-audit-trail-00 to -01.
+
+   o  Added mandatory "record_phase" field to all audit records
+      (Section 3.1) with values "pre_execution",
+      "post_execution", and "concurrent".
+
+   o  Added Section 4 (Pre-Execution Recording) requiring
+      pre-execution records for denied and escalated decisions,
+      and for state-modifying actions in high-risk systems.
+
+   o  Added Section 5 (Recording Independence) specifying when
+      an agent may write its own records (L0/L1) and when an
+      independent component should write records (L2+).
+
+   o  Added optional "recording_component" field (Section 3.2)
+      to identify independent recording components.
+
+   o  Added optional "deny_reasons" field (Section 3.2) with
+      nine defined reason codes for denied outcomes.
+
+   o  Added optional "nonce" field (Section 3.2) for replay
+      protection, RECOMMENDED for L2+ deployments.
+
+   o  Added optional "external_timestamp" field (Section 3.2)
+      for RFC 3161 timestamp anchoring, RECOMMENDED for L3+
+      deployments.
+
+   o  Added optional "content_fingerprint" field (Section 3.2)
+      for SHA-256 fingerprinting of full content before
+      redaction, supporting GDPR erasure with proof of
+      existence.
+
+   o  Added Section 14.5 (Replay Attacks) to Security
+      Considerations.
+
+   o  Added Section 11.4 (ISO/IEC 24970) and Section 11.5
+      (prEN 18229-1) to Regulatory Mapping.
+
+   o  Added Section C.6 (Two-Plane Storage) to Implementation
+      Notes.
+
+   o  Added "authorization_record_id" field to decision and
+      tool_call action_detail for linking pre-execution and
+      post-execution records.
+
+   o  Updated examples in Appendix A to demonstrate -01
+      features.
+
+   o  Added RFC 3161 to normative references.
+
+   o  Various editorial improvements for clarity.
+
+   Changes from -01 to -02:
+
+   o  Added Section 13 (Decision Reproducibility), distinguishing
+      record reproducibility (available for any model) from
+      decision reproducibility (available only for open-weight
+      models executed at temperature 0 in an attested
+      environment), and defining the record fields
+      model_weights_digest, inference_config, output_digest,
+      environment, environment_attestation, and
+      reproducibility_class, plus a verification procedure.
+
+   o  Renumbered Security Considerations (now Section 14), IANA
+      Considerations (now Section 15), and References (now
+      Section 16) to accommodate the new Section 13.
+
+   o  Added RFC 9334 (RATS Architecture) to informative
+      references.
+
+   Changes from -02 to -03:
+
+   o  Added Section 13.6 (Attestation Closure), requiring the
+      attested set to cover the complete computational closure
+      of the inference function, and defining closed versus open
+      attestations.
+
+   o  Added Section 13.7 (Minimal-Change Threat Model),
+      enumerating for each closure component the minimal
+      modification that changes the output while all recorded
+      attestations continue to verify, including one empirically
+      demonstrated vector (an unrecorded decoding penalty
+      parameter at temperature 0).
+
+   o  Added record fields tokenizer_digest,
+      chat_template_digest, and engine_build_digest
+      (Section 13.3); extended the environment object with
+      num_threads.
+
+   o  Added an attestation-closure condition to Section 13.2 and
+      extended the verification procedure (Section 13.4) to
+      check all closure digests.
+
+   o  Recommended binding runtime attestations to the specific
+      execution rather than the platform (Sections 13.6, 13.7).
+
+Acknowledgments
+
+   The author thanks independent implementers who built
+   production code against the -00 revision and provided
+   field-level crosswalks identifying the pre-execution
+   recording gap and other deficiencies addressed in this
+   revision.
+
+Author's Address
+
+   Raza Sharif
+   CyberSecAI Ltd
+
+   Email: contact@agentsign.dev

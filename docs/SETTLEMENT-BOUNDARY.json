@@ -1,0 +1,57 @@
+{
+  "kind": "uibc-settlement-boundary-v0",
+  "what_this_file_is": "Six questions a payment dispute would ask, answered against what this repository can actually produce, with the file that proves each answer. It is machine-read by tools/settlement_boundary.py, which refuses an answer of 'supported' that points at a missing file and refuses the two facts below being anything but false.",
+  "we_process_payments": false,
+  "we_authorize_charges": false,
+  "questions": [
+    {
+      "id": "Q1",
+      "question": "Did someone run this verifier against these exact bytes?",
+      "answer": "supported",
+      "evidence": "docs/RECEIPT-FORMAT.md",
+      "proves": "A receipt records verifier version, corpus digest, per-case table, the command and a named runner; tools/check_outward_receipt.py refuses one that omits any of them.",
+      "limit": ""
+    },
+    {
+      "id": "Q2",
+      "question": "Were these bytes unchanged since a date anyone can check?",
+      "answer": "partial",
+      "evidence": "docs/LAB-PROTOCOL.md",
+      "proves": "A digest list can be signed with Ed25519 and timestamped by an independent TSA, verified offline; ANCHORS.json records one state per output.",
+      "limit": "Implemented and measured locally; not yet exercised on a published release. No OpenTimestamps proof is shipped while the client is absent - the report says 'unavailable' rather than implying an anchor."
+    },
+    {
+      "id": "Q3",
+      "question": "Was the party who ran it authorised to act for the party they named?",
+      "answer": "partial",
+      "evidence": "docs/DELEGATION.md",
+      "proves": "A one-hop, time-boxed delegation record pinned to the corpus digest, with the proposer unable to be the decider.",
+      "limit": "One signature, not a threshold; no revocation registry; the identity is bound only when the delegator's key is supplied out of band, and the checker says 'identity unbound' otherwise."
+    },
+    {
+      "id": "Q4",
+      "question": "Was the charge inside the mandate's amount, merchant and currency limits?",
+      "answer": "not_ours",
+      "evidence": "",
+      "proves": "",
+      "limit": "This format binds an action to evidence bytes; it carries no mandate, no amount, no merchant and no currency. A corpus that judges exactly that exists elsewhere - probityai's vectors-agent-payment-mandate, 15 cases over 11 rules - and our answer to it is that it is theirs, not ours."
+    },
+    {
+      "id": "Q5",
+      "question": "Who bears the loss if the charge was not authorised?",
+      "answer": "not_ours",
+      "evidence": "",
+      "proves": "",
+      "limit": "No field in this format, and no sentence in this repository, allocates liability. Saying otherwise would be a legal claim dressed as a technical one."
+    },
+    {
+      "id": "Q6",
+      "question": "Can this be filed with an acquirer or arbitrator as evidence?",
+      "answer": "not_ours",
+      "evidence": "",
+      "proves": "",
+      "limit": "Admissibility is decided by the forum, under its rules, by people who are not us. This repository can make a record replayable; it cannot make a record admissible."
+    }
+  ],
+  "how_to_reproduce": "python tools/settlement_boundary.py; it exits 1 if any document scanned for payment claims contains one of the banned phrases, and 3 if a 'supported' answer points at a file that is not in the repository."
+}

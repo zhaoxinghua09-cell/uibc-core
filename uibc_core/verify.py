@@ -410,6 +410,26 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
     declared = set(REQUIRED_FILES) | {"signatures/seal.json"}
     for e in index.get("entries", []):
         declared.add("evidence/" + str(e.get("path", "")).replace("\\", "/"))
+    # A package MAY carry the verifier able to judge it - parity with AIVS, which
+    # ships verify.py inside the bundle and needs no repository at all. The path
+    # is declared here and the hash is bound, so an embedded verifier can never
+    # be swapped for one that always answers PASS.
+    embedded = manifest.get("embedded_verifier") if isinstance(manifest, dict) else None
+    embedded_problems = []
+    if isinstance(embedded, dict) and embedded.get("path"):
+        rel = str(embedded["path"]).replace("\\", "/")
+        declared.add(rel)
+        full = os.path.join(package_dir, rel)
+        if not os.path.isfile(full):
+            embedded_problems.append(
+                f"embedded verifier declared but missing: {rel}")
+        elif embedded.get("sha256"):
+            got = hash_file(full)
+            want = str(embedded["sha256"]).strip().lower()
+            if got != want:
+                embedded_problems.append(
+                    f"embedded verifier hash mismatch: {rel} "
+                    f"(declared {want[:16]}..., found {got[:16]}...)")
     os_junk = {"thumbs.db", ".ds_store", "desktop.ini"}
     undeclared = []
     if not missing and not manifest.get("allow_extra_files"):
@@ -449,6 +469,8 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
                        and not u.startswith("evidence/policies/")]
     aux_extras = [u for u in nested_extras if not u.startswith("evidence/")]
     s1_detail = []
+    if embedded_problems:
+        s1_detail.extend(embedded_problems)
     if missing:
         s1_detail.append(f"missing: {missing}")
     if root_extras:
@@ -482,7 +504,8 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
                          f"carries cannot be judged here")
     if _floor_ok:
         record("S1", "package structure",
-               not missing and not root_extras and not uncommitted,
+               not missing and not root_extras and not uncommitted
+               and not embedded_problems,
                "; ".join(s1_detail) if s1_detail
                else f"all required files present, no undeclared files "
                     f"({len(declared)} declared)")

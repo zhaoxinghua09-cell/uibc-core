@@ -67,6 +67,34 @@ it publishes nothing on its own.
 
 Measured on 0.4.1, 2026-11-20: `36/36` positive, `6/36` hostile, `exit 3` negative, 15 s.
 
+## The digest list is signed, and the external anchors are recorded
+
+`tools/anchor_release_digests.py` adds three things to `CORPUS-DIGESTS.txt`, and states
+which of them happened:
+
+| output | what it is | how a failure is recorded |
+|---|---|---|
+| `.sig` | Ed25519 over the exact bytes, public key inside the sidecar | never produced without a key; the demo seed is **refused**, not warned about |
+| `.tsr` + `_ca.pem` | RFC 3161 token from an independent TSA, verifiable offline against the shipped CA | `unanchored` |
+| `.ots` | OpenTimestamps proof | `pending_calendar` when it is a calendar attestation — that word "Bitcoin" is not printed for it |
+| `ANCHORS.json` | one status per item: `anchored` / `pending_calendar` / `unanchored` / `unavailable` / `not attempted` | the status is the output; there is no summary sentence to misread |
+
+Verification needs no network:
+
+```bash
+python tools/anchor_release_digests.py verify --sig release/CORPUS-DIGESTS.txt.sig
+python tools/anchor_tsa.py --verify release/anchor_freetsa.tsr \
+    --data release/CORPUS-DIGESTS.txt --cabundle release/anchor_freetsa_ca.pem
+```
+
+Measured on 2026-11-20 with a throwaway digest file: the signature verified; FreeTSA
+answered and the token verified offline (`signature_verified: true`, `problems: []`);
+OpenTimestamps reported `unavailable` on this machine because the client is not
+installed — which is what `ANCHORS.json` says, rather than an implied success.
+
+If `UIBC_RELEASE_SEED_HEX` is not configured, the release ships an `UNSIGNED.txt`
+marker instead of a signature. That is a visible absence, not a claim.
+
 ## What this protocol is not
 
 - It is not the lab protocol `probityai/agent-evidence-vectors` publishes. Theirs

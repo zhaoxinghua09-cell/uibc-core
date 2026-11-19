@@ -1,0 +1,18 @@
+{
+  "description": "tree_size declared one smaller than the path assumes; proof length is one short.",
+  "inclusion_path": [
+    "64db9c118655acdc4aabee6b7c17c41e0d03c42bde67b6ffd54f1e229ea72053",
+    "dd40ff3291bf20d0e161cc6e85ccd18de330c1cdb137cb2951a5b3f56a1b287f"
+  ],
+  "leaf_entry": {
+    "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+    "digest_hex": "a8176b8e70cc042430474aa5ea51bbd2674ba3eea5bdd0418d977264c9e6ebb1",
+    "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: fail-wrong-tree-size :: leaf 2",
+    "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a206661696c2d77726f6e672d747265652d73697a65203a3a206c6561662032"
+  },
+  "leaf_index": 2,
+  "reconstructed_root": "d7545c8933ece7206e261be0b556875cbf152e9ea91f2b4cb7ca7e3b0743d9d2",
+  "result": "INVALID_TREE_SIZE",
+  "root_true": "629d368b8cd98da1ceb86601542d738d6b6f604c7a36656be57162f2de1fb74f",
+  "tree_size": 7
+}

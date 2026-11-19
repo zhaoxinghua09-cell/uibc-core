@@ -3,9 +3,9 @@ message: >-
   If you use uibc-core or UIBC in academic work, please cite the entry below.
   SCOPE, stated because it is easy to get wrong: this entry pins the archived
   0.2.1 snapshot (2026-09-17), whose verifier implements six checks, S1-S6.
-  The current repository implements eighteen, S1-S18, and not one of S7-S18
+  The current repository implements nineteen, S1-S19, and not one of S7-S19
   exists in any archived artifact. A reader who follows this DOI therefore
-  cannot reproduce any claim about S7-S18 -- those may be cited only against
+  cannot reproduce any claim about S7-S19 -- those may be cited only against
   the repository state. docs/ARCHIVE-GAP.md records the measurement, and
   tools/check_citation_scope.py recomputes it.
 type: software
@@ -17,7 +17,7 @@ abstract: >-
   submission.uibc package (identity + lifecycle events + content-hashed evidence +
   evidence root + optional seal), then verified offline.
   Scope of this archived version: six checks (S1-S6); the repository
-  has since grown to eighteen, and none of S7-S18 is in an archived
+  has since grown to nineteen, and none of S7-S19 is in an archived
   artifact.
 version: "0.2.1"
 date-released: "2026-09-17"

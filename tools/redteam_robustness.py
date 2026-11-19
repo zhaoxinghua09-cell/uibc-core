@@ -66,8 +66,9 @@ def build(tmp):
 
     def add(name, mutate, expect_fail=True, why=""):
         d = fresh(name)
-        mutate(d)
-        cases.append({"name": name, "path": d, "expect_fail": expect_fail, "why": why})
+        built = mutate(d) is not False
+        cases.append({"name": name, "path": d, "expect_fail": expect_fail,
+                      "why": why, "built": built})
 
     add("not-json", lambda d: open(os.path.join(d, "manifest.json"), "w").write("{oops"),
         why="bytes that are not JSON must be refused, not crashed on")
@@ -116,12 +117,19 @@ def _symlink(d):
     try:
         os.symlink("/etc/hostname", target)
     except OSError:
-        return
+        # No privilege to create symlinks on this host (e.g. Windows without
+        # the SeCreateSymbolicLinkPrivilege). The hostile sample cannot be
+        # constructed here, so the case must be skipped rather than judged:
+        # an INCONCLUSIVE on a package that was never turned into an attack
+        # is not a verifier refusal. Linux CI has the privilege and will
+        # exercise this case for real.
+        return False
     idx["entries"].append({"evidence_id": "11111111-1111-4111-8111-111111111111",
                            "type": "OUTPUT", "path": "files/escaped.txt",
                            "content_hash": hashlib.sha256(b"x").hexdigest(),
                            "created_at": "2026-11-17T00:00:00Z"})
     json.dump(idx, open(p, "w"), indent=2)
+    return True
 
 
 def _empty(d):
@@ -140,6 +148,11 @@ def main():
     cases = build(tmp)
     rows, bad = [], 0
     for c in cases:
+        if not c["built"]:
+            rows.append({"case": c["name"], "js": "SKIPPED(platform)",
+                         "py": "SKIPPED(platform)", "ok": True,
+                         "skipped": True, "why": c["why"]})
+            continue
         jv, jcrashed = verdict(run_js(c["path"]))
         pv, pcrashed = verdict(run_py(c["path"]))
         answered = not (jcrashed or pcrashed)

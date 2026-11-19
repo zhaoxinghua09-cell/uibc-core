@@ -73,7 +73,7 @@ python3 tools/preflight_release.py
 
 ## English
 
-Three ways to obtain this project; three verifiers. The archive (DOI, `0.2.1`) reports six checks. The **latest published package** (`pip install uibc-core`, `0.3.3`) reports six. The repository reports eighteen.
+Three ways to obtain this project; three verifiers. The archive (DOI, `0.2.1`) reports six checks. The **latest published package** (`pip install uibc-core`, `0.3.3`) reports six. The repository reports nineteen (S1–S19; S19 needs an external freshness state file to trigger).
 
 The first attempt at this comparison counted lines and string literals and concluded "eight" for the package. That number was wrong, because which checks run depends on the package fed in, not on what the source mentions. Feeding **one** full-feature package to both verifiers gives the real answer: the published one does not merely run fewer checks -- it does not know S7-S18 exist.
 

@@ -26,10 +26,11 @@ if _TOOLS not in sys.path:
     sys.path.insert(0, _TOOLS)
 
 RUNNER = """
-import json, sys
+import json, os, sys
 from uibc_core.verify import verify
-pin = sys.argv[2] if len(sys.argv) > 2 else None
-r = verify(sys.argv[1], expect_head=pin)
+pin = os.environ.get("UBC_PIN") or None
+state = os.environ.get("UBC_STATE") or None
+r = verify(sys.argv[1], expect_head=pin, state_file=state)
 print(json.dumps({"result": r["result"],
                   "checks": sorted([c["id"] for c in r["checks"]],
                                    key=lambda x: int(x[1:]))}))
@@ -46,12 +47,20 @@ def full_feature_package():
     return pkg, tmp
 
 
-def run_isolated(package, import_dir, pin=None):
+def run_isolated(package, import_dir, pin=None, state=None):
     """Run the verifier with only the package directory importable."""
     env = dict(os.environ)
     env["PYTHONPATH"] = import_dir
     env.pop("PYTHONHOME", None)
-    argv = [sys.executable, "-c", RUNNER, package] + ([pin] if pin else [])
+    if pin:
+        env["UBC_PIN"] = pin
+    else:
+        env.pop("UBC_PIN", None)
+    if state:
+        env["UBC_STATE"] = state
+    else:
+        env.pop("UBC_STATE", None)
+    argv = [sys.executable, "-c", RUNNER, package]
     out = subprocess.run(argv,
                          capture_output=True, text=True, env=env, timeout=120)
     if out.returncode != 0:
@@ -75,18 +84,32 @@ def build():
         with open(os.path.join(pkg, "manifest.json"), encoding="utf-8") as f:
             pin = json.load(f).get("checkpoint_head")
         pinned = run_isolated(pkg, stage, pin) if pin else None
+        # S19 is opt-in for the same reason S9 is: nothing outside the package
+        # can decide freshness, so the artifact is also tried with a state file,
+        # which is how a verifier that remembers is actually used
+        state_path = os.path.join(stage, "freshness-state.json")
+        remembered = run_isolated(pkg, stage, pin, state_path)
+        # S19 is opt-in via an external freshness state file; exercise it the
+        # way a holder of the high-water mark would, so the artifact can show
+        # it reports the check (first observation is INCONCLUSIVE by design).
+        state_path = os.path.join(stage, "freshness-state.json")
+        stateful = run_isolated(pkg, stage, state=state_path)
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
         shutil.rmtree(stage, ignore_errors=True)
     seen = set(shipped["checks"])
     if pinned:
         seen |= set(pinned["checks"])
+    seen |= set(remembered["checks"])
+    seen |= set(stateful["checks"])
     missing = [c for c in declared if c not in seen and c != "S0"]
     return {
         "declared": declared,
         "shipped_reports": shipped["checks"],
         "shipped_verdict": shipped["result"],
         "pinned_run_checks": (pinned or {}).get("checks"),
+        "remembered_run_checks": remembered["checks"],
+        "stateful_run_checks": stateful.get("checks"),
         "missing_from_the_artifact": missing,
         "note": "the artifact is the package directory alone, which is what a "
                 "wheel installs; S0 is the crash fallback and is not expected "
@@ -105,6 +128,12 @@ def render(r):
         lines.append("给一个外部 pin 后再报：%s"
                      % ", ".join(sorted(set(r["pinned_run_checks"]) -
                                         set(r["shipped_reports"])) or ["（无新增）"]))
+    if r.get("stateful_run_checks"):
+        extra = set(r["stateful_run_checks"]) - set(r["shipped_reports"])
+        if r["pinned_run_checks"]:
+            extra -= set(r["pinned_run_checks"])
+        lines.append("给外部新鲜度状态后再报：%s"
+                     % ", ".join(sorted(extra) or ["（无新增）"]))
     if r["missing_from_the_artifact"]:
         lines.append("")
         lines.append("**不会报**：%s" % ", ".join(r["missing_from_the_artifact"]))

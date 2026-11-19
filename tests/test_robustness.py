@@ -43,6 +43,11 @@ class TestHostileInput(unittest.TestCase):
         # Ten cases, all of them refused by both implementations.
         self.assertEqual(len(rows), 10)
         for name, row in rows.items():
+            if row.get("skipped"):
+                # The host could not construct this hostile sample (e.g. no
+                # symlink privilege on Windows). It is pending real exercise
+                # on Linux CI, not a verifier refusal - do not count it PASS.
+                continue
             self.assertTrue(row["js"].startswith("FAIL"), name)
             self.assertTrue(row["py"].startswith("FAIL"), name)
         # A depth ceiling, not a stack ending: 4000 levels is a verdict on the

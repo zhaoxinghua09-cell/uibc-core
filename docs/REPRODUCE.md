@@ -18,7 +18,7 @@ python3 tools/build_reproduce.py
 | 5-4 | reason counts under the same attacks | `python3 tools/compare_diagnostics.py --json` | `compared attacks=4  ours reasons=13  theirs reasons=5` | 0 |
 | 5-5 | three distribution channels 6/6/19 | `python3 tools/check_release_parity.py --json` | `archive (DOI)=6  package (pip)=6  repository=19` | 0 |
 | 5-6 | hot-path latency | `python3 tools/latency_per_call.py --json` | `median_ms=1.311  p99_ms=2.261  n=300` | 0 |
-| summary | 19 checks | `python3 -c "from uibc_core import basis; print(len(basis.BASIS))"` | `19` | 0 |
+| summary | 19 checks | `python3 -c "from uibc_core import basis; print(len([k for k in basis.BASIS if k != 'S0']))"` | `19` | 0 |
 | summary | conformance vectors | `python3 tools/run_conformance.py` | `strict 34/34   refused 29/34` | 0 |
 | summary | published numbers match the tree | `python3 tools/check_doc_facts.py` | `0 mismatch(es)` | 0 |
 | summary | audit verdict on the shipped fixture | `python3 -m uibc_core.cli verify fixtures/clean.uibc` | `result=INCONCLUSIVE` | 1 |

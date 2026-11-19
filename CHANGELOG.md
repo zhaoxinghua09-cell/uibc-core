@@ -15,6 +15,19 @@ Nothing here is a ratified standard.
 
 ## [Unreleased]
 
+### Three witnesses of the artefact, re-checked (2026-11-19)
+
+- **`tools/check_witnesses.py`**: asks Zenodo, Software Heritage and Sigstore
+  Rekor, live, whether what they hold is what we cite. 6 s, exit 0 only if every
+  digest matches. Both digests (Rekor SHA-256, Zenodo md5) equal the file in
+  `dist/`.
+- **`docs/WITNESSES.md`**: what each one proves and does not - witness of the
+  artefact, never adoption of the format.
+- **`docs/IMPLEMENTATION-STATUS.md`**: a new section 0 separates the two
+  numbers. The previous page reported "zero external evidence"; that was a
+  counting error, and hiding a DOI that already exists is worse than having none.
+- **Not in CI, on purpose**: a third party's outage should not turn our CI red.
+
 ### One command, one stranger, both implementations (2026-11-19)
 
 - **`tools/verify-js/chain.mjs`**: the anchor line judged with node:crypto, no

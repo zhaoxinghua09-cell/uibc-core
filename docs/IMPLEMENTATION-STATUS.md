@@ -9,6 +9,20 @@ Date of this page: **2026-11-18**. Every bucket below was checked on that date.
 
 [rfc7942]: https://www.rfc-editor.org/rfc/rfc7942
 
+## 0. Witnesses of the artefact (not of adoption)
+
+These are three, and they are real: a Zenodo DOI, two Software Heritage
+identifiers, and a Sigstore Rekor entry, all re-checked live on 2026-11-19 with
+`tools/check_witnesses.py`. Both the Rekor SHA-256 and the Zenodo md5 came back
+equal to the file in `dist/`.
+
+They witness that the artefact exists and is that byte sequence, at a time a
+third party recorded. They witness nobody using it. The four buckets below
+count adoption, and all four are still empty. Keeping these two numbers apart
+matters: an earlier version of this page folded them together and reported
+"zero external evidence", which was wrong, and would have hidden the one thing
+here that a stranger can already verify.
+
 ## 1. Merged upstream
 
 **None.** No change from this project has been merged into any repository it does

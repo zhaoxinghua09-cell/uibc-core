@@ -16,7 +16,7 @@ from .lifecycle import validate_lifecycle, validate_lifecycle_strict
 from .signing import (ALGORITHM, ALGORITHM_ED25519, b64decode_strict,
                       ed_key_id, ed_seal_verify_scoped, key_id, seal_verify)
 from . import SPEC_VERSION, VERIFIER_ID, __version__, spec_id
-from . import basis as _basis
+from . import basis as _basis, freshness
 
 # Computed once per process: the label plus the bytes it names (see
 # __init__.spec_id). Reported so a reader can tell two builds of the same
@@ -296,7 +296,8 @@ def _semantic_problems(obj, path="", now=None, future_skew_s=300):
 
 
 def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
-                 expect_head: str = None, strict: bool = False) -> dict:
+                 expect_head: str = None, strict: bool = False,
+                 state_file: str = None) -> dict:
     """Verify a submission.uibc package directory. Returns a report dict.
     Seal v0.3 verdict semantics (docs/verdict-and-seal-semantics.md):
 
@@ -587,16 +588,23 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
             s4_unknown.append(e.get("type"))
     # evidence_id: the index is read by position everywhere else, so a duplicate
     # or a missing identifier costs nothing until somebody cites an id. The
-    # field-coverage audit listed this as unchecked; it is checked now.
+    # field-coverage audit listed this as unchecked; it is checked now - but as a
+    # SEMANTIC problem (S12), not a structural one (S4). Rationale (2026-11-19):
+    # a duplicated entry carries a readable file with a matching hash, so the
+    # evidence root can still be computed and the duplicate is then caught by the
+    # root itself (S5), which is what the corpus expects. Filing it under S4 made
+    # the reference answer INCONCLUSIVE on that fixture while the independent
+    # implementation answered FAIL - two implementations, two answers, one spec.
     _ids = [e.get("evidence_id") for e in entries]
+    id_problems = []
     for _i, _eid in enumerate(_ids):
         if not (isinstance(_eid, str) and _eid.strip()):
-            s4_failures.append(f"entry {_i} has no evidence_id")
+            id_problems.append(f"entry {_i} has no evidence_id")
     _seen = set()
     for _eid in _ids:
         if isinstance(_eid, str) and _eid.strip():
             if _eid in _seen:
-                s4_failures.append(f"duplicate evidence_id {_eid!r}")
+                id_problems.append(f"duplicate evidence_id {_eid!r}")
             _seen.add(_eid)
     if s4_failures:
         record("S4", "evidence integrity", False,
@@ -615,6 +623,7 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
     # identifiers must be canonical. Runs on the parsed values, so it is
     # deliberately separate from S11 (which runs on the bytes).
     s12_problems = []
+    s12_problems.extend(id_problems)
     for doc_name, doc in (("manifest.json", manifest), ("identity.json", identity),
                           ("lifecycle.json", lifecycle),
                           ("evidence/index.json", index)):
@@ -981,6 +990,66 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
                            "result": "PASS",
                            "detail": "checkpoint matches the out-of-band pinned value"})
 
+    # S19 freshness state (opt-in). S9 needs the caller to know the head every
+    # time; this remembers it instead. Deliberately narrow: it says nothing
+    # about authenticity (that is S6) and nothing about correctness (that is
+    # S1-S5 and S8). A first observation is INCONCLUSIVE, never PASS - there is
+    # no high-water mark yet, so nothing has been established.
+    if state_file:
+        head_field = manifest.get("freshness_head") if isinstance(manifest, dict) else None
+        subject = manifest.get("agent_id") if isinstance(manifest, dict) else None
+        sequence = None
+        prev_head = None
+        if isinstance(head_field, dict):
+            subject = head_field.get("subject") or subject
+            sequence = head_field.get("sequence")
+            prev_head = head_field.get("prev_head")
+        if subject is None and isinstance(identity, dict):
+            subject = identity.get("agent_id")
+        state = None
+        if subject is None:
+            # Nothing to key a high-water mark on. Saying so is the only honest
+            # answer: guessing a subject would let two unrelated agents share
+            # one watermark.
+            checks.append({"id": "S19", "name": "freshness state",
+                           "result": "INCONCLUSIVE",
+                           "detail": "no agent_id or freshness_head.subject: a "
+                                     "high-water mark cannot be keyed to anything"})
+        else:
+            try:
+                state = freshness.load(state_file)
+            except Exception as exc:  # an unreadable state is not a verdict either
+                ok = False
+                checks.append({"id": "S19", "name": "freshness state",
+                               "result": "FAIL",
+                               "detail": f"state file unreadable: {exc}"})
+        if state is not None:
+            verdict10, detail10 = freshness.evaluate(
+                state, subject, actual_ckpt, sequence=sequence, prev_head=prev_head)
+            if verdict10 == "FAIL":
+                ok = False
+            checks.append({"id": "S19", "name": "freshness state",
+                           "result": verdict10, "detail": detail10})
+            if verdict10 == "PASS" or (verdict10 == "INCONCLUSIVE"
+                                        and subject not in state.get("subjects", {})):
+                # A first observation is reported as INCONCLUSIVE because nothing
+                # was compared, but it is remembered - otherwise the high-water
+                # mark could never start and every run would stay unplaceable.
+                try:
+                    freshness.record(state_file, subject, actual_ckpt, sequence=sequence)
+                except freshness.Busy as exc:
+                    # Not a pass and not a failure: this run's observation was not
+                    # recorded, so the next run cannot compare against it. Saying
+                    # which one that is beats pretending the write happened.
+                    checks.append({"id": "S19", "name": "freshness state",
+                                   "result": "INCONCLUSIVE",
+                                   "detail": f"observation not recorded: {exc}"})
+                except Exception as exc:
+                    ok = False
+                    checks.append({"id": "S19", "name": "freshness state",
+                                   "result": "FAIL",
+                                   "detail": f"state file not writable: {exc}"})
+
     # S5 evidence root
     if entries and not s4_failures:
         computed = evidence_root(recomputed_hashes)
@@ -1181,7 +1250,8 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
 
 
 def verify(package_dir: str, key: bytes = None, pubkey: bytes = None,
-           expect_head: str = None, strict: bool = False) -> dict:
+           expect_head: str = None, strict: bool = False,
+           state_file: str = None) -> dict:
     """Fail-closed wrapper: a verifier must return a verdict, never crash.
 
     Red-team RT06 put a NaN into manifest.json. json accepts NaN, RFC 8785 does
@@ -1191,7 +1261,8 @@ def verify(package_dir: str, key: bytes = None, pubkey: bytes = None,
     """
     try:
         result = _verify_impl(package_dir, key=key, pubkey=pubkey,
-                              expect_head=expect_head, strict=strict)
+                              expect_head=expect_head, strict=strict,
+                              state_file=state_file)
         result["strict"] = bool(strict)
         # Some checks are appended from a dozen hand-written branches (S6 alone
         # has fourteen). Rather than touch each one and still miss a path, the

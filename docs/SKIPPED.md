@@ -91,3 +91,38 @@ $ python -m unittest discover -s tests -p "test_*.py"   # 527, skipped=2
 The number in `README.md` now reads `2 skipped`, and `docs/RELEASE-DRY-RUN.md`
 keeps its historical `16 skipped`, because that is what was measured on
 2026-11-19 before this extra existed.
+
+## A skip that was lying: the symlink case (`2026-11-19`, Windows)
+
+A second class of skip exists and is not about packages at all: **the host may
+be unable to construct the hostile condition**. On a default Windows account
+`os.symlink` raises `WinError 1314` (no `SeCreateSymbolicLinkPrivilege`), so
+`tools/redteam_robustness.py` could not build its `symlink-out` package.
+
+Until 2026-11-19 the tool swallowed that in `except OSError: return` and went on
+to verify a *clean* package - the two implementations dutifully answered
+`INCONCLUSIVE`, and the sandbox recorded that as **"the implementations failed
+to refuse"**. The same file argues, eight lines from the top, that `INCONCLUSIVE`
+must never be the answer to bytes that were never judged. It was doing exactly
+that, to itself.
+
+```
+before:   symlink-out   JS=INCONCLUSIVE   PY=INCONCLUSIVE   PROBLEM   (problems: 1)
+after:    symlink-out   SKIPPED (symlink could not be created on this host (1314))
+          9 of 9 hostile inputs answered and refused
+          1 case(s) skipped on this platform - not counted as a pass   (problems: 0)
+```
+
+The rule now: a case the host cannot build raises `CaseSkipped`, is reported as
+`SKIPPED` with its reason, is **never** counted as a pass, and appears in the JSON
+as `"skipped": N`. On Windows a clean run therefore reads `skipped=24` where
+Linux reads `2` - the difference is the host, not the software, and both numbers
+are stated rather than averaged into one.
+
+**Reproduce (Windows, no admin):**
+
+```
+$ python tools/redteam_robustness.py     # 9 of 9 ... 1 case skipped, problems: 0
+$ python -m unittest discover tests      # Ran 561 tests, OK (skipped=24)
+```
+

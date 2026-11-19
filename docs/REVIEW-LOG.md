@@ -294,3 +294,45 @@ Also fixed here: `docs/EXTERNAL-NODE-KIT.md` said strict base64 and Merkle inclu
 equivalent implementation in this repository. They do (`uibc_core/aee.py::_b64decode_strict`,
 `uibc_core/merkle.py::verify_inclusion`); the honest remaining limitation is that we have not
 executed AER-1 vector-by-vector.
+## Outside AI review, 2026-11-19 (SiliconFlow / DeepSeek-V3)
+
+A reviewer read a fact pack — narrow claim, measured numbers, our own admitted gaps — and
+returned CONDITIONAL with three must-fix items. Recorded here because a review that only
+appears in a summary is not a review.
+
+- **Lock model (accepted, fixed).** `freshness.record()` now takes `<state>.lock` with
+  `O_EXCL` and raises `Busy`; the verifier reports that as INCONCLUSIVE with
+  "observation not recorded" — neither PASS nor FAIL, because neither happened. The
+  alternative was two interleaved read-modify-writes keeping one observation and dropping
+  the other, which is the failure a high-water mark exists to prevent.
+- **Third-party verification count = 0 (accepted, not closed).** Independence still rests on
+  two implementations by one author. It is written in the report, not argued away.
+- **No CI dispatch on this branch (accepted, not closed).** `pull_request` workflows do not
+  fire for this branch; the clean-clone run on a separate host is the evidence instead.
+- **"May be covered by RFC 9162" (rejected, with a correction).** RFC 9162 is Certificate
+  Transparency version 2; Signed HTTP Exchanges is RFC 8878. CT's STH plus consistency
+  proof addresses log-side freshness, not a verifier's own memory — `basis.py` now says
+  which layer each covers.
+- **Open-mode false accept 9.5% (accepted).** Already published as the uncovered-type
+  budget; it now also sits next to the narrow claim rather than in a table alone.
+
+The reviewer saw text only and had no repository access, so this is recorded as a
+self-consistency opinion, not as an independent replay.
+
+## Positioning check, 2026-11-19 (S19 is not a new mechanism)
+
+Four sources found while re-checking the claim that a verifier-side high-water mark is novel:
+
+- `draft-chang-delta1-settlement-00` §7.2 and §12.4 require a monotonic `sequence_number`
+  and a unique `run_id`, and say validators MUST reject decreases and replays.
+- `draft-maintainer-1f916-agent-record` checkpoints Ed25519 logs with RFC 6962 Merkle heads
+  and countersignatures by independent witnesses, and defines a three-valued verdict.
+- `draft-wilder-scitt-physical-site-engage-receipt-05` states the point plainly: a TEE proves
+  it wrote the state it attests, not that the state is the most recent.
+- `veritrail` (PyPI 0.3.0) ships hash-chained records and tells operators to publish the head
+  hash to an external witness.
+
+So the rule "an older but validly signed package must be refused" already exists in drafts and
+in products. What is ours is narrower and should be described that way: an opt-in check inside
+an offline package verifier, with the three INCONCLUSIVE cases written down and a red-team case
+(RT16) that isolates it. No claim of invention; the `basis.py` note now names the drafts.

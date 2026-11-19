@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at_utc": "2026-11-17T06:00:00Z",
+    "generated_at_utc": "2026-11-19T05:23:31Z",
     "verifier": "uibc-core verify()",
     "package": "mb-agent-001",
     "base_open": "PASS",
@@ -179,6 +179,7 @@
           "verdict": "FAIL",
           "failed_checks": [
             "S3",
+            "S12",
             "S8",
             "S6"
           ],
@@ -188,6 +189,7 @@
           "verdict": "FAIL",
           "failed_checks": [
             "S3",
+            "S12",
             "S8",
             "S6"
           ],
@@ -295,6 +297,7 @@
           "verdict": "FAIL",
           "failed_checks": [
             "S4",
+            "S12",
             "S7",
             "S8"
           ],
@@ -304,6 +307,7 @@
           "verdict": "FAIL",
           "failed_checks": [
             "S4",
+            "S12",
             "S7",
             "S8"
           ],
@@ -318,6 +322,7 @@
         "open": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S12",
             "S7",
             "S8",
             "S5"
@@ -327,6 +332,7 @@
         "pinned": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S12",
             "S7",
             "S8",
             "S5"

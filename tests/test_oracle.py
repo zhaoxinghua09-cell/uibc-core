@@ -27,6 +27,14 @@ class TestOracle(unittest.TestCase):
         mod = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)
         self.assertGreaterEqual(len(mod.ORACLE) + len(mod.ORACLE_EXT) + 2, 21)
+
+    def test_the_accept_side_exists_and_only_expects_acceptance(self):
+        """A reject-only table is satisfied by a verifier that rejects everything."""
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("oracle_check", TOOL)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        self.assertGreaterEqual(len(mod.ORACLE_ACCEPT), 5)
         verdicts = {row[2] for row in mod.ORACLE}
         self.assertEqual(verdicts, {"PASS", "FAIL"}, "an oracle of one verdict cannot fail")
 

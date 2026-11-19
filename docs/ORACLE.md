@@ -14,8 +14,28 @@ Run: `python tools/oracle_check.py` — exit 0 means every scored cell matched.
 
 ## Measured 2026-11-19, Windows, Python 3.13
 
-**21 cases, 0 cells disagreeing with the oracle, `ORACLE: PASS`, exit 0.**
-**Coverage: 19 of 19 checks have a case whose failure is predicted.**
+**27 cases, 0 cells disagreeing with the oracle, `ORACLE: PASS`, exit 0.**
+**21 cases predict a failure; 6 predict an acceptance. Coverage: 19 of 19 checks have a
+case whose failure is predicted.**
+
+A table of cases that must fail says nothing about false alarms — a verifier that failed
+everything would satisfy all twenty-one of them. So the tool also carries six packages
+with nothing wrong, built through the ordinary CLI path:
+
+| case | shape | expected | both verifiers |
+|---|---|---|---|
+| accept-one-file | one evidence item | PASS | PASS |
+| accept-many-files | five items | PASS | PASS |
+| accept-unicode-names | Chinese and accented filenames, UTF-8 content | PASS | PASS |
+| accept-binary | PNG-magic bytes and raw octets | PASS | PASS |
+| accept-large-text | 200 KB single file | PASS | PASS |
+| accept-resubmitted | sealed, then sealed again | PASS | PASS |
+
+**Measured false-alarm rate on this sample: 0 of 6.** That is six shapes, not a
+population — it says these six are not rejected, not that false alarms do not happen.
+Nothing here varies the policy, anchor or token artefacts, so the accept side is
+thinner than the reject side and is reported as such.
+
 
 | case | what is broken | expected | first failure |
 |---|---|---|---|
@@ -86,9 +106,10 @@ Restating a qualitative note in `INDEPENDENCE.md` as a number: agreement covers
 - **Not exhaustive.** One mutation per case, one host, one Python version. A mutation
   that breaks several things at once has no single expected first failure, so none is
   claimed.
-- **Predicted failures, not predicted passes.** Coverage here means "each check can be
-  made to fail on purpose and its first-failure code is written down". It says nothing
-  about the false-alarm rate on good packages beyond the single clean control.
+- **Predicted failures, not predicted passes.** Coverage on the reject side means "each
+  check can be made to fail on purpose and its first-failure code is written down". The
+  accept side is six ordinary shapes with zero rejections; that is a floor for the
+  false-alarm rate, not a rate.
 
 Adding a case means writing the expected verdict and first failure down **first**. Editing
 the table after seeing an output is the failure mode this tool exists to prevent.

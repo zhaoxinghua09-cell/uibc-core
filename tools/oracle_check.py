@@ -71,6 +71,66 @@ ORACLE_EXT = [
     ("oracle-s07-index-metadata",   "build_ckpt",    "m_ckpt_rewrite_index_note", "FAIL", "S7"),
 ]
 
+# Tranche four: the other half of the oracle. A table of cases that must FAIL says
+# nothing about false alarms, and a verifier that fails everything would pass all
+# twenty-one of them. These rows are legitimate packages that must be ACCEPTED: the
+# ordinary shapes a real agent produces, not attacks. Every row is expected PASS in
+# strict mode (owner key supplied), so a rejection here is a false alarm and is
+# scored as a disagreement with the oracle.
+ORACLE_ACCEPT = [
+    ("accept-one-file",       "one"),
+    ("accept-many-files",     "many"),
+    ("accept-unicode-names",  "unicode"),
+    ("accept-binary",         "binary"),
+    ("accept-large-text",     "large"),
+    ("accept-resubmitted",    "resubmit"),
+]
+
+
+def build_good(tmp, name, variant):
+    """A legitimate package. Nothing here is an attack: these are shapes real use produces."""
+    pkg = os.path.join(tmp, name)
+    ucli.cmd_init(type("A", (), {"path": pkg})())
+    ucli.cmd_register(type("A", (), {
+        "path": pkg, "agent_id": "accept", "owner": "accept",
+        "agent_type": "software-agent", "version": "1"})())
+
+    files = []
+    if variant == "one":
+        files = [("log.txt", "one action\n")]
+    elif variant == "many":
+        files = [(f"step-{i}.txt", f"step {i}\n") for i in range(5)]
+    elif variant == "unicode":
+        files = [("运行日志.txt", "代理执行了一次检索\n第二行中文\n"),
+                 ("résumé.md", "accented filename\n")]
+    elif variant == "binary":
+        files = [("blob.bin", b"\x89PNG\r\n\x1a\n" + bytes(range(64)))]
+    elif variant == "large":
+        files = [("big.txt", "x" * 200000 + "\n")]
+    elif variant == "resubmit":
+        files = [("log.txt", "one action\n")]
+    else:
+        raise ValueError(variant)
+
+    for fname, content in files:
+        src = os.path.join(tmp, f"{name}-{fname}")
+        mode = "wb" if isinstance(content, bytes) else "w"
+        with open(src, mode, **({} if mode == "wb" else {"encoding": "utf-8"})) as f:
+            f.write(content)
+        ucli.cmd_evidence(type("A", (), {
+            "path": pkg, "type": "ACTION", "file": src,
+            "media_type": "text/plain", "note": fname})())
+
+    key = generate_key()
+    kf = os.path.join(tmp, f"{name}.key")
+    with open(kf, "w", encoding="ascii") as f:
+        f.write(key.hex())
+    ucli.cmd_submit(type("A", (), {"path": pkg, "key": kf})())
+    if variant == "resubmit":
+        # a second submission is ordinary: the agent sealed, then sealed again
+        ucli.cmd_submit(type("A", (), {"path": pkg, "key": kf})())
+    return pkg, key
+
 
 def build(tmp, name, mutation, nevid=1):
     pkg = os.path.join(tmp, name)
@@ -252,6 +312,19 @@ def main():
         bad += 0 if r_ok else 1
         rows.append(("oracle-s19-regressed", "FAIL", "S19", r_verdict, str(r_first),
                      "n/a", "n/a", r_ok, None))
+
+        # --- tranche four: legitimate packages must be accepted, not merely "not attacked" ---
+        for name, variant in ORACLE_ACCEPT:
+            pkg, key = build_good(tmp, name, variant)
+            rep = verify(pkg, key=key)
+            r_verdict, r_first = ref_view(pkg, None, rep=rep)
+            i_verdict, i_first = ind_view(pkg, key)
+            r_ok = (r_verdict == "PASS")
+            i_ok = (i_verdict == "PASS")
+            bad += 0 if r_ok else 1
+            bad += 0 if i_ok else 1
+            rows.append((name, "PASS", "—", r_verdict, str(r_first),
+                         i_verdict, str(i_first), r_ok, i_ok))
 
     print(f"{'case':<26}{'oracle':<8}{'o-first':<9}{'ref':<8}{'r-first':<9}"
           f"{'ind':<8}{'i-first':<9}{'ref?':<6}{'ind?'}")

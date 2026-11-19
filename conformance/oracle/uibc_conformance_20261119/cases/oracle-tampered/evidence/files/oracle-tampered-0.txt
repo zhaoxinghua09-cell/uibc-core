@@ -1,2 +1,0 @@
-oracle oracle-tampered 0
-TAMPERED

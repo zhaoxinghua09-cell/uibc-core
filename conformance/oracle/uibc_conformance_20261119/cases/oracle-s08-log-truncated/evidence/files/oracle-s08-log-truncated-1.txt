@@ -1,1 +1,0 @@
-oracle oracle-s08-log-truncated 1

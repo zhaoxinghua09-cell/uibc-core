@@ -1,6 +1,0 @@
-{
-  "digest_of": "timestamps/anchored_head.json",
-  "tsr": "timestamps/freetsa.tsr",
-  "cabundle": "timestamps/freetsa_ca.pem",
-  "tsr_sha256": "b95e5c70a3b26c440deec9c0dca73bf928d8261ddff1dc393e22a6c1674d6a16"
-}

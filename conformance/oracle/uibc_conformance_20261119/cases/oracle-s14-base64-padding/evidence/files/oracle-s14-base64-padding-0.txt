@@ -1,1 +1,0 @@
-oracle oracle-s14-base64-padding 0

@@ -1,1 +1,0 @@
-oracle oracle-s12-id-only 0

@@ -15,6 +15,21 @@ Nothing here is a ratified standard.
 
 ## [Unreleased]
 
+### The recheck that changed the conclusion, and the adoption note (2026-11-19)
+
+- `docs/LANDSCAPE-2026-11.md` gains a dated recheck: the space now has
+  `draft-mih-scitt-agent-action-capsule-05` (61 pages, 7 IANA registry requests),
+  `draft-pidlisnyi-aps-04` (17 repositories, four languages, two hosted services),
+  `draft-munoz-scitt-permit-profile-01`, and a chain of adjacent drafts. On
+  specification completeness and ecosystem size the gap widened.
+- The same recheck finds that adoption is zero **across the field**:
+  `arXiv:2606.04193` says so in its own words. An adoption count is therefore not
+  a competitive metric - nobody leads it, including the largest draft.
+- `docs/ADOPTION-MEASUREMENT.md` publishes the four-bucket method as a copyable
+  contribution, states what it cannot measure, and carries an unsent draft message.
+  Marked **draft, unsent**.
+- `tools/check_citations.py` gains four references; three IETF ones resolve at 200.
+
 ### v0.4.0 tagged, and the suite is downloadable without an account (2026-11-19)
 
 - Tag `v0.4.0` on the commit that carries the PyPI bytes; release

@@ -23,7 +23,7 @@
 | S16 | external timestamp (RFC 3161) | 存在真实的第三方时间戳（RFC 3161），且它覆盖的是本包的链头？ | 草案明文规定 | 时间戳协议本体；「须覆盖本包链头」的判定自定（RFC 3161） | 760 |
 | S17 | linear receipt chain | 收据链线性、无分叉、无伪造的创世前驱？ | 草案明文规定 | 收据与摘要（draft-marques-asqav-compliance-receipts-01） | 827 |
 | S18 | policy artefact resolution | 策略产物存在，且其摘要与收据引用的摘要一致？ | 草案明文规定 | 摘要须可解析（draft-marques-asqav-compliance-receipts-01 §4.2.4） | 848 |
-| S19 | freshness state | 包比这个验证器上次接受的那份更新（而不是一个更旧但签名合法的包）？ | 思想来源（非直接规定） | 新鲜度只能由外部状态判定，签名不蕴含时间顺序；高水位记忆机制为本项目自定。与 RFC 9162 (Certificate Transparency v2) 的 STH 加一致性证明不同层：那边管日志侧的新鲜度，这边管验证器自己的记忆（draft-bailey-scitt-agent-session-receipt） | 975 |
+| S19 | freshness state | 包比这个验证器上次接受的那份更新（而不是一个更旧但签名合法的包）？ | 思想来源（非直接规定） | 新鲜度只能由外部状态判定，签名不蕴含时间顺序；高水位记忆机制为本项目自定。机制并不新：draft-chang-delta1-settlement-00 §7.2/§12.4 已要求序号单调、拒绝重放；draft-maintainer-1f916-agent-record 用 checkpoint 加见证方；RFC 9162 的 STH 管的是日志侧。本项目做的是把这条放进离线验包器，作为可选的验证器侧状态，并给出三值裁决口径（draft-bailey-scitt-agent-session-receipt） | 975 |
 
 ## 关于「外部依据」这一列
 

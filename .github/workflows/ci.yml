@@ -157,6 +157,11 @@ jobs:
           mkdir -p /tmp/isolated && cd /tmp/isolated
           python /tmp/uibc.pyz explain "$GITHUB_WORKSPACE/fixtures/clean.uibc" | head -3
 
+      - name: The line of anchors, judged by both implementations
+        # Includes the end-to-end rehearsal: build, link, judge four questions
+        # with python and node in a stripped environment, under a second.
+        run: python -m pytest tests/test_chain_second_impl.py -q
+
       - name: A stale anchor has to be distinguishable from a current one
         # Six refusals and one STALE: gap, replay, rewritten predecessor, a
         # first anchor claiming a predecessor, withheld anchors, rollback.

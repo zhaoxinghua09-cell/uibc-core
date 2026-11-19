@@ -15,6 +15,20 @@ Nothing here is a ratified standard.
 
 ## [Unreleased]
 
+### One command, one stranger, both implementations (2026-11-19)
+
+- **`tools/verify-js/chain.mjs`**: the anchor line judged with node:crypto, no
+  shared code with `anchor_chain.py`. Five scenarios frozen as *agreement*:
+  sound line, gap, replay, rewritten predecessor, withheld anchor (STALE).
+- **`tools/outsider_chain_audit.py`**: one command that builds two bundles,
+  links them, and answers four questions with both implementations in a
+  stripped environment - 0.877 s end to end, exit 0 only on VERDICT OK.
+- **Deliberate duplication, stated**: the six lines of JCS are repeated rather
+  than shared; a shared helper is one more thing that can drift, and the rule is
+  tiny.
+- **What it does not prove**: the line is not real. No `anchors/` directory,
+  no publication - `docs/IMPLEMENTATION-STATUS.md` still reads zero.
+
 ### Anchors that name their predecessor (2026-11-19)
 
 - **`anchor.json` gains `seq` and `prev_anchor_digest`.** A single anchor cannot

@@ -191,6 +191,17 @@ UIBC Core 参考实现 v0.3.3 —— Agent 生命周期证据包与验证器：�
 的数字（接受率 / **未被设计解释的接受数**）。当前 open 9.5%（2/21，均为设计边界）、
 pinned 4.8%（1/21）、head-pinned 0.0%，**三档未解释接受均为 0**。见 `benchmark/README.md`。
 
+**500 例确定性语料（逐例可查）**：`benchmarks/corpus/mutation-corpus-500.json` 把同一批族
+扩到 500 例，每例一行、带各模式裁决与被触发的检查 id。外人可一条命令复算并出具回执：
+
+```bash
+python tools/corpus_selfcheck.py --receipt my-receipt.md
+```
+
+目前 open 60/500（12.0%）、pinned 20/500（4.0%）、head-pinned 0/60（0.0%）；`open` 档被
+接受的 60 例全部落在 rollback 与换钥两族——无锚点时按设计判不了的那两类。族清单由我们自己
+选定、未经外部审过，因此这组数字不构成强度主张。见 `docs/MUTATION-CORPUS.md`。
+
 | uibc 用词 | 上游用词（出处） | 关系 |
 |---|---|---|
 | 证据包 / package + manifest + 离线验证 | Package Digest（`draft-raskar-scitt-agent-provenance-00`）；AIVS bundle（`draft-stone-aivs-01`） | **同形态**。我们不加新格式，只在包上给出一个裁决 |

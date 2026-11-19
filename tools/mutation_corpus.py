@@ -9,8 +9,9 @@
 
 所有参数由索引决定，不用随机数：同一条命令在任何机器上生成同一批用例。
 
-用法： python tools/mutation_corpus.py
-输出： tools/out/mutation_corpus.json
+用法： python tools/mutation_corpus.py [--out <path>]
+输出： 默认 tools/out/mutation_corpus.json；--out 可写到仓库内（如
+      benchmarks/corpus/mutation-corpus-500.json），供外人逐例比对。
 """
 import base64
 import hashlib
@@ -366,7 +367,15 @@ def build_newer(k):
     return _j(os.path.join(d, "manifest.json"))["checkpoint_head"]
 
 
-def main():
+def main(argv=None):
+    argv = list(sys.argv[1:] if argv is None else argv)
+    out_path = os.path.join(OUT, "mutation_corpus.json")
+    if "--out" in argv:
+        i = argv.index("--out")
+        if i + 1 >= len(argv):
+            print("--out needs a path", file=sys.stderr)
+            return 2
+        out_path = argv[i + 1]
     os.makedirs(WORK, exist_ok=True)
     mb.build_base()
     pub = us.ed_public_key(mb.DEMO_SEED)
@@ -493,8 +502,8 @@ def main():
                     "note": "参数由索引决定，不用随机数；PASS 即视为被接受"},
            "summary": summary, "families": fam,
            "rows": rows}
-    os.makedirs(OUT, exist_ok=True)
-    p = os.path.join(OUT, "mutation_corpus.json")
+    p = out_path
+    os.makedirs(os.path.dirname(os.path.abspath(p)) or ".", exist_ok=True)
     with open(p, "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, indent=2)
 

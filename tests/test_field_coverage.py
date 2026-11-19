@@ -87,17 +87,27 @@ class TestFieldCoverage(unittest.TestCase):
         json.dump(doc, open(path, "w", encoding="utf-8"), ensure_ascii=False)
         return {c["id"]: c for c in verify(pkg)["checks"]}
 
-    def test_a_repeated_evidence_id_fails_integrity(self):
+    def test_a_repeated_evidence_id_fails_semantics(self):
+        """Structural (S4) or semantic (S12)?
+
+        2026-11-19 decision: semantic. A repeated entry still names a readable
+        file whose hash matches, so the evidence root can be computed and the
+        duplicate is caught by the root itself (S5) - which is what
+        benchmarks.md promises for fixture duplicated.uibc. Filing it under S4
+        made the reference answer INCONCLUSIVE there while the independent
+        implementation answered FAIL, i.e. two answers to one spec.
+        """
         checks = self._with_index_edit(
             lambda d: d["entries"][1].__setitem__("evidence_id",
                                                   d["entries"][0]["evidence_id"]))
-        self.assertEqual(checks["S4"]["result"], "FAIL", checks["S4"]["detail"])
-        self.assertIn("duplicate evidence_id", checks["S4"]["detail"])
+        self.assertEqual(checks["S12"]["result"], "FAIL", checks["S12"]["detail"])
+        self.assertIn("duplicate evidence_id", checks["S12"]["detail"])
 
-    def test_an_empty_evidence_id_fails_integrity(self):
+    def test_an_empty_evidence_id_fails_semantics(self):
         checks = self._with_index_edit(
             lambda d: d["entries"][0].__setitem__("evidence_id", ""))
-        self.assertEqual(checks["S4"]["result"], "FAIL", checks["S4"]["detail"])
+        self.assertEqual(checks["S12"]["result"], "FAIL", checks["S12"]["detail"])
+        self.assertIn("evidence_id", checks["S12"]["detail"])
 
     def test_a_declared_payload_hash_has_a_shape(self):
         tmp = tempfile.mkdtemp()

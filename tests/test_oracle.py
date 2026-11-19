@@ -75,6 +75,8 @@ class TestOracle(unittest.TestCase):
         self.assertIn("measured: V7 fires alone -> reference FAIL S1", out)
         self.assertIn("reference says FAIL and the second says INCONCLUSIVE", out)
         self.assertIn("says PASS on 0 and declines to judge 9", out)
+        self.assertIn("reaches 9 by rule (S1,S2,S3,S4,S5,S6,S7,S8,S12)", out)
+        self.assertIn("can never reach 8 (S10,S11,S13,S14,S15,S16,S17,S18)", out)
 
     def test_no_case_is_silently_unscored(self):
         """Rows must not be blanket-recorded as "n/a" when the second implementation can

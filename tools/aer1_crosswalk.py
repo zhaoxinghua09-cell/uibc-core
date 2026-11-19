@@ -79,7 +79,10 @@ MAPPING = [
     ("base/id-binding-vectors.json", "COVERED", "S2 identity binding"),
     ("base/anchor-vectors.json", "PARTIAL", "trust_level anchored + S9 out-of-band head; "
                                             "no anchor-event resolution"),
-    ("base/merkle-vectors.json", "TO-ADD", "no Merkle tree or inclusion proof at all"),
+    ("base/merkle-vectors.json", "PARTIAL",
+     "Merkle tree and inclusion proofs implemented (RFC 6962 default); "
+     "AER-1 Section 8.1 construction available as the named profile 'aer1' "
+     "(9/9 corpus vectors); the default construction's roots differ (0/9)"),
 ]
 
 VERDICT_ORDER = {"COVERED": 0, "PARTIAL": 1, "TO-ADD": 2, "N_A": 3}
@@ -173,7 +176,6 @@ CAP_FOR_CLASS = {
     "invalid/ax-feb29-1900": "ts_feb29_1900",
     "invalid/ax-feb29-non-leap": "ts_feb29_nonleap",
     "invalid/bad-offset-range": "ts_offset_range",
-    "base/merkle-vectors.json": "merkle",
     "base/anchor-vectors.json": "anchor",
 }
 

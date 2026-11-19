@@ -13,14 +13,14 @@
   },
   "summary": {
     "COVERED": {
-      "classes": 34,
-      "vectors": 66,
-      "checks": 69
+      "classes": 33,
+      "vectors": 57,
+      "checks": 57
     },
     "PARTIAL": {
-      "classes": 0,
-      "vectors": 0,
-      "checks": 0
+      "classes": 1,
+      "vectors": 9,
+      "checks": 12
     },
     "TO-ADD": {
       "classes": 0,
@@ -346,11 +346,11 @@
     },
     {
       "class": "base/merkle-vectors.json",
-      "verdict": "COVERED",
-      "check": "no Merkle tree or inclusion proof at all [recomputed: probe rejects]",
+      "verdict": "PARTIAL",
+      "check": "Merkle tree and inclusion proofs implemented (RFC 6962 default); AER-1 Section 8.1 construction available as the named profile 'aer1' (9/9 corpus vectors); the default construction's roots differ (0/9)",
       "vectors": 9,
       "checks": 12,
-      "recomputed": true
+      "recomputed": false
     }
   ]
 }

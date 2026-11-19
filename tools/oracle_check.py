@@ -84,6 +84,13 @@ ORACLE_ACCEPT = [
     ("accept-binary",         "binary"),
     ("accept-large-text",     "large"),
     ("accept-resubmitted",    "resubmit"),
+    # Tranche five: the shapes the reject side mutates, built correctly. A accept table
+    # of plain packages says nothing about policy, anchor or lifecycle artefacts, which
+    # is where the interesting rules live. These three are the legitimate versions of
+    # the S14/S15/S18 and actor/sequence machinery.
+    ("accept-typed-evidence",  "typed"),
+    ("accept-lifecycle-events", "lifecycle"),
+    ("accept-anchored-policy", "anchored"),
 ]
 
 
@@ -107,19 +114,38 @@ def build_good(tmp, name, variant):
         files = [("blob.bin", b"\x89PNG\r\n\x1a\n" + bytes(range(64)))]
     elif variant == "large":
         files = [("big.txt", "x" * 200000 + "\n")]
+    elif variant == "typed":
+        files = [("call.json", '{"tool":"search","q":"a"}', "ACTION"),
+                 ("in.txt", "three results\n", "INPUT"),
+                 ("out.txt", "pick the first\n", "OUTPUT")]
+    elif variant == "lifecycle":
+        files = [("log.txt", "one action\n")]
+    elif variant == "anchored":
+        # Two items, not one: an anchor carries a Merkle proof, and a single-leaf tree
+        # has an empty proof, which the anchor resolver treats as unresolvable. Found
+        # while building this case, recorded in docs/ORACLE.md rather than worked around.
+        files = [("log.txt", "one action\n"), ("extra.txt", "second action\n")]
     elif variant == "resubmit":
         files = [("log.txt", "one action\n")]
     else:
         raise ValueError(variant)
 
-    for fname, content in files:
+    for fname, content, *_rest in [(f[0], f[1], *(f[2:] if len(f) > 2 else [])) for f in files]:
+        etype = _rest[0] if _rest else "ACTION"
         src = os.path.join(tmp, f"{name}-{fname}")
         mode = "wb" if isinstance(content, bytes) else "w"
         with open(src, mode, **({} if mode == "wb" else {"encoding": "utf-8"})) as f:
             f.write(content)
         ucli.cmd_evidence(type("A", (), {
-            "path": pkg, "type": "ACTION", "file": src,
+            "path": pkg, "type": etype, "file": src,
             "media_type": "text/plain", "note": fname})())
+
+    if variant == "lifecycle":
+        # Ordinary lifecycle: three events by the recorded principal, using words the
+        # verifier knows. This exercises the actor/principal rules and sequence
+        # continuity in the accepting direction.
+        for etype in ("UPDATE", "DELEGATE", "UPDATE"):
+            ucli.cmd_event(type("A", (), {"path": pkg, "type": etype, "actor": None})())
 
     key = generate_key()
     kf = os.path.join(tmp, f"{name}.key")
@@ -128,6 +154,12 @@ def build_good(tmp, name, variant):
     ucli.cmd_submit(type("A", (), {"path": pkg, "key": kf})())
     if variant == "resubmit":
         # a second submission is ordinary: the agent sealed, then sealed again
+        ucli.cmd_submit(type("A", (), {"path": pkg, "key": kf})())
+    if variant == "anchored":
+        # A legitimate package that also carries a resolvable anchor and a resolvable
+        # policy artefact - the accepting version of the S14/S15/S18 machinery.
+        import outsider_audit as oa
+        oa.build_ext(pkg)
         ucli.cmd_submit(type("A", (), {"path": pkg, "key": kf})())
     return pkg, key
 

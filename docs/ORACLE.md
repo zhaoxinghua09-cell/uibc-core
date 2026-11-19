@@ -14,12 +14,16 @@ Run: `python tools/oracle_check.py` — exit 0 means every scored cell matched.
 
 ## Measured 2026-11-19, Windows, Python 3.13
 
-**27 cases, 0 cells disagreeing with the oracle, `ORACLE: PASS`, exit 0.**
-**21 cases predict a failure; 6 predict an acceptance. Coverage: 19 of 19 checks have a
-case whose failure is predicted.**
+**30 cases, 0 cells disagreeing with the oracle, `ORACLE: PASS`, exit 0.**
+**21 cases predict a failure; 9 predict an acceptance.**
+
+Tranche five took the accept side past plain packages, into the machinery the reject side
+mutates: evidence types, lifecycle events, and a package carrying a resolvable anchor and
+a resolvable policy artefact. **Three more accepting cases, and two defects found by doing
+it** — both described below.
 
 A table of cases that must fail says nothing about false alarms — a verifier that failed
-everything would satisfy all twenty-one of them. So the tool also carries six packages
+everything would satisfy all twenty-one of them. So the tool also carries nine packages
 with nothing wrong, built through the ordinary CLI path:
 
 | case | shape | expected | both verifiers |
@@ -30,9 +34,40 @@ with nothing wrong, built through the ordinary CLI path:
 | accept-binary | PNG-magic bytes and raw octets | PASS | PASS |
 | accept-large-text | 200 KB single file | PASS | PASS |
 | accept-resubmitted | sealed, then sealed again | PASS | PASS |
+| accept-typed-evidence | three evidence entries with types ACTION / INPUT / OUTPUT | PASS | PASS |
+| accept-lifecycle-events | three lifecycle events (UPDATE, DELEGATE, UPDATE) by the owner | PASS | PASS |
+| accept-anchored-policy | two items, plus a resolvable anchor and a resolvable policy artefact | PASS | PASS |
 
-**Measured false-alarm rate on this sample: 0 of 6.** That is six shapes, not a
-population — it says these six are not rejected, not that false alarms do not happen.
+**Measured false-alarm rate on this sample: 0 of 9.** That is nine shapes, not a
+population — it says these nine are not rejected, not that false alarms do not happen.
+
+## Two defects found by building the accept side
+
+Writing a *legal* package is how these surfaced. Neither was visible from the reject
+side, because the reject side only ever asks "is this caught".
+
+**1. Closed vocabularies that the writer did not enforce.** `evidence --type X` accepted
+any word and wrote it into the index; the verifier's S4 then answered **INCONCLUSIVE** —
+"an unknown evidence type, not counted as checked". `event --type Y` was worse: L3
+returned **FAIL**, so a typo in a field name was reported to the user as a bad package.
+Two closed vocabularies existed and only the reader knew them.
+
+Both are now `choices` in `uibc_core/cli.py` — the writer refuses the word and prints the
+allowed list before anything is written — and `tests/test_vocabulary.py` fails if the CLI
+and the verifier ever drift apart again, or if a refused write leaves a half-written
+entry behind. The accepting cases `accept-typed-evidence` and `accept-lifecycle-events`
+exercise the legal members of both vocabularies.
+
+**2. An anchor over a single evidence item cannot resolve.** The anchor document carries a
+Merkle proof, and a one-leaf tree has an empty proof, which `uibc_core.anchor` treats as
+`proof is missing or empty` — so S15 answered FAIL for a package that was internally
+consistent. This is a restriction, not a bug: a proof of inclusion in a one-element tree
+is vacuous. It is recorded here because a user hitting it would have no way to tell that
+from a broken package, and the accepting case therefore uses two items.
+
+If either of these reads as a small thing: the whole point of the oracle is that the
+accept side is where "the tool told me my package was bad" and "the tool and I disagreed
+about a word" get told apart. Both defects were of the second kind.
 Nothing here varies the policy, anchor or token artefacts, so the accept side is
 thinner than the reject side and is reported as such.
 
@@ -108,7 +143,7 @@ Restating a qualitative note in `INDEPENDENCE.md` as a number: agreement covers
   claimed.
 - **Predicted failures, not predicted passes.** Coverage on the reject side means "each
   check can be made to fail on purpose and its first-failure code is written down". The
-  accept side is six ordinary shapes with zero rejections; that is a floor for the
+  accept side is nine ordinary shapes with zero rejections; that is a floor for the
   false-alarm rate, not a rate.
 
 Adding a case means writing the expected verdict and first failure down **first**. Editing

@@ -56,12 +56,52 @@ def _sha(rows):
 
 
 def _git_head():
+    """Resolve the commit three ways, so a receipt never ships with a hole in it.
+
+    1. ask git (works in a normal clone with git on PATH)
+    2. read .git/HEAD and the ref it points at (works when git is absent)
+    3. read a CI-provided commit variable (works in detached CI checkouts)
+    Returns a 40-char hex sha, or "UNAVAILABLE" - never the ambiguous "unknown".
+    """
     try:
         out = subprocess.check_output(["git", "-C", ROOT, "rev-parse", "HEAD"],
                                       stderr=subprocess.DEVNULL).decode().strip()
-        return out
+        if len(out) == 40:
+            return out
     except Exception:
-        return "unknown"
+        pass
+
+    git_dir = os.path.join(ROOT, ".git")
+    try:
+        with open(os.path.join(git_dir, "HEAD"), encoding="utf-8") as f:
+            head = f.read().strip()
+        if head.startswith("ref:"):
+            ref = head.split("ref:", 1)[1].strip()
+            ref_path = os.path.join(git_dir, *ref.split("/"))
+            if os.path.exists(ref_path):
+                with open(ref_path, encoding="utf-8") as f:
+                    sha = f.read().strip()
+                if len(sha) == 40:
+                    return sha
+            packed = os.path.join(git_dir, "packed-refs")
+            if os.path.exists(packed):
+                with open(packed, encoding="utf-8") as f:
+                    for line in f:
+                        if line.startswith("#") or not line.strip():
+                            continue
+                        parts = line.split()
+                        if len(parts) == 2 and parts[1] == ref and len(parts[0]) == 40:
+                            return parts[0]
+        elif len(head) == 40:
+            return head
+    except Exception:
+        pass
+
+    for var in ("GITHUB_SHA", "CI_COMMIT_SHA", "CI_COMMIT_ID", "BUILD_SOURCEVERSION"):
+        sha = os.environ.get(var, "").strip()
+        if len(sha) == 40:
+            return sha
+    return "UNAVAILABLE"
 
 
 def main():
@@ -122,8 +162,13 @@ def main():
     receipt = []
     receipt.append("# Corpus self-check receipt")
     receipt.append("")
+    head = _git_head()
+    if head == "UNAVAILABLE":
+        receipt.append("- provenance: **INCOMPLETE** - commit could not be resolved")
+        receipt.append("  (git absent, no .git/HEAD, no CI commit variable). The verdict below")
+        receipt.append("  still holds, but it cannot be pinned to a specific code state.")
     receipt.append("- verdict: **%s**" % ("MATCH" if ok else "MISMATCH"))
-    receipt.append("- commit: `%s`" % _git_head())
+    receipt.append("- commit: `%s`" % head)
     receipt.append("- shipped file: `benchmarks/corpus/mutation-corpus-500.json`")
     receipt.append("- command: `python tools/corpus_selfcheck.py`")
     receipt.append("- started (UTC): %s" % time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()))

@@ -1,8 +1,16 @@
 # uibc-conformance 0.4.1 - archive built from this repository
 
-c232b21fa3400e8c97a2446e05ad5d6dbe40004b55e7fc7267b746403eedd260  uibc-conformance-0.4.1.zip
+c232b21fa3400e8c97a2446e05ad5d6dbe40004b55e7fc7267b746403eedd260  conformance/uibc-conformance-0.4.1.zip
 
 # 124505 bytes. Built by: python tools/build_conformance_bundle.py 0.4.1
+#
+# The path above is repository-relative on purpose. A pin naming only a basename
+# tells a reader what to hash but not where to get it; the hash is then
+# unresolvable for anyone who did not read an earlier conversation. Found by
+# testing a competitor's pin file on 2026-11-20: three of its four values
+# resolved, one did not, and the first question was "resolved where?".
+# tests/test_pin_resolvability.py now fails if a pin cannot be resolved.
+#
 # The build is deterministic (fixed timestamps, sorted entries): rebuilding from
 # the same inputs produces the same bytes and this same hash. Checked 2026-11-19.
 # Contents: cases/ (36 packages), manifest.json, expected.json, run.py, README.md.

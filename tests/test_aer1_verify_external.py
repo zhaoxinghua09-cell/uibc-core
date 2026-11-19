@@ -84,6 +84,17 @@ class VerifyExternalTest(unittest.TestCase):
                     "reference_profile", "disinterested", "anchors", "id_verdict"):
             self.assertIn(key, report)
 
+    def test_id_verdict_is_a_verdict_not_an_error_string(self):
+        # Measured 2026-11-19: the call passed one argument to a two-argument
+        # function, the exception was swallowed into "error: ...", and the
+        # report still printed ACCEPTED. A field that can only ever hold an
+        # error string never fails, so pin the vocabulary instead.
+        vocabulary = {"absent", "unverified", "matched", "resolved", "mismatched"}
+        path = self._write("id.json", json.dumps(self.receipt))
+        report = external.judge(path)
+        self.assertIn(report["id_verdict"], vocabulary)
+        self.assertNotIn("error", str(report["id_verdict"]).lower())
+
 
 if __name__ == "__main__":
     unittest.main()

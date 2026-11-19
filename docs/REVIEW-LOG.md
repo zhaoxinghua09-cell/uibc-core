@@ -318,3 +318,21 @@ appears in a summary is not a review.
 
 The reviewer saw text only and had no repository access, so this is recorded as a
 self-consistency opinion, not as an independent replay.
+
+## Positioning check, 2026-11-19 (S19 is not a new mechanism)
+
+Four sources found while re-checking the claim that a verifier-side high-water mark is novel:
+
+- `draft-chang-delta1-settlement-00` §7.2 and §12.4 require a monotonic `sequence_number`
+  and a unique `run_id`, and say validators MUST reject decreases and replays.
+- `draft-maintainer-1f916-agent-record` checkpoints Ed25519 logs with RFC 6962 Merkle heads
+  and countersignatures by independent witnesses, and defines a three-valued verdict.
+- `draft-wilder-scitt-physical-site-engage-receipt-05` states the point plainly: a TEE proves
+  it wrote the state it attests, not that the state is the most recent.
+- `veritrail` (PyPI 0.3.0) ships hash-chained records and tells operators to publish the head
+  hash to an external witness.
+
+So the rule "an older but validly signed package must be refused" already exists in drafts and
+in products. What is ours is narrower and should be described that way: an opt-in check inside
+an offline package verifier, with the three INCONCLUSIVE cases written down and a red-team case
+(RT16) that isolates it. No claim of invention; the `basis.py` note now names the drafts.

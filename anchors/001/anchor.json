@@ -1,0 +1,13 @@
+{
+  "schema": "uibc-anchor/0.1",
+  "agent_id": "fx-agent-001",
+  "key_id": "75935681213e00a12f514061084ab2cd6d7e6608224279be694c6326352c5cb1",
+  "pubkey_b64": "sdf+easDguxiDiwkJJpJxUYTh3vATA7Y4NVNfjyBkEQ=",
+  "checkpoint_head": "sha256:2935c3f497b00949bffc84b0b6f8c5db6a41ce192864b11b089a3aa4607323ef",
+  "evidence_count": 2,
+  "published_at": "2026-11-19T00:37:40Z",
+  "tsa": null,
+  "seq": 1,
+  "prev_anchor_digest": null,
+  "note": "Publish this file somewhere the package cannot reach: a release asset, a DNS TXT record, a transparency log. A verifier that reads it out of the bundle is back to trusting the bundle."
+}

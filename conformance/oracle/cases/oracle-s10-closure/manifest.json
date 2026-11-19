@@ -1,0 +1,20 @@
+{
+  "schema": "uibc-core/0.3.3-proposal",
+  "agent_id": "oracle",
+  "agent_version": "1",
+  "created_at": "2026-11-19T09:15:43Z",
+  "evidence_count": 2,
+  "evidence_root": "dad6995e03d6a61ee24063f0714be7b1b7fab542524b9f8e9cfad589253b7dc4",
+  "status": "SUBMITTED",
+  "evidence_index_digest": "sha256:453d51b74afdd0c64cea057965981d10be916fd14556dc81d2a50543bfd96471",
+  "lifecycle_head": "sha256:47c0598c5c8f238a55414aa1c29b43dc6e7ec62338e89c3b831e14bacd2ab62c",
+  "checkpoint_head": "sha256:54f8a5ec8b1505de9335fa4bea190ff622f1824e2162df7ab240dd02a17b0c22",
+  "min_verifier_version": "0.4.0",
+  "closure": {
+    "model_weights": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "tokenizer": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "chat_template": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "decoding": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "numeric_env": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  }
+}

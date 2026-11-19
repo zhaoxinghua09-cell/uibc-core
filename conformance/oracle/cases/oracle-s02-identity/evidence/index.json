@@ -1,0 +1,22 @@
+{
+  "entries": [
+    {
+      "evidence_id": "e5877b73-59db-4b51-9129-049a94b96364",
+      "type": "ACTION",
+      "path": "files/oracle-s02-identity-0.txt",
+      "content_hash": "57f3c97ebaff82e6c32544c4df98a4ee3520045592aeb9abc913e4172e5fee12",
+      "created_at": "2026-11-19T09:15:43Z",
+      "media_type": "text/plain",
+      "note": "n0"
+    },
+    {
+      "evidence_id": "a34f19e5-9252-4d81-b2fe-002070d45c03",
+      "type": "ACTION",
+      "path": "files/oracle-s02-identity-1.txt",
+      "content_hash": "d60949f8922e943b9e773454297d253a6f69a68c6e45c3c11986b5533fcafc61",
+      "created_at": "2026-11-19T09:15:43Z",
+      "media_type": "text/plain",
+      "note": "n1"
+    }
+  ]
+}

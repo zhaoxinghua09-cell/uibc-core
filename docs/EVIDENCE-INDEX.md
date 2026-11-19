@@ -2,7 +2,7 @@
 
 每条检查对应到：验证器里的定义、覆盖它的测试、指向它的红队攻击、以及提到它的文档。**重新生成即可复核**，不会随记忆漂移。
 
-**测试套件：687 个用例**（本页由生成器现数，别处只引用本页，不再抄写这个数字）。
+**测试套件：690 个用例**（本页由生成器现数，别处只引用本页，不再抄写这个数字）。
 
 
 | 检查 | 名称 | 出厂包是否走到 | 测试 | 红队 | 文档 |
@@ -15,7 +15,7 @@
 | S5 | evidence root | 是 | 12 | 3 | 31 |
 | S6 | seal signature | 是 | 19 | 1 | 31 |
 | S7 | evidence index metadata | 否 | 6 | 1 | 14 |
-| S8 | package checkpoint head | 否 | 7 | 2 | 20 |
+| S8 | package checkpoint head | 否 | 8 | 2 | 20 |
 | S9 | head pinned out-of-band | 否 | 8 | 1 | 24 |
 | S10 | attestation closure declared | 否 | 6 | 2 | 8 |
 | S11 | strict serialization | 是 | 6 | 1 | 17 |

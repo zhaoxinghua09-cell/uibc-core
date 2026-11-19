@@ -249,6 +249,113 @@ def measure_declared_scope(tmp):
     return len(ref_items), len(ind_items), sorted(only_ind), sorted(only_ref)
 
 
+def emit_corpus(dest, only=None):
+    """Materialise the corpus as data a third party can run without our tooling.
+
+    Everything above checks our two implementations against each other inside one
+    process. That is useful and it is not consumable: an outside verifier cannot run
+    this code. Emission writes the packages, the throwaway keys, and the expected
+    verdicts to disk, then re-verifies the *written copies* and refuses to report
+    success unless the copied bytes still produce the declared answers. If the corpus
+    and its answers could drift apart, publishing them would be worse than not
+    publishing at all.
+    """
+    os.makedirs(dest, exist_ok=True)
+    cases_dir = os.path.join(dest, "cases")
+    os.makedirs(cases_dir, exist_ok=True)
+    expected = []
+    keys = {}
+    want_names = set(only) if only else None
+
+    def keep(name):
+        return want_names is None or name in want_names
+
+    work = tempfile.mkdtemp()
+    for name, mutation, want_verdict, want_first in ORACLE:
+        if not keep(name):
+            continue
+        pkg, key = build(work, name, mutation)
+        target = os.path.join(cases_dir, name)
+        shutil.copytree(pkg, target, dirs_exist_ok=True)
+        keys[name] = key.hex()
+        expected.append({"case": name, "kind": "reject-or-accept", "mode": "strict",
+                         "expected_verdict": want_verdict,
+                         "expected_first_fail": want_first})
+    for name, prebuild, fn_name, want_verdict, want_first in ORACLE_EXT:
+        if not keep(name):
+            continue
+        pkg, key = build(work, name, "none", nevid=2)
+        if prebuild:
+            getattr(oa, prebuild)(pkg)
+        getattr(oa, fn_name)(pkg)
+        target = os.path.join(cases_dir, name)
+        shutil.copytree(pkg, target, dirs_exist_ok=True)
+        keys[name] = key.hex()
+        expected.append({"case": name, "kind": "reject", "mode": "open",
+                         "expected_verdict": want_verdict,
+                         "expected_first_fail": want_first})
+    for name, variant in ORACLE_ACCEPT:
+        if not keep(name):
+            continue
+        pkg, key = build_good(work, name, variant)
+        target = os.path.join(cases_dir, name)
+        shutil.copytree(pkg, target, dirs_exist_ok=True)
+        keys[name] = key.hex()
+        expected.append({"case": name, "kind": "accept", "mode": "strict",
+                         "expected_verdict": "PASS", "expected_first_fail": None})
+
+    with open(os.path.join(dest, "expected.json"), "w", encoding="utf-8") as f:
+        json.dump({"spec": "uibc", "cases": expected}, f, indent=2, ensure_ascii=False)
+    with open(os.path.join(dest, "keys.json"), "w", encoding="utf-8") as f:
+        json.dump({"note": "throwaway test keys; these packages are synthetic",
+                   "keys": keys}, f, indent=2)
+
+    # Round trip on the written copies, not on the in-memory packages.
+    mismatches = []
+    for row in expected:
+        case_dir = os.path.join(cases_dir, row["case"])
+        key = bytes.fromhex(keys[row["case"]]) if row.get("mode") == "strict" else None
+        verdict, first = ref_view(case_dir, key)
+        if verdict != row["expected_verdict"] or first != row["expected_first_fail"]:
+            mismatches.append((row["case"], verdict, str(first),
+                               row["expected_verdict"], str(row["expected_first_fail"])))
+    with open(os.path.join(dest, "README.md"), "w", encoding="utf-8") as f:
+        f.write(EMIT_README % (len(expected), len(mismatches)))
+    return len(expected), mismatches
+
+
+EMIT_README = """# UIBC conformance corpus
+
+%d cases, each a complete submission package plus the verdict it must produce.
+Written by `python tools/oracle_check.py --emit <dir>`; the answers were checked
+against the bytes on disk after writing, so what you read here is what the files
+do (mismatches at emit time: %d).
+
+## How to use it with any verifier
+
+1. Take `cases/<name>/` as the package.
+2. Read `keys.json` for that case. If `mode` is `strict`, verify in strict
+   (owner-key) mode exactly as `uibc verify <path> --key <hex> --json` does. If
+   `mode` is `open`, verify with no key: those packages were built sealed and then
+   mutated, so the seal is expected to fail and open mode is what lets the case
+   reach the check it was written for.
+3. Compare the overall verdict, and the first failing check id for reject cases,
+   with `expected.json`.
+
+`kind` is `accept` (must not be rejected) or `reject` (must be rejected at the
+named check). A verifier that rejects everything passes every reject case and
+fails every accept case, which is why both halves are here.
+
+## What this corpus does not prove
+
+These packages were produced by this project. They are anchored to
+`docs/CHECK-MATRIX.md` and to the spec text, not to an outside authority, and
+passing them shows conformance to this reading of the spec, not to any
+regulator's requirement. Anything a verifier does that is not in here is
+unmeasured, not impossible.
+"""
+
+
 def build_good(tmp, name, variant):
     """A legitimate package. Nothing here is an attack: these are shapes real use produces."""
     pkg = os.path.join(tmp, name)
@@ -602,4 +709,13 @@ def main():
 
 
 if __name__ == "__main__":
+    if "--emit" in sys.argv:
+        target = sys.argv[sys.argv.index("--emit") + 1]
+        n, bad_rt = emit_corpus(target)
+        print("emitted %d cases to %s; round-trip mismatches: %d"
+              % (n, target, len(bad_rt)))
+        for row in bad_rt:
+            print("  DRIFT: %s wrote %s/%s but expects %s/%s"
+                  % (row[0], row[1], row[2], row[3], row[4]))
+        sys.exit(0 if not bad_rt else 1)
     sys.exit(main())

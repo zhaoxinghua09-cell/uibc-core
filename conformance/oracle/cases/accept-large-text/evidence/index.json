@@ -1,0 +1,13 @@
+{
+  "entries": [
+    {
+      "evidence_id": "47ede416-72ad-4933-831f-9658aeba31d1",
+      "type": "ACTION",
+      "path": "files/accept-large-text-big.txt",
+      "content_hash": "0b275ee6ac2cf82899226aafbb1fb47a9c88bf3ec709e63a6ab03603a03d735c",
+      "created_at": "2026-11-19T09:15:44Z",
+      "media_type": "text/plain",
+      "note": "big.txt"
+    }
+  ]
+}

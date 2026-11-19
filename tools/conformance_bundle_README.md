@@ -31,6 +31,13 @@ when JSON parses, so a non-zero exit on FAIL is fine.
 platform, the verifier version, a hash of the manifest, and every case's
 verdict. Publish it if you want your run to be citable, and fill in `--run-by`.
 
+**If the verifier is missing, no receipt is written.** When not one case produces
+parseable JSON, `run.py` exits 3, prints the interpreter it used and the install
+command, and stops. A receipt saying `0/36` in that situation would be a lie that
+looks like evidence: it is indistinguishable from "these packages all fail", and
+someone could publish it in good faith. Exit codes: `0` all cases behaved, `1`
+some case did not, `3` no verifier output at all (setup problem, not a result).
+
 ## What a pass means — and what it does not
 
 It means: on this machine, with this corpus, your verifier refused the 35 broken

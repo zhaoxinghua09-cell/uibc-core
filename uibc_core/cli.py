@@ -435,7 +435,8 @@ def cmd_verify(args):
     pubkey = _load_pubkey(args.pubkey) if getattr(args, "pubkey", None) else None
     report = verify(pkg, key=key, pubkey=pubkey,
                     expect_head=getattr(args, "expect_head", None),
-                    strict=getattr(args, "strict", False))
+                    strict=getattr(args, "strict", False),
+                    state_file=getattr(args, "state_file", None))
     print(json.dumps(report, ensure_ascii=False, indent=2))
     sys.exit(0 if report["result"] == "PASS" else 1)
 
@@ -544,6 +545,11 @@ def main():
     p.add_argument("--strict", action="store_true",
                    help="fail any file under evidence/ that the index never declared "
                         "(the structural members the format places there are exempt)")
+    p.add_argument("--state-file", dest="state_file", default=None, metavar="JSON",
+                   help="remember the last accepted head here (S19). Compared on the "
+                        "next run, so a rollback is refused without the caller "
+                        "supplying --expect-head every time. First observation is "
+                        "INCONCLUSIVE, not PASS")
     p.set_defaults(func=cmd_verify)
 
     p = sub.add_parser("explain", help="verify and print why, one check per line")

@@ -61,11 +61,16 @@ independent=PASS  reference=PASS(8ms)  probes=3/3 rejected  -> CONSISTENT
 第 3 步正常输出：
 
 ```
-Ran 328 tests in ~40s
-OK (skipped=6)
+Ran <N> tests in ~40s
+OK (skipped=<k>)
 ```
 
-6 个跳过是因为没装可选的 `opentimestamps`，属于旁证检查，不是失败。
+`N` 我们不写死：套件每天在长，写一个数字就会过期。你机器上的 `Ran N tests` 应与
+[`docs/EVIDENCE-INDEX.md`](EVIDENCE-INDEX.md) 第一页的现数一致（那一页由生成器数，不手写）；
+对不上时**以你的结果为准**。
+
+`skipped` 通常来自没装的可选依赖（`opentimestamps` / 锚定相关），属旁证检查，不是失败；
+如果你看到 skip 原因是"not installed"，同样记下来发给我们。
 
 ### 然后请把 `external_node_result.json` 发回给我
 
@@ -77,7 +82,7 @@ OK (skipped=6)
 
 1. 你跑出**失败**，我们也照原样贴出来，并在 README 上标为 1 次失败尝试——不删、不改、不解释成"环境问题"。
 2. 你的名字如果不想公开，就写"匿名复跑者 #1"，我们不追问。
-3. 如果你发现我们的文档和你的结果对不上（比如用例数不是 328），**以你的结果为准**，文档是我们的错。
+3. 如果你发现我们的文档和你的结果对不上（比如用例数、skip 数），**以你的结果为准**，文档是我们的错。
 
 ---
 
@@ -123,9 +128,14 @@ Two independent implementations (one written from the spec, sharing no code with
 Step 3 normally prints:
 
 ```
-Ran 328 tests in ~40s
-OK (skipped=6)
+Ran <N> tests in ~40s
+OK (skipped=<k>)
 ```
+
+We do not print `N`: the suite grows every day and a digit in a document expires.
+Your `Ran N tests` should equal the live count at the top of
+[`docs/EVIDENCE-INDEX.md`](EVIDENCE-INDEX.md), which is generated, not typed.
+If they differ, your numbers win.
 
 The six skips are optional `opentimestamps` checks; skipped, not failed.
 
@@ -139,16 +149,16 @@ Send by email, chat, or a GitHub issue — whatever is easiest.
 
 1. If your run **fails**, we publish that too, marked as one failed attempt — no deletion, no rewording it as "an environment issue".
 2. If you prefer not to be named, you are "anonymous runner #1"; we will not ask who you are.
-3. If our documentation disagrees with your numbers (say, not 328 tests), **your numbers win** and our docs are wrong.
+3. If our documentation disagrees with your numbers (test count, skip count), **your numbers win** and our docs are wrong.
 
 ---
 
 ## 附：这份邀请本身怎么被验证 / Appendix: how this invitation is itself checked
 
 - 命令与依赖声明来自仓库实测，不是设计稿。
-- 邀请里所有数字（328、6、`CONSISTENT`）均可在 `main` 分支近期提交中复现。
+- 邀请里唯一写死的数字是 `CONSISTENT` 这个判词；用例数与 skip 数以你自己跑出来的为准。
 - 若你发现任何一处与实际不符，请直接指出——这正是我们在找的东西。
 
 - Every command and dependency claim here comes from a real run, not a design draft.
-- Every number quoted (328, 6, `CONSISTENT`) is reproducible from recent `main`.
+- The only literal we quote is the verdict word `CONSISTENT`; your test and skip counts are yours to report.
 - If any line of this is wrong, say so — that is exactly what we are looking for.

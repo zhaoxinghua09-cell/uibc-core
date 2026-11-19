@@ -56,7 +56,7 @@ RESULT_JSON=.../external_node_result.json
 ## 6. 可选的深一步（约 25 分钟）
 
 ```bash
-python -m unittest discover -s tests -p "test_*.py"    # 全量 328 项
+python -m unittest discover -s tests -p "test_*.py"    # 全量；项数以你的输出为准
 python tools/compose_demo.py                            # K1-K8 七个组合场景
 python tools/pccp_case.py --prev benchmark/corpus/base --curr tools/out/_mb/m_M17
 ```

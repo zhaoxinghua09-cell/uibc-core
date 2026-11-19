@@ -22,8 +22,17 @@ _REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 _BASELINE = os.path.join(_REPO, "docs", "ARCHIVE-BASELINE.json")
 
 
-def archived_checks():
-    with open(_BASELINE, encoding="utf-8") as f:
+def baselines():
+    """Every measured baseline in docs/, oldest first. More than one archive
+    can exist at a time: an old version stays valid for its own snapshot while
+    a newer one carries the current checks."""
+    import glob
+    found = sorted(glob.glob(os.path.join(_REPO, "docs", "ARCHIVE-BASELINE*.json")))
+    return found
+
+
+def archived_checks(path=None):
+    with open(path or _BASELINE, encoding="utf-8") as f:
         return json.load(f)
 
 
@@ -36,13 +45,14 @@ def current_checks():
     return sorted(declared, key=lambda c: int(c[1:]))
 
 
-def build():
-    base = archived_checks()
+def build(path=None):
+    base = archived_checks(path)
     now = current_checks()
     only_now = [c for c in now if c not in base["checks"]]
     only_then = [c for c in base["checks"] if c not in now]
     return {
         "archived_revision": base["source_revision"],
+        "baseline_file": os.path.basename(path or _BASELINE),
         "archived_version": base["version_declared"],
         "archived_checks": base["checks"],
         "current_checks": now,
@@ -60,6 +70,8 @@ def render(r):
                  % (r["archived_version"], r["archived_revision"][:8],
                     r["counts"]["archived"], ", ".join(r["archived_checks"])))
     lines.append("当前仓库包含 %d 项检查。" % r["counts"]["current"])
+    lines.append("基线文件：%s（docs/ 下另有 %d 份历史基线，各自只对自己的快照负责）"
+                 % (r["baseline_file"], max(0, len(baselines()) - 1)))
     lines.append("")
     lines.append("**挂 DOI 可以说哪些**：")
     lines.append("  " + ", ".join(r["supported_by_the_doi"]))
@@ -77,7 +89,11 @@ def render(r):
 
 
 def main():
-    r = build()
+    path = None
+    for i, a in enumerate(sys.argv):
+        if a == "--baseline" and i + 1 < len(sys.argv):
+            path = sys.argv[i + 1]
+    r = build(path)
     if "--json" in sys.argv:
         print(json.dumps(r, indent=2, ensure_ascii=False))
         return 0 if not r["checks_that_vanished"] else 1

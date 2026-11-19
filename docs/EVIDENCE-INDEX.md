@@ -16,7 +16,7 @@
 | S6 | seal signature | 是 | 20 | 1 | 35 |
 | S7 | evidence index metadata | 否 | 6 | 1 | 16 |
 | S8 | package checkpoint head | 否 | 8 | 2 | 23 |
-| S9 | head pinned out-of-band | 否 | 8 | 1 | 25 |
+| S9 | head pinned out-of-band | 否 | 8 | 1 | 26 |
 | S10 | attestation closure declared | 否 | 6 | 2 | 8 |
 | S11 | strict serialization | 是 | 6 | 1 | 17 |
 | S12 | timestamp and identifier strictness | 是 | 10 | 2 | 20 |

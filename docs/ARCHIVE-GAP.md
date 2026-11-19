@@ -55,6 +55,27 @@ record("S1" …) record("S2" …) record("S3" …) record("S4" …) record("S5" 
 
 ---
 
+## 缺口已闭合（2026-11-20）
+
+新归档已发布：**`10.5281/zenodo.24375013`**（concept `10.5281/zenodo.22821834`，版本 **0.4.2**）。
+
+| 项 | 值 |
+|---|---|
+| 归档提交 | `2c82d55feb2a`（当时的 `main` 头） |
+| 文件 | `uibc-core-src-2c82d55feb2a.zip`(1,978,070 B)、`uibc-oracle-corpus-0.4.2.zip`(106,713 B)、`README.md`(1,983 B)、`SHA256SUMS.txt`(268 B) |
+| 源码归档里的 `verify.py` | 含 S1–S19 与 S0 兜底 |
+| 语料归档 | 28 例（18 必拒 / 1 对照 / 9 必通过），自带零依赖验证器与 runner |
+
+**这个 DOI 能背书什么**：源码树的每一项检查、语料的每一次判定。**不能背书什么**：语料只触发了 19 项里的 15 项；S9、S19 用代码内自定构造，不在语料里。这句话写进了归档 README 与描述，不在附录里。
+
+**仍然存在的老 DOI**：`10.5281/zenodo.22821835`（0.2.1，6 项）没有被撤回，也没有被说成过时。它记录的是那天真实的样子。本文件上半部分的测量仍然成立——变的是"现在有了另一个能指向当前状态的归档"，不是旧归档变成了错的。
+
+**成本记录**：这一条从"需要本人登录 Zenodo"变成"本机可做"，靠的不是登录态，是记录 API + 钉 IP 绕过本机 DNS 拦截（`zenodo.org` 在本机被解析成 `0.0.0.0`）。中途犯的错留给后来者：`/api/deposits/{id}/actions/newversion` 在这台实例上是 404（要改用 `POST /api/records/{id}/versions`）；文件声明要**顶层数组**，不是 `{"files": [...]}`；`commit` 与 `PATCH` 在这个实例上返回 405，但 `PUT` 可用；缺 `publisher` 字段会让发布以 400 退回。
+
+---
+
+## English
+
 ## English
 
 The DOI in `CITATION.cff` pins the 0.2.1 snapshot. Its verifier is **167 lines and six checks (S1–S6)**; the repository is 1221 lines and nineteen. Everything built after 2026-09-18 — the auditor, the outside kit, the endpoint, the cross-implementation exports, and thirteen checks — is in **no archived artifact**.

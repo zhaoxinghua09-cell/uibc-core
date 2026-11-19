@@ -59,7 +59,25 @@ So: **an older verifier will certify a claim it cannot see.** This is the
 protocol-level failure the vector was written to catch, and it is not fixable by
 editing this repository: a published release cannot be recalled. The only
 mitigation is a version floor the artefact declares and the consumer compares -
-recorded as `VERSIONING.md` §8, not yet implemented.
+recorded as `VERSIONING.md` §8.
+
+## M2d - the floor, and what it cannot do
+
+Implemented 2026-11-19: `uibc submit` writes `manifest.min_verifier_version`, and
+`verify` reports **S1 INCONCLUSIVE** when its own version is below that floor.
+Unit-pinned by `tests/test_version_floor.py` (floor 99.0.0 blocks PASS; floor at
+or below passes; no floor changes nothing; a non-numeric floor does not crash).
+
+The floor is measured; its limit is measured too. Searching the shipped source of
+0.3.3 for `min_verifier_version` returns **zero hits**: an older verifier cannot
+honour a declaration it does not know exists. A package that declares a 0.4.0
+floor is still PASSed by 0.3.3.
+
+That is the same lesson as M2c, one level up. **The floor is a control for
+consumers, not a defence of the package.** It only changes anything when a
+registry, gate or CI compares the declared floor against the verifier before
+treating a PASS as evidence. Until that comparison happens somewhere real, this
+row stays partially measured.
 
 ## M3 - key rotation and pinning
 

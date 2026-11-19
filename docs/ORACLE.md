@@ -38,10 +38,10 @@ Run: `python tools/oracle_check.py` — exit 0 means every scored cell matched.
 | oracle-s17-receipt-body | first receipt body edited | FAIL | S17 |
 | oracle-s18-policy-artefact | policy artefact edited after sealing | FAIL | S18 |
 
-**Coverage: 17 of 19 checks have a written expectation.** S9 (a rolled-back package
+**Coverage: 17 of 20 checks have a written expectation.** S9 (a rolled-back package
 against an old pin) and S19 (freshness) do not: both need state carried in from an
 earlier run, and neither can be built by a single CLI invocation. That is the honest
-size of the claim "19 checks": seventeen of them can be made to fail on purpose and
+size of the claim "20 checks": seventeen of them can be made to fail on purpose and
 their failure predicted.
 
 ## The ordering rule is part of the oracle
@@ -67,7 +67,7 @@ to object to.
 That is the concrete measure of how much "two implementations agree" is worth. They agree
 on the six checks both implement, and beyond that the second implementation contributes
 nothing. Restating the qualitative note in `INDEPENDENCE.md` as a number: agreement covers
-**6 of 19 checks**, and 13 checks have one implementation only.
+**6 of 20 checks**, and 13 checks have one implementation only.
 
 ## What this is not
 

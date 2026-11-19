@@ -57,9 +57,11 @@ BASIS = {
             "note": "摘要须可解析"},
     "S19": {"class": "related", "citation": "draft-bailey-scitt-agent-session-receipt",
             "note": "新鲜度只能由外部状态判定，签名不蕴含时间顺序；"
-                    "高水位记忆机制为本项目自定。与 RFC 9162 (Certificate "
-                    "Transparency v2) 的 STH 加一致性证明不同层：那边管日志侧"
-                    "的新鲜度，这边管验证器自己的记忆"},
+                    "高水位记忆机制为本项目自定。机制并不新："
+                    "draft-chang-delta1-settlement-00 §7.2/§12.4 已要求序号单调、"
+                    "拒绝重放；draft-maintainer-1f916-agent-record 用 checkpoint 加"
+                    "见证方；RFC 9162 的 STH 管的是日志侧。本项目做的是把这条"
+                    "放进离线验包器，作为可选的验证器侧状态，并给出三值裁决口径"},
 }
 
 CLASSES = ("direct", "related", "none")

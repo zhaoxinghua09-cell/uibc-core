@@ -5,10 +5,10 @@
 | 检查 | 名称 | 出厂包是否走到 | 测试 | 红队 | 文档 |
 |---|---|---|---|---|---|
 | S0 | verifier robustness | 否 | 4 | 0 | 9 |
-| S1 | package structure | 是 | 8 | 1 | 26 |
+| S1 | package structure | 是 | 8 | 1 | 27 |
 | S2 | identity consistency | 是 | 7 | 1 | 19 |
 | S3 | lifecycle state machine + semantics | 是 | 9 | 1 | 17 |
-| S4 | evidence integrity | 是 | 15 | 3 | 32 |
+| S4 | evidence integrity | 是 | 15 | 3 | 33 |
 | S5 | evidence root | 是 | 9 | 3 | 25 |
 | S6 | seal signature | 是 | 18 | 1 | 29 |
 | S7 | evidence index metadata | 否 | 5 | 1 | 12 |
@@ -22,7 +22,7 @@
 | S15 | anchor event resolution | 否 | 6 | 4 | 9 |
 | S16 | external timestamp (RFC 3161) | 否 | 7 | 4 | 14 |
 | S17 | linear receipt chain | 否 | 6 | 2 | 14 |
-| S18 | policy artefact resolution | 否 | 7 | 2 | 16 |
+| S18 | policy artefact resolution | 否 | 7 | 2 | 17 |
 
 出厂包判定：`INCONCLUSIVE`，走到 8/19 项（未签名的包停在 S6，后面不越过去）。
 

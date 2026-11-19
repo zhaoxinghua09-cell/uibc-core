@@ -15,6 +15,16 @@ Nothing here is a ratified standard.
 
 ## [Unreleased]
 
+### The suite is now addressed to strangers (2026-11-19)
+
+- **`docs/CONTRIBUTION-FALSIFIABILITY.md`**: the 36-package suite stated as an
+  offer to any agent-evidence verifier - the CLI contract, the accept half that
+  stops a refuse-everything verifier scoring full marks, the two current results,
+  and the four limits including the one this document exists to invite someone
+  to close.
+- **`tools/run_conformance.py --name`**: a third party's result can carry its
+  own implementation label instead of ours.
+
 ### Adoption is a measurement, not an adjective (2026-11-19)
 
 - **`tools/check_adoption.py`**: asks four parties we do not run - another

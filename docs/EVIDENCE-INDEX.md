@@ -22,9 +22,10 @@
 | S15 | anchor event resolution | 否 | 6 | 4 | 9 |
 | S16 | external timestamp (RFC 3161) | 否 | 7 | 4 | 14 |
 | S17 | linear receipt chain | 否 | 6 | 2 | 14 |
-| S18 | policy artefact resolution | 否 | 7 | 2 | 17 |
+| S18 | policy artefact resolution | 否 | 7 | 2 | 16 |
+| S19 | freshness state | 否 | 3 | 1 | 2 |
 
-出厂包判定：`INCONCLUSIVE`，走到 8/19 项（未签名的包停在 S6，后面不越过去）。
+出厂包判定：`INCONCLUSIVE`，走到 8/20 项（未签名的包停在 S6，后面不越过去）。
 
 **每项检查都至少有一个测试文件提到**。
 

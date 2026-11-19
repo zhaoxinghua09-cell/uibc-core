@@ -5,6 +5,7 @@ These tests skip when Node is absent: the suite has to stay green on a machine
 without it, but the moment Node is there, the two implementations are held to
 each other.
 """
+import atexit
 import hashlib
 import json
 import os
@@ -26,15 +27,40 @@ _ZIP = os.path.join(_REPO, "conformance", "uibc-conformance-0.4.0.zip")
 NODE = shutil.which("node")
 
 
+_CASES_ROOT = None
+_CASES_TMPS = []
+
+
 def cases_root():
-    """The repo ships only the archive; unpack it once when cases/ is absent."""
+    """The repo ships only the archive; unpack it **once** when cases/ is absent.
+
+    Unpacking per call leaked an extracted-copy per test: measured 2026-11-19,
+    /tmp held 1,387 `uibc-js-cases-*` directories at 449 inodes each, which
+    exhausted the machine's inode table (655,360 total, 100% used) and made
+    every later test error out with "No usable temporary directory". The cache
+    below keeps the extraction to one per process, and atexit removes it.
+    """
+    global _CASES_ROOT
+    if _CASES_ROOT is not None:
+        return _CASES_ROOT
     direct = os.path.join(_REPO, "conformance", "cases")
     if os.path.isdir(direct):
-        return direct
+        _CASES_ROOT = direct
+        return _CASES_ROOT
     tmp = tempfile.mkdtemp(prefix="uibc-js-cases-")
+    _CASES_TMPS.append(tmp)
     with zipfile.ZipFile(_ZIP) as z:
         z.extractall(tmp)
-    return os.path.join(tmp, "cases")
+    _CASES_ROOT = os.path.join(tmp, "cases")
+    return _CASES_ROOT
+
+
+def _drop_case_tmps():
+    for path in _CASES_TMPS:
+        shutil.rmtree(path, ignore_errors=True)
+
+
+atexit.register(_drop_case_tmps)
 COVERED = ("S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8", "S9", "S10", "S11", "S12", "S13",
            "S14", "S15", "S16", "S17", "S18")
 
@@ -46,6 +72,24 @@ def js(pkg):
 
 def failed(report):
     return {c["id"] for c in report["checks"] if str(c["result"]).upper() == "FAIL"}
+
+
+class TestCaseExtractionIsNotRepeated(unittest.TestCase):
+    """Regression: the unpack must happen once per process, not once per call.
+
+    Each extraction cost 449 inodes; 1,387 leaked copies exhausted the inode
+    table and every subsequent test failed with "No usable temporary directory".
+    """
+
+    def test_two_calls_share_one_extraction(self):
+        first = cases_root()
+        second = cases_root()
+        self.assertEqual(first, second)
+
+    def test_at_most_one_temporary_directory_is_registered(self):
+        cases_root()
+        cases_root()
+        self.assertLessEqual(len(_CASES_TMPS), 1, "each call started a new unpack")
 
 
 @unittest.skipUnless(NODE, "node is not installed")

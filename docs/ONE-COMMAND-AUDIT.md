@@ -46,5 +46,5 @@ Node 版不判包（那是 `anchor.mjs`）、不判时间戳（那是 `anchor_ch
 **不证明**：链是真的。仓库里没有 `anchors/`，没有一次发布，这一切仍发生在临时目录里。`IMPLEMENTATION-STATUS` 仍是零 —— **能力齐了，见证没有**。
 
 ```
-608 tests · doc_facts 0 · falsifiability 19/19 · 4 问全绿 · 0.877 s
+629 tests · doc_facts 0 · falsifiability 19/19 · 4 问全绿 · 0.877 s
 ```

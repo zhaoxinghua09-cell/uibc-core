@@ -15,6 +15,27 @@ Nothing here is a ratified standard.
 
 ## [Unreleased]
 
+### The recheck, the adoption note, and a test that exhausted the inode table (2026-11-19)
+
+- `docs/LANDSCAPE-2026-11.md` gains a dated recheck. On specification and
+  ecosystem the gap widened: `-05` is 61 pages with seven IANA registry requests;
+  `draft-pidlisnyi-aps-04` ships 17 repositories in four languages and two hosted
+  services; `draft-munoz-scitt-permit-profile-01` is a third independent author.
+- The same recheck finds adoption at zero **across the field**: `arXiv:2606.04193`
+  says it in its own words. An adoption count is not a competitive metric -
+  nobody leads it, including the largest draft.
+- `docs/ADOPTION-MEASUREMENT.md`: the four-bucket method published as something
+  copyable, its four limits stated, the UIBC/UPnP name collision recorded, and a
+  message draft marked **draft, unsent**.
+- `tests/test_verify_js.py::cases_root()` unpacked the archive **once per call**.
+  Measured 2026-11-19: `/tmp` held 1,387 `uibc-js-cases-*` directories at 449
+  inodes each; the machine's inode table hit 100% (655,360/655,360) and every
+  later test failed with "No usable temporary directory". Now one extraction per
+  process, removed at exit, with two regression tests; a full run leaves zero
+  such directories.
+- `tools/check_citations.py` gains four references; the three IETF ones resolve
+  at 200.
+
 ### v0.4.0 tagged, and the suite is downloadable without an account (2026-11-19)
 
 - Tag `v0.4.0` on the commit that carries the PyPI bytes; release

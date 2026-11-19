@@ -1,6 +1,6 @@
 """A citation is a promise that the link leads to the thing described.
 
-The archived 0.2.1 verifier implements six checks; the tree implements eighteen.
+The archived 0.2.1 verifier implements six checks; the tree implements nineteen.
 These tests hold the statement of that scope in place, because the convenient
 version of this problem -- quietly bump the version string -- is the one that
 would make a reader's download disagree with our claim.
@@ -38,11 +38,11 @@ class TestArchiveScope(unittest.TestCase):
         self.assertEqual(self.r["archived_checks"],
                          ["S1", "S2", "S3", "S4", "S5", "S6"])
 
-    def test_thirteen_ids_are_not_in_the_archive(self):
+    def test_fourteen_ids_are_not_in_the_archive(self):
         unsupported = self.r["not_supported_by_the_doi"]
-        for cid in ("S7", "S8", "S9", "S10", "S13", "S16", "S18"):
+        for cid in ("S7", "S8", "S9", "S10", "S13", "S16", "S18", "S19"):
             self.assertIn(cid, unsupported)
-        self.assertEqual(len(unsupported), 13)  # S0 plus S7-S18
+        self.assertEqual(len(unsupported), 14)  # S0 plus S7-S19
 
     def test_nothing_vanished(self):
         self.assertEqual(self.r["checks_that_vanished"], [])
@@ -54,7 +54,7 @@ class TestArchiveScope(unittest.TestCase):
             text = f.read()
         self.assertIn("SCOPE", text)
         self.assertRegex(text, r"six checks")
-        self.assertIn("S7-S18", text)
+        self.assertIn("S7-S19", text)
         self.assertIn("ARCHIVE-GAP.md", text)
 
     def test_the_cff_still_pins_the_archived_version(self):

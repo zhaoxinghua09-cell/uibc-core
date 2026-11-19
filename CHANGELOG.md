@@ -15,6 +15,30 @@ Nothing here is a ratified standard.
 
 ## [Unreleased]
 
+- CI fix: `actions/checkout` now uses `fetch-depth: 0` in `ci.yml`. The test that
+  recomputes the outsider's figures at `8a95747` needs that commit to exist in the
+  clone; on a shallow clone it now reports **skipped** with the reason, rather than
+  failing, because a missing input is not a passing test either.
+
+### The outsider's receipt is recomputed here, not quoted (2026-11-19)
+
+- `EXTERNAL-NODE-001.md` quoted two figures - `Ran 605 tests` and
+  `checks compared: 70, mismatches: 2` - from a host we do not control. Quoting
+  numbers nobody here can recompute is the smallest form of hearsay, under a
+  heading that says "third-party evidence".
+- `tools/verify_external_node_report.py` exports `8a95747` into a scratch
+  directory and runs the same two commands. Result on our side:
+  `605 tests`, `mismatches: 2`, `AGREEMENT: FAIL - SPEC BUG` - both figures
+  match his exactly.
+- The skip count does not match: he saw 22, we see 1. Skips follow installed
+  extras, which is why no document should carry one.
+- The point of the match: **605 and 2 are properties of that commit, not of his
+  machine.** A different OS and Python arrived at the same pair because the code
+  produced them.
+- `tests/test_verify_external_node_report.py` (3 cases): the tool's expected
+  figures are read back out of the report itself, the two-line shapes parse, and
+  a `--quick` run recomputes the comparison and prints its scope sentence.
+
 ### Conflicts on generated files get a script, not a person's afternoon (2026-11-19)
 
 - `docs/EVIDENCE-INDEX.md` and `docs/EVIDENCE-DASHBOARD.svg` are script output.

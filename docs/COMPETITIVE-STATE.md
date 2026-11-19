@@ -151,3 +151,24 @@ their verifier: ok=True
 **仍然落后的一半（写清）**：我们的 `CORPUS-DIGESTS.txt` **没有签名、没有 OTS、没有 RFC 3161**。仓内已有
 `anchor_tsa.py` / `anchor_ots.py` / Rekor 三条路子，但**没有接到发版流程上**；对外部锚定这一层，他们是已做的，
 我们是可做但未做。此条记为缺口，不计入任何"对齐"。
+
+### 2026-11-20 实测（配置层）：他们写"改动怎么被决定"，我们只有一行 CODEOWNERS
+
+读三家的 `GOVERNANCE.md`（`gh api` 逐份取全文）：
+
+| 仓库 | 改动由谁决定 | 可机械化的那条规则 |
+|---|---|---|
+| `probityai/agent-evidence-vectors` | 单一维护者，公开绑住自己；提案落入**四种处置闭集**（`adopted` / `adopted-in-part` / `declined` / `open`），`declined` 必带理由，部分采纳必写残差，台账 append-only，被拒的异议也公开 | "**A record of only the agreeable objections is worse than none.**" |
+| `emiliaprotocol/emilia-protocol` | 任何人可提；规范行为的改动**必须规格、参考验证器、一致性向量三处同时落地，或都不落地**；另有 policy-rollout 与 revoke 的服务端实现 | "**Specification, reference verifiers and conformance vectors together, or not at all.**" |
+| `tyche-institute/eatf-verifier` | 一段话：个人维护、开放研究软件 | 无可机械化规则 |
+| **我们** | `.github/CODEOWNERS` 一行 `* @zhaoxinghua09-cell` | 无 |
+
+我们那一行只约束"谁点了合并按钮"，不约束"改了什么、谁批的、为什么、批完语料是否跟着动"。
+
+本轮补的是可核的那一层：`tools/check_config_change.py` + `docs/CONFIG-CONTROL.md`，
+五类拒（自我批准／处置不在闭集／拒绝无理由或部分采纳无残差／规范变更缺三腿之一／行被事后编辑或台账断链），
+"silence is not agreement" 落成"决定人与时间都是必填"。实测四条记录串成台账通过，删一条腿后一次报三条理由。
+
+**仍然落后**：台账是**空表**（仓库里没有任何 `uibc-change-v0` 记录）；分支保护与 required review 是平台设置，
+不在字节里，外人无法从仓库证明；emilia 把 policy rollout 与 revoke 做成了服务端接口，我们只有文件级记录。
+这三条都记为缺口，不计入对齐。

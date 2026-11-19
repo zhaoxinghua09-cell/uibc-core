@@ -1,3 +1,21 @@
+### We ran their vectors, and wrote down the first run that failed
+
+- `tools/crosscheck_scitt_cose_vectors.py` folds the inclusion paths in the
+  `scitt-cose` set published by `ietf-wg-scitt/examples` using only
+  `uibc_core.merkle`; no COSE library is needed to check a path.
+- First run: **all five vectors disagreed** — because we read `leaf_entry` as a
+  leaf hash, when it is the leaf *input* digest (RFC 9162: `H(0x00 || leaf_input)`).
+  That was our error; corrected run: `vectors: 5  mismatches: 0`.
+- Outcomes: `valid-eddsa` and `valid-es256` fold onto their stated roots;
+  `fail-tampered-path` folds away as it must; the signature and VDS negatives
+  are reported but not adjudicated here, since those failures live outside the
+  tree layer.
+- `docs/external-review/CROSSCHECK-SCITT-COSE.md` states plainly what this is
+  not: not an audit of `scitt-cose`, not a claim of verifier agreement, and not
+  a place in anyone's record — their `INTEROP.md` still does not list us.
+- 5 new tests, including a note test that fails if the "not an audit" sentence
+  or the failed-first-run record is removed.
+
 ### The upstream submission is now a package, not a plan
 
 - `tools/build_scitt_vector_package.py` builds and self-verifies a

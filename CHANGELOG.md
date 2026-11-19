@@ -15,6 +15,39 @@ Nothing here is a ratified standard.
 
 ## [Unreleased]
 
+### v0.4.0 tagged, and the suite is downloadable without an account (2026-11-19)
+
+- Tag `v0.4.0` on the commit that carries the PyPI bytes; release
+  `uibc-core 0.4.0` with `uibc-conformance-0.4.0.zip` (114,576 B, sha256
+  `9a1ca72f...`) as an asset - a branch moves, an asset does not.
+- The stranger's path was exercised rather than assumed: the asset was
+  downloaded, its hash compared with the tree, then run against a verifier
+  invoked only through the documented CLI contract - `strict 36/36, refused 30/36`.
+- `docs/UPSTREAM-SUBMISSION-PLAN.md` now marks steps 1 and 2 done and still says
+  steps 3 and 4 are unsent.
+
+### The suite is now addressed to strangers (2026-11-19)
+
+- **`docs/CONTRIBUTION-FALSIFIABILITY.md`**: the 36-package suite stated as an
+  offer to any agent-evidence verifier - the CLI contract, the accept half that
+  stops a refuse-everything verifier scoring full marks, the two current results,
+  and the four limits including the one this document exists to invite someone
+  to close.
+- **`tools/run_conformance.py --name`**: a third party's result can carry its
+  own implementation label instead of ours.
+
+### Adoption is a measurement, not an adjective (2026-11-19)
+
+- **`tools/check_adoption.py`**: asks four parties we do not run - another
+  repository, another codebase, a standards body, the nearest SCITT profile.
+  All four currently return zero; a non-zero bucket exits 1 so nobody can quietly
+  start claiming more.
+- **`docs/LANDSCAPE-2026-11.md`**: what the nearest project actually has
+  (`draft-mih-scitt-agent-action-capsule-05`, an IETF 126 interop report, two
+  PyPI packages, four framework adapters) against what we have (nothing in that
+  column). It says the number plainly: not ahead, behind. Then three routes that
+  could move adoption off zero, ranked by cost.
+
 ### One command, seven checks, one exit code (2026-11-19)
 
 - **`tools/run_all_evidence.py`**: runs the seven things this repository claims,

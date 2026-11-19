@@ -15,6 +15,18 @@ Nothing here is a ratified standard.
 
 ## [Unreleased]
 
+### Adoption is a measurement, not an adjective (2026-11-19)
+
+- **`tools/check_adoption.py`**: asks four parties we do not run - another
+  repository, another codebase, a standards body, the nearest SCITT profile.
+  All four currently return zero; a non-zero bucket exits 1 so nobody can quietly
+  start claiming more.
+- **`docs/LANDSCAPE-2026-11.md`**: what the nearest project actually has
+  (`draft-mih-scitt-agent-action-capsule-05`, an IETF 126 interop report, two
+  PyPI packages, four framework adapters) against what we have (nothing in that
+  column). It says the number plainly: not ahead, behind. Then three routes that
+  could move adoption off zero, ranked by cost.
+
 ### One command, seven checks, one exit code (2026-11-19)
 
 - **`tools/run_all_evidence.py`**: runs the seven things this repository claims,

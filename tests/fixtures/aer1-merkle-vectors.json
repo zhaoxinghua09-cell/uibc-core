@@ -1,0 +1,119 @@
+{
+  "spec": "draft-zambo-aer1 Section 8.1 (normative): leaf = SHA-256 over UTF-8 bytes of receipt_id; internal node = SHA-256 over raw 32-byte left || raw 32-byte right; odd node duplicated.",
+  "vectors": [
+    {
+      "name": "canonical-5-step",
+      "desc": "Five frozen workflow steps in seq order; the live page root and the -05 worked example root.",
+      "receipt_ids": [
+        "e80168eb-a6a1-4ec9-8478-ac108f9397ff",
+        "514fe841-bbdd-4804-9ef4-6828842d8763",
+        "a090bdad-f2cf-48c9-bc89-e9e17700fb15",
+        "bf88a036-416b-456a-8e82-8c0991811d68",
+        "ae795bf0-27f8-4cf2-8aef-3f8142b77217"
+      ],
+      "expected_root": "7c4817ca249edfeae259b98abf63ed38a31d9dbeebf5ee23139410a7a7f63b37",
+      "expected_workflow_verdict": "valid"
+    },
+    {
+      "name": "legacy-construction-rejected",
+      "desc": "Old page construction (SHA-256 of 'seq:receipt_hash'). Produces a different root; MUST NOT equal the canonical root.",
+      "leaves": [
+        {
+          "seq": 1,
+          "preimage": "1:11c3a071051a42cbf5cf4da60a7577b1dffeb0419e6dd8a258b19c4c0d0d108e"
+        },
+        {
+          "seq": 2,
+          "preimage": "2:68e3bcad3f46218672fd7ef7bf32f4a7089937dda2b8ade3cfe1050cec856285"
+        },
+        {
+          "seq": 3,
+          "preimage": "3:3da48b2d392fb79ed78f7ed0cc8e6c122fc1089947ff6d7f829748d7745840dd"
+        },
+        {
+          "seq": 4,
+          "preimage": "4:0f024f209392b918909df5478aadd3a9189520d74cfdf78e2ccf51b9f075f926"
+        },
+        {
+          "seq": 5,
+          "preimage": "5:f52d9c03605047ad0ac347e5e9cbc0e2e197a009d8ee5c7d775f86f360eca963"
+        }
+      ],
+      "expected_root": "a4b2fcb4684cec481e4ece889ed15c7d9e47e58d9ba4fb02ea354c0cb2ca44c4",
+      "must_not_equal": "7c4817ca249edfeae259b98abf63ed38a31d9dbeebf5ee23139410a7a7f63b37"
+    },
+    {
+      "name": "odd-duplication-3",
+      "desc": "Three leaves: final node duplicated at level 1.",
+      "receipt_ids": [
+        "e80168eb-a6a1-4ec9-8478-ac108f9397ff",
+        "514fe841-bbdd-4804-9ef4-6828842d8763",
+        "a090bdad-f2cf-48c9-bc89-e9e17700fb15"
+      ],
+      "expected_root": "4860e25bbc8dba2382887cb08ccaf6cd88434bbda5aeda45c6a8373bb15f63e4"
+    },
+    {
+      "name": "ordering-matters",
+      "desc": "Same five IDs in reverse order produce a different root.",
+      "receipt_ids": [
+        "ae795bf0-27f8-4cf2-8aef-3f8142b77217",
+        "bf88a036-416b-456a-8e82-8c0991811d68",
+        "a090bdad-f2cf-48c9-bc89-e9e17700fb15",
+        "514fe841-bbdd-4804-9ef4-6828842d8763",
+        "e80168eb-a6a1-4ec9-8478-ac108f9397ff"
+      ],
+      "expected_root": "362530ecc354e40c5787139705ca6d85af1354a4b6af83ee9c3a16cb66b8a66c",
+      "must_not_equal": "7c4817ca249edfeae259b98abf63ed38a31d9dbeebf5ee23139410a7a7f63b37"
+    },
+    {
+      "name": "single-leaf",
+      "desc": "One leaf: root is the leaf digest.",
+      "receipt_ids": [
+        "e80168eb-a6a1-4ec9-8478-ac108f9397ff"
+      ],
+      "expected_root": "609eb71e8855515d3d1988f17c714429b4433cfbd8a837f22182652d22ae1f51"
+    },
+    {
+      "name": "empty",
+      "desc": "No leaves: root is SHA-256 of empty input.",
+      "receipt_ids": [],
+      "expected_root": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "worked-example-byte-exact",
+      "desc": "Byte-exact recomputation of the -05 worked example (Section 8.1): same five step receipt_ids, same root as the draft text.",
+      "receipt_ids": [
+        "e80168eb-a6a1-4ec9-8478-ac108f9397ff",
+        "514fe841-bbdd-4804-9ef4-6828842d8763",
+        "a090bdad-f2cf-48c9-bc89-e9e17700fb15",
+        "bf88a036-416b-456a-8e82-8c0991811d68",
+        "ae795bf0-27f8-4cf2-8aef-3f8142b77217"
+      ],
+      "expected_root": "7c4817ca249edfeae259b98abf63ed38a31d9dbeebf5ee23139410a7a7f63b37"
+    },
+    {
+      "name": "duplicate-receipt-id-collision",
+      "desc": "Six steps with the fifth step repeated as seq 6 recompute to the same Merkle root as the canonical five; the Section 8.2 duplicate receipt_id rule marks this workflow invalid regardless of the root check.",
+      "receipt_ids": [
+        "e80168eb-a6a1-4ec9-8478-ac108f9397ff",
+        "514fe841-bbdd-4804-9ef4-6828842d8763",
+        "a090bdad-f2cf-48c9-bc89-e9e17700fb15",
+        "bf88a036-416b-456a-8e82-8c0991811d68",
+        "ae795bf0-27f8-4cf2-8aef-3f8142b77217",
+        "ae795bf0-27f8-4cf2-8aef-3f8142b77217"
+      ],
+      "expected_root": "7c4817ca249edfeae259b98abf63ed38a31d9dbeebf5ee23139410a7a7f63b37",
+      "expected_workflow_verdict": "invalid",
+      "rejected_by": "duplicate receipt_id"
+    },
+    {
+      "name": "one-step-single-receipt",
+      "desc": "One-step workflow: the Section 8.1 leaf digest is itself the merkle_root, no pairing occurs. Added 2026-10-12 at the request of implementer Iman Schrock (Emilia Protocol), whose report identified Sections 8.5/8.7 describing the root over step output hashes where Section 8.1 specifies receipt identifiers. Live workflow 6b6952a5-ab1f-4596-a0b3-a352c137cb41 anchors this vector: the reference server aligned to Section 8.1 on 2026-10-12 and its API now returns this vector's root (7c90f65a...) for the workflow; before the alignment it returned 62780c8f..., the output-hash root.",
+      "receipt_ids": [
+        "4028dabb-3d12-4960-855c-639ce37f14cc"
+      ],
+      "expected_root": "7c90f65aeccd214f8bb583bec76878d5f463d65b9b26c11e07c51dd59be814d5",
+      "expected_workflow_verdict": "valid"
+    }
+  ]
+}

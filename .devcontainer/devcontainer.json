@@ -1,0 +1,16 @@
+{
+  "name": "uibc-core - one-click outsider run",
+  "image": "mcr.microsoft.com/devcontainers/python:3.12",
+  "postCreateCommand": "python --version && python -c \"import sys; print('stdout ok')\"",
+  "postAttachCommand": "python tools/external_node_check.py --out external_node_result.json",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "files.eol": "\n"
+      }
+    }
+  },
+  "hostRequirements": {
+    "cpus": 2
+  }
+}

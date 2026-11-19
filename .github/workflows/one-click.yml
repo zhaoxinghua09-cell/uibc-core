@@ -1,0 +1,62 @@
+name: one-click outsider run
+
+# Manual only. This exists so that a person who does not want to install
+# anything can click one button on a machine neither they nor we control, and
+# get the same line the README asks for. The run is public and timestamped;
+# it is a machine run, not a third-party human node, and docs/EXTERNAL-NODES.md
+# is the only place where a node is counted.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    name: external node check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.12"
+
+      - name: Run the outsider check
+        shell: bash
+        run: |
+          set -o pipefail
+          python tools/external_node_check.py --out external_node_result.json | tee run.txt
+
+      - name: Record the result on the run page
+        shell: bash
+        run: |
+          {
+            echo "### One-click outsider run"
+            echo ""
+            echo "- commit: \`$GITHUB_SHA\`"
+            echo "- python: $(python --version 2>&1)"
+            echo "- runner: $RUNNER_OS $RUNNER_ARCH (GitHub-hosted)"
+            echo ""
+            echo '```'
+            cat run.txt
+            echo '```'
+            echo ""
+            echo "sha256 of external_node_result.json: \`$(sha256sum external_node_result.json | cut -d' ' -f1)\`"
+            echo ""
+            echo "This is a machine run on a hosted runner. It is not a third-party"
+            echo "human node, and it is not counted in docs/EXTERNAL-NODES.md."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Keep the result file
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: external-node-result
+          path: |
+            external_node_result.json
+            run.txt
+          retention-days: 90

@@ -5,7 +5,7 @@
 | 检查 | 名称 | 出厂包是否走到 | 测试 | 红队 | 文档 |
 |---|---|---|---|---|---|
 | S0 | verifier robustness | 否 | 4 | 0 | 9 |
-| S1 | package structure | 是 | 9 | 1 | 28 |
+| S1 | package structure | 是 | 10 | 1 | 29 |
 | S2 | identity consistency | 是 | 7 | 1 | 20 |
 | S3 | lifecycle state machine + semantics | 是 | 9 | 1 | 18 |
 | S4 | evidence integrity | 是 | 15 | 3 | 34 |

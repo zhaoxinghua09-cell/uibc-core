@@ -23,7 +23,7 @@ verifier that refuses malformed input).
 | Verifier modules | 25 | 40 |
 | Test files / test functions | 30 / 527 | 95 / 1189 |
 | Conformance material | 36 packages (6 positive, 30 mutations), shipped as its own zip | `vectors/` in the repo, referenced by tests, not in the sdist |
-| Second implementation is a **CI gate** | Yes — `second-implementation` job, 18 of 19 checks, 36/36 identical FAIL sets | No second implementation to gate |
+| Second implementation is a **CI gate** | Yes — `second-implementation` job, 18 of 20 checks, 36/36 identical FAIL sets | No second implementation to gate |
 | Hostile-input suite | `tools/redteam_robustness.py`, 10 cases, table in `docs/ROBUSTNESS.md` | `tests/test_json_nesting_vectors.py`, `tests/test_verify_bounds.py`, `tests/test_parse.py` |
 | Deep-nesting ceiling | **512 levels, both implementations, refuses with S11** | 128 levels, refuses at parse time |
 | External time proof | RFC 3161 timestamp verified in both implementations (real FreeTSA token, 7/7 red-team on the token verifier) | SCITT transparency log via an anchor client and witness records |
@@ -33,7 +33,7 @@ verifier that refuses malformed input).
 Re-run the machine-checkable half:
 
 ```
-python3 tools/check_doc_facts.py            # ours: 527 tests, 19 checks, 36 cases
+python3 tools/check_doc_facts.py            # ours: 527 tests, 20 checks, 36 cases
 python3 tools/redteam_robustness.py         # ours: 10 of 10 refused
 python3 tools/cross_impl_check.py --json    # ours: 36 of 36 identical
 ```

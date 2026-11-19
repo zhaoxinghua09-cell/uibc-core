@@ -89,7 +89,24 @@ What this requires instead:
 3. **Unknown stays INCONCLUSIVE.** A verifier that meets the floor but does not recognise a value reports INCONCLUSIVE naming it (`S4` for an unknown evidence type, per #178). PASS is reserved for "I judged everything here and it holds".
 4. **Nobody claims retroactive coverage.** Documents may not say a later check would have caught an earlier artefact. It did not run.
 
-Point 1 is not implemented yet. Until it is, this section records a known hole rather than a closed rule, and forward compatibility stays **partially measured**.
+Point 1 is implemented as of 2026-11-19: `uibc submit` writes
+`manifest.min_verifier_version`, and a verifier older than that floor reports
+**S1 INCONCLUSIVE** naming both versions (`tests/test_version_floor.py`).
+
+But the floor has a limit that must be stated plainly, because it is the same
+lesson as M2c one level up: **an older verifier cannot be made to obey a field it
+has never heard of.** 0.3.3 contains `min_verifier_version` zero times - measured
+by search over its shipped source - so a package that declares a floor of 0.4.0
+is still PASSed by 0.3.3, exit 0, with the declaration silently ignored.
+
+Therefore point 2 is not a convenience, it is the load-bearing control: the floor
+only protects anything when a consumer compares it before trusting a PASS. A
+package's own declaration cannot defend itself against a verifier that does not
+read it.
+
+Until consumers actually perform that comparison, this section records a
+partially closed rule rather than a closed one, and forward compatibility stays
+**partially measured**.
 
 ## 9. Amendments
 

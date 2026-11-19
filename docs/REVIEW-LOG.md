@@ -336,3 +336,26 @@ So the rule "an older but validly signed package must be refused" already exists
 in products. What is ours is narrower and should be described that way: an opt-in check inside
 an offline package verifier, with the three INCONCLUSIVE cases written down and a red-team case
 (RT16) that isolates it. No claim of invention; the `basis.py` note now names the drafts.
+
+## Positioning check, academic axis, 2026-11-19 (rollback protection is a solved problem elsewhere)
+
+The standard and product axes were checked earlier today. The academic axis turns up the same
+rule under a different name, plus one number that is worse than ours.
+
+- Nimble (OSDI '23, `http://people.csail.mit.edu/stellal/papers/nimble-OSDI23.pdf`) exists to
+  "detect rollback attacks, i.e. detect whether a data item retrieved from persistent storage is
+  the latest version". That is S19, stated in one sentence, three years ago, with a Dafny proof.
+- `arXiv:2608.16178` (Agent-Native Telemetry) reports 500 adversarial mutation trials covering
+  "cross-batch sequence gaps" and "suffix truncations" with a 100% detection rate.
+- `arXiv:2609.38266` (Janus) ships an offline verifier over an exported audit bundle that checks
+  "sequence continuity" among other findings and reports each by severity. Offline bundle plus
+  sequence continuity is our shape.
+- `arXiv:2609.31490` rejects stale manifests explicitly (`reject-stale`).
+
+So the mechanism claim stays retired. What remains ours is thin and should stay thin: this
+verifier's opt-in check, its three INCONCLUSIVE cases, and RT16.
+
+The uncomfortable part: our mutation benchmark is **21 cases per mode**, against a published 500
+trials. 2/21 accepted in the open mode is a 9.5% false-accept rate on a sample small enough that
+one case swings it by 4.8 points. Until the corpus is larger, the honest reading is "we have not
+measured this well", not "we are stricter". Larger corpus is the next work item, not a claim.

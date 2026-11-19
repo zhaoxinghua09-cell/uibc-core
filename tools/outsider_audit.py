@@ -135,7 +135,10 @@ def _json(path):
 
 
 def _dump(path, obj):
-    with open(path, "w", encoding="utf-8") as f:
+    # newline="\n": these files are evidence. Written on Windows, a bare "w"
+    # gained CRLF and the stored content hash then matched only on Windows -
+    # the same defect the fixtures rule in .gitattributes documents.
+    with open(path, "w", encoding="utf-8", newline="\n") as f:
         json.dump(obj, f, ensure_ascii=False, indent=2)
 
 
@@ -450,7 +453,8 @@ def build_ext(pkg):
     artefact = {"policy": "retention", "days": 90}
     adir = os.path.join(pkg, "evidence", "policies")
     os.makedirs(adir, exist_ok=True)
-    with open(os.path.join(adir, "retention.json"), "w", encoding="utf-8") as fh:
+    with open(os.path.join(adir, "retention.json"), "w", encoding="utf-8",
+              newline="\n") as fh:
         json.dump(artefact, fh, sort_keys=True, separators=(",", ":"))
     _dump(os.path.join(pkg, "evidence", "policies.json"),
           {"policies": [{"path": "evidence/policies/retention.json",

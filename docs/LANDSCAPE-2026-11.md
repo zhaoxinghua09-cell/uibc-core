@@ -147,3 +147,50 @@ VERDICT: ZERO ADOPTION - no party outside this account has taken up the format
 
 中文：**规格、生态、生产就绪三项我们在后；唯一不同是"外部发现被留成一条会失败的检查"，这在别人那里未见公开对应做法。第三方执行本身已不是我们独占。**
 
+## 八、2026-11-19 第四次复核：外部记录不是一个量级
+
+上一节（§7）刚把"对手没有第三方执行"收回，但收得还不够。查了对手仓库的登记册之后，真实差距是**数量级**，不是"各有一次"。
+
+### 8.1 他们的登记册
+
+`https://github.com/action-state-group/agent-action-capsule/blob/main/INTEROP.md`
+标题 `AAC Interop Registry`，状态标注 `IETF 126, Vienna, Jul 18–22 2026`，并写了一句话：
+
+> "A name is not evidence; a digest is — every `ran` row links a public record."
+
+其 `Independent parties` 表列出 **9 个独立方**，状态都是 `ran & verified`，每行带公开记录链接：
+
+| 独立方 | 做了什么 | 公开记录 |
+|---|---|---|
+| EMILIA Protocol (Schrock) | 3 次独立计算 | PR #40 |
+| Songbo Bu | vector 复现 · -03 已投 | datatracker 上的独立 draft |
+| Tyche Institute (Sokolov) | TPM quote 复验 · **第三方行 0→1** | aep-pcr16-vector release · eatf/verification |
+| Microsoft / CCF (Chamayou) | 双 TS、两份 receipt 均 ok | scitt-ccf-ledger PR #424 |
+| NANDA / MIT | 跨注册表 deal-room **LIVE** | verify.actionstate.ai |
+| GlyphZero | 双向均跑通 | cross-org-delegation-registry #3 |
+| APS (Pidlisnyi) | 双向 cross-run 6/6 + 24/24 | audit-bof-preparation #9 |
+| A2A boundary-seal | a2a-tck 100% MUST | capsule-emit #29 |
+| GAR / SOOS | seal + verify，leaf 166 | anchor.agentactioncapsule.org |
+
+### 8.2 我们的对应数字
+
+| | 他们 | 我们 |
+|---|---|---|
+| 独立方公开记录 | **9**（每行带链接） | **1**（`docs/external-review/EXTERNAL-NODE-001.md`） |
+| 对方是否把我们写进其记录 | — | **没有**（`INTEROP.md` 里没有本仓库） |
+
+**这是本文件里最不利的一行。** 它说明：我们的问题从来不是"自测不够多"，而是**没有进入任何一份别人维护的记录**。
+
+### 8.3 由此得到一个不必再绕的结论
+
+他们的机制值得照抄，而且它比任何自测更硬：**"名字不是证据，摘要才是"**——一行 `ran` 必须挂一个公开记录链接。
+
+我们的 1 行确实挂了记录（外部节点的回执 + 我们复算它的工具）。但**1 行与 9 行不在一个量级**，且我们的 1 行还是自己写的，不是别人写的。
+
+要改变这一点，只有一条路：**让别人在他们的记录里写我们**。那需要一次对外动作（向他们开一个带回执的 PR/issue，或向 SCITT 投实现报告），**这需要授权，我停在门口**。
+
+### 8.4 结论（第四版）
+
+> On specification, ecosystem and the count of independent public records, other work is ahead by roughly an order of magnitude — nine independent parties with linked records against our one. The one thing this repository does differently is what it did with a finding: a disagreement found by an outside operator became a check that fails if it returns. That is a difference in handling, not a claim of superiority.
+
+中文：**在独立公开记录的条数上，我们是 1，他们是 9；这个差距不是一个量级。我们唯一不同的做法，是把外部发现留成会失败的检查。**

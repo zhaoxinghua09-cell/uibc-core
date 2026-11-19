@@ -81,13 +81,51 @@ row stays partially measured.
 
 ## M3 - key rotation and pinning
 
-Not run. Nothing claimed.
+Run 2026-11-19, new release (this working tree, 0.4.1) against itself. Two
+throwaway Ed25519 pairs were generated for the run; **the project's own signing
+key was not rotated and was not touched** — the second pair exists only so a
+"pin points at the wrong key" case can be produced. Seed files stayed in the
+run directory and are not part of any artefact.
+
+| # | Case | Verdict |
+|---|---|---|
+| M3a | no pin supplied | **PASS**, `trust_level: unanchored` |
+| M3b | `--pubkey` = the newer (unrelated) key | **FAIL** (S6: "public key does not match the pinned `--pubkey`") |
+| M3c | `--pubkey` = the signing key | **PASS**, `trust_level: anchored` |
+| M3d | `--pubkey` = the signing key, that key marked revoked | **not run — no implementation exists** |
+
+M3a and M3c are the same package, same bytes, verified twice. The only
+difference is whether the verifier was handed an out-of-band public key. That
+is exactly what `trust_level` is for: `unanchored` means "this signature is
+internally consistent and a forger's own key would look identical"; `anchored`
+means "the key used was supplied from outside the package". Publishing M3a's
+`PASS` as if it were M3c's would be the misstatement this vector exists to
+prevent.
+
+M3d cannot be run. `verify` accepts no key-status input, so a revoked pinned key
+and a valid pinned key produce the same verdict. Revocation in this repository
+is a package-level object (`revocation.json`, `target_root` = `evidence_root`)
+that terminates at `gate` (`DENY` on a valid owner signature, `HOLD` when the
+revocation itself cannot be verified). Recording this as unimplemented rather
+than dropping it: the row is a real gap in "can I still trust this after a
+rotation", and the honest answer today is "not from the package alone".
+
+Three defects in the published recipe were found by running it. `MIGRATION-VECTORS.md`
+§M3 previously showed `init --out … --key …` — `init` takes only a path and
+does no signing — and `verify --pin …`, when the flag is `--pubkey`. Its verdict
+table also required `FAIL` for the unpinned case, which contradicts the
+verifier's deliberate `unanchored` behaviour. All three are corrected there,
+with the observed values beside the declared ones.
 
 ## What this changes in the repository's own claims
 
 `VERSIONING.md` forward-compatibility row could previously only be filled with
 intentions. After M1 it can carry one measured fact - a 0.3.3 package verifies
 as PASS under 0.4.0 when it uses the shared vocabulary, and degrades to
-INCONCLUSIVE, not FAIL, when it uses a type 0.4.0 does not know. M2 produced a conclusive negative and M3 is still
-open, so the row is not "verified" - it is "partially measured", and that is the
-word it should carry.
+INCONCLUSIVE, not FAIL, when it uses a type 0.4.0 does not know. M2 produced a
+conclusive negative, and M3 adds the attribution dimension: the same package is
+`PASS unanchored` or `PASS anchored` depending only on whether the verifier was
+given an out-of-band key, and a rotated-away key is not detectable from the
+package alone. The row is still "partially measured", not "verified" — no
+registry or gate consumes the floor or the anchor yet, and M3d has no
+implementation. That is the word it should carry.

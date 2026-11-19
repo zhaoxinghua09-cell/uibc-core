@@ -133,3 +133,21 @@ their verifier: ok=True
 **用我们 36/36 那次的真实运行目录做过一次**（含解包后的语料与 `receipt.json`）：
 `ACCEPTABLE — 300 files digested, archive 711fa82c…, controls present, limits stated`。
 **但这份 bundle 的 `roles.runner` 写的是作者本人**，因此它只能计入"作者产出"，不能计入外部节点——这是设计而非疏漏。
+### 2026-11-20 实测（发版资产）：他们发的是"签过名的摘要 + 两个外部时间戳"，我们只发了 zip
+
+读三家最近三个 release 的资产清单（`gh api repos/<r>/releases`）：
+
+| 仓库 | 发版资产 |
+|---|---|
+| `probityai/agent-evidence-vectors` v0.37.1 | `CORPUS-DIGESTS.txt` + `.sig`（签名）+ `.sig.ots`（OpenTimestamps）+ `.sig.tsr`（RFC 3161） |
+| `tyche-institute/eatf-verifier` v0.7.4 | `eatf-pqc-hybrid-lab-v0.7.4.zip` + `.sha256` + 一份 PDF |
+| `emiliaprotocol/emilia-protocol` clean-room-kit-v1 | `emilia-clean-room-kit-v1.tar.gz` + `.manifest.json` |
+| **我们** v0.4.0 | **只有 `uibc-conformance-0.4.0.zip`** |
+
+结论：**"发版挂摘要"是这三家的共同做法，其中一家还附签名与 OTS/TSA 两个外部时间戳**；我们此前连摘要文件都没挂。
+本轮补的是这一层里我们做得到的：`tools/release_lab_bundle.py` 在发版时把三种对照实跑一遍，产出
+`uibc-lab-bundle-<v>.json` + `receipt.json` + `CORPUS-DIGESTS.txt`，工作流在打 tag 时挂到 release。
+
+**仍然落后的一半（写清）**：我们的 `CORPUS-DIGESTS.txt` **没有签名、没有 OTS、没有 RFC 3161**。仓内已有
+`anchor_tsa.py` / `anchor_ots.py` / Rekor 三条路子，但**没有接到发版流程上**；对外部锚定这一层，他们是已做的，
+我们是可做但未做。此条记为缺口，不计入任何"对齐"。

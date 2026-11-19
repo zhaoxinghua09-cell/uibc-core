@@ -48,6 +48,25 @@ or its vectors before or during the run. That is not disqualifying and is not
 hidden: it changes what the number supports. The two are never added together and
 never averaged in `docs/RUNS.md`.
 
+## The release bundle, measured by the release script
+
+`tools/release_lab_bundle.py --version <v>` runs three scenarios in throwaway
+directories and refuses to write anything if a control misbehaves:
+
+| scenario | what runs | what it must show |
+|---|---|---|
+| A | the archive as shipped, `python run.py`, no install | full pass, and a receipt with `passed == cases` |
+| B | the same archive with `--verify` pointed at a verifier that answers PASS to everything | **far below full** — 6/36 on 0.4.1; full marks would mean the corpus does not discriminate |
+| C | the bundled verifier removed and none installed | **exit 3, no receipt** — an environment failure must not be publishable as a corpus result |
+
+Outputs: `uibc-lab-bundle-<v>.json`, `receipt.json` from scenario A, the archive copy,
+and `CORPUS-DIGESTS.txt` (sha256 + size for each). `.github/workflows/release-lab-bundle.yml`
+runs it on a version tag, re-checks the bundle with `tools/check_lab_bundle.py`, and
+attaches the four files to the release. It fires only when a maintainer pushes a tag;
+it publishes nothing on its own.
+
+Measured on 0.4.1, 2026-11-20: `36/36` positive, `6/36` hostile, `exit 3` negative, 15 s.
+
 ## What this protocol is not
 
 - It is not the lab protocol `probityai/agent-evidence-vectors` publishes. Theirs

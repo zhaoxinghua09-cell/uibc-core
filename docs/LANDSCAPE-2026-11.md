@@ -61,3 +61,46 @@ VERDICT: ZERO ADOPTION - no party outside this account has taken up the format
 ```
 
 四个桶分别问：别人的仓库、别人的代码、标准组织、最近的同题规格。任一桶非零时脚本退出码变 1，逼人来看——**"零"从此是一个可被推翻的测量结果，而不是一句自我描述。**
+
+## 六、2026-11-19 复核：竞争维度变了，而"零采纳"有第三方佐证
+
+上一版把结论写成"我们落后"。这句仍然成立，但不够准确：复核之后必须分成两个维度看，否则会得出错误的行动方向。
+
+**as of 2026-11-19T04:14:10Z**（`python3 tools/check_citations.py` → 49 条外链，43 条本机直达；下列三条 IETF 链接均 200，arXiv 页本机 503 但正文已取回）。
+
+### 6.1 规格与生态：差距被拉大了，不是缩小了
+
+| 新证据 | 事实 |
+|---|---|
+| `draft-mih-scitt-agent-action-capsule-05`（2026-09-26，Standards Track，Expires 2027-03-30，61 页） | 一次性请求 **7 个 IANA registry**（registry group "Agent Action Capsule Parameters"，Specification Required），并写明 `Interim registry of record: REGISTRY.md`，Change controller 为 Action State Group, Inc.；正文含 Cross-Profile Comparability 与一条可机器核对的 vector `urn:action-state:aac-aep-scitt:digest-binding:2026-07-02` |
+| `draft-pidlisnyi-aps-04`（2026-09-28，Informational，Agent Passport System） | 定义了 passport / 单调委托 / 签名行动记录 / verifier outcomes / **profiles** / MCP 绑定，并把要求切成 **APS Core 与 Candidate**，还写"哪些要求有 exact conformance-vector coverage"；组织下 **17 个仓库**、TypeScript/Python/MCP/Go 包、两个托管服务、npm `agent-passport-system-mcp` 6.0.0 |
+| `draft-munoz-scitt-permit-profile-01`（2026-07-19，Informational，Keel API, Inc.，31 页） | 另一个独立作者的**执行前授权** profile，含 Implementation Status 段、IANA 请求、Appendix B 开列待解问题 |
+| 相邻文本（同一批引用链里可见） | `draft-emirdag-scitt-ai-agent-execution-00`、`draft-kamimura-scitt-refusal-events-03`、`draft-klrc-aiagent-auth`、`draft-veridom-omp`、`draft-sato-soos-gar-08`、`draft-noa-scitt-ai-agent-receipt` 等 |
+
+一句话：这条赛道上已经有**多家公司、多作者、多轮草案、注册表请求、四种语言的实现、两个托管服务**。以"规格完备度"和"生态规模"为尺子，我们落后不止一个身位，且这个差距**不会因为再加自测而缩小**。
+
+### 6.2 采纳：全领域都是零，有第三方论文自己写的
+
+`arXiv:2606.04193`（Juan Figuera，2026-06-02，22 页，cs.CR，"Notarized Agents: Receiver-Attested Confidential Receipts for AI Agent Actions"）在第 8 节把这件事写成了原话：
+
+> **Adoption-incentive problem.** Sello is only useful if services adopt it; **in 2026, that adoption is zero.**
+
+它还对自己提出的四条属性做了同类对比（Signet、AgentROA、Agent Passport System、`draft-farley-acta`、agentreceipts.ai、Pipelock、Attested Intelligence、SCITT），结论是"没有哪个现存系统同时具备这四条"。
+
+这条证据改变了"零采纳"的含义：**它不是我们的耻辱，是这类格式在 2026 年的共同天花板**。因此把"采纳率"当作竞争指标是不成立的——**在这个指标上没有任何人领先，包括写了 61 页草案的人**。
+
+### 6.3 于是我们唯一站得住的差异，恰好是他们公开材料里没有的
+
+| 我们的做法 | 复核后仍然成立的判断 |
+|---|---|
+| 19 项检查逐项"只违反该项"的样本，19/19 非零 | 未在 -05 / APS-04 / munoz-01 中见到同类的逐项可证伪矩阵 |
+| 36 包双实现判决一致，且**拒绝必须指名检查项** | 他们的 Implementation Status 只报"覆盖到哪"，不报"拒绝时能否定位" |
+| `check_adoption.py` 四桶全零、非零即退出码 1 | **没有见到任何一方把"我们未被采纳"做成一条会失败的检查**；这是最便宜、也最不容易被反驳的一条差异 |
+| `docs/PAPER-EVIDENCE.md` 每条主张带"不能支持什么" | 未见同等写法 |
+
+### 6.4 结论（替换上一版单句结论）
+
+- 在**规格与生态**上：落后，且差距在扩大。任何"全面超越"的表述都会被上面四条事实推翻。
+- 在**采纳**上：全领域为零，无可比性，谁说自己领先谁就需要出示证据。
+- 在**可证伪性**上：我们有一条别人没公开做的动作——把"零采纳"写成会失败的检查，并把"拒绝必须指名检查项"写进契约。这条可以写进论文的方法章，**但不能写成"领先"**，只能写成"我们采用了一种别人未采用的可证伪做法"。
+

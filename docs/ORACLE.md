@@ -162,6 +162,40 @@ numbers are answering different questions. `tools/oracle_check.py` prints all fo
 and `tests/test_oracle.py` fails if any of them changes without this document changing
 with it.
 
+## What the extra rules actually are — measured, not reasoned
+
+The sentence above, "they pair with parts of S1/S7/S8", was another one I wrote. Each probe
+now breaks exactly one thing and then **re-seals**, so the seal stays valid and S6 cannot
+answer first. Whatever each side reports is then the rule itself:
+
+```
+measured: V7 fires alone -> reference FAIL S1;     independent FAIL V7
+measured: V8 fires alone -> reference FAIL S7,S8;  independent FAIL V8,V9
+measured: V9 fires alone -> reference FAIL S8;     independent FAIL V9
+```
+
+V7 ↔ S1, V8 ↔ S7 (S8 also fires), V9 ↔ S8, each measured on a package whose seal is valid.
+Stronger than the wording it replaces, and repeatable by anyone.
+
+## The finding a coverage percentage cannot express
+
+```
+measured: where the reference has a rule and the second does not
+          (closure dropped, S10), reference says FAIL and the second says PASS
+```
+
+**The second implementation returns `PASS` on a package whose closure is incomplete**, because
+it has no rule for the closure at all. Its `INCONCLUSIVE` discipline — which it does apply
+to V6/V8/V9 when a judgement is impossible — covers only rules it possesses. Where it has
+none, the overall three-valued verdict comes back green.
+
+That is worse than being blind: blindness is `n/a`, this is an affirmative "no violation was
+detected" about a package that violates a check. It is the one cell in this document where
+the two implementations do not merely differ — one of them is wrong in a way a user would
+act on. Recorded rather than fixed: the fix would be another rule in our own second
+implementation, and `INDEPENDENCE.md` already says adding implementations by the same author
+buys no independence.
+
 ## What this is not
 
 - **Not independent judgement.** Expectations were drawn from documents this project

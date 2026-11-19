@@ -365,31 +365,41 @@ measured this well", not "we are stricter". Larger corpus is the next work item,
 The published false-accept number came from 21 mutation kinds, one instance each. With a sample
 that size one case moves the rate by 4.8 points, so the number could not support any strictness
 claim. `tools/mutation_corpus.py` keeps the same families but varies the parameter inside each
-family — byte position, field, timestamp, sequence index, attacker key, rollback depth, truncation
-length — and lands on **500 deterministic cases** (no RNG; every index comes from the case list).
+family - byte position, field, timestamp, sequence index, attacker key, rollback depth,
+truncation length - and lands on **500 deterministic cases** (no RNG; every parameter comes
+from the case list).
 
-Measured on this tree, `python tools/mutation_corpus.py`:
+Measured on this tree with `python tools/mutation_corpus.py`:
 
 | mode | accepted | total | false-accept |
 |---|---|---|---|
-| open | 65 | 500 | **13.0%** |
-| pinned | 25 | 500 | **5.0%** |
+| open | 60 | 500 | **12.0%** |
+| pinned | 20 | 500 | **4.0%** |
 | head-pinned | 0 | 60 | **0.0%** |
 
-The 13.0% is higher than the 9.5% the 21-case benchmark reported, and the reason is structural,
-not a regression: the corpus contains 40 keyswap cases and 20 rollback cases, and open mode has
-no anchor to judge either by design. Per family, everything else is caught:
+12.0% is higher than the 9.5% the 21-case benchmark reported, and the reason is structural,
+not a regression: the corpus contains 40 key-swap cases and 20 rollback cases, and open mode
+has no anchor to judge either by design. Everything else is caught, with the catching check
+recorded per case: blob bytes 98/98, signature bytes 64/64, identity 12/12, manifest scalar
+40/40, manifest extra 24/24, manifest delete 8/8, lifecycle events 76/76, index metadata
+24/24, index-entry deletion 6/6, evidence added 24/24, extra root files 24/24, truncation
+40/40. Key-swap: accepted in open (nothing to pin against), refused 40/40 when pinned.
+Rollback: accepted in open and pinned, refused 20/20 with an external head.
 
-- blob-byte 98/98, sig-byte 64/64, identity 12/12, manifest scalar 40/40, manifest extra 24/24,
-  manifest delete 8/8, lifecycle (ts/actor/drop/insert) 76/76, index metadata 24/24,
-  evidence add 24/24, root extra 24/24, truncation 40/40 — all refused, with the catching check
-  recorded per case.
-- keyswap 40/40 accepted in open (nothing to pin against), 0/40 in pinned.
-- rollback 20/20 accepted in open and pinned, 0/20 in head-pinned.
-- evidence-drop 5/6 accepted in both open and pinned. This is the one family the corpus newly
-  exposed: dropping index entries without changing the manifest is not caught when no seal
-  covers the index. Written down as a gap, not filed away.
+### Correction: the gap this section first reported did not exist
 
-So the honest sentence is now: **open mode lets through one in eight of these 500; pinned brings
-it to one in twenty; and the only way to catch rollback is an external head.** Still not a
-strictness claim — the corpus has 17 families chosen by us, and nobody has audited the list.
+The first version of this entry claimed a real gap - "dropping evidence index entries is
+accepted 5 of 6 times when nothing covers the index". That was wrong, and wrong because of a
+bug in our own generator: the cases were written as "keep the first N entries" with N from 1
+to 6 against a base package that holds 2 entries, so five of the six "attacks" changed
+nothing at all and were counted as accepted. A no-op is not a bypass.
+
+The generator now removes an entry and then offers the attacker the repairs a careful attacker
+would make: fix `evidence_count`, fix `evidence_index_digest`, both, both plus a fresh
+attacker signature, and finally delete `evidence/index.json` outright. All six are refused in
+open and pinned mode, caught by S8, S5, S6, S12, S7 and S1. So the hole was in the test, not
+in the verifier - and the way it was found was by asking why a "5 of 6" number looked too
+round to be believable.
+
+Still not a strictness claim: 17 families chosen by us, and nobody outside has audited the
+list.

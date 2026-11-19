@@ -5,13 +5,13 @@
 | 检查 | 名称 | 回答的问题 | 依据类别 | 依据说明 | 源码行 |
 |---|---|---|---|---|---|
 | S0 | verifier robustness | 包根本无法处理时，验证器是崩溃还是给出判定？ | 无 | 异常时也必须给出判定，不得崩溃（本项目自定） | 1283 |
-| S1 | package structure | 声明的每个文件都在，且没有多出不该有的文件？ | 草案明文规定 | 回执包的结构与成员（draft-noa-scitt-ai-agent-receipt-00） | 392 |
+| S1 | package structure | 声明的每个文件都在，且没有多出不该有的文件？ | 无 | 包文件布局（声明的文件都在、无多出文件）为本项目自定；草案规定的是回执载荷字段，不是包的文件布局 | 392 |
 | S2 | identity consistency | 包自称的 agent 身份与生命周期事件里的一致？ | 草案明文规定 | 主体标识（draft-noa-scitt-ai-agent-receipt-00） | 534 |
 | S3 | lifecycle state machine + semantics | 生命周期事件序列合法（类型、顺序、时间），不是伪造的转场？ | 思想来源（非直接规定） | 状态机自定；事件类型集合参照该草案（draft-maintainer-1f916-agent-record-01） | 552 |
 | S4 | evidence integrity | 每个证据文件的字节未被改动，且没有指向证据目录之外的符号链接？ | 无 | 内容哈希为通用做法；符号链接围栏为本项目自定的安全加固 | 610 |
 | S5 | evidence root | 所有证据的根承诺与清单声明一致（含整条尾部被删除）？ | 思想来源（非直接规定） | Merkle 根的思想；本包的根构造自定（RFC 6962） | 1057 |
 | S6 | seal signature | 封条签名有效，且签名覆盖的是当前这份内容？ | 思想来源（非直接规定） | Ed25519 签名；「签名须覆盖当前内容」的组合检查自定（RFC 8032） | 1078 |
-| S7 | evidence index metadata | 索引自身的元数据（类型、备注）未被改写（内容哈希看不到这层）？ | 草案明文规定 | 被审计对象的元数据（draft-sharif-agent-audit-trail-03） | 902 |
+| S7 | evidence index metadata | 索引自身的元数据（类型、备注）未被改写（内容哈希看不到这层）？ | 无 | 索引元数据未可改由内容哈希看不到、需单独摘要，为本项目自定；草案中没有对应条款 | 902 |
 | S8 | package checkpoint head | 整包状态与封存的检查点一致（能看见被截短的日志）？ | 思想来源（非直接规定） | checkpoint 概念；整状态提交自定（draft-maintainer-1f916-agent-record-01） | 959 |
 | S9 | head pinned out-of-band | 包与外部钉住的链头一致（能看见回滚到旧的自洽包）？ | 思想来源（非直接规定） | 链头需在外部被观察；pin 机制自定（draft-bailey-scitt-agent-session-receipt） | 982 |
 | S10 | attestation closure declared | 六个证明闭包成分都被声明并给了摘要（只声明，不验内容）？ | 草案明文规定 | 证明闭包六成分（draft-sharif-agent-audit-trail-03 §13.6） | 931 |
@@ -27,7 +27,7 @@
 
 ## 关于「外部依据」这一列
 
-草案明文规定 7 项；思想来源 9 项；完全自定 4 项（S0, S4, S12, S15）。
+草案明文规定 5 项；思想来源 9 项；完全自定 6 项（S0, S1, S4, S7, S12, S15）。
 
 三类的区别不是措辞，是责任：第一类写「按某草案要求」，第二类只能写「借鉴某处思想」，第三类必须写「本项目自定」。**混写会被抓住。**
 

@@ -57,9 +57,23 @@ class TestGrounds(unittest.TestCase):
 
     def test_unlocated_clauses_are_declared_not_omitted(self):
         absent = [row["check"] for row in self.grounds if row.get("clause_absent")]
-        self.assertEqual(sorted(absent), ["S1", "S16", "S7"],
-                         "the set of draft-mandated checks with no located clause "
-                         "changed without the document changing")
+        self.assertEqual(absent, [],
+                         "a draft-mandated check with no located clause must be "
+                         "reclassified in uibc_core/basis.py, not shipped as absent")
+
+    def test_grounds_follow_the_shipped_basis_table(self):
+        """grounds.json is derived from uibc_core.basis; if the two disagree, one of
+        them is telling a different story about the same check."""
+        import sys
+        repo = os.path.dirname(HERE)
+        if repo not in sys.path:
+            sys.path.insert(0, repo)
+        from uibc_core.basis import BASIS
+        kinds = {"direct": "draft_mandated", "related": "borrowed_idea",
+                 "none": "own_choice"}
+        for row in self.grounds:
+            self.assertEqual(kinds[BASIS[row["check"]]["class"]], row["basis"],
+                             "%s: basis table and corpus disagree" % row["check"])
 
     def test_own_choice_checks_never_claim_a_clause(self):
         for row in self.grounds:

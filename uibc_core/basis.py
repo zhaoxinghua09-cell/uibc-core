@@ -19,8 +19,9 @@ leave blank and quietly fill in later.
 BASIS = {
     "S0": {"class": "none", "citation": "",
            "note": "异常时也必须给出判定，不得崩溃（本项目自定）"},
-    "S1": {"class": "direct", "citation": "draft-noa-scitt-ai-agent-receipt-00",
-           "note": "回执包的结构与成员"},
+    "S1": {"class": "none", "citation": "",
+           "note": ("包文件布局（声明的文件都在、无多出文件）为本项目自定；"
+                    "草案规定的是回执载荷字段，不是包的文件布局")},
     "S2": {"class": "direct", "citation": "draft-noa-scitt-ai-agent-receipt-00",
            "note": "主体标识"},
     "S3": {"class": "related", "citation": "draft-maintainer-1f916-agent-record-01",
@@ -31,8 +32,9 @@ BASIS = {
            "note": "Merkle 根的思想；本包的根构造自定"},
     "S6": {"class": "related", "citation": "RFC 8032",
            "note": "Ed25519 签名；「签名须覆盖当前内容」的组合检查自定"},
-    "S7": {"class": "direct", "citation": "draft-sharif-agent-audit-trail-03",
-           "note": "被审计对象的元数据"},
+    "S7": {"class": "none", "citation": "",
+           "note": ("索引元数据未可改由内容哈希看不到、需单独摘要，为本项目自定；"
+                    "草案中没有对应条款")},
     "S8": {"class": "related", "citation": "draft-maintainer-1f916-agent-record-01",
            "note": "checkpoint 概念；整状态提交自定"},
     "S9": {"class": "related", "citation": "draft-bailey-scitt-agent-session-receipt",

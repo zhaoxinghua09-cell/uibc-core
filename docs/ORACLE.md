@@ -301,7 +301,36 @@ were produced by this project, pass them and you have shown conformance to this 
 of the spec — not to a regulator's requirement. Anything a verifier does that is not in
 here is unmeasured, not impossible.
 
-## What each reject case rests on — and the three that still rest on nothing
+## What each reject case rests on — after two claims failed inspection
+
+```
+reject cases in grounds: 18
+clauses verified verbatim against the vendored draft: 5
+draft-mandated checks with no clause recorded: 0
+by basis: borrowed_idea 7, draft_mandated 5, own_choice 6
+```
+
+Last round the manual claimed **seven** draft-mandated checks and I could locate clauses
+for four. This round the remaining three were checked against the vendored text:
+
+- **S16** — clause found in RFC 3161 §2.4.2 (`messageImprint` must equal the one requested).
+  Vendored as `docs/spec-sources/rfc3161.txt`.
+- **S1** — **the claim did not survive.** The noa draft mandates receipt *payload* fields;
+  our S1 checks the *file layout* of a submission package. Different objects, so
+  `uibc_core/basis.py` now says `none` with that reason written out.
+- **S7** — **the claim did not survive either.** `draft-sharif-agent-audit-trail-03` has no
+  clause about index metadata; the nearest mentions are a query plane and a closure
+  component. Reclassified `none`.
+
+So the manual's "7 draft-mandated" was wrong in two places, in this project's own favour,
+and `docs/CHECKS-REFERENCE.md` now reads **5 draft-mandated, 9 borrowed idea, 6 own choice**
+— regenerated from `uibc_core/basis.py`, which is the table the verifier ships.
+
+`grounds.json` is now **derived from that table** rather than from a second hand-written
+list, and a test fails if the two ever disagree. A claim table that lives in two places
+will disagree eventually; the only question is whether anyone notices.
+
+## What this is not
 
 The expectations in `expected.json` were written by this project. That is the weakest link
 in the whole corpus, so each reject case now says what it rests on, in
@@ -313,21 +342,6 @@ clauses verified verbatim against the vendored draft: 4
 draft-mandated checks with no clause recorded: 3 (S1, S16, S7)
 by basis: borrowed_idea 7, draft_mandated 7, own_choice 4
 ```
-
-The seven draft-mandated checks are S1, S2, S7, S10, S16, S17, S18. Four of their clauses
-are now vendored in `docs/spec-sources/` and quoted: S2 (identity manifest binding
-`agent.id` to its key), S10 (§13.6 attestation closure), S17 (§4.3 hash-chain linkage),
-S18 (§4.2.2 `policy_digest` resolution). `tools/check_grounds.py` re-finds every quote in
-the vendored text after collapsing whitespace, and fails if a quote is not there.
-
-**Three draft-mandated checks have no clause located: S1, S7 and S16.** They are marked
-`clause_absent` rather than left blank, so the gap is visible instead of implied. S16 needs
-RFC 3161 rather than an IETF draft, which is next on the list.
-
-Four checks are `own_choice` (S4, S12, S15 and S0 in the reference manual): they rest on
-nothing but our decision, and the file says so where a reader would otherwise assume a
-standard. A test fails if any `own_choice` case ever cites a clause — being stricter than
-the standard is fine, claiming the standard said it is not.
 
 ## What this is not
 

@@ -1,5 +1,5 @@
 {
-  "note": "What each reject case rests on. draft_mandated entries carry a clause read in docs/spec-sources; clause_absent marks a draft-mandated check for which no clause has been located yet.",
+  "note": "What each reject case rests on, taken from the basis table the verifier ships (uibc_core/basis.py). draft_mandated entries carry a clause quoted from docs/spec-sources; clause_absent would mark a direct claim with no locatable clause.",
   "cases": [
     {
       "case": "oracle-tampered",
@@ -29,8 +29,7 @@
     {
       "case": "oracle-s01-undeclared-file",
       "check": "S1",
-      "basis": "draft_mandated",
-      "clause_absent": true
+      "basis": "own_choice"
     },
     {
       "case": "oracle-s02-identity",
@@ -82,7 +81,9 @@
       "case": "oracle-s16-token-byte",
       "check": "S16",
       "basis": "draft_mandated",
-      "clause_absent": true
+      "clause_source": "docs/spec-sources/rfc3161.txt",
+      "clause_section": "2.4.2 (Time-Stamp Token)",
+      "clause_quote": "The messageImprint MUST have the same value as the similar field in TimeStampReq, provided that the size of the hash value matches the expected size of the hash algorithm identified in hashAlgorithm."
     },
     {
       "case": "oracle-s17-receipt-body",
@@ -103,8 +104,7 @@
     {
       "case": "oracle-s07-index-metadata",
       "check": "S7",
-      "basis": "draft_mandated",
-      "clause_absent": true
+      "basis": "own_choice"
     }
   ]
 }

@@ -11,6 +11,7 @@
 | 我们（本仓库） | — | 复现公开语料 143 个向量 | 143/143 | [PR #85](https://github.com/zhaoxinghua09-cell/uibc-core/pull/85)、`docs/AER1-REPLAY-FULL.md` |
 | 我们（本仓库） | — | 八种篡改 × 双实现对照 | 7 种双方一致拒绝，1 处分歧已公开 | `docs/AER1-EMIT-RESULT.md` |
 | 异协议产物（Agent Action Capsule / SCITT，28 份 JSON） | 协议不同 | 冒名测试：能否被误认成 AER-1 | 0 误接受 | `docs/COMPETITIVE-VERIFIABILITY.md` |
+| SEP-2828 官方语料（`vaaraio/vaara` 1.0.1，`corpusDigest 5b46b5d5…9315bd08`） | 对方代码、对方语料；判词由我们独立重算 | 把 17 例（10 记录 + 7 组集合）逐例装进 uibc 包、签封、验证，再用自写规则复算对方判词 | `uibc_chain` 17/17 PASS；`sep2828` 17/17 与对方 `expected.json` 一致；封后改 1 字节 → FAIL（S4、S8） | `docs/SEP2828-CARRIAGE.md`、`tools/sep2828_carriage.py`、复跑命令见该文档 |
 | **真实独立第三方** | — | — | **0（缺口）** | 见下 |
 
 ## 缺口

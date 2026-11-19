@@ -15,6 +15,26 @@ Nothing here is a ratified standard.
 
 ## [Unreleased]
 
+### The defect an outsider found is now a check that can fail (2026-11-19)
+
+- External node 001 (Wang Guigui, Debian 13, uid 1001, no `pip install`, README
+  commands verbatim) ran `cross_check.py` on `8a95747` and got exit 1: two rows
+  on `fixture:duplicated` disagreed (S4 `FAIL` vs `PASS`, S5 `INCONCLUSIVE` vs
+  `FAIL`). He then re-ran on `343d906` on his own initiative and got 0 mismatches.
+- `tools/external_node_regression.py` re-runs that comparison and fails if the
+  two implementations ever disagree on `fixture:duplicated` again. The exit code
+  of `cross_check.py` is deliberately not the signal: it was 0 after the fix and
+  1 before, and this check has to accept the first and refuse the second.
+- Ninth item in `tools/run_all_evidence.py`; `--online` is now
+  `9 ok, 0 failed, 0 skipped, 22.8 s`, and the dashboard carries nine rows.
+- `tests/test_external_node_regression.py` (2 cases): the parser recognises the
+  exact line shape from his report, and the limit ("this does not establish that
+  his run is reproducible today") travels with the claim.
+- `docs/external-review/RE-RUN-REQUEST.md`: draft, unsent. Asks the same operator
+  to run today's `main` on the same host - first run found the defect, second
+  confirms the repair, which makes a verification line rather than a second node.
+- No claim about being stronger, better, or first appears in any of this.
+
 ### The suite size is counted in one place (2026-11-19)
 
 - Eight documents carried the literal test count. Every parallel branch rewrote

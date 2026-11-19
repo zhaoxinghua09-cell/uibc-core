@@ -14,12 +14,12 @@ class TestEvidenceRun(unittest.TestCase):
             src = fh.read()
         block = src.split("CHECKS = [")[1].split("\n]")[0]
         rows = [l for l in block.splitlines() if l.strip().startswith("(")]
-        self.assertEqual(len(rows), 8, "the runner and the docs disagree on how many checks there are")
+        self.assertEqual(len(rows), 9, "the runner and the docs disagree on how many checks there are")
 
     def test_the_dashboard_has_a_row_per_check(self):
         tree = ET.parse(os.path.join(REPO, "docs", "EVIDENCE-DASHBOARD.svg"))
         dots = [e for e in tree.iter() if e.tag.endswith("circle")]
-        self.assertEqual(len(dots), 8, "the picture and the runner disagree on how many checks there are")
+        self.assertEqual(len(dots), 9, "the picture and the runner disagree on how many checks there are")
 
 
 if __name__ == "__main__":

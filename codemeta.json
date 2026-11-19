@@ -3,7 +3,7 @@
   "@type": "SoftwareSourceCode",
   "identifier": "uibc-core",
   "name": "uibc-core",
-  "version": "0.2.1",
+  "version": "0.4.1",
   "developmentStatus": "wip",
   "description": "Reference implementation of UIBC (Uniform Identity-Behavior Chain): verifiable evidence packages for autonomous AI agents, built on the LGD principles of Registry, Evidence and Gates. Every agent action can be sealed into a submission.uibc package (identity + lifecycle events + content-hashed evidence + evidence root + optional seal), then verified offline. Status: PROPOSAL, not a formal standard. Verification results are scoped proofs, not absolute trust claims.",
   "applicationCategory": "DeveloperApplication",
@@ -43,7 +43,7 @@
   ],
   "dateCreated": "2026-09-17",
   "datePublished": "2026-09-17",
-  "dateModified": "2026-09-18",
+  "dateModified": "2026-11-20",
   "keywords": [
     "autonomous agents",
     "verifiable evidence",

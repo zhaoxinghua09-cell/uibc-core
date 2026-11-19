@@ -6,6 +6,26 @@ Both halves matter. A suite of only broken packages gives full marks to a verifi
 
 This exists so that a second implementer — or a reviewer, or a suspicious stranger — does not have to take our word for anything. Point your verifier at these packages and see what happens.
 
+## Run it without cloning anything
+
+The archive `uibc-conformance-0.4.1.zip` is self-contained: cases, manifest,
+expected results, the runner and its README. Two commands, no repository, no
+account:
+
+```bash
+python -m pip install uibc-core==0.4.1
+python run.py
+```
+
+It prints `strict 36/36` against the reference verifier and writes
+`receipt.json` (command, time, Python, platform, verifier version, manifest
+hash, per-case verdicts) so a run can be cited. Point it at any other
+implementation with `--verify "cmd {pkg}"`.
+
+A negative control is worth knowing: a verifier that answers `PASS` to
+everything scores **6/36** — the six cases that must be accepted. The suite
+cannot be passed by refusing nothing.
+
 ## Run it with any verifier
 
 ```bash

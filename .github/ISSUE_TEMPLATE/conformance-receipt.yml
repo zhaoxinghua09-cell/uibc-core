@@ -64,6 +64,30 @@ body:
       required: false
 
   - type: dropdown
+    id: verifier
+    attributes:
+      label: "Which verifier produced the numbers"
+      description: "The archive runs ours by default; say so if you pointed `--verify` at something else."
+      options:
+        - "the bundled uibc_core.pyz, as shipped"
+        - "an installed uibc-core package (say which version)"
+        - "my own implementation, via --verify"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: blind
+    attributes:
+      label: "Blind or directed"
+      description: "Directed if you read this repository's checks, expected reasons, or vectors before or during the run. Only you can answer this, and the answer is taken as given."
+      options:
+        - "blind — I did not read the checks or the expected reasons"
+        - "directed — I read them before or during the run"
+        - "part blind, part directed (say which in the last field)"
+    validations:
+      required: true
+
+  - type: dropdown
     id: relation
     attributes:
       label: "Your relation to the author"

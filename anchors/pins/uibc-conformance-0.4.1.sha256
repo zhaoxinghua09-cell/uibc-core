@@ -1,8 +1,8 @@
 # uibc-conformance 0.4.1 - archive built from this repository
 
-23e5808a4b14bd8536f5b3ecb817c114a229081b173001fb133a0f6028f457b4  conformance/uibc-conformance-0.4.1.zip
+690b17c2be430919dc6145527953dd20fbfab90a04448116e09b7a4600ff8a1d  conformance/uibc-conformance-0.4.1.zip
 
-# 125417 bytes. Built by: python tools/build_conformance_bundle.py 0.4.1
+# 225775 bytes. Built by: python tools/build_conformance_bundle.py 0.4.1
 #
 # The path above is repository-relative on purpose. A pin naming only a basename
 # tells a reader what to hash but not where to get it; the hash is then

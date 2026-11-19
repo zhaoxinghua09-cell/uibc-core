@@ -4,12 +4,13 @@ This document exists because "trust us" is not evidence. Everything below runs o
 
 ## Zero: the archive that needs no repository
 
-`conformance/uibc-conformance-0.4.1.zip` — sha256 `23e5808a4b14bd8536f5b3ecb817c114a229081b173001fb133a0f6028f457b4`, 125,417 bytes. Pin: `anchors/pins/uibc-conformance-0.4.1.sha256`; the build is deterministic, so rebuilding gives the same bytes.
+`conformance/uibc-conformance-0.4.1.zip` — sha256 `690b17c2be430919dc6145527953dd20fbfab90a04448116e09b7a4600ff8a1d`, 225,775 bytes. Pin: `anchors/pins/uibc-conformance-0.4.1.sha256`; the build is deterministic, so rebuilding gives the same bytes.
 
 ```
-python -m pip install uibc-core==0.4.1
 python run.py
 ```
+
+**One command, no install.** The archive carries `uibc_core.pyz` (the reference verifier as a single file) and `run.py` uses it by default, so this works offline, on a machine that has never seen this project, in about six seconds.
 
 `strict 36/36` on the reference verifier, and a `receipt.json` you can publish. A verifier that answers `PASS` to everything scores **6/36**, so the corpus cannot be passed by refusing nothing. Point it at another implementation with `--verify "cmd {pkg}"`.
 

@@ -25,6 +25,7 @@ import hashlib
 import json
 import os
 import platform
+import shlex
 import shutil
 import subprocess
 import sys
@@ -44,6 +45,26 @@ def sha256(path):
     return h.hexdigest()
 
 
+def _split(command):
+    """Split a command template into argv, respecting quotes.
+
+    str.split() breaks `--verify '"C:/Program Files/Python/python.exe" uibc_core.pyz
+    verify {pkg}'` at every space, so a bundled single-file verifier on a path with
+    spaces could never be run. shlex in posix mode eats Windows backslashes, so it
+    is used non-posix and the quote characters are trimmed from the tokens.
+    """
+    try:
+        toks = shlex.split(command, posix=False)
+    except ValueError:
+        toks = command.split()
+    out = []
+    for t in toks:
+        if len(t) >= 2 and t[0] == t[-1] and t[0] in "\"'":
+            t = t[1:-1]
+        out.append(t)
+    return out
+
+
 def verifier_version(command):
     """Version of the reference implementation, only when it is what was run.
 
@@ -54,6 +75,15 @@ def verifier_version(command):
     if "uibc_core" not in command and "uibc " not in command:
         return "not the reference verifier (version not probed)"
     try:
+        # a bundled .pyz reports its own version via --version; an installed
+        # package reports through import. Neither is assumed.
+        pyz = [t for t in _split(command.replace("{pkg}", "")) if t.endswith(".pyz")]
+        if pyz:
+            out = subprocess.run([sys.executable, pyz[0], "--version"],
+                                 capture_output=True, text=True, timeout=30)
+            if out.returncode == 0 and out.stdout.strip():
+                return out.stdout.strip()
+            return "unknown"
         out = subprocess.run([sys.executable, "-c",
                               "import uibc_core;print(uibc_core.__version__)"],
                              capture_output=True, text=True, timeout=30)
@@ -65,7 +95,7 @@ def verifier_version(command):
 
 
 def call_verifier(command, pkg):
-    argv = command.replace("{pkg}", pkg).split()
+    argv = _split(command.replace("{pkg}", pkg))
     proc = subprocess.run(argv, capture_output=True, text=True, timeout=180)
     try:
         out = json.loads(proc.stdout)
@@ -136,7 +166,11 @@ def _public(rows):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--verify", default=sys.executable + " -m uibc_core.cli verify {pkg}")
+    pyz = os.path.join(HERE, "uibc_core.pyz")
+    default_verify = ('"%s" "%s" verify {pkg}' % (sys.executable, pyz)
+                      if os.path.isfile(pyz)
+                      else sys.executable + " -m uibc_core.cli verify {pkg}")
+    ap.add_argument("--verify", default=default_verify)
     ap.add_argument("--json", action="store_true")
     ap.add_argument("--receipt", default="receipt.json",
                     help="where to write the run receipt; '' to skip")

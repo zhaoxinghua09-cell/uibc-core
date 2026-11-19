@@ -44,6 +44,41 @@ def read(path):
         return f.read()
 
 
+def build_pyz():
+    """A single-file verifier, so the archive needs no pip and no network.
+
+    zipapp.create_archive() stamps real times into the entries, which would make
+    the archive hash change on every build. Assembled here with the same FIXED
+    date as everything else, sorted, no __pycache__: same inputs, same bytes.
+    """
+    import shutil
+    import tempfile
+
+    tmp = tempfile.mkdtemp(prefix="uibc-pyz-")
+    shutil.copytree(os.path.join(REPO, "uibc_core"),
+                    os.path.join(tmp, "uibc_core"),
+                    ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
+    with io.open(os.path.join(tmp, "__main__.py"), "w",
+                 encoding="utf-8", newline="\n") as f:
+        f.write("import sys\nfrom uibc_core.cli import main\n"
+                "if __name__ == '__main__':\n    sys.exit(main())\n")
+
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
+        for root, dirs, files in os.walk(tmp):
+            dirs.sort()
+            for name in sorted(files):
+                full = os.path.join(root, name)
+                rel = os.path.relpath(full, tmp).replace("\\", "/")
+                info = zipfile.ZipInfo(rel, date_time=FIXED)
+                info.external_attr = 0o644 << 16
+                info.compress_type = zipfile.ZIP_DEFLATED
+                with io.open(full, "rb") as f:
+                    z.writestr(info, f.read())
+    shutil.rmtree(tmp, ignore_errors=True)
+    return buf.getvalue()
+
+
 def add(z, name, data):
     info = zipfile.ZipInfo(name, date_time=FIXED)
     info.external_attr = 0o644 << 16
@@ -83,6 +118,7 @@ def main():
             json.dumps(expected, ensure_ascii=False, indent=2).encode("utf-8"))
         add(z, "run.py", runner)
         add(z, "README.md", readme)
+        add(z, "uibc_core.pyz", build_pyz())
 
     digest = hashlib.sha256(read(OUT)).hexdigest()
     print("wrote %s" % OUT)

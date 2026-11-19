@@ -1,3 +1,18 @@
+### The external-record gap is an order of magnitude, not a tie
+
+- `docs/LANDSCAPE-2026-11.md` §8: the other draft's `INTEROP.md` lists **nine
+  independent parties**, each `ran & verified` with a linked public record
+  (EMILIA, Songbo Bu, Tyche, Microsoft/CCF, NANDA/MIT, GlyphZero, APS,
+  A2A boundary-seal, GAR/SOOS). This repository has one, and it wrote that
+  record itself. `INTEROP.md` does not mention us.
+- Their registry states the rule worth copying: *"A name is not evidence;
+  a digest is."*
+- The only way to close it is to have someone else write us into their record,
+  which is an outbound action and is not taken here.
+- `tests/test_landscape_corrections.py` (+3): fails if that 9-vs-1 line, or the
+  "we are not in their record" line, is edited away, and if any line outside a
+  disclaimer claims the gap is closed.
+
 ### Two claims about the competition were wrong
 
 - `docs/LANDSCAPE-2026-11.md` §7: an author of another draft states that

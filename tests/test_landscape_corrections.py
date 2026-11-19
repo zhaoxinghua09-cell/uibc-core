@@ -71,5 +71,41 @@ class TestTheRetiredComparisonStaysRetired(unittest.TestCase):
                                   % (lineno, pat, line.strip()[:120]))
 
 
+class TestTheOrderOfMagnitudeGapIsRecorded(unittest.TestCase):
+    """The most adverse finding in the file must not be quietly dropped.
+
+    2026-11-19, fourth recheck: the other draft's INTEROP.md lists nine
+    independent parties, each with a linked public record. This repository has
+    one, and it wrote that itself. If this number is edited down, someone is
+    making the file look better than the evidence.
+    """
+
+    def test_nine_against_one_is_stated(self):
+        doc = _landscape()
+        self.assertIn("2026-11-19 第四次复核", doc)
+        self.assertIn("9", doc)
+        self.assertIn("INTEROP.md", doc)
+        self.assertIn("A name is not evidence", doc)
+        self.assertIn("1**（`docs/external-review/EXTERNAL-NODE-001.md`）", doc)
+
+    def test_it_says_we_are_not_in_their_record(self):
+        doc = _landscape()
+        self.assertIn("INTEROP.md` 里没有本仓库", doc)
+
+    # Quoting that a phrase is unsupportable is not asserting it. First run
+    # tripped on "any '全面超越' wording is refuted by the four facts above".
+    EXEMPT = ("推翻", "不能", "不是", "无法", "站不住", "被")
+
+    def test_it_does_not_claim_the_gap_is_closed(self):
+        doc = _landscape()
+        for lineno, line in enumerate(doc.splitlines(), 1):
+            if any(k in line for k in self.EXEMPT):
+                continue
+            for phrase in ("已经追平", "已超越", "数量级领先", "全面超越"):
+                self.assertNotIn(phrase, line,
+                                  "line %d claims more than the records show: %s"
+                                  % (lineno, line.strip()[:120]))
+
+
 if __name__ == "__main__":
     unittest.main()

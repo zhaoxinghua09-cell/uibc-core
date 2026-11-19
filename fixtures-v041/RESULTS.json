@@ -1,0 +1,208 @@
+{
+  "clean": {
+    "open": {
+      "exit": 0,
+      "result": "PASS",
+      "non_pass": []
+    },
+    "pinned-owner": {
+      "exit": 0,
+      "result": "PASS",
+      "non_pass": []
+    },
+    "pinned-attacker": {
+      "exit": 1,
+      "result": "FAIL",
+      "non_pass": [
+        "S6"
+      ]
+    }
+  },
+  "tampered": {
+    "open": {
+      "exit": 1,
+      "result": "FAIL",
+      "non_pass": [
+        "S4",
+        "S8",
+        "S5"
+      ]
+    },
+    "pinned-owner": {
+      "exit": 1,
+      "result": "FAIL",
+      "non_pass": [
+        "S4",
+        "S8",
+        "S5"
+      ]
+    },
+    "pinned-attacker": {
+      "exit": 1,
+      "result": "FAIL",
+      "non_pass": [
+        "S4",
+        "S8",
+        "S5",
+        "S6"
+      ]
+    }
+  },
+  "deleted": {
+    "open": {
+      "exit": 1,
+      "result": "FAIL",
+      "non_pass": [
+        "S4",
+        "S8",
+        "S5"
+      ]
+    },
+    "pinned-owner": {
+      "exit": 1,
+      "result": "FAIL",
+      "non_pass": [
+        "S4",
+        "S8",
+        "S5"
+      ]
+    },
+    "pinned-attacker": {
+      "exit": 1,
+      "result": "FAIL",
+      "non_pass": [
+        "S4",
+        "S8",
+        "S5",
+        "S6"
+      ]
+    }
+  },
+  "duplicated": {
+    "open": {
+      "exit": 1,
+      "result": "FAIL",
+      "non_pass": [
+        "S12",
+        "S7",
+        "S8",
+        "S5"
+      ]
+    },
+    "pinned-owner": {
+      "exit": 1,
+      "result": "FAIL",
+      "non_pass": [
+        "S12",
+        "S7",
+        "S8",
+        "S5"
+      ]
+    },
+    "pinned-attacker": {
+      "exit": 1,
+      "result": "FAIL",
+      "non_pass": [
+        "S12",
+        "S7",
+        "S8",
+        "S5",
+        "S6"
+      ]
+    }
+  },
+  "reordered": {
+    "open": {
+      "exit": 1,
+      "result": "FAIL",
+      "non_pass": [
+        "S3",
+        "S8",
+        "S6"
+      ]
+    },
+    "pinned-owner": {
+      "exit": 1,
+      "result": "FAIL",
+      "non_pass": [
+        "S3",
+        "S8",
+        "S6"
+      ]
+    },
+    "pinned-attacker": {
+      "exit": 1,
+      "result": "FAIL",
+      "non_pass": [
+        "S3",
+        "S8",
+        "S6"
+      ]
+    }
+  },
+  "migrated": {
+    "open": {
+      "exit": 1,
+      "result": "FAIL",
+      "non_pass": [
+        "S8",
+        "S5"
+      ]
+    },
+    "pinned-owner": {
+      "exit": 1,
+      "result": "FAIL",
+      "non_pass": [
+        "S8",
+        "S5"
+      ]
+    },
+    "pinned-attacker": {
+      "exit": 1,
+      "result": "FAIL",
+      "non_pass": [
+        "S8",
+        "S5",
+        "S6"
+      ]
+    }
+  },
+  "malicious": {
+    "open": {
+      "exit": 0,
+      "result": "PASS",
+      "non_pass": []
+    },
+    "pinned-owner": {
+      "exit": 1,
+      "result": "FAIL",
+      "non_pass": [
+        "S6"
+      ]
+    },
+    "pinned-attacker": {
+      "exit": 0,
+      "result": "PASS",
+      "non_pass": []
+    }
+  },
+  "malicious-keyswap": {
+    "open": {
+      "exit": 0,
+      "result": "PASS",
+      "non_pass": []
+    },
+    "pinned-owner": {
+      "exit": 1,
+      "result": "FAIL",
+      "non_pass": [
+        "S6"
+      ]
+    },
+    "pinned-attacker": {
+      "exit": 0,
+      "result": "PASS",
+      "non_pass": []
+    }
+  }
+}

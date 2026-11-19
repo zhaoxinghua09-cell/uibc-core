@@ -15,6 +15,16 @@ Nothing here is a ratified standard.
 
 ## [Unreleased]
 
+### The anchor moves to a channel the package cannot reach (2026-11-19)
+
+- **Release `anchor-001`**: the same `anchor.json`, published as a downloadable
+  asset, so editing the package can no longer edit the anchor in one commit.
+- **`tools/check_channel.py`**: takes the anchor from the release and the
+  package from the repository, reassembles them, and asks the verifier whether
+  they still belong together. 1.383 s, `VERDICT: OK`.
+- **`docs/ANCHOR-CHANNEL.md`**: the four channels considered and why this one,
+  including what it does not buy (same platform, same account).
+
 ### The first anchor inside the repository (2026-11-19)
 
 - **`anchors/001/`**: `seq 1`, a new key, `checkpoint_head sha256:2935c3f4…`.

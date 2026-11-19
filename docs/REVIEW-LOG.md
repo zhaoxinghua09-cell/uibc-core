@@ -437,3 +437,62 @@ Sources read on 2026-11-19:
 - https://pypi.org/project/veritrail/0.3.1/
 - https://www.ietf.org/archive/id/draft-pidlisnyi-aps-04.html
 - https://www.ietf.org/archive/id/draft-schrock-ep-authorization-receipts-13.html
+
+---
+
+## Positioning check, 2026-11-19 (third pass): the MCP receipt layer, and three more retractions
+
+The first two passes read the IETF drafts we already cited, PyPI packages, and four arXiv
+papers. Two areas had not been swept: the MCP receipt layer, which is the most crowded part
+of this space in 2026, and the ITU-T SG17 work on trust and digital identity for agentic AI.
+Both were swept on 2026-11-19 and both take away claims rather than add any.
+
+What the sweep found:
+
+- `draft-sirkkavaara-vaara-receipt-03` ships public conformance vectors **with standalone
+  checkers** (`tests/vectors/*/_check_independent.py`) and states that no library of the
+  issuer needs importing. It also specifies the "held set proves the gap" mechanism
+  outright: a monotonic sequence with a running count signed into each record, an optional
+  sealing record, and gap detection that needs no issuer access. It names the residual we
+  left as INCONCLUSIVE - a pure suffix drop - and closes it with an RFC 3161 anchor over
+  the running count.
+- `draft-farley-acta-signed-receipts-03` has a reference implementation published on npm
+  (`protect-mcp`, ScopeBlind) with four operating modes.
+- `draft-nivalto-agentroa-route-authorization-00` submits per-hop receipts to a SCITT log
+  to obtain non-equivocation and tail-truncation.
+- `draft-marques-asqav-compliance-receipts-09` requires hash-chained receipts, mandatory
+  RFC 3161 or OpenTimestamps anchoring, retention floors tied to named articles, and lists
+  per-action freshness among its extension fields.
+- `draft-klassen-eu2122-content-profile-03` publishes the verification key and records that
+  all five checks ran and passed on 2026-10-08.
+- The ITU-T SG17 liaison report of 2026-07-01 shows agentic-AI trust and digital identity as
+  a standing work item, with three workshops scheduled inside 2026.
+
+Three retractions follow from this, all recorded here rather than only in an internal note:
+
+1. "We are unusual in shipping a harness an outsider can run in one command." Not unusual.
+   Vaara ships vectors plus independent checkers with the draft; klassen records the checks
+   running in the body of the draft. Recomputability is the entry ticket for this layer.
+2. "Held-set gap detection, with tail truncation called out as a residual." Vaara specifies
+   the mechanism, gives it fields, and closes the residual with an anchored running count.
+   Even the honesty about the residual is not distinctive now.
+3. "Per-action freshness has not been written into a specification." It has: the ASQAV
+   compliance profile lists it among its extension fields.
+
+What is left is narrower and weaker than in the second pass: the requirement table with
+named untested rows (36 requirements, 11 with an executing test, 25 named and machine
+readable - none of the eight sources read this round carries a comparable list, which is
+absence of evidence, not evidence of absence); the three modes of false-accept rate
+published side by side; and `run_external.py`, which accepts an arbitrary external command
+as the thing being tested. Each of those can be overtaken by one external run or one
+citation.
+
+Consequence: stop adding survey, and spend the effort on making those three things
+recomputable by a third party. Sources read on 2026-11-19:
+
+- https://datatracker.ietf.org/doc/html/draft-sirkkavaara-vaara-receipt-03
+- https://www.ietf.org/archive/id/draft-farley-acta-signed-receipts-03.html
+- https://www.ietf.org/archive/id/draft-nivalto-agentroa-route-authorization-00.html
+- https://www.ietf.org/archive/id/draft-marques-asqav-compliance-receipts-09.html
+- https://datatracker.ietf.org/doc/draft-klassen-eu2122-content-profile/
+- https://www.ietf.org/lib/dt/documents/LIAISON/liaison-2026-07-01-itu-t-sg-17-iesg-iab-title-ls-update-of-sg17-on-agentic-ai-prior-and-after-the-sg17-5th-plenary-meeting-attachment-4.pdf

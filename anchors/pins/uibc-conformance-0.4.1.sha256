@@ -1,8 +1,8 @@
 # uibc-conformance 0.4.1 - archive built from this repository
 
-690b17c2be430919dc6145527953dd20fbfab90a04448116e09b7a4600ff8a1d  conformance/uibc-conformance-0.4.1.zip
+711fa82c9f183066cfae6441a4fe3fc27fcc516b25f2a976cad5e0dd61b5135f  conformance/uibc-conformance-0.4.1.zip
 
-# 225775 bytes. Built by: python tools/build_conformance_bundle.py 0.4.1
+# 228000 bytes. Built by: python tools/build_conformance_bundle.py 0.4.1
 #
 # The path above is repository-relative on purpose. A pin naming only a basename
 # tells a reader what to hash but not where to get it; the hash is then
@@ -12,7 +12,7 @@
 # tests/test_pin_resolvability.py now fails if a pin cannot be resolved.
 #
 # The build is deterministic (fixed timestamps, sorted entries): rebuilding from
-# the same inputs produces the same bytes and this same hash. Checked 2026-11-19.
+# the same inputs produces the same bytes and this same hash. Checked 2026-11-20.
 # Contents: cases/ (36 packages), manifest.json, expected.json, run.py, README.md.
 #
 # What it does not prove: 36/36 on the reference verifier is a self-run. A

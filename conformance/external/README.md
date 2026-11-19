@@ -41,7 +41,7 @@ problem we have — and because the same record shows how to do it honestly:
     "entrypoint": "<how it is invoked>"
   },
   "conformance": {
-    "archive_sha256": "690b17c2be430919dc6145527953dd20fbfab90a04448116e09b7a4600ff8a1d",
+    "archive_sha256": "711fa82c9f183066cfae6441a4fe3fc27fcc516b25f2a976cad5e0dd61b5135f",
     "cases": 36,
     "passed": 0,
     "status": "not_run",

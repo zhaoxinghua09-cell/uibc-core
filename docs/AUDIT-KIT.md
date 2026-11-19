@@ -4,7 +4,7 @@ This document exists because "trust us" is not evidence. Everything below runs o
 
 ## Zero: the archive that needs no repository
 
-`conformance/uibc-conformance-0.4.1.zip` — sha256 `690b17c2be430919dc6145527953dd20fbfab90a04448116e09b7a4600ff8a1d`, 225,775 bytes. Pin: `anchors/pins/uibc-conformance-0.4.1.sha256`; the build is deterministic, so rebuilding gives the same bytes.
+`conformance/uibc-conformance-0.4.1.zip` — sha256 `711fa82c9f183066cfae6441a4fe3fc27fcc516b25f2a976cad5e0dd61b5135f`, 228,000 bytes. Pin: `anchors/pins/uibc-conformance-0.4.1.sha256`; the build is deterministic, so rebuilding gives the same bytes.
 
 ```
 python run.py
@@ -25,8 +25,8 @@ What that is not: a self-run. 36/36 here was produced by the maintainer on one m
 A check nobody can make fail is decoration.
 
 If you have not cloned anything: `conformance/uibc-conformance-0.4.1.zip` is
-self-contained — unzip it, `pip install uibc-core==0.4.1`, `python run.py`
-prints `strict 36/36` and writes a receipt. The commands below need the
+self-contained — unzip it and `python run.py` prints `strict 36/36` and writes
+a receipt, with no install step. The commands below need the
 repository, because they rebuild the suite rather than run it.
 
 ```

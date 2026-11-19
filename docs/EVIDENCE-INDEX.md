@@ -11,18 +11,18 @@
 | S1 | package structure | 是 | 11 | 1 | 31 |
 | S2 | identity consistency | 是 | 8 | 1 | 20 |
 | S3 | lifecycle state machine + semantics | 是 | 10 | 1 | 19 |
-| S4 | evidence integrity | 是 | 19 | 3 | 39 |
-| S5 | evidence root | 是 | 12 | 3 | 32 |
-| S6 | seal signature | 是 | 20 | 1 | 34 |
-| S7 | evidence index metadata | 否 | 6 | 1 | 15 |
-| S8 | package checkpoint head | 否 | 8 | 2 | 22 |
-| S9 | head pinned out-of-band | 否 | 8 | 1 | 24 |
+| S4 | evidence integrity | 是 | 19 | 3 | 40 |
+| S5 | evidence root | 是 | 12 | 3 | 33 |
+| S6 | seal signature | 是 | 20 | 1 | 35 |
+| S7 | evidence index metadata | 否 | 6 | 1 | 16 |
+| S8 | package checkpoint head | 否 | 8 | 2 | 23 |
+| S9 | head pinned out-of-band | 否 | 8 | 1 | 25 |
 | S10 | attestation closure declared | 否 | 6 | 2 | 8 |
 | S11 | strict serialization | 是 | 6 | 1 | 17 |
 | S12 | timestamp and identifier strictness | 是 | 10 | 2 | 20 |
 | S13 | merkle inclusion proofs | 否 | 9 | 4 | 11 |
 | S14 | strict base64 | 否 | 5 | 2 | 7 |
-| S15 | anchor event resolution | 否 | 7 | 4 | 10 |
+| S15 | anchor event resolution | 否 | 7 | 4 | 11 |
 | S16 | external timestamp (RFC 3161) | 否 | 8 | 4 | 15 |
 | S17 | linear receipt chain | 否 | 7 | 2 | 15 |
 | S18 | policy artefact resolution | 否 | 9 | 2 | 15 |

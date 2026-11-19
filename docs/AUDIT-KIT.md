@@ -19,6 +19,11 @@ What that is not: a self-run. 36/36 here was produced by the maintainer on one m
 
 A check nobody can make fail is decoration.
 
+If you have not cloned anything: `conformance/uibc-conformance-0.4.1.zip` is
+self-contained — unzip it, `pip install uibc-core==0.4.1`, `python run.py`
+prints `strict 36/36` and writes a receipt. The commands below need the
+repository, because they rebuild the suite rather than run it.
+
 ```
 python3 tools/export_conformance.py
 python3 tools/check_falsifiability.py

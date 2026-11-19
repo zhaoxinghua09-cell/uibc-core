@@ -58,9 +58,13 @@ class TestArchiveScope(unittest.TestCase):
         self.assertIn("ARCHIVE-GAP.md", text)
 
     def test_the_cff_still_pins_the_archived_version(self):
-        """Bumping the version here would claim the DOI covers S1-S18."""
+        """Bumping the version here without a new archive would claim the DOI
+        covers checks it does not contain. It is bumped here, to 0.4.2, because
+        a new archive was actually published and measured."""
         self.assertRegex(text_of(os.path.join(_REPO, "CITATION.cff")),
-                         r'version:\s*"0\.2\.1"')
+                         r'version:\s*"0\.4\.2"')
+        self.assertIn("10.5281/zenodo.24375013", text_of(os.path.join(_REPO, "CITATION.cff")))
+        self.assertIn("10.5281/zenodo.22821835", text_of(os.path.join(_REPO, "CITATION.cff")))
 
     def test_the_doc_states_the_measured_numbers(self):
         path = os.path.join(_REPO, "docs", "ARCHIVE-GAP.md")
@@ -68,6 +72,41 @@ class TestArchiveScope(unittest.TestCase):
             doc = f.read()
         self.assertIn("167", doc)
         self.assertIn("954", doc)
+
+
+class TestTheGapIsClosed(unittest.TestCase):
+    """A second archive now exists. The point of these tests is that closure is
+    a measurement too: the baseline records the hash of the verifier inside the
+    downloaded archive, and the tool must report zero unsupported checks
+    against it."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.path = os.path.join(_REPO, "docs", "ARCHIVE-BASELINE-0.4.2.json")
+        with open(cls.path, encoding="utf-8") as f:
+            cls.baseline = json.load(f)
+        cls.r = ccs.build(cls.path)
+
+    def test_the_new_baseline_is_also_a_measurement(self):
+        self.assertEqual(len(self.baseline["verify_py_sha256"]), 64)
+        self.assertEqual(self.baseline["verify_py_bytes"], 69835)
+        self.assertTrue(self.baseline["limits_of_this_measurement"])
+
+    def test_the_new_archive_carries_every_current_check(self):
+        self.assertEqual(self.r["not_supported_by_the_doi"], [])
+        self.assertEqual(self.r["checks_that_vanished"], [])
+        for cid in ("S7", "S12", "S16", "S19"):
+            self.assertIn(cid, self.r["supported_by_the_doi"])
+
+    def test_the_old_baseline_is_still_honest_about_itself(self):
+        old = ccs.build(os.path.join(_REPO, "docs", "ARCHIVE-BASELINE.json"))
+        self.assertEqual(old["counts"]["archived"], 6)
+        self.assertIn("S19", old["not_supported_by_the_doi"])
+
+    def test_the_doc_records_the_closure_with_its_limits(self):
+        doc = text_of(os.path.join(_REPO, "docs", "ARCHIVE-GAP.md"))
+        self.assertIn("10.5281/zenodo.24375013", doc)
+        self.assertIn("不能背书什么", doc)
 
 
 def text_of(path):

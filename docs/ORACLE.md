@@ -241,6 +241,33 @@ another (that one also carried an unjudgeable artefact, so the guard answered fi
 two of three. A per-check number that only counted "ever detected" would call both of them
 covered; the table keeps the split.
 
+## Two verdicts that say what they did not do
+
+A verdict is read as broader than its evidence unless the report says otherwise. So the
+second implementation now emits the same disclosure shape the reference does — `scope`,
+`limitations`, `checked`, `not_checked`, `statement` — alongside its `unjudged` guard list.
+
+```
+measured: things each implementation declares it did NOT check - reference 5, second 11;
+          7 of the second's are absent from the reference's list
+          (base64,closure,duplicate evidence,duplicate json,merkle,policy,receipt),
+          and the reference names 1 the second does not (lifecycle event signature)
+```
+
+Two things worth noticing in that line:
+
+- **The reference's list is a constant.** It names the same five things on every package,
+  because they are standing non-goals of the spec. It does not say what *this run* failed to
+  evaluate. The second implementation's list is built per run: standing non-goals plus
+  whatever the guard found in the package handed to it.
+- **The asymmetry runs both ways.** Seven things only the second implementation admits it
+  skips, and one thing only the reference admits (`lifecycle event signatures`, which the
+  second implementation genuinely does not verify). Declaring more is not the same as being
+  more thorough; it is the same as being more legible.
+
+Neither list makes a verdict stronger. They make it narrower, which is the only honest
+direction for a list of non-claims.
+
 ## What this is not
 
 - **Not independent judgement.** Expectations were drawn from documents this project

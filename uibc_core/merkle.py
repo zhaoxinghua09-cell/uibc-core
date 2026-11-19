@@ -1,4 +1,4 @@
-"""Merkle inclusion proofs (RFC 6962 style), standard library only.
+"""Merkle inclusion proofs, standard library only, with selectable profiles.
 
 Why this exists: the AER-1 conformance corpus has a whole class we had nothing
 for - `base/merkle-vectors.json`, 9 vectors / 12 checks. A hash chain answers
@@ -7,11 +7,28 @@ size N that you committed to, without my handing you all N files?" Those are
 different questions and only the second one scales to a device with thousands
 of evidence objects.
 
-Construction (RFC 6962, the Certificate Transparency tree):
-    leaf hash  = SHA-256(0x00 || leaf_bytes)
-    node hash  = SHA-256(0x01 || left || right)
-    an unbalanced tail is promoted, not duplicated - duplicating it would make
-    two different trees share a root, which is the classic mistake.
+Two constructions are available, selected by name:
+
+`profile="rfc6962"` (default, unchanged)
+    RFC 6962, the Certificate Transparency tree:
+        leaf hash  = SHA-256(0x00 || leaf_bytes)
+        node hash  = SHA-256(0x01 || left || right)
+        an unbalanced tail is promoted, not duplicated - duplicating it would
+        make two different trees share a root, which is the classic mistake.
+
+`profile="aer1"`
+    draft-zambo-aer1 Section 8.1, so that the AER-1 vectors can be run through
+    this implementation unchanged:
+        leaf hash  = SHA-256(UTF-8 bytes of receipt_id), no prefix
+        node hash  = SHA-256(raw 32-byte left || raw 32-byte right), no prefix
+        an odd node is duplicated level by level
+        empty tree = SHA-256 of the empty input (e3b0c442...)
+
+The two constructions differ in all three parameters, so a root computed under
+one cannot be re-verified under the other - that is a construction difference,
+not an implementation error, and it is why the profile is a named option rather
+than a silent switch. Nothing here changes the default: callers that do not
+name a profile get exactly the bytes they got before.
 
 Proofs are index-addressed, so a verifier needs: the leaf, its index, the tree
 size, the sibling path, and the root it was told out of band.
@@ -22,16 +39,43 @@ import hashlib
 LEAF_PREFIX = b"\x00"
 NODE_PREFIX = b"\x01"
 
+PROFILE_RFC6962 = "rfc6962"
+PROFILE_AER1 = "aer1"
+DEFAULT_PROFILE = PROFILE_RFC6962
+PROFILES = (PROFILE_RFC6962, PROFILE_AER1)
+
 
 def _sha256(data: bytes) -> bytes:
     return hashlib.sha256(data).digest()
 
 
-def leaf_hash(data: bytes) -> bytes:
+def _check_profile(profile: str) -> str:
+    if profile not in PROFILES:
+        raise ValueError(
+            "unknown Merkle profile %r; expected one of %s" % (profile, ", ".join(PROFILES))
+        )
+    return profile
+
+
+def _as_bytes(data) -> bytes:
+    """Accept a receipt_id string or bytes; the spec hashes UTF-8 bytes."""
+    if isinstance(data, str):
+        return data.encode("utf-8")
+    return bytes(data)
+
+
+def leaf_hash(data, profile: str = DEFAULT_PROFILE) -> bytes:
+    _check_profile(profile)
+    data = _as_bytes(data)
+    if profile == PROFILE_AER1:
+        return _sha256(data)
     return _sha256(LEAF_PREFIX + data)
 
 
-def node_hash(left: bytes, right: bytes) -> bytes:
+def node_hash(left: bytes, right: bytes, profile: str = DEFAULT_PROFILE) -> bytes:
+    _check_profile(profile)
+    if profile == PROFILE_AER1:
+        return _sha256(bytes(left) + bytes(right))
     return _sha256(NODE_PREFIX + left + right)
 
 
@@ -42,9 +86,31 @@ def _largest_pow2_below(n: int) -> int:
     return k
 
 
-def root_hash(leaves):
-    """Merkle root over already-hashed leaves. Empty tree -> all-zero digest."""
+def _root_aer1(leaves):
+    """Section 8.1 tree: pair level by level, duplicate the odd node."""
+    level = list(leaves)
+    if not level:
+        return _sha256(b"")
+    while len(level) > 1:
+        nxt = []
+        for i in range(0, len(level), 2):
+            left = level[i]
+            right = level[i + 1] if i + 1 < len(level) else level[i]
+            nxt.append(node_hash(left, right, PROFILE_AER1))
+        level = nxt
+    return level[0]
+
+
+def root_hash(leaves, profile: str = DEFAULT_PROFILE) -> bytes:
+    """Merkle root over already-hashed leaves.
+
+    rfc6962: empty tree -> all-zero digest (the historical convention here).
+    aer1:    empty tree -> SHA-256 of the empty input, per Section 8.1.
+    """
+    _check_profile(profile)
     leaves = list(leaves)
+    if profile == PROFILE_AER1:
+        return _root_aer1(leaves)
     if not leaves:
         return b"\x00" * 32
     if len(leaves) == 1:
@@ -53,13 +119,39 @@ def root_hash(leaves):
     return node_hash(root_hash(leaves[:k]), root_hash(leaves[k:]))
 
 
-def root_from_data(items) -> str:
-    return root_hash([leaf_hash(i) for i in items]).hex()
+def root_from_data(items, profile: str = DEFAULT_PROFILE) -> str:
+    """Root over raw items (bytes, or str receipt_ids) as lowercase hex."""
+    _check_profile(profile)
+    return root_hash([leaf_hash(i, profile) for i in items], profile).hex()
 
 
-def audit_path(leaves, index):
-    """Sibling hashes from the leaf up to the root (RFC 6962 PATH)."""
+def _depth_aer1(size: int) -> int:
+    depth, width = 0, size
+    while width > 1:
+        width = (width + 1) // 2
+        depth += 1
+    return depth
+
+
+def audit_path(leaves, index: int, profile: str = DEFAULT_PROFILE):
+    """Sibling hashes from the leaf up to the root, bottom-up."""
+    _check_profile(profile)
     leaves = list(leaves)
+    if profile == PROFILE_AER1:
+        if not 0 <= index < len(leaves):
+            raise IndexError("leaf index out of range")
+        level, idx, path = list(leaves), index, []
+        while len(level) > 1:
+            if len(level) % 2:
+                level.append(level[-1])
+            sibling = level[idx + 1] if idx % 2 == 0 else level[idx - 1]
+            path.append(sibling)
+            level = [
+                node_hash(level[i], level[i + 1], PROFILE_AER1)
+                for i in range(0, len(level), 2)
+            ]
+            idx //= 2
+        return path
     if not 0 <= index < len(leaves):
         raise IndexError("leaf index out of range")
     if len(leaves) == 1:
@@ -70,7 +162,22 @@ def audit_path(leaves, index):
     return audit_path(leaves[k:], index - k) + [root_hash(leaves[:k])]
 
 
-def verify_inclusion(leaf: bytes, index: int, size: int, proof, root: bytes) -> bool:
+def _verify_aer1(leaf: bytes, index: int, size: int, proof, root: bytes) -> bool:
+    if not 0 <= index < size:
+        return False
+    if len(proof) != _depth_aer1(size):
+        return False
+    r, idx = leaf, index
+    for sibling in proof:
+        if not isinstance(sibling, (bytes, bytearray)) or len(sibling) != 32:
+            return False
+        r = node_hash(r, sibling, PROFILE_AER1) if idx % 2 == 0 else node_hash(sibling, r, PROFILE_AER1)
+        idx //= 2
+    return r == root
+
+
+def verify_inclusion(leaf: bytes, index: int, size: int, proof, root: bytes,
+                     profile: str = DEFAULT_PROFILE) -> bool:
     """Recompute the root from the leaf and its path; compare with `root`.
 
     `proof` is a list of sibling hashes (bytes), bottom-up. Malformed inputs
@@ -78,10 +185,13 @@ def verify_inclusion(leaf: bytes, index: int, size: int, proof, root: bytes) -> 
     a verifier that can be turned off by one bad package.
     """
     try:
+        _check_profile(profile)
         if not isinstance(size, int) or size <= 0:
             return False
         if not 0 <= index < size:
             return False
+        if profile == PROFILE_AER1:
+            return _verify_aer1(leaf, index, size, proof, root)
         fn, sn, r = index, size - 1, leaf
         for sibling in proof:
             if not isinstance(sibling, (bytes, bytearray)) or len(sibling) != 32:
@@ -100,6 +210,6 @@ def verify_inclusion(leaf: bytes, index: int, size: int, proof, root: bytes) -> 
         return False
 
 
-def build_proof(leaves, index):
+def build_proof(leaves, index: int, profile: str = DEFAULT_PROFILE):
     """Audit path as lowercase hex, for putting in a package."""
-    return [h.hex() for h in audit_path(leaves, index)]
+    return [h.hex() for h in audit_path(leaves, index, profile)]

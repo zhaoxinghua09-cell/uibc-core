@@ -84,10 +84,11 @@ jobs:
           git clone --depth 1 https://gitlab.com/rambozambodotdev/zambo kit
           git -C kit rev-parse HEAD | tee kit-commit.txt
           python - <<'PY'
-          import json
-          c = json.load(open("kit/corpus.json", encoding="utf-8"))
-          print(f"kit_version={c['kit_version']} vector_count={c['vector_count']} "
-                f"check_count={c['check_count']} draft={c['draft']}")
+          import os
+          base = "kit/base/test-vectors"
+          for name in ("valid", "invalid", "invalid-profile", "anchored"):
+              n = len([f for f in os.listdir(os.path.join(base, name)) if f.endswith(".json")])
+              print(f"{name}: {n} receipts on disk")
           PY
 
       - name: Judge their receipts with our verifier

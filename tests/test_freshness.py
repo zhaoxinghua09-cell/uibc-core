@@ -83,6 +83,21 @@ class TestRecord(unittest.TestCase):
         with self.assertRaises(ValueError):
             freshness.load(p)
 
+    def test_second_writer_is_refused_not_silently_merged(self):
+        # Two interleaved read-modify-writes lose one observation. The refusal
+        # is the point: it says "not recorded" instead of returning a state file
+        # that quietly lacks the other writer's observation.
+        d = tempfile.mkdtemp()
+        p = os.path.join(d, "state.json")
+        with open(p + ".lock", "w", encoding="utf-8") as fh:
+            fh.write("held")
+        with self.assertRaises(freshness.Busy):
+            freshness.record(p, "a1", "sha256:aa", sequence=1)
+        self.assertFalse(os.path.exists(p), "nothing should be written when the lock is held")
+        os.unlink(p + ".lock")
+        freshness.record(p, "a1", "sha256:aa", sequence=1)
+        self.assertTrue(os.path.exists(p))
+
 
 class TestVerifierIntegration(unittest.TestCase):
     """The CLI path: first run bootstraps the watermark, second run compares."""

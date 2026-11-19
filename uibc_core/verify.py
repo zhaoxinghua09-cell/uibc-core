@@ -969,6 +969,13 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
                 # mark could never start and every run would stay unplaceable.
                 try:
                     freshness.record(state_file, subject, actual_ckpt, sequence=sequence)
+                except freshness.Busy as exc:
+                    # Not a pass and not a failure: this run's observation was not
+                    # recorded, so the next run cannot compare against it. Saying
+                    # which one that is beats pretending the write happened.
+                    checks.append({"id": "S19", "name": "freshness state",
+                                   "result": "INCONCLUSIVE",
+                                   "detail": f"observation not recorded: {exc}"})
                 except Exception as exc:
                     ok = False
                     checks.append({"id": "S19", "name": "freshness state",

@@ -8,8 +8,10 @@ accepted", by remembering the last accepted head on disk.
 Three deliberate limits, because a state file that over-promises is worse than
 none:
 
-1. One writer. No locking. A state file raced by two processes is a race, not
-   a state file; the caller serialises, or it does not use this.
+1. One writer. A second concurrent writer is refused loudly (a lock file), not
+   merged silently: a state file raced by two processes is a race, not a state
+   file. Serialising the callers is still the caller's job; this only makes the
+   collision visible instead of losing one of the two observations.
 2. Ordering needs a stated sequence. Without one, a different head cannot be
    placed in time, and the answer is INCONCLUSIVE - never PASS, because
    "different" is not "newer".
@@ -22,6 +24,15 @@ import os
 import tempfile
 
 SCHEMA = "uibc-freshness/1"
+
+
+class Busy(RuntimeError):
+    """Another writer holds the state file's lock.
+
+    Raised instead of proceeding: two interleaved read-modify-writes would
+    silently keep one of the two observations, and a high-water mark that
+    quietly forgets an accepted package is worse than no mark at all.
+    """
 
 
 def empty():
@@ -93,27 +104,43 @@ def evaluate(state, subject, head, sequence=None, prev_head=None):
 
 
 def record(path, subject, head, sequence=None, accepted_at=None):
-    """Remember an observation. Atomic replace so a crash cannot leave half a file."""
-    state = load(path) if path else empty()
-    row = {"head": str(head)}
-    if sequence is not None:
-        try:
-            row["sequence"] = int(sequence)
-        except (TypeError, ValueError):
-            pass
-    if accepted_at:
-        row["accepted_at"] = str(accepted_at)
-    state.setdefault("subjects", {})[subject] = row
-    d = os.path.dirname(os.path.abspath(path))
-    fd, tmp = tempfile.mkstemp(dir=d, prefix=".freshness-", suffix=".json")
+    """Remember an observation. Atomic replace so a crash cannot leave half a file.
+
+    Refuses (raises Busy) when another writer holds <path>.lock: the observation
+    is not lost silently, the caller is told it was not recorded.
+    """
+    lock = path + ".lock"
     try:
-        with os.fdopen(fd, "w", encoding="utf-8") as fh:
-            json.dump(state, fh, indent=1, sort_keys=True, ensure_ascii=False)
-        os.replace(tmp, path)
-    except Exception:
+        fd_lock = os.open(lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+    except FileExistsError:
+        raise Busy("another writer holds %s" % lock)
+    try:
+        os.close(fd_lock)
+        state = load(path) if path else empty()
+        row = {"head": str(head)}
+        if sequence is not None:
+            try:
+                row["sequence"] = int(sequence)
+            except (TypeError, ValueError):
+                pass
+        if accepted_at:
+            row["accepted_at"] = str(accepted_at)
+        state.setdefault("subjects", {})[subject] = row
+        d = os.path.dirname(os.path.abspath(path))
+        fd, tmp = tempfile.mkstemp(dir=d, prefix=".freshness-", suffix=".json")
         try:
-            os.unlink(tmp)
+            with os.fdopen(fd, "w", encoding="utf-8") as fh:
+                json.dump(state, fh, indent=1, sort_keys=True, ensure_ascii=False)
+            os.replace(tmp, path)
+        except Exception:
+            try:
+                os.unlink(tmp)
+            except OSError:
+                pass
+            raise
+        return state
+    finally:
+        try:
+            os.unlink(lock)
         except OSError:
             pass
-        raise
-    return state

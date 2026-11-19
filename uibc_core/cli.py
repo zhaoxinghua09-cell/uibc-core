@@ -15,6 +15,8 @@ from .signing import (ALGORITHM, ALGORITHM_ED25519, ed_generate_seed,
                       ed_key_id, ed_public_key, ed_seal_sign, generate_key,
                       key_id, seal_sign)
 from .verify import verify
+from . import verify as verify_mod
+from . import lifecycle
 from . import SPEC_VERSION, __version__
 
 REQUIRED = ["manifest.json", "identity.json", "lifecycle.json", "evidence/index.json"]
@@ -523,11 +525,19 @@ def main():
     p.set_defaults(func=cmd_register)
 
     p = sub.add_parser("event", help="append lifecycle event")
-    p.add_argument("path"); p.add_argument("--type", required=True); p.add_argument("--actor", default=None)
+    p.add_argument("path")
+    # choices, not free text: the verifier's L3 rejects any event_type outside this
+    # vocabulary with a FAIL. Accepting the word here and rejecting it there made a
+    # typo look like a bad package, so the writer refuses it first (see docs/ORACLE.md).
+    p.add_argument("--type", required=True, choices=lifecycle.EVENTS)
+    p.add_argument("--actor", default=None)
     p.set_defaults(func=cmd_event)
 
     p = sub.add_parser("evidence", help="add evidence file (hash recorded)")
-    p.add_argument("path"); p.add_argument("--type", required=True); p.add_argument("--file", required=True)
+    p.add_argument("path"); p.add_argument("--file", required=True)
+    # Same reason: an unknown evidence type makes S4 return INCONCLUSIVE, which reads
+    # to a user as "the verifier could not decide" when the real problem is a word.
+    p.add_argument("--type", required=True, choices=sorted(verify_mod.EVIDENCE_TYPES))
     p.add_argument("--media-type", default="text/plain"); p.add_argument("--note", default="")
     p.set_defaults(func=cmd_evidence)
 

@@ -8,8 +8,8 @@
 | S1 | package structure | 是 | 8 | 1 | 26 |
 | S2 | identity consistency | 是 | 7 | 1 | 19 |
 | S3 | lifecycle state machine + semantics | 是 | 9 | 1 | 17 |
-| S4 | evidence integrity | 是 | 14 | 3 | 30 |
-| S5 | evidence root | 是 | 9 | 3 | 24 |
+| S4 | evidence integrity | 是 | 15 | 3 | 31 |
+| S5 | evidence root | 是 | 9 | 3 | 25 |
 | S6 | seal signature | 是 | 18 | 1 | 29 |
 | S7 | evidence index metadata | 否 | 5 | 1 | 12 |
 | S8 | package checkpoint head | 否 | 6 | 2 | 17 |
@@ -20,7 +20,7 @@
 | S13 | merkle inclusion proofs | 否 | 8 | 4 | 10 |
 | S14 | strict base64 | 否 | 4 | 2 | 6 |
 | S15 | anchor event resolution | 否 | 6 | 4 | 9 |
-| S16 | external timestamp (RFC 3161) | 否 | 7 | 4 | 13 |
+| S16 | external timestamp (RFC 3161) | 否 | 7 | 4 | 14 |
 | S17 | linear receipt chain | 否 | 6 | 2 | 14 |
 | S18 | policy artefact resolution | 否 | 7 | 2 | 16 |
 

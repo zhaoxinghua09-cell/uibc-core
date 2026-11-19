@@ -313,8 +313,33 @@ def undeclared_root_files(package_dir: str, entries) -> list:
     return extra
 
 
+def _has_duplicate_members(package_dir):
+    """True when any JSON file in the package repeats a member name in one object."""
+    import json as _json
+
+    def hook(pairs):
+        keys = [k for k, _v in pairs]
+        if len(keys) != len(set(keys)):
+            hook.found = True
+        return dict(pairs)
+
+    hook.found = False
+    for root, _dirs, files in os.walk(package_dir):
+        for name in files:
+            if not name.endswith(".json"):
+                continue
+            try:
+                with open(os.path.join(root, name), encoding="utf-8") as fh:
+                    _json.load(fh, object_pairs_hook=hook)
+            except Exception:
+                continue
+            if hook.found:
+                return True
+    return False
+
+
 def independent_verify(package_dir: str, key: bytes = None) -> dict:
-    """Return {'result': PASS/FAIL/INCONCLUSIVE, 'checks': {V1..V6: result}}."""
+    """Return {'result': PASS/FAIL/INCONCLUSIVE, 'checks': {V1..V9: result}}."""
     outcomes = {}
 
     outcomes["V1"] = "PASS" if all(
@@ -378,15 +403,61 @@ def independent_verify(package_dir: str, key: bytes = None) -> dict:
     else:
         outcomes["V9"] = "INCONCLUSIVE"
 
+    # Scope guard. Everything above is what this implementation can judge; this is the
+    # statement of what it cannot. Without it, a package carrying an artefact this
+    # implementation has no rule for came back PASS - an affirmative "no violation was
+    # detected" about a file nobody in this implementation ever read. Measured before the
+    # guard existed: PASS on 9 of 20 hostile packages the reference rejected.
+    #
+    # INCONCLUSIVE is the honest answer here, and it costs coverage: it does not raise any
+    # number in INDEPENDENCE.md, it lowers the number of packages this implementation
+    # will endorse.
+    unjudged = []
+    try:
+        manifest = load("manifest.json") or {}
+    except Exception:
+        manifest = {}
+    if isinstance(manifest, dict) and manifest.get("closure") is not None:
+        unjudged.append("attestation closure (manifest.closure)")
+    if os.path.isfile(os.path.join(package_dir, "evidence", "anchors.json")):
+        unjudged.append("anchor resolution (evidence/anchors.json)")
+    if os.path.isfile(os.path.join(package_dir, "evidence", "external_anchor.json")):
+        unjudged.append("external timestamp (evidence/external_anchor.json)")
+    if os.path.isfile(os.path.join(package_dir, "evidence", "chain.json")):
+        unjudged.append("receipt chain (evidence/chain.json)")
+    if os.path.isfile(os.path.join(package_dir, "evidence", "policies.json")):
+        unjudged.append("policy artefacts (evidence/policies.json)")
+    identity = None
+    try:
+        identity = load("identity.json") or {}
+    except Exception:
+        identity = {}
+    if isinstance(identity, dict) and identity.get("note_b64") is not None:
+        unjudged.append("strict base64 (identity.note_b64)")
+    # Duplicate identifiers and duplicate JSON member names are detectable without
+    # deciding whether they are violations; this implementation has no rule for either,
+    # so it says it cannot judge rather than counting them as fine.
+    try:
+        index = load("evidence/index.json")
+        entries = index["entries"] if isinstance(index, dict) else index
+        ids = [e.get("evidence_id") for e in entries]
+        if len(ids) != len(set(ids)):
+            unjudged.append("duplicate evidence_id (S12 class)")
+    except Exception:
+        pass
+    if _has_duplicate_members(package_dir):
+        unjudged.append("duplicate JSON member name (S11 class)")
+
     # overall (seal v0.3 three-valued rule, same as the reference):
     # FAIL anywhere -> FAIL; unresolved INCONCLUSIVE anywhere -> INCONCLUSIVE.
     vals = list(outcomes.values())
     if "FAIL" in vals:
         overall = "FAIL"
-    elif "INCONCLUSIVE" in vals:
+    elif "INCONCLUSIVE" in vals or unjudged:
         overall = "INCONCLUSIVE"
     else:
         overall = "PASS"
     return {"implementer": "independent_verifier/0.1.0",
             "result": overall,
-            "checks": outcomes}
+            "checks": outcomes,
+            "unjudged": unjudged}

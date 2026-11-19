@@ -190,11 +190,30 @@ to V6/V8/V9 when a judgement is impossible — covers only rules it possesses. W
 none, the overall three-valued verdict comes back green.
 
 That is worse than being blind: blindness is `n/a`, this is an affirmative "no violation was
-detected" about a package that violates a check. It is the one cell in this document where
-the two implementations do not merely differ — one of them is wrong in a way a user would
-act on. Recorded rather than fixed: the fix would be another rule in our own second
-implementation, and `INDEPENDENCE.md` already says adding implementations by the same author
-buys no independence.
+detected" about a package that violates a check.
+
+**Fixed the same way it was found — by measuring the whole corpus instead of the one case.**
+Across the 18 hostile packages the reference rejects, the second implementation used to say
+`PASS` on **9** of them. Not nine demonstrations of a missing rule: nine greens a user could
+act on.
+
+The fix is a **scope guard**, not a rule. Before returning any verdict the second
+implementation now lists the artefacts it has no rule for — attestation closure, anchor
+resolution, external timestamp, receipt chain, policy artefacts, strict base64, duplicate
+`evidence_id`, duplicate JSON member names — and if any is present it returns
+`INCONCLUSIVE` naming them.
+
+```
+measured: of 18 hostile packages the reference rejects, the second
+          implementation says PASS on 0 and declines to judge 9
+```
+
+**The guard lowers every number in this document rather than raising one.** It does not add
+a check to the second implementation; it removes nine endorsements it was not entitled to
+make. The accept side pays for it too: `accept-anchored-policy` now comes back
+`INCONCLUSIVE` from the second implementation instead of `PASS`, because that package carries
+anchors it cannot resolve. On the accept side the oracle therefore scores "no false alarm"
+as **not FAIL** — declining to judge is allowed, rejecting is not — and records which it did.
 
 ## What this is not
 

@@ -8,18 +8,18 @@
 | 检查 | 名称 | 出厂包是否走到 | 测试 | 红队 | 文档 |
 |---|---|---|---|---|---|
 | S0 | verifier robustness | 否 | 4 | 0 | 9 |
-| S1 | package structure | 是 | 10 | 1 | 29 |
+| S1 | package structure | 是 | 10 | 1 | 30 |
 | S2 | identity consistency | 是 | 7 | 1 | 20 |
 | S3 | lifecycle state machine + semantics | 是 | 10 | 1 | 18 |
 | S4 | evidence integrity | 是 | 17 | 3 | 36 |
-| S5 | evidence root | 是 | 12 | 3 | 29 |
-| S6 | seal signature | 是 | 18 | 1 | 30 |
-| S7 | evidence index metadata | 否 | 5 | 1 | 13 |
-| S8 | package checkpoint head | 否 | 6 | 2 | 19 |
+| S5 | evidence root | 是 | 12 | 3 | 30 |
+| S6 | seal signature | 是 | 18 | 1 | 31 |
+| S7 | evidence index metadata | 否 | 5 | 1 | 14 |
+| S8 | package checkpoint head | 否 | 6 | 2 | 20 |
 | S9 | head pinned out-of-band | 否 | 8 | 1 | 24 |
 | S10 | attestation closure declared | 否 | 5 | 2 | 8 |
 | S11 | strict serialization | 是 | 5 | 1 | 17 |
-| S12 | timestamp and identifier strictness | 是 | 9 | 2 | 18 |
+| S12 | timestamp and identifier strictness | 是 | 9 | 2 | 19 |
 | S13 | merkle inclusion proofs | 否 | 8 | 4 | 11 |
 | S14 | strict base64 | 否 | 4 | 2 | 7 |
 | S15 | anchor event resolution | 否 | 6 | 4 | 10 |

@@ -15,6 +15,17 @@ Nothing here is a ratified standard.
 
 ## [Unreleased]
 
+### v0.4.0 tagged, and the suite is downloadable without an account (2026-11-19)
+
+- Tag `v0.4.0` on the commit that carries the PyPI bytes; release
+  `uibc-core 0.4.0` with `uibc-conformance-0.4.0.zip` (114,576 B, sha256
+  `9a1ca72f...`) as an asset - a branch moves, an asset does not.
+- The stranger's path was exercised rather than assumed: the asset was
+  downloaded, its hash compared with the tree, then run against a verifier
+  invoked only through the documented CLI contract - `strict 36/36, refused 30/36`.
+- `docs/UPSTREAM-SUBMISSION-PLAN.md` now marks steps 1 and 2 done and still says
+  steps 3 and 4 are unsent.
+
 ### The suite is now addressed to strangers (2026-11-19)
 
 - **`docs/CONTRIBUTION-FALSIFIABILITY.md`**: the 36-package suite stated as an

@@ -1,3 +1,19 @@
+### A second class of their vectors, and it agreed the first time
+
+- `tools/crosscheck_aac_history_frame.py` reproduces the `table_binding` /
+  `pack_binding` verdicts of `vectors/history-frame-v0`:
+  `properties: 22  disagreements: 0` → `OUR JCS REPRODUCES THEIR BINDING VERDICTS`.
+- No fix was needed here: our RFC 8785 form over the JSON values they ship
+  yields exactly the digests they list, and the five negative cases
+  (`pack-digest-mismatch`, `table-digest-mismatch`, `pack-for-another-instance`,
+  `pack-translated-in-place`, `pack-carries-checked-string`) disagree as intended.
+- Scope stated plainly: this tests **binding** (the digest names the right
+  document), not their counting rules.
+- `docs/COMPETITIVE-COVERAGE-AAC.md` now counts **2 of 40** classes (5%):
+  `json-nesting` (which found a limit we lacked) and `history-frame-v0`
+  (which agreed on first run). Both numbers are kept.
+- 6 new tests.
+
 ### One of their forty vector classes, and the limit we did not have
 
 - `tools/crosscheck_aac_json_nesting.py` runs the `json-nesting` cases from

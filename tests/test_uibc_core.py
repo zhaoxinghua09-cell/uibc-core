@@ -207,11 +207,16 @@ class TestVerifier(unittest.TestCase):
         self.assertEqual(self._checks(verify(self.pkg))["S2"], "FAIL")
 
     def test_unknown_evidence_type_S4(self):
+        # Was FAIL until 2026-11-19. A type the verifier does not know is not a
+        # violation: 0.3.3 accepted any string here, so a package sealed by that
+        # release cannot be said to have broken a rule that did not exist. FAIL
+        # would assert "I checked, and this is wrong"; the honest result is "I
+        # cannot judge this entry". See docs/MIGRATION-RESULTS.md (M1a).
         ip = os.path.join(self.pkg, "evidence", "index.json")
         idx = json.load(open(ip, encoding="utf-8"))
         idx["entries"][0]["type"] = "GOSSIP"
         json.dump(idx, open(ip, "w", encoding="utf-8"))
-        self.assertEqual(self._checks(verify(self.pkg))["S4"], "FAIL")
+        self.assertEqual(self._checks(verify(self.pkg))["S4"], "INCONCLUSIVE")
 
     def test_tamper_content_S4_root_inconclusive(self):
         ep = os.path.join(self.pkg, "evidence", "files", "e.txt")

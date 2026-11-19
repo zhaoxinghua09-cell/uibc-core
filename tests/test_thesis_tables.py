@@ -48,6 +48,16 @@ class TestThesisTables(unittest.TestCase):
         self.assertRegex(lat, r"^\d+(\.\d+)?$")
         self.assertIn("中位延迟 | %s ms" % lat, self.md)
 
+    def test_the_committed_chapter_is_what_the_tool_builds(self):
+        """The chapter drifted once: 表 5-2 still summed to 19 after a twentieth
+        check landed, so the prose contradicted the code it cites."""
+        path = os.path.join(_REPO, "docs", "THESIS-CH5-TABLES.md")
+        with open(path, encoding="utf-8") as fh:
+            on_disk = fh.read().replace("\r\n", "\n").strip()
+        self.assertEqual(on_disk, self.md.replace("\r\n", "\n").strip(),
+                         "docs/THESIS-CH5-TABLES.md is stale; regenerate with "
+                         "`python tools/build_thesis_tables.py > docs/THESIS-CH5-TABLES.md`")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -95,6 +95,21 @@ VERDICT: OUR JCS REPRODUCES THEIR BINDING VERDICTS
 
 注意范围：这只验证**绑定**（摘要是对的那份），不验证他们的计数规则（那是他们的主题）。
 
+
+## 已排除的候选，与排除的理由
+
+探查过、判断**不做**的类，理由写在这里，免得下次重复试：
+
+| 类 | 为什么不做 |
+|---|---|
+| `standard-history-v0`（3 个文件共 69 个 case） | 考的是**计数规则**（`in_window`、`outcomes` 分类、优先级），不是摘要绑定。要复算就得完整实现 SH §5–§11 的优先级语义——那等于照抄对方的规范，不构成独立验证；读漏一条，产出的"分歧"还是我们的错。所以不碰。 |
+| `cbor-nesting` / `cbor-request-model` | 需 CBOR 解码器。本机无 `cbor2`；手写最小解码器的风险大于它能给的证据。 |
+| `checkpoint-consistency` / `cll-material` / `bundle` | MMR（`cll`）树。与 RFC 6962 是两套算法族，折叠结果的差异不可归因。 |
+| `cross-language` / `minimum-necessary` / `producer-envelope` / `settlement` / `evidence-request` / `anchor-witness-v1` | COSE + ed25519，需 COSE 库；本机无。 |
+| `capsule`（239 文件）、`judge`、`judgment`、`interop`、`profiles`、`registry-conformance`、`viewer-core-text`、`evidence-dataset`、`evidence-result`、`disclosure-envelope`、`adapters`、`deal-reconcile-v0`、`controller-binding-v0`、`coverage-declaration-v0`、`personal-history-*`、`inference-service-history-*`、`interop-profile-*` | 注册表 / 文本 / 策略层，或依赖签名。不在算术可比范围。 |
+
+**结论：2/40 是"只用标准库可独立复算"的上限，不是偷懒。** 把 40 类都跑一遍需要先实现 MMR、COSE、CBOR 三套东西，那时跑出来的数字已不能叫"独立复算"。
+
 ## 边界
 
 - 这只覆盖 40 类中的 2 类，占 5%。

@@ -1,3 +1,15 @@
+### Where coverage stops, and why
+
+- `docs/COMPETITIVE-COVERAGE-AAC.md` gains a table of the classes we probed and
+  deliberately did **not** run: `standard-history-v0` (69 cases counting rules —
+  reproducing them means copying their spec, so it would not be an independent
+  check), CBOR classes (no decoder here), MMR classes (different hash family),
+  COSE classes (no library), and the registry/text layers.
+- Stated conclusion: **2 of 40 is the ceiling for standard-library-only
+  recomputation, not laziness.** Running all 40 would first require
+  implementing MMR, COSE and CBOR — the numbers would then no longer be
+  independent.
+
 ### A second class of their vectors, and it agreed the first time
 
 - `tools/crosscheck_aac_history_frame.py` reproduces the `table_binding` /

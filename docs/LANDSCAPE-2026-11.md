@@ -104,3 +104,46 @@ VERDICT: ZERO ADOPTION - no party outside this account has taken up the format
 - 在**采纳**上：全领域为零，无可比性，谁说自己领先谁就需要出示证据。
 - 在**可证伪性**上：我们有一条别人没公开做的动作——把"零采纳"写成会失败的检查，并把"拒绝必须指名检查项"写进契约。这条可以写进论文的方法章，**但不能写成"领先"**，只能写成"我们采用了一种别人未采用的可证伪做法"。
 
+## 七、2026-11-19 第三次复核：两处自我修正
+
+这一节存在的唯一理由是**上两版有两句话被今天的材料推翻了**。修正写在这里，不删旧文——删掉会让人以为我们从没错过。
+
+### 7.1 修正一：不能说"对手没有第三方执行"
+
+上一版隐含的对照是"我们有外部节点，他们未见"。查证结果相反。
+
+- 来源：IETF SCITT 邮件列表，2026-07-14，
+  `https://mailarchive.ietf.org/arch/msg/scitt/RBzdNmy9QOfgzMgmmWekmyHv81s/`
+- 原话（verbatim）："An independent party has run the full vector suite against the published package and **reproduced 32/32**."
+
+同一线程（2026-06-23、2026-07-01）还有：Python 与 Go 两实现跑同一套 vectors "with zero divergences"；`583 passed, 9 skipped`（-02 上）；PyPI/rustion 侧另有 Rust 与 TypeScript 兄弟实现；公开 anchor 实例 `http://anchor.agentactioncapsule.org`。
+
+**所以"第三方执行"不是我们的独占项。** 我们与它的差别只剩下面 7.3 那一条。
+
+### 7.2 修正二："任何组织采纳 = 0"要说准
+
+- 来源：OpenChain，2026-07-17，
+  `https://openchainproject.org/conformance/2026/07/17/agent-passport-system-joins-the-openchain-community-of-conformance`
+- 事实：Agent Passport System 进入 **OpenChain Community of Conformance**，就 ISO/IEC 5230:2020 与 ISO/IEC 18974:2023 作自我认证。
+
+精确说法是：**"有组织的用户采纳该协议"仍然为 0；但"外部组织公开发布过与它的合规记录"不是 0**。这两件事不同，我此前把后者也说成了 0，那是错的。
+
+另：APS 另有独立仓 `aps-conformance-suite`（跨实现 golden/negative fixtures），Python SDK 声称与 TS 做 byte-identical canonical JSON 对比，跨语言签名互验。
+
+### 7.3 收窄后仍站得住的一条
+
+对照两份材料，我们仍有**一件别人没公开做过的事**：
+
+- 他们：独立方复现 = **全部通过**（32/32），两/四语言 = **零分歧**。
+- 我们：外部节点在异体机上**跑出了 2 处分歧**（S4、S5），随后**把那条分歧做成一条会失败的检查**（`tools/external_node_regression.py`，`run_all_evidence` 第 9 项）。
+
+即：**他们证明了"能跑通"；我们多了一条"跑不通时会被记住、并且会一直盯着"。** 这不是"更强"，是**另一种做法**——把外部发现当资产而不是当成绩。
+
+### 7.4 结论（第三版）
+
+可以对外说的，只有这一句：
+
+> On specification maturity, ecosystem access and production readiness, published work from other authors is ahead. On one axis this repository differs: an outside operator found two disagreements here, and those two rows are now a check that fails if they come back. Elsewhere the same kind of independence exists — another draft reports an independent party reproducing 32/32 — so this is a difference in what is done with a finding, not a monopoly on outside execution.
+
+中文：**规格、生态、生产就绪三项我们在后；唯一不同是"外部发现被留成一条会失败的检查"，这在别人那里未见公开对应做法。第三方执行本身已不是我们独占。**
+

@@ -21,10 +21,34 @@ when any bucket goes non-zero the check fails, and a human has to look at why.
 | a neighbouring spec | does the closest adjacent spec mention us? | the adjacent package's registry metadata, read as text |
 
 Reference implementation: `tools/check_adoption.py` in this repository. `--json`
-for machine use; exit code 1 when any bucket is non-zero, exit code 0 when all
-four are zero.
+for machine use; `--out` writes the dated report. Exit codes: **0** every bucket was
+asked and answered zero, **1** a signal, **3** at least one bucket could not be asked.
 
-## 2. What went wrong the first time
+## 2. What went wrong the second time (2026-11-20)
+
+Run live, the check printed `ZERO ADOPTION` while its own JSON showed
+`"error": "HTTP 401"` on the code-search bucket. An unauthenticated code search is
+**not** a search that found nothing; it is a search that did not happen. The verdict
+was reading a refusal as a result — the same defect as the earlier one where a
+missing interpreter made a corpus look like it failed every case.
+
+Three things changed, and they are the point of this section rather than a footnote:
+
+- buckets carry a **state**, not just a number: `measured` / `unmeasured` / `context`;
+- any `unmeasured` bucket makes the verdict `INCOMPLETE` with **exit code 3** and a
+  sentence naming which bucket refused and why, so a reader cannot quote the run as
+  a zero;
+- a fifth bucket records **package downloads** as `context` — it is a real number and
+  it is never summed into adoption, because **downloads are not a party**: a mirror,
+  a cache and a CI image all download without adopting.
+
+While fixing this, a second defect surfaced from the test: two repository searches
+(`uibc-core`, `uibc-anchor`) can both return the same repository, and the count was
+the number of hits rather than the number of repositories. One adoption could read
+as two. The bucket now de-duplicates by full name — the direction that flatters is
+the one that has to be closed.
+
+## 2b. What went wrong the first time
 
 The first version searched for `uibc`. That returned 18 repositories — and none
 of them were about this format: `UIBC` is also the name of a UPnP display
@@ -54,6 +78,47 @@ limits is marketing:
 All four buckets are zero as of 2026-11-19. The command, its output and the
 timestamp are reproduced in `docs/LANDSCAPE-2026-11.md` §五. This is published
 as a **zero that can be overturned**, not as a claim of quality.
+
+Dated snapshots of the re-run are committed under `docs/adoption/` so the sequence
+can be diffed rather than trusted. `docs/adoption/2026-11-20.json` is the run that
+found the 401 defect and the double-count; it is kept even though it is wrong in
+those two ways, because deleting a wrong measurement is how a history of
+measurements becomes a history of good news.
+
+## 4b. What the run of 2026-11-20 actually returned
+
+```
+$ python tools/check_adoption.py --out docs/adoption/2026-11-20.json
+bucket                 state       found  what
+another repository     measured        0
+another codebase       unmeasured     —
+a standards body       measured        0  
+a neighbouring spec    measured        0  
+package downloads      context        598  last_month=598
+
+VERDICT: INCOMPLETE — 1 of 5 buckets could not be measured: another codebase
+         (HTTP 401 — code search needs an authenticated request; without one this
+         bucket was not asked)
+```
+
+Two facts from that table that are easy to lose: the package was fetched **598 times
+in the last month** and that number says nothing about adoption, and the only
+non-zero in the table is that number. Everything that would count as adoption
+remains zero — with one bucket not even asked.
+
+The same command, borrowing the `gh` CLI's existing credential so the code search
+could actually be asked, gives the other verdict:
+
+```
+$ python tools/check_adoption.py --out docs/adoption/2026-11-20-authenticated.json
+VERDICT: ZERO ADOPTION — each bucket was asked and each answered zero
+```
+
+Two snapshots, both committed, different exit codes: **3** when one bucket could not
+be asked, **0** when all four were asked and all four answered zero. The pair exists
+so nobody has to take either one on trust — the difference between them is the
+entire discipline. The credential is borrowed in memory for one request, never
+written into the report; the report records only `"credential": "present"`.
 
 ## 5. Why publish a zero at all
 

@@ -3,7 +3,7 @@
   "agent_id": "oracle",
   "agent_type": "software-agent",
   "owner": "oracle",
-  "created_at": "2026-11-19T09:15:43Z",
+  "created_at": "2026-11-15T00:00:00Z",
   "status": "REGISTERED",
   "version": "1",
   "note_b64": "aGVsbG8="

@@ -13,6 +13,7 @@ Run:  python tools/oracle_check.py
 Exit: 0 = both implementations match the oracle, 1 = at least one cell differs.
 """
 
+import hashlib
 import json
 import os
 import shutil
@@ -28,7 +29,7 @@ sys.path.insert(0, os.path.join(ROOT, "independent_verifier"))
 
 from uibc_core.verify import verify                      # noqa: E402
 from uibc_core import cli as ucli                        # noqa: E402
-from uibc_core.signing import generate_key               # noqa: E402
+from uibc_core.signing import generate_key  # unused by _oracle_key; kept for build_bad               # noqa: E402
 from iverify import independent_verify                   # noqa: E402
 import outsider_audit as oa                              # noqa: E402  (mutations only)
 
@@ -262,6 +263,11 @@ def emit_corpus(dest, only=None):
     publishing at all.
     """
     os.makedirs(dest, exist_ok=True)
+    # Ids and keys are derived, not drawn, so that a second run of this command
+    # produces the same bytes; the remaining variable is the clock, and that is
+    # the caller's SOURCE_DATE_EPOCH. Unpinned, the corpus still emits, it just
+    # cannot be rebuilt by a stranger - which is the thing this exists to avoid.
+    os.environ.setdefault("UIBC_REPRO_SEED", "uibc-oracle/1")
     cases_dir = os.path.join(dest, "cases")
     os.makedirs(cases_dir, exist_ok=True)
     expected = []
@@ -332,6 +338,21 @@ Written by `python tools/oracle_check.py --emit <dir>`; the answers were checked
 against the bytes on disk after writing, so what you read here is what the files
 do (mismatches at emit time: %d).
 
+## Rebuilding these bytes
+
+The corpus is reproducible, not merely consistent. Emit it with the same clock
+and you get the same files:
+
+    SOURCE_DATE_EPOCH=1794700800 python tools/oracle_check.py --emit <empty dir>
+
+Every `created_at` comes from that epoch instead of the wall clock, and every
+`event_id`, `evidence_id` and file name prefix is derived from a fixed seed
+(`UIBC_REPRO_SEED`, set by `--emit`) instead of `uuid4`, so a second run asking
+in the same order gets the same identifiers. `tests/test_oracle_reproducible.py`
+rebuilds the corpus and compares bytes; it fails if that stops being true.
+Without `SOURCE_DATE_EPOCH` the corpus still emits and still round-trips - it
+just cannot be rebuilt, which is the thing worth not doing.
+
 ## How to use it with any verifier
 
 1. Take `cases/<name>/` as the package.
@@ -355,6 +376,19 @@ passing them shows conformance to this reading of the spec, not to any
 regulator's requirement. Anything a verifier does that is not in here is
 unmeasured, not impossible.
 """
+
+
+def _oracle_key(name):
+    """The seal key for a case, derived from its name instead of drawn at random.
+
+    A corpus a stranger cannot rebuild is a corpus a stranger has to trust. Two
+    things stopped that: keys drawn per run, and a wall-clock `created_at`. The
+    key is now the hash of the case name, and the clock is pinned by
+    SOURCE_DATE_EPOCH when `--emit` runs, so the same commands produce the same
+    bytes anywhere. These keys are published in `keys.json` and seal nothing but
+    synthetic packages.
+    """
+    return hashlib.sha256(b"uibc-oracle-key/" + name.encode("utf-8")).digest()
 
 
 def build_good(tmp, name, variant):
@@ -410,7 +444,7 @@ def build_good(tmp, name, variant):
         for etype in ("UPDATE", "DELEGATE", "UPDATE"):
             ucli.cmd_event(type("A", (), {"path": pkg, "type": etype, "actor": None})())
 
-    key = generate_key()
+    key = _oracle_key(name)
     kf = os.path.join(tmp, f"{name}.key")
     with open(kf, "w", encoding="ascii") as f:
         f.write(key.hex())
@@ -440,7 +474,7 @@ def build(tmp, name, mutation, nevid=1):
         ucli.cmd_evidence(type("A", (), {
             "path": pkg, "type": "ACTION", "file": src,
             "media_type": "text/plain", "note": f"n{i}"})())
-    key = generate_key()
+    key = _oracle_key(name)
     kf = os.path.join(tmp, f"{name}.key")
     with open(kf, "w", encoding="ascii") as f:
         f.write(key.hex())

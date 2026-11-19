@@ -15,6 +15,20 @@ Nothing here is a ratified standard.
 
 ## [Unreleased]
 
+### The first anchor inside the repository (2026-11-19)
+
+- **`anchors/001/`**: `seq 1`, a new key, `checkpoint_head sha256:2935c3f4…`.
+  The package is the demo fixture, so the head is the number the demo pages
+  already print; the key is not the demo key, which is public and must never
+  sign a publication.
+- **`tests/test_published_anchor.py`**: five offline checks in CI - well-formed,
+  ANCHORED, chain accepts it, the JavaScript implementation agrees, and a
+  one-byte edit to an evidence file makes S4, S8 and S9 fire.
+- **`docs/FIRST-ANCHOR.md`** and **`anchors/README.md`**: what it is, what it
+  is not, and how to withdraw it. The anchor and the package share one channel,
+  which proves the mechanism and not yet the separation; that needs a channel
+  decision, not a commit.
+
 ### Three witnesses of the artefact, re-checked (2026-11-19)
 
 - **`tools/check_witnesses.py`**: asks Zenodo, Software Heritage and Sigstore

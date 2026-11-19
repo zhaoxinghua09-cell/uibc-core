@@ -61,3 +61,12 @@ that cannot be built is reported as not built.**
 A run record is a photograph, not a certificate. If you ran it and got something else, open
 `.github/ISSUE_TEMPLATE/external-node-report.yml` and paste what you saw — a different answer is more useful
 here than a matching one.
+
+## Later note (2026-11-19, same day)
+
+This record is a snapshot of commit `64124b7` and its numbers are not retroactively
+edited. `tools/oracle_check.py` and `tests/test_oracle.py` were added afterwards, so the
+live suite count measured by `tools/check_doc_facts.py` is now 608, not 605. The Linux
+platform behaviour in the tables above (2 skipped, `10 of 10 hostile inputs refused`) was
+measured at `64124b7`; a fresh Linux run at the merged commit would be needed to restate it
+for the new count, and this document does not claim that run happened.

@@ -107,6 +107,15 @@ class TestTheComparisonAgainstTheCompetitorIsWrittenDown(unittest.TestCase):
         self.assertIn("DISPOSITIONS", text)
         self.assertIn("比我们成熟", text)
 
+    def test_the_lab_protocol_says_what_it_is_not(self):
+        page = os.path.join(_REPO, "docs", "LAB-PROTOCOL.md")
+        if not os.path.isfile(page):
+            self.skipTest("no lab protocol in this tree (sdist build)")
+        text = _read("docs", "LAB-PROTOCOL.md")
+        self.assertIn("probity", text.lower(), "the protocol must name the fuller one it is smaller than")
+        self.assertIn("cannot prove a run happened", text)
+        self.assertIn("does not raise any count", text)
+
 
 if __name__ == "__main__":
     unittest.main()

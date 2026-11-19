@@ -70,8 +70,10 @@ def judge(path):
         return report
 
     report["structural"] = verifier.core_check(receipt)
+    state = "unverified"
     try:
-        report["binding"] = verifier.version_and_binding(receipt)[1]
+        state, binding_fails = verifier.version_and_binding(receipt)
+        report["binding"] = binding_fails
     except Exception as exc:  # noqa: BLE001 - a malformed payload is a verdict
         report["binding"] = ["binding check raised: %s" % exc]
     try:
@@ -88,7 +90,7 @@ def judge(path):
     except Exception as exc:  # noqa: BLE001
         report["anchors"] = {"error": str(exc)}
     try:
-        report["id_verdict"] = verifier.id_verdict(receipt)
+        report["id_verdict"] = verifier.id_verdict(receipt, state)
     except Exception as exc:  # noqa: BLE001
         report["id_verdict"] = "error: %s" % exc
 

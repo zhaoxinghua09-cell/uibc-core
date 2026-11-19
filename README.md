@@ -23,7 +23,7 @@ It prints `CONSISTENT` only when **both** hold: a second, independently written 
 
 > A uibc PASS means: within the observed evidence boundary, no violation was detected. It does not claim the agent was correct, safe, or wise; that the recorded inputs were true or complete; or that any real-world outcome followed.
 
-**Current state, including what we are short of:** 629 tests green on Linux / Python 3.12 (2 skipped with `.[verify,interop]`; it was 16 before that extra existed — see `docs/SKIPPED.md`); the CI matrix runs the same suite on 3.10-3.13 · the verifier needs no third-party package (Ed25519 is implemented in-repo) · **external verification nodes: 0** — we publish the number we do not have; running the command above and sending back `external_node_result.json` makes it 1. Zero means the independence of this repository's verification rests entirely on two implementations written by the same author; it is not evidence of a third party having reproduced anything.
+**Current state, including what we are short of:** 630 tests green on Linux / Python 3.12 (2 skipped with `.[verify,interop]`; it was 16 before that extra existed — see `docs/SKIPPED.md`); the CI matrix runs the same suite on 3.10-3.13 · the verifier needs no third-party package (Ed25519 is implemented in-repo) · **external verification nodes: 0** — we publish the number we do not have; running the command above and sending back `external_node_result.json` makes it 1. Zero means the independence of this repository's verification rests entirely on two implementations written by the same author; it is not evidence of a third party having reproduced anything.
 
 **Seven machine reviews do exist, and they are not this number.** `docs/external-review/` holds seven receipts written on 2026-11-17 by an external model (DeepSeek-V3 via SiliconFlow) in four lenses (expert / process / adversary / outsider). Under `INDEPENDENCE.md` those are stage **S3m/S4m** machine reviews: they must be labelled `reviewer_type: machine`, and they may not be described as a third party, because no human and no separate administration stands behind them. Counted by category: human independent reproduction 0; external machine review 7; external document citing this repository 0; adoption by any group 0. Quoting any one of those four as "external 0" without saying which line is meant is the kind of collapse this repository exists to catch.
 
@@ -47,7 +47,7 @@ repository's own node result.
 **Three more commands, if you want to see the failure paths rather than the green ones:**
 
 ```bash
-python -m unittest discover -s tests -p "test_*.py"        # 629 tests (Linux / Python 3.12, 2 skipped with .[verify,interop])
+python -m unittest discover -s tests -p "test_*.py"        # 630 tests (Linux / Python 3.12, 2 skipped with .[verify,interop])
 python tools/emit_receipts.py --package fixtures/clean.uibc --count 3   # 3 chained receipts
 python tools/redteam_suite.py                              # 16 attacks, expected vs actual
 ```
@@ -145,7 +145,7 @@ other exists.
 > **Verifiable today** — every artifact is independently checkable: Sigstore Rekor transparency log
 > (logIndex 2883389783), concept DOI 10.5281/zenodo.22456647, SWHID
 > `swh:1:ori:819530c8be2adf6da901256ce9fd28063f8f1296` (ISO/IEC 18670).
-> Reproduce: `python -m unittest discover -s tests -p "test_*.py"` (629 tests, Linux / Python 3.12) · `python independent_verifier/cross_check.py`.
+> Reproduce: `python -m unittest discover -s tests -p "test_*.py"` (630 tests, Linux / Python 3.12) · `python independent_verifier/cross_check.py`.
 > **Honest boundary** — no third-party quality review to date; any operational use is self-reported
 > (see ENDORSEMENTS.md: 存证 ≠ 参与 ≠ 认可). Context: [FG-TIDA themes #27](https://github.com/FG-TIDA/themes/issues/27).
 
@@ -254,7 +254,7 @@ uibc verify demo.uibc                   # 开放模式：仅完整性检查
 ## 运行测试（外人复现三件套）
 
 ```bash
-python -m unittest discover -s tests -p "test_*.py"   # 全量 629 用例（实测 `Ran 629 tests in ~42s, OK (skipped=2)`，Linux / Python 3.12.11，已装 `.[verify,interop]`；未装该 extra 时为 `skipped=16`，逐步查清见 `docs/SKIPPED.md`；stress 7 场景单跑，见下条）
+python -m unittest discover -s tests -p "test_*.py"   # 全量 630 用例（实测 `Ran 630 tests in ~42s, OK (skipped=2)`，Linux / Python 3.12.11，已装 `.[verify,interop]`；未装该 extra 时为 `skipped=16`，逐步查清见 `docs/SKIPPED.md`；stress 7 场景单跑，见下条）
 python -m unittest tests.stress_test        # 压力 7 场景
 python independent_verifier/cross_check.py  # 独立第二实现交叉核验（70 项，0 分歧）
 ```

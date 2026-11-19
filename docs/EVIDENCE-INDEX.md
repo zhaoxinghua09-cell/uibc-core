@@ -13,17 +13,17 @@
 | S6 | seal signature | 是 | 18 | 1 | 30 |
 | S7 | evidence index metadata | 否 | 5 | 1 | 13 |
 | S8 | package checkpoint head | 否 | 6 | 2 | 19 |
-| S9 | head pinned out-of-band | 否 | 8 | 1 | 23 |
-| S10 | attestation closure declared | 否 | 5 | 2 | 7 |
+| S9 | head pinned out-of-band | 否 | 8 | 1 | 24 |
+| S10 | attestation closure declared | 否 | 5 | 2 | 8 |
 | S11 | strict serialization | 是 | 5 | 1 | 17 |
 | S12 | timestamp and identifier strictness | 是 | 9 | 2 | 18 |
-| S13 | merkle inclusion proofs | 否 | 8 | 4 | 10 |
-| S14 | strict base64 | 否 | 4 | 2 | 6 |
-| S15 | anchor event resolution | 否 | 6 | 4 | 9 |
-| S16 | external timestamp (RFC 3161) | 否 | 7 | 4 | 14 |
-| S17 | linear receipt chain | 否 | 6 | 2 | 14 |
+| S13 | merkle inclusion proofs | 否 | 8 | 4 | 11 |
+| S14 | strict base64 | 否 | 4 | 2 | 7 |
+| S15 | anchor event resolution | 否 | 6 | 4 | 10 |
+| S16 | external timestamp (RFC 3161) | 否 | 7 | 4 | 15 |
+| S17 | linear receipt chain | 否 | 6 | 2 | 15 |
 | S18 | policy artefact resolution | 否 | 7 | 2 | 17 |
-| S19 | freshness state | 否 | 3 | 1 | 3 |
+| S19 | freshness state | 否 | 3 | 1 | 4 |
 
 出厂包判定：`INCONCLUSIVE`，走到 8/20 项（未签名的包停在 S6，后面不越过去）。
 

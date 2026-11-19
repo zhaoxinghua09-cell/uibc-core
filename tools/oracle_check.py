@@ -22,12 +22,14 @@ import tempfile
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 sys.path.insert(0, ROOT)
+sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(ROOT, "independent_verifier"))
 
 from uibc_core.verify import verify                      # noqa: E402
 from uibc_core import cli as ucli                        # noqa: E402
 from uibc_core.signing import generate_key               # noqa: E402
 from iverify import independent_verify                   # noqa: E402
+import outsider_audit as oa                              # noqa: E402  (mutations only)
 
 V_TO_S = {"V1": "S1", "V2": "S2", "V3": "S3", "V4": "S4", "V5": "S5", "V6": "S6"}
 
@@ -38,27 +40,61 @@ ORACLE = [
     ("oracle-deleted",    "delete",    "FAIL", "S4"),
     ("oracle-duplicated", "duplicate", "FAIL", "S5"),
     ("oracle-unsealed",   "unseal",    "FAIL", "S6"),
+    # S12 on its own: duplicate the entry *and* repair the root and the count, so that
+    # S5 has nothing to complain about and the identifier rule is the only thing left
+    # to fail. An S12 case that also breaks S5 never proves S12 is doing work.
+    ("oracle-s12-id-only", "dup_root", "FAIL", "S12"),
+]
+
+# Tranche two: the checks a CLI-built package cannot reach. Each row takes its
+# expectation from `docs/CHECK-MATRIX.md`, which is committed evidence about which
+# attack makes which check FAIL - written down before this tool ran.
+#
+# Honest limit: the matrix and the mutation functions below share one provenance
+# (tools/outsider_audit.py). This tranche therefore locks in verdicts and first-failure
+# codes against regressions; it is not an independent judgement, and it has no
+# second implementation to compare with, because the independent verifier stops at V6.
+ORACLE_EXT = [
+    # name, prebuild (None = base package as is), mutation, verdict, first failure
+    ("oracle-s01-undeclared-file",  None,         "m_add_undeclared_file",   "FAIL", "S1"),
+    ("oracle-s02-identity",         None,         "m_identity_mismatch",     "FAIL", "S2"),
+    ("oracle-s03-calendar",         None,         "m_bad_calendar_date",     "FAIL", "S3"),
+    ("oracle-s08-log-truncated",    "build_ckpt", "m_ckpt_truncate_the_log", "FAIL", "S8"),
+    ("oracle-s10-closure",          "build_ckpt", "m_ckpt_drop_closure_component", "FAIL", "S10"),
+    ("oracle-s11-duplicate-member", None,            "m_duplicate_member",      "FAIL", "S11"),
+    ("oracle-s13-merkle-root",      "build_v11",     "m13_merkle_root",         "FAIL", "S13"),
+    ("oracle-s14-base64-padding",   "build_ext",     "m14_base64_padding",      "FAIL", "S14"),
+    ("oracle-s15-anchor-time",      "build_ext",     "m15_bad_time",            "FAIL", "S15"),
+    ("oracle-s16-token-byte",       "build_s16",     "m16_flip_token_byte",     "FAIL", "S16"),
+    ("oracle-s17-receipt-body",     "build_v11",     "m17_receipt_body",        "FAIL", "S17"),
+    ("oracle-s18-policy-artefact",  "build_ext",     "m18_edited_artefact",     "FAIL", "S18"),
+    ("oracle-s07-index-metadata",   "build_ckpt",    "m_ckpt_rewrite_index_note", "FAIL", "S7"),
 ]
 
 
-def build(tmp, name, mutation):
+def build(tmp, name, mutation, nevid=1):
     pkg = os.path.join(tmp, name)
     ucli.cmd_init(type("A", (), {"path": pkg})())
     ucli.cmd_register(type("A", (), {
         "path": pkg, "agent_id": "oracle", "owner": "oracle",
         "agent_type": "software-agent", "version": "1"})())
-    src = os.path.join(tmp, f"{name}.txt")
-    with open(src, "w", encoding="utf-8") as f:
-        f.write(f"oracle {name}\n")
-    ucli.cmd_evidence(type("A", (), {
-        "path": pkg, "type": "ACTION", "file": src,
-        "media_type": "text/plain", "note": "n1"})())
+    for i in range(nevid):
+        src = os.path.join(tmp, f"{name}-{i}.txt")
+        with open(src, "w", encoding="utf-8") as f:
+            f.write(f"oracle {name} {i}\n")
+        ucli.cmd_evidence(type("A", (), {
+            "path": pkg, "type": "ACTION", "file": src,
+            "media_type": "text/plain", "note": f"n{i}"})())
     key = generate_key()
     kf = os.path.join(tmp, f"{name}.key")
     with open(kf, "w", encoding="ascii") as f:
         f.write(key.hex())
     ucli.cmd_submit(type("A", (), {"path": pkg, "key": kf})())
     mutate(pkg, name, mutation)
+    if mutation == "dup_root":
+        # re-seal after the edit: otherwise the seal (S6) fails and the case never
+        # reaches the identifier rule it was built to test.
+        ucli.cmd_submit(type("A", (), {"path": pkg, "key": kf})())
     return pkg, key
 
 
@@ -66,15 +102,24 @@ def mutate(pkg, name, mutation):
     idx_path = os.path.join(pkg, "evidence", "index.json")
     if mutation == "none":
         return
+    idx = json.load(open(idx_path, encoding="utf-8"))
+    first = os.path.join(pkg, "evidence", idx["entries"][0]["path"].replace("\\", "/"))
     if mutation == "tamper":
-        with open(os.path.join(pkg, "evidence", "files", f"{name}.txt"), "a", encoding="utf-8") as f:
+        with open(first, "a", encoding="utf-8") as f:
             f.write("TAMPERED\n")
         return
     if mutation == "delete":
-        os.remove(os.path.join(pkg, "evidence", "files", f"{name}.txt"))
+        os.remove(first)
         return
     if mutation == "duplicate":
         idx = json.load(open(idx_path, encoding="utf-8"))
+        idx["entries"].append(dict(idx["entries"][0]))
+        with open(idx_path, "w", encoding="utf-8") as f:
+            json.dump(idx, f, indent=2, sort_keys=True)
+        return
+    if mutation == "dup_root":
+        # duplicate the first entry; the re-seal that follows rewrites manifest and
+        # signature from the index, so only the identifier rule (S12) can fail.
         idx["entries"].append(dict(idx["entries"][0]))
         with open(idx_path, "w", encoding="utf-8") as f:
             json.dump(idx, f, indent=2, sort_keys=True)
@@ -103,8 +148,8 @@ def first_fail(checks):
     return min(failing, key=num) if failing else None
 
 
-def ref_view(pkg, key):
-    rep = verify(pkg, key=key)
+def ref_view(pkg, key, rep=None):
+    rep = rep or verify(pkg, key=key)
     return rep["result"], first_fail(rep["checks"])
 
 
@@ -123,16 +168,35 @@ def main():
             r_verdict, r_first = ref_view(pkg, key)
             i_verdict, i_first = ind_view(pkg, key)
             r_ok = (r_verdict == want_verdict and r_first == want_first)
-            i_ok = (i_verdict == want_verdict and i_first == want_first)
-            bad += 0 if (r_ok and i_ok) else 1
+            # The independent verifier implements V1-V6 only. A case whose expected
+            # first failure is above S6 is outside what it can see, so it is recorded
+            # rather than scored: scoring it would report a "pass" that means "blind".
+            beyond = want_first is not None and int(want_first[1:]) > 6
+            i_ok = None if beyond else (i_verdict == want_verdict and i_first == want_first)
+            bad += 0 if r_ok else 1
+            bad += 0 if (i_ok in (True, None)) else 1
             rows.append((name, want_verdict, str(want_first), r_verdict, str(r_first),
                          i_verdict, str(i_first), r_ok, i_ok))
 
-    print(f"{'case':<20}{'oracle':<8}{'o-first':<9}{'ref':<8}{'r-first':<9}"
+        for name, prebuild, fn_name, want_verdict, want_first in ORACLE_EXT:
+            pkg, _key = build(tmp, name, "none", nevid=2)
+            if prebuild:
+                getattr(oa, prebuild)(pkg)
+            getattr(oa, fn_name)(pkg)
+            rep = verify(pkg)
+            r_verdict, r_first = ref_view(pkg, None, rep=rep)
+            r_ok = (r_verdict == want_verdict and r_first == want_first)
+            bad += 0 if r_ok else 1
+            # no second implementation above V6: recorded, not scored
+            rows.append((name, want_verdict, str(want_first), r_verdict, str(r_first),
+                         "n/a", "n/a", r_ok, None))
+
+    print(f"{'case':<26}{'oracle':<8}{'o-first':<9}{'ref':<8}{'r-first':<9}"
           f"{'ind':<8}{'i-first':<9}{'ref?':<6}{'ind?'}")
     for name, ov, of, rv, rf, iv, iff, rok, iok in rows:
-        print(f"{name:<20}{ov:<8}{of:<9}{rv:<8}{rf:<9}{iv:<8}{iff:<9}"
-              f"{'OK' if rok else 'DIFF':<6}{'OK' if iok else 'DIFF'}")
+        mark = "OK" if rok else "DIFF"
+        imark = "n/a" if iok is None else ("OK" if iok else "DIFF")
+        print(f"{name:<26}{ov:<8}{of:<9}{rv:<8}{rf:<9}{iv:<8}{iff:<9}{mark:<6}{imark}")
 
     print(f"\ncases: {len(rows)}, cells disagreeing with the oracle: {bad}")
     print("ORACLE: " + ("PASS - both implementations match the written expectations"

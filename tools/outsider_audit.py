@@ -1009,6 +1009,49 @@ def run_pinned(package, baseline_verdict):
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 
+    # attack: no pin supplied by the caller; the verifier remembers instead.
+    # Same rolled-back shape as above, but the only thing that can catch it is
+    # the state file, which is what S19 exists for and what it must refuse.
+    tmp = tempfile.mkdtemp()
+    try:
+        pkg = _prepare(package, tmp)
+        build_ckpt(pkg)
+        from uibc_core.canonical import (checkpoint_head, evidence_root,
+                                         index_metadata_digest, lifecycle_head)
+        import hashlib as _h
+        lc_path = os.path.join(pkg, "lifecycle.json")
+        lc = _json(lc_path)
+        lc["events"] = lc["events"][:-1]
+        _dump(lc_path, lc)
+        manifest = _json(os.path.join(pkg, "manifest.json"))
+        index = _json(os.path.join(pkg, "evidence", "index.json"))
+        entries = index["entries"] if isinstance(index, dict) else index
+        index_obj = index if isinstance(index, dict) else {"entries": entries}
+        hashes = [_h.sha256(_read(os.path.join(pkg, "evidence", e["path"]))).hexdigest()
+                  for e in entries]
+        new_head = checkpoint_head(lifecycle_head(lc["events"]),
+                                   evidence_root(hashes),
+                                   index_metadata_digest(index_obj), len(entries))
+        subject = manifest.get("agent_id")
+        state = os.path.join(tmp, "freshness-state.json")
+        _dump(state, {"schema": "uibc-freshness/1",
+                      "subjects": {subject: {"head": "sha256:" + "0" * 64,
+                                             "sequence": 2}}})
+        manifest["freshness_head"] = {"subject": subject, "sequence": 1}
+        manifest["checkpoint_head"] = new_head
+        _dump(os.path.join(pkg, "manifest.json"), manifest)
+        checks = {c["id"]: c for c in _v(pkg, state_file=state)["checks"]}
+        got = checks.get("S19", {}).get("result")
+        rows.append({"name": "an older package against a remembered head",
+                     "expectation": "FAIL", "got": got,
+                     "failed_checks": ["S19"] if got == "FAIL" else [],
+                     "ok": got == "FAIL", "expectation_note": "",
+                     "why": "S19: the sequence is older than the one the "
+                            "verifier already accepted, so replay is refused "
+                            "even though the signature is valid"})
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
     return {
         "stage": "red-team-pinned",
         "rows": rows,

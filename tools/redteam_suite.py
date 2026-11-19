@@ -231,6 +231,35 @@ def rt15(d, key):
     return verify(d)
 
 
+# RT16 重放更旧的已签包，并自洽声明一个更老的序号 --------------------------
+def rt16(d, key):
+    """A package from an earlier point in time, re-signed by the attacker.
+
+    The signature is valid and self-consistent - S6 has nothing to say, which
+    is the whole reason this attack exists. The only thing that can catch it is
+    a verifier that remembers the last head it accepted, and then only if the
+    presented sequence is older than the remembered one.
+    """
+    man = _j(os.path.join(d, "manifest.json"))
+    man["freshness_head"] = {"subject": man.get("agent_id"),
+                             "sequence": 1}
+    _w(os.path.join(d, "manifest.json"), man)
+    seed = us.ed_generate_seed()
+    ident = _j(os.path.join(d, "identity.json"))
+    lc = _j(os.path.join(d, "lifecycle.json"))
+    sig, pub_b64 = us.ed_seal_sign(seed, ident, man, lc)
+    _w(os.path.join(d, "signatures", "seal.json"), {
+        "schema": "x", "algorithm": "Ed25519",
+        "key_id": us.ed_key_id(us.ed_public_key(seed)), "public_key": pub_b64,
+        "signed": "identity+manifest+lifecycle", "signature": sig,
+        "created_at": "2026-11-17T00:00:00Z"})
+    state = os.path.join(os.path.dirname(d), "rt16-state.json")
+    _w(state, {"schema": "uibc-freshness/1",
+               "subjects": {man.get("agent_id"): {
+                   "head": "sha256:" + "0" * 64, "sequence": 3}}})
+    return verify(d, state_file=state)
+
+
 case("RT01", "索引路径穿越 ../../outside.txt", "FAIL（路径必须落在证据根内）", rt01)
 case("RT02", "索引绝对路径 C:\\Windows\\win.ini", "FAIL（不得读任意绝对路径）", rt02)
 case("RT03", "证据文件换成指向外部的符号链接", "FAIL（或至少不得读穿）", rt03)
@@ -246,6 +275,7 @@ case("RT12", "换钥重签 + 验证方钉住原公钥", "FAIL（S6）", rt12)
 case("RT13", "链尾追加伪造回执（前驱链接写错）", "FAIL（S17）", rt13)
 case("RT14", "策略制品换掉、声明摘要不改", "FAIL（S18）", rt14)
 case("RT15", "manifest 时间回填到 6 小时后", "FAIL（S12 未来偏斜）", rt15)
+case("RT16", "重放旧包并自洽声明更老的序号", "FAIL（S19 回滚）", rt16)
 
 
 def main():

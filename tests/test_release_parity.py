@@ -1,7 +1,7 @@
 """A claim is only as good as the artifact a reader can download.
 
 The archive reports six checks, the latest published package reports six, the
-tree reports eighteen. These tests hold the recorded measurements and the
+tree reports nineteen. These tests hold the recorded measurements and the
 preflight gate, because "eight" was what a source-text count said and it was
 wrong: which checks run depends on the package, not on the source.
 """
@@ -36,14 +36,14 @@ class TestReleaseParity(unittest.TestCase):
         self.assertEqual(self.r["channels"]["archive (DOI)"]["checks"],
                          ["S1", "S2", "S3", "S4", "S5", "S6"])
 
-    def test_twelve_checks_exist_only_in_the_repository(self):
-        """S7-S10 (4) + S11-S12 (2) + S13-S18 (6). A bare id count is a weak
+    def test_thirteen_checks_exist_only_in_the_repository(self):
+        """S7-S10 (4) + S11-S12 (2) + S13-S19 (7). A bare id count is a weak
         assertion, so the ids are named as well."""
         only = [c for c in self.r["only_the_repository_has"] if c != "S0"]
         self.assertEqual(sorted(only, key=lambda c: int(c[1:])),
                          ["S7", "S8", "S9", "S10", "S11", "S12",
-                          "S13", "S14", "S15", "S16", "S17", "S18"])
-        for cid in ("S7", "S8", "S9", "S10", "S13", "S18"):
+                          "S13", "S14", "S15", "S16", "S17", "S18", "S19"])
+        for cid in ("S7", "S8", "S9", "S10", "S13", "S18", "S19"):
             self.assertIn(cid, only)
 
     def test_the_decisive_measurement_is_recorded(self):

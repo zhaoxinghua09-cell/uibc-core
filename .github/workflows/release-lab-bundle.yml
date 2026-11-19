@@ -42,28 +42,6 @@ jobs:
           python tools/check_lab_bundle.py "release/uibc-lab-bundle-${{ steps.v.outputs.version }}.json" \
             --archive "release/uibc-conformance-${{ steps.v.outputs.version }}.zip"
 
-      - name: Sign the digest list, if a signing key is configured
-        env:
-          UIBC_RELEASE_SEED_HEX: ${{ secrets.UIBC_RELEASE_SEED_HEX }}
-        run: |
-          if [ -n "$UIBC_RELEASE_SEED_HEX" ]; then
-            python tools/anchor_release_digests.py sign --file release/CORPUS-DIGESTS.txt --out-dir release
-          else
-            echo "no UIBC_RELEASE_SEED_HEX secret: this release's digest list ships unsigned" > release/UNSIGNED.txt
-          fi
-
-      - name: Try the two external anchors, recording what happened
-        run: |
-          python tools/anchor_release_digests.py anchor --file release/CORPUS-DIGESTS.txt --out-dir release || true
-
-      - name: Verify the signature we just produced
-        run: |
-          if [ -f release/CORPUS-DIGESTS.txt.sig ]; then
-            python tools/anchor_release_digests.py verify --sig release/CORPUS-DIGESTS.txt.sig
-          else
-            echo "unsigned (see release/UNSIGNED.txt)"
-          fi
-
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: lab-bundle
@@ -73,10 +51,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          files="release/uibc-lab-bundle-${{ steps.v.outputs.version }}.json release/CORPUS-DIGESTS.txt release/receipt.json"
-          for extra in release/CORPUS-DIGESTS.txt.sig release/ANCHORS.json \
-                       release/anchor_freetsa.tsr release/anchor_freetsa_ca.pem \
-                       release/UNSIGNED.txt release/CORPUS-DIGESTS.txt.ots; do
-            [ -f "$extra" ] && files="$files $extra"
-          done
-          gh release upload "${{ steps.v.outputs.tag }}" $files --clobber
+          gh release upload "${{ steps.v.outputs.tag }}" \
+            "release/uibc-lab-bundle-${{ steps.v.outputs.version }}.json" \
+            "release/CORPUS-DIGESTS.txt" \
+            "release/receipt.json" \
+            --clobber

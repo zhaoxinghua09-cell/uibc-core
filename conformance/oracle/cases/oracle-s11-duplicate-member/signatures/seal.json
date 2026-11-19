@@ -1,8 +1,8 @@
 {
   "schema": "uibc-core/0.3.3-proposal",
   "algorithm": "HMAC-SHA256",
-  "key_id": "c7fc5216d77c0b6b6ec10ca361004b4d0d8c6ab7e558ac10dd3b46733ffa9632",
+  "key_id": "3b2261243d0bf284b46a525798800d328b64db16ad20b7d3f4ba594c2492b945",
   "signed": "identity+manifest+lifecycle",
-  "signature": "XCKu5L+WoQI4V6osUUqK5ZucXWMJ/Y4yELVuRLf8nbc=",
-  "created_at": "2026-11-19T09:15:43Z"
+  "signature": "Rc62XUBX0WC+F6IR0Vk76ft992Wf/sm+SUyN2Dqbqls=",
+  "created_at": "2026-11-15T00:00:00Z"
 }

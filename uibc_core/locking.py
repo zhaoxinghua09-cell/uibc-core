@@ -89,8 +89,12 @@ def package_lock(package, timeout=30.0):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     fd = os.open(path, os.O_CREAT | os.O_RDWR, 0o600)
     try:
-        if _HAVE_MSVCRT and os.path.getsize(path) == 0:
-            # msvcrt locks a byte range; give it a byte to stand on.
+        # msvcrt locks a byte range and needs a byte to stand on; POSIX does not.
+        # The byte is written on both platforms anyway: a Windows-made package
+        # and a Linux-made one then carry the same lock file, which is what lets
+        # the published corpus be rebuilt byte for byte anywhere. Only the
+        # padding is unconditional; a package that already has content keeps it.
+        if os.path.getsize(path) == 0:
             os.write(fd, b"\0")
         _acquire(fd, timeout)
         try:

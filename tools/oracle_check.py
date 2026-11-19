@@ -13,6 +13,7 @@ Run:  python tools/oracle_check.py
 Exit: 0 = both implementations match the oracle, 1 = at least one cell differs.
 """
 
+import hashlib
 import json
 import os
 import shutil
@@ -28,7 +29,7 @@ sys.path.insert(0, os.path.join(ROOT, "independent_verifier"))
 
 from uibc_core.verify import verify                      # noqa: E402
 from uibc_core import cli as ucli                        # noqa: E402
-from uibc_core.signing import generate_key               # noqa: E402
+from uibc_core.signing import generate_key  # unused by _oracle_key; kept for build_bad               # noqa: E402
 from iverify import independent_verify                   # noqa: E402
 import outsider_audit as oa                              # noqa: E402  (mutations only)
 
@@ -262,6 +263,11 @@ def emit_corpus(dest, only=None):
     publishing at all.
     """
     os.makedirs(dest, exist_ok=True)
+    # Ids and keys are derived, not drawn, so that a second run of this command
+    # produces the same bytes; the remaining variable is the clock, and that is
+    # the caller's SOURCE_DATE_EPOCH. Unpinned, the corpus still emits, it just
+    # cannot be rebuilt by a stranger - which is the thing this exists to avoid.
+    os.environ.setdefault("UIBC_REPRO_SEED", "uibc-oracle/1")
     cases_dir = os.path.join(dest, "cases")
     os.makedirs(cases_dir, exist_ok=True)
     expected = []
@@ -305,9 +311,9 @@ def emit_corpus(dest, only=None):
         expected.append({"case": name, "kind": "accept", "mode": "strict",
                          "expected_verdict": "PASS", "expected_first_fail": None})
 
-    with open(os.path.join(dest, "expected.json"), "w", encoding="utf-8") as f:
+    with open(os.path.join(dest, "expected.json"), "w", encoding="utf-8", newline="\n") as f:
         json.dump({"spec": "uibc", "cases": expected}, f, indent=2, ensure_ascii=False)
-    with open(os.path.join(dest, "keys.json"), "w", encoding="utf-8") as f:
+    with open(os.path.join(dest, "keys.json"), "w", encoding="utf-8", newline="\n") as f:
         json.dump({"note": "throwaway test keys; these packages are synthetic",
                    "keys": keys}, f, indent=2)
 
@@ -320,7 +326,7 @@ def emit_corpus(dest, only=None):
         if verdict != row["expected_verdict"] or first != row["expected_first_fail"]:
             mismatches.append((row["case"], verdict, str(first),
                                row["expected_verdict"], str(row["expected_first_fail"])))
-    with open(os.path.join(dest, "README.md"), "w", encoding="utf-8") as f:
+    with open(os.path.join(dest, "README.md"), "w", encoding="utf-8", newline="\n") as f:
         f.write(EMIT_README % (len(expected), len(mismatches)))
     return len(expected), mismatches
 
@@ -331,6 +337,21 @@ EMIT_README = """# UIBC conformance corpus
 Written by `python tools/oracle_check.py --emit <dir>`; the answers were checked
 against the bytes on disk after writing, so what you read here is what the files
 do (mismatches at emit time: %d).
+
+## Rebuilding these bytes
+
+The corpus is reproducible, not merely consistent. Emit it with the same clock
+and you get the same files:
+
+    SOURCE_DATE_EPOCH=1794700800 python tools/oracle_check.py --emit <empty dir>
+
+Every `created_at` comes from that epoch instead of the wall clock, and every
+`event_id`, `evidence_id` and file name prefix is derived from a fixed seed
+(`UIBC_REPRO_SEED`, set by `--emit`) instead of `uuid4`, so a second run asking
+in the same order gets the same identifiers. `tests/test_oracle_reproducible.py`
+rebuilds the corpus and compares bytes; it fails if that stops being true.
+Without `SOURCE_DATE_EPOCH` the corpus still emits and still round-trips - it
+just cannot be rebuilt, which is the thing worth not doing.
 
 ## How to use it with any verifier
 
@@ -355,6 +376,19 @@ passing them shows conformance to this reading of the spec, not to any
 regulator's requirement. Anything a verifier does that is not in here is
 unmeasured, not impossible.
 """
+
+
+def _oracle_key(name):
+    """The seal key for a case, derived from its name instead of drawn at random.
+
+    A corpus a stranger cannot rebuild is a corpus a stranger has to trust. Two
+    things stopped that: keys drawn per run, and a wall-clock `created_at`. The
+    key is now the hash of the case name, and the clock is pinned by
+    SOURCE_DATE_EPOCH when `--emit` runs, so the same commands produce the same
+    bytes anywhere. These keys are published in `keys.json` and seal nothing but
+    synthetic packages.
+    """
+    return hashlib.sha256(b"uibc-oracle-key/" + name.encode("utf-8")).digest()
 
 
 def build_good(tmp, name, variant):
@@ -397,7 +431,10 @@ def build_good(tmp, name, variant):
         etype = _rest[0] if _rest else "ACTION"
         src = os.path.join(tmp, f"{name}-{fname}")
         mode = "wb" if isinstance(content, bytes) else "w"
-        with open(src, mode, **({} if mode == "wb" else {"encoding": "utf-8"})) as f:
+        # newline="\n" even here: these bytes become evidence, and evidence
+        # hashed on Windows must hash the same as evidence hashed on Linux.
+        opts = {} if mode == "wb" else {"encoding": "utf-8", "newline": "\n"}
+        with open(src, mode, **opts) as f:
             f.write(content)
         ucli.cmd_evidence(type("A", (), {
             "path": pkg, "type": etype, "file": src,
@@ -410,9 +447,9 @@ def build_good(tmp, name, variant):
         for etype in ("UPDATE", "DELEGATE", "UPDATE"):
             ucli.cmd_event(type("A", (), {"path": pkg, "type": etype, "actor": None})())
 
-    key = generate_key()
+    key = _oracle_key(name)
     kf = os.path.join(tmp, f"{name}.key")
-    with open(kf, "w", encoding="ascii") as f:
+    with open(kf, "w", encoding="ascii", newline="\n") as f:
         f.write(key.hex())
     ucli.cmd_submit(type("A", (), {"path": pkg, "key": kf})())
     if variant == "resubmit":
@@ -435,14 +472,14 @@ def build(tmp, name, mutation, nevid=1):
         "agent_type": "software-agent", "version": "1"})())
     for i in range(nevid):
         src = os.path.join(tmp, f"{name}-{i}.txt")
-        with open(src, "w", encoding="utf-8") as f:
+        with open(src, "w", encoding="utf-8", newline="\n") as f:
             f.write(f"oracle {name} {i}\n")
         ucli.cmd_evidence(type("A", (), {
             "path": pkg, "type": "ACTION", "file": src,
             "media_type": "text/plain", "note": f"n{i}"})())
-    key = generate_key()
+    key = _oracle_key(name)
     kf = os.path.join(tmp, f"{name}.key")
-    with open(kf, "w", encoding="ascii") as f:
+    with open(kf, "w", encoding="ascii", newline="\n") as f:
         f.write(key.hex())
     ucli.cmd_submit(type("A", (), {"path": pkg, "key": kf})())
     mutate(pkg, name, mutation)
@@ -460,7 +497,7 @@ def mutate(pkg, name, mutation):
     idx = json.load(open(idx_path, encoding="utf-8"))
     first = os.path.join(pkg, "evidence", idx["entries"][0]["path"].replace("\\", "/"))
     if mutation == "tamper":
-        with open(first, "a", encoding="utf-8") as f:
+        with open(first, "a", encoding="utf-8", newline="\n") as f:
             f.write("TAMPERED\n")
         return
     if mutation == "delete":
@@ -469,14 +506,14 @@ def mutate(pkg, name, mutation):
     if mutation == "duplicate":
         idx = json.load(open(idx_path, encoding="utf-8"))
         idx["entries"].append(dict(idx["entries"][0]))
-        with open(idx_path, "w", encoding="utf-8") as f:
+        with open(idx_path, "w", encoding="utf-8", newline="\n") as f:
             json.dump(idx, f, indent=2, sort_keys=True)
         return
     if mutation == "dup_root":
         # duplicate the first entry; the re-seal that follows rewrites manifest and
         # signature from the index, so only the identifier rule (S12) can fail.
         idx["entries"].append(dict(idx["entries"][0]))
-        with open(idx_path, "w", encoding="utf-8") as f:
+        with open(idx_path, "w", encoding="utf-8", newline="\n") as f:
             json.dump(idx, f, indent=2, sort_keys=True)
         return
     if mutation == "unseal":
@@ -501,7 +538,7 @@ def reseal(pkg, key):
     sp = os.path.join(pkg, "signatures", "seal.json")
     seal = json.load(open(sp, encoding="utf-8"))
     seal["signature"] = seal_sign(key, ident, man, lc)
-    with open(sp, "w", encoding="utf-8") as f:
+    with open(sp, "w", encoding="utf-8", newline="\n") as f:
         json.dump(seal, f, indent=2, sort_keys=True)
 
 
@@ -620,13 +657,13 @@ def main():
         man_path = os.path.join(pkg_c, "manifest.json")
         man = json.load(open(man_path, encoding="utf-8"))
         man["freshness_head"] = {"subject": "oracle", "sequence": 5}
-        with open(man_path, "w", encoding="utf-8") as f:
+        with open(man_path, "w", encoding="utf-8", newline="\n") as f:
             json.dump(man, f, indent=2, sort_keys=True)
         reseal(pkg_c, key_c)
         verify(pkg_c, state_file=state_file)      # first observation: records the mark
         man = json.load(open(man_path, encoding="utf-8"))
         man["freshness_head"]["sequence"] = 3     # ...validly signed, but from earlier
-        with open(man_path, "w", encoding="utf-8") as f:
+        with open(man_path, "w", encoding="utf-8", newline="\n") as f:
             json.dump(man, f, indent=2, sort_keys=True)
         reseal(pkg_c, key_c)
         rep = verify(pkg_c, state_file=state_file)

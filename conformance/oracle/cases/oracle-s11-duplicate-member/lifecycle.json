@@ -2,11 +2,11 @@
   "schema": "uibc-core/0.3.3-proposal",
   "events": [
     {
-      "event_id": "fe35da7c-ef5b-4043-94cb-be31c4d3e82c",
+      "event_id": "55b5100b-1b32-57f0-9b15-f9a5bccb8d94",
       "sequence_number": 0,
       "event_type": "REGISTER",
       "agent_id": "oracle",
-      "timestamp": "2026-11-19T09:15:43Z",
+      "timestamp": "2026-11-15T00:00:00Z",
       "actor": "oracle",
       "payload_hash": null,
       "previous_event": null,

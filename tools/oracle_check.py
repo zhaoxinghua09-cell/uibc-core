@@ -99,6 +99,48 @@ ORACLE_ACCEPT = [
 ]
 
 
+def measure_rule_correspondence(tmp):
+    """Measure, do not assert, what the second implementation's extra rules correspond to.
+
+    Each probe breaks exactly one thing and then re-seals, so the seal is valid and the
+    seal complaint cannot answer first. Whatever each side reports is then the rule itself.
+    """
+    probes = [
+        ("V7", "m_add_undeclared_file", None),
+        ("V8", "m_ckpt_rewrite_index_note", "build_ckpt"),
+        ("V9", "m_ckpt_truncate_the_log", "build_ckpt"),
+    ]
+    out = []
+    for rule, fn, prebuild in probes:
+        pkg, key = build(tmp, "corr-" + rule, "none")
+        if prebuild:
+            getattr(oa, prebuild)(pkg)
+        getattr(oa, fn)(pkg)
+        reseal(pkg, key)
+        rep = verify(pkg, key=key)
+        ref_failed = [c["id"] for c in rep["checks"] if c["result"] != "PASS"]
+        ind = independent_verify(pkg, key=key)
+        ind_failed = [k for k, v in ind["checks"].items() if v != "PASS"]
+        out.append((rule, ref_failed, rep["result"], ind_failed, ind["result"]))
+    return out
+
+
+def measure_blind_verdict(tmp):
+    """Does the second implementation fall silent, or say PASS, where it has no rule?
+
+    This is the question a coverage percentage cannot answer. INCONCLUSIVE and PASS are
+    different reports about the same package, and only one of them is honest when the
+    rule is missing.
+    """
+    pkg, key = build(tmp, "blind-s10", "none")
+    oa.build_ckpt(pkg)
+    oa.m_ckpt_drop_closure_component(pkg)
+    reseal(pkg, key)
+    rep = verify(pkg, key=key)
+    ind = independent_verify(pkg, key=key)
+    return rep["result"], ind["result"]
+
+
 def build_good(tmp, name, variant):
     """A legitimate package. Nothing here is an attack: these are shapes real use produces."""
     pkg = os.path.join(tmp, name)
@@ -379,6 +421,10 @@ def main():
         rows.append(("oracle-s19-regressed", "FAIL", "S19", r_verdict, str(r_first),
                      "n/a", "n/a", r_ok, None))
 
+        # --- measured correspondence for the rules CHECK_MAP does not translate ---
+        corr = measure_rule_correspondence(tmp)
+        blind_ref, blind_ind = measure_blind_verdict(tmp)
+
         # --- tranche four: legitimate packages must be accepted, not merely "not attacked" ---
         for name, variant in ORACLE_ACCEPT:
             pkg, key = build_good(tmp, name, variant)
@@ -416,6 +462,13 @@ def main():
     print("unmapped independent rules: %s - these pair with parts of S1/S7/S8, "
           "not with whole checks, so they are not counted as coverage"
           % (", ".join(r for r in ind_rules if r not in V_TO_S) or "none"))
+    for rule, ref_failed, ref_verdict, ind_failed, ind_verdict in corr:
+        print("measured: %s fires alone -> reference %s %s; independent %s %s"
+              % (rule, ref_verdict, ",".join(ref_failed) or "-",
+                 ind_verdict, ",".join(ind_failed) or "-"))
+    print("measured: where the reference has a rule and the second does not "
+          "(closure dropped, S10), reference says %s and the second says %s"
+          % (blind_ref, blind_ind))
     print("ORACLE: " + ("PASS - both implementations match the written expectations"
                         if bad == 0 else "FAIL - an implementation disagrees with the oracle"))
     return 0 if bad == 0 else 1

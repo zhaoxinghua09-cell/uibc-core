@@ -150,6 +150,39 @@ per-case verdicts from both implementations, the exact pairs, the un-mapped
 rules, the hostile split and the clean split, so that a reader can recompute
 both denominators instead of trusting a summary.
 
+### 5.2 Verdicts on a corpus the implementer does not own
+
+Two implementations sharing an author are a differential, not an
+endorsement: they can be wrong together in the same direction. Section 5.1
+therefore constrains *agreement*, and this section constrains *reach*.
+
+An implementation claiming conformance SHOULD report, per directory, the
+verdicts it reaches on at least one published corpus it did not author, and
+SHOULD state the corpus revision. The report has four requirements:
+
+* **Expectation stated first.** Each directory carries the verdict its own
+  publisher expects. A corpus without stated expectations measures nothing,
+  because any answer can be called agreement afterwards.
+* **Disagreement named, not averaged.** A run that disagrees names the
+  directory and the receipt. An aggregate "97% agreement" hides exactly the
+  case a reader needs.
+* **Zero receipts is a failure, not unanimity.** Counting an empty run as
+  agreement is how a check stops checking.
+* **Granularity differences are declared.** Where the corpus publisher
+  separates a core verdict from a profile verdict and the implementation
+  reports one verdict, that difference is stated as a granularity difference,
+  not scored as a win or a miss.
+
+The reference implementation reports this in `uibc-aer1-corpus/1`
+(`tools/aer1_corpus_matrix.py`). Measured 2026-11-19 against AER-1's
+`base/test-vectors` at kit 1.5.7: 64 receipts across four directories, four
+of four directories in agreement, with the single `invalid-profile` receipt
+declared as the granularity difference described above.
+
+This is a bounded claim on purpose. Judging another organisation's corpus
+does not make that organisation a witness to ours; Section 8 covers external
+anchoring, which is a different obligation.
+
 ## 6. Seal and Key Custody
 
 Two seal types are defined: Ed25519 over canonical package state (publicly

@@ -133,6 +133,35 @@ def mutate(pkg, name, mutation):
     raise ValueError(mutation)
 
 
+def reseal(pkg, key):
+    """Re-sign the manifest with the same key after a deliberate edit.
+
+    S9 and S19 need a package that is internally consistent *except* for the one
+    thing under test, so the seal has to be restored or S6 would answer first.
+    """
+    from uibc_core.signing import seal_sign
+    ident = json.load(open(os.path.join(pkg, "identity.json"), encoding="utf-8"))
+    man = json.load(open(os.path.join(pkg, "manifest.json"), encoding="utf-8"))
+    lc = json.load(open(os.path.join(pkg, "lifecycle.json"), encoding="utf-8"))
+    sp = os.path.join(pkg, "signatures", "seal.json")
+    seal = json.load(open(sp, encoding="utf-8"))
+    seal["signature"] = seal_sign(key, ident, man, lc)
+    with open(sp, "w", encoding="utf-8") as f:
+        json.dump(seal, f, indent=2, sort_keys=True)
+
+
+def checkpoint_of(pkg):
+    """The head the package commits to, derived the same way the verifier derives it."""
+    from uibc_core import canonical as ca
+    man = json.load(open(os.path.join(pkg, "manifest.json"), encoding="utf-8"))
+    lc = json.load(open(os.path.join(pkg, "lifecycle.json"), encoding="utf-8"))
+    idx = json.load(open(os.path.join(pkg, "evidence", "index.json"), encoding="utf-8"))
+    return ca.checkpoint_head(ca.lifecycle_head(lc["events"]),
+                              man["evidence_root"],
+                              ca.index_metadata_digest(idx),
+                              len(idx["entries"]))
+
+
 def first_fail(checks):
     """First failing check in CHECK-NUMBER order, not in report order.
 
@@ -190,6 +219,39 @@ def main():
             # no second implementation above V6: recorded, not scored
             rows.append((name, want_verdict, str(want_first), r_verdict, str(r_first),
                          "n/a", "n/a", r_ok, None))
+
+        # --- S9: a self-consistent package judged against someone else's head ---
+        pkg_a, key_a = build(tmp, "oracle-s09-old", "none", nevid=1)
+        pkg_b, _kb = build(tmp, "oracle-s09-new", "none", nevid=2)
+        want_head = checkpoint_of(pkg_b)          # the head observed elsewhere
+        rep = verify(pkg_a, expect_head=want_head)
+        r_verdict, r_first = ref_view(pkg_a, None, rep=rep)
+        r_ok = (r_verdict == "FAIL" and r_first == "S9")
+        bad += 0 if r_ok else 1
+        rows.append(("oracle-s09-rollback-pin", "FAIL", "S9", r_verdict, str(r_first),
+                     "n/a", "n/a", r_ok, None))
+
+        # --- S19: a package whose sequence went backwards, remembered state ---
+        state_file = os.path.join(tmp, "freshness.json")
+        pkg_c, key_c = build(tmp, "oracle-s19", "none", nevid=2)
+        man_path = os.path.join(pkg_c, "manifest.json")
+        man = json.load(open(man_path, encoding="utf-8"))
+        man["freshness_head"] = {"subject": "oracle", "sequence": 5}
+        with open(man_path, "w", encoding="utf-8") as f:
+            json.dump(man, f, indent=2, sort_keys=True)
+        reseal(pkg_c, key_c)
+        verify(pkg_c, state_file=state_file)      # first observation: records the mark
+        man = json.load(open(man_path, encoding="utf-8"))
+        man["freshness_head"]["sequence"] = 3     # ...validly signed, but from earlier
+        with open(man_path, "w", encoding="utf-8") as f:
+            json.dump(man, f, indent=2, sort_keys=True)
+        reseal(pkg_c, key_c)
+        rep = verify(pkg_c, state_file=state_file)
+        r_verdict, r_first = ref_view(pkg_c, None, rep=rep)
+        r_ok = (r_verdict == "FAIL" and r_first == "S19")
+        bad += 0 if r_ok else 1
+        rows.append(("oracle-s19-regressed", "FAIL", "S19", r_verdict, str(r_first),
+                     "n/a", "n/a", r_ok, None))
 
     print(f"{'case':<26}{'oracle':<8}{'o-first':<9}{'ref':<8}{'r-first':<9}"
           f"{'ind':<8}{'i-first':<9}{'ref?':<6}{'ind?'}")

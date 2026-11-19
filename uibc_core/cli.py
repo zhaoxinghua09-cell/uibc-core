@@ -285,6 +285,25 @@ def cmd_submit(args):
     # claim it never read (MIGRATION-RESULTS.md, M2c).
     from . import __version__ as _builder_version
     manifest["min_verifier_version"] = _builder_version
+    # Optional: carry the verifier inside the package, so an archive can be
+    # checked with nothing but Python - parity with AIVS, which ships verify.py
+    # in the bundle. The builder records path + hash; verify.py binds it in S1,
+    # so an embedded verifier cannot be swapped for one that always says PASS.
+    embedded_src = getattr(args, "embed_verifier", None)
+    if embedded_src:
+        src = os.path.abspath(embedded_src)
+        if not os.path.isfile(src):
+            sys.exit(f"error: embedded verifier not found: {embedded_src}")
+        dst_dir = os.path.join(pkg, "verify")
+        os.makedirs(dst_dir, exist_ok=True)
+        dst = os.path.join(dst_dir, "uibc_verify.py")
+        shutil.copyfile(src, dst)
+        manifest["embedded_verifier"] = {
+            "path": "verify/uibc_verify.py",
+            "sha256": hash_file(dst),
+            "built_by_verifier_version": _builder_version,
+            "note": "outside the evidence root; hash-bound by check S1",
+        }
     _write(os.path.join(pkg, "manifest.json"), manifest)
     msg = f"submission sealed: agent={identity['agent_id']} evidence={len(idx['entries'])} root={root}"
     if getattr(args, "key", None):
@@ -546,6 +565,11 @@ def main():
     p.add_argument("--key", default=None, metavar="KEYFILE",
                    help="key file: write a seal signature (HMAC hex key, or an "
                         "ed25519: key file for a third-party-verifiable seal)")
+    p.add_argument("--embed-verifier", dest="embed_verifier", default=None,
+                   metavar="SCRIPT",
+                   help="copy a single-file verifier into the package as "
+                        "verify/uibc_verify.py and bind its hash in the manifest, "
+                        "so the package can be checked without this repository")
     p.set_defaults(func=cmd_submit)
 
     p = sub.add_parser("verify", help="verify package (exit 0 = PASS)")

@@ -44,7 +44,7 @@
 | 见证人 / 透明日志 | 自己给自己联署等于没联署 | 找到第一个真实的外部见证方（第二家机构或公开日志） |
 | 生产部署 | 事实，不是文档 | 真实用户跑起来并留下可查记录 |
 | 集成广度 | 适配器代码能写，**被生态采纳不能自封** | 已给出可跑的形状适配器（`adapters/frameworks`，7 项测试）；剩下的是分发与上游采纳，仍属运营问题 |
-| 内嵌自验脚本 | AIVS 把验证脚本放进包里，我们还要求 clone 仓库 | 把 `iverify.py` 打成单文件塞进包 `verify/`（半天，兼容性无损） |
+| 内嵌自验脚本 | ~~AIVS 把验证脚本放进包里，我们还要求 clone 仓库~~ → **2026-11-20 已补**：`uibc submit --embed-verifier <script>` 把单文件验证器放进 `verify/uibc_verify.py`，`manifest.embedded_verifier` 记 path + sha256，S1 校验 hash（改了就叫 FAIL，不是"没覆盖"） | `tools/build_standalone_verifier.py` 从 `iverify.py` 现场生成该单文件；实测：无仓无 pip 直接跑 → INCONCLUSIVE/exit 2（未签名包的正确结论），签发包装进 → PASS/anchored，篡改嵌入脚本 → S1 FAIL。**仍与 AIVS 对齐、不领先**：他们先有，我们只是补上 |
 
 ## 4. 覆盖补齐与主张下调（2026-11-20）
 

@@ -28,6 +28,34 @@ REQUIRED = ["manifest.json", "identity.json", "lifecycle.json", "evidence/index.
 KNOWN_EVENTS = {"REGISTER", "ACTIVATE", "UPDATE", "TRANSFER", "DELEGATE",
                 "MIGRATE", "SUSPEND", "RESUME", "REVOKE", "RETIRE"}
 TERMINAL_EVENTS = {"REVOKE", "RETIRE"}
+
+NOT_DETECTED = "No violation was detected within the observed evidence boundary."
+# (keyword that identifies the topic, the wording used when the topic is a standing
+# non-goal of this implementation). A topic already reported as an unjudged artefact
+# found in this run is not repeated under its standing wording.
+NOT_CHECKED_ALWAYS = [
+    ("Merkle proof", "Merkle proof and root recomputation"),
+    ("external timestamp", "external timestamp anchoring"),
+    ("receipt", "compliance receipts"),
+    ("policy", "policy artefacts"),
+    ("strict base64", "strict base64 of identity notes"),
+    ("attestation closure", "attestation closure"),
+    ("duplicate JSON member", "duplicate JSON member names"),
+    ("duplicate evidence_id", "duplicate evidence identifiers"),
+    ("behavioral", "behavioral evaluation"),
+    ("memory fidelity", "memory fidelity/continuity"),
+    ("anchor", "anchor resolution"),
+]
+
+
+def _not_checked(unjudged):
+    """Union of what this run found no rule for and what was never a goal here."""
+    out = list(unjudged)
+    for keyword, wording in NOT_CHECKED_ALWAYS:
+        if any(keyword in item for item in unjudged):
+            continue
+        out.append(wording)
+    return out
 KNOWN_EVIDENCE_TYPES = {
     "IDENTITY", "LIFECYCLE", "INPUT", "ACTION", "TOOL", "MEMORY", "OUTPUT",
     "EVALUATION", "HUMAN_DECISION", "VERIFICATION", "INCIDENT", "RETIREMENT",
@@ -460,4 +488,27 @@ def independent_verify(package_dir: str, key: bytes = None) -> dict:
     return {"implementer": "independent_verifier/0.1.0",
             "result": overall,
             "checks": outcomes,
-            "unjudged": unjudged}
+            "unjudged": unjudged,
+            # Disclosure of the same shape the reference emits, because a verdict without
+            # a scope statement is read as broader than it is. `not_checked` here is the
+            # union of what this run found it had no rule for and what this implementation
+            # never set out to check at all - two different reasons, kept in one list on
+            # purpose, since a consumer only needs to know it was not checked.
+            "scope": ("Structure, identity consistency, lifecycle state machine, evidence "
+                      "content hashes, evidence index metadata and the seal signature, "
+                      "using rules V1-V9 only."),
+            "limitations": [
+                "Rules V1-V9 cover nine of the checks the reference implements; the rest "
+                "are declared not checked rather than assumed clean.",
+                "HMAC seals are symmetric: verification needs the owner key. Ed25519 "
+                "seals are third-party verifiable with the key recorded in the seal.",
+                "In open mode the seal key is read out of the package under test, so a "
+                "passing signature proves internal consistency only ('unanchored').",
+                "No Merkle proof, anchor, receipt, policy or strict-base64 evaluation "
+                "exists in this implementation.",
+            ],
+            "checked": ["structure", "identity", "lifecycle", "evidence hashes",
+                        "index metadata", "seal signature"],
+            "not_checked": _not_checked(unjudged),
+            "statement": NOT_DETECTED,
+            "strict": key is not None}

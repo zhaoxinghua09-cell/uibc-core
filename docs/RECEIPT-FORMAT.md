@@ -41,6 +41,18 @@ The relation field is what decides which count moves:
 - contributed code, same organisation, or paid → **self-reproduction**, published
   with the same prominence and counted separately
 
+The form also asks **blind or directed** and **which verifier produced the numbers**.
+Those are not decoration: a directed run is different evidence from a blind one and
+the two are never added together. A row that lands is transcribed into
+[`docs/RUNS.md`](RUNS.md) with the runner's own words, and any disagreement becomes a
+permanent entry in [`docs/DISPOSITIONS.md`](DISPOSITIONS.md) — including the rows
+that were declined, which stay visible.
+
+This mechanism is simpler than the one `probityai/agent-evidence-vectors` already
+publishes (`RUNS.md` / `DISPOSITIONS.md` / blind-and-directed labels), and the
+comparison is written down against us in
+[`docs/COMPETITIVE-STATE.md`](COMPETITIVE-STATE.md).
+
 ## What a receipt does not mean
 
 Passing 36/36 says: a verifier this project wrote, running the corpus this

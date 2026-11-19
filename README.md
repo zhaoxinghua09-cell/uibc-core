@@ -379,6 +379,7 @@ It does five things and prints one receipt:
 | corpus | regenerates the 500-case corpus and compares row hashes |
 | vectors | `tools/conformance_vectors.py --check` |
 | denominators | re-adds every published per-family count and every mode's accepted count against the corpus file, including the `0/60` head-pinned denominator that must never be quoted as `0/500` |
+| convention axis | rebuilds artifacts sealed under a superseded scheme (which a current verifier genuinely cannot judge), then reports the same case set under `strict` / `lenient` / `excluded` — the 500-case corpus has no such verdicts, so on it all three readings return 12.0% and the axis would otherwise look flat |
 
 Exit code is 0 only if every comparison matches; a single disagreement prints expected vs
 observed and exits non-zero. The tool never repairs its own inputs — a reproduction script that

@@ -185,6 +185,44 @@ def denominators(repo, prof_p=None):
     return "checked", result, notes
 
 
+def convention_axis(repo, uibc, outdir):
+    """Build the convention corpus and compute all three readings.
+
+    Two axes get confused easily: which key you trust (anchor) and what counts as
+    accepted (convention). The 500-case corpus only exercises the first, because
+    none of its cases can come back INCONCLUSIVE. This builds artifacts that
+    genuinely cannot be judged — sealed under a superseded scheme — so the
+    convention axis finally has something to divide.
+
+    Returns (rows, notes, ok).
+    """
+    builder = os.path.join(repo, "tools", "build_convention_corpus.py")
+    if not os.path.exists(builder):
+        return [], ["convention builder not present; axis not exercised"], True
+    cdir = os.path.join(outdir, "convention_corpus")
+    rc, out, _ = run([sys.executable, builder, "--repo", repo, "--uibc", uibc,
+                      "--out", cdir], timeout=900)
+    if rc != 0:
+        return [], ["builder failed (exit %d)" % rc], False
+    cases_path = os.path.join(cdir, "convention_corpus.json")
+    sys.path.insert(0, os.path.join(repo, "tools"))
+    try:
+        import convention_crosswalk as cw
+    except Exception as e:
+        return [], ["crosswalk module unavailable: %s" % e], False
+    doc = json.load(open(cases_path, encoding="utf-8"))
+    res = cw.audit(doc)
+    rows = []
+    for conv in ("strict", "lenient", "excluded"):
+        r = res["rows"][conv]
+        shown = "n/a" if r["rate"] is None else "%.1f%%" % (100 * r["rate"])
+        rows.append((conv, "%d/%d" % (r["false_accept"], r["denominator"]), shown))
+    notes = ["%s/%s" % (k, v) for k, v in sorted((doc.get("counts") or {}).items())]
+    notes.append("convention corpus is a measuring instrument, not a security benchmark: "
+                 "forgeries share one failure class")
+    return rows, notes, True
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--repo", required=True)
@@ -218,6 +256,9 @@ def main():
     corpus_v, corpus_out, corpus_sec = corpus_selfcheck(repo, sys.executable)
     conf_v, conf_out = conformance(repo, sys.executable)
     den_v, den_rows, den_notes = denominators(repo, a.profile)
+    cav_rows, cav_notes, cav_ok = convention_axis(repo, a.uibc, a.out or ".")
+    if not cav_ok:
+        hard.append(("convention", "axis", "builder or crosswalk failed"))
 
     hard = []
     hard += fx_mismatch
@@ -269,6 +310,23 @@ def main():
     lines.append("")
     lines.append("`tools/conformance_vectors.py --check` -> **%s**" % conf_v)
     lines.append("")
+    lines.append("## 4. Convention axis — the same artifacts, three readings")
+    lines.append("")
+    if cav_rows:
+        lines.append("Artifacts are sealed under a superseded scheme, so a current verifier genuinely "
+                     "cannot judge them. That is what makes the axis measurable at all: the 500-case "
+                     "corpus contains no such verdicts, and on it all three readings return 12.0%.")
+        lines.append("")
+        lines.append("| convention | false accepts | rate |")
+        lines.append("|---|---|---|")
+        for conv, frac, shown in cav_rows:
+            lines.append("| `%s` | %s | %s |" % (conv, frac, shown))
+        lines.append("")
+        for n in cav_notes:
+            lines.append("> %s" % n)
+    else:
+        lines.append("_not exercised in this run_")
+    lines.append("")
     lines.append("## Verdict")
     lines.append("")
     if hard:
@@ -277,7 +335,8 @@ def main():
             lines.append("- %s / %s: %s" % h)
     else:
         lines.append("**ALL COMPARISONS MATCH** (%d fixture comparisons, corpus row hashes, "
-                     "conformance vectors, published denominators)." % len(rows))
+                     "conformance vectors, published denominators%s)."
+                     % (len(rows), ", convention axis recomputed from rebuilt artifacts" if cav_rows else ""))
         lines.append("")
         lines.append("This receipt says the numbers reproduce on this machine. It does **not** say "
                      "an independent party verified them: the runner is the same holder. "

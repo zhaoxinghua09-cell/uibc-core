@@ -1,9 +1,5 @@
 # INDEPENDENCE.md — 独立评估与利益关系披露政策
 
-| `S3m` | Assessed by an external machine (model or service) with no commercial relationship to the assessed party | Yes, machine |
-| `S4m` | Assessed by an external machine under a third-party service, with the key fingerprint and raw exchange retained | Yes, machine |
-
-A machine review is not a human review. Both `S3m` and `S4m` MUST record `reviewer_type: machine`, the model or service identity, and a key fingerprint. Wording may say "reviewed by an external model", never "independently reviewed by a third party" — the latter implies a person taking responsibility.
 Version 1.0 · 2026-11-19 · Owner: Xinghua Zhao (Steven Zhao) · ORCID 0009-0001-0512-1237
 
 ## 1. Purpose
@@ -20,12 +16,16 @@ Every evaluation record carries exactly one relation value. There is no default 
 | `S2` | Assessed within the same project or by the same owner | **No** |
 | `S3` | Assessed by an external developer with no commercial relationship | Yes, with disclosure |
 | `S4` | Assessed by an unrelated reviewer with no relationship of any kind | Yes |
+| `S3m` | Assessed by an external machine (model or service) with no commercial relationship to the assessed party | Yes, machine |
+| `S4m` | Assessed by an external machine under a third-party service, with the key fingerprint and raw exchange retained | Yes, machine |
+
+A machine review is not a human review. Both `S3m` and `S4m` MUST record `reviewer_type: machine`, the model or service identity, and a key fingerprint. Wording may say "reviewed by an external model", never "independently reviewed by a third party" — the latter implies a person taking responsibility.
 
 ## 3. Required disclosures
 
 An evaluation record MUST contain:
 
-- `relation` — one of the four values above;
+- `relation` — one of the values in section 2;
 - `self_assessment` — boolean, `true` whenever `relation` is `S1` or `S2`;
 - `evaluator` — named party;
 - `consideration` — any payment, equity, employment or in-kind benefit received by the evaluator from the assessed party.

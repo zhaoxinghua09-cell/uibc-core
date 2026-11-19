@@ -1,0 +1,110 @@
+{
+  "note": "What each reject case rests on. draft_mandated entries carry a clause read in docs/spec-sources; clause_absent marks a draft-mandated check for which no clause has been located yet.",
+  "cases": [
+    {
+      "case": "oracle-tampered",
+      "check": "S4",
+      "basis": "own_choice"
+    },
+    {
+      "case": "oracle-deleted",
+      "check": "S4",
+      "basis": "own_choice"
+    },
+    {
+      "case": "oracle-duplicated",
+      "check": "S5",
+      "basis": "borrowed_idea"
+    },
+    {
+      "case": "oracle-unsealed",
+      "check": "S6",
+      "basis": "borrowed_idea"
+    },
+    {
+      "case": "oracle-s12-id-only",
+      "check": "S12",
+      "basis": "own_choice"
+    },
+    {
+      "case": "oracle-s01-undeclared-file",
+      "check": "S1",
+      "basis": "draft_mandated",
+      "clause_absent": true
+    },
+    {
+      "case": "oracle-s02-identity",
+      "check": "S2",
+      "basis": "draft_mandated",
+      "clause_source": "docs/spec-sources/draft-noa-scitt-ai-agent-receipt-00.txt",
+      "clause_section": "2 (Terminology: Identity manifest)",
+      "clause_quote": "Identity manifest:* an out-of-band, operator-vouched binding of agent.id to its authorized key identifier(s) (kid), used to authenticate _which agent_ acted, not merely that a trusted key signed."
+    },
+    {
+      "case": "oracle-s03-calendar",
+      "check": "S3",
+      "basis": "borrowed_idea"
+    },
+    {
+      "case": "oracle-s08-log-truncated",
+      "check": "S8",
+      "basis": "borrowed_idea"
+    },
+    {
+      "case": "oracle-s10-closure",
+      "check": "S10",
+      "basis": "draft_mandated",
+      "clause_source": "docs/spec-sources/draft-sharif-agent-audit-trail-03.txt",
+      "clause_section": "13.6 (Attestation Closure)",
+      "clause_quote": "An attestation is CLOSED when every component of the closure is covered by a recorded digest or by a recorded, pinned configuration value; it is OPEN when any component is not."
+    },
+    {
+      "case": "oracle-s11-duplicate-member",
+      "check": "S11",
+      "basis": "borrowed_idea"
+    },
+    {
+      "case": "oracle-s13-merkle-root",
+      "check": "S13",
+      "basis": "borrowed_idea"
+    },
+    {
+      "case": "oracle-s14-base64-padding",
+      "check": "S14",
+      "basis": "borrowed_idea"
+    },
+    {
+      "case": "oracle-s15-anchor-time",
+      "check": "S15",
+      "basis": "own_choice"
+    },
+    {
+      "case": "oracle-s16-token-byte",
+      "check": "S16",
+      "basis": "draft_mandated",
+      "clause_absent": true
+    },
+    {
+      "case": "oracle-s17-receipt-body",
+      "check": "S17",
+      "basis": "draft_mandated",
+      "clause_source": "docs/spec-sources/draft-marques-asqav-compliance-receipts-01.txt",
+      "clause_section": "4.3 (Hash-Chain Linkage)",
+      "clause_quote": "Implementations MUST emit a previousReceiptHash field, populated as specified by [ACTA-RECEIPTS] (lowercase hex SHA-256 of the JSON Canonicalization Scheme [RFC8785] encoding of the predecessor receipt). The first receipt in a chain MUST set this field to the all-zero SHA-256 value."
+    },
+    {
+      "case": "oracle-s18-policy-artefact",
+      "check": "S18",
+      "basis": "draft_mandated",
+      "clause_source": "docs/spec-sources/draft-marques-asqav-compliance-receipts-01.txt",
+      "clause_section": "4.2.2 (policy_digest)",
+      "clause_quote": "The value MUST be of the form sha256:<hex> and MUST reference a policy artefact that the Deployer retains for the applicable retention window. Verifiers MUST reject Compliance Receipts whose policy_digest does not resolve in the Audit Pack."
+    },
+    {
+      "case": "oracle-s07-index-metadata",
+      "check": "S7",
+      "basis": "draft_mandated",
+      "clause_absent": true
+    }
+  ]
+}

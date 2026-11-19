@@ -160,6 +160,9 @@ jobs:
       - name: The anchor in the tree still verifies
         run: python -m pytest tests/test_published_anchor.py -q
 
+      - name: The anchor channel is named in exactly one place
+        run: python -m pytest tests/test_channel.py -q
+
       - name: The witness constants still match what we cite
         # Offline by design: the live check (tools/check_witnesses.py) needs three
         # third-party services, and their outage must not colour our CI.

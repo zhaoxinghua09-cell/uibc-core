@@ -431,7 +431,10 @@ def build_good(tmp, name, variant):
         etype = _rest[0] if _rest else "ACTION"
         src = os.path.join(tmp, f"{name}-{fname}")
         mode = "wb" if isinstance(content, bytes) else "w"
-        with open(src, mode, **({} if mode == "wb" else {"encoding": "utf-8"})) as f:
+        # newline="\n" even here: these bytes become evidence, and evidence
+        # hashed on Windows must hash the same as evidence hashed on Linux.
+        opts = {} if mode == "wb" else {"encoding": "utf-8", "newline": "\n"}
+        with open(src, mode, **opts) as f:
             f.write(content)
         ucli.cmd_evidence(type("A", (), {
             "path": pkg, "type": etype, "file": src,

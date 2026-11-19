@@ -80,7 +80,7 @@ class TestTheCoverageNote(unittest.TestCase):
     def test_it_states_the_coverage_fraction(self):
         doc = self._doc()
         self.assertIn("40", doc)
-        self.assertIn("2.5%", doc)
+        self.assertIn("5%", doc)
 
     def test_it_says_the_limit_was_added_not_original(self):
         doc = self._doc()

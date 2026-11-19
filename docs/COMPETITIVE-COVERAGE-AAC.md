@@ -9,9 +9,10 @@
 | 项 | 数字 |
 |---|---|
 | 对手公开向量目录 | 40 |
-| 我们能**只用标准库**独立复算的 | **1**（`json-nesting`） |
+| 我们能**只用标准库**独立复算的 | **2**（`json-nesting`、`history-frame-v0`） |
 | 在这一类里跑出的首个结果 | **4/9 分歧，全部是我们缺 128 层上限** |
 | 把我们缺的那条补上之后 | **9/9 一致，rc=0** |
+| `history-frame-v0` 的 22 项绑定判定 | **22/22 一致，0 分歧（一次就对，无需补任何东西）** |
 
 也就是说：不是"我们更强"，是**在他们写成规范、四种语言共享的这一条上，我们原来是缺的**。补上之后才一致。
 
@@ -24,6 +25,7 @@
 | 类别 | 标记 | 可否独立复算 |
 |---|---|---|
 | `json-nesting` | 无（纯 JSON 文本） | **可以** |
+| `history-frame-v0` | 无（JSON 值 + SHA-256） | **可以**（`tools/crosscheck_aac_history_frame.py`） |
 | `cbor-nesting` / `cbor-request-model` | 无 | 需 CBOR 解析器，未做 |
 | `checkpoint-consistency` / `cll-material` / `bundle` | MMR | 算法不同，不可比 |
 | `cross-language` / `minimum-necessary` / `producer-envelope` / `settlement` / `evidence-request` | COSE + ed25519 | 需 COSE 库，本机无 |
@@ -80,8 +82,21 @@ VERDICT: WE MATCH THEIR NESTING CONTRACT
 
 **必须写"补齐的"，不能写"我们本来就有"。**
 
+## 第二类：`history-frame-v0`，一次就对
+
+11 个 case，22 项绑定判定（`table_binding` / `pack_binding`）：
+
+```
+properties: 22  disagreements: 0
+VERDICT: OUR JCS REPRODUCES THEIR BINDING VERDICTS
+```
+
+这一类的摘要算法与我们完全一致：我们对他们给的 JSON 值做 RFC 8785 规范化后取 SHA-256，得到的值与他们在 `listed` 里登记的一致；五个负例（`pack-digest-mismatch`、`table-digest-mismatch`、`pack-for-another-instance`、`pack-translated-in-place`、`pack-carries-checked-string`）也按预期不一致。
+
+注意范围：这只验证**绑定**（摘要是对的那份），不验证他们的计数规则（那是他们的主题）。
+
 ## 边界
 
-- 这只覆盖 40 类中的 1 类，占 2.5%。
+- 这只覆盖 40 类中的 2 类，占 5%。
 - 其余 39 类的差异属算法族不同，不构成本实现的强弱证据。
 - 对手的 `INTEROP.md` 仍不列本仓库；跑通一类向量不改这一点。

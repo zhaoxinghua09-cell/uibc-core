@@ -132,6 +132,36 @@ identifier rule, so on a package that breaks only that rule it has nothing to ob
 Restating a qualitative note in `INDEPENDENCE.md` as a number: agreement covers
 **6 of 19 checks**; 13 checks have one implementation only.
 
+**These numbers are printed by the tool, not written in this document.** Each run ends
+with four lines:
+
+```
+checks evaluated by the reference across these cases: 19 (S1, ..., S19)
+rules the independent implementation emits: 9 (V1, ..., V9)
+exact id-mapped pairs (CHECK_MAP): 6 of 19 (S1->V1, ..., S6->V6)
+unmapped independent rules: V7, V8, V9
+```
+
+Two corrections are baked into that shape, both against earlier text here:
+
+1. **`19` is not the number declared in the source.** It is the number that produced output
+   on at least one of the thirty packages. A declared check that no package ever reaches
+   looks exactly like a check that does not exist; this count is what tells them apart.
+2. **The second implementation is not "V1–V6".** It emits nine rules: V7 (undeclared root
+   files), V8 (index metadata digest) and V9 (checkpoint head) were added for parity
+   against S1, S7 and S8 after the benchmark corpus showed them missing. They pair with
+   *parts* of those checks rather than whole checks, so nine rules is not "nine checks
+   covered" — but the earlier sentence in this document, which said the second
+   implementation stops at V6 and that thirteen checks have one implementation only, was
+   wrong, and it was wrong in this repository's own favour for the direction that
+   mattered least.
+
+Where a case's first failure lands on an unmapped rule, the verdict is still scored and the
+code is printed as `V7 (unmapped)` rather than being counted as a disagreement: the two
+numbers are answering different questions. `tools/oracle_check.py` prints all four lines
+and `tests/test_oracle.py` fails if any of them changes without this document changing
+with it.
+
 ## What this is not
 
 - **Not independent judgement.** Expectations were drawn from documents this project

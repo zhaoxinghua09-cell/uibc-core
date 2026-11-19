@@ -159,3 +159,40 @@ The honest next step is not more local tests. It is:
 - publish 0.4.0, so the numbers above are reachable by a stranger;
 - hand the 36-package suite to one outside person, so "two implementations
   agree" stops being a claim made only by the two implementations.
+
+## Five comparators on the same ruler (2026-11-20)
+
+Measured again a day later, with one more party included. The reason for this
+section: an earlier draft of the table below left out `agent-action-capsule`,
+which would have produced the sentence "only two projects publish a runnable
+corpus". That sentence would have been **wrong**, and wrong in the direction
+that flatters this project. It is recorded here rather than quietly fixed.
+
+Four columns, each measuring *what is published*, not capability:
+
+| | cases with expected verdicts | runs offline | second implementation | verdict traceable to a clause |
+|---|---|---|---|---|
+| Tyche / EATF | **13** (5 valid, 8 invalid; README states `5 verified, 8 rejected`) | yes (Python, 3 deps) | TypeScript (not exercised here) | no |
+| Action State Group / AAC | **36** (6 positive, 30 mutations) in `vectors/`, *not in the sdist* | yes (Python) | yes (JavaScript) | no |
+| SCC-1 (Watts) | 0 public; **15** prose obligations; the document says a user-supplied record holds 88 frozen vectors | no verifier found | claims Python/TS agreement | partly |
+| Asqav (Marques) | 0; **8** Cedar templates + **4** worked requests | no (Cedar engine not vendored) | no | partly |
+| AAS-1 | **1** worked example; **12** audit assertions | no | no | partly (ISA/ISAE mapping) |
+| this project | **28** (18 must-reject, 1 control, 9 must-accept), shipped with per-case `expected.json` | yes (zero dependencies) | yes (V1–V9) | yes: 18 rejects carry a basis, 5 a verbatim clause |
+
+What the table now supports, and nothing more: **three of the five publish an
+offline-runnable corpus with per-case expected verdicts** (this project 28,
+AAC 36, EATF 13); two publish prose obligations or a plan. On corpus size this
+project is **second of three**, not first — AAC ships more cases and more
+mutations.
+
+The distinguishing column is the last one: of the three runnable corpora, this
+project is the only one measured here where every must-reject case names the
+clause or the project decision it rests on, and where a checker verifies the
+quotes verbatim (`tools/check_grounds.py`, 18 rejects, 5 with a clause). AAC's
+vectors are named by mutation, which is traceable to a *behaviour*, not to a
+document.
+
+Still not claimable: stricter (SCC-1 has obligations with no counterpart here);
+complete (this project has no audit-framework mapping, no identity standard
+binding, no cross-sink semantics); or adopted (real-TSA anchoring and outside
+reproduction remain zero).

@@ -15,6 +15,20 @@ Nothing here is a ratified standard.
 
 ## [Unreleased]
 
+### Conflicts on generated files get a script, not a person's afternoon (2026-11-19)
+
+- `docs/EVIDENCE-INDEX.md` and `docs/EVIDENCE-DASHBOARD.svg` are script output.
+  Both sides of a parallel branch regenerate them, so every merge conflicted on
+  them; one round spent five rebases, two of which were hand-regenerating files
+  a script had already known how to print.
+- `tools/resolve_generated.py` reads the conflicted paths mid-rebase and
+  regenerates the ones a generator owns, then stages them. If a conflicted path
+  is not generator output it prints it and exits 1 - a tool that "picks a side"
+  on hand-written files can silently drop someone's work, so it refuses to.
+- `tests/test_resolve_generated.py` (3 cases): the allow-list stays at exactly
+  two paths, every listed generator exists, and outside a rebase the tool
+  changes nothing.
+
 ### The defect an outsider found is now a check that can fail (2026-11-19)
 
 - External node 001 (Wang Guigui, Debian 13, uid 1001, no `pip install`, README

@@ -138,12 +138,40 @@ def mut_insert_event(kind, ts):
     return f
 
 
-def mut_drop_index(keep):
+def mut_drop_index(fix_count=False, fix_digest=False, delete_index=False,
+                   resign=False, drop=1):
+    """Remove `drop` entries from the index, optionally repairing the two fields
+    that make the removal self-consistent (count, metadata digest) and optionally
+    re-sealing with an attacker key. A variant that repairs nothing is what a
+    careless attacker does; a variant that repairs everything is what a careful
+    one does. The first is caught by S12, the second only by S6/S19."""
     def f(d):
-        p = os.path.join(d, "evidence", "index.json")
-        o = _j(p)
-        o["entries"] = o.get("entries", [])[:keep]
-        _w(p, o)
+        ip = os.path.join(d, "evidence", "index.json")
+        if delete_index:
+            os.remove(ip)
+            return
+        o = _j(ip)
+        o["entries"] = o.get("entries", [])[:-drop]
+        _w(ip, o)
+        mp = os.path.join(d, "manifest.json")
+        m = _j(mp)
+        if fix_count:
+            m["evidence_count"] = len(o["entries"])
+        if fix_digest:
+            from uibc_core.canonical import index_metadata_digest as imd
+            m["evidence_index_digest"] = imd(o)
+        _w(mp, m)
+        if resign:
+            attacker = bytes([0xC5] * 32)
+            ident = _j(os.path.join(d, "identity.json"))
+            lc = _j(os.path.join(d, "lifecycle.json"))
+            sig_b64, pub_b64 = us.ed_seal_sign(attacker, ident, m, lc)
+            sp = os.path.join(d, "signatures", "seal.json")
+            so = _j(sp)
+            so["public_key"] = pub_b64
+            so["signature"] = sig_b64
+            so["key_id"] = hashlib.sha256(us.ed_public_key(attacker)).hexdigest()
+            _w(sp, so)
     return f
 
 
@@ -267,9 +295,26 @@ def build_cases():
                       "追加伪造 %s 事件（%d）" % (kinds[i % 4], i),
                       mut_insert_event(kinds[i % 4], "2026-11-17T00:%02d:00Z" % (i % 60)), None))
 
-    for keep in range(1, 7):
-        cases.append(("F9-%02d" % keep, "evidence-drop", "索引只留前 %d 条" % keep,
-                      mut_drop_index(keep), None))
+    # 删索引条目：只有"真的删掉"才算攻击。若只留的条数 ≥ 原条数，改动是空操作，
+    # 那不是在测验证器，是在给自己记一个假缺口（本轮真踩过这个坑）。
+    drop_variants = [
+        ("F9-00", "删 1 条，什么都不修"),
+        ("F9-01", "删 1 条，顺手改 evidence_count"),
+        ("F9-02", "删 1 条，顺手改 evidence_index_digest"),
+        ("F9-03", "删 1 条，两个字段都修"),
+        ("F9-04", "删 1 条，两个字段都修 + 攻击者重签"),
+        ("F9-05", "整个删掉 evidence/index.json"),
+    ]
+    for cid, desc in drop_variants:
+        args = {
+            "F9-00": {},
+            "F9-01": {"fix_count": True},
+            "F9-02": {"fix_digest": True},
+            "F9-03": {"fix_count": True, "fix_digest": True},
+            "F9-04": {"fix_count": True, "fix_digest": True, "resign": True},
+            "F9-05": {"delete_index": True},
+        }[cid]
+        cases.append((cid, "evidence-drop", desc, mut_drop_index(**args), None))
 
     for i in range(24):
         cases.append(("F10-%02d" % i, "evidence-add",

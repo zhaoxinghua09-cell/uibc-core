@@ -1,14 +1,20 @@
 # Where this could be sent, and what each route costs
 
-**Nothing here has been sent. Every route below needs the account holder's
-explicit go-ahead**, because each one is an external act that cannot be taken
-back. This is the plan, not the act.
+**Steps 1 and 2 are done** — both are releases of this repository, not acts
+against anyone else. **Steps 3 and 4 have not been sent**, and still need the
+account holder's explicit go-ahead, because each one is an external act that
+cannot be taken back.
 
 The order matters: a submission that cites a verifier nobody can install is a
 description of a private project. Steps 1 and 2 come first for that reason, not
 for tidiness.
 
 ## 1. Publish `0.4.0` — the precondition for everything else
+
+**Status: done, 2026-11-19.** `0.4.0` is on PyPI (whl 115,131 B / sdist 821,066 B,
+uploaded 2026-11-18T17:19Z by the parallel line), the bytes are pinned in
+`anchors/pins/uibc-core-0.4.0.sha256` and checked by `tools/check_pins.py`, and
+the tag `v0.4.0` now points at the commit that carries them.
 
 | | |
 |---|---|
@@ -22,6 +28,14 @@ Before uploading, `tools/check_release_parity.py` and
 steps and marks 3–5 as "account holder required".
 
 ## 2. Put the 36 packages where a stranger can get them without an account
+
+**Status: done, 2026-11-19.** `uibc-conformance-0.4.0.zip` (114,576 B,
+sha256 `9a1ca72fea75f8377919dad2602d7f6fd9e0f6803dbe88813074b2645ebef4c7`) is an
+asset on the `v0.4.0` release. The download was fetched back, its hash compared
+with the file in the tree, and then run against a verifier invoked only through
+the documented CLI contract — `strict 36/36, refused 30/36`. That is the
+stranger's path, exercised here so it is not exercised for the first time by a
+stranger.
 
 | | |
 |---|---|

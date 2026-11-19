@@ -4,7 +4,7 @@ This document exists because "trust us" is not evidence. Everything below runs o
 
 ## Zero: the archive that needs no repository
 
-`conformance/uibc-conformance-0.4.1.zip` — sha256 `c232b21fa3400e8c97a2446e05ad5d6dbe40004b55e7fc7267b746403eedd260`, 124,505 bytes. Pin: `anchors/pins/uibc-conformance-0.4.1.sha256`; the build is deterministic, so rebuilding gives the same bytes.
+`conformance/uibc-conformance-0.4.1.zip` — sha256 `23e5808a4b14bd8536f5b3ecb817c114a229081b173001fb133a0f6028f457b4`, 125,417 bytes. Pin: `anchors/pins/uibc-conformance-0.4.1.sha256`; the build is deterministic, so rebuilding gives the same bytes.
 
 ```
 python -m pip install uibc-core==0.4.1
@@ -12,6 +12,8 @@ python run.py
 ```
 
 `strict 36/36` on the reference verifier, and a `receipt.json` you can publish. A verifier that answers `PASS` to everything scores **6/36**, so the corpus cannot be passed by refusing nothing. Point it at another implementation with `--verify "cmd {pkg}"`.
+
+If the verifier is not installed for the Python you are using, `run.py` **exits 3 and writes no receipt** — 36 rows of `FAIL` with no parseable output look exactly like a corpus that fails everything, and that is not a result. Found by walking this page as a stranger on 2026-11-20.
 
 What that is not: a self-run. 36/36 here was produced by the maintainer on one machine. It becomes a third-party reproduction only when someone else runs this same hash elsewhere and publishes the receipt.
 

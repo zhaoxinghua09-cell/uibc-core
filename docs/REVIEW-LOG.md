@@ -359,3 +359,37 @@ The uncomfortable part: our mutation benchmark is **21 cases per mode**, against
 trials. 2/21 accepted in the open mode is a 9.5% false-accept rate on a sample small enough that
 one case swings it by 4.8 points. Until the corpus is larger, the honest reading is "we have not
 measured this well", not "we are stricter". Larger corpus is the next work item, not a claim.
+
+## Mutation corpus, 2026-11-19: 500 cases instead of 21
+
+The published false-accept number came from 21 mutation kinds, one instance each. With a sample
+that size one case moves the rate by 4.8 points, so the number could not support any strictness
+claim. `tools/mutation_corpus.py` keeps the same families but varies the parameter inside each
+family — byte position, field, timestamp, sequence index, attacker key, rollback depth, truncation
+length — and lands on **500 deterministic cases** (no RNG; every index comes from the case list).
+
+Measured on this tree, `python tools/mutation_corpus.py`:
+
+| mode | accepted | total | false-accept |
+|---|---|---|---|
+| open | 65 | 500 | **13.0%** |
+| pinned | 25 | 500 | **5.0%** |
+| head-pinned | 0 | 60 | **0.0%** |
+
+The 13.0% is higher than the 9.5% the 21-case benchmark reported, and the reason is structural,
+not a regression: the corpus contains 40 keyswap cases and 20 rollback cases, and open mode has
+no anchor to judge either by design. Per family, everything else is caught:
+
+- blob-byte 98/98, sig-byte 64/64, identity 12/12, manifest scalar 40/40, manifest extra 24/24,
+  manifest delete 8/8, lifecycle (ts/actor/drop/insert) 76/76, index metadata 24/24,
+  evidence add 24/24, root extra 24/24, truncation 40/40 — all refused, with the catching check
+  recorded per case.
+- keyswap 40/40 accepted in open (nothing to pin against), 0/40 in pinned.
+- rollback 20/20 accepted in open and pinned, 0/20 in head-pinned.
+- evidence-drop 5/6 accepted in both open and pinned. This is the one family the corpus newly
+  exposed: dropping index entries without changing the manifest is not caught when no seal
+  covers the index. Written down as a gap, not filed away.
+
+So the honest sentence is now: **open mode lets through one in eight of these 500; pinned brings
+it to one in twenty; and the only way to catch rollback is an external head.** Still not a
+strictness claim — the corpus has 17 families chosen by us, and nobody has audited the list.

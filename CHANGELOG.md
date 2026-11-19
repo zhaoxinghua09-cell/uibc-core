@@ -1,3 +1,23 @@
+### Two claims about the competition were wrong
+
+- `docs/LANDSCAPE-2026-11.md` §7: an author of another draft states that
+  **"an independent party has run the full vector suite … and reproduced 32/32"**
+  (SCITT list, 2026-07-14). "Third-party execution" is therefore **not** this
+  repository's exclusive property, and the comparison that implied it has
+  been retired.
+- The same section records that Agent Passport System holds a public
+  **OpenChain Community of Conformance** record (2026-07-17), so "no external
+  organisation has published anything about it" was also wrong. The precise
+  statement is: no organisation has *adopted the protocol*; an organisation
+  *published a conformance record* about it.
+- What still holds: their independent runs pass in full (32/32, zero
+  divergence across implementations); ours produced **two disagreements** on
+  a foreign host, and those two rows are now a check that fails if they
+  return.
+- `tests/test_landscape_corrections.py` (4) fails if either correction is
+  edited out, or if the retired comparison reappears outside a line that
+  says it is wrong.
+
 # Changelog
 
 All notable changes to `uibc-core` are recorded here.

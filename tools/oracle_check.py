@@ -32,6 +32,11 @@ from iverify import independent_verify                   # noqa: E402
 import outsider_audit as oa                              # noqa: E402  (mutations only)
 
 V_TO_S = {"V1": "S1", "V2": "S2", "V3": "S3", "V4": "S4", "V5": "S5", "V6": "S6"}
+# What the independent implementation emits as of v1.1. It is not V1-V6 only: three parity
+# rules were added after the benchmark corpus showed it missing them, and they pair with
+# parts of S1/S7/S8 rather than with whole checks. Counting nine rules as "nine checks
+# covered" would be the same overclaim this repository keeps catching in others.
+IND_RULES = ["V1", "V2", "V3", "V4", "V5", "V6", "V7", "V8", "V9"]
 
 # case name, mutation, expected top-level verdict, expected FIRST failing check in strict mode
 ORACLE = [
@@ -283,10 +288,16 @@ def ind_view(pkg, key):
 
 def main():
     rows, bad = [], 0
+    # Which checks the reference actually evaluated across all these packages. Not which
+    # checks it declares: which ones produced a line of output on at least one package.
+    # The difference is the whole point of this count - a check that is declared and never
+    # reached is indistinguishable from a check that does not exist.
+    seen = set()
     with tempfile.TemporaryDirectory() as tmp:
         for name, mutation, want_verdict, want_first in ORACLE:
             pkg, key = build(tmp, name, mutation)
             r_verdict, r_first = ref_view(pkg, key)
+            seen |= {c["id"] for c in verify(pkg, key=key)["checks"]}
             i_verdict, i_first = ind_view(pkg, key)
             r_ok = (r_verdict == want_verdict and r_first == want_first)
             # The independent verifier implements V1-V6 only. A case whose expected
@@ -305,18 +316,40 @@ def main():
                 getattr(oa, prebuild)(pkg)
             getattr(oa, fn_name)(pkg)
             rep = verify(pkg)
+            seen |= {c["id"] for c in rep["checks"]}
             r_verdict, r_first = ref_view(pkg, None, rep=rep)
             r_ok = (r_verdict == want_verdict and r_first == want_first)
             bad += 0 if r_ok else 1
-            # no second implementation above V6: recorded, not scored
-            rows.append((name, want_verdict, str(want_first), r_verdict, str(r_first),
-                         "n/a", "n/a", r_ok, None))
+            # Score the second implementation where it can actually see the rule. S1-S3
+            # are V1-V3, so an extension row expecting a failure at S1 is within its sight
+            # and must not be waved through as "n/a" - that was a hole in this tool until
+            # a test pointed at it.
+            #
+            # Its first failure is only comparable when it lands on an id CHECK_MAP
+            # translates. It also emits V7/V8/V9, rules that pair with parts of S1/S7/S8
+            # rather than whole checks; a case where one of those fires first has the right
+            # verdict and a first-failure code that means something different, so the code
+            # is recorded as un-mapped instead of being called a disagreement.
+            if int(want_first[1:]) <= 6:
+                i_verdict, i_first = ind_view(pkg, None)
+                code_comparable = i_first is None or str(i_first).startswith("S")
+                i_ok = (i_verdict == want_verdict and
+                        (not code_comparable or i_first == want_first))
+                bad += 0 if i_ok else 1
+                rows.append((name, want_verdict, str(want_first), r_verdict, str(r_first),
+                             i_verdict,
+                             str(i_first) if code_comparable else "%s (unmapped)" % i_first,
+                             r_ok, i_ok))
+            else:
+                rows.append((name, want_verdict, str(want_first), r_verdict, str(r_first),
+                             "n/a", "n/a", r_ok, None))
 
         # --- S9: a self-consistent package judged against someone else's head ---
         pkg_a, key_a = build(tmp, "oracle-s09-old", "none", nevid=1)
         pkg_b, _kb = build(tmp, "oracle-s09-new", "none", nevid=2)
         want_head = checkpoint_of(pkg_b)          # the head observed elsewhere
         rep = verify(pkg_a, expect_head=want_head)
+        seen |= {c["id"] for c in rep["checks"]}
         r_verdict, r_first = ref_view(pkg_a, None, rep=rep)
         r_ok = (r_verdict == "FAIL" and r_first == "S9")
         bad += 0 if r_ok else 1
@@ -339,6 +372,7 @@ def main():
             json.dump(man, f, indent=2, sort_keys=True)
         reseal(pkg_c, key_c)
         rep = verify(pkg_c, state_file=state_file)
+        seen |= {c["id"] for c in rep["checks"]}
         r_verdict, r_first = ref_view(pkg_c, None, rep=rep)
         r_ok = (r_verdict == "FAIL" and r_first == "S19")
         bad += 0 if r_ok else 1
@@ -349,6 +383,7 @@ def main():
         for name, variant in ORACLE_ACCEPT:
             pkg, key = build_good(tmp, name, variant)
             rep = verify(pkg, key=key)
+            seen |= {c["id"] for c in rep["checks"]}
             r_verdict, r_first = ref_view(pkg, None, rep=rep)
             i_verdict, i_first = ind_view(pkg, key)
             r_ok = (r_verdict == "PASS")
@@ -366,6 +401,21 @@ def main():
         print(f"{name:<26}{ov:<8}{of:<9}{rv:<8}{rf:<9}{iv:<8}{iff:<9}{mark:<6}{imark}")
 
     print(f"\ncases: {len(rows)}, cells disagreeing with the oracle: {bad}")
+    # Computed, not written: how many checks actually produced output across these
+    # packages, and how many of those the second implementation can also speak to.
+    observed = sorted(seen, key=lambda i: int(i[1:]) if i[1:].isdigit() else 0)
+    mapped = sorted(V_TO_S, key=lambda v: int(v[1:]) if v[1:].isdigit() else 0)
+    ind_rules = sorted(IND_RULES, key=lambda v: int(v[1:]) if v[1:].isdigit() else 0)
+    print("checks evaluated by the reference across these cases: %d (%s)"
+          % (len(observed), ", ".join(observed)))
+    print("rules the independent implementation emits: %d (%s)"
+          % (len(ind_rules), ", ".join(ind_rules)))
+    print("exact id-mapped pairs (CHECK_MAP): %d of %d (%s)"
+          % (len(mapped), len(observed),
+             ", ".join("%s->%s" % (V_TO_S[k], k) for k in mapped)))
+    print("unmapped independent rules: %s - these pair with parts of S1/S7/S8, "
+          "not with whole checks, so they are not counted as coverage"
+          % (", ".join(r for r in ind_rules if r not in V_TO_S) or "none"))
     print("ORACLE: " + ("PASS - both implementations match the written expectations"
                         if bad == 0 else "FAIL - an implementation disagrees with the oracle"))
     return 0 if bad == 0 else 1

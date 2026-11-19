@@ -72,6 +72,8 @@ class TestOracle(unittest.TestCase):
         self.assertIn("rules the independent implementation emits: 9", out)
         self.assertIn("exact id-mapped pairs (CHECK_MAP): 6 of 19", out)
         self.assertIn("unmapped independent rules: V7, V8, V9", out)
+        self.assertIn("measured: V7 fires alone -> reference FAIL S1", out)
+        self.assertIn("reference says FAIL and the second says PASS", out)
 
     def test_no_case_is_silently_unscored(self):
         """Rows must not be blanket-recorded as "n/a" when the second implementation can

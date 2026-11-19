@@ -22,3 +22,10 @@ tests/fixtures/anchor/*.tsr -text
 tests/fixtures/anchor/*.ots -text
 tests/fixtures/anchor/*.json -text
 tests/fixtures/anchor/*.pem -text
+
+# The published corpus is rebuilt byte for byte (`tests/test_oracle_reproducible.py`),
+# so its JSON travels LF on store and on checkout, on every platform. The exception
+# is the same kind as above: `anchored_head.json` under s16 is the file a real
+# RFC 3161 token was taken over, so its bytes are fixed by the token, not by us.
+conformance/oracle/**/*.json text eol=lf
+conformance/oracle/cases/oracle-s16-token-byte/timestamps/anchored_head.json -text

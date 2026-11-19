@@ -2,12 +2,12 @@
   "schema": "uibc-core/0.3.3-proposal",
   "agent_id": "oracle",
   "agent_version": "1",
-  "created_at": "2026-11-19T09:15:44Z",
+  "created_at": "2026-11-15T00:00:00Z",
   "evidence_count": 2,
-  "evidence_root": "ede7ce5b8faeeb8c943c40a2de1454000a8537e5143e0535fb1b9b2176aa70eb",
+  "evidence_root": "739732500d0ca68b127e9077eee756c03cf416c97f9c80f39eac246fcbe9a9b2",
   "status": "SUBMITTED",
   "evidence_index_digest": "sha256:a5fdc8c070e6439cde2b508898da9a1914218d466369cd678462eb156819b093",
-  "lifecycle_head": "sha256:a1872c61fead197028dca56cd9f734fdf62dbbe62cecb379f29c6a14ee54703b",
-  "checkpoint_head": "sha256:10eda3cb354d0b84479ea79a52003db75827ea3ba16cbcc596cc0f3a325f6af5",
-  "min_verifier_version": "0.4.0"
+  "lifecycle_head": "sha256:e10c6de995f0833cbb69a1425a46d278c06b164bc391715fc1107fe79c9013d0",
+  "checkpoint_head": "sha256:ae2b4ff58ab608660c54ba32a8e285c86c0a8d99ecb1cd9cd0e71d73972c168b",
+  "min_verifier_version": "0.4.1"
 }

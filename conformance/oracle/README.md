@@ -5,6 +5,21 @@ Written by `python tools/oracle_check.py --emit <dir>`; the answers were checked
 against the bytes on disk after writing, so what you read here is what the files
 do (mismatches at emit time: 0).
 
+## Rebuilding these bytes
+
+The corpus is reproducible, not merely consistent. Emit it with the same clock
+and you get the same files:
+
+    SOURCE_DATE_EPOCH=1794700800 python tools/oracle_check.py --emit <empty dir>
+
+Every `created_at` comes from that epoch instead of the wall clock, and every
+`event_id`, `evidence_id` and file name prefix is derived from a fixed seed
+(`UIBC_REPRO_SEED`, set by `--emit`) instead of `uuid4`, so a second run asking
+in the same order gets the same identifiers. `tests/test_oracle_reproducible.py`
+rebuilds the corpus and compares bytes; it fails if that stops being true.
+Without `SOURCE_DATE_EPOCH` the corpus still emits and still round-trips - it
+just cannot be rebuilt, which is the thing worth not doing.
+
 ## How to use it with any verifier
 
 1. Take `cases/<name>/` as the package.

@@ -1,20 +1,20 @@
 {
   "algorithm": "rfc6962-sha256",
   "size": 2,
-  "root": "fd7f5433dd4cc9948865995b80eb4fa169a1393389e3b8f091c0d6c2ab5d1234",
+  "root": "8db9c2dd7adcb0097365a61b18e5aba594fbf06368f79651c4b3f7fccad59465",
   "proofs": [
     {
       "index": 0,
       "path": "files/oracle-s17-receipt-body-0.txt",
       "proof": [
-        "b6d38978d8977363e3292093a09fbb866cc8b845a345d0b0bc2db40d7402788d"
+        "aaf978b08e4f41a2ea26aa38f83152f5c166a8a5bebee660d2fa2e323ffb9fb6"
       ]
     },
     {
       "index": 1,
       "path": "files/oracle-s17-receipt-body-1.txt",
       "proof": [
-        "7cb2eb2ff85876efdc3a0555eb485c6601a552e1919e92b1a0b9d0483107131b"
+        "e34bd648ac3248f03ffbbde2d20b1e2e63f47f7c02a5961d461694d8e926b74d"
       ]
     }
   ]

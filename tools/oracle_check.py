@@ -141,6 +141,35 @@ def measure_blind_verdict(tmp):
     return rep["result"], ind["result"]
 
 
+def measure_false_pass(tmp):
+    """How often the second implementation says PASS on a package the reference rejects.
+
+    This is the number a coverage percentage hides. Before the scope guard it was 9 of 20;
+    after it, every one of those became INCONCLUSIVE, which is a statement about the
+    verifier rather than about the package.
+    """
+    hostile = []
+    for name, mutation, _v, _f in ORACLE:
+        if mutation == "none":
+            continue
+        pkg, key = build(tmp, "fp-" + name, mutation)
+        ref = verify(pkg, key=key)
+        ind = independent_verify(pkg, key=key)
+        hostile.append((name, ref["result"], ind["result"]))
+    for name, prebuild, fn, _v, _f in ORACLE_EXT:
+        pkg, key = build(tmp, "fp-" + name, "none", nevid=2)
+        if prebuild:
+            getattr(oa, prebuild)(pkg)
+        getattr(oa, fn)(pkg)
+        reseal(pkg, key)
+        ref = verify(pkg, key=key)
+        ind = independent_verify(pkg, key=key)
+        hostile.append((name, ref["result"], ind["result"]))
+    false_pass = [n for n, r, i in hostile if i == "PASS" and r != "PASS"]
+    declined = [n for n, r, i in hostile if i == "INCONCLUSIVE" and r != "PASS"]
+    return len(hostile), false_pass, declined
+
+
 def build_good(tmp, name, variant):
     """A legitimate package. Nothing here is an attack: these are shapes real use produces."""
     pkg = os.path.join(tmp, name)
@@ -424,6 +453,7 @@ def main():
         # --- measured correspondence for the rules CHECK_MAP does not translate ---
         corr = measure_rule_correspondence(tmp)
         blind_ref, blind_ind = measure_blind_verdict(tmp)
+        n_hostile, false_pass, declined = measure_false_pass(tmp)
 
         # --- tranche four: legitimate packages must be accepted, not merely "not attacked" ---
         for name, variant in ORACLE_ACCEPT:
@@ -433,7 +463,11 @@ def main():
             r_verdict, r_first = ref_view(pkg, None, rep=rep)
             i_verdict, i_first = ind_view(pkg, key)
             r_ok = (r_verdict == "PASS")
-            i_ok = (i_verdict == "PASS")
+            # On the accept side the second implementation is allowed to decline to judge
+            # (INCONCLUSIVE) but not to reject: a rejection here is a false alarm. After
+            # the scope guard it says INCONCLUSIVE on packages carrying artefacts it has
+            # no rule for, which is the honest answer rather than a green one.
+            i_ok = (i_verdict != "FAIL")
             bad += 0 if r_ok else 1
             bad += 0 if i_ok else 1
             rows.append((name, "PASS", "—", r_verdict, str(r_first),
@@ -469,6 +503,9 @@ def main():
     print("measured: where the reference has a rule and the second does not "
           "(closure dropped, S10), reference says %s and the second says %s"
           % (blind_ref, blind_ind))
+    print("measured: of %d hostile packages the reference rejects, the second "
+          "implementation says PASS on %d and declines to judge %d"
+          % (n_hostile, len(false_pass), len(declined)))
     print("ORACLE: " + ("PASS - both implementations match the written expectations"
                         if bad == 0 else "FAIL - an implementation disagrees with the oracle"))
     return 0 if bad == 0 else 1

@@ -50,12 +50,20 @@ class TestThesisTables(unittest.TestCase):
 
     def test_the_committed_chapter_is_what_the_tool_builds(self):
         """The chapter drifted once: 表 5-2 still summed to 19 after a twentieth
-        check landed, so the prose contradicted the code it cites."""
+        check landed, so the prose contradicted the code it cites.
+
+        Only 表 5-1 … 5-3 are compared: from 表 5-4 on, the numbers depend on
+        which optional dependencies are installed, so an equality check over the
+        whole file is an environment check wearing a drift check's clothes. That
+        is how this guard first failed -- green locally, red in `test-with-extras`.
+        """
         path = os.path.join(_REPO, "docs", "THESIS-CH5-TABLES.md")
         with open(path, encoding="utf-8") as fh:
-            on_disk = fh.read().replace("\r\n", "\n").strip()
-        self.assertEqual(on_disk, self.md.replace("\r\n", "\n").strip(),
-                         "docs/THESIS-CH5-TABLES.md is stale; regenerate with "
+            on_disk = fh.read().replace("\r\n", "\n")
+        built = self.md.replace("\r\n", "\n")
+        cut = built.index("## 表 5-4")
+        self.assertEqual(on_disk[:cut].strip(), built[:cut].strip(),
+                         "docs/THESIS-CH5-TABLES.md 表 5-1…5-3 are stale; regenerate with "
                          "`python tools/build_thesis_tables.py > docs/THESIS-CH5-TABLES.md`")
 
 

@@ -64,27 +64,39 @@ The tool:
 1. decodes the body and computes `SHA-256(0x00 ‖ body)`;
 2. folds the proof against `proof.logIndex` / `proof.treeSize`;
 3. compares the folded root with `proof.rootHash`;
-4. compares that root with the root line of the signed checkpoint.
+4. compares that root with the root line of the checkpoint;
+5. verifies the checkpoint's own signature against the log's public key
+   (`https://rekor.sigstore.dev/api/v1/log/publicKey`, ECDSA P-256, SHA-256).
 
-On 2026-11-21 both comparisons are equal:
+Step 5 matters because a root printed in an unsigned document proves only that
+someone printed a root. The signed bytes are the three text lines (origin, size,
+root) each newline-terminated; the signature line is `— <signer> <base64>`, whose
+first four bytes are the key id (`c0d23d6a` for `rekor.sigstore.dev -
+1193050959916656506`) followed by a DER ECDSA signature.
+
+On 2026-11-21 all five comparisons pass, for our entry and for the third party's:
 
 ```
 verified=True  proof.index=2761485521  entry.index=2883389783
+checkpoint.signature_verified=True  key_id=c0d23d6a  curve=secp256r1
 ```
 
 The same tool, same rules, verifies the DFR (`dfr.derappar.at`) entry
-`108e9186…c439bd6b455…` — a **third party's** entry, not ours. The defect was in
-the reading, so it was in every reading we did, ours and theirs.
+`108e9186…c439bd6b455…` — a **third party's** entry, not ours, on a different
+origin. The defect was in the reading, so it was in every reading we did, ours
+and theirs.
 
 ## What this does not prove
 
-- **The checkpoint signature is not verified.** The tool compares the checkpoint's
-  root line with the proof root; it does not check the checkpoint's signature
-  against the log public key, so it does not establish that the log signed this
-  tree size. That is the next step, not a step already taken.
+- **Nothing about consistency between tree sizes.** Inclusion at one `treeSize`
+  says the entry is in that tree; it does not say that tree is an extension of the
+  tree at any earlier size. A consistency proof is the missing step, and the tool
+  does not attempt one.
 - **The meaning of `entry.logIndex` is not established.** We record the
   difference and use the proof's index. Anyone who knows the intended semantics
   should say so, and the tool's comment will follow the answer, not lead it.
+- **The log's anti-equivocation behaviour is not audited.** A valid signature
+  proves the log signed this root once, not that it never signed a conflicting one.
 - **Nothing here says Rekor is wrong.** It says our reading was wrong, twice,
   and that a third-party verifier shared the mistake rather than correcting it.
 

@@ -146,3 +146,83 @@ def test_a_dropped_sibling_is_caught(mod):
         entry["verification"]["inclusionProof"]["hashes"][:-1]
     out = mod.check_entry(entry)
     assert out["verified"] is False
+
+
+# --- checkpoint signature ----------------------------------------------------
+# The note format: three text lines each ending in a newline (the signed bytes),
+# a blank line, then "— <origin> <base64(4-byte key id ‖ DER signature)>".
+# Rekor's log key is ECDSA P-256 with SHA-256. Being able to verify this is the
+# difference between "a root appears in a checkpoint" and "the log signed it".
+
+
+@pytest.fixture(scope="module")
+def log_key():
+    from cryptography.hazmat.primitives import serialization
+    from cryptography.hazmat.primitives.asymmetric import ec
+    key = ec.generate_private_key(ec.SECP256R1())
+    pem = key.public_key().public_bytes(
+        serialization.Encoding.PEM, serialization.PublicFormat.SubjectPublicKeyInfo)
+    return key, pem
+
+
+def signed_checkpoint(key, origin, size, root_b64, key_id=b"\xc0\xd2\x3d\x6a",
+                     signer="rekor.sigstore.dev"):
+    """A checkpoint in the note format.
+
+    The text's origin line carries the tree id ("rekor.sigstore.dev - <id>"), but the
+    signer name on the signature line is the bare origin ("rekor.sigstore.dev") — two
+    different first fields, which is why `split_note` parts on the *second* space.
+    """
+    from cryptography.hazmat.primitives import hashes
+    from cryptography.hazmat.primitives.asymmetric import ec
+    body = ("%s\n%d\n%s\n" % (origin, size, root_b64)).encode()
+    sig = key.sign(body, ec.ECDSA(hashes.SHA256()))
+    return "%s\n%d\n%s\n\n\u2014 %s %s\n" % (
+        origin, size, root_b64, signer, base64.b64encode(key_id + sig).decode())
+
+
+def test_checkpoint_signature_verifies(mod, log_key):
+    key, pem = log_key
+    entry = make_entry(BODIES, 3)
+    proof = entry["verification"]["inclusionProof"]
+    proof["checkpoint"] = signed_checkpoint(
+        key, "rekor.sigstore.dev - 1", len(BODIES), base64.b64encode(bytes.fromhex(proof["rootHash"])).decode())
+    out = mod.check_entry(entry, pem)
+    assert out["verified"] is True
+    assert out["checkpoint"]["signature_verified"] is True
+    assert out["checkpoint"]["signature"]["curve"] == "secp256r1"
+    assert out["checkpoint"]["signature"]["signers"][0]["key_id"] == "c0d23d6a"
+
+
+def test_unsigned_checkpoint_is_reported_not_assumed(mod, log_key):
+    """Without the log key the tool must not claim a signature it never checked."""
+    entry = make_entry(BODIES, 3)
+    out = mod.check_entry(entry)
+    assert out["checkpoint"]["signature_verified"] is None
+    assert out["verified"] is True
+
+
+def test_a_forged_checkpoint_signature_is_caught(mod, log_key):
+    from cryptography.hazmat.primitives.asymmetric import ec
+    key, pem = log_key
+    other = ec.generate_private_key(ec.SECP256R1())
+    entry = make_entry(BODIES, 3)
+    proof = entry["verification"]["inclusionProof"]
+    proof["checkpoint"] = signed_checkpoint(
+        other, "rekor.sigstore.dev - 1", len(BODIES), base64.b64encode(bytes.fromhex(proof["rootHash"])).decode())
+    out = mod.check_entry(entry, pem)
+    assert out["checkpoint"]["signature_verified"] is False
+    assert out["verified"] is False
+
+
+def test_a_rewritten_tree_size_breaks_the_signature(mod, log_key):
+    """The signature covers the size line: claiming a larger tree must not pass."""
+    key, pem = log_key
+    entry = make_entry(BODIES, 3)
+    proof = entry["verification"]["inclusionProof"]
+    cp = signed_checkpoint(key, "rekor.sigstore.dev - 1", len(BODIES),
+                           base64.b64encode(bytes.fromhex(proof["rootHash"])).decode())
+    proof["checkpoint"] = cp.replace("\n%d\n" % len(BODIES), "\n%d\n" % (len(BODIES) + 1))
+    out = mod.check_entry(entry, pem)
+    assert out["checkpoint"]["signature_verified"] is False
+    assert out["verified"] is False

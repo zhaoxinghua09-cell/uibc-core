@@ -1,0 +1,25 @@
+{
+  "kind": "uibc-attestation-v0",
+  "release": "v0.5.0",
+  "what": "These are the bytes v0.5.0 published, copied here so a reader can check the page against something that is not the page. v0.5.0 is the first release the signing key covers; v0.4.1 predates it and stays unsigned.",
+  "digest_file": "CORPUS-DIGESTS.txt",
+  "digest_file_sha256": "9a3ffbbcd1c516e005dcb1bb95f413fd166066df20ab88b4c0e9fe4ab395d86c",
+  "signature": {
+    "file": "CORPUS-DIGESTS.txt.sig",
+    "kind": "uibc-detached-signature-v0",
+    "key_id": "179c615aef27cbcd"
+  },
+  "timestamp_on_the_digest": {
+    "file": "CORPUS-DIGESTS.txt",
+    "file_sha256": "9a3ffbbcd1c516e005dcb1bb95f413fd166066df20ab88b4c0e9fe4ab395d86c",
+    "tsa": {
+      "state": "anchored",
+      "detail": "RESULT_JSON=release/anchor_freetsa.json"
+    },
+    "ots": {
+      "state": "pending_calendar",
+      "detail": "calendar attestation from alice.btc.calendar.opentimestamps.org, not a Bitcoin block"
+    }
+  },
+  "limits": "A signature says which key signed these bytes, not who controls that key outside this repository. The OpenTimestamps file is a calendar attestation here, not a Bitcoin block."
+}

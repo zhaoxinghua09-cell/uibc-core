@@ -4,7 +4,7 @@ This document exists because "trust us" is not evidence. Everything below runs o
 
 ## Zero: the archive that needs no repository
 
-`conformance/uibc-conformance-0.4.1.zip` — sha256 `711fa82c9f183066cfae6441a4fe3fc27fcc516b25f2a976cad5e0dd61b5135f`, 228,000 bytes. Pin: `anchors/pins/uibc-conformance-0.4.1.sha256`; the build is deterministic, so rebuilding gives the same bytes.
+`conformance/uibc-conformance-0.4.1.zip` — sha256 `711fa82c9f183066cfae6441a4fe3fc27fcc516b25f2a976cad5e0dd61b5135f`, 228,000 bytes. Pin: `anchors/pins/uibc-conformance-0.4.1.sha256`. The build is deterministic for a given tree, and this hash is reproducible only from the tree that produced it: `0.4.1` was built at commit `d72c4f9`, and rebuilding from today's tree gives `083c0dbc…` because the runner template was fixed afterwards. `tools/build_conformance_bundle.py` therefore refuses to overwrite a pinned archive whose bytes would change, and prints both hashes (measured 2026-11-20, exit 3). A version number names one set of bytes; "latest" does not.
 
 ```
 python run.py

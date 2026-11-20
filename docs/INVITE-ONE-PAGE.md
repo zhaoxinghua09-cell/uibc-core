@@ -46,17 +46,34 @@ sha256sum -c docs/upstream-package/scitt-rfc9162/SHA256SUMS   # integrity first
 python tools/check_scitt_vectors_standalone.py                # reference run, ours
 ```
 
-Then run **your** verifier over `docs/upstream-package/scitt-rfc9162/v1/*/expected.json`.
+Then, instead of writing glue code, give us **one executable** and let the harness
+drive it:
+
+```bash
+python tools/conformance_harness.py --adapter "node your-adapter.mjs"
+```
+
+Your adapter reads one JSON line and writes one back — five fields in, two out. The
+protocol is in [`conformance/ADAPTER-PROTOCOL.md`](../conformance/ADAPTER-PROTOCOL.md)
+and it is short enough to read in two minutes. The harness feeds every vector,
+compares results, and writes a receipt naming your command, your OS, your runtime
+and the UTC time.
+
+The receipt splits two things on purpose: **root agreement** (language-neutral —
+your fold either produces the same bytes or it does not) and **verdict agreement**
+(your error vocabulary versus ours). A root-equal, verdict-different row is recorded
+as *wording only* and is explicitly **not** counted as a conformance failure. You
+are not being asked to adopt our names for things.
 
 ## What to send back
 
-Five lines, no form, no template:
+The receipt file the harness wrote, plus three lines we cannot derive from it:
 
 1. Your implementation: language, repository URL, commit you ran.
-2. Environment: OS, runtime version.
-3. The exact command you ran.
-4. Per vector: `VALID` / the failure name you produce / `INCONCLUSIVE`.
-5. Any vector where you believe **the RFC** (not our vector) is ambiguous — with the
+2. Whether you had seen our expected results before running (**blind** or
+   **directed**) — asked because directed runs prove reproducibility, not independent
+   discovery, and the ledger records which it was.
+3. Any vector where you believe **the RFC** (not our vector) is ambiguous — with the
    sentence of the RFC you are reading.
 
 If a vector is wrong, say so and say which field is wrong. We will fix the package

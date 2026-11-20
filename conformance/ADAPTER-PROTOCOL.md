@@ -46,7 +46,7 @@ It compares two things **separately**:
    If your root matches and your word differs, the receipt records it as
    *wording only* and does **not** count it as a conformance failure.
 
-That split is the point: a report that says "6 of 30 failed" because you call it
+That split is the point: a report that says "6 of 41 failed" because you call it
 `E_PROOF_MISMATCH` and we call it `INVALID_INCLUSION_PATH` teaches nobody anything.
 
 ## Two examples in this repository

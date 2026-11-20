@@ -55,6 +55,26 @@ HUMAN_ONLY = [
                                                "phrases a checker refuses in anything new"),
 ]
 
+REPRODUCE = [
+    ("python tools/status_page.py --check",
+     "is this page still true"),
+    ("python tools/check_release_anchors.py",
+     "the frozen page against its pin, its token, its signature and its block"),
+    ("python tools/ots_merkle.py <proof> --data <file> --block-json <record>",
+     "walk the proof to the merkle root without the opentimestamps library; "
+     "the three arguments are the files in anchors/attestations/v0.4.1/"),
+    ("python tools/check_release_pins.py",
+     "every release carries a record of what it holds"),
+    ("python tools/check_outsider_entry.py --probe",
+     "both documented URLs still serve the pinned archive"),
+    ("python tools/check_adoption.py",
+     "0 measured zero, 3 a bucket was not asked"),
+    ("python tools/settlement_boundary.py",
+     "six questions, no payment claim in the docs"),
+    ("python tools/check_scitt_crosswalk.py",
+     "18 rows against the vendored draft"),
+]
+
 
 def _root():
     return os.getcwd()
@@ -196,13 +216,19 @@ def render(f, missing):
     for what, why in HUMAN_ONLY:
         add("- **%s** — %s" % (what, why))
     add("")
-    add("## Reproduce")
+    add("## Verify it yourself")
+    add("")
+    add("Every command below runs offline and needs no account. The anchors are the "
+        "evidence that this repository's own words are not the only witness.")
     add("")
     add("```bash")
-    add("python tools/status_page.py --check     # is this page still true")
-    add("python tools/check_adoption.py         # 0 measured zero, 3 a bucket was not asked")
-    add("python tools/settlement_boundary.py    # six questions, no payment claim in the docs")
-    add("python tools/check_scitt_crosswalk.py  # 18 rows against the vendored draft")
+    body = []
+    for command, comment in REPRODUCE:
+        body.extend(["# " + comment, command, ""])
+    if body:
+        body.pop()
+    for line in body:
+        add(line)
     add("```")
     add("")
     if missing:
@@ -210,6 +236,31 @@ def render(f, missing):
             "them say `missing` rather than a guess." % ", ".join(missing))
         add("")
     return "\n".join(lines) + "\n"
+
+
+def _tool_path(command):
+    """`python tools/x.py ...` -> `tools/x.py`."""
+    words = command.split()
+    for word in words:
+        if word.startswith("tools/"):
+            return word
+    return ""
+
+
+def _missing_reproduce_tools(root):
+    """A page that lists a command whose tool is gone is wrong, not merely old.
+
+    Measured 2026-11-20: the reproduce block named four tools and none of the anchor
+    checks, so the strongest evidence in the repository was unreachable from the page a
+    reader lands on -- and a renamed tool would have left every command pointing at
+    nothing while `--check` stayed green. When this tree has a `tools/` directory, every
+    listed path must exist. An unpacked sdist has no `tools/` at all, and there the check
+    says nothing rather than inventing a failure.
+    """
+    if not os.path.isdir(os.path.join(root, "tools")):
+        return []
+    return [row[0] for row in REPRODUCE
+            if not os.path.isfile(os.path.join(root, _tool_path(row[0])))]
 
 
 def main(argv=None):
@@ -226,6 +277,11 @@ def main(argv=None):
         if not os.path.isfile(path):
             print("STALE — %s does not exist; run python tools/status_page.py" % PAGE)
             return 3
+        gone = _missing_reproduce_tools(root)
+        if gone:
+            print("STALE - %s lists a command whose tool does not exist: %s"
+                  % (PAGE, ", ".join(_tool_path(row) for row in gone)))
+            return 1
         current = _read(path)
         if current != page:
             print("STALE — %s does not match its sources; run python tools/status_page.py" % PAGE)

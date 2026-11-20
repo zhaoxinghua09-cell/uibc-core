@@ -52,6 +52,31 @@ def sha256_file(path):
     return h.hexdigest()
 
 
+def canonical_bytes(obj):
+    """The one serialization used for every hash in this repo's receipts."""
+    return json.dumps(obj, sort_keys=True, separators=(",", ":"),
+                      ensure_ascii=False).encode("utf-8")
+
+
+def package_root(pkg):
+    """Digest of the package's file tree, independent of where it sits.
+
+    Paths are relative and sorted, so a copy of the package on another machine
+    yields the same root. Two packages that differ in one byte of one file
+    differ here — that is what makes the receipt checkable without trusting
+    the receipt's own `package` field.
+    """
+    lines = []
+    for root, dirs, files in os.walk(pkg):
+        dirs.sort()
+        for name in sorted(files):
+            full = os.path.join(root, name)
+            rel = os.path.relpath(full, pkg).replace(os.sep, "/")
+            lines.append("%s\0%d\0%s" % (rel, os.path.getsize(full),
+                                         sha256_file(full)))
+    return hashlib.sha256("\n".join(lines).encode("utf-8")).hexdigest()
+
+
 def _zip_members(path):
     out = []
     with zipfile.ZipFile(path) as z:
@@ -207,12 +232,58 @@ def admit(artifact, out, agent_id, owner, py, key=None, pinned=None,
         gate = _gate_dict(py, out, pinned)
 
     row = disclosure_row(verdicts, kind, len(members))
-    return {"inventory": inv, "steps": steps, "verdicts": verdicts,
-            "checks": sorted({c["id"] for c in open_v.get("checks", [])
-                              if c.get("result") != "PASS"}),
-            "decision": (gate or {}).get("decision"),
-            "reason": (gate or {}).get("reason"),
-            "disclosure": row, "package": out}
+    result = {"inventory": inv, "steps": steps, "verdicts": verdicts,
+              "checks": sorted({c["id"] for c in open_v.get("checks", [])
+                                if c.get("result") != "PASS"}),
+              "decision": (gate or {}).get("decision"),
+              "reason": (gate or {}).get("reason"),
+              "disclosure": row, "package": out}
+    if gate is not None:
+        result["receipt"] = build_receipt(out, inv, gate, row, verdicts)
+    return result
+
+
+def build_receipt(pkg, inv, gate, row, verdicts):
+    """A decision that a third party can recompute, not just read.
+
+    The record above is prose a reader has to trust. This receipt carries the
+    inputs of the decision (package root, subject sha256) next to its outputs
+    (decision, reason, overlays), plus a hash over its own canonical bytes —
+    so `tools/verify_decision.py` can redo the whole thing and say MATCH or
+    name the field that moved.
+    """
+    payload = {
+        "tool": "decision_receipt/1.0",
+        "generated": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "subject": {
+            "name": inv["artifact"]["name"],
+            "sha256": inv["artifact"]["sha256"],
+            "bytes": inv["artifact"]["bytes"],
+            "members": inv["member_count"],
+            "kind": inv["artifact"]["kind"],
+        },
+        "package_root": package_root(pkg),
+        "gate_version": gate.get("gate_version"),
+        "verifier_version": (gate.get("verify_report") or {}).get("verifier_version"),
+        "decision": gate.get("decision"),
+        "reason": gate.get("reason"),
+        "verify_result": gate.get("verify_result"),
+        "revocation": gate.get("revocation"),
+        "dispute": gate.get("dispute"),
+        "verdicts": verdicts,
+        "disclosure": {k: row[k] for k in DISCLOSURE_FIELDS},
+        "not_covered": inv["not_covered"],
+    }
+    payload["receipt_sha256"] = hashlib.sha256(
+        canonical_bytes(payload)).hexdigest()
+    return payload
+
+
+def write_receipt(path, receipt):
+    with open(path, "w", encoding="utf-8", newline="\n") as f:
+        json.dump(receipt, f, indent=2, sort_keys=True, ensure_ascii=False)
+        f.write("\n")
+    return path
 
 
 def _gate_dict(py, out, pinned):
@@ -279,7 +350,17 @@ def render(result):
     if result.get("decision"):
         lines.append("| admission decision | **%s** — %s |"
                      % (result["decision"], result.get("reason") or ""))
+    if result.get("receipt"):
+        lines.append("| decision receipt | `%s` |" % (result.get("receipt_path") or "not written"))
+        lines.append("| receipt sha256 | `%s` |"
+                     % result["receipt"]["receipt_sha256"])
+        lines.append("| package root | `%s` |" % result["receipt"]["package_root"])
     lines.append("")
+    lines.append("Recompute the decision without trusting this file:")
+    lines.append("")
+    lines.append("    python tools/verify_decision.py --package %s --receipt %s"
+                 % (result["package"],
+                    result.get("receipt_path") or "<receipt>.json"))
     lines.append("## Disclosure row (seven fields)")
     lines.append("")
     lines.append("| " + " | ".join(DISCLOSURE_FIELDS) + " |")
@@ -314,6 +395,10 @@ def main(argv=None):
     ap.add_argument("--no-gate", dest="run_gate", action="store_false",
                     help="skip the gate decision (verify only); the decision carries "
                          "revocation and dispute overlays, so skipping it is weaker")
+    ap.add_argument("--decision-out", default=None,
+                    help="where to write the decision receipt (default <out>.decision.json)")
+    ap.add_argument("--no-receipt", action="store_true",
+                    help="do not write a decision receipt")
     a = ap.parse_args(argv)
     try:
         result = admit(a.artifact, a.out, a.agent_id, a.owner, a.python,
@@ -321,6 +406,10 @@ def main(argv=None):
     except ArtifactError as e:
         print("ADMISSION ERROR: %s" % e, file=sys.stderr)
         return 2
+    receipt_path = None
+    if result.get("receipt") and not a.no_receipt:
+        receipt_path = a.decision_out or (a.out + ".decision.json")
+        result["receipt_path"] = write_receipt(receipt_path, result["receipt"])
     if a.json:
         print(json.dumps(result, indent=2, sort_keys=True, default=str))
     else:

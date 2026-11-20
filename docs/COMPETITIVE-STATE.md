@@ -149,7 +149,7 @@ their verifier: ok=True
 `uibc-lab-bundle-<v>.json` + `receipt.json` + `CORPUS-DIGESTS.txt`，工作流在打 tag 时挂到 release。
 
 **落后与追平的现状（2026-11-20 复核一次，按行写清）**：他们三件齐（`.sig` + `.sig.ots` + `.sig.tsr`）
-挂在已发布的 release 上。我们的 `v0.4.1` release 现在也有三件中的两件：
+挂在已发布的 release 上。我们的 `v0.4.1` release 现在也有四件里的三件：
 
 | 件 | 他们 | 我们（`v0.4.1` release 实读，2026-11-20 04:24 UTC） |
 | --- | --- | --- |

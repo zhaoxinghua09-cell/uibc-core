@@ -155,6 +155,18 @@ def _sha256(path):
         return hashlib.sha256(handle.read()).hexdigest()
 
 
+def _before_freeze(gen_time, frozen_at):
+    """True when a claimed signing time precedes the freeze it is supposed to follow.
+
+    Comparing these two strings works because both are UTC timestamps in the same
+    shape (YYYY-MM-DDTHH:MM:SS+00:00 / ...Z); a timezone other than UTC would need
+    parsing, and the tokens this repository accepts are FreeTSA's, which are UTC.
+    """
+    if not gen_time or not frozen_at:
+        return False
+    return gen_time.replace("+00:00", "Z") <= frozen_at.replace("+00:00", "Z")
+
+
 def _download_sha256(tag, name, tmpdir=None):
     """Hash an asset from the bytes the page serves.
 
@@ -239,8 +251,39 @@ def verify_dir(directory, tag="v0.4.1"):
         if not pinned:
             return 1, lines + ["the repository-held signature verified but no key is "
                                "recorded in anchors/release-signing-key.json"]
-        lines.append("publisher    identified by the key recorded in this repository; the "
-                     "signature was made after publication, not during it")
+        lines.append("publisher    identified by the key recorded in this repository")
+        # Who signed, and when. The second question needs a witness that is not us:
+        # without a token, "signed after publication" is a sentence, not a fact.
+        tok = os.path.join(os.path.dirname(held), "anchor_freetsa.tsr")
+        ca = os.path.join(os.path.dirname(held), "anchor_freetsa_ca.pem")
+        if not (os.path.isfile(tok) and os.path.isfile(ca)):
+            lines.append("signed_at    no timestamp on the signature: the publisher is "
+                         "identified, the time is only asserted")
+            return 0, lines
+        tok_code, tok_out = _verify_token(tok, held, ca)
+        if tok_code is None:
+            return 3, lines + ["could not run the timestamp verifier: %s" % tok_out]
+        tok_blob = _json_block(tok_out)
+        if tok_code != 0 or not tok_blob or not tok_blob.get("verified"):
+            problems = (tok_blob or {}).get("problems") or ["token does not verify"]
+            return 1, lines + ["the timestamp on the signature does not verify: %s"
+                               % "; ".join(map(str, problems))]
+        info = tok_blob.get("info") or {}
+        gen = str(info.get("gen_time", ""))
+        lines.append("signed_at    %s, attested by a third party (serial %s)"
+                     % (gen, info.get("serial")))
+        frozen = None
+        pin_path = os.path.join(ROOT, "anchors", "pins", "uibc-release-%s.json" % tag)
+        if os.path.isfile(pin_path):
+            with open(pin_path, encoding="utf-8") as handle:
+                frozen = (json.load(handle) or {}).get("frozen_at")
+        if _before_freeze(gen, frozen):
+            return 1, lines + ["the signature is timestamped %s, before the page was frozen "
+                               "at %s: that is earlier than the claim it supports"
+                               % (gen, frozen)]
+        if frozen:
+            lines.append("order        the signature is later than the freeze (%s), as the "
+                         "attestation claims" % frozen)
         return 0, lines
     code, out = _verify_sig(sig, digest_path)
     if code is None:

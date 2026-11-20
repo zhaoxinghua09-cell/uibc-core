@@ -80,3 +80,43 @@ def test_checker_uses_the_repository_signature_when_the_page_has_none():
     assert code == 0, out
     blob = cra._json_block(out)
     assert blob and blob["verified"] is True
+
+
+# --- when, not only who -----------------------------------------------------------
+
+TSR = os.path.join(ATT, "anchor_freetsa.tsr")
+CA = os.path.join(ATT, "anchor_freetsa_ca.pem")
+
+
+def test_the_signature_carries_a_third_party_timestamp():
+    """The attestation says "signed after publication". Without a token that is a
+    sentence written by the same party that benefits from it."""
+    assert os.path.isfile(TSR) and os.path.isfile(CA)
+    code, out = cra._verify_token(TSR, SIG, CA)
+    assert code == 0, out
+    blob = cra._json_block(out)
+    assert blob["verified"] is True
+    assert blob["info"]["gen_time"] == "2026-11-20T07:00:46+00:00"
+    assert blob["info"]["serial"] == "172106544"
+
+
+def test_the_recorded_time_is_the_time_the_token_says():
+    recorded = json.load(io.open(ATTESTATION, encoding="utf-8"))[
+        "timestamp_on_the_signature"]
+    code, out = cra._verify_token(TSR, SIG, CA)
+    blob = json.loads(out[out.index("{"):])
+    assert recorded["gen_time"] == blob["info"]["gen_time"]
+    assert recorded["serial"] == str(blob["info"]["serial"])
+    assert recorded["digest_hex"] == blob["info"]["digest_hex"]
+
+
+def test_the_signature_comes_after_the_freeze_not_before():
+    pin = json.load(io.open(os.path.join(ROOT, "anchors", "pins",
+                                       "uibc-release-v0.4.1.json"), encoding="utf-8"))
+    assert not cra._before_freeze("2026-11-20T07:00:46+00:00", pin["frozen_at"])
+
+
+def test_a_time_before_the_freeze_is_flagged():
+    pin = json.load(io.open(os.path.join(ROOT, "anchors", "pins",
+                                       "uibc-release-v0.4.1.json"), encoding="utf-8"))
+    assert cra._before_freeze("2026-11-20T04:00:00Z", pin["frozen_at"]) is True

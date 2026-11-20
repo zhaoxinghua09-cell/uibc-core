@@ -133,7 +133,7 @@ def _cli(py, *args, **kw):
 
 
 def admit(artifact, out, agent_id, owner, py, key=None, pinned=None,
-          media_type="application/octet-stream"):
+          media_type="application/octet-stream", run_gate=True):
     """Build a sealed UIBC package around the artifact and verify it.
 
     Returns a dict with the inventory, both verdicts (open and pinned) and the
@@ -198,11 +198,31 @@ def admit(artifact, out, agent_id, owner, py, key=None, pinned=None,
     if pinned:
         verdicts["pinned"] = _verify_dict(py, out, pinned)["result"]
 
+    # The gate is the admission decision, not a second opinion: it folds the
+    # revocation and dispute overlays in and returns ALLOW/DENY with a reason.
+    # Running verify and stopping there would leave the caller to reimplement
+    # the decision logic — the step where a revocation silently gets ignored.
+    gate = None
+    if run_gate:
+        gate = _gate_dict(py, out, pinned)
+
     row = disclosure_row(verdicts, kind, len(members))
     return {"inventory": inv, "steps": steps, "verdicts": verdicts,
             "checks": sorted({c["id"] for c in open_v.get("checks", [])
                               if c.get("result") != "PASS"}),
+            "decision": (gate or {}).get("decision"),
+            "reason": (gate or {}).get("reason"),
             "disclosure": row, "package": out}
+
+
+def _gate_dict(py, out, pinned):
+    args = ["gate", out]
+    if pinned:
+        args += ["--pubkey", pinned]
+    code, so, se = _cli(py, *args)
+    if not so.strip():
+        raise ArtifactError("gate produced no decision: %s" % (se or so)[:300])
+    return json.loads(so)
 
 
 def _verify(py, out, pinned):
@@ -256,6 +276,9 @@ def render(result):
     lines.append("| package | `%s` |" % result["package"])
     for k, v in result["verdicts"].items():
         lines.append("| verdict (%s) | **%s** |" % (k, v))
+    if result.get("decision"):
+        lines.append("| admission decision | **%s** — %s |"
+                     % (result["decision"], result.get("reason") or ""))
     lines.append("")
     lines.append("## Disclosure row (seven fields)")
     lines.append("")
@@ -288,10 +311,13 @@ def main(argv=None):
     ap.add_argument("--pinned", default=None, help="public key to pin at verify time")
     ap.add_argument("--python", default=sys.executable, help="interpreter that can import uibc_core")
     ap.add_argument("--json", action="store_true", help="print the record as JSON")
+    ap.add_argument("--no-gate", dest="run_gate", action="store_false",
+                    help="skip the gate decision (verify only); the decision carries "
+                         "revocation and dispute overlays, so skipping it is weaker")
     a = ap.parse_args(argv)
     try:
         result = admit(a.artifact, a.out, a.agent_id, a.owner, a.python,
-                       key=a.key, pinned=a.pinned)
+                       key=a.key, pinned=a.pinned, run_gate=a.run_gate)
     except ArtifactError as e:
         print("ADMISSION ERROR: %s" % e, file=sys.stderr)
         return 2
@@ -299,6 +325,8 @@ def main(argv=None):
         print(json.dumps(result, indent=2, sort_keys=True, default=str))
     else:
         print(render(result))
+    if result.get("decision") is not None:
+        return 0 if result["decision"] == "ALLOW" else 1
     return 0 if result["verdicts"].get("pinned", result["verdicts"]["open"]) == "PASS" else 1
 
 

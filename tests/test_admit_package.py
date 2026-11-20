@@ -105,6 +105,35 @@ class TestAdmitPackage(unittest.TestCase):
                          ["SKILL.md", "sub/run.py"])
         self.assertEqual(r["verdicts"]["pinned"], "PASS")
 
+    def test_the_gate_decides_allow_and_states_why(self):
+        r = ap.admit(self.art, self.out, "demo-1.0", "alice", sys.executable,
+                     key=self.seed, pinned=self.pub)
+        self.assertEqual(r["decision"], "ALLOW")
+        self.assertIn("verify PASS", r["reason"])
+        self.assertIn("no revocation", r["reason"])
+
+    def test_a_tampered_package_is_denied_not_only_failed(self):
+        # verify returning FAIL and the gate returning DENY are different
+        # answers: the gate folds revocation and dispute overlays in, and a
+        # caller who stops at verify would implement that logic themselves.
+        ap.admit(self.art, self.out, "demo-1.0", "alice", sys.executable,
+                 key=self.seed, pinned=self.pub)
+        for root, _d, files in os.walk(os.path.join(self.out, "evidence")):
+            for f in files:
+                if f.endswith(".whl"):
+                    p = os.path.join(root, f)
+                    data = bytearray(open(p, "rb").read())
+                    data[4] ^= 0xFF
+                    open(p, "wb").write(bytes(data))
+        gate = ap._gate_dict(sys.executable, self.out, self.pub)
+        self.assertEqual(gate["decision"], "DENY")
+        self.assertEqual(gate["verify_result"], "FAIL")
+
+    def test_skipping_the_gate_is_possible_but_weaker(self):
+        r = ap.admit(self.art, self.out, "demo-1.0", "alice", sys.executable,
+                     key=self.seed, pinned=self.pub, run_gate=False)
+        self.assertIsNone(r["decision"])
+
     def test_the_record_names_what_it_did_not_look_at(self):
         r = ap.admit(self.art, self.out, "demo-1.0", "alice", sys.executable,
                      key=self.seed, pinned=self.pub)

@@ -72,6 +72,25 @@ exists to prevent.
 - anything about dependencies or the transitive graph;
 - that a third party admitted it. The key is whoever ran the command.
 
+## The decision, not just the verdict
+
+`verify` answers "do these bytes match the seal". The **gate** answers "may this be
+installed", folding revocation and dispute overlays into one decision:
+
+```
+| admission decision | ALLOW — verify PASS, no revocation, no dispute |
+```
+
+Both are printed, because they fail differently: `verify` can be PASS while the gate is
+DENY (a revoked key, a disputed package), and a caller who reads only the verify field
+would miss exactly the case the overlays exist for. Exit code follows the **decision**
+(`ALLOW` → 0, `DENY` → 1). `--no-gate` still exists for debugging the package itself, and
+says so in the record — the weaker answer is labelled weaker.
+
+Negative control: `test_a_tampered_package_is_denied_not_only_failed` flips a byte, then
+asserts `gate.decision == DENY` **and** `verify_result == FAIL`. Two assertions because the
+interesting case is when they disagree.
+
 ## The same source produced two different wheels (measured)
 
 Building this repository's wheel on two machines, from the same commit `e83d93f`, gave:

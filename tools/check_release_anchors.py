@@ -213,8 +213,34 @@ def verify_dir(directory, tag="v0.4.1"):
     sig = os.path.join(directory, "CORPUS-DIGESTS.txt.sig")
     pinned = _pinned_key()
     if not os.path.isfile(sig):
-        lines.append("signature    none published (the page carries UNSIGNED.txt); "
-                     "not a failure, but nothing identifies the publisher either")
+        # The page may be frozen without a signature, which is the case for v0.4.1.
+        # A signature held in the repository over the digest the page serves still
+        # identifies the publisher -- and it does not rewrite the page to say so.
+        held = os.path.join(ROOT, "anchors", "attestations", tag, "CORPUS-DIGESTS.txt.sig")
+        if not os.path.isfile(held):
+            lines.append("signature    none published, none held in the repository; "
+                         "not a failure, but nothing identifies the publisher either")
+            return 0, lines
+        code, out = _verify_sig(held, digest_path)
+        if code is None:
+            return 3, lines + ["could not run the signature verifier: %s" % out]
+        heldblob = _json_block(out)
+        if code != 0 or not heldblob:
+            return 1, lines + ["the repository-held signature does not verify against the "
+                               "published bytes: %s"
+                               % (out.strip().splitlines() or [""])[-1][:160]]
+        held_key = str(heldblob.get("key_id", ""))
+        lines.append("signature    held in the repository (the page itself carries "
+                     "UNSIGNED.txt): key_id %s over %s…"
+                     % (held_key, str(heldblob.get("file_sha256", ""))[:12]))
+        if pinned and held_key != pinned:
+            return 1, lines + ["the repository-held signature uses key_id %s, but this "
+                               "repository records %s" % (held_key, pinned)]
+        if not pinned:
+            return 1, lines + ["the repository-held signature verified but no key is "
+                               "recorded in anchors/release-signing-key.json"]
+        lines.append("publisher    identified by the key recorded in this repository; the "
+                     "signature was made after publication, not during it")
         return 0, lines
     code, out = _verify_sig(sig, digest_path)
     if code is None:
@@ -245,7 +271,7 @@ def _pinned_key():
 def _verify_sig(sig, data):
     try:
         proc = subprocess.run([sys.executable, os.path.join(ROOT, "tools", "anchor_release_digests.py"),
-                               "verify", "--sig", sig, "--file", data],
+                               "verify", "--sig", sig, "--file", data, "--json"],
                               capture_output=True, text=True, timeout=90)
     except (OSError, subprocess.TimeoutExpired) as exc:
         return None, str(exc)

@@ -38,7 +38,7 @@ No passing-test count appears here on purpose: it changes every day, and a numbe
 
 ## What only a person can do
 
-- **decide whether v0.4.1 is ever re-signed** — adding a signature means rewriting a page frozen on 2026-11-20; the key exists now, so this is a choice and not a capability gap
+- **approve the repository-held attestation as v0.4.1's answer** — the frozen page stays unsigned; the release key signed the digest it served and that signature lives in anchors/attestations/v0.4.1/, which the page cannot rewrite -- a human has to accept that this identifies the publisher
 - **answer the two invitations when they come back** — both went out on 2026-11-20 (Templeman by email from the 126 mailbox, Stone as a public issue on swarmsync-ai/aivs-spec); a reply is a human voice, and the external count does not move until one arrives
 - **approve edits to 29 historical phrases** — the archived bundle still carries production-sounding phrases a checker refuses in anything new
 

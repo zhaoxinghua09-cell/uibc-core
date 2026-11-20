@@ -6,6 +6,17 @@ This document exists because "trust us" is not evidence. Everything below runs o
 
 `conformance/uibc-conformance-0.5.0.zip` — sha256 `ad2b73ccdd8e5606364372350fc35134d8efe897f0382b36dd4ee65af341bfc0`, 231,243 bytes. Pin: `anchors/pins/uibc-conformance-0.5.0.sha256`. The build is deterministic for a given tree, and this hash is reproducible only from the tree that produced it: `0.4.1` was built at commit `d72c4f9`, and rebuilding from today's tree gives `083c0dbc…` because the runner template was fixed afterwards. `tools/build_conformance_bundle.py` therefore refuses to overwrite a pinned archive whose bytes would change, and prints both hashes (measured 2026-11-20, exit 3). A version number names one set of bytes; "latest" does not. 
 
+One thing here is weaker than it reads: the archive's runner falls back to a
+`uibc-core` installed in the Python that runs it when the bundled verifier is absent.
+Measured 2026-11-20 in CI: the control that says "a machine with no verifier exits 3" went
+green on a runner where the package happened to be pip-installed, so it measured the
+machine, not the archive. The runner this tree ships no longer does that silently -- with
+no bundled verifier it exits 3 and names the two ways out (`--verify`, or
+`--allow-installed`, which records `verifier_source` in the receipt). The archives already
+published (0.4.1, 0.5.0) carry the old runner and cannot be changed without changing their
+bytes, so on a machine that has `uibc-core` installed their missing-verifier control will
+read green while measuring nothing. On a clean machine it behaves as published.
+
 One thing here is per-run, not per-tag: the lab bundle now stamps the tag's own commit time (`SOURCE_DATE_EPOCH` = `git log -1 --format=%ct`), but the receipt it covers is written by `run.py` inside the archive, and the receipt carries the time the archive ran. An archive built before 2026-11-20 does not read that variable, and rebuilding it would change published bytes. So two runs of one tag produce two digest lists; the freeze guard, not determinism, is what keeps the published page from changing.
 
 A pin outranks `--replace`: measured on 2026-11-20, `--replace` used to skip the guard and rewrote the published `0.4.1` archive from `711fa82c…` (228,000 bytes) to `37afab99…` (231,280 bytes), while `docs` promised the opposite; the flag now only overwrites an unpinned file. `tools/export_conformance.py` no longer writes any archive at all — it used to delete and rebuild the published `0.4.0` archive on every run (`9a1ca72f…` became `0e5fd46f…`), so a late pin described a file that no longer existed.

@@ -54,30 +54,56 @@ def receipt_integrity(receipt):
     return computed == receipt.get("receipt_sha256"), computed
 
 
-def recompute(pkg, py, pubkey=None):
-    gate = ap._gate_dict(py, pkg, pubkey)
+def recompute(pkg, py, pubkey=None, revocation=None):
+    gate = ap._gate_dict(py, pkg, pubkey, revocation=revocation)
     return {
         "package_root": ap.package_root(pkg),
         "gate": gate,
+        "overlay": ap._revocation_evidence(py, revocation) if revocation else None,
     }
 
 
-def compare(pkg, receipt, py, pubkey=None):
+OVERLAY_FIELDS = ("revocation_id", "target_root", "body_sha256", "key_id",
+                  "algorithm", "reason_code")
+
+
+def compare(pkg, receipt, py, pubkey=None, revocation=None):
     """Field-by-field comparison against the sealed package. Returns (rows, ok)."""
     rows = []
     ok, computed = receipt_integrity(receipt)
     rows.append(("receipt_sha256", receipt.get("receipt_sha256"), computed, ok))
-    live = recompute(pkg, py, pubkey)
+    live = recompute(pkg, py, pubkey, revocation)
     rows.append(("package_root", receipt.get("package_root"),
                  live["package_root"],
                  receipt.get("package_root") == live["package_root"]))
     gate = live["gate"]
+    want_overlay = receipt.get("overlay")
+    # A receipt that pins an overlay and a reader who did not bring the
+    # revocation file: the gate recomputation is *incomplete*, not wrong.
+    # Reporting MISMATCH there would accuse an honest receipt of lying because
+    # the reader forgot an input, so those fields are NOT CHECKABLE instead.
+    overlay_missing = bool(want_overlay) and not revocation
     for f in FIELDS:
         want = receipt.get(f)
         got = gate.get(f)
         if f == "verifier_version":
             got = (gate.get("verify_report") or {}).get("verifier_version")
+        if overlay_missing and f in ("decision", "reason", "revocation"):
+            rows.append((f, want, "needs the revocation file", None))
+            continue
         rows.append((f, want, got, want == got))
+    # The overlay is what turned a PASS into a DENY. A reader who wants to
+    # redo that decision needs the revocation file itself: without it these
+    # fields are NOT CHECKABLE rather than assumed to agree.
+    if want_overlay:
+        for f in OVERLAY_FIELDS:
+            got_overlay = live["overlay"]
+            if got_overlay is None:
+                rows.append(("overlay." + f, want_overlay.get(f),
+                             "needs the revocation file", None))
+            else:
+                rows.append(("overlay." + f, want_overlay.get(f), got_overlay.get(f),
+                             want_overlay.get(f) == got_overlay.get(f)))
     all_ok = all(r[3] for r in rows if r[3] is not None)
     return rows, all_ok
 
@@ -109,6 +135,11 @@ def compare_artifact(artifact, receipt):
                  "note" if subject.get("name") != os.path.basename(artifact) else True))
     for f in ("package_root",) + FIELDS:
         rows.append((f, receipt.get(f), "needs the sealed package", None))
+    want_overlay = receipt.get("overlay") or {}
+    for f in OVERLAY_FIELDS:
+        if f in want_overlay:
+            rows.append(("overlay." + f, want_overlay.get(f),
+                         "needs the sealed package and the revocation file", None))
     all_ok = all(r[3] for r in rows if r[3] in (True, False))
     return rows, all_ok
 
@@ -143,9 +174,10 @@ def render(rows, ok, receipt_path, subject_path, subject_label):
         lines.append("A NOTE, not a failure: %s differs. A renamed download is the same "
                      "artifact — the bytes are what the receipt pins." % ", ".join(notes))
     if ok and unchecked:
-        lines.append("**MATCH on every checkable field** — %d field(s) could not be checked without "
-                     "the sealed package: %s. What is proven here is narrower than the full "
-                     "recomputation, and the report says so instead of printing a bare MATCH."
+        lines.append("**MATCH on every checkable field** — %d field(s) could not be checked "
+                     "without the sealed package or the revocation file it pins: %s. What is "
+                     "proven here is narrower than the full recomputation, and the report says "
+                     "so instead of printing a bare MATCH."
                      % (len(unchecked), ", ".join(unchecked)))
     elif ok:
         lines.append("**MATCH** — every field recomputed on these bytes. This says the receipt "
@@ -171,6 +203,9 @@ def main(argv=None):
                    help="interpreter that can import uibc_core")
     p.add_argument("--pubkey", default=None,
                    help="pinned public key; without it the gate verifies unanchored")
+    p.add_argument("--revocation", default=None, metavar="FILE",
+                   help="the revocation overlay the receipt pins, if any; without it the "
+                        "overlay rows are NOT CHECKABLE (not assumed to agree)")
     p.add_argument("--json", action="store_true")
     a = p.parse_args(argv)
     try:
@@ -188,7 +223,7 @@ def main(argv=None):
         if not os.path.isdir(a.package):
             print("RECEIPT ERROR: package directory not found: %s" % a.package, file=sys.stderr)
             return 2
-        rows, ok = compare(a.package, receipt, a.python, a.pubkey)
+        rows, ok = compare(a.package, receipt, a.python, a.pubkey, a.revocation)
         label, subject = "package", a.package
     if a.json:
         print(json.dumps({"ok": ok, "mode": label,

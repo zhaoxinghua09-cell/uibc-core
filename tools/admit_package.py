@@ -158,12 +158,16 @@ def _cli(py, *args, **kw):
 
 
 def admit(artifact, out, agent_id, owner, py, key=None, pinned=None,
-          media_type="application/octet-stream", run_gate=True):
+          media_type="application/octet-stream", run_gate=True, revocation=None):
     """Build a sealed UIBC package around the artifact and verify it.
 
     Returns a dict with the inventory, both verdicts (open and pinned) and the
     disclosure row. Nothing is assumed about the artifact's provenance: the
     only claim is that these bytes were sealed by this key at this time.
+
+    `revocation` is a revocation.json to fold into the decision. When it is
+    given, the receipt also pins the revocation's canonical body digest, so a
+    reader can redo the DENY instead of being told about it.
     """
     artifact = os.path.abspath(artifact)
     out = os.path.abspath(out)
@@ -229,7 +233,7 @@ def admit(artifact, out, agent_id, owner, py, key=None, pinned=None,
     # the decision logic — the step where a revocation silently gets ignored.
     gate = None
     if run_gate:
-        gate = _gate_dict(py, out, pinned)
+        gate = _gate_dict(py, out, pinned, revocation=revocation)
 
     row = disclosure_row(verdicts, kind, len(members))
     result = {"inventory": inv, "steps": steps, "verdicts": verdicts,
@@ -239,11 +243,13 @@ def admit(artifact, out, agent_id, owner, py, key=None, pinned=None,
               "reason": (gate or {}).get("reason"),
               "disclosure": row, "package": out}
     if gate is not None:
-        result["receipt"] = build_receipt(out, inv, gate, row, verdicts)
+        overlay = _revocation_evidence(py, revocation) if revocation else None
+        result["receipt"] = build_receipt(out, inv, gate, row, verdicts,
+                                          overlay=overlay)
     return result
 
 
-def build_receipt(pkg, inv, gate, row, verdicts):
+def build_receipt(pkg, inv, gate, row, verdicts, overlay=None):
     """A decision that a third party can recompute, not just read.
 
     The record above is prose a reader has to trust. This receipt carries the
@@ -270,6 +276,7 @@ def build_receipt(pkg, inv, gate, row, verdicts):
         "verify_result": gate.get("verify_result"),
         "revocation": gate.get("revocation"),
         "dispute": gate.get("dispute"),
+        "overlay": overlay,
         "verdicts": verdicts,
         "disclosure": {k: row[k] for k in DISCLOSURE_FIELDS},
         "not_covered": inv["not_covered"],
@@ -286,13 +293,28 @@ def write_receipt(path, receipt):
     return path
 
 
-def _gate_dict(py, out, pinned):
+def _gate_dict(py, out, pinned, revocation=None):
     args = ["gate", out]
     if pinned:
         args += ["--pubkey", pinned]
+    if revocation:
+        args += ["--revocation", os.path.abspath(revocation)]
     code, so, se = _cli(py, *args)
     if not so.strip():
         raise ArtifactError("gate produced no decision: %s" % (se or so)[:300])
+    return json.loads(so)
+
+
+def _revocation_evidence(py, path):
+    """What a receipt pins about an overlay: the canonical body digest + labels.
+
+    The digest comes from `uibc revocation-digest`, i.e. from the same
+    canonicalization the signer and the gate use. Computing it here with a
+    second JSON canonicalization would recreate the #319 bug in a slower form.
+    """
+    code, so, se = _cli(py, "revocation-digest", os.path.abspath(path))
+    if code != 0 or not so.strip():
+        raise ArtifactError("cannot digest revocation %s: %s" % (path, (se or so)[:300]))
     return json.loads(so)
 
 
@@ -397,12 +419,16 @@ def main(argv=None):
                          "revocation and dispute overlays, so skipping it is weaker")
     ap.add_argument("--decision-out", default=None,
                     help="where to write the decision receipt (default <out>.decision.json)")
+    ap.add_argument("--revocation", default=None, metavar="FILE",
+                    help="revocation.json to fold into the decision; the receipt then also "
+                         "pins its canonical body digest, so the DENY is recomputable")
     ap.add_argument("--no-receipt", action="store_true",
                     help="do not write a decision receipt")
     a = ap.parse_args(argv)
     try:
         result = admit(a.artifact, a.out, a.agent_id, a.owner, a.python,
-                       key=a.key, pinned=a.pinned, run_gate=a.run_gate)
+                       key=a.key, pinned=a.pinned, run_gate=a.run_gate,
+                       revocation=a.revocation)
     except ArtifactError as e:
         print("ADMISSION ERROR: %s" % e, file=sys.stderr)
         return 2

@@ -59,6 +59,38 @@ jobs:
             echo "::warning::could not enumerate every release today"
           fi
 
+      # The page about the page. STATUS.md is generated from repository files and is
+      # meant to be the one place a reader can trust without re-running anything; on
+      # 2026-11-20 a one-character drift in it (36 cases written as 35) was caught by
+      # `--check` and by nothing else, because no scheduled job ran it. Both doc gates
+      # below need only the checkout, so they cost seconds and run every night.
+      - name: Does the status page still match its sources?
+        run: |
+          set +e
+          python tools/status_page.py --check
+          code=$?
+          if [ "$code" -eq 1 ]; then
+            echo "::error::STATUS.md no longer matches the repository; run python tools/status_page.py"
+            exit 1
+          fi
+          if [ "$code" -eq 3 ]; then
+            echo "::warning::could not regenerate the status page today; not a pass"
+          fi
+
+      - name: Do the documents still agree with the files they cite?
+        run: |
+          set +e
+          python tools/check_doc_facts.py > doc-facts-report.json
+          code=$?
+          cat doc-facts-report.json
+          if [ "$code" -eq 1 ]; then
+            echo "::error::a document states a fact the repository no longer supports"
+            exit 1
+          fi
+          if [ "$code" -eq 3 ]; then
+            echo "::warning::could not measure the document facts today"
+          fi
+
       # The documented entry points are probed anonymously: both URLs must serve the
       # pinned archive, and no document may point at another version's asset.
       - name: Can a stranger still walk in?
@@ -78,4 +110,6 @@ jobs:
         if: always()
         with:
           name: release-integrity-report
-          path: anchors-report.json
+          path: |
+            anchors-report.json
+            doc-facts-report.json

@@ -1,21 +1,21 @@
 # 网关能力自证矩阵 — T/ISC 0174-2026
 
-生成时间：2026-11-20T12:50:08.388043+00:00（脚本：`tools/gateway_conformance.py`，探针 33/33 通过）
+生成时间：2026-11-20T13:15:41.148994+00:00（脚本：`tools/gateway_conformance.py`，探针 37/37 通过）
 标准原文：[T/ISC 0174-2026](https://www.isc.org.cn/profile/2026/10/30/1e2b29f9-8aab-438a-9114-e8eadc5f04cd.pdf)
 
 **判定口径**：PASS = 条款要求的行为存在且有可复跑证据；PARTIAL = 部分存在、缺口已写明；MISSING = 本网关不做这件事。不做四舍五入。
 
 | 汇总 | 全部条款 43 | 其中“应” 34 |
 | --- | --- | --- |
-| PASS | 19 | 15 |
-| PARTIAL | 22 | 18 |
-| MISSING | 2 | 1 |
+| PASS | 21 | 17 |
+| PARTIAL | 22 | 17 |
+| MISSING | 0 | 0 |
 
 | 能力域 | PASS | PARTIAL | MISSING |
 | --- | --- | --- | --- |
 | 协议适配 | 7 | 4 | 0 |
-| 安全防护 | 2 | 7 | 1 |
-| 路由寻址 | 4 | 2 | 1 |
+| 安全防护 | 4 | 6 | 0 |
+| 路由寻址 | 4 | 3 | 0 |
 | 身份分发 | 6 | 9 | 0 |
 
 ## 逐条
@@ -54,16 +54,16 @@
 | 8.1.2 b) | 应 | 语义路由决策可解释：依据、得分、候选集、阈值、日志 | [+] PASS | router.semantic_route 回传 threshold/candidates/score/basis/log_entry；低于阈值拒绝指派 | 打分用 Jaccard 词重合，是词面而非向量语义；对同义改写会低分 |
 | 8.2.1 a) | 应 | 满足约定的消息转发时延指标 | [+] PASS | metrics 记录每次调用时延与 p50/p95，并统计超预算次数（--latency-budget-ms） | 预算是我们自己声明的 250ms，尚未与对方约定数值；无超时熔断 |
 | 8.2.1 b) | 应 | 吞吐/延迟/错误率实时监控与可视化 | [~] PARTIAL | GET /metrics（Prometheus 文本 + JSON snapshot），含请求量/错误率/延迟分位/超预算 | 有指标输出与文本展示，无图表面板与长期趋势分析 |
-| 8.2.2 | 宜 | AI 报文解析与转发加速、流式透传、内容感知路由 | [ ] MISSING | - | 未实现，且不该在没有压测前宣称 |
+| 8.2.2 | 宜 | AI 报文解析与转发加速、流式透传、内容感知路由 | [~] PARTIAL | adapters/a2a/accel.py 重复请求缓存（键含包指纹）+ gateway/cache 实测命中率；探针现跑首调/缓存调 p50 | 只对字节完全相同的重复请求生效；不解析模型报文、不流式透传、不做内容感知路由 |
 | 9.1.1 a) | 应 | 通信访问日志与异常事件日志 | [+] PASS | adapter.access_log（含 trace/agent/result） | 进程内列表，重启即丢；未落盘 |
 | 9.1.1 b)-d) | 宜 | 日志集中存储、检索、维度组合查询、关联分析 | [~] PARTIAL | adapters/a2a/journal.py：JSONL 落盘 + trace/agent/method/时间窗组合过滤；gateway/journal | 无集中日志后端；关联分析只做到按 trace 串链路，没有异常聚合 |
 | 9.1.2 a) | 应 | 跨智能体分布式链路追踪，每次调用全局唯一追踪标识 | [+] PASS | X-AUIB-Trace-Id 生成/继承 + 回传 | - |
 | 9.1.2 d) | 应 | 跨协议转发时追踪上下文语义连续，优先透传上游标识 | [~] PARTIAL | 同协议透传已实测 | 跨协议路径不存在，故“跨协议连续”不可测 |
 | 9.1.3 a) | 应 | 对通信流量实时异常检测 | [~] PARTIAL | tools/guardrail_shim.py（请求级规则拦截） | 规则式、非流量模型；无基线学习 |
-| 9.1.3 b) | 应 | 识别提示词注入、指令篡改、身份伪造 | [~] PARTIAL | tools/redteam_suite.py 16 例；guardrail 规则；DID 验签 | 未内联到网关转发路径，需外挂执行 |
-| 9.1.4 a)-b) | 应 | TLS 保障机密性完整性；对端证书校验与双向认证 | [~] PARTIAL | 部署层可置于 TLS 反代（deploy/） | 适配器自身只监听 HTTP；无 mTLS 对端校验 |
-| 9.1.5 a)-c) | 应 | ACL 报文过滤、限速与清洗、安全域隔离 | [ ] MISSING | - | 网络层能力，非本适配器职责；需部署侧声明 |
-| 9.2.1 a)-b) | 应 | 每请求身份验证与权限校验；差异化权限 | [~] PARTIAL | agent 状态校验（403）+ authorization.scopes 声明 | scopes 只被校验存在，未按 scope 拒绝越权调用 |
+| 9.1.3 b) | 应 | 识别提示词注入、指令篡改、身份伪造 | [+] PASS | adapters/a2a/guard.py 内联网关转发路径（12 类规则）+ tools/redteam_suite.py 16 例 + DID 验签 | 规则式识别，召回受规则库限制，未知变体可能漏检；拒绝只记类别与摘要，不落原文 |
+| 9.1.4 a)-b) | 应 | TLS 保障机密性完整性；对端证书校验与双向认证 | [~] PARTIAL | deploy/nginx-gateway.conf（TLS1.2+ / ssl_verify_client on / 对端 CA / 深度上限）+ tools/check_deploy_hardening.py 静态校验 | 适配器自身仍只监听 HTTP；mTLS 由部署侧反代执行，需运维签发并部署证书后才真正生效 |
+| 9.1.5 a)-c) | 应 | ACL 报文过滤、限速与清洗、安全域隔离 | [~] PARTIAL | deploy/nginx-gateway.conf：geo ACL 白名单 + limit_req/limit_conn + /metrics 独立安全域；tools/check_deploy_hardening.py 校验指令在场 | 网络层由部署侧执行，适配器不自称具备；配置需按真实对端网段替换后才算生效 |
+| 9.2.1 a)-b) | 应 | 每请求身份验证与权限校验；差异化权限 | [+] PASS | adapters/a2a/scopes.py：每请求按 method 绑定权限，取 record 的 authorization.scopes 判定；调用方声明 scope 时双重判定；拒绝 HTTP 403 且记 clause | 调用方未声明 scope 时按传输层对端身份放行（basis=transport-peer），对端身份由反代 mTLS 承担；权限未按任务动态最小化 |
 | 9.2.2 a)-b) | 应/宜 | 最小权限原则；权限回收与到期预警 | [~] PARTIAL | revoke 立即断权（6.1.3 b） | 无按任务最小化；无到期前预警 |
 
 ## 探针
@@ -94,6 +94,10 @@
 | P29_restore_verified | PASS | restore refuses unverified snapshots and repaired 3 file(s) |
 | P2_binding | PASS | org/endpoint/credential/scope binding checks: {'B1': True, 'B2': True, 'B4': True, 'B5': True, 'B6': True, 'B7': True} |
 | P30_spec_validation | PASS | tool descriptor parsed and rejected when malformed (D4 on non-object schema) |
+| P31_scope_enforced | PASS | caller presenting a scope the record does not grant is refused: HTTP 403, clause 9.2.1 a) |
+| P32_injection_blocked | PASS | override payload refused before verification, no payload text in the refusal (categories=['prompt-override']) |
+| P33_repeat_cache_measured | PASS | identical repeats served from cache: hits=11 misses=2 hit_rate=0.8462; measured first=0.566ms cached_p50=0.472ms (in-process) |
+| P34_deploy_hardening_linted | PASS | deploy config carries mTLS + ACL + rate/connection limits: 12/12 directive(s) |
 | P3_forward_verified | PASS | A2A call reached verification and returned PASS |
 | P4_agent_required | PASS | call without registered agent refused (fail closed) |
 | P5_suspend_blocks_immediately | PASS | next call after suspend -> HTTP 403, state suspended |

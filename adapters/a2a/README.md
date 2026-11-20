@@ -69,9 +69,17 @@ Extra surfaces in this mode:
 | `gateway/backup` | 6.3.1 a/c, 6.3.2 a/b | snapshot with SHA-256 manifest, incremental mode, corruption alarm, verified restore |
 | `gateway/registry/update` | 6.1.1 c | metadata edit: re-validate, hold for approval, then apply with a diff in the journal |
 | `gateway/templates` | 6.1.1 d | scenario registration templates (medical-device, government-service) that must pass the real validator |
+| inline injection guard | 9.1.3 b | `guard.py`: 12 rule families, refusal before forwarding, categories + digest in the journal, never the text |
+| per-call permission | 9.2.1 a | `scopes.py`: method → permission, decided against the record's `authorization.scopes`, HTTP 403 on refusal |
+| `gateway/cache` | 8.2.2 | repeat-request cache with hit/miss and measured latency; key carries a package fingerprint so a verdict cannot go stale |
+| `deploy/nginx-gateway.conf` | 9.1.4, 9.1.5 | TLS/mTLS, geo ACL, rate and connection limits; `check_deploy_hardening.py` fails when a directive is missing |
 
 Clause-by-clause status, gaps included: `docs/CROSSWALK-ISC-0174.md`, regenerated
-by `tools/gateway_conformance.py` (33 live probes, loopback, no mocks).
+by `tools/gateway_conformance.py` (37 live probes, loopback, no mocks).
+
+Two switches exist to turn a control off, and both are visible in
+`gateway/cache` so a caller can see what it is talking to: `--no-guard`,
+`--no-scope-check`, `--no-cache`.
 
 ## Verifying with a DID instead of a key
 

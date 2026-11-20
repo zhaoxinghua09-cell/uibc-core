@@ -73,13 +73,16 @@ from adapters.a2a import templates as templates_mod  # noqa: E402
 from adapters.a2a import transform as transform_mod  # noqa: E402
 from adapters.a2a import backup as backup_mod  # noqa: E402
 from adapters.a2a import specs as specs_mod  # noqa: E402
+from adapters.a2a import guard as guard_mod  # noqa: E402
+from adapters.a2a import scopes as scopes_mod  # noqa: E402
+from adapters.a2a import accel as accel_mod  # noqa: E402
 
 JSONRPC_VERSION = "2.0"
 _METHODS = ("card", "uibc/verify", "uibc/gate", "uibc/inspect",
             "gateway/registry", "gateway/registry/update", "gateway/state",
             "gateway/discover", "gateway/route", "gateway/routes",
             "gateway/transform", "gateway/templates", "gateway/journal",
-            "gateway/specs", "gateway/backup", "agent-record")
+            "gateway/specs", "gateway/backup", "gateway/cache", "agent-record")
 
 # 7.3.1 d) minimum common extension-header set for gateway-to-gateway hops.
 TRACE_HEADERS = ("X-AUIB-Trace-Id", "X-AUIB-Source", "X-AUIB-Target",
@@ -153,7 +156,8 @@ class A2AAdapter:
     def __init__(self, packages_root, card_path, did_document=None,
                  registry=None, lifecycle_state=None, allow_opaque_id=False,
                  clock=None, journal_path=None, routes_path=None,
-                 latency_budget_ms=250.0, backup_root=None):
+                 latency_budget_ms=250.0, backup_root=None,
+                 cache_enabled=True, guard_enabled=True, enforce_scopes=True):
         self.packages_root = os.path.abspath(packages_root)
         with open(card_path, "r", encoding="utf-8") as f:
             self.card = json.load(f)
@@ -169,6 +173,10 @@ class A2AAdapter:
         # 6.3.x operates on the gateway's own state files; nothing else is ours
         # to back up, and pretending otherwise would be a false coverage claim.
         self.backup_root = os.path.abspath(backup_root) if backup_root else None
+        # 8.2.2 repeat cache, 9.1.3 b) inline guard, 9.2.1 a) scope decision.
+        self.cache = accel_mod.RepeatCache(enabled=cache_enabled, clock=self.clock)
+        self.guard_enabled = guard_enabled
+        self.enforce_scopes = enforce_scopes
         self.state_paths = [p for p in (registry if isinstance(registry, str) else None,
                                         lifecycle_state, routes_path, journal_path) if p]
 
@@ -310,6 +318,16 @@ class A2AAdapter:
                     "example": specs_mod.MCP_EXAMPLE}
         if method == "gateway/backup":
             return gateway_backup(self, params)
+        if method == "gateway/cache":
+            # 8.2.2: report what the cache actually did, with the narrow scope
+            # statement attached so the number cannot be read as "AI acceleration".
+            return {"cache": self.cache.stats(),
+                    "guard": {"enabled": self.guard_enabled,
+                              "clause": guard_mod.CLAUSE,
+                              "rules": len(guard_mod._RULES)},
+                    "scopes": {"enforced": bool(self.enforce_scopes
+                                                and self.registry_report),
+                               "clause": scopes_mod.CLAUSE}}
 
         # 6.1.3 b) enforce state *before* any work, whenever a registry exists.
         agent = params.get("agent")
@@ -319,6 +337,52 @@ class A2AAdapter:
                                  "with a registry (6.1.1 a): the gateway must know "
                                  "which registered agent a call is for")
             self.lifecycle.require_active(agent)
+
+        # 9.1.3 b) refusal happens on the way in: the payload never reaches the
+        # handler, and the journal keeps the category and a digest, not the text.
+        if self.guard_enabled:
+            blocking, warnings = guard_mod.inspect(params)
+            if blocking:
+                self.journal.record({"ts": self.clock().isoformat(),
+                                     "type": "injection-blocked",
+                                     "clause": guard_mod.CLAUSE,
+                                     "agent": agent, "method": method,
+                                     "categories": sorted({f["category"]
+                                                           for f in blocking}),
+                                     "evidence": blocking[0].get("evidence")})
+                raise guard_mod.GuardRefusal(blocking)
+            if warnings:
+                self.journal.record({"ts": self.clock().isoformat(),
+                                     "type": "injection-warning",
+                                     "method": method,
+                                     "categories": sorted({f["category"]
+                                                           for f in warnings})})
+
+        # 9.2.1 a) the declared scope becomes a decision, not a comment.
+        if self.enforce_scopes and self.registry_report is not None:
+            scopes_mod.enforce(self, method, params)
+
+        # 8.2.2 byte-identical repeat requests are answered from cache; anything
+        # else goes through the normal path. Measured, not advertised.
+        cached = None
+        cache_params = None
+        if method in ("uibc/verify", "uibc/gate"):
+            # The verdict is only reusable while the package on disk is the
+            # same one that produced it, so the key carries a fingerprint.
+            cache_params = dict(params)
+            cache_params["_fp"] = accel_mod.package_fingerprint(
+                self.packages_root, params.get("package"))
+            cached = self.cache.get(method, cache_params)
+            if cached is not None:
+                label = "CACHED"
+                if isinstance(cached, dict):
+                    label = (cached.get("result") or cached.get("decision") or "CACHED")
+                self.access_log.append({"ts": self.clock().isoformat(),
+                                        "trace": trace_id, "method": method,
+                                        "agent": agent, "cache": "hit",
+                                        "result": label,
+                                        "package": params.get("package")})
+                return cached
 
         pkg = _resolve_package(self.packages_root, params.get("package"))
         key = params.get("key")  # hex string, same format as .key files
@@ -338,10 +402,13 @@ class A2AAdapter:
             report = verify(pkg, key=key, pubkey=pubkey)
         elif method == "uibc/gate":
             report = gate(pkg, key=key, pubkey=pubkey)
-            return {"decision": report.get("decision"),
-                    "reason": report.get("reason",
-                                         report.get("detail", "")),
-                    "report": report}
+            result = {"decision": report.get("decision"),
+                      "reason": report.get("reason",
+                                           report.get("detail", "")),
+                      "report": report}
+            if method == "uibc/gate":
+                self.cache.put(method, cache_params, result)
+            return result
         elif method == "uibc/inspect":
             with open(os.path.join(pkg, "identity.json"), "r",
                       encoding="utf-8") as f:
@@ -357,6 +424,8 @@ class A2AAdapter:
                                 "package": params.get("package"),
                                 "result": report.get("result")
                                 if isinstance(report, dict) else None})
+        if method == "uibc/verify":
+            self.cache.put(method, cache_params, report)
         return report
 
 
@@ -577,6 +646,36 @@ def make_handler(adapter):
                 self.end_headers()
                 self.wfile.write(body)
                 return
+            except (guard_mod.GuardRefusal, scopes_mod.ScopeDenied) as exc:
+                # 9.1.3 b) / 9.2.1 a) a refusal is a policy answer: HTTP 403,
+                # categories and digests only, never the payload text.
+                duration = (_dt.datetime.now() - started).total_seconds() * 1000.0
+                adapter.metrics.observe(method, duration, blocked=True,
+                                        result="REFUSED")
+                data = {"clause": exc.clause}
+                if isinstance(exc, guard_mod.GuardRefusal):
+                    data["categories"] = exc.categories
+                    data["evidence"] = exc.evidence
+                else:
+                    data["agent"] = exc.agent
+                    data["granted"] = exc.granted
+                adapter.journal.record({"trace": trace_id, "method": method,
+                                        "type": "blocked",
+                                        "clause": exc.clause,
+                                        "detail": data,
+                                        "duration_ms": round(duration, 2)})
+                body = json.dumps({"jsonrpc": JSONRPC_VERSION, "id": rid,
+                                   "error": {"code": -32001,
+                                             "message": str(exc),
+                                             "data": data},
+                                   "traceId": trace_id}).encode("utf-8")
+                self.send_response(403)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.send_header("Content-Length", str(len(body)))
+                self.send_header("X-AUIB-Trace-Id", trace_id)
+                self.end_headers()
+                self.wfile.write(body)
+                return
             except (ValueError, FileNotFoundError) as exc:
                 duration = (_dt.datetime.now() - started).total_seconds() * 1000.0
                 adapter.metrics.observe(method, duration, error=True, result="PARAMS")
@@ -649,6 +748,14 @@ def main(argv=None):
     ap.add_argument("--backup-dir", default=None,
                     help="state snapshot directory for 6.3.1/6.3.2 backup, "
                          "integrity check and restore")
+    ap.add_argument("--no-guard", action="store_true",
+                    help="disable the inline 9.1.3 b) injection guard (not advised; "
+                         "the refusal is what makes the clause executable)")
+    ap.add_argument("--no-scope-check", action="store_true",
+                    help="stop enforcing authorization.scopes per call (9.2.1 a)")
+    ap.add_argument("--no-cache", action="store_true",
+                    help="disable the 8.2.2 repeat cache; GET gateway/cache still "
+                         "reports what happened")
     args = ap.parse_args(argv)
 
     did_document = None
@@ -669,7 +776,10 @@ def main(argv=None):
                              journal_path=args.journal,
                              routes_path=args.routes,
                              latency_budget_ms=args.latency_budget_ms,
-                             backup_root=args.backup_dir)
+                             backup_root=args.backup_dir,
+                             cache_enabled=not args.no_cache,
+                             guard_enabled=not args.no_guard,
+                             enforce_scopes=not args.no_scope_check)
     except ValueError as exc:
         ap.error(str(exc))
     srv = ThreadingHTTPServer((args.host, args.port), make_handler(adapter))

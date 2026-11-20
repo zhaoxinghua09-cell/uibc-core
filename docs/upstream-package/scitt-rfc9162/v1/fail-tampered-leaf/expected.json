@@ -1,0 +1,18 @@
+{
+  "description": "Leaf input altered before hashing: digest and reconstructed root both differ.",
+  "inclusion_path": [
+    "32850d35f2322b8db6985b98971b3a63175303e0fbe7e482d86816811df569a7",
+    "fed61d83b5eed7ad054aca4601c4ebd412def531a075a7553c829f9e1384f287"
+  ],
+  "leaf_entry": {
+    "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+    "digest_hex": "a1fcec1e3efcc55123bcf32bdf7ecc9f1171e3790809e129f3a94041f339a9ce",
+    "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: fail-tampered-leaf :: leaf 1 (tampered)",
+    "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a206661696c2d74616d70657265642d6c656166203a3a206c6561662031202874616d706572656429"
+  },
+  "leaf_index": 1,
+  "reconstructed_root": "49da7ce5a38e157d1c1e0fb31bde614b17444cd39e0d57df4bccbb40efe6b24d",
+  "result": "INVALID_LEAF_DIGEST",
+  "root_true": "ecfaf22542e5d275257bf6422303b42036c2b805593d47cec2b7ddc661daa895",
+  "tree_size": 4
+}

@@ -56,7 +56,7 @@ built 5 vectors into docs/upstream-package/scitt-rfc9162
 VERDICT: CONSISTENT
 
 $ cd docs/upstream-package/scitt-rfc9162 && sha256sum -c SHA256SUMS
-6/6 OK
+31/31 OK
 ```
 
 五个向量：`valid-tree8-index2`、`valid-tree4-index0`（正例，折叠出的根 == `root_true`）；

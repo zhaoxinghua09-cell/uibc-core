@@ -1,0 +1,19 @@
+{
+  "description": "tree_size=7, leaf_index=3: interior leaf of a tree whose split is 4|3.",
+  "inclusion_path": [
+    "6c625f27a12d9241d5a7983018e652b6f5a4765df9a3c5087f3574d95dc48859",
+    "b7b3fd9bcef00151ad86c717c7e7d91b5faca11a9e0613deb34589d66aa17de7",
+    "73d538b164f9c8c5db547cca9b0d39f2ea2341bca03e9b655ce6073f16127c27"
+  ],
+  "leaf_entry": {
+    "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+    "digest_hex": "2d7418ab007c75dd54965f0f9d2cd4dcfaaabb5e25c2305268ba83e5041a3a0c",
+    "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: valid-tree7-index3 :: leaf 3",
+    "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a2076616c69642d74726565372d696e64657833203a3a206c6561662033"
+  },
+  "leaf_index": 3,
+  "reconstructed_root": "d97fd25f340715c23ee6dc880421be0f84e0e0c85adb5d7b9d06046b1d7118bb",
+  "result": "VALID",
+  "root_true": "d97fd25f340715c23ee6dc880421be0f84e0e0c85adb5d7b9d06046b1d7118bb",
+  "tree_size": 7
+}

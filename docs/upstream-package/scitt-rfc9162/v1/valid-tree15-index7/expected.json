@@ -1,0 +1,20 @@
+{
+  "description": "tree_size=15, leaf_index=7: last leaf of the left subtree, path crosses the 8|7 split.",
+  "inclusion_path": [
+    "37ec404c3d7433a9849c30ff86068672bd7cfd55b852bcd00fe80d0f8736266c",
+    "b4479ea4f1eb46daef934e388feb204d322a9eabf94cbade75f00adb8022018b",
+    "27dd7f185764336910eeb2c8a3497dcae56b67e6fa13f0f58d933aa2ce1a3cf0",
+    "c5922f90b236c8422405a87ca455c263a6ec2e10e86c996442dbb478bd606cec"
+  ],
+  "leaf_entry": {
+    "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+    "digest_hex": "70038990b2b897d014c423e9cb224772ca4b148c00210ea2f66791e6b98153ef",
+    "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: valid-tree15-index7 :: leaf 7",
+    "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a2076616c69642d7472656531352d696e64657837203a3a206c6561662037"
+  },
+  "leaf_index": 7,
+  "reconstructed_root": "c3ac436d11701260e08dc47480b9308ef295458accb8a31dc6cac8fe8e6d406d",
+  "result": "VALID",
+  "root_true": "c3ac436d11701260e08dc47480b9308ef295458accb8a31dc6cac8fe8e6d406d",
+  "tree_size": 15
+}

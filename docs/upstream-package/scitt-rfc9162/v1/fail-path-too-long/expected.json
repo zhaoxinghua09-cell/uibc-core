@@ -1,0 +1,20 @@
+{
+  "description": "One extra 32-byte sibling appended; folding it adds a node that is not in the tree.",
+  "inclusion_path": [
+    "99c89aa6eb314a70f4bcb2156c14d1b5be931a88c2f718c24195169ad0da78e6",
+    "a93ff4d970818be0560a4afb977ddddaa2f7ea07887dc905678f62f7bddebdbf",
+    "799b180fbbca61468a8752ba404460c82049e26ae938578491a4160f6aef3a6c",
+    "0000000000000000000000000000000000000000000000000000000000000000"
+  ],
+  "leaf_entry": {
+    "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+    "digest_hex": "dc1ae8565e7fefecd433b733d71c0a9471056160c2d6e8e836901ec89c01534d",
+    "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: fail-path-too-long :: leaf 2",
+    "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a206661696c2d706174682d746f6f2d6c6f6e67203a3a206c6561662032"
+  },
+  "leaf_index": 2,
+  "reconstructed_root": "871b5b640a17367e8ab7a400e07b8f7c76bdbe63206f7477e4d8d60772a3a88d",
+  "result": "INVALID_INCLUSION_PATH",
+  "root_true": "2ea7bdec3efde5324ed0723b059841028470fb95ce211b816ba6767476062034",
+  "tree_size": 8
+}

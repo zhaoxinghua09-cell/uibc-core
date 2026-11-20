@@ -40,18 +40,18 @@ this one. The build is deterministic for a given tree, but "rebuilding gives the
 
 No repository, no network, no `pip install`: the archive carries its own verifier as a single file (`uibc_core.pyz`), and `run.py` uses it. Expected tail `strict 36/36` in about six seconds, and a `receipt.json` you can publish. A verifier that answers PASS to everything scores **6/36**, so refusing nothing does not pass.
 
-#### Or the RFC 9162 vector set — six vectors, and one of them is the reason to look
+#### Or the RFC 9162 vector set — 30 vectors, and four of them are the reason to look
 
 ```bash
 git clone --depth 1 https://github.com/zhaoxinghua09-cell/uibc-core.git
 cd uibc-core && python tools/check_scitt_vectors_standalone.py
 ```
 
-That script imports **nothing** from this project. It re-derives the leaf hash (`SHA-256(0x00 ‖ x)`), the node hash (`SHA-256(0x01 ‖ l ‖ r)`) and the fold from the RFC 9162 text, then walks all six vectors in [`docs/upstream-package/scitt-rfc9162`](docs/upstream-package/scitt-rfc9162/README.md). Expected tail:
+That script imports **nothing** from this project. It re-derives the leaf hash (`SHA-256(0x00 ‖ x)`), the node hash (`SHA-256(0x01 ‖ l ‖ r)`) and the fold from the RFC 9162 text, then walks all 30 vectors in [`docs/upstream-package/scitt-rfc9162`](docs/upstream-package/scitt-rfc9162/README.md). Expected tail:
 
 ```
   ambiguous-tree-size: ambiguity confirmed — size 8 folds to the same root
-  vectors: 6
+  vectors: 30
 VERDICT: CONSISTENT
 ```
 

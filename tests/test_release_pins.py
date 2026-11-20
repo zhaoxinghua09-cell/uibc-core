@@ -12,6 +12,7 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "tools"))
 import check_release_pins as crp  # noqa: E402
+import check_release_anchors as cra  # noqa: E402
 import make_release_pin as mrp  # noqa: E402
 
 
@@ -26,13 +27,14 @@ def _pin(tag, digest="a" * 64, extra=None, excluded=()):
 def test_a_page_that_matches_its_pin_is_quiet():
     blob = _pin("v0.4.2")
     live = {a["name"]: a["sha256"] for a in blob["assets"]}
-    assert crp.compare(blob, live, set()) == []
+    assert crp.compare(blob, live, set()) == ([], [])
 
 
 def test_a_rewritten_asset_is_named():
     blob = _pin("v0.4.2")
     live = {a["name"]: "b" * 64 for a in blob["assets"]}
-    bad = crp.compare(blob, live, set())
+    bad, unsure = crp.compare(blob, live, set())
+    assert unsure == []
     assert len(bad) == 1
     assert bad[0][0] == "uibc-conformance-v0.4.2.zip"
     assert bad[0][1] == "a" * 64 and bad[0][2] == "b" * 64
@@ -42,7 +44,7 @@ def test_an_asset_the_pin_never_saw_is_named():
     blob = _pin("v0.4.2")
     live = {a["name"]: a["sha256"] for a in blob["assets"]}
     live["extra.bin"] = "c" * 64
-    bad = crp.compare(blob, live, set())
+    bad, unsure = crp.compare(blob, live, set())
     assert [b[0] for b in bad] == ["extra.bin"]
     assert bad[0][1] is None
 
@@ -50,7 +52,7 @@ def test_an_asset_the_pin_never_saw_is_named():
 def test_an_asset_that_disappeared_is_named():
     blob = _pin("v0.4.2")
     live = {}
-    bad = crp.compare(blob, live, set())
+    bad, unsure = crp.compare(blob, live, set())
     assert bad and bad[0][2] is None
 
 
@@ -60,8 +62,8 @@ def test_the_pin_asset_itself_is_not_compared_with_itself():
     blob["assets"] = [a for a in blob["assets"] if a["name"] != mrp.PIN_NAME]
     live = {a["name"]: a["sha256"] for a in blob["assets"]}
     live[mrp.PIN_NAME] = "e" * 64
-    bad = crp.compare(blob, live, set(blob["excluded"]))
-    assert bad == []
+    bad, unsure = crp.compare(blob, live, set(blob["excluded"]))
+    assert bad == [] and unsure == []
 
 
 def test_every_published_release_has_a_pin_in_the_repository():
@@ -103,3 +105,53 @@ def test_writing_the_same_content_twice_is_a_no_op(tmp_path):
     blob = _pin("v0.4.2")
     assert mrp.write(path, blob) == 0
     assert mrp.write(path, blob) == 0
+
+
+def _pin_once(digest):
+    return {"kind": "uibc-release-pin-v0", "tag": "v0.4.2",
+            "assets": [{"name": "a.zip", "bytes": 1, "sha256": digest}], "excluded": []}
+
+
+def test_an_unreported_digest_is_not_an_assumption_of_a_match():
+    """This is the defect the change is about.
+
+    Before: the page reported no digest for an asset, the comparison skipped it, and
+    the verdict was ACCEPTABLE -- green without measuring anything. A page that stops
+    reporting digests (or a new asset GitHub has not digested yet) would have passed
+    silently, on exactly the assets a rewrite would target.
+    """
+    bad, unsure = crp.compare(_pin_once("a" * 64), {"a.zip": ""}, set())
+    assert bad == []
+    assert unsure and unsure[0][0] == "a.zip"
+    assert "reports no digest" in unsure[0][1]
+
+
+def test_an_unreported_digest_is_resolved_by_hashing_the_bytes():
+    bad, unsure = crp.compare(_pin_once("a" * 64), {"a.zip": ""}, set(),
+                              resolve=lambda name: "a" * 64)
+    assert bad == [] and unsure == []
+
+
+def test_hashing_the_bytes_can_still_come_back_wrong():
+    bad, unsure = crp.compare(_pin_once("a" * 64), {"a.zip": ""}, set(),
+                              resolve=lambda name: "b" * 64)
+    assert unsure == []
+    assert bad and bad[0][0] == "a.zip" and bad[0][2] == "b" * 64
+
+
+def test_bytes_that_cannot_be_fetched_are_unmeasured_not_green():
+    def boom(name):
+        raise RuntimeError("network down")
+    bad, unsure = crp.compare(_pin_once("a" * 64), {"a.zip": ""}, set(), resolve=boom)
+    assert bad == []
+    assert unsure and "network down" in unsure[0][1]
+
+
+def test_check_pin_reports_three_things_separately():
+    path = os.path.join(ROOT, "anchors", "pins", "uibc-release-v0.4.1.json")
+    pin = json.load(io.open(path, encoding="utf-8"))
+    live = {a["name"]: "" for a in pin["assets"]}
+    bad, lines, unsure = cra.check_pin("v0.4.1", live)
+    assert bad == 0
+    assert unsure == len(pin["assets"])
+    assert all(line.startswith("unreported ") for line in lines)

@@ -66,26 +66,55 @@ def _live_manifest(tag):
     return manifest
 
 
-def check_pin(tag, live):
-    """Compare the live release against anchors/pins/uibc-release-<tag>.json."""
+def check_pin(tag, live, resolve=None):
+    """Compare the live release against anchors/pins/uibc-release-<tag>.json.
+
+    Returns (bad, lines, unsure). `unsure` counts assets the page does not report a
+    digest for: those are neither a match nor a mismatch until the bytes are hashed.
+    A caller that cannot hash them must report the result as unmeasured rather than
+    accepting it.
+    """
     path = PIN.format(tag=tag)
     if not os.path.isfile(path):
         return None, []
     with open(path, encoding="utf-8") as handle:
         pin = json.load(handle)
     expected = {a["name"]: a["sha256"] for a in pin.get("assets", [])}
-    lines, bad = [], 0
+    lines, bad, unsure = [], 0, 0
     for name, digest in sorted(expected.items()):
         if name not in live:
             lines.append("missing    %s (pinned, not on the page)" % name)
             bad += 1
-        elif live[name] and live[name] != digest:
+        elif not live[name]:
+            if resolve is None:
+                lines.append("unreported %s: the page reports no digest; not compared" % name)
+                unsure += 1
+                continue
+            try:
+                got = resolve(name)
+            except Exception as exc:  # the bytes could not be fetched
+                lines.append("unsure     %s: %s" % (name, exc))
+                unsure += 1
+                continue
+            if got != digest:
+                lines.append("changed    %s: pinned %s…, bytes hash to %s…"
+                             % (name, digest[:12], got[:12]))
+                bad += 1
+            else:
+                lines.append("hashed     %s: no digest reported, bytes match the pin" % name)
+        elif live[name] != digest:
             lines.append("changed    %s: pinned %s… now %s…" % (name, digest[:12], live[name][:12]))
             bad += 1
     for name in sorted(set(live) - set(expected)):
+        if not live[name]:
+            # An asset the pin never saw, whose bytes this check cannot measure.
+            lines.append("unpinned   %s is on the page but not in the pin, and reports no digest"
+                         % name)
+            unsure += 1
+            continue
         lines.append("unpinned   %s is on the page but not in the pin" % name)
         bad += 1
-    return bad, lines
+    return bad, lines, unsure
 
 
 
@@ -124,6 +153,26 @@ def _fetch(url, dest, attempts=3, timeout=45):
 def _sha256(path):
     with open(path, "rb") as handle:
         return hashlib.sha256(handle.read()).hexdigest()
+
+
+def _download_sha256(tag, name, tmpdir=None):
+    """Hash an asset from the bytes the page serves.
+
+    Needed when the API reports no digest for an asset -- which happens for assets
+    uploaded before GitHub started computing them, and would happen again if it
+    stopped. Treating an unreported digest as a match is how a check goes green
+    without measuring anything, so it is resolved by hashing the bytes instead.
+    """
+    gh = shutil.which("gh")
+    if not gh:
+        raise RuntimeError("gh unavailable, so the bytes cannot be fetched")
+    tmpdir = tmpdir or tempfile.mkdtemp(prefix="uibc_hash_")
+    proc = subprocess.run([gh, "release", "download", tag, "-R", REPO,
+                           "-p", name, "-D", tmpdir, "--clobber"],
+                          capture_output=True, text=True, timeout=600)
+    if proc.returncode != 0:
+        raise RuntimeError((proc.stderr or proc.stdout).strip()[:200])
+    return _sha256(os.path.join(tmpdir, name))
 
 
 def verify_dir(directory, tag="v0.4.1"):
@@ -256,13 +305,18 @@ def main(argv=None):
         if live is None:
             lines.append("pin          not checked: gh unavailable or the release unreadable")
         else:
-            bad, plines = check_pin(args.tag, live)
+            bad, plines, unsure = check_pin(
+                args.tag, live, resolve=lambda name: _download_sha256(args.tag, name))
             if bad is None:
                 lines.append("pin          no pin file for %s; nothing to compare" % args.tag)
             else:
                 lines.extend(plines)
                 if bad:
                     code = max(code, 1)
+                elif unsure:
+                    lines.append("pin          %d asset(s) could not be measured; this is not a pass"
+                                 % unsure)
+                    code = max(code, 3)
                 else:
                     lines.append("pin          all %d assets match the pin recorded at freeze"
                                  % len(live))

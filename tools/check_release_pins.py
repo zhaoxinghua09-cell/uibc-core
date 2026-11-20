@@ -74,22 +74,41 @@ def self_pin(tag, tmpdir):
         return None
 
 
-def compare(blob, live, skip):
-    """[(name, recorded, served)] for assets that differ, plus missing/unpinned."""
+def compare(blob, live, skip, resolve=None):
+    """[(name, recorded, served)] for assets that differ, plus missing/unpinned.
+
+    Assets whose digest the page does not report are not assumed to match: they go
+    through `resolve` (hash the served bytes) or are returned as unsure, so a caller
+    can say "not measured" instead of "fine".
+    """
     recorded = {a["name"]: a["sha256"] for a in blob.get("assets", [])}
-    bad = []
+    bad, unsure = [], []
     for name, digest in sorted(recorded.items()):
         if name in skip:
             continue
         if name not in live:
             bad.append((name, digest, None))
-        elif live[name] and live[name] != digest:
-            bad.append((name, digest, live[name]))
+            continue
+        served = live[name]
+        if not served:
+            if resolve is None:
+                unsure.append((name, "the page reports no digest"))
+                continue
+            try:
+                served = resolve(name)
+            except Exception as exc:
+                unsure.append((name, str(exc)))
+                continue
+        if served != digest:
+            bad.append((name, digest, served))
     for name in sorted(live):
         if name in skip or name in recorded:
             continue
+        if not live[name]:
+            unsure.append((name, "not in the pin, and the page reports no digest"))
+            continue
         bad.append((name, None, live[name]))
-    return bad
+    return bad, unsure
 
 
 def main(argv=None):
@@ -136,7 +155,13 @@ def main(argv=None):
                 continue
             kind = "self_pin"
             skip = set(blob.get("excluded", [])) | {PIN_NAME}
-        bad = compare(blob, live, skip)
+        bad, unsure = compare(blob, live, skip,
+                              resolve=lambda name: cra._download_sha256(tag, name))
+        if unsure:
+            for name, why in unsure[:6]:
+                print("%-12s UNMEASURED %s: %s" % (tag, name, why))
+            code = max(code, 3)
+            report[tag] = {"state": "unmeasured", "assets": [u[0] for u in unsure]}
         if bad:
             for name, recorded, served in bad[:6]:
                 why = ("missing from the page" if served is None

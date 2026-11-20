@@ -173,8 +173,8 @@ def test_the_pin_matches_an_unchanged_page(tmp_path):
     assert os.path.isfile(pin)
     blob = json.load(open(pin, encoding="utf-8"))
     live = {a["name"]: a["sha256"] for a in blob["assets"]}
-    bad, lines = cra.check_pin("v0.4.1", live)
-    assert bad == 0
+    bad, lines, unsure = cra.check_pin("v0.4.1", live)
+    assert bad == 0 and unsure == 0
     assert not lines
 
 
@@ -183,7 +183,7 @@ def test_a_changed_asset_is_a_drift():
                                       "uibc-release-v0.4.1.json"), encoding="utf-8"))
     live = {a["name"]: a["sha256"] for a in pin["assets"]}
     live["CORPUS-DIGESTS.txt"] = "0" * 64
-    bad, lines = cra.check_pin("v0.4.1", live)
+    bad, lines, _ = cra.check_pin("v0.4.1", live)
     assert bad == 1
     assert any(line.startswith("changed    CORPUS-DIGESTS.txt") for line in lines)
 
@@ -194,7 +194,7 @@ def test_a_missing_asset_and_an_unpinned_one_are_both_reported():
     live = {a["name"]: a["sha256"] for a in pin["assets"]}
     live.pop("anchor_freetsa.tsr")
     live["surprise.bin"] = "f" * 64
-    bad, lines = cra.check_pin("v0.4.1", live)
+    bad, lines, _ = cra.check_pin("v0.4.1", live)
     assert bad == 2
     assert any("missing    anchor_freetsa.tsr" in line for line in lines)
     assert any("unpinned   surprise.bin" in line for line in lines)

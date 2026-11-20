@@ -397,7 +397,9 @@ python tools/reproduce_gate.py --repo . --uibc <path-to-uibc[.exe]> \
        --profile docs/assurance/far-profile.json --out receipts
 ```
 
-It does five things and prints one receipt:
+It does five things and prints one receipt. What the receipt claims about the network —
+and the four things it deliberately does not claim — is stated separately in
+[`docs/assurance/NETWORK-SCOPE.md`](docs/assurance/NETWORK-SCOPE.md).
 
 | step | what it re-derives |
 |---|---|

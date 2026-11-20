@@ -1,0 +1,12 @@
+{
+  "kind": "uibc-release-signing-key-v0",
+  "alg": "ed25519",
+  "key_id": "179c615aef27cbcd",
+  "public_key_b64": "cXzoqCMn8Dp34+e5uGn6LIrwCTDxWUwyqNnR1HP+pdI=",
+  "created": "2026-11-20",
+  "what_it_signs": "the exact bytes of CORPUS-DIGESTS.txt on each release, published beside it as CORPUS-DIGESTS.txt.sig",
+  "where_the_private_half_is": "nowhere in this repository: kept DPAPI-protected on the maintainer's machine and supplied to the release workflow only as the repository secret UIBC_RELEASE_SEED_HEX (set 2026-11-20)",
+  "first_release": "the first tag published after 2026-11-20; v0.4.1 carries UNSIGNED.txt because it was published before this key existed",
+  "why_this_file_exists": "a signature checked against a key that travels inside the signature proves integrity but not identity. Recording the expected key_id here, in the repository, makes a swapped key visible to a reader instead of invisible.",
+  "check": "python tools/check_release_anchors.py refuses a CORPUS-DIGESTS.txt.sig whose key_id differs from this file"
+}

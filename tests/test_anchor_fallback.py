@@ -102,3 +102,66 @@ def test_an_unrunnable_verifier_is_not_measured_not_refused(tmp_path):
 
     assert code == 3
     assert "could not run the verifier" in lines[0]
+
+
+def _token_json(digest_hex):
+    return json.dumps({"verified": True, "info": {"digest_hex": digest_hex,
+                                                  "gen_time": "2026-11-20T04:24:44+00:00",
+                                                  "serial": "172003659"}, "problems": []})
+
+
+def test_a_signature_under_the_recorded_key_is_accepted(tmp_path):
+    _write(tmp_path, "CORPUS-DIGESTS.txt", b"list\n")
+    _write(tmp_path, "anchor_freetsa.tsr", b"t")
+    _write(tmp_path, "anchor_freetsa_ca.pem", b"p")
+    _write(tmp_path, "CORPUS-DIGESTS.txt.sig", b"sig")
+    digest = cra._sha256(str(tmp_path / "CORPUS-DIGESTS.txt"))
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setattr(cra, "_verify_token", lambda *a: (0, _token_json(digest)))
+        mp.setattr(cra, "_verify_sig", lambda *a: (0, json.dumps(
+            {"key_id": "179c615aef27cbcd", "file_sha256": digest})))
+        mp.setattr(cra, "_pinned_key", lambda: "179c615aef27cbcd")
+        code, lines = cra.verify_dir(str(tmp_path))
+    assert code == 0
+    assert any("key_id 179c615aef27cbcd" in line for line in lines)
+
+
+def test_a_signature_under_a_different_key_is_refused(tmp_path):
+    _write(tmp_path, "CORPUS-DIGESTS.txt", b"list\n")
+    _write(tmp_path, "anchor_freetsa.tsr", b"t")
+    _write(tmp_path, "anchor_freetsa_ca.pem", b"p")
+    _write(tmp_path, "CORPUS-DIGESTS.txt.sig", b"sig")
+    digest = cra._sha256(str(tmp_path / "CORPUS-DIGESTS.txt"))
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setattr(cra, "_verify_token", lambda *a: (0, _token_json(digest)))
+        mp.setattr(cra, "_verify_sig", lambda *a: (0, json.dumps(
+            {"key_id": "deadbeefdeadbeef", "file_sha256": digest})))
+        mp.setattr(cra, "_pinned_key", lambda: "179c615aef27cbcd")
+        code, lines = cra.verify_dir(str(tmp_path))
+    assert code == 1
+    assert any("records 179c615aef27cbcd" in line for line in lines)
+
+
+def test_a_signature_with_no_recorded_key_says_the_signer_is_unidentified(tmp_path):
+    _write(tmp_path, "CORPUS-DIGESTS.txt", b"list\n")
+    _write(tmp_path, "anchor_freetsa.tsr", b"t")
+    _write(tmp_path, "anchor_freetsa_ca.pem", b"p")
+    _write(tmp_path, "CORPUS-DIGESTS.txt.sig", b"sig")
+    digest = cra._sha256(str(tmp_path / "CORPUS-DIGESTS.txt"))
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setattr(cra, "_verify_token", lambda *a: (0, _token_json(digest)))
+        mp.setattr(cra, "_verify_sig", lambda *a: (0, json.dumps(
+            {"key_id": "179c615aef27cbcd", "file_sha256": digest})))
+        mp.setattr(cra, "_pinned_key", lambda: None)
+        code, lines = cra.verify_dir(str(tmp_path))
+    assert code == 1
+    assert any("unidentified" in line for line in lines)
+
+
+def test_the_repository_records_a_signing_key():
+    path = os.path.join(ROOT, "anchors", "release-signing-key.json")
+    assert os.path.isfile(path)
+    key = json.load(open(path, encoding="utf-8"))
+    assert key["alg"] == "ed25519"
+    assert len(key["key_id"]) == 16
+    assert "nowhere in this repository" in key["where_the_private_half_is"]

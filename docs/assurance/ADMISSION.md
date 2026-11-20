@@ -91,6 +91,30 @@ Negative control: `test_a_tampered_package_is_denied_not_only_failed` flips a by
 asserts `gate.decision == DENY` **and** `verify_result == FAIL`. Two assertions because the
 interesting case is when they disagree.
 
+### Two machines, same decision (measured, 2026-11-20)
+
+Same commit `1ca32c6`, a clean clone on each side, `pip install .` in a fresh venv, then
+`tools/admit_package.py` on the wheel that machine had just built:
+
+| machine | wheel | decision | exit | negative control (one byte flipped) |
+|---|---|---|---|---|
+| Windows 11 / Python 3.13.15 | 128763 B | `ALLOW` — verify PASS, no revocation, no dispute | 0 | — |
+| Linux 6.6.95 / Python 3.12.11 | 129205 B, sha256 `8bf7a93ecfd4…` | `ALLOW` — same reason string | 0 | `DENY` — `verifier FAIL: S4; S8`, gate exit 2 |
+
+The wheels differ in size again, which is the earlier section's point holding under the
+new code path: the decision is a statement about the bytes that were sealed, not about
+the source they came from.
+
+One asymmetry worth naming rather than smoothing over: `uibc gate` itself exits **2** on
+DENY, while `admit_package.py` collapses any non-ALLOW decision to **1**. Both are
+non-zero, so a shell `if` behaves the same; a caller that branches on the *specific*
+code gets a different number from the two tools. If you need the gate's own code, call
+`uibc gate` directly — the wrapper documents its own coarseness instead of hiding it.
+
+And the standing caveat: both rows were produced by the same person, on two machines he
+controls. That is a reproduction, not an independent verification; evidence level does
+not move.
+
 ## The same source produced two different wheels (measured)
 
 Building this repository's wheel on two machines, from the same commit `e83d93f`, gave:

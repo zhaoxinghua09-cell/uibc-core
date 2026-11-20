@@ -15,7 +15,7 @@
 | S5 | evidence root | 是 | 12 | 3 | 34 |
 | S6 | seal signature | 是 | 21 | 1 | 38 |
 | S7 | evidence index metadata | 否 | 6 | 1 | 17 |
-| S8 | package checkpoint head | 否 | 8 | 2 | 25 |
+| S8 | package checkpoint head | 否 | 8 | 2 | 26 |
 | S9 | head pinned out-of-band | 否 | 9 | 1 | 31 |
 | S10 | attestation closure declared | 否 | 6 | 2 | 10 |
 | S11 | strict serialization | 是 | 6 | 1 | 19 |

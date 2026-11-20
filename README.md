@@ -431,10 +431,21 @@ python tools/admit_package.py --artifact dist/pkg-1.0.whl --out /tmp/admitted/pk
 ```
 
 It hashes the artifact and every member, seals the binding with your key, and verifies
-open and pinned. A PASS means *the bytes you hold are the bytes that were sealed* — not
-that the artifact is safe. No scan, no execution, no dependency graph; the record says so
-in its own `not_covered` list. Details and a measured example:
-[`docs/assurance/ADMISSION.md`](docs/assurance/ADMISSION.md).
+open and pinned, then runs the gate and prints the **decision** (`ALLOW`/`DENY` with its
+reason) — the verify verdict alone would leave revocation and dispute overlays to the
+caller. It also writes `<out>.decision.json`, a receipt whose every field somebody else can
+recompute:
+
+```
+python tools/verify_decision.py --package /tmp/admitted/pkg-1.0 \
+       --receipt /tmp/admitted/pkg-1.0.decision.json --pubkey owner.ed25519.pub
+```
+
+A PASS means *the bytes you hold are the bytes that were sealed* — not that the artifact is
+safe. No scan, no execution, no dependency graph; the record says so in its own
+`not_covered` list. Details and a measured example:
+[`docs/assurance/ADMISSION.md`](docs/assurance/ADMISSION.md); the receipt and its three
+tamper controls: [`docs/assurance/DECISION-RECEIPT.md`](docs/assurance/DECISION-RECEIPT.md).
 
 ## Reproduce the published numbers in one command
 

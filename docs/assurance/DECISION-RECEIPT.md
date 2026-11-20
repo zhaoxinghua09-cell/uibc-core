@@ -106,7 +106,14 @@ report says so instead of printing a bare MATCH.
 
 This is the honest half of "the decision applies to your download": it proves *the receipt
 is about this file*, and it refuses to imply *the decision was redone*. A different file
-turns `subject.sha256`, `subject.bytes` and `subject.members` red and exits 1.
+turns `subject.sha256`, `subject.bytes` and `subject.members` red and exits 1. A **renamed**
+copy of the same file does not: a browser saving `pkg (1).whl` is the ordinary case, so
+`subject.name` is printed as `NOTE` and stays out of the verdict — the bytes decide.
+
+That was a defect found by running the tool on the second machine, not by reading the
+code: the first version compared the name like any other field, so `cp wheel.whl other.whl`
+flipped the whole verdict to `MISMATCH`. The control is now a test
+(`test_a_renamed_download_is_not_a_failure`).
 
 ## Boundaries
 

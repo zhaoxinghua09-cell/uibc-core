@@ -103,10 +103,13 @@ def compare_artifact(artifact, receipt):
     rows.append(("subject.members", subject.get("members"), len(members),
                  subject.get("members") == len(members)))
     rows.append(("subject.name", subject.get("name"), os.path.basename(artifact),
-                 subject.get("name") == os.path.basename(artifact)))
+                 # A renamed file is the same artifact: a download called
+                 # "pkg (1).whl" must not fail the check. The name is recorded
+                 # as a note, and the bytes decide.
+                 "note" if subject.get("name") != os.path.basename(artifact) else True))
     for f in ("package_root",) + FIELDS:
         rows.append((f, receipt.get(f), "needs the sealed package", None))
-    all_ok = all(r[3] for r in rows if r[3] is not None)
+    all_ok = all(r[3] for r in rows if r[3] in (True, False))
     return rows, all_ok
 
 
@@ -118,7 +121,8 @@ def _fmt(v):
 
 
 def _verdict(good):
-    return {True: "MATCH", False: "MISMATCH", None: "NOT CHECKABLE"}[good]
+    return {True: "MATCH", False: "MISMATCH", None: "NOT CHECKABLE",
+            "note": "NOTE"}[good]
 
 
 def render(rows, ok, receipt_path, subject_path, subject_label):
@@ -134,6 +138,10 @@ def render(rows, ok, receipt_path, subject_path, subject_label):
 
     lines.append("")
     unchecked = [r[0] for r in rows if r[3] is None]
+    notes = [r[0] for r in rows if r[3] == "note"]
+    if ok and notes:
+        lines.append("A NOTE, not a failure: %s differs. A renamed download is the same "
+                     "artifact — the bytes are what the receipt pins." % ", ".join(notes))
     if ok and unchecked:
         lines.append("**MATCH on every checkable field** — %d field(s) could not be checked without "
                      "the sealed package: %s. What is proven here is narrower than the full "

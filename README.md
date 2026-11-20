@@ -454,6 +454,11 @@ safe. No scan, no execution, no dependency graph; the record says so in its own
 [`docs/assurance/ADMISSION.md`](docs/assurance/ADMISSION.md); the receipt and its three
 tamper controls: [`docs/assurance/DECISION-RECEIPT.md`](docs/assurance/DECISION-RECEIPT.md).
 
+The decision layer can also take a package back: `tools/demo_revocation.py` runs the gate
+four times on one unchanged package and shows `ALLOW` without an overlay, `DENY` with a
+valid owner revocation, and `HOLD` (never `ALLOW`) when the revocation cannot be verified —
+[`docs/assurance/REVOCATION-DEMO.md`](docs/assurance/REVOCATION-DEMO.md).
+
 ## Reproduce the published numbers in one command
 
 If you do not want to take our arithmetic on trust, there is one command that re-derives it

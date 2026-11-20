@@ -240,7 +240,15 @@ def main():
                        "independent audit: the corpus, the manifest and this runner "
                        "are all authored by the project."),
             "run_by": a.run_by or None,
-            "when_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            # A receipt is normally stamped with the clock. When the caller fixes
+            # SOURCE_DATE_EPOCH -- as the release workflow does, so one tag means one
+            # set of bytes -- the stamp follows it. Measured 2026-11-20: this one field
+            # made a re-run of the same tag produce a different receipt, and therefore
+            # a different CORPUS-DIGESTS.txt.
+            "when_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ",
+                                      time.gmtime(int(os.environ["SOURCE_DATE_EPOCH"])
+                                                  if os.environ.get("SOURCE_DATE_EPOCH")
+                                                  else None)),
             "command": a.verify,
             "python": sys.version.split()[0],
             "platform": platform.platform(),

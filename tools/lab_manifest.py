@@ -37,6 +37,20 @@ def _sha256(path):
 
 
 def _now():
+    """Wall clock, unless a build wants the same tag to mean the same bytes.
+
+    `SOURCE_DATE_EPOCH` is the reproducible-builds convention `uibc_core.cli` already
+    honours. Measured 2026-11-20: without it, a dispatch of the same tag produced a
+    different `CORPUS-DIGESTS.txt` than the tag push did (9a3ffbbc -> 60f48c32), because
+    this stamp lands in the bundle and the digest list hashes the bundle.
+    """
+    epoch = os.environ.get("SOURCE_DATE_EPOCH")
+    if epoch:
+        try:
+            return datetime.datetime.fromtimestamp(
+                int(epoch), datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        except (TypeError, ValueError):
+            raise SystemExit("error: SOURCE_DATE_EPOCH=%r is not a unix timestamp" % epoch)
     return datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 

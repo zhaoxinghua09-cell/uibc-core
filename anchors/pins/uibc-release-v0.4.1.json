@@ -1,0 +1,27 @@
+{
+  "kind": "uibc-release-pin-v0",
+  "tag": "v0.4.1",
+  "frozen_at": "2026-11-20T04:24:44Z",
+  "measured": "gh api repos/zhaoxinghua09-cell/uibc-core/releases/tags/v0.4.1, 2026-11-20",
+  "why": "This workflow rewrote the same tag three times today. Each rewrite was invisible until someone remembered the earlier digest. A reader who checks the release against this file learns about a rewrite without having to remember one.",
+  "assets": [
+    {"name": "uibc-conformance-0.4.1.zip", "bytes": 228000,
+     "sha256": "711fa82c9f183066cfae6441a4fe3fc27fcc516b25f2a976cad5e0dd61b5135f"},
+    {"name": "uibc-lab-bundle-0.4.1.json", "bytes": 210899,
+     "sha256": "12dbb083cbb044c08c4e5ab779fe538f94a17d1e389d1d57caecb100a0c65957"},
+    {"name": "receipt.json", "bytes": 8665,
+     "sha256": "d2dba1def2e76ac3e7c9e7f2885d86c6b802a28a1bacd442e58232ef04763f50"},
+    {"name": "CORPUS-DIGESTS.txt", "bytes": 287,
+     "sha256": "153f9b898878aaa9da97c7a496dd22af124d9bb3112ec5fede0a04eff94df033"},
+    {"name": "anchor_freetsa.tsr", "bytes": 4645,
+     "sha256": "e4ec11a9dc8f470d9fe7f83516a10b32986cd6d3db1d35ec7c8735d37810ab7f"},
+    {"name": "anchor_freetsa_ca.pem", "bytes": 5107,
+     "sha256": "b8201c19ae46a882ceb83ce58251662fa0e47b0ebff40d6bc025f3e4626ab51e"},
+    {"name": "CORPUS-DIGESTS.txt.ots", "bytes": 172,
+     "sha256": "282808f5b8f05aa8bbc392ddcf9bd127cacd8d65eaa907751c666ab53b9a8759"},
+    {"name": "ANCHORS.json", "bytes": 375,
+     "sha256": "7ae90ea4ac554f704a4a2ce068d75145d4ae56a9b4284ab1772a6657fbd8f5d8"},
+    {"name": "UNSIGNED.txt", "bytes": 173,
+     "sha256": "edde499de029e80b83d396c1a671ee09fb6f67c9ce426c516a2c4e9a505ef855"}
+  ]
+}

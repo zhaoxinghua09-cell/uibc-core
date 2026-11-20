@@ -24,9 +24,24 @@ What that is not: a self-run. 36/36 here was produced by the maintainer on one m
 
 A check nobody can make fail is decoration.
 
-If you have not cloned anything: `conformance/uibc-conformance-0.4.1.zip` is
-self-contained — unzip it and `python run.py` prints `strict 36/36` and writes
-a receipt, with no install step. The commands below need the
+If you have not cloned anything, the corpus is one anonymous download away — no login, no token, no
+`pip install`:
+
+```bash
+curl -fL -o corpus.zip \
+  https://github.com/zhaoxinghua09-cell/uibc-core/raw/main/conformance/uibc-conformance-0.4.1.zip
+sha256sum corpus.zip   # 711fa82c9f183066cfae6441a4fe3fc27fcc516b25f2a976cad5e0dd61b5135f
+unzip -q corpus.zip -d corpus && cd corpus && python run.py
+```
+
+Expected: `strict 36/36`, a `receipt.json`, exit 0. Measured this way on 2026-11-20 (download →
+unzip → run, `PYTHONPATH` empty, nothing installed): the archive came down as 228,000 bytes with
+that hash, and the run printed `strict 36/36` with `verifier_version 0.4.1 / cases 36 / passed 36`.
+
+Note what does **not** exist: there is no release asset for `0.4.1`. The newest release is `v0.4.0`
+and its single asset is `uibc-conformance-0.4.0.zip`, which is not this corpus. The URL above is
+therefore the entry point, and `tools/check_outsider_entry.py` fails if the documented URL and the
+pinned bytes drift apart. The commands below need the
 repository, because they rebuild the suite rather than run it.
 
 ```

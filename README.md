@@ -24,11 +24,16 @@ It prints `CONSISTENT` only when **both** hold: a second, independently written 
 
 ### Or don't clone at all — run the corpus in about sixty seconds
 
-Download `conformance/uibc-conformance-0.4.1.zip` (sha256 `711fa82c…`, 228,000 bytes; deterministic build, so rebuilding gives the same bytes), unzip it, and run:
+Fetch it anonymously, without cloning (no login, no token — measured 2026-11-20, the bytes match the pin exactly):
 
 ```bash
-python run.py
+curl -fL -o corpus.zip \
+  https://github.com/zhaoxinghua09-cell/uibc-core/raw/main/conformance/uibc-conformance-0.4.1.zip
+sha256sum corpus.zip   # 711fa82c9f183066cfae6441a4fe3fc27fcc516b25f2a976cad5e0dd61b5135f, 228,000 bytes
+unzip -q corpus.zip -d corpus && cd corpus && python run.py
 ```
+
+There is **no** release asset for `0.4.1` (the newest release, `v0.4.0`, carries `uibc-conformance-0.4.0.zip`, which is not this corpus) — the URL above is the entry point, and if it ever stops resolving that is a defect we want reported, not something to work around. The archive is deterministic, so rebuilding it gives the same bytes.
 
 No repository, no network, no `pip install`: the archive carries its own verifier as a single file (`uibc_core.pyz`), and `run.py` uses it. Expected tail `strict 36/36` in about six seconds, and a `receipt.json` you can publish. A verifier that answers PASS to everything scores **6/36**, so refusing nothing does not pass.
 

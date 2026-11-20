@@ -99,6 +99,31 @@ class TestRecord(unittest.TestCase):
         self.assertTrue(os.path.exists(p))
 
 
+class TestStateBytes(unittest.TestCase):
+    """The same observation must produce the same bytes on every platform.
+
+    A state file is handed to another verifier, sometimes on another machine. If
+    Windows wrote CRLF where Linux writes LF, the two would differ for no reason
+    and a byte-for-byte comparison of "the same memory" would report a difference
+    that is only a line ending.
+    """
+
+    def test_recorded_state_uses_lf_only(self):
+        p = os.path.join(tempfile.mkdtemp(), "state.json")
+        freshness.record(p, "a1", "sha256:aa", sequence=3, accepted_at="2026-11-20T00:00:00Z")
+        raw = open(p, "rb").read()
+        self.assertNotIn(b"\r\n", raw, "state file carries CRLF")
+        self.assertIn(b"\n", raw, "state file is not line-delimited at all")
+
+    def test_two_identical_observations_are_byte_identical(self):
+        d = tempfile.mkdtemp()
+        a = os.path.join(d, "a.json")
+        b = os.path.join(d, "b.json")
+        for p in (a, b):
+            freshness.record(p, "a1", "sha256:aa", sequence=3)
+        self.assertEqual(open(a, "rb").read(), open(b, "rb").read())
+
+
 class TestVerifierIntegration(unittest.TestCase):
     """The CLI path: first run bootstraps the watermark, second run compares."""
 

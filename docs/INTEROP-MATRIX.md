@@ -68,8 +68,9 @@ did not run their vectors.
 4. **We are ahead on**: a public repository an outsider can clone and run
    (full suite - count in `docs/EVIDENCE-INDEX.md` - 16 red-team scenarios, 37 attacks, all re-run from a fresh anonymous clone), a
    published crosswalk to an IETF draft with the failing cells written down, and
-   a habit of publishing our own failed verification attempts (Rekor inclusion
-   proof) with the third-party cross-check that also failed.
+   a habit of publishing our own failed verification attempts — including one we
+   had to retract: the Rekor inclusion "failure" was our reading error, corrected
+   on 2026-11-21 with a reproduction (`docs/REKOR-INCLUSION-2026-11-21.md`).
 
 The differentiator is not a feature. It is that **our claims are already
 exercised by someone who is not us**, and we publish the parts that do not work.

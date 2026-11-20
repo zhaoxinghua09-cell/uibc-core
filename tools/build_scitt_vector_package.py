@@ -132,6 +132,41 @@ CASES = [
     ("fail-wrong-leaf-index-edge", 16, 0, "index", "INVALID_LEAF_INDEX",
      "Left-most leaf paired with the right-most leaf's path on the same tree."),
 
+    # --- fail: path structure (length and order), each isolated ---
+    ("fail-path-short", 8, 2, "path-short", "INVALID_INCLUSION_PATH",
+     "One sibling dropped from a size-8 path: folding stops a level below the root, so "
+     "the reconstructed root is a subtree hash rather than the root."),
+    ("fail-path-short-tree3", 3, 1, "path-short", "INVALID_INCLUSION_PATH",
+     "Same one-sibling-short tamper on a 2|1 split, to show it is not size-8 specific."),
+    ("fail-path-short-tree32", 32, 31, "path-short", "INVALID_INCLUSION_PATH",
+     "One sibling dropped on the right edge of a full 32-leaf tree: the last fold is "
+     "missing, which is the case a length-only check misses."),
+    ("fail-path-swap", 8, 5, "path-swap", "INVALID_INCLUSION_PATH",
+     "First two siblings exchanged: byte count and path length are unchanged, the root "
+     "differs. A verifier that validates shape but not order accepts this wrongly."),
+    ("fail-path-swap-tree16", 16, 9, "path-swap", "INVALID_INCLUSION_PATH",
+     "Same order tamper on an unbalanced 16-leaf tree, where one sibling sits above the "
+     "split rather than beside the leaf."),
+    ("fail-path-swap-tree5", 5, 0, "path-swap", "INVALID_INCLUSION_PATH",
+     "Order tamper on a 4|1 split at the left edge, the smallest tree with two siblings "
+     "in the path."),
+    ("fail-path-short-tampered", 7, 6, "path-short", "INVALID_INCLUSION_PATH",
+     "A size-7 path with both a dropped sibling and an unbalanced split: isolates length "
+     "from tree shape."),
+
+    # --- valid: sizes just above and below a power of two, beyond the first batch ---
+    ("valid-tree33-index0", 33, 0, None, "VALID",
+     "tree_size=33 = 32|1: left subtree full, tail is a single leaf; leaf 0 path crosses "
+     "the split at the top."),
+    ("valid-tree63-index31", 63, 31, None, "VALID",
+     "tree_size=63 = 32|31: last leaf of the left subtree in a two-level unbalanced tree."),
+    ("valid-tree64-index63", 64, 63, None, "VALID",
+     "tree_size=64: full binary tree of depth 6, right-most leaf; every sibling is on "
+     "the left."),
+    ("valid-tree65-index64", 65, 64, None, "VALID",
+     "tree_size=65 = 64|1: the single tail leaf of a full tree plus one; path length 1 "
+     "and the top split is the whole tree."),
+
     # --- ambiguous: the root does not authenticate the declared size ---
     ("ambiguous-tree-size", 7, 5, "ambiguous", "VALID_BUT_SIZE_UNAUTHENTICATED",
      "tree_size=7, leaf_index=5: the same inclusion_path folds to the same root at "
@@ -169,6 +204,16 @@ def _expected(cid, size, index, tamper, result, desc):
         proof = []
     elif tamper == "path-long":
         proof = proof + [b"\x00" * 32]
+    elif tamper == "path-short":
+        # One sibling dropped. The fold stops early, so the "reconstructed root" is a
+        # subtree hash rather than the root. A verifier that only compares lengths,
+        # or one that stops folding without comparing, both need to reject this.
+        proof = proof[:-1]
+    elif tamper == "path-swap":
+        # Two siblings in each other's place. Same number of bytes, same length, so a
+        # verifier that checks shape rather than order will wrongly accept it.
+        proof = list(proof)
+        proof[0], proof[1] = proof[1], proof[0]
     elif tamper == "leaf":
         leaf_input = _leaf_text(cid, index) + b" (tampered)"
         leaf_digest = merkle.leaf_hash(leaf_input)

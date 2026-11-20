@@ -1,10 +1,10 @@
 {
   "class_counts": {
-    "INVALID_INCLUSION_PATH": 5,
+    "INVALID_INCLUSION_PATH": 12,
     "INVALID_LEAF_DIGEST": 1,
     "INVALID_LEAF_INDEX": 2,
     "INVALID_TREE_SIZE": 1,
-    "VALID": 17,
+    "VALID": 21,
     "VALID_BUT_SIZE_UNAUTHENTICATED": 4
   },
   "coverage_note": "Declaring a tree_size one larger than the path assumes never changes the reconstructed root in this algebra - the fold reads no additional node - so that input is carried as an ambiguous-* vector (the root does not authenticate the size), not as an INVALID_TREE_SIZE vector. INVALID_TREE_SIZE therefore covers 'declared smaller' (path one short) and 'declared zero' (no fold defined) only. This asymmetry was found by running the vectors, not assumed: an earlier draft carried a 'size larger' fail case that our own verifier reported as root-equal.",
@@ -634,6 +634,274 @@
       },
       "expected_result": "INVALID_LEAF_INDEX",
       "id": "fail-wrong-leaf-index-edge"
+    },
+    {
+      "description": "One sibling dropped from a size-8 path: folding stops a level below the root, so the reconstructed root is a subtree hash rather than the root.",
+      "dir": "v1/fail-path-short",
+      "expected": {
+        "inclusion_path": [
+          "ded346000e3eb2564a3ac9fa7707b043430e9ce2cdbb43db1570ad0d5bd21291",
+          "9b1036e0a3fc9fcd79211446c67fe0eacf80152d7f6ad1180345ca7dcdc3ac1e"
+        ],
+        "leaf_entry": {
+          "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+          "digest_hex": "8f935333a6032df134af8f7bb13f792520dd0d0cbc64b8f94b01b59f7a7141e5",
+          "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: fail-path-short :: leaf 2",
+          "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a206661696c2d706174682d73686f7274203a3a206c6561662032"
+        },
+        "leaf_index": 2,
+        "reconstructed_root": "68e2133123fa04fd7b28efbc6aa7a4c8b409aefc35438a904ea19106e9809fa1",
+        "result": "INVALID_INCLUSION_PATH",
+        "root_true": "fdddff29a51cc6d1318d5198e1cefaeed82f835b3f7c3baf088a4fe9f134582e",
+        "tree_size": 8
+      },
+      "expected_result": "INVALID_INCLUSION_PATH",
+      "id": "fail-path-short"
+    },
+    {
+      "description": "Same one-sibling-short tamper on a 2|1 split, to show it is not size-8 specific.",
+      "dir": "v1/fail-path-short-tree3",
+      "expected": {
+        "inclusion_path": [
+          "9dca133df776728010c08829d9d2fa477743b900ddd85630683ec0bf782962de"
+        ],
+        "leaf_entry": {
+          "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+          "digest_hex": "33662b0e03be032ddb91d2ca86a52a18bb4555cfe0fbfa5d45e51f333733e2e0",
+          "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: fail-path-short-tree3 :: leaf 1",
+          "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a206661696c2d706174682d73686f72742d7472656533203a3a206c6561662031"
+        },
+        "leaf_index": 1,
+        "reconstructed_root": "64c1d47d6a757ada5311f1d996a27e1697599d415782dabf6016d0bbe7a22e08",
+        "result": "INVALID_INCLUSION_PATH",
+        "root_true": "5a22e81f30761c4bf77ec510484862bf095b1e92ecd2fd26d99e72e25bdc742c",
+        "tree_size": 3
+      },
+      "expected_result": "INVALID_INCLUSION_PATH",
+      "id": "fail-path-short-tree3"
+    },
+    {
+      "description": "One sibling dropped on the right edge of a full 32-leaf tree: the last fold is missing, which is the case a length-only check misses.",
+      "dir": "v1/fail-path-short-tree32",
+      "expected": {
+        "inclusion_path": [
+          "e5f8de859e67a2a23b25d21c3dff1616d9bfc3e9afccac367785af6c389890c8",
+          "b5170a4249a95b8d43e97d0a419419fd3036dc8acebe7949913f4e11e6949de2",
+          "4a39ea7389e42f0a65d309f6177379f5003074dc7765c13f035aff6d390164c5",
+          "827f55a54cd32b03874be16be6d25c37ab2c3642f3759330c1e43abee1a2fb9b"
+        ],
+        "leaf_entry": {
+          "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+          "digest_hex": "02f3d82ce1456efd92dcd69904b4b82d748343bfea1b697eca34a2f6a658594b",
+          "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: fail-path-short-tree32 :: leaf 31",
+          "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a206661696c2d706174682d73686f72742d747265653332203a3a206c656166203331"
+        },
+        "leaf_index": 31,
+        "reconstructed_root": "4fb8c54f4644f90afafe7f02e50610ff66a6cd5a16e379af80804624c3a920d7",
+        "result": "INVALID_INCLUSION_PATH",
+        "root_true": "c2961ad73496219057ae2fe7a4d450a8b5d3a4fe99af25560e2a91c23f75767d",
+        "tree_size": 32
+      },
+      "expected_result": "INVALID_INCLUSION_PATH",
+      "id": "fail-path-short-tree32"
+    },
+    {
+      "description": "First two siblings exchanged: byte count and path length are unchanged, the root differs. A verifier that validates shape but not order accepts this wrongly.",
+      "dir": "v1/fail-path-swap",
+      "expected": {
+        "inclusion_path": [
+          "b2d1c06f2f12a01558599eb5fc3042da216e8610537bd5235c25f12a189b44ac",
+          "cce7987aa07c84b90b126a5d348ae6a21d8efb8ccea9843c4cd62a8643742718",
+          "7d59924c688a4934682f6b965047392359aae9be037379c7d71b8d4b4c238aae"
+        ],
+        "leaf_entry": {
+          "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+          "digest_hex": "254afaf89aca6b1b412cca7173a30201b6000fee044538d885577e89bb43fb80",
+          "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: fail-path-swap :: leaf 5",
+          "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a206661696c2d706174682d73776170203a3a206c6561662035"
+        },
+        "leaf_index": 5,
+        "reconstructed_root": "f20459bc60efe5076a7b5d70589365604a43de0385efa35a4e256417525365a2",
+        "result": "INVALID_INCLUSION_PATH",
+        "root_true": "738ff3734d042c169594d6bee17cc0e89b9a0a3ec56fff2e92f5e083cf182009",
+        "tree_size": 8
+      },
+      "expected_result": "INVALID_INCLUSION_PATH",
+      "id": "fail-path-swap"
+    },
+    {
+      "description": "Same order tamper on an unbalanced 16-leaf tree, where one sibling sits above the split rather than beside the leaf.",
+      "dir": "v1/fail-path-swap-tree16",
+      "expected": {
+        "inclusion_path": [
+          "5a5119eb167497e39fabce89ddd1abbfa4060f86ad2fe8c6a66513b177690588",
+          "4d2212fd49712e00e5085ca011b378c746e2ef4be4e500c37be80818580d7d68",
+          "44236aa3182a3a8642b873066a6ce9ba63d200edc840a8ab1af9e25dd23bbcdd",
+          "0d4018dd4bfd005708a475b3e139f1ae3836fec9f00aca20ae05726f6b994606"
+        ],
+        "leaf_entry": {
+          "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+          "digest_hex": "ac564a23bda39dfd298bc389a98ac6b575791088186cd4f4cf4621c0dfaafb6a",
+          "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: fail-path-swap-tree16 :: leaf 9",
+          "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a206661696c2d706174682d737761702d747265653136203a3a206c6561662039"
+        },
+        "leaf_index": 9,
+        "reconstructed_root": "6a6981fc78d1fa700b80fede91da6402ac83720cf3793dba96a3889c9217c04d",
+        "result": "INVALID_INCLUSION_PATH",
+        "root_true": "4b4c1e6f7f858663263f5d2bfebea7821bb6a4b52c53b0b2077c2c2e486e0128",
+        "tree_size": 16
+      },
+      "expected_result": "INVALID_INCLUSION_PATH",
+      "id": "fail-path-swap-tree16"
+    },
+    {
+      "description": "Order tamper on a 4|1 split at the left edge, the smallest tree with two siblings in the path.",
+      "dir": "v1/fail-path-swap-tree5",
+      "expected": {
+        "inclusion_path": [
+          "c4c3e1574a3148c834d4f64273f4aacbb6ab67db6c4e5527adb25658b3d18528",
+          "5024c3f15949f4c010692f560aec9572dc7a08f29b3f18d37f36e461b9826d08",
+          "476f3cbbab17bccdeb972e38224b3c1a49a032236bdb9243f1ab990d6971b68e"
+        ],
+        "leaf_entry": {
+          "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+          "digest_hex": "5f6358068616b71b159020070817cdbde808e03c30f7104d714875cae5fa95fe",
+          "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: fail-path-swap-tree5 :: leaf 0",
+          "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a206661696c2d706174682d737761702d7472656535203a3a206c6561662030"
+        },
+        "leaf_index": 0,
+        "reconstructed_root": "bed720d19bfe02319260fcfd3aa46d83c7d5e75b09c1d66468f075e084429202",
+        "result": "INVALID_INCLUSION_PATH",
+        "root_true": "01a6c5ff96cc3807b1a38533cd232545c0ee9105789676ea72fc747846861ba7",
+        "tree_size": 5
+      },
+      "expected_result": "INVALID_INCLUSION_PATH",
+      "id": "fail-path-swap-tree5"
+    },
+    {
+      "description": "A size-7 path with both a dropped sibling and an unbalanced split: isolates length from tree shape.",
+      "dir": "v1/fail-path-short-tampered",
+      "expected": {
+        "inclusion_path": [
+          "4545455b665a6e849d89715e9151eee5bcee11e0bc275913e40b103c9990ad6f"
+        ],
+        "leaf_entry": {
+          "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+          "digest_hex": "d58a0d8a5e62c6829a90f980b047b9cc980d8a42cab7c0c8ecb9db315463a3d1",
+          "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: fail-path-short-tampered :: leaf 6",
+          "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a206661696c2d706174682d73686f72742d74616d7065726564203a3a206c6561662036"
+        },
+        "leaf_index": 6,
+        "reconstructed_root": "240c439ef4857a5029a8d343eb9215d04d3a5d645a6eb8c26e214f8c33e54a35",
+        "result": "INVALID_INCLUSION_PATH",
+        "root_true": "a018f96ea666f3021e51a7471154281ff85289e149ed0a915fc0efe2a8e0c513",
+        "tree_size": 7
+      },
+      "expected_result": "INVALID_INCLUSION_PATH",
+      "id": "fail-path-short-tampered"
+    },
+    {
+      "description": "tree_size=33 = 32|1: left subtree full, tail is a single leaf; leaf 0 path crosses the split at the top.",
+      "dir": "v1/valid-tree33-index0",
+      "expected": {
+        "inclusion_path": [
+          "927406163daca220e5e98ffd07032d8b17212ed3ca693d45bcdc839eaa3267b9",
+          "eaaa885a34acb042292f27673b05444ea14e591d50c4946b9943ca1252eecdb4",
+          "d3deb2492d1e4abf4af32c19b23ab0b303734a83dd08dd0f782be8948996bad0",
+          "4ef0a4642899f097ba33f11b084d897be06fc2f90c0812dc572dc8ad24f715f0",
+          "a2bddd516505d0da158a56eae4ca15487113c0f61d82dc66b9969bb1e220b7a8",
+          "10bca0566537a3b33856347c262c4a56f6a46fac68592ac36672684c19c86cf6"
+        ],
+        "leaf_entry": {
+          "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+          "digest_hex": "90152603393e60d0653ebfdf12080b5eaf8ea3122eff7a33414bd1acdb2aa131",
+          "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: valid-tree33-index0 :: leaf 0",
+          "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a2076616c69642d7472656533332d696e64657830203a3a206c6561662030"
+        },
+        "leaf_index": 0,
+        "reconstructed_root": "9fc759350b47d8709e0edc0eaf11411f36e316af2e9a060b92fa711badb35587",
+        "result": "VALID",
+        "root_true": "9fc759350b47d8709e0edc0eaf11411f36e316af2e9a060b92fa711badb35587",
+        "tree_size": 33
+      },
+      "expected_result": "VALID",
+      "id": "valid-tree33-index0"
+    },
+    {
+      "description": "tree_size=63 = 32|31: last leaf of the left subtree in a two-level unbalanced tree.",
+      "dir": "v1/valid-tree63-index31",
+      "expected": {
+        "inclusion_path": [
+          "5ac92f7dcf62ea9ee090e0aefb165e373028c3a41804bab36da1fd5b3f2f54c5",
+          "ccaf9fe7af3c407ca1f35c404eef3c329eb9414d33734ca6968000d0bf78d35d",
+          "f614c4a92eec37016428fd1f7039f88cc1fdacdca4c5efad8bae8654045ecff0",
+          "5b2f3d7a2c4524d0399bee30b4a8fd2f8f246c53651cf9a4a8cafdc13fa8b26d",
+          "7922cd264a3acc6c5136cde42e18499700bf23603ffa81cc546ec6b512acc1b1",
+          "783029919b1633b8fb9ddf381f03586343cbd1024ea8fae18ebe5f54a54639f6"
+        ],
+        "leaf_entry": {
+          "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+          "digest_hex": "0870beab569663d0d22e52d43fe2841d384b31d34ee7262d79529b5549498e89",
+          "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: valid-tree63-index31 :: leaf 31",
+          "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a2076616c69642d7472656536332d696e6465783331203a3a206c656166203331"
+        },
+        "leaf_index": 31,
+        "reconstructed_root": "9fafdfa4b4627426951a27f252b5c25e7a00bfb4dabd62ea1de76fbec8c5f59a",
+        "result": "VALID",
+        "root_true": "9fafdfa4b4627426951a27f252b5c25e7a00bfb4dabd62ea1de76fbec8c5f59a",
+        "tree_size": 63
+      },
+      "expected_result": "VALID",
+      "id": "valid-tree63-index31"
+    },
+    {
+      "description": "tree_size=64: full binary tree of depth 6, right-most leaf; every sibling is on the left.",
+      "dir": "v1/valid-tree64-index63",
+      "expected": {
+        "inclusion_path": [
+          "64c5a924d2a7702029bda214d874bb21c4848fbce9238d3dab067d4980b2bacf",
+          "f1d8ed2e6fd6e2f93565e7536b043023125d12bd05711732b8b460c4fce8cdf0",
+          "405cd20e95ebc27d3fc4d0dd7fa794bbd07ad33dc59219093e2134ec5b6385f8",
+          "8a0574a48568ad7c487e007dd9ec9de32eee02b392d5d0f9824df3bc97a4cb5a",
+          "b9495a243e2eed8ec0dc9284f7365f740803536bb5759f9081777e8b4734cbed",
+          "f373c5a6dbb98ba5d21b009aaba4544727da7626cbf10a5d3d80c6275b77c0ca"
+        ],
+        "leaf_entry": {
+          "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+          "digest_hex": "ca3f4773445c4aee105ded7430d38f5596def5d2a8679a0130738bdc3da948b8",
+          "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: valid-tree64-index63 :: leaf 63",
+          "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a2076616c69642d7472656536342d696e6465783633203a3a206c656166203633"
+        },
+        "leaf_index": 63,
+        "reconstructed_root": "e91ddf36e67bc0c5d41bc2a701eadf6ad5397de22e0ec43742e19057638f8f27",
+        "result": "VALID",
+        "root_true": "e91ddf36e67bc0c5d41bc2a701eadf6ad5397de22e0ec43742e19057638f8f27",
+        "tree_size": 64
+      },
+      "expected_result": "VALID",
+      "id": "valid-tree64-index63"
+    },
+    {
+      "description": "tree_size=65 = 64|1: the single tail leaf of a full tree plus one; path length 1 and the top split is the whole tree.",
+      "dir": "v1/valid-tree65-index64",
+      "expected": {
+        "inclusion_path": [
+          "9b52175cadc44d6dee6a264dd784f94be5c87ad18d30135848da4394f416c57c"
+        ],
+        "leaf_entry": {
+          "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+          "digest_hex": "af82454ca4d3c5be6933c696e3cf5ea74e0b04a579f35d538533bddab843895b",
+          "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: valid-tree65-index64 :: leaf 64",
+          "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a2076616c69642d7472656536352d696e6465783634203a3a206c656166203634"
+        },
+        "leaf_index": 64,
+        "reconstructed_root": "378f2585a74238ac171d29032f9b531f9dd6aa7e891f2d95a73aa1876a18d715",
+        "result": "VALID",
+        "root_true": "378f2585a74238ac171d29032f9b531f9dd6aa7e891f2d95a73aa1876a18d715",
+        "tree_size": 65
+      },
+      "expected_result": "VALID",
+      "id": "valid-tree65-index64"
     },
     {
       "description": "tree_size=7, leaf_index=5: the same inclusion_path folds to the same root at tree_size=8, so the declared size is not authenticated by the root. Independent reproduction of the RFC 9942 Section 5.2.1 observation posted to scitt@ietf.org on 2026-11-15.",

@@ -193,3 +193,27 @@ Q5 损失谁承担（not_ours）；Q6 能否递给收单方当证据（not_ours�
 一类短语即判 **OVERCLAIM**，退出码 1——这条是为了防"改一个字段就把能绑字节读成能收款"。
 
 **仍然落后**：没有 mandate 语料、没有清算/收单链路、没有法律意见；Q5/Q6 的回答除非有书面法律意见否则不变。三条都记为缺口。
+
+### 2026-11-20 实测（SCITT 侧适配）：18 行字段对照，3 同 / 8 部分 / 6 缺 / 1 多做
+
+读仓内原件 `docs/spec-sources/draft-noa-scitt-ai-agent-receipt-00.txt`（504 行，individual draft）的 §3 载荷、§4 COSE 配置、§5 哈希链、§6 身份绑定、§9 范围排除。
+
+**三行是同一个构造，不是巧合**：他们的 `chain.hash` = `sha256(JCS(去掉 hash 与 sig.value))`，我们的签名与摘要也覆盖 JCS(去掉 `signature` 的整行)；
+他们的哈希链自述"不证明 equivocation"，我们的 LAB-PROTOCOL 自述"只能证明之后无法改口"；
+他们规定"没有身份清单时必须向依赖方明示限制"，我们把它落成校验器输出 `identity unbound`。
+
+**六行缺失，逐条写明代价**：`scope.tenant`/`scope.chain`（无发行方归属）、`agent.model`（回执侧观察不到模型）、
+`agent.principal`（不分类谁在行动）、`action.paramsHash`（我们绑语料不绑行动参数）、`action.reversible`/`rollbackRef`（验证无副作用可回滚）、
+注册进透明服务（我们锚 TSA/OTS；**时间戳不证明某个日志接受了这些字节**，把 TSA 叫透明服务是本文档拒绝做的那一步）。
+
+**八行部分相同**：`spec` 标识（角色同、字符串不同）、`id`（靠文件摘要寻址）、`ts`、`agent.id`（`run_by` 自由文本）、
+`action` 三元组（案例 id 而非风险类）、`governance.*`（逐案 verdict 有、随运行批准无）、`chain.seq/prevHash`（链在变更台账不在回执流）、
+COSE 容器与 alg 拒绝规则（规则同、容器不同、无 CBOR 互操作）。
+
+**一行我们多做**：草案 §9 把 policy-replay 明确排除在本版之外，我们的产品就是逐案重放（294 案例、三种对照、退出码契约）。这是"草案还没做"，不是"我们更强"。
+
+**检查器**：`tools/check_scitt_crosswalk.py` 拒五类——源文档不在仓库、容器声明互通、三个标志（是否注册透明服务／是否输出 COSE／是否宣称符合）任一为 true、
+`partial` 无 note 或 `absent` 无 cost、整表无一行 `have`；另扫描 README 与三份文档，出现兼容性宣称短语即判 OVERCLAIM（退出码 1）。
+实测：`counts: have=3, partial=8, absent=6, ours_only=1` → `ACCEPTABLE`，exit 0。
+
+**仍然落后**：无 COSE/CBOR 路径、无任何透明服务（运营方／日志／注册策略皆无）、未向 SCITT 的 IETF 线程提交（那是用户账号动作）。三条记为缺口。

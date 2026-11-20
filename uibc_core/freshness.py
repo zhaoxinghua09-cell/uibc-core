@@ -129,7 +129,10 @@ def record(path, subject, head, sequence=None, accepted_at=None):
         d = os.path.dirname(os.path.abspath(path))
         fd, tmp = tempfile.mkstemp(dir=d, prefix=".freshness-", suffix=".json")
         try:
-            with os.fdopen(fd, "w", encoding="utf-8") as fh:
+            # newline="\n": the same observation recorded on Windows and on
+            # Linux has to produce the same bytes, or a state file copied between
+            # machines reads as a different memory for no reason.
+            with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as fh:
                 json.dump(state, fh, indent=1, sort_keys=True, ensure_ascii=False)
             os.replace(tmp, path)
         except Exception:

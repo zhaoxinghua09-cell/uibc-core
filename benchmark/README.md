@@ -19,12 +19,28 @@ Output ends with two numbers per mode. They are deliberately different:
 | `pinned` | public key out-of-band (`--pubkey`) | 1 / 21 (4.8%) | M20 | **0** |
 | `head-pinned` | public key **and** checkpoint head out-of-band (`--expect-head`) | 0 / 21 (0.0%) | — | **0** |
 
+(21 mutated members plus 1 unmutated anchor = 22 scored members; the anchor must PASS.)
+
 - **acceptance rate** = how many mutations passed, period.
 - **undocumented acceptance** = those *not* explained by a channel the mode lacks.
 
 Only the second is a defect. Quoting the first without the second invites a reader to
 mistake a design boundary for a bug; quoting only the second invites the opposite
 mistake — pretending nothing was accepted.
+
+**The third number: the corpus anchor.**
+
+The unmutated package is part of the corpus and **must PASS** (`base_open` / `base_pinned`,
+carried into `results.json` as `corpus_anchor`). Without it a verifier that refuses every
+input scores a perfect 0/21 acceptance rate and looks flawless while being useless; the
+anchor makes that score 0/22 instead. `run.py` exits non-zero when the anchor is not PASS,
+because once the base fails, every rate below it is a number about nothing.
+
+This is the property a mutation suite has to state rather than imply: the corpus contains
+a member that must be **accepted**, and each of the 21 is **one mutation from that member**.
+`benchmark/corpus/manifest.json` records the base digest and, per case, exactly which field
+was changed. So "refuse everything" and "accept everything" both score badly; only a
+verifier that reads each field separately scores well.
 
 **The two documented boundaries, stated plainly.**
 

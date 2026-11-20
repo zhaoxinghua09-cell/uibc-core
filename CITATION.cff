@@ -1,13 +1,15 @@
 cff-version: 1.2.0
 message: >-
   If you use uibc-core or UIBC in academic work, please cite the entry below.
-  SCOPE, stated because it is easy to get wrong: this entry pins the archived
-  0.2.1 snapshot (2026-09-17), whose verifier implements six checks, S1-S6.
-  The current repository implements nineteen, S1-S19, and not one of S7-S19
-  exists in any archived artifact. A reader who follows this DOI therefore
-  cannot reproduce any claim about S7-S19 -- those may be cited only against
-  the repository state. docs/ARCHIVE-GAP.md records the measurement, and
-  tools/check_citation_scope.py recomputes it.
+  SCOPE, stated because it is easy to get wrong: this entry pins the 0.4.2
+  archive (2026-11-20), whose verifier implements the same checks as the
+  repository -- S1-S19, plus S0 as a fallback branch. Two earlier versions
+  remain valid for their own snapshots and must not be attributed more than
+  they carry: 0.2.1 (10.5281/zenodo.22821835) holds only six checks, S1-S6,
+  so S7-S19 may never be cited against it. docs/ARCHIVE-GAP.md records both
+  measurements and how the gap was closed, and
+  tools/check_citation_scope.py recomputes them from the baseline files in
+  docs/.
 type: software
 title: "uibc-core: Verifiable Evidence Packages for Autonomous AI Agents"
 abstract: >-
@@ -16,13 +18,16 @@ abstract: >-
   of Registry, Evidence and Gates. Every agent action can be sealed into a
   submission.uibc package (identity + lifecycle events + content-hashed evidence +
   evidence root + optional seal), then verified offline.
-  Scope of this archived version: six checks (S1-S6); the repository
-  has since grown to nineteen, and none of S7-S19 is in an archived
-  artifact.
-version: "0.2.1"
-date-released: "2026-09-17"
-doi: "10.5281/zenodo.22821835"
+  Scope of this archived version: S1-S19 (S0 is a fallback branch, not a
+  separate check); the bundled 28-case corpus exercises 15 of the 20 ids, and
+  says so in its own README.
+version: "0.4.2"
+date-released: "2026-11-20"
+doi: "10.5281/zenodo.24375013"
 identifiers:
+  - type: other
+    value: "10.5281/zenodo.22821835"
+    description: "Previous version 0.2.1 (2026-09-18). Its verifier implements six checks only (S1-S6); do not cite S7-S19 against it."
   - type: other
     value: "10.5281/zenodo.22821834"
     description: "Concept DOI — uibc-core across all versions. Resolves to the latest release: https://doi.org/10.5281/zenodo.22821834"

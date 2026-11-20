@@ -5,16 +5,20 @@ one thing broken. Your verifier has to accept the correct one and refuse the
 rest, naming at least one check that this manifest expects. Refusing everything
 scores nothing — the accept cases fail.
 
-Nothing here needs our repository.
+Nothing here needs our repository, a network, or a package install.
 
-## Run it (two commands)
+## Run it (one command)
 
 ```bash
-python -m pip install uibc-core==0.4.1     # the reference verifier
 python run.py
 ```
 
-Expected tail: `strict 36/36`.
+The archive carries `uibc_core.pyz` — the reference verifier as one file — and
+`run.py` uses it by default. Expected tail: `strict 36/36`, about six seconds,
+writes `receipt.json`.
+
+If you would rather use an installed copy, `python run.py --verify "python -m uibc_core.cli verify {pkg}"`
+after `python -m pip install uibc-core==0.4.1`. Both paths produce the same table.
 
 Testing a different implementation:
 
@@ -30,6 +34,13 @@ when JSON parses, so a non-zero exit on FAIL is fine.
 `python run.py` writes `receipt.json`: the command, the time, the Python and
 platform, the verifier version, a hash of the manifest, and every case's
 verdict. Publish it if you want your run to be citable, and fill in `--run-by`.
+
+**If the verifier is missing, no receipt is written.** When not one case produces
+parseable JSON, `run.py` exits 3, prints the interpreter it used and the install
+command, and stops. A receipt saying `0/36` in that situation would be a lie that
+looks like evidence: it is indistinguishable from "these packages all fail", and
+someone could publish it in good faith. Exit codes: `0` all cases behaved, `1`
+some case did not, `3` no verifier output at all (setup problem, not a result).
 
 ## What a pass means — and what it does not
 

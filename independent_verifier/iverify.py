@@ -370,6 +370,28 @@ def independent_verify(package_dir: str, key: bytes = None) -> dict:
     """Return {'result': PASS/FAIL/INCONCLUSIVE, 'checks': {V1..V9: result}}."""
     outcomes = {}
 
+    # Foreign container. A verifier handed something that is not a UIBC package at all
+    # -- an .aep archive, a random folder, a single file -- has no basis to say "this
+    # package is broken". Saying FAIL there is an affirmative claim about a format it
+    # never read. Measured 2026-11-20: run against the 13 published EATF vectors, this
+    # implementation returned FAIL on all 5 of their packages that are valid by their
+    # own contract, and agreement on the other 8 was incidental, not judgment.
+    if not os.path.isdir(package_dir) or not any(
+            os.path.isfile(os.path.join(package_dir, rel)) for rel in REQUIRED):
+        return {"implementer": "independent_verifier/0.1.0",
+                "result": "INCONCLUSIVE",
+                "checks": {"V1": "INCONCLUSIVE"},
+                "unjudged": ["container format: none of %s present" % ", ".join(REQUIRED)],
+                "unsupported": "not-a-uibc-package",
+                "scope": "Nothing: the input is not a UIBC package directory.",
+                "limitations": ["This implementation only reads UIBC package directories; "
+                                "other evidence formats are declined, not judged."],
+                "checked": [],
+                "not_checked": ["everything: no UIBC package was supplied"],
+                "statement": "Declined: the input is not a UIBC package, so no verdict "
+                             "about it is offered either way.",
+                "strict": "open"}
+
     outcomes["V1"] = "PASS" if all(
         os.path.isfile(os.path.join(package_dir, rel)) for rel in REQUIRED) else "FAIL"
 

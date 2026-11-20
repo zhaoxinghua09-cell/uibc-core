@@ -1,0 +1,25 @@
+{
+  "what": "The verifier that the published 0.4.2 archive actually contains",
+  "why": "The 0.2.1 DOI carried six checks and stayed silent about the rest. This baseline records, from the downloaded archive itself, what the 0.4.2 archive carries, so that a claim about S1-S19 can be checked against the file rather than remembered.",
+  "source_revision": "2c82d55feb2ab01feb4ff6953a5c57571664e52c",
+  "archive_record": "24375013",
+  "doi": "10.5281/zenodo.24375013",
+  "concept_doi": "10.5281/zenodo.22821834",
+  "version_declared": "0.4.2",
+  "publication_date": "2026-11-20",
+  "archive_file": "uibc-core-src-2c82d55feb2a.zip",
+  "archive_file_bytes": 1978070,
+  "verify_py_path_in_archive": "uibc_core/verify.py",
+  "verify_py_sha256": "f7ed854ea6ed5a877316c6d4ff879bc5e3682c38adaed3c9354997726a801ddd",
+  "verify_py_bytes": 69835,
+  "verify_py_lines": 1320,
+  "checks": ["S0", "S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8", "S9", "S10", "S11", "S12", "S13", "S14", "S15", "S16", "S17", "S18", "S19"],
+  "checks_that_are_not_top_level": ["S0"],
+  "how_measured": "curl --resolve zenodo.org:443:<IP> downloaded the archive through the poisoned-DNS host; the zip was unpacked and uibc_core/verify.py was hashed and regex-scanned for quoted S-ids. At the moment of measurement the file was byte-identical (same sha256, 69835 bytes) to the copy in main, so the archive is not a stale snapshot of the verifier.",
+  "limits_of_this_measurement": [
+    "It measures CHECK IDS, not behaviour. A count of ids says nothing about how much each id actually inspects.",
+    "S0 is a fallback branch, not a nineteenth check of the same rank as the rest; it is listed so the count is not silently off by one.",
+    "The bundled 28-case corpus exercises 15 of the 20 ids. S9 and S19 are built inside the oracle tool's own code and are not shipped as packages in the corpus.",
+    "The archive matched main on the day it was published; main moves. The hash above is the fact, the equality is a dated observation."
+  ]
+}

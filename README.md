@@ -19,6 +19,18 @@ cd uibc-core && python tools/external_node_check.py
 
 It prints `CONSISTENT` only when **both** hold: a second, independently written verifier agrees with the reference one, **and** three packages that must be rejected (timestamp without a zone, `1900-02-29`, uppercase UUID) are rejected. A checker that answers PASS for everything cannot pass this.
 
+### Or don't clone at all — run the corpus in about sixty seconds
+
+Download `conformance/uibc-conformance-0.4.1.zip` (sha256 `711fa82c…`, 228,000 bytes; deterministic build, so rebuilding gives the same bytes), unzip it, and run:
+
+```bash
+python run.py
+```
+
+No repository, no network, no `pip install`: the archive carries its own verifier as a single file (`uibc_core.pyz`), and `run.py` uses it. Expected tail `strict 36/36` in about six seconds, and a `receipt.json` you can publish. A verifier that answers PASS to everything scores **6/36**, so refusing nothing does not pass.
+
+The number above is **our own run**. It becomes an external node report only when someone else runs this same archive digest elsewhere and posts the receipt — the format, the checker (`tools/check_outward_receipt.py`) and the issue form are in [`docs/RECEIPT-FORMAT.md`](docs/RECEIPT-FORMAT.md), and the walk-through is [`docs/AUDIT-KIT.md`](docs/AUDIT-KIT.md). If no unrelated party has done that by **2027-05-19**, that sentence gets downgraded to "self-run only" rather than left standing; the clause is in AUDIT-KIT, written before the outcome was known.
+
 **What a PASS means** — and nothing more:
 
 > A uibc PASS means: within the observed evidence boundary, no violation was detected. It does not claim the agent was correct, safe, or wise; that the recorded inputs were true or complete; or that any real-world outcome followed.

@@ -1,6 +1,7 @@
 """uibc CLI (archive SS23): init / register / event / evidence / submit / verify / inspect."""
 
 import argparse
+import itertools
 import json
 import os
 import shutil
@@ -23,7 +24,39 @@ REQUIRED = ["manifest.json", "identity.json", "lifecycle.json", "evidence/index.
 
 
 def _now() -> str:
+    """The time a package records.
+
+    A wall clock makes a package irreproducible: re-running the same commands
+    produces different bytes, so nobody else can check the published corpus by
+    rebuilding it. `SOURCE_DATE_EPOCH` (the reproducible-builds convention, in
+    seconds) pins the clock instead. Unset, this is the ordinary wall clock and
+    nothing about the format changes.
+    """
+    epoch = os.environ.get("SOURCE_DATE_EPOCH")
+    if epoch:
+        try:
+            stamp = datetime.fromtimestamp(int(epoch), timezone.utc)
+        except (TypeError, ValueError, OSError) as exc:
+            raise SystemExit(f"error: SOURCE_DATE_EPOCH={epoch!r} is not a unix timestamp: {exc}")
+        return stamp.strftime("%Y-%m-%dT%H:%M:%SZ")
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+_repro_counter = itertools.count()
+
+
+def _uuid() -> str:
+    """An identifier a rebuild reproduces.
+
+    Unset `UIBC_REPRO_SEED`, this is uuid4, as it always was. Set, the nth id a
+    process asks for is uuid5 of the seed and n - so a second run asking in the
+    same order gets the same ids. They stay unique inside a package because the
+    counter never repeats; what they stop being is unpredictable.
+    """
+    seed = os.environ.get("UIBC_REPRO_SEED")
+    if not seed:
+        return str(uuid.uuid4())
+    return str(uuid.uuid5(uuid.NAMESPACE_URL, "%s/%d" % (seed, next(_repro_counter))))
 
 
 def _write(path, obj):
@@ -53,7 +86,7 @@ def cmd_register(args):
     agent_id = args.agent_id
     now = _now()
     reg_event = {
-        "event_id": str(uuid.uuid4()),
+        "event_id": _uuid(),
         "sequence_number": 0,      # v1.1: contiguous from 0; a gap is a
                                    # suppression indicator (GAR -08 6.2)
         "event_type": "REGISTER",
@@ -115,7 +148,7 @@ def cmd_event(args):
         identity = _read(os.path.join(pkg, "identity.json"))
         actor = identity.get("owner") or events[0].get("agent_id")
     events.append({
-        "event_id": str(uuid.uuid4()),
+        "event_id": _uuid(),
         "sequence_number": len(events),
         "event_type": args.type,
         "agent_id": events[0]["agent_id"],
@@ -145,12 +178,12 @@ def cmd_evidence(args):
         rel = os.path.join("files", fname)
         dst = os.path.join(pkg, "evidence", rel)
         while os.path.exists(dst):
-            fname = f"{uuid.uuid4().hex[:8]}_{fname}"
+            fname = f"{_uuid()[:8]}_{fname}"
             rel = os.path.join("files", fname)
             dst = os.path.join(pkg, "evidence", rel)
         shutil.copy2(src, dst)
         entries.append({
-            "evidence_id": str(uuid.uuid4()),
+            "evidence_id": _uuid(),
             "type": args.type,
             "path": rel.replace("\\", "/"),
             "content_hash": hash_file(dst),
@@ -521,6 +554,10 @@ def cmd_inspect(args):
 
 def main():
     ap = argparse.ArgumentParser(prog="uibc", description="UIBC Core CLI v%s [PROPOSAL]" % __version__)
+    # --version exists so a bundled single-file build can state which version it
+    # is without importing the package: the conformance runner reads it to label
+    # a receipt correctly (run.py, 2026-11-20).
+    ap.add_argument("--version", action="version", version=__version__)
     sub = ap.add_subparsers(dest="cmd", required=True)
 
     p = sub.add_parser("init", help="create submission package skeleton")
@@ -645,3 +682,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

@@ -95,3 +95,101 @@ their verifier: ok=True
 顺带，这次外部数据逼出了我们复算工具两处缺陷（Merkle 的 k 写成 `<=` 导致 5 叶无限递归；重复奇尾函数只接受 hex 字符串）。
 两处都因自测样例只有一个叶而不触发——1 叶通过不证明分叉正确。
 
+
+## 2026-11-20 实测（回执通道）：这一栏**对方比我们成熟**，不是我们领先
+
+我们刚给 conformance 归档配了"外人回执 → issue 表单 → 校验器"这条路（PR #270）。查同业时发现
+`probityai/agent-evidence-vectors` 早有一套更完整的同类机制，且它正是我们跑过 288/288 的那套语料的作者。
+逐项对照（文件一手读取，走 `gh api`）：
+
+| 项 | 他们（`agent-evidence-vectors`） | 我们（#270 之后） |
+|---|---|---|
+| 提交入口 | `.github/ISSUE_TEMPLATE/independent-run.yml` | `.github/ISSUE_TEMPLATE/conformance-receipt.yml` |
+| 公开台账 | `RUNS.md`，一行一次运行，**按提交者原话转录**、不四舍五入、不换算成别的语料的比例 | 无（本轮补 `docs/RUNS.md`，空表 + 规则） |
+| 盲/定向 | 强制字段 blind / directed / part blind | **本轮才有**（补进表单） |
+| 谁写的代码 | 强制字段 independent / second-party same code / author-produced | **本轮才有**（等同我们的"关系"字段，但他们的命名更贴事实） |
+| 分歧处理 | `DISPOSITIONS.md`：每条异议一个永久条目，**在被异议者自己的框架里写**，拒掉的也记 | 无（本轮补 `docs/DISPOSITIONS.md`，空表 + 规则） |
+| 结论口径 | "分歧比干净通过更有价值"；不做跨语料的比率换算 | 同向，但此前没有落成文件 |
+| 实验协议 | 另有 `evidence-run.yml` + 公开 lab 协议（证据种类、保留字节清单、期望答案暴露申报、正/敌意/负对照） | `docs/LAB-PROTOCOL.md` + `tools/lab_manifest.py` / `tools/check_lab_bundle.py`（**本轮补**，见下） |
+
+**结论（对我们不利的那一半）**：在"第三方运行如何被记录、异议如何被处置"这一维，他们有台账、有永久条目、
+有盲/定向分离，我们此前只有一份自述。本轮补的是其中四件（RUNS / DISPOSITIONS / 两个强制字段 / lab 协议），
+**但 lab 协议仍是缩小版**：他们按"证据种类"分类（保留字节完整、验证器行为、宿主 CI 依赖、观测效果、独立见证），
+并带采纳声明与按 claim 的分母表；我们只有"一次运行、一个语料、一个问题"的四件套（字节清单、敌意对照必须不满分、
+退出码、暴露申报）。**没有对应物的是他们那套证据种类分类与采纳/见证层**，如实记为缺口。
+
+**这个对照还纠正了一个我自己的说法**：我在 #270 的 PR 描述里写"这个数字此前没有登记通道"，读起来像首创。
+准确表述应是"我们此前没有，补上了一个更简单的版本；同业已有更完整的版本"。页面按后者写。
+
+**不因此改口的地方**：他们的 RUNS 里跑的是"别人的验证器跑他们的语料"，我们的语料目前仍只有本机自测回执；
+两边都不是"我方的外部节点"。计数口径不变。
+
+### 本轮补的 lab 协议，实测到什么
+
+`tools/lab_manifest.py` 直接吃运行目录：把里面 300 个文件逐个记 bytes + sha256 + media type，再单独记归档摘要、
+命令、退出码、stdout 尾、三种对照结果、暴露申报与局限清单。`tools/check_lab_bundle.py` 重算这些字节并拒绝
+四类断言——摘要对不上、敌意对照拿到满分（那说明语料没有区分力）、没有退出码、暴露申报空白。
+
+**用我们 36/36 那次的真实运行目录做过一次**（含解包后的语料与 `receipt.json`）：
+`ACCEPTABLE — 300 files digested, archive 711fa82c…, controls present, limits stated`。
+**但这份 bundle 的 `roles.runner` 写的是作者本人**，因此它只能计入"作者产出"，不能计入外部节点——这是设计而非疏漏。
+### 2026-11-20 实测（发版资产）：他们发的是"签过名的摘要 + 两个外部时间戳"，我们只发了 zip
+
+读三家最近三个 release 的资产清单（`gh api repos/<r>/releases`）：
+
+| 仓库 | 发版资产 |
+|---|---|
+| `probityai/agent-evidence-vectors` v0.37.1 | `CORPUS-DIGESTS.txt` + `.sig`（签名）+ `.sig.ots`（OpenTimestamps）+ `.sig.tsr`（RFC 3161） |
+| `tyche-institute/eatf-verifier` v0.7.4 | `eatf-pqc-hybrid-lab-v0.7.4.zip` + `.sha256` + 一份 PDF |
+| `emiliaprotocol/emilia-protocol` clean-room-kit-v1 | `emilia-clean-room-kit-v1.tar.gz` + `.manifest.json` |
+| **我们** v0.4.0 | **只有 `uibc-conformance-0.4.0.zip`** |
+
+结论：**"发版挂摘要"是这三家的共同做法，其中一家还附签名与 OTS/TSA 两个外部时间戳**；我们此前连摘要文件都没挂。
+本轮补的是这一层里我们做得到的：`tools/release_lab_bundle.py` 在发版时把三种对照实跑一遍，产出
+`uibc-lab-bundle-<v>.json` + `receipt.json` + `CORPUS-DIGESTS.txt`，工作流在打 tag 时挂到 release。
+
+**仍然落后的一半（写清）**：我们的 `CORPUS-DIGESTS.txt` **没有签名、没有 OTS、没有 RFC 3161**。仓内已有
+`anchor_tsa.py` / `anchor_ots.py` / Rekor 三条路子，但**没有接到发版流程上**；对外部锚定这一层，他们是已做的，
+我们是可做但未做。此条记为缺口，不计入任何"对齐"。
+
+### 2026-11-20 实测（配置层）：他们写"改动怎么被决定"，我们只有一行 CODEOWNERS
+
+读三家的 `GOVERNANCE.md`（`gh api` 逐份取全文）：
+
+| 仓库 | 改动由谁决定 | 可机械化的那条规则 |
+|---|---|---|
+| `probityai/agent-evidence-vectors` | 单一维护者，公开绑住自己；提案落入**四种处置闭集**（`adopted` / `adopted-in-part` / `declined` / `open`），`declined` 必带理由，部分采纳必写残差，台账 append-only，被拒的异议也公开 | "**A record of only the agreeable objections is worse than none.**" |
+| `emiliaprotocol/emilia-protocol` | 任何人可提；规范行为的改动**必须规格、参考验证器、一致性向量三处同时落地，或都不落地**；另有 policy-rollout 与 revoke 的服务端实现 | "**Specification, reference verifiers and conformance vectors together, or not at all.**" |
+| `tyche-institute/eatf-verifier` | 一段话：个人维护、开放研究软件 | 无可机械化规则 |
+| **我们** | `.github/CODEOWNERS` 一行 `* @zhaoxinghua09-cell` | 无 |
+
+我们那一行只约束"谁点了合并按钮"，不约束"改了什么、谁批的、为什么、批完语料是否跟着动"。
+
+本轮补的是可核的那一层：`tools/check_config_change.py` + `docs/CONFIG-CONTROL.md`，
+五类拒（自我批准／处置不在闭集／拒绝无理由或部分采纳无残差／规范变更缺三腿之一／行被事后编辑或台账断链），
+"silence is not agreement" 落成"决定人与时间都是必填"。实测四条记录串成台账通过，删一条腿后一次报三条理由。
+
+**仍然落后**：台账是**空表**（仓库里没有任何 `uibc-change-v0` 记录）；分支保护与 required review 是平台设置，
+不在字节里，外人无法从仓库证明；emilia 把 policy rollout 与 revoke 做成了服务端接口，我们只有文件级记录。
+这三条都记为缺口，不计入对齐。
+
+### 2026-11-20 实测（支付适配）：他们有 15 个案例判"金额是否超授权"，我们连"损失谁担"都没写过
+
+一手读 `probityai/agent-evidence-vectors` 的 `corpora/vectors-agent-payment-mandate/`：`agent-payment-mandate/v1`，
+**15 个案例、11 条规则、11 个变异体逐一被抓**；四样东西绑在一起（用户签的 mandate、agent 出示的凭证、实际扣款、串起它们的回执），
+读者自己重算摘要而不是相信声称摘要的字段。其 README 自述两句边界："它证明扣款停留在用户授权之内；它不证明用户本意如此"，
+"它不说争议中谁承担损失"。
+
+**我们这一维：没有对应物。** 本格式无 mandate、无金额、无商户、无币种，也没有清算链路。
+
+本轮补的是把缺失写成**机器可读**的边界：`docs/SETTLEMENT-BOUNDARY.json` + `tools/settlement_boundary.py`，六问六答：
+Q1 有人在这些确切字节上跑过吗（supported，依据 RECEIPT-FORMAT）；Q2 字节自某日起未改吗（partial——
+签名与 TSA 已实现但**未在已发布 release 上跑过**）；Q3 跑的人被授权代表那方吗（partial——单签、无撤销登记处、
+公钥不带外给出时只给 identity unbound）；Q4 扣款在限额内吗（not_ours，判它的语料在对方那边）；
+Q5 损失谁承担（not_ours）；Q6 能否递给收单方当证据（not_ours）。
+
+检查器拒三类：两个"我们是否处理支付／是否授权扣款"字段改成 true 即否决；`supported`/`partial` 指向不存在的文件即否决；
+`partial` 不写限制即否决（没有限制的 partial 读起来就是 supported）。另扫描 README 与四份文档，出现"guarantees payment"
+一类短语即判 **OVERCLAIM**，退出码 1——这条是为了防"改一个字段就把能绑字节读成能收款"。
+
+**仍然落后**：没有 mandate 语料、没有清算/收单链路、没有法律意见；Q5/Q6 的回答除非有书面法律意见否则不变。三条都记为缺口。

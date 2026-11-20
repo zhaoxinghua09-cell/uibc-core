@@ -13,6 +13,7 @@ Run:  python tools/oracle_check.py
 Exit: 0 = both implementations match the oracle, 1 = at least one cell differs.
 """
 
+import hashlib
 import json
 import os
 import shutil
@@ -28,7 +29,7 @@ sys.path.insert(0, os.path.join(ROOT, "independent_verifier"))
 
 from uibc_core.verify import verify                      # noqa: E402
 from uibc_core import cli as ucli                        # noqa: E402
-from uibc_core.signing import generate_key               # noqa: E402
+from uibc_core.signing import generate_key  # unused by _oracle_key; kept for build_bad               # noqa: E402
 from iverify import independent_verify                   # noqa: E402
 import outsider_audit as oa                              # noqa: E402  (mutations only)
 
@@ -262,6 +263,11 @@ def emit_corpus(dest, only=None):
     publishing at all.
     """
     os.makedirs(dest, exist_ok=True)
+    # Ids and keys are derived, not drawn, so that a second run of this command
+    # produces the same bytes; the remaining variable is the clock, and that is
+    # the caller's SOURCE_DATE_EPOCH. Unpinned, the corpus still emits, it just
+    # cannot be rebuilt by a stranger - which is the thing this exists to avoid.
+    os.environ.setdefault("UIBC_REPRO_SEED", "uibc-oracle/1")
     cases_dir = os.path.join(dest, "cases")
     os.makedirs(cases_dir, exist_ok=True)
     expected = []
@@ -305,9 +311,46 @@ def emit_corpus(dest, only=None):
         expected.append({"case": name, "kind": "accept", "mode": "strict",
                          "expected_verdict": "PASS", "expected_first_fail": None})
 
-    with open(os.path.join(dest, "expected.json"), "w", encoding="utf-8") as f:
+    # Tranche five: the checks a package cannot carry on its own.
+    #
+    # Three of the twenty checks need something that is not inside the submission:
+    # S0 needs input that is not a package at all, S9 needs a head somebody
+    # observed elsewhere, S19 needs what this verifier remembered last time. A
+    # corpus of packages can therefore never name them - unless the external
+    # input ships with the case. Two of the three do, as data in `expected.json`:
+    # `expect_head` for S9 and `state` for S19. S0 stays out and is named as the
+    # one limit in README.md, because there is no package to put in a directory.
+    if keep("oracle-s09-rollback-pin"):
+        pkg_old, key_old = build(work, "oracle-s09-rollback-pin", "none", nevid=1)
+        pkg_new, _kb = build(work, "oracle-s09-pin-source", "none", nevid=2)
+        head = checkpoint_of(pkg_new)
+        shutil.copytree(pkg_old, os.path.join(cases_dir, "oracle-s09-rollback-pin"),
+                        dirs_exist_ok=True)
+        keys["oracle-s09-rollback-pin"] = key_old.hex()
+        expected.append({"case": "oracle-s09-rollback-pin", "kind": "reject",
+                         "mode": "strict", "expected_verdict": "FAIL",
+                         "expected_first_fail": "S9", "expect_head": head})
+
+    if keep("oracle-s19-stale-state"):
+        pkg_s, key_s = build(work, "oracle-s19-stale-state", "none", nevid=2)
+        man_path = os.path.join(pkg_s, "manifest.json")
+        man = json.load(open(man_path, encoding="utf-8"))
+        man["freshness_head"] = {"subject": "oracle", "sequence": 3}
+        with open(man_path, "w", encoding="utf-8", newline="\n") as f:
+            json.dump(man, f, indent=2, sort_keys=True)
+        reseal(pkg_s, key_s)
+        shutil.copytree(pkg_s, os.path.join(cases_dir, "oracle-s19-stale-state"),
+                        dirs_exist_ok=True)
+        keys["oracle-s19-stale-state"] = key_s.hex()
+        expected.append({"case": "oracle-s19-stale-state", "kind": "reject",
+                         "mode": "strict", "expected_verdict": "FAIL",
+                         "expected_first_fail": "S19",
+                         "state": {"subjects": {"oracle": {
+                             "head": "sha256:" + "0" * 64, "sequence": 5}}}})
+
+    with open(os.path.join(dest, "expected.json"), "w", encoding="utf-8", newline="\n") as f:
         json.dump({"spec": "uibc", "cases": expected}, f, indent=2, ensure_ascii=False)
-    with open(os.path.join(dest, "keys.json"), "w", encoding="utf-8") as f:
+    with open(os.path.join(dest, "keys.json"), "w", encoding="utf-8", newline="\n") as f:
         json.dump({"note": "throwaway test keys; these packages are synthetic",
                    "keys": keys}, f, indent=2)
 
@@ -316,11 +359,24 @@ def emit_corpus(dest, only=None):
     for row in expected:
         case_dir = os.path.join(cases_dir, row["case"])
         key = bytes.fromhex(keys[row["case"]]) if row.get("mode") == "strict" else None
-        verdict, first = ref_view(case_dir, key)
+        extra = {}
+        state_tmp = None
+        if row.get("expect_head"):
+            extra["expect_head"] = row["expect_head"]
+        if row.get("state"):
+            fd, state_tmp = tempfile.mkstemp(prefix="state-", suffix=".json")
+            os.close(fd)
+            with open(state_tmp, "w", encoding="utf-8", newline="\n") as f:
+                json.dump(row["state"], f, indent=1, sort_keys=True)
+            extra["state_file"] = state_tmp
+        rep = verify(case_dir, key=key, **extra) if extra else None
+        verdict, first = ref_view(case_dir, key, rep=rep)
+        if state_tmp:
+            os.unlink(state_tmp)
         if verdict != row["expected_verdict"] or first != row["expected_first_fail"]:
             mismatches.append((row["case"], verdict, str(first),
                                row["expected_verdict"], str(row["expected_first_fail"])))
-    with open(os.path.join(dest, "README.md"), "w", encoding="utf-8") as f:
+    with open(os.path.join(dest, "README.md"), "w", encoding="utf-8", newline="\n") as f:
         f.write(EMIT_README % (len(expected), len(mismatches)))
     return len(expected), mismatches
 
@@ -331,6 +387,21 @@ EMIT_README = """# UIBC conformance corpus
 Written by `python tools/oracle_check.py --emit <dir>`; the answers were checked
 against the bytes on disk after writing, so what you read here is what the files
 do (mismatches at emit time: %d).
+
+## Rebuilding these bytes
+
+The corpus is reproducible, not merely consistent. Emit it with the same clock
+and you get the same files:
+
+    SOURCE_DATE_EPOCH=1794700800 python tools/oracle_check.py --emit <empty dir>
+
+Every `created_at` comes from that epoch instead of the wall clock, and every
+`event_id`, `evidence_id` and file name prefix is derived from a fixed seed
+(`UIBC_REPRO_SEED`, set by `--emit`) instead of `uuid4`, so a second run asking
+in the same order gets the same identifiers. `tests/test_oracle_reproducible.py`
+rebuilds the corpus and compares bytes; it fails if that stops being true.
+Without `SOURCE_DATE_EPOCH` the corpus still emits and still round-trips - it
+just cannot be rebuilt, which is the thing worth not doing.
 
 ## How to use it with any verifier
 
@@ -347,6 +418,27 @@ do (mismatches at emit time: %d).
 named check). A verifier that rejects everything passes every reject case and
 fails every accept case, which is why both halves are here.
 
+## The three checks a package cannot carry
+
+Seventeen of the twenty checks are decided by the package alone. Three are not, and
+two of those ship their outside input with the case rather than leaving the reader
+to guess:
+
+- **S9, `oracle-s09-rollback-pin`** — the package is a valid older one. S9 is the
+  check that it is not a *rollback*, which only means something against a head
+  observed somewhere else. `expected.json` carries that head in `expect_head`; verify
+  the suite the way `uibc verify --expect-head <value>` does and it must FAIL at S9.
+  Verified against its own head it is PASS, so the case is not simply broken.
+- **S19, `oracle-s19-stale-state`** — the package is signed and self-consistent, and
+  is older than what this verifier remembers. `expected.json` carries the memory in
+  `state` (the same shape `uibc verify --state <file>` writes). Supply it as the
+  state file and the verdict must be FAIL at S19.
+- **S0 is not here at all.** S0 asks what the verifier does with input that is not a
+  package: truncation, deep nesting, invalid UTF-8, a path climbing out. There is no
+  package to put in a directory, so the ten hostile inputs live in
+  `tools/redteam_robustness.py` and `docs/ROBUSTNESS.md` instead. This is a real
+  limit of a package corpus and it is written down rather than papered over.
+
 ## What this corpus does not prove
 
 These packages were produced by this project. They are anchored to
@@ -355,6 +447,19 @@ passing them shows conformance to this reading of the spec, not to any
 regulator's requirement. Anything a verifier does that is not in here is
 unmeasured, not impossible.
 """
+
+
+def _oracle_key(name):
+    """The seal key for a case, derived from its name instead of drawn at random.
+
+    A corpus a stranger cannot rebuild is a corpus a stranger has to trust. Two
+    things stopped that: keys drawn per run, and a wall-clock `created_at`. The
+    key is now the hash of the case name, and the clock is pinned by
+    SOURCE_DATE_EPOCH when `--emit` runs, so the same commands produce the same
+    bytes anywhere. These keys are published in `keys.json` and seal nothing but
+    synthetic packages.
+    """
+    return hashlib.sha256(b"uibc-oracle-key/" + name.encode("utf-8")).digest()
 
 
 def build_good(tmp, name, variant):
@@ -397,7 +502,10 @@ def build_good(tmp, name, variant):
         etype = _rest[0] if _rest else "ACTION"
         src = os.path.join(tmp, f"{name}-{fname}")
         mode = "wb" if isinstance(content, bytes) else "w"
-        with open(src, mode, **({} if mode == "wb" else {"encoding": "utf-8"})) as f:
+        # newline="\n" even here: these bytes become evidence, and evidence
+        # hashed on Windows must hash the same as evidence hashed on Linux.
+        opts = {} if mode == "wb" else {"encoding": "utf-8", "newline": "\n"}
+        with open(src, mode, **opts) as f:
             f.write(content)
         ucli.cmd_evidence(type("A", (), {
             "path": pkg, "type": etype, "file": src,
@@ -410,9 +518,9 @@ def build_good(tmp, name, variant):
         for etype in ("UPDATE", "DELEGATE", "UPDATE"):
             ucli.cmd_event(type("A", (), {"path": pkg, "type": etype, "actor": None})())
 
-    key = generate_key()
+    key = _oracle_key(name)
     kf = os.path.join(tmp, f"{name}.key")
-    with open(kf, "w", encoding="ascii") as f:
+    with open(kf, "w", encoding="ascii", newline="\n") as f:
         f.write(key.hex())
     ucli.cmd_submit(type("A", (), {"path": pkg, "key": kf})())
     if variant == "resubmit":
@@ -435,14 +543,14 @@ def build(tmp, name, mutation, nevid=1):
         "agent_type": "software-agent", "version": "1"})())
     for i in range(nevid):
         src = os.path.join(tmp, f"{name}-{i}.txt")
-        with open(src, "w", encoding="utf-8") as f:
+        with open(src, "w", encoding="utf-8", newline="\n") as f:
             f.write(f"oracle {name} {i}\n")
         ucli.cmd_evidence(type("A", (), {
             "path": pkg, "type": "ACTION", "file": src,
             "media_type": "text/plain", "note": f"n{i}"})())
-    key = generate_key()
+    key = _oracle_key(name)
     kf = os.path.join(tmp, f"{name}.key")
-    with open(kf, "w", encoding="ascii") as f:
+    with open(kf, "w", encoding="ascii", newline="\n") as f:
         f.write(key.hex())
     ucli.cmd_submit(type("A", (), {"path": pkg, "key": kf})())
     mutate(pkg, name, mutation)
@@ -460,7 +568,7 @@ def mutate(pkg, name, mutation):
     idx = json.load(open(idx_path, encoding="utf-8"))
     first = os.path.join(pkg, "evidence", idx["entries"][0]["path"].replace("\\", "/"))
     if mutation == "tamper":
-        with open(first, "a", encoding="utf-8") as f:
+        with open(first, "a", encoding="utf-8", newline="\n") as f:
             f.write("TAMPERED\n")
         return
     if mutation == "delete":
@@ -469,14 +577,14 @@ def mutate(pkg, name, mutation):
     if mutation == "duplicate":
         idx = json.load(open(idx_path, encoding="utf-8"))
         idx["entries"].append(dict(idx["entries"][0]))
-        with open(idx_path, "w", encoding="utf-8") as f:
+        with open(idx_path, "w", encoding="utf-8", newline="\n") as f:
             json.dump(idx, f, indent=2, sort_keys=True)
         return
     if mutation == "dup_root":
         # duplicate the first entry; the re-seal that follows rewrites manifest and
         # signature from the index, so only the identifier rule (S12) can fail.
         idx["entries"].append(dict(idx["entries"][0]))
-        with open(idx_path, "w", encoding="utf-8") as f:
+        with open(idx_path, "w", encoding="utf-8", newline="\n") as f:
             json.dump(idx, f, indent=2, sort_keys=True)
         return
     if mutation == "unseal":
@@ -501,7 +609,7 @@ def reseal(pkg, key):
     sp = os.path.join(pkg, "signatures", "seal.json")
     seal = json.load(open(sp, encoding="utf-8"))
     seal["signature"] = seal_sign(key, ident, man, lc)
-    with open(sp, "w", encoding="utf-8") as f:
+    with open(sp, "w", encoding="utf-8", newline="\n") as f:
         json.dump(seal, f, indent=2, sort_keys=True)
 
 
@@ -620,13 +728,13 @@ def main():
         man_path = os.path.join(pkg_c, "manifest.json")
         man = json.load(open(man_path, encoding="utf-8"))
         man["freshness_head"] = {"subject": "oracle", "sequence": 5}
-        with open(man_path, "w", encoding="utf-8") as f:
+        with open(man_path, "w", encoding="utf-8", newline="\n") as f:
             json.dump(man, f, indent=2, sort_keys=True)
         reseal(pkg_c, key_c)
         verify(pkg_c, state_file=state_file)      # first observation: records the mark
         man = json.load(open(man_path, encoding="utf-8"))
         man["freshness_head"]["sequence"] = 3     # ...validly signed, but from earlier
-        with open(man_path, "w", encoding="utf-8") as f:
+        with open(man_path, "w", encoding="utf-8", newline="\n") as f:
             json.dump(man, f, indent=2, sort_keys=True)
         reseal(pkg_c, key_c)
         rep = verify(pkg_c, state_file=state_file)

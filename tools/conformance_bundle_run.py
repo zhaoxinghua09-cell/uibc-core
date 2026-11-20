@@ -25,6 +25,7 @@ import hashlib
 import json
 import os
 import platform
+import shlex
 import shutil
 import subprocess
 import sys
@@ -44,6 +45,26 @@ def sha256(path):
     return h.hexdigest()
 
 
+def _split(command):
+    """Split a command template into argv, respecting quotes.
+
+    str.split() breaks `--verify '"C:/Program Files/Python/python.exe" uibc_core.pyz
+    verify {pkg}'` at every space, so a bundled single-file verifier on a path with
+    spaces could never be run. shlex in posix mode eats Windows backslashes, so it
+    is used non-posix and the quote characters are trimmed from the tokens.
+    """
+    try:
+        toks = shlex.split(command, posix=False)
+    except ValueError:
+        toks = command.split()
+    out = []
+    for t in toks:
+        if len(t) >= 2 and t[0] == t[-1] and t[0] in "\"'":
+            t = t[1:-1]
+        out.append(t)
+    return out
+
+
 def verifier_version(command):
     """Version of the reference implementation, only when it is what was run.
 
@@ -54,6 +75,15 @@ def verifier_version(command):
     if "uibc_core" not in command and "uibc " not in command:
         return "not the reference verifier (version not probed)"
     try:
+        # a bundled .pyz reports its own version via --version; an installed
+        # package reports through import. Neither is assumed.
+        pyz = [t for t in _split(command.replace("{pkg}", "")) if t.endswith(".pyz")]
+        if pyz:
+            out = subprocess.run([sys.executable, pyz[0], "--version"],
+                                 capture_output=True, text=True, timeout=30)
+            if out.returncode == 0 and out.stdout.strip():
+                return out.stdout.strip()
+            return "unknown"
         out = subprocess.run([sys.executable, "-c",
                               "import uibc_core;print(uibc_core.__version__)"],
                              capture_output=True, text=True, timeout=30)
@@ -65,17 +95,23 @@ def verifier_version(command):
 
 
 def call_verifier(command, pkg):
-    argv = command.replace("{pkg}", pkg).split()
+    argv = _split(command.replace("{pkg}", pkg))
     proc = subprocess.run(argv, capture_output=True, text=True, timeout=180)
     try:
         out = json.loads(proc.stdout)
     except json.JSONDecodeError:
+        # No JSON at all is a DIFFERENT event from "JSON said FAIL". Recording
+        # both as FAIL once produced a 0/36 receipt on a machine where the
+        # verifier was simply not installed - a stranger could publish that as
+        # "their corpus fails everything". Keep the evidence needed to tell them
+        # apart.
         return {"result": "FAIL" if proc.returncode else "PASS", "checks": [],
-                "raw": proc.stdout[-400:]}
+                "unparsed": True, "raw": proc.stdout[-400:],
+                "stderr": proc.stderr[-400:], "returncode": proc.returncode}
     checks = out.get("checks")
     if isinstance(checks, list) and checks and isinstance(checks[0], dict):
-        return {"result": out.get("result"), "checks": checks}
-    return {"result": out.get("result"), "checks": []}
+        return {"result": out.get("result"), "checks": checks, "unparsed": False}
+    return {"result": out.get("result"), "checks": [], "unparsed": False}
 
 
 def reported_failures(got):
@@ -85,11 +121,14 @@ def reported_failures(got):
 
 def judge(case, got):
     verdict = (got.get("result") or "").upper()
+    parsed = not got.get("unparsed", False)
     if case.get("expect") == "accept":
         ok = verdict != "FAIL" and not reported_failures(got)
         return {"id": case["id"], "attack": case["attack"], "ok": ok,
                 "verdict": verdict, "reported": [], "expected": [],
-                "note": "" if ok else "refused a package that is correct"}
+                "note": "" if ok else "refused a package that is correct",
+                "verifier_parsed": parsed,
+                "verifier_stderr": got.get("stderr", "")}
     reported = reported_failures(got)
     named = bool(reported & set(case["expected_checks"]))
     refused = verdict in ("FAIL", "INCONCLUSIVE")
@@ -98,7 +137,9 @@ def judge(case, got):
             "reported": sorted(reported), "expected": case["expected_checks"],
             "note": ("" if refused and named else
                      "refused but did not name an expected check" if refused
-                     else "did not refuse a package that is broken")}
+                     else "did not refuse a package that is broken"),
+            "verifier_parsed": parsed,
+            "verifier_stderr": got.get("stderr", "")}
 
 
 def run_all(command):
@@ -119,9 +160,17 @@ def run_all(command):
     return rows
 
 
+def _public(rows):
+    return [{k: v for k, v in r.items() if not k.startswith("verifier_")} for r in rows]
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--verify", default=sys.executable + " -m uibc_core.cli verify {pkg}")
+    pyz = os.path.join(HERE, "uibc_core.pyz")
+    default_verify = ('"%s" "%s" verify {pkg}' % (sys.executable, pyz)
+                      if os.path.isfile(pyz)
+                      else sys.executable + " -m uibc_core.cli verify {pkg}")
+    ap.add_argument("--verify", default=default_verify)
     ap.add_argument("--json", action="store_true")
     ap.add_argument("--receipt", default="receipt.json",
                     help="where to write the run receipt; '' to skip")
@@ -135,6 +184,24 @@ def main():
     rows = run_all(a.verify)
     passed = sum(1 for r in rows if r["ok"])
 
+    # Preflight, in effect: if not one case produced JSON, the verifier did not
+    # run. That is a setup problem, not a verdict about the corpus, so refuse to
+    # write a receipt that would read as "36 failures".
+    if not any(r["verifier_parsed"] for r in rows):
+        first = rows[0] if rows else {}
+        sys.stderr.write(
+            "\nNo verifier output was parseable in any case, so this is not a "
+            "conformance result.\n"
+            "Command run: %s\n" % a.verify
+            + ("stderr (last 400 chars):\n%s\n" % first.get("verifier_stderr", "")
+               if first.get("verifier_stderr") else "")
+            + "The reference verifier is probably not installed for this Python "
+              "(%s).\nTry:\n    %s -m pip install uibc-core==0.4.1\n"
+              % (sys.executable, sys.executable)
+            + "No receipt was written, because a receipt saying 0/%d would be "
+              "misleading.\n" % len(rows))
+        sys.exit(3)
+
     if not a.json:
         for r in rows:
             print("%-4s %-6s %s" % (r["id"], "ok" if r["ok"] else "FAIL",
@@ -147,6 +214,10 @@ def main():
                   "    pip install uibc-core==0.4.1")
 
     if a.receipt:
+        # diagnostic keys stay out of the receipt: it is a published artefact,
+        # and a stranger's receipt should have the same shape as ours.
+        public_rows = [{k: v for k, v in r.items() if not k.startswith("verifier_")}
+                       for r in rows]
         receipt = {
             "kind": "uibc-conformance-run-receipt",
             "notice": ("This records that a command ran on a machine and produced "
@@ -160,8 +231,8 @@ def main():
             "platform": platform.platform(),
             "verifier_version": verifier_version(a.verify),
             "manifest_sha256": sha256(MANIFEST) if os.path.isfile(MANIFEST) else None,
-            "cases": len(rows), "passed": passed,
-            "rows": rows,
+            "cases": len(public_rows), "passed": passed,
+            "rows": public_rows,
         }
         with open(a.receipt, "w", encoding="utf-8", newline="\n") as f:
             json.dump(receipt, f, ensure_ascii=False, indent=2)
@@ -170,7 +241,7 @@ def main():
             print("\nreceipt written to %s" % a.receipt)
 
     if a.json:
-        print(json.dumps({"cases": len(rows), "passed": passed, "rows": rows},
+        print(json.dumps({"cases": len(rows), "passed": passed, "rows": _public(rows)},
                          ensure_ascii=False, indent=2))
     sys.exit(0 if passed == len(rows) else 1)
 

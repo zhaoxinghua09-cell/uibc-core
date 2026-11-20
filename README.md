@@ -40,18 +40,18 @@ this one. The build is deterministic for a given tree, but "rebuilding gives the
 
 No repository, no network, no `pip install`: the archive carries its own verifier as a single file (`uibc_core.pyz`), and `run.py` uses it. Expected tail `strict 36/36` in about six seconds, and a `receipt.json` you can publish. A verifier that answers PASS to everything scores **6/36**, so refusing nothing does not pass.
 
-#### Or the RFC 9162 vector set — six vectors, and one of them is the reason to look
+#### Or the RFC 9162 vector set — 41 vectors, and seven of them isolate path structure
 
 ```bash
 git clone --depth 1 https://github.com/zhaoxinghua09-cell/uibc-core.git
 cd uibc-core && python tools/check_scitt_vectors_standalone.py
 ```
 
-That script imports **nothing** from this project. It re-derives the leaf hash (`SHA-256(0x00 ‖ x)`), the node hash (`SHA-256(0x01 ‖ l ‖ r)`) and the fold from the RFC 9162 text, then walks all six vectors in [`docs/upstream-package/scitt-rfc9162`](docs/upstream-package/scitt-rfc9162/README.md). Expected tail:
+That script imports **nothing** from this project. It re-derives the leaf hash (`SHA-256(0x00 ‖ x)`), the node hash (`SHA-256(0x01 ‖ l ‖ r)`) and the fold from the RFC 9162 text, then walks all 41 vectors in [`docs/upstream-package/scitt-rfc9162`](docs/upstream-package/scitt-rfc9162/README.md). Expected tail:
 
 ```
   ambiguous-tree-size: ambiguity confirmed — size 8 folds to the same root
-  vectors: 6
+  vectors: 41
 VERDICT: CONSISTENT
 ```
 
@@ -213,7 +213,14 @@ UIBC Core 参考实现 v0.3.3 —— Agent 生命周期证据包与验证器：�
 
 > 🔏 发布产物已进入 Sigstore Rekor 公共透明日志（条目 `2883389783` 属早期发布产物 `dist/*.cosign.bundle`；另有条目
 > `3944456520` 记录本仓 head 摘要的外部锚，见 `docs/EXTERNAL-ANCHOR.md`）。
-> **包含证明（inclusion proof）目前验不过**：我们的 RFC 6962 走法与第三方库 `rekor_log_verifier` 同时失败，如实记在文档里。
+> **包含证明（inclusion proof）现在验得过，而此前“验不过”的结论是我们读错了**（2026-11-21 更正）：
+> 叶子应为 `SHA-256(0x00 ‖ body 原始字节)`（我们曾把 body 先哈希一次再套前缀），且必须用
+> `inclusionProof.logIndex` 折叠（条目里的 `logIndex` 是另一个数，见 `tools/verify_rekor_inclusion.py`）。
+> 复跑：`pip install "uibc-core[verify]"` 后 `python tools/verify_rekor_inclusion.py --log-index 2883389783`（连 checkpoint 签名一起验：ECDSA P-256，
+> 对三行文本、key id `c0d23d6a`；缺 `cryptography` 时报 `signature_verified: null`，不会假装验过）。
+> 跨树规模的一致性也用同一工具验：`python tools/verify_rekor_inclusion.py --consistency --from <回执.json>`
+> （回执自带 checkpoint 文本，折叠算法移植 `transparency-dev/merkle` 的 `proof/verify.go`，两个树头签名都验）。全过程与两条错误的由来见
+> [`docs/REKOR-INCLUSION-2026-11-21.md`](docs/REKOR-INCLUSION-2026-11-21.md)。
 > Zenodo **概念 DOI** `10.5281/zenodo.22456647` 属 LGD 理论本体；**本包 0.3.0 的单独 DOI 尚未分配**（存缴包已备，需本人登录上传）。
 > Software Heritage SWHID 见 `CITATION.cff`。
 > 以上均为**存证**，非质量认可。

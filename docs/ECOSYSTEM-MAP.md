@@ -80,12 +80,18 @@ Rekor failure - as an observation with a reproduction, never as a verdict on the
    [arXiv 2609.12594, Determinism of the signed bytes](https://arxiv.org/html/2609.12594).
    So "re-runnable" is no longer ours alone; it is table stakes, and Tracekit holds
    a stronger form of it than we do.
-2. **We are still alone on one thing: publishing a failed verification.** Our Rekor
-   inclusion proof does not verify, our own RFC 6962 walk fails, and the third-party
-   `rekor_log_verifier` fails on the same proof with a different root. None of the
-   projects above publishes that kind of negative result; they publish passing
-   experiment counts. A negative result with a reproduction command is the one asset
-   nobody in this table is competing for.
+2. **We used to be alone on one thing: publishing a failed verification — and then
+   we had to retract it.** Our Rekor inclusion proof did not verify for weeks, and
+   neither did a third-party verifier on the same proof. On 2026-11-21 we found that
+   both failures came from the same two mistakes on our side: the leaf is
+   `SHA-256(0x00 ‖ body)`, not `SHA-256(0x00 ‖ SHA-256(body))`, and a proof folds
+   against `inclusionProof.logIndex`, which is a **different number** from
+   `entry.logIndex`. The proof verifies
+   (`python tools/verify_rekor_inclusion.py --log-index 2883389783`), and it also
+   verifies on a third party's entry. See `docs/REKOR-INCLUSION-2026-11-21.md`.
+   What survives is the habit, not the claim: the failure was published with a
+   reproduction, which is why it could be found wrong. A project that published only
+   passing counts would still be asserting it.
 3. **The cheapest real gap to close is the conformance corpus.** agent-receipts
    publishes 8 vectors so that "any conforming implementation produces byte-identical
    signatures". We publish Python tests, which is not the same object. A language-neutral

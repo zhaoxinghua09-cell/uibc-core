@@ -76,17 +76,117 @@ def root_from_path(leaf, index, size, path):
 
 # id, tree_size, leaf_index, tamper, expected_result, description
 CASES = [
-    ("valid-tree8-index2", 8, 2, None, "VALID",
-     "Happy path: tree_size=8, leaf_index=2; the reconstructed root equals root_true."),
+    # --- valid: tree shape and index position varied on purpose ---
+    ("valid-tree1-index0", 1, 0, None, "VALID",
+     "Smallest tree: tree_size=1, empty inclusion path, root == leaf digest."),
+    ("valid-tree2-index0", 2, 0, None, "VALID",
+     "tree_size=2, leaf_index=0: the only sibling is the left one."),
+    ("valid-tree2-index1", 2, 1, None, "VALID",
+     "tree_size=2, leaf_index=1: the sibling is consumed to the left of the leaf."),
+    ("valid-tree3-index2", 3, 2, None, "VALID",
+     "tree_size=3, leaf_index=2: the right subtree has size 1, so the path is uneven."),
     ("valid-tree4-index0", 4, 0, None, "VALID",
      "Happy path: tree_size=4, leaf_index=0 (left edge)."),
+    ("valid-tree5-index2", 5, 2, None, "VALID",
+     "tree_size=5, leaf_index=2: middle leaf of an unbalanced tree."),
+    ("valid-tree6-index4", 6, 4, None, "VALID",
+     "tree_size=6, leaf_index=4: near-right leaf of an unbalanced tree."),
+    ("valid-tree7-index3", 7, 3, None, "VALID",
+     "tree_size=7, leaf_index=3: interior leaf of a tree whose split is 4|3."),
+    ("valid-tree8-index2", 8, 2, None, "VALID",
+     "Happy path: tree_size=8, leaf_index=2; the reconstructed root equals root_true."),
+    ("valid-tree9-index8", 9, 8, None, "VALID",
+     "tree_size=9, leaf_index=8: split 8|1, so the tail leaf carries a short path."),
+    ("valid-tree15-index7", 15, 7, None, "VALID",
+     "tree_size=15, leaf_index=7: last leaf of the left subtree, path crosses the 8|7 split."),
+    ("valid-tree16-index0", 16, 0, None, "VALID",
+     "tree_size=16, leaf_index=0: full binary tree, all left edges."),
+    ("valid-tree17-index8", 17, 8, None, "VALID",
+     "tree_size=17, leaf_index=8: first leaf of the 1-leaf tail subtree."),
+    ("valid-tree17-index16", 17, 16, None, "VALID",
+     "tree_size=17, leaf_index=16: the single tail leaf of a 16|1 split."),
+    ("valid-tree31-index15", 31, 15, None, "VALID",
+     "tree_size=31, leaf_index=15: deepest interior leaf of a 16|15 split."),
+    ("valid-tree32-index31", 32, 31, None, "VALID",
+     "tree_size=32, leaf_index=31: full binary tree, all right edges."),
+
+    # --- fail: one property broken per vector, so a report names the property ---
     ("fail-tampered-path", 8, 2, "path", "INVALID_INCLUSION_PATH",
      "The first sibling is replaced with 32 zero bytes; reconstructed root differs."),
+    ("fail-tampered-path-last", 16, 9, "path-last", "INVALID_INCLUSION_PATH",
+     "The last sibling is replaced with 32 zero bytes; only the final fold differs."),
+    ("fail-tampered-path-small-tree", 4, 1, "path", "INVALID_INCLUSION_PATH",
+     "Same single-byte tamper on a tree of size 4, to show the rule is not size-specific."),
+    ("fail-empty-path", 5, 2, "path-empty", "INVALID_INCLUSION_PATH",
+     "tree_size=5 with an empty inclusion path: reconstructed root is the leaf digest."),
+    ("fail-path-too-long", 8, 2, "path-long", "INVALID_INCLUSION_PATH",
+     "One extra 32-byte sibling appended; folding it adds a node that is not in the tree."),
+    ("fail-tampered-leaf", 4, 1, "leaf", "INVALID_LEAF_DIGEST",
+     "Leaf input altered before hashing: digest and reconstructed root both differ."),
     ("fail-wrong-tree-size", 8, 2, "size", "INVALID_TREE_SIZE",
      "tree_size declared one smaller than the path assumes; proof length is one short."),
+    ("valid-tree9-index0", 9, 0, None, "VALID",
+     "tree_size=9, leaf_index=0: the left subtree is full (8) and the tail is 1."),
     ("fail-wrong-leaf-index", 8, 2, "index", "INVALID_LEAF_INDEX",
      "The path belongs to a different leaf index of the same tree."),
+    ("fail-wrong-leaf-index-edge", 16, 0, "index", "INVALID_LEAF_INDEX",
+     "Left-most leaf paired with the right-most leaf's path on the same tree."),
+
+    # --- fail: path structure (length and order), each isolated ---
+    ("fail-path-short", 8, 2, "path-short", "INVALID_INCLUSION_PATH",
+     "One sibling dropped from a size-8 path: folding stops a level below the root, so "
+     "the reconstructed root is a subtree hash rather than the root."),
+    ("fail-path-short-tree3", 3, 1, "path-short", "INVALID_INCLUSION_PATH",
+     "Same one-sibling-short tamper on a 2|1 split, to show it is not size-8 specific."),
+    ("fail-path-short-tree32", 32, 31, "path-short", "INVALID_INCLUSION_PATH",
+     "One sibling dropped on the right edge of a full 32-leaf tree: the last fold is "
+     "missing, which is the case a length-only check misses."),
+    ("fail-path-swap", 8, 5, "path-swap", "INVALID_INCLUSION_PATH",
+     "First two siblings exchanged: byte count and path length are unchanged, the root "
+     "differs. A verifier that validates shape but not order accepts this wrongly."),
+    ("fail-path-swap-tree16", 16, 9, "path-swap", "INVALID_INCLUSION_PATH",
+     "Same order tamper on an unbalanced 16-leaf tree, where one sibling sits above the "
+     "split rather than beside the leaf."),
+    ("fail-path-swap-tree5", 5, 0, "path-swap", "INVALID_INCLUSION_PATH",
+     "Order tamper on a 4|1 split at the left edge, the smallest tree with two siblings "
+     "in the path."),
+    ("fail-path-short-tampered", 7, 6, "path-short", "INVALID_INCLUSION_PATH",
+     "A size-7 path with both a dropped sibling and an unbalanced split: isolates length "
+     "from tree shape."),
+
+    # --- valid: sizes just above and below a power of two, beyond the first batch ---
+    ("valid-tree33-index0", 33, 0, None, "VALID",
+     "tree_size=33 = 32|1: left subtree full, tail is a single leaf; leaf 0 path crosses "
+     "the split at the top."),
+    ("valid-tree63-index31", 63, 31, None, "VALID",
+     "tree_size=63 = 32|31: last leaf of the left subtree in a two-level unbalanced tree."),
+    ("valid-tree64-index63", 64, 63, None, "VALID",
+     "tree_size=64: full binary tree of depth 6, right-most leaf; every sibling is on "
+     "the left."),
+    ("valid-tree65-index64", 65, 64, None, "VALID",
+     "tree_size=65 = 64|1: the single tail leaf of a full tree plus one; path length 1 "
+     "and the top split is the whole tree."),
+
+    # --- ambiguous: the root does not authenticate the declared size ---
+    ("ambiguous-tree-size", 7, 5, "ambiguous", "VALID_BUT_SIZE_UNAUTHENTICATED",
+     "tree_size=7, leaf_index=5: the same inclusion_path folds to the same root at "
+     "tree_size=8, so the declared size is not authenticated by the root. Independent "
+     "reproduction of the RFC 9942 Section 5.2.1 observation posted to scitt@ietf.org "
+     "on 2026-11-15."),
+    ("ambiguous-tree-size-2", 2, 1, "ambiguous", "VALID_BUT_SIZE_UNAUTHENTICATED",
+     "tree_size=2, leaf_index=1: the single-sibling path also folds at tree_size=3."),
+    ("ambiguous-tree-size-4", 4, 3, "ambiguous", "VALID_BUT_SIZE_UNAUTHENTICATED",
+     "tree_size=4, leaf_index=3: right-most leaf, path folds identically at tree_size=5."),
+    ("ambiguous-tree-size-8", 8, 2, "ambiguous", "VALID_BUT_SIZE_UNAUTHENTICATED",
+     "tree_size=8, leaf_index=2: the same path folds identically at tree_size=9. "
+     "Together with the 7|8 instance this shows the ambiguity runs in both directions; "
+     "each instance here was found by exhaustive search, not by hand."),
 ]
+
+# The ambiguous case carries four extra fields. They are listed here rather than
+# inlined so the shape stays visible next to the case table above.
+AMBIGUOUS_NOTE = ("the size-8 fold consumes the same three siblings; no additional "
+                  "node is read, so the root is identical")
 
 
 def _expected(cid, size, index, tamper, result, desc):
@@ -94,20 +194,43 @@ def _expected(cid, size, index, tamper, result, desc):
     true_root = merkle.root_hash(leaves)
     proof = list(merkle.audit_path(leaves, index))
     stated_size = size
+    leaf_input = _leaf_text(cid, index)
+    leaf_digest = leaves[index]
     if tamper == "path":
         proof[0] = b"\x00" * 32
+    elif tamper == "path-last":
+        proof[-1] = b"\x00" * 32
+    elif tamper == "path-empty":
+        proof = []
+    elif tamper == "path-long":
+        proof = proof + [b"\x00" * 32]
+    elif tamper == "path-short":
+        # One sibling dropped. The fold stops early, so the "reconstructed root" is a
+        # subtree hash rather than the root. A verifier that only compares lengths,
+        # or one that stops folding without comparing, both need to reject this.
+        proof = proof[:-1]
+    elif tamper == "path-swap":
+        # Two siblings in each other's place. Same number of bytes, same length, so a
+        # verifier that checks shape rather than order will wrongly accept it.
+        proof = list(proof)
+        proof[0], proof[1] = proof[1], proof[0]
+    elif tamper == "leaf":
+        leaf_input = _leaf_text(cid, index) + b" (tampered)"
+        leaf_digest = merkle.leaf_hash(leaf_input)
     elif tamper == "size":
         stated_size = size - 1
         proof = proof[:-1]
+    elif tamper == "size-zero":
+        stated_size = 0
     elif tamper == "index":
         proof = list(merkle.audit_path(leaves, (index + 1) % size))
-    reconstructed = root_from_path(leaves[index], index, stated_size, proof)
+    reconstructed = root_from_path(leaf_digest, index, stated_size, proof)
     exp = {
         "description": desc,
         "leaf_entry": {
-            "leaf_input_hex": _leaf_text(cid, index).hex(),
-            "leaf_input_ascii": _leaf_text(cid, index).decode(),
-            "digest_hex": leaves[index].hex(),
+            "leaf_input_hex": leaf_input.hex(),
+            "leaf_input_ascii": leaf_input.decode(),
+            "digest_hex": leaf_digest.hex(),
             "definition": "SHA-256 of the leaf input bytes, hex-encoded",
         },
         "leaf_index": index,
@@ -117,12 +240,19 @@ def _expected(cid, size, index, tamper, result, desc):
         "reconstructed_root": reconstructed.hex() if reconstructed else "",
         "result": result,
     }
+    if tamper == "ambiguous":
+        # Same path, one larger declared size: if the fold reads no additional node
+        # the root comes out identical, which is exactly the ambiguity being shown.
+        alt = root_from_path(leaves[index], index, size + 1, proof)
+        exp["alt_tree_size"] = size + 1
+        exp["alt_root_equal"] = (alt is not None and alt == true_root)
+        exp["note"] = AMBIGUOUS_NOTE
     return exp
 
 
 def _write_gitattributes(out):
     ga = os.path.join(out, ".gitattributes")
-    with open(ga, "w", encoding="utf-8") as fh:
+    with open(ga, "w", encoding="utf-8", newline="\n") as fh:
         fh.write("# Pin vector files as non-normalized so SHA256SUMS reproduces\n")
         fh.write("# byte-for-byte on any platform, including core.autocrlf=true.\n")
         fh.write("v1/** -text\nmanifest.json -text\nREADME.md -text\nSHA256SUMS -text\n")
@@ -136,7 +266,7 @@ def build(out=OUT):
         d = os.path.join(out, "v1", cid)
         os.makedirs(d, exist_ok=True)
         p = os.path.join(d, "expected.json")
-        with open(p, "w", encoding="utf-8") as fh:
+        with open(p, "w", encoding="utf-8", newline="\n") as fh:
             json.dump(exp, fh, indent=2, sort_keys=True)
             fh.write("\n")
         written.append(p)
@@ -146,12 +276,41 @@ def build(out=OUT):
             "expected": {k: v for k, v in exp.items() if k != "description"},
         })
 
+    classes = {}
+    for v in vectors:
+        classes[v["expected_result"]] = classes.get(v["expected_result"], 0) + 1
+
     manifest = {
         "version": "v1",
         "stability": "append-only",
         "scope_note": ("Covers the RFC 9162 SHA-256 hash-tree and inclusion-path layer "
                        "only. No COSE_Sign1 statement or receipt bytes are included; "
                        "see README 'What this set does not cover'."),
+        "coverage_note": (
+            "Declaring a tree_size one larger than the path assumes never changes the "
+            "reconstructed root in this algebra - the fold reads no additional node - so "
+            "that input is carried as an ambiguous-* vector (the root does not authenticate "
+            "the size), not as an INVALID_TREE_SIZE vector. INVALID_TREE_SIZE therefore "
+            "covers 'declared smaller' (path one short) and 'declared zero' (no fold "
+            "defined) only. This asymmetry was found by running the vectors, not assumed: "
+            "an earlier draft carried a 'size larger' fail case that our own verifier "
+            "reported as root-equal."
+        ),
+        "class_counts": classes,
+        "underspecified_inputs": [
+            {
+                "input": "tree_size=0 with a leaf_index asserted",
+                "our_behaviour": "refused: no fold is defined, reconstructed_root left empty",
+                "independent_behaviour": ("a literal RFC 9162 fold keeps folding and returns a "
+                                          "root, because nothing in the text forbids size 0"),
+                "why_not_a_vector": ("a vector has to be reproducible by an independent "
+                                     "reading of the text. This input is not: two conforming "
+                                     "readings disagree, so it is declared here instead of "
+                                     "being scored. It was found on 2026-11-20 when the "
+                                     "standalone checker disagreed with the builder; the "
+                                     "earlier draft carried it as fail-tree-size-zero."),
+            }
+        ],
         "leaf_entry_definition": ("SHA-256 of the leaf input bytes, hex-encoded. Leaf "
                                   "inputs here are plain ASCII strings rather than "
                                   "COSE_Sign1 digests, so the tree algebra can be "
@@ -166,13 +325,13 @@ def build(out=OUT):
         "vectors": vectors,
     }
     mp = os.path.join(out, "manifest.json")
-    with open(mp, "w", encoding="utf-8") as fh:
+    with open(mp, "w", encoding="utf-8", newline="\n") as fh:
         json.dump(manifest, fh, indent=2, sort_keys=True)
         fh.write("\n")
     written.append(mp)
 
     ga = os.path.join(out, ".gitattributes")
-    with open(ga, "w", encoding="utf-8") as fh:
+    with open(ga, "w", encoding="utf-8", newline="\n") as fh:
         fh.write("# Pin vector files as non-normalized so SHA256SUMS reproduces\n")
         fh.write("# byte-for-byte on any platform, including core.autocrlf=true.\n")
         fh.write("v1/** -text\nmanifest.json -text\nREADME.md -text\nSHA256SUMS -text\n")
@@ -184,7 +343,7 @@ def build(out=OUT):
         rel = os.path.relpath(p, out).replace(os.sep, "/")
         with open(p, "rb") as fh:
             lines.append("%s  %s" % (hashlib.sha256(fh.read()).hexdigest(), rel))
-    with open(sums, "w", encoding="utf-8") as fh:
+    with open(sums, "w", encoding="utf-8", newline="\n") as fh:
         fh.write("\n".join(sorted(lines)) + "\n")
     return out, len(vectors)
 
@@ -212,6 +371,19 @@ def verify(out=OUT):
             ok = False
             msgs.append("%s: result %s but root comparison says %s"
                         % (v["id"], exp["result"], "equal" if same else "differ"))
+        if "alt_tree_size" in exp:
+            # An ambiguous vector is only worth carrying if the claim in it is
+            # reproducible: the same path must fold to the same root at the other size.
+            alt = root_from_path(leaf, exp["leaf_index"], exp["alt_tree_size"],
+                                 [bytes.fromhex(h) for h in exp["inclusion_path"]])
+            alt_equal = alt is not None and alt == bytes.fromhex(exp["root_true"])
+            if alt_equal != exp["alt_root_equal"]:
+                ok = False
+                msgs.append("%s: alt_root_equal is %s but the fold says %s"
+                            % (v["id"], exp["alt_root_equal"], alt_equal))
+            if not alt_equal:
+                ok = False
+                msgs.append("%s: claims size ambiguity that does not reproduce" % v["id"])
     with open(os.path.join(out, "SHA256SUMS"), encoding="utf-8") as fh:
         for line in fh.read().splitlines():
             if not line.strip():
@@ -225,11 +397,71 @@ def verify(out=OUT):
     return ok, msgs
 
 
+def check_drift(out=OUT):
+    """Rebuild into a temp dir and demand byte-identity with the committed package.
+
+    Why: on 2026-11-20 this check found that ``CASES`` knew about 5 vectors while the
+    committed ``manifest.json`` listed 6 - ``ambiguous-tree-size`` had been added by
+    hand afterwards. ``--check`` reads only the manifest, so it could not see the gap;
+    a plain ``build`` run would have silently dropped that vector from the manifest while
+    leaving its directory behind. Byte-identity closes both directions: the committed
+    package must be exactly what the script produces, and the script must produce
+    exactly what is committed.
+    """
+    import tempfile
+
+    tmp = tempfile.mkdtemp(prefix="scitt-drift-")
+    ok, msgs = True, []
+    try:
+        build(tmp)
+        rels = []
+        hand_written = {"README.md"}  # prose, maintained by hand; never built
+        for root, _dirs, files in os.walk(out):
+            for f in files:
+                full = os.path.join(root, f)
+                rel = os.path.relpath(full, out).replace(os.sep, "/")
+                if rel in hand_written:
+                    continue
+                rels.append(rel)
+        rels.sort()
+        for rel in rels:
+            a = os.path.join(out, rel)
+            b = os.path.join(tmp, rel)
+            if not os.path.isfile(b):
+                ok = False
+                msgs.append("committed file not produced by build: %s" % rel)
+                continue
+            if open(a, "rb").read() != open(b, "rb").read():
+                ok = False
+                msgs.append("committed bytes differ from build output: %s" % rel)
+        built_rels = []
+        for root, _dirs, files in os.walk(tmp):
+            for f in files:
+                built_rels.append(os.path.relpath(os.path.join(root, f), tmp).replace(os.sep, "/"))
+        for rel in built_rels:
+            if rel not in rels:
+                ok = False
+                msgs.append("build produces a file the package does not have: %s" % rel)
+    finally:
+        import shutil
+        shutil.rmtree(tmp, ignore_errors=True)
+    msgs.append("compared files: %d" % len(rels))
+    return ok, msgs
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--check", action="store_true")
+    ap.add_argument("--check-drift", action="store_true",
+                    help="rebuild into a temp dir and compare bytes with the package")
     ap.add_argument("--out", default=OUT)
     a = ap.parse_args(argv)
+    if a.check_drift:
+        ok, msgs = check_drift(a.out)
+        for m in msgs:
+            print("  " + m)
+        print("VERDICT: %s" % ("CONSISTENT" if ok else "DISCREPANCY"))
+        return 0 if ok else 1
     if not a.check:
         out, n = build(a.out)
         print("built %d vectors into %s" % (n, out))

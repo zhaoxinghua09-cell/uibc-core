@@ -1,0 +1,18 @@
+{
+  "description": "Same single-byte tamper on a tree of size 4, to show the rule is not size-specific.",
+  "inclusion_path": [
+    "0000000000000000000000000000000000000000000000000000000000000000",
+    "76af8410b51ffd6fe45d57b64cc0ab7b69039bd39f82350502452f856b47c53a"
+  ],
+  "leaf_entry": {
+    "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+    "digest_hex": "cce119f00cc038677f6dc844f4a9df1dae802d1155dae01369dbf855235de833",
+    "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: fail-tampered-path-small-tree :: leaf 1",
+    "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a206661696c2d74616d70657265642d706174682d736d616c6c2d74726565203a3a206c6561662031"
+  },
+  "leaf_index": 1,
+  "reconstructed_root": "969594192e4963df795c42ffe22ff11135fda576d9ff6847727722c53d763fda",
+  "result": "INVALID_INCLUSION_PATH",
+  "root_true": "61fbcf75382cd51ec0400df202d5c2453645c2edccbfecbf91bab305ade6ca35",
+  "tree_size": 4
+}

@@ -1,0 +1,21 @@
+{
+  "description": "tree_size=17, leaf_index=8: first leaf of the 1-leaf tail subtree.",
+  "inclusion_path": [
+    "3c7e60dcce7948fe8d0edc512810ad47522ce2cf459c8f8ad3a9f0d8d26fa197",
+    "3f9d1351714bffadd708e4569a90112badfc24aa29dbd9c8608838c0bb8db8b4",
+    "54cad14c988f4aaab26e8c8171d69844e5d64e2e16b96a8bee5af996c0f53bb2",
+    "b09a8f983b5d136f586a5fe6cd0bbcdc1d26cca1e0712aaae82d05e3285149f1",
+    "216859d9976b25eae4e4fe7979d7ae5d391e8ab9925192a74bb4cefbc617833f"
+  ],
+  "leaf_entry": {
+    "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+    "digest_hex": "9ca80e31f833c6c9d68c8620b586f3fe6aaa7bfaf50a892e7210c5fecffcd7bb",
+    "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: valid-tree17-index8 :: leaf 8",
+    "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a2076616c69642d7472656531372d696e64657838203a3a206c6561662038"
+  },
+  "leaf_index": 8,
+  "reconstructed_root": "32928419bef89afc2e88c955308f9c4695262c444e33e7535afd15d0d96ed918",
+  "result": "VALID",
+  "root_true": "32928419bef89afc2e88c955308f9c4695262c444e33e7535afd15d0d96ed918",
+  "tree_size": 17
+}

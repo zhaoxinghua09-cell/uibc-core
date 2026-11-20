@@ -1,0 +1,18 @@
+{
+  "description": "tree_size=6, leaf_index=4: near-right leaf of an unbalanced tree.",
+  "inclusion_path": [
+    "8ec30c78f71d9e4115ccd61beb58521d5d299b1b79078104e4a3bce5a713a5f2",
+    "9911943d66e0f8f392066e91af1c940370ca09611942d7e1b2351c9aa4b81b5e"
+  ],
+  "leaf_entry": {
+    "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+    "digest_hex": "8869aa0f0818c85e0dc7a9f5f3cafa6402c3e9214d333dea4ea029282918016e",
+    "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: valid-tree6-index4 :: leaf 4",
+    "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a2076616c69642d74726565362d696e64657834203a3a206c6561662034"
+  },
+  "leaf_index": 4,
+  "reconstructed_root": "7b822b94463ab28223b638733922fe1f73b17e8fcf51289b419bb33241f7d443",
+  "result": "VALID",
+  "root_true": "7b822b94463ab28223b638733922fe1f73b17e8fcf51289b419bb33241f7d443",
+  "tree_size": 6
+}

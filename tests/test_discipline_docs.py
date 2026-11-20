@@ -59,6 +59,14 @@ class TestInvitePageIsStillAnInvite(unittest.TestCase):
         doc = _read("INVITE-ONE-PAGE.md")
         self.assertIn("do not endorse anything", doc)
 
+    def test_it_points_at_the_harness_rather_than_asking_for_glue_code(self):
+        # The invite used to end at "run your verifier over these files", which is a
+        # request for laboour and is why the external-run axis stayed at zero.
+        doc = _read("INVITE-ONE-PAGE.md")
+        self.assertIn("conformance_harness.py", doc)
+        self.assertIn("ADAPTER-PROTOCOL.md", doc)
+        self.assertIn("wording only", doc)
+
 
 if __name__ == "__main__":
     unittest.main()

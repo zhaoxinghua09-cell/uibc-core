@@ -49,20 +49,51 @@ def our_gate(pkg, overlay=None, anchor=None):
     return {"decision": report["decision"], "exit_code": report["exit_code"]}
 
 
-def external_gate(template):
+def _strip_absent(tokens, overlay, anchor):
+    """Drop the flags for files this case does not have.
+
+    The convention is the ordinary one: `--flag {value}` (the flag token is
+    removed together with its value) or `--flag={value}` (that one token is
+    removed). Anything else - a value the command needs but the case cannot
+    supply - is refused rather than guessed, because scoring a command that
+    silently lost an argument would invent a result.
+    """
+    out = []
+    for tok in tokens:
+        missing = ("{overlay}" in tok and overlay is None) or \
+                  ("{anchor}" in tok and anchor is None)
+        if missing:
+            if tok.strip() in ("{overlay}", "{anchor}"):
+                if out and out[-1].startswith("-") and "{" not in out[-1]:
+                    out.pop()
+                continue
+            continue    # --flag={value} form: drop this token only
+        out.append(tok)
+    return out
+
+
+def external_gate(template, plain_template=None):
+    """Run somebody else's gate.
+
+    Flags for files a case does not carry are dropped by `_strip_absent`, so
+    one command serves all seven cases even when the overlay and the anchor are
+    optional flags. `plain_template` stays as an escape hatch for implementations
+    whose interface does not follow `--flag value`.
+    """
     def run(pkg, overlay=None, anchor=None):
-        cmd = template.replace("{pkg}", pkg)
-        if "{overlay}" in cmd:
-            if overlay is None:
-                return {"decision": None, "exit_code": None,
-                        "error": "case needs an overlay but the command wants one"}
+        cmd = template
+        if (overlay is None and anchor is None) and plain_template:
+            cmd = plain_template
+        cmd = cmd.replace("{pkg}", pkg)
+        if overlay is not None:
             cmd = cmd.replace("{overlay}", overlay)
-        if "{anchor}" in cmd:
-            if anchor is None:
-                return {"decision": None, "exit_code": None,
-                        "error": "case needs an anchor but the command wants one"}
+        if anchor is not None:
             cmd = cmd.replace("{anchor}", anchor)
-        proc = subprocess.run(cmd.split(), capture_output=True, text=True, timeout=120)
+        tokens = _strip_absent(cmd.split(), overlay, anchor)
+        if any("{" in t for t in tokens):
+            return {"decision": None, "exit_code": None,
+                    "error": "could not fill every placeholder: %s" % " ".join(tokens)}
+        proc = subprocess.run(tokens, capture_output=True, text=True, timeout=120)
         try:
             out = json.loads(proc.stdout)
         except json.JSONDecodeError:
@@ -89,6 +120,9 @@ def main(argv=None):
     ap.add_argument("--gate", default=None,
                     help='external gate command, e.g. "python3 my_gate.py {pkg} '
                          '--revocation {overlay} --pubkey {anchor}"; omit to test ours')
+    ap.add_argument("--gate-plain", default=None,
+                    help="the same command for cases with no overlay and no anchor, "
+                         "e.g. \"python3 my_gate.py {pkg}\".")
     ap.add_argument("--json", action="store_true")
     a = ap.parse_args(argv)
 
@@ -97,7 +131,7 @@ def main(argv=None):
               file=sys.stderr)
         return 2
     manifest = load_manifest()
-    runner = external_gate(a.gate) if a.gate else our_gate
+    runner = external_gate(a.gate, a.gate_plain) if a.gate else our_gate
     rows = []
     for case in manifest["cases"]:
         pkg = os.path.join(SUITE, case["pkg"])

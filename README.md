@@ -74,6 +74,13 @@ imports nothing from this project reproduces all 29, verifying signatures with t
 What it does **not** prove: that a second implementation of the whole receipt exists —
 it does not (see [`docs/CONFORMANCE.md`](docs/CONFORMANCE.md)).
 
+**Check what each reject case rests on**: [`docs/GROUNDS.md`](docs/GROUNDS.md) — one page,
+twenty must-reject cases, the kind of basis each has (draft-mandated / borrowed idea / our
+own choice), and the five sentences quoted verbatim, each re-found in the vendored draft by
+`python tools/check_grounds.py`. The page is generated from the data and a test fails when
+the two disagree. What it does **not** prove: that a quoted sentence is read the way its
+author intended, or that a check implements all of it.
+
 **Verify someone else's receipt, offline** — a receipt we did not issue, digested by our own code:
 
 | item | value |

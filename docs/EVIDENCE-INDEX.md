@@ -2,31 +2,31 @@
 
 每条检查对应到：验证器里的定义、覆盖它的测试、指向它的红队攻击、以及提到它的文档。**重新生成即可复核**，不会随记忆漂移。
 
-**测试套件：810 个用例**（本页由生成器现数，别处只引用本页，不再抄写这个数字）。
+**测试套件：816 个用例**（本页由生成器现数，别处只引用本页，不再抄写这个数字）。
 
 
 | 检查 | 名称 | 出厂包是否走到 | 测试 | 红队 | 文档 |
 |---|---|---|---|---|---|
 | S0 | verifier robustness | 否 | 5 | 0 | 10 |
-| S1 | package structure | 是 | 11 | 1 | 32 |
-| S2 | identity consistency | 是 | 9 | 1 | 20 |
-| S3 | lifecycle state machine + semantics | 是 | 10 | 1 | 19 |
-| S4 | evidence integrity | 是 | 21 | 3 | 41 |
-| S5 | evidence root | 是 | 12 | 3 | 33 |
-| S6 | seal signature | 是 | 21 | 1 | 36 |
-| S7 | evidence index metadata | 否 | 6 | 1 | 16 |
-| S8 | package checkpoint head | 否 | 8 | 2 | 24 |
-| S9 | head pinned out-of-band | 否 | 9 | 1 | 30 |
-| S10 | attestation closure declared | 否 | 6 | 2 | 9 |
-| S11 | strict serialization | 是 | 6 | 1 | 18 |
-| S12 | timestamp and identifier strictness | 是 | 11 | 2 | 20 |
-| S13 | merkle inclusion proofs | 否 | 9 | 4 | 12 |
-| S14 | strict base64 | 否 | 5 | 2 | 7 |
-| S15 | anchor event resolution | 否 | 7 | 4 | 12 |
-| S16 | external timestamp (RFC 3161) | 否 | 9 | 4 | 19 |
-| S17 | linear receipt chain | 否 | 7 | 2 | 16 |
-| S18 | policy artefact resolution | 否 | 9 | 2 | 15 |
-| S19 | freshness state | 否 | 4 | 1 | 11 |
+| S1 | package structure | 是 | 11 | 1 | 33 |
+| S2 | identity consistency | 是 | 9 | 1 | 21 |
+| S3 | lifecycle state machine + semantics | 是 | 10 | 1 | 20 |
+| S4 | evidence integrity | 是 | 21 | 3 | 42 |
+| S5 | evidence root | 是 | 12 | 3 | 34 |
+| S6 | seal signature | 是 | 21 | 1 | 37 |
+| S7 | evidence index metadata | 否 | 6 | 1 | 17 |
+| S8 | package checkpoint head | 否 | 8 | 2 | 25 |
+| S9 | head pinned out-of-band | 否 | 9 | 1 | 31 |
+| S10 | attestation closure declared | 否 | 6 | 2 | 10 |
+| S11 | strict serialization | 是 | 6 | 1 | 19 |
+| S12 | timestamp and identifier strictness | 是 | 11 | 2 | 21 |
+| S13 | merkle inclusion proofs | 否 | 9 | 4 | 13 |
+| S14 | strict base64 | 否 | 5 | 2 | 8 |
+| S15 | anchor event resolution | 否 | 7 | 4 | 13 |
+| S16 | external timestamp (RFC 3161) | 否 | 9 | 4 | 20 |
+| S17 | linear receipt chain | 否 | 7 | 2 | 17 |
+| S18 | policy artefact resolution | 否 | 9 | 2 | 16 |
+| S19 | freshness state | 否 | 4 | 1 | 12 |
 
 出厂包判定：`INCONCLUSIVE`，走到 8/20 项（未签名的包停在 S6，后面不越过去）。
 

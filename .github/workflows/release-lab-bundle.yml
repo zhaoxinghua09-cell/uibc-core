@@ -47,6 +47,40 @@ jobs:
           name: lab-bundle
           path: release/
 
+      # The digest list is signed only when a seed exists, and the absence is shipped
+      # as a file rather than implied. The seed is never echoed; it reaches the step
+      # through env and is not written to disk in any form the artifact could carry.
+      - name: Sign the digest list, or record that it is unsigned
+        env:
+          SEED: ${{ secrets.UIBC_RELEASE_SEED_HEX }}
+        run: |
+          if [ -n "$SEED" ]; then
+            UIBC_RELEASE_SEED_HEX="$SEED" python tools/anchor_release_digests.py sign \
+              --file release/CORPUS-DIGESTS.txt \
+              --out-dir release \
+              --note "signed by the release workflow for ${{ steps.v.outputs.tag }}"
+            python tools/anchor_release_digests.py verify --sig release/CORPUS-DIGESTS.txt.sig \
+              --file release/CORPUS-DIGESTS.txt
+          else
+            printf '%s\n' "No signing key was configured for this release (UIBC_RELEASE_SEED_HEX absent)." \
+              "The digest list below is NOT signed. Verify it by recomputing the hashes, not by a signature." \
+              > release/UNSIGNED.txt
+            echo "no seed configured: release/UNSIGNED.txt written, nothing signed"
+          fi
+
+      # Both anchors are attempted and their failures are recorded rather than retried
+      # into success. `anchor` writes ANCHORS.json with one state per output.
+      - name: Try the two external anchors
+        continue-on-error: true
+        run: |
+          python tools/anchor_release_digests.py anchor \
+            --file release/CORPUS-DIGESTS.txt \
+            --out-dir release || echo "anchor step did not complete; ANCHORS.json says so if it exists"
+
+      - name: Show the anchor states
+        run: |
+          if [ -f release/ANCHORS.json ]; then cat release/ANCHORS.json; else echo "no ANCHORS.json"; fi
+
       - name: Attach to the release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -56,3 +90,14 @@ jobs:
             "release/CORPUS-DIGESTS.txt" \
             "release/receipt.json" \
             --clobber
+          # Each optional artifact is attached only when it exists, so a missing signature
+          # shows up as a missing file plus UNSIGNED.txt, never as a silent success.
+          for f in release/CORPUS-DIGESTS.txt.sig release/anchor_freetsa.tsr \
+                   release/anchor_freetsa_ca.pem release/CORPUS-DIGESTS.txt.ots \
+                   release/ANCHORS.json release/UNSIGNED.txt; do
+            if [ -f "$f" ]; then
+              gh release upload "${{ steps.v.outputs.tag }}" "$f" --clobber
+            else
+              echo "not attached (absent): $f"
+            fi
+          done

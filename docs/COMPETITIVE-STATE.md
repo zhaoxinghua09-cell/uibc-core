@@ -148,9 +148,10 @@ their verifier: ok=True
 本轮补的是这一层里我们做得到的：`tools/release_lab_bundle.py` 在发版时把三种对照实跑一遍，产出
 `uibc-lab-bundle-<v>.json` + `receipt.json` + `CORPUS-DIGESTS.txt`，工作流在打 tag 时挂到 release。
 
-**仍然落后的一半（写清）**：我们的 `CORPUS-DIGESTS.txt` **没有签名、没有 OTS、没有 RFC 3161**。仓内已有
-`anchor_tsa.py` / `anchor_ots.py` / Rekor 三条路子，但**没有接到发版流程上**；对外部锚定这一层，他们是已做的，
-我们是可做但未做。此条记为缺口，不计入任何"对齐"。
+**仍然落后的一半（写清）**：他们的 `.sig` / `.sig.ots` / `.sig.tsr` 已经挂在已发布的 release 上；我们的
+`tools/anchor_release_digests.py` 能签能锚（Ed25519、FreeTSA、OTS），发版工作流也在打 tag 时签名并尝试两个锚，
+缺密钥时挂 `UNSIGNED.txt`——**但这条链尚未在任何已发布的 release 上实际跑过**，下一次 tag 才是第一次。
+当前状态应读作"已实现、本地实测通过、发布侧未验证"，不是"已经对齐"。
 
 ### 2026-11-20 实测（配置层）：他们写"改动怎么被决定"，我们只有一行 CODEOWNERS
 

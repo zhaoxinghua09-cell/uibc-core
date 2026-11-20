@@ -2,9 +2,11 @@
 # scitt-rfc9162 test vectors (v1)
 
 A self-contained, append-only set of **RFC 9162 SHA-256 hash-tree and
-inclusion-path** vectors: two positive and three negative, each negative
+inclusion-path** vectors: two positive, three negative, each negative
 isolating one failure (`INVALID_INCLUSION_PATH`, `INVALID_TREE_SIZE`,
-`INVALID_LEAF_INDEX`).
+`INVALID_LEAF_INDEX`), and one *ambiguity* vector
+(`VALID_BUT_SIZE_UNAUTHENTICATED`) that documents a case where the declared
+tree size is not authenticated by the root at all.
 
 > **A mismatch against your implementation is exactly the report these authors
 > want.** Agreement on *rejection* is as load-bearing as agreement on
@@ -44,6 +46,18 @@ The two roots are the whole test: **for `VALID` vectors they must be equal;
 for the three `fail-*` vectors they must differ.** For the negative vectors
 `reconstructed_root` is computed from the tampered material, not asserted
 by hand.
+
+### The ambiguity vector, stated plainly
+
+`v1/ambiguous-tree-size` is `tree_size=7, leaf_index=5`. Folding the recorded
+path with `tree_size=8` (its `alt_tree_size`) consumes the same three siblings
+and yields **the same root**, so a verifier that trusts the declared size
+accepts both. This is a property of the algorithm as written, reported on the
+SCITT list on 2026-11-15 and raised as an erratum to RFC 9942 Section 5.2.1;
+it is not a defect in these vectors. A relying party that needs the log size
+must take it from signed data (a signed tree head, or an anchor whose signed
+payload carries both root and size). **This set does not claim that any
+particular deployment binds it.**
 
 ## One-command verify
 

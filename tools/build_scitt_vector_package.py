@@ -207,7 +207,8 @@ def verify(out=OUT):
             ok = False
             msgs.append("%s: recorded reconstructed_root is not reproducible" % v["id"])
         same = rec_hex == exp["root_true"]
-        if (exp["result"] == "VALID") != same:
+        is_valid = exp["result"].startswith("VALID")
+        if is_valid != same:
             ok = False
             msgs.append("%s: result %s but root comparison says %s"
                         % (v["id"], exp["result"], "equal" if same else "differ"))

@@ -1,0 +1,22 @@
+{
+  "entries": [
+    {
+      "evidence_id": "94c3ef80-90c8-4083-b7a5-ccb6fdfcb9b2",
+      "type": "ACTION",
+      "path": "files/a.txt",
+      "content_hash": "b6a98d9ce9a2d9149288fa3df42d377c3e42737afdcdaf714e33c0a100b51060",
+      "created_at": "2026-11-20T06:29:11Z",
+      "media_type": "text/plain",
+      "note": ""
+    },
+    {
+      "evidence_id": "73e3ed5b-aa76-41d2-ad72-68a7faa7c5f0",
+      "type": "ACTION",
+      "path": "files/b.txt",
+      "content_hash": "f2c82decdd7181cf98945929a62598db7e6b477e11f6e0eb0ae97020eff151ad",
+      "created_at": "2026-11-20T06:29:12Z",
+      "media_type": "text/plain",
+      "note": ""
+    }
+  ]
+}

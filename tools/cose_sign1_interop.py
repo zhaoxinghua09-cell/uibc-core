@@ -32,35 +32,48 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
 from uibc_core import signing as us  # noqa: E402
+from uibc_core import ed25519 as _ed  # noqa: E402
 
+# ---- 后端选择：有 cbor2+pycose 就走参考库；没有就走零依赖垫片 ----------------
+# 2026-11-20 外人实跑在这里 rc=1（ModuleNotFoundError: cbor2）。对外可复跑的前提是
+# "不装任何第三方包也能跑"，所以缺库不再是失败，而是切到 tools/_mini_cose.py。
 try:
+    import cbor2
     from cbor2 import CBORTag
-except Exception:  # pragma: no cover
-    CBORTag = None
-from cryptography.hazmat.primitives.asymmetric.ed25519 import (
-    Ed25519PrivateKey, Ed25519PublicKey, )
+    from pycose.keys.curves import Ed25519
+    from pycose.keys.okp import OKPKey
+    from pycose.messages import Sign1Message
+    BACKEND = "pycose"
+except Exception:  # ImportError 或库自身初始化失败
+    sys.path.insert(0, os.path.join(ROOT, "tools"))
+    import _mini_cose as cbor2
+    from _mini_cose import CBORTag, Ed25519, OKPKey, Sign1Message
+    BACKEND = "mini-cose(零依赖)"
 
 
 def ed25519_sign(seed: bytes, msg: bytes) -> bytes:
     """Raw Ed25519 sign with a 32-byte seed, no COSE library in the way."""
-    return Ed25519PrivateKey.from_private_bytes(seed).sign(msg)
+    return _ed.sign(seed, msg)
 
 
 def ed25519_verify(pub: bytes, msg: bytes, sig: bytes) -> bool:
     try:
-        Ed25519PublicKey.from_public_bytes(pub).verify(sig, msg)
-        return True
+        return bool(_ed.verify(pub, msg, sig))
     except Exception:
         return False
 
 
-RESULTS = {"meta": {"generated_at_utc": None, "uibc_core": ROOT, "probe": "scitt-cose-sign1"},
+RESULTS = {"meta": {"generated_at_utc": None, "uibc_core": ROOT, "probe": "scitt-cose-sign1",
+                    "backend": BACKEND},
            "tests": []}
 
 
-def rec(name, ok, detail, extra=None):
-    RESULTS["tests"].append({"name": name, "pass": bool(ok), "detail": detail, **(extra or {})})
-    print(("[PASS] " if ok else "[FAIL] ") + name + " :: " + detail)
+def rec(name, ok, detail, extra=None, status=None):
+    st = status or ("pass" if ok else "fail")
+    RESULTS["tests"].append({"name": name, "pass": (st == "pass"), "status": st,
+                             "detail": detail, **(extra or {})})
+    tag = {"pass": "[PASS] ", "fail": "[FAIL] ", "skip": "[SKIP] ", "na": "[N/A ] "}.get(st, "[?] ")
+    print(tag + name + " :: " + detail)
 
 
 def _thaw(o):
@@ -82,11 +95,7 @@ def main():
     ap.add_argument("--json", default=os.path.join(ROOT, "tools", "out", "cose_sign1_result.json"))
     a = ap.parse_args()
 
-    import cbor2
-    from pycose.keys.curves import Ed25519
-    from pycose.keys.okp import OKPKey
-    from pycose.messages import Sign1Message
-
+    # cbor2 / pycose 的符号已在模块顶部按后端选好（有库用库，无库用 _mini_cose）
     identity = {"agent_id": "scitt-bridge-agent", "owner": "medxpert", "agent_type": "software-agent"}
     manifest = {"evidence_root": hashlib.sha256(b"scitt-bridge-evidence").hexdigest(),
                 "type": "seal", "version": "0.3"}
@@ -190,7 +199,7 @@ def main():
     # The honest half: the reference Python COSE library cannot decode -19 even
     # after you register the attribute, which is exactly why "aligned to -19"
     # is a claim about our code, not about the ecosystem's readiness.
-    if env19 is not None:
+    if env19 is not None and BACKEND == "pycose":
         try:
             _decode(env19, Sign1Message, cbor2)
             rec("C9_LIB_GAP", False,
@@ -199,11 +208,18 @@ def main():
             rec("C9_LIB_GAP", True,
                 "pycose 1.1.0 拒绝 alg=-19（%s）→ -19 仍走在库配套之前：对外只能说"
                 "“我们的信封支持 -19”，不能宣称“生态已通用 -19”" % type(e).__name__)
+    elif env19 is not None:
+        rec("C9_LIB_GAP", False,
+            "pycose 未安装，本机无法复核“参考库拒绝 -19”的库缺口；本条不计入通过数。"
+            "零依赖路径只证明我们自己的 C2/C3/C5/C8 可用，不替生态表态",
+            status="na")
 
     _dump(a.json)
-    n_pass = sum(1 for t in RESULTS["tests"] if t["pass"])
-    print("\n=== %d/%d PASS ===" % (n_pass, len(RESULTS["tests"])))
-    return 0 if n_pass == len(RESULTS["tests"]) else 1
+    fails = [t for t in RESULTS["tests"] if t.get("status") == "fail"]
+    n_pass = sum(1 for t in RESULTS["tests"] if t.get("status") == "pass")
+    print("\n=== backend=%s  %d PASS / %d FAIL / %d 条 n.a. ===" % (
+        BACKEND, n_pass, len(fails), sum(1 for t in RESULTS["tests"] if t.get("status") == "na")))
+    return 0 if not fails else 1
 
 
 def _dump(path):

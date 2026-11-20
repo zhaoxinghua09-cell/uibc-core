@@ -82,6 +82,29 @@ ALTERNATES = {
         "https://raw.githubusercontent.com/ethereum/ERCs/master/ERCS/erc-8004.md",
 }
 
+# 有些站点对脚本一律拒绝：ISO 对无浏览器指纹的请求返回 403，imdrf.org 整站在本网络
+# 无响应（连首页都超时），modernrequirements.com 由 Cloudflare 拦截。这些不是"死链"，
+# 而是"本网络不可自动复核"。写材料时按类处理：付费标准只给标准号；IMDRF 随附 PDF；
+# 厂商页换成能直取的落地页。分类落进结果文件，避免下次再把它们当"忘了修"。
+NOTES = {
+    "https://www.iso.org/standard/88723.html":
+        "付费标准（ISO/IEC 24970）：站点对脚本一律 403。材料里只写标准号+名称，不挂链接，或标“需浏览器访问”。",
+    "https://www.imdrf.org/sites/default/files/2026-08/IMDRF%20SaMD%20WG%20N90%20FINAL%20Essential%20Principles%20and%20Content%20PCCPs%20(1).pdf":
+        "imdrf.org 整站在本网络无响应（首页也超时）。材料引用必须随附 PDF 文件，不让读者依赖该站可达性。",
+    "https://www.modernrequirements.com/fr-ca/med-tech/":
+        "厂商页被 Cloudflare 拦截（无浏览器指纹一律 403）。该类引用只作“存在此能力”的旁证，主张由监管文本支撑。",
+}
+
+
+def classify(r):
+    if r.get("ok") and r.get("satisfied_by"):
+        return "mirror"          # 主链接不通，但同源镜像 200
+    if r.get("ok"):
+        return "direct"
+    if r.get("status") in (401, 403, 429):
+        return "blocked"          # 站点反爬，非死链
+    return "unreachable"          # 连接/读取超时，站点或网络不可达
+
 
 def check(url, timeout=25, retries=2):
     req = urllib.request.Request(url, headers={
@@ -130,12 +153,19 @@ def main():
             if a["ok"]:
                 r["ok"] = True
                 r["satisfied_by"] = alt
-        rows.append({"name": name, "url": url, **r})
+        rows.append({"name": name, "url": url, "cite_class": classify(r), **r})
         print("%-34s %-5s %s" % (name, r["status"], r.get("error", "")))
     ok = sum(1 for r in rows if r["ok"])
+    blocked = [{"name": r["name"], "url": r["url"], "status": r.get("status"),
+                "error": r.get("error"), "note": NOTES.get(r["url"], "")}
+               for r in rows if not r["ok"]]
     doc = {"meta": {"generated_at_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ",
                                                      time.gmtime()),
-                    "checked": len(rows), "reachable": ok},
+                    "checked": len(rows), "reachable": ok,
+                    "blocked": sum(1 for r in rows if not r["ok"] and r["cite_class"] == "blocked"),
+                    "unreachable": sum(1 for r in rows if r["cite_class"] == "unreachable"),
+                    "mirrored": sum(1 for r in rows if r["cite_class"] == "mirror"),
+                    "blocked_detail": blocked},
            "rows": rows}
     os.makedirs(OUT, exist_ok=True)
     p = os.path.join(OUT, "citations_result.json")

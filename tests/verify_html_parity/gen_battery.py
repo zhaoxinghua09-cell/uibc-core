@@ -225,6 +225,17 @@ anchor = {"id": "anchor-001", "version": 1, "leaf_hash": leaves[1].hex(),
           "size": len(leaves), "index": 1, "proof": MK.build_proof(leaves, 1)}
 save(d, "evidence/anchors.json", {"resolver": "evidence-merkle", "anchors": [anchor]})
 run("case20", d)
+# 21 invalid UTF-8 bytes embedded inside a string value. After a UTF-8 decode
+# they become replacement chars and the JSON still parses, so the only thing
+# that refuses the package is the byte-level UTF-8 scan; the verifier must
+# short-circuit at S11 instead of letting later checks judge non-JSON bytes.
+d = cp(DEMO, "case21")
+mp = os.path.join(d, "manifest.json")
+_raw = open(mp, "rb").read().decode("utf-8")
+_raw = _raw.replace('"status": "SUBMITTED"',
+                    '"status": "SUB\xff\xfeITTED"')
+open(mp, "wb").write(_raw.encode("latin-1"))
+run("case21", d)
 
 json.dump(truth, open(os.path.join(os.getcwd(), "truth.json"), "w"), indent=1)
 print("cases:", len(truth))

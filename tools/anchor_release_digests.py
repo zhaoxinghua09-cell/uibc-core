@@ -135,9 +135,13 @@ def _detail_line(text):
     if "=" in line:
         key, value = line.split("=", 1)
         value = value.strip()
-        # Windows drive path or POSIX absolute path: publish the name only.
+        # Windows drive path or POSIX absolute path: publish the name only. Both
+        # separators are normalised before the basename, because a Windows path handed
+        # to a POSIX `basename` comes back whole — measured in CI on 2026-11-20, where
+        # the test for a Windows path failed on Linux for exactly that reason.
         if value.startswith("/") or (len(value) > 2 and value[1] == ":" and value[2] in "\\/"):
-            line = "%s=%s" % (key, os.path.basename(value))
+            name = value.replace("\\", "/").rstrip("/").rsplit("/", 1)[-1]
+            line = "%s=%s" % (key, name)
     return line[:200]
 
 

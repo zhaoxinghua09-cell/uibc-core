@@ -32,6 +32,18 @@ Usage
 Exit codes: 0 the proof folds to the proof's root and that root equals the
 checkpoint's root line; 1 it does not; 2 the entry could not be read or carries
 no inclusion proof.
+
+Consistency (a different question)
+----------------------------------
+    python tools/verify_rekor_inclusion.py --consistency --from receipt.json
+
+Inclusion at one size does not show that the earlier tree is a prefix of the
+later one. `--consistency` takes an earlier head (a receipt from this tool, or a
+checkpoint text), asks the log for the consistency proof between that size and
+the current head, and folds it with the RFC 6962 algorithm ported from
+transparency-dev/merkle `proof/verify.go`. Both checkpoints' signatures are
+verified. Heads from different origins (different tree ids) are not compared:
+a consistency proof across a shard boundary is not a claim this tool makes.
 """
 from __future__ import annotations
 
@@ -45,6 +57,8 @@ import urllib.request
 ENTRY_BY_UUID = "https://rekor.sigstore.dev/api/v1/log/entries/%s"
 ENTRY_BY_INDEX = "https://rekor.sigstore.dev/api/v1/log/entries?logIndex=%d"
 LOG_PUBLIC_KEY = "https://rekor.sigstore.dev/api/v1/log/publicKey"
+LOG_META = "https://rekor.sigstore.dev/api/v1/log"
+LOG_PROOF = "https://rekor.sigstore.dev/api/v1/log/proof?firstSize=%d&lastSize=%d"
 
 
 def fetch(url: str) -> dict:
@@ -157,6 +171,144 @@ def verify_checkpoint_signature(checkpoint: str, key_pem: bytes) -> dict:
             "curve": key.curve.name, "signers": results}
 
 
+# --- consistency between two tree sizes --------------------------------------
+# Ported from transparency-dev/merkle proof/verify.go (Go, Apache-2.0), the
+# implementation behind the RFC 6962 consistency proof. Inclusion at one size
+# says nothing about an earlier tree being a prefix of it; a consistency proof
+# does, and Rekor serves one at /api/v1/log/proof?firstSize=&lastSize=.
+
+def _popcount(x: int) -> int:
+    return bin(x).count("1")
+
+
+def _tz(x: int) -> int:
+    """Trailing zero bits; x must be positive."""
+    return (x & -x).bit_length() - 1
+
+
+def _chain_inner(seed: bytes, proof: list[bytes], index: int) -> bytes:
+    for i, h in enumerate(proof):
+        seed = node_hash(seed, h) if (index >> i) & 1 == 0 else node_hash(h, seed)
+    return seed
+
+
+def _chain_inner_right(seed: bytes, proof: list[bytes], index: int) -> bytes:
+    for i, h in enumerate(proof):
+        if (index >> i) & 1 == 1:
+            seed = node_hash(h, seed)
+    return seed
+
+
+def _chain_border_right(seed: bytes, proof: list[bytes]) -> bytes:
+    for h in proof:
+        seed = node_hash(h, seed)
+    return seed
+
+
+def _decomp_incl_proof(index: int, size: int) -> tuple[int, int]:
+    inner = (index ^ (size - 1)).bit_length()
+    return inner, _popcount(index >> inner)
+
+
+def _decomp_subtree_proof(start: int, end: int, size: int, border: int,
+                          proof: list[bytes]) -> tuple[list[bytes], list[bytes]]:
+    h = ((end - 1) ^ start).bit_length()
+    fork_level = ((end - 1) ^ (size - 1)).bit_length()
+    shift = _tz(end - start)
+    sub_inner = min(h, fork_level) - shift
+    inner = fork_level - shift
+    sub_border = max(0, border - _popcount((end - 1) >> h))
+    return proof[0:sub_inner], proof[inner:inner + sub_border]
+
+
+def _root_from_subtree_consistency(start: int, end: int, size: int,
+                                   proof: list[bytes], sub_root: bytes) -> bytes:
+    if end == size:
+        level = ((end - 1) ^ start).bit_length()
+        index = start >> level
+        want = _popcount(index)
+        if len(proof) != want:
+            raise ValueError("wrong proof size %d, want %d" % (len(proof), want))
+        return _chain_border_right(sub_root, proof)
+
+    fork_level, border = _decomp_incl_proof(end - 1, size)
+    shift = _tz(end - start)
+    inner = fork_level - shift
+
+    seed, p_start = proof[0], 1
+    if (end - start) == 1 << shift:
+        seed, p_start = sub_root, 0
+    if len(proof) != p_start + inner + border:
+        raise ValueError("wrong proof size %d, want %d"
+                         % (len(proof), p_start + inner + border))
+    proof = proof[p_start:]
+    mask = (end - 1) >> shift
+
+    if p_start == 1:
+        sub_inner, sub_border = _decomp_subtree_proof(start, end, size, border, proof)
+        hash1 = _chain_inner_right(seed, sub_inner, mask)
+        hash1 = _chain_border_right(hash1, sub_border)
+        if hash1 != sub_root:
+            raise ValueError("the proof does not chain to the earlier root")
+
+    hash2 = _chain_inner(seed, proof[:inner], mask)
+    return _chain_border_right(hash2, proof[inner:])
+
+
+def root_from_consistency_proof(size1: int, size2: int, proof: list[bytes],
+                                root1: bytes) -> bytes:
+    """The root the second tree must have, given the first tree's root and a proof."""
+    if size2 < size1:
+        raise ValueError("size2 (%d) < size1 (%d)" % (size2, size1))
+    if size1 == 0:
+        raise ValueError("a consistency proof from an empty tree is meaningless")
+    if size1 == size2:
+        if proof:
+            raise ValueError("size1=size2, but the proof is not empty")
+        return root1
+    if not proof:
+        raise ValueError("empty proof")
+    return _root_from_subtree_consistency(0, size1, size2, proof, root1)
+
+
+def consistency_check(first_size: int, first_root_hex: str, first_checkpoint: str,
+                      second_checkpoint: str, proof_hex: list[str],
+                      key_pem: bytes | None = None) -> dict:
+    """Verify that the earlier tree is a prefix of the later one, signatures included."""
+    proof = [bytes.fromhex(h) for h in proof_hex]
+    origin2, size2, root2 = checkpoint_root(second_checkpoint)
+    out = {
+        "first_size": first_size, "second_size": size2,
+        "first_root": first_root_hex, "second_root": root2,
+        "proof_nodes": len(proof),
+        "origins": {"first": checkpoint_root(first_checkpoint)[0] if first_checkpoint else None,
+                    "second": origin2},
+    }
+    out["same_origin"] = (out["origins"]["first"] == origin2) if first_checkpoint else None
+    try:
+        folded = root_from_consistency_proof(first_size, size2, proof,
+                                             bytes.fromhex(first_root_hex)).hex()
+        out["folded_root"] = folded
+        out["folded_equals_second_root"] = folded == root2
+    except ValueError as exc:
+        out["folded_root"] = None
+        out["folded_equals_second_root"] = False
+        out["why_not"] = str(exc)
+
+    sig2 = verify_checkpoint_signature(second_checkpoint, key_pem) if key_pem else {"verified": None}
+    out["second_checkpoint_signature"] = sig2.get("verified")
+    if first_checkpoint and key_pem:
+        out["first_checkpoint_signature"] = verify_checkpoint_signature(
+            first_checkpoint, key_pem).get("verified")
+    else:
+        out["first_checkpoint_signature"] = None
+
+    out["verified"] = bool(out["folded_equals_second_root"]
+                           and sig2.get("verified") is not False
+                           and out["same_origin"] is not False)
+    return out
+
+
 def check_entry(entry: dict, key_pem: bytes | None = None) -> dict:
     body = base64.b64decode(entry["body"])
     proof = entry["verification"]["inclusionProof"]
@@ -184,6 +336,7 @@ def check_entry(entry: dict, key_pem: bytes | None = None) -> dict:
     if checkpoint:
         origin, size, root_hex = checkpoint_root(checkpoint)
         out["checkpoint"] = {"origin": origin, "tree_size": size, "root": root_hex,
+                             "text": checkpoint,
                              "root_equals_proof_root": root_hex == proof["rootHash"]}
         if key_pem:
             sig = verify_checkpoint_signature(checkpoint, key_pem)
@@ -205,7 +358,6 @@ def check_entry(entry: dict, key_pem: bytes | None = None) -> dict:
 
 
 def load_log_key(path: str = "") -> bytes | None:
-    """The log's public key: from a local PEM file, else from the log, else None."""
     if path:
         with open(path, "rb") as fh:
             return fh.read()
@@ -216,12 +368,57 @@ def load_log_key(path: str = "") -> bytes | None:
         return None
 
 
+def load_checkpoint_file(path: str) -> str:
+    """A checkpoint from a file: a receipt JSON (its checkpoint.text) or bare text."""
+    raw = open(path, encoding="utf-8").read()
+    if raw.lstrip().startswith("{"):
+        data = json.loads(raw)
+        for key in ("checkpoint_text", "text"):
+            if key in data:
+                return data[key]
+        if isinstance(data.get("checkpoint"), dict) and "text" in data["checkpoint"]:
+            return data["checkpoint"]["text"]
+        raise ValueError("%s is JSON but carries no checkpoint text" % path)
+    return raw
+
+
+def live_tree_head() -> str:
+    """/api/v1/log serves the active tree's signed checkpoint; that is our second head."""
+    meta = fetch(LOG_META)
+    return meta["signedTreeHead"]
+
+
+def consistency_mode(from_file: str, to_file: str, key_pem: bytes | None) -> int:
+    first = load_checkpoint_file(from_file)
+    second = load_checkpoint_file(to_file) if to_file else live_tree_head()
+    origin1, size1, root1 = checkpoint_root(first)
+    _, size2, _ = checkpoint_root(second)
+    if size2 < size1:
+        print("the 'to' checkpoint is older than the 'from' checkpoint (%d < %d)"
+              % (size2, size1), file=sys.stderr)
+        return 2
+    proof = fetch(LOG_PROOF % (size1, size2))["hashes"]
+    receipt = consistency_check(size1, root1, first, second, proof, key_pem)
+    print(json.dumps(receipt, indent=2, sort_keys=True))
+    print("consistency=%s  %d -> %d  signature=%s  same_origin=%s"
+          % (receipt["verified"], size1, size2,
+             receipt["second_checkpoint_signature"], receipt["same_origin"]),
+          file=sys.stderr)
+    return 0 if receipt["verified"] else 1
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     g = ap.add_mutually_exclusive_group(required=True)
     g.add_argument("--uuid")
     g.add_argument("--log-index", type=int)
     g.add_argument("--file")
+    g.add_argument("--consistency", action="store_true",
+                   help="verify that an earlier tree is a prefix of a later one")
+    ap.add_argument("--from", dest="from_file", default="",
+                    help="receipt JSON or checkpoint text for the earlier head")
+    ap.add_argument("--to", dest="to_file", default="",
+                    help="checkpoint text for the later head (default: the live signed tree head)")
     ap.add_argument("--out", default="")
     ap.add_argument("--log-key", default="",
                     help="PEM file for the log's public key (offline use); "
@@ -229,6 +426,17 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--no-signature", action="store_true",
                     help="skip checkpoint signature verification (root comparison only)")
     args = ap.parse_args(argv)
+
+    if args.consistency:
+        if not args.from_file:
+            print("--consistency needs --from (a receipt JSON or a checkpoint file)", file=sys.stderr)
+            return 2
+        key = None if args.no_signature else load_log_key(args.log_key)
+        try:
+            return consistency_mode(args.from_file, args.to_file, key)
+        except Exception as exc:  # noqa: BLE001 - could not read is exit 2, not a verdict
+            print("could not check consistency: %s" % exc, file=sys.stderr)
+            return 2
 
     try:
         if args.file:

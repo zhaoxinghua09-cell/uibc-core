@@ -217,7 +217,9 @@ UIBC Core 参考实现 v0.3.3 —— Agent 生命周期证据包与验证器：�
 > 叶子应为 `SHA-256(0x00 ‖ body 原始字节)`（我们曾把 body 先哈希一次再套前缀），且必须用
 > `inclusionProof.logIndex` 折叠（条目里的 `logIndex` 是另一个数，见 `tools/verify_rekor_inclusion.py`）。
 > 复跑：`pip install "uibc-core[verify]"` 后 `python tools/verify_rekor_inclusion.py --log-index 2883389783`（连 checkpoint 签名一起验：ECDSA P-256，
-> 对三行文本、key id `c0d23d6a`；缺 `cryptography` 时报 `signature_verified: null`，不会假装验过）。全过程与两条错误的由来见
+> 对三行文本、key id `c0d23d6a`；缺 `cryptography` 时报 `signature_verified: null`，不会假装验过）。
+> 跨树规模的一致性也用同一工具验：`python tools/verify_rekor_inclusion.py --consistency --from <回执.json>`
+> （回执自带 checkpoint 文本，折叠算法移植 `transparency-dev/merkle` 的 `proof/verify.go`，两个树头签名都验）。全过程与两条错误的由来见
 > [`docs/REKOR-INCLUSION-2026-11-21.md`](docs/REKOR-INCLUSION-2026-11-21.md)。
 > Zenodo **概念 DOI** `10.5281/zenodo.22456647` 属 LGD 理论本体；**本包 0.3.0 的单独 DOI 尚未分配**（存缴包已备，需本人登录上传）。
 > Software Heritage SWHID 见 `CITATION.cff`。

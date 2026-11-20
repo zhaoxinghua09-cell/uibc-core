@@ -254,7 +254,8 @@ function verify(pkg, opts = {}) {
       }
     }
         s11Unparseable = problems.some((x) =>
-          x.includes("not parseable JSON") || x.includes("nested deeper than"));
+          x.includes("not parseable JSON") || x.includes("nested deeper than") ||
+          x.includes("not valid UTF-8"));
     note("S11", "strict serialization", problems.length === 0, problems.slice(0, 4).join("; ") || "ok");
   }
   if (s11Unparseable) {

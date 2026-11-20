@@ -226,3 +226,21 @@ def test_a_rewritten_tree_size_breaks_the_signature(mod, log_key):
     out = mod.check_entry(entry, pem)
     assert out["checkpoint"]["signature_verified"] is False
     assert out["verified"] is False
+
+
+def test_missing_cryptography_is_reported_not_crashed(mod, log_key, monkeypatch):
+    """The core is stdlib-only; a stranger without the extra must get a sentence."""
+    import sys
+    key, pem = log_key
+    entry = make_entry(BODIES, 3)
+    proof = entry["verification"]["inclusionProof"]
+    proof["checkpoint"] = signed_checkpoint(
+        key, "rekor.sigstore.dev - 1", len(BODIES), base64.b64encode(bytes.fromhex(proof["rootHash"])).decode())
+    # A None in sys.modules is Python's own "this package cannot be imported" marker.
+    # Every cached submodule has to go too, or the import resolves from the cache.
+    for name in [n for n in list(sys.modules) if n == "cryptography" or n.startswith("cryptography.")]:
+        monkeypatch.delitem(sys.modules, name)
+    monkeypatch.setitem(sys.modules, "cryptography", None)
+    out = mod.check_entry(entry, pem)
+    assert out["checkpoint"]["signature_verified"] is None
+    assert "uibc-core[verify]" in out["checkpoint"]["signature"]["why"]

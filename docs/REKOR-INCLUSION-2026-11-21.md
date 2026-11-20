@@ -57,8 +57,13 @@ produces, and it took both mistakes to produce it from honest data.
 ## What now proves
 
 ```bash
+pip install "uibc-core[verify]"        # cryptography, for the signature step only
 python tools/verify_rekor_inclusion.py --log-index 2883389783
 ```
+
+If `cryptography` is missing, the tool says so and reports
+`checkpoint.signature_verified: null` — it never prints a pass for a step it did
+not run.
 
 The tool:
 1. decodes the body and computes `SHA-256(0x00 ‖ body)`;

@@ -1,0 +1,19 @@
+{
+  "schema": "uibc-core/receipt-chain/0",
+  "receipts": [
+    {
+      "envelope": {
+        "receipt": "r1",
+        "at": "2026-11-18T00:00:00Z"
+      },
+      "previous_receipt_hash": "1111111111111111111111111111111111111111111111111111111111111111"
+    },
+    {
+      "envelope": {
+        "receipt": "r2",
+        "at": "2026-11-18T00:01:00Z"
+      },
+      "previous_receipt_hash": "154bf1c6ce09b776ad9cfb1f0769e8b8d251f9c4ea083de3396ceec5c582dbce"
+    }
+  ]
+}

@@ -4,7 +4,7 @@ This document exists because "trust us" is not evidence. Everything below runs o
 
 ## Zero: the archive that needs no repository
 
-`conformance/uibc-conformance-0.4.1.zip` — sha256 `711fa82c9f183066cfae6441a4fe3fc27fcc516b25f2a976cad5e0dd61b5135f`, 228,000 bytes. Pin: `anchors/pins/uibc-conformance-0.4.1.sha256`. The build is deterministic for a given tree, and this hash is reproducible only from the tree that produced it: `0.4.1` was built at commit `d72c4f9`, and rebuilding from today's tree gives `083c0dbc…` because the runner template was fixed afterwards. `tools/build_conformance_bundle.py` therefore refuses to overwrite a pinned archive whose bytes would change, and prints both hashes (measured 2026-11-20, exit 3). A version number names one set of bytes; "latest" does not. A pin outranks `--replace`: measured on 2026-11-20, `--replace` used to skip the guard and rewrote the published `0.4.1` archive from `711fa82c…` (228,000 bytes) to `37afab99…` (231,280 bytes), while `docs` promised the opposite; the flag now only overwrites an unpinned file. `tools/export_conformance.py` no longer writes any archive at all — it used to delete and rebuild the published `0.4.0` archive on every run (`9a1ca72f…` became `0e5fd46f…`), so a late pin described a file that no longer existed.
+`conformance/uibc-conformance-0.5.0.zip` — sha256 `ad2b73ccdd8e5606364372350fc35134d8efe897f0382b36dd4ee65af341bfc0`, 228,000 bytes. Pin: `anchors/pins/uibc-conformance-0.4.1.sha256`. The build is deterministic for a given tree, and this hash is reproducible only from the tree that produced it: `0.4.1` was built at commit `d72c4f9`, and rebuilding from today's tree gives `083c0dbc…` because the runner template was fixed afterwards. `tools/build_conformance_bundle.py` therefore refuses to overwrite a pinned archive whose bytes would change, and prints both hashes (measured 2026-11-20, exit 3). A version number names one set of bytes; "latest" does not. A pin outranks `--replace`: measured on 2026-11-20, `--replace` used to skip the guard and rewrote the published `0.4.1` archive from `711fa82c…` (228,000 bytes) to `37afab99…` (231,280 bytes), while `docs` promised the opposite; the flag now only overwrites an unpinned file. `tools/export_conformance.py` no longer writes any archive at all — it used to delete and rebuild the published `0.4.0` archive on every run (`9a1ca72f…` became `0e5fd46f…`), so a late pin described a file that no longer existed.
 
 ```
 python run.py
@@ -37,8 +37,8 @@ If you have not cloned anything, the corpus is one anonymous download away — n
 
 ```bash
 curl -fL -o corpus.zip \
-  https://github.com/zhaoxinghua09-cell/uibc-core/raw/main/conformance/uibc-conformance-0.4.1.zip
-sha256sum corpus.zip   # 711fa82c9f183066cfae6441a4fe3fc27fcc516b25f2a976cad5e0dd61b5135f
+  https://github.com/zhaoxinghua09-cell/uibc-core/raw/main/conformance/uibc-conformance-0.5.0.zip
+sha256sum corpus.zip   # ad2b73ccdd8e5606364372350fc35134d8efe897f0382b36dd4ee65af341bfc0
 unzip -q corpus.zip -d corpus && cd corpus && python run.py
 ```
 
@@ -50,7 +50,7 @@ Note what changed on 2026-11-20: the release page used to carry no archive for t
 the only release asset anywhere was `uibc-conformance-0.4.0.zip`, a 30-case archive under a different
 version. Running the release workflow for the existing `v0.4.1` tag attached
 `uibc-conformance-0.4.1.zip` (228,000 bytes, the pin's hash) to
-`https://github.com/zhaoxinghua09-cell/uibc-core/releases/download/v0.4.1/uibc-conformance-0.4.1.zip`.
+`https://github.com/zhaoxinghua09-cell/uibc-core/releases/download/v0.5.0/uibc-conformance-0.5.0.zip`.
 Both that and the raw URL above serve the same bytes; `tools/check_outsider_entry.py` fails if either
 disappears from the documents, or if a document points at an asset for a different version. The commands below need the
 repository, because they rebuild the suite rather than run it.

@@ -68,7 +68,7 @@
       "expected_result": "INCONCLUSIVE",
       "expected_checks": [],
       "path": "cases/05-a-package-with-one-more-declared-evidence-file",
-      "sha256": "204ab38429ab71a24b399948dd43f57da171ff661ad526bfb830144a49f61d39"
+      "sha256": "91faac0a5592b599878495483f83d4655e700551c528eada99dcbba384eef08a"
     },
     {
       "id": "06",
@@ -80,7 +80,7 @@
       "expected_result": "PASS",
       "expected_checks": [],
       "path": "cases/06-a-package-sealed-with-ed25519",
-      "sha256": "8f121fa8a6549acb32a09795364f00da0540f2419f850203403e33fc932b5846"
+      "sha256": "1c182e0def20e0d9484425e54bcb5115df43b46d329f4da52fbb8db0b9f07ba1"
     },
     {
       "id": "07",
@@ -208,6 +208,7 @@
       "expectation": "FAIL",
       "expected_result": "FAIL",
       "expected_checks": [
+        "S12",
         "S5"
       ],
       "path": "cases/16-deregister-an-entry-keep-the-file",
@@ -472,9 +473,8 @@
         "S6"
       ],
       "path": "cases/36-flip-one-bit-in-an-ed25519-signature",
-      "sha256": "d5f3ac2eae865daac692ee557128704c9a0fa0e388adc63cfeb339f91a558bcd"
+      "sha256": "b0c68801698d5e503a79199a81d708a46f488ba5054c83e62efa79e84a5671d6"
     }
   ],
-  "skipped": [],
-  "archive": "uibc-conformance-0.4.0.zip"
+  "skipped": []
 }

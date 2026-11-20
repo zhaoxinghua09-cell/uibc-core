@@ -63,7 +63,25 @@ def pin_path(version):
 
 
 def read_cases():
-    """Cases live inside the previous archive in the repo; read them from there."""
+    """The cases are files under `conformance/cases`, written by the exporter.
+
+    They used to live only inside `uibc-conformance-0.4.0.zip`, which made the
+    exporter the writer of a published asset (measured 2026-11-20). With the files
+    committed, the archive is a build product of a directory, and nothing has to
+    overwrite a release to refresh them. The zip is still read as a fallback so an
+    old tree can build.
+    """
+    cases_dir = os.path.join(CONF, "cases")
+    if os.path.isdir(cases_dir):
+        out = {}
+        for root, dirs, files in os.walk(cases_dir):
+            dirs.sort()
+            for name in sorted(files):
+                full = os.path.join(root, name)
+                rel = os.path.relpath(full, CONF).replace("\\", "/")
+                with io.open(full, "rb") as handle:
+                    out[rel] = handle.read()
+        return out
     src_zip = os.path.join(CONF, "uibc-conformance-0.4.0.zip")
     out = {}
     with zipfile.ZipFile(src_zip) as z:

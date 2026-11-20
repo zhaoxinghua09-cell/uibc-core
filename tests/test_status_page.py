@@ -11,9 +11,17 @@ import status_page as sp  # noqa: E402
 def test_the_facts_come_from_the_repository_not_from_prose():
     f, missing = sp.facts(REPO)
     assert missing == []
-    assert f["version"] == "0.4.1"
+    import re
+    declared = re.search(r'version *= *"([^"]+)"',
+                         open(os.path.join(REPO, "pyproject.toml"), encoding="utf-8").read()).group(1)
+    assert f["version"] == declared
     assert len(f["archive_sha256"]) == 64
-    assert f["archive_bytes"] == 228000
+    declared = re.search(r'version *= *"([^"]+)"',
+                         open(os.path.join(REPO, "pyproject.toml"), encoding="utf-8").read()).group(1)
+    pin = open(os.path.join(REPO, "anchors", "pins", "uibc-conformance-%s.sha256" % declared),
+               encoding="utf-8").read()
+    import re as _re
+    assert _re.search(r"([0-9a-f]{64})  conformance/", pin).group(1) == f["archive_sha256"]
     assert f["archive_cases"] == 36
     assert f["archive_carries_verifier"] is True
     assert f["oracle_cases"] >= 25
@@ -50,7 +58,8 @@ def test_the_render_is_deterministic():
 def test_a_stale_page_is_detected(tmp_path, monkeypatch):
     f, missing = sp.facts(REPO)
     page = sp.render(f, missing)
-    (tmp_path / "STATUS.md").write_text(page.replace("228000", "227999"), encoding="utf-8")
+    stale = sp.render(f, missing).replace(str(f["archive_bytes"]), "227999")
+    (tmp_path / "STATUS.md").write_text(stale, encoding="utf-8")
     monkeypatch.chdir(tmp_path)
     monkeypatch.setattr(sp, "facts", lambda root: (f, missing))
     assert sp.main(["--check"]) == 1

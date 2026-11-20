@@ -179,7 +179,21 @@ def build_case(name, fn, expectation, why, group, index):
         shutil.rmtree(tmp, ignore_errors=True)
 
 
+# The cases are built by running `uibc_core.cli`, which stamps `created_at` from the
+# wall clock unless `SOURCE_DATE_EPOCH` is set (the reproducible-builds convention it
+# already honours, uibc_core/cli.py). Without it, two exports of the same tree differ
+# in a handful of case files -- measured 2026-11-20: 6 of 294 files changed while
+# nothing about the corpus had. The value below is the moment the published 0.4.1
+# corpus was exported, so a rebuild reproduces those stamps byte for byte.
+BUILD_EPOCH = "1795008087"
+
+
 def export():
+    os.environ.setdefault("SOURCE_DATE_EPOCH", BUILD_EPOCH)
+    # Evidence ids are uuid4 unless `UIBC_REPRO_SEED` is set (uibc_core/cli.py). Two
+    # exports of one tree differed in the ids that end up in `evidence/index.json` and
+    # then in every digest above them -- measured 2026-11-20, same 6 files as above.
+    os.environ.setdefault("UIBC_REPRO_SEED", "uibc-conformance-cases")
     # The README lives here too and must survive a rebuild.
     os.makedirs(OUT, exist_ok=True)
     if os.path.isdir(os.path.join(OUT, "cases")):
@@ -230,9 +244,9 @@ def export():
     # silently, and the late pin then described a page that no longer existed. The
     # cases are repository files; `build_conformance_bundle.py` now reads them from
     # `conformance/cases/` and nothing has to be packed twice.
-    manifest["archive"] = "built by tools/build_conformance_bundle.py, not here"
-    with open(os.path.join(OUT, "manifest.json"), "w", encoding="utf-8") as f:
-        json.dump(manifest, f, ensure_ascii=False, indent=2)
+    # No archive field: a reader who needs the bytes is pointed at the tool that
+    # builds them (tools/build_conformance_bundle.py). Measured 2026-11-20: this
+    # key held a path and the export rewrote that published file.
     return manifest
 
 

@@ -1,0 +1,22 @@
+{
+  "alt_root_equal": true,
+  "alt_tree_size": 8,
+  "description": "tree_size=7, leaf_index=5: the same inclusion_path folds to the same root at tree_size=8, so the declared size is not authenticated by the root. Independent reproduction of the RFC 9942 Section 5.2.1 observation posted to scitt@ietf.org on 2026-11-15.",
+  "inclusion_path": [
+    "20bf43d8eb4052a142f1a6a83e9417ead9d0b28eba1560d21bfb659f46be17f9",
+    "5a567998920d166fc279ea7211cb6914212294e7f4d23f7566a7b9ceed85fc6e",
+    "d688425830579c366be21b3d622d21df69d1f8a019be73a9c0245356c54a6b2b"
+  ],
+  "leaf_entry": {
+    "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+    "digest_hex": "1540185fe166c7c5030cf5f0ee74073773db91b74b708b9db9a027bb6b8e6c65",
+    "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: ambiguous-tree-size :: leaf 5",
+    "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a20616d626967756f75732d747265652d73697a65203a3a206c6561662035"
+  },
+  "leaf_index": 5,
+  "note": "the size-8 fold consumes the same three siblings; no additional node is read, so the root is identical",
+  "reconstructed_root": "6a1417d22022d2463454b1c42b8bedb4fefaf9c0f38737ed52dcd97ed06c11fe",
+  "result": "VALID_BUT_SIZE_UNAUTHENTICATED",
+  "root_true": "6a1417d22022d2463454b1c42b8bedb4fefaf9c0f38737ed52dcd97ed06c11fe",
+  "tree_size": 7
+}

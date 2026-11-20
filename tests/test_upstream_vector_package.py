@@ -29,7 +29,7 @@ class TestPackageShape(unittest.TestCase):
 
     def test_every_vector_has_expected_json(self):
         manifest = json.loads(_read("manifest.json"))
-        self.assertEqual(len(manifest["vectors"]), 5)
+        self.assertEqual(len(manifest["vectors"]), 6)
         for v in manifest["vectors"]:
             self.assertTrue(os.path.isfile(os.path.join(PKG, v["dir"], "expected.json")))
 
@@ -60,7 +60,8 @@ class TestPackageSelfChecks(unittest.TestCase):
         for v in manifest["vectors"]:
             e = v["expected"]
             same = e["reconstructed_root"] == e["root_true"]
-            self.assertEqual(e["result"] == "VALID", same, v["id"])
+            ok = e["result"] == "VALID" or e["result"].endswith("_UNAUTHENTICATED")
+            self.assertEqual(ok, same, v["id"])
 
 
 class TestScopeIsDeclared(unittest.TestCase):
@@ -86,3 +87,4 @@ class TestScopeIsDeclared(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+

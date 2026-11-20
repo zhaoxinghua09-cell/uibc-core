@@ -1,6 +1,6 @@
 # UIBC conformance corpus
 
-28 cases, each a complete submission package plus the verdict it must produce.
+30 cases, each a complete submission package plus the verdict it must produce.
 Written by `python tools/oracle_check.py --emit <dir>`; the answers were checked
 against the bytes on disk after writing, so what you read here is what the files
 do (mismatches at emit time: 0).
@@ -34,6 +34,27 @@ just cannot be rebuilt, which is the thing worth not doing.
 `kind` is `accept` (must not be rejected) or `reject` (must be rejected at the
 named check). A verifier that rejects everything passes every reject case and
 fails every accept case, which is why both halves are here.
+
+## The three checks a package cannot carry
+
+Seventeen of the twenty checks are decided by the package alone. Three are not, and
+two of those ship their outside input with the case rather than leaving the reader
+to guess:
+
+- **S9, `oracle-s09-rollback-pin`** — the package is a valid older one. S9 is the
+  check that it is not a *rollback*, which only means something against a head
+  observed somewhere else. `expected.json` carries that head in `expect_head`; verify
+  the suite the way `uibc verify --expect-head <value>` does and it must FAIL at S9.
+  Verified against its own head it is PASS, so the case is not simply broken.
+- **S19, `oracle-s19-stale-state`** — the package is signed and self-consistent, and
+  is older than what this verifier remembers. `expected.json` carries the memory in
+  `state` (the same shape `uibc verify --state <file>` writes). Supply it as the
+  state file and the verdict must be FAIL at S19.
+- **S0 is not here at all.** S0 asks what the verifier does with input that is not a
+  package: truncation, deep nesting, invalid UTF-8, a path climbing out. There is no
+  package to put in a directory, so the ten hostile inputs live in
+  `tools/redteam_robustness.py` and `docs/ROBUSTNESS.md` instead. This is a real
+  limit of a package corpus and it is written down rather than papered over.
 
 ## What this corpus does not prove
 

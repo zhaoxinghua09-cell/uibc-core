@@ -274,13 +274,13 @@ Every measurement above runs inside one process, on packages that exist only for
 duration of a test. That is useful and it is not consumable: an outsider cannot run our
 tooling to check our answers.
 
-`python tools/oracle_check.py --emit conformance/oracle` writes 28 packages, their
+`python tools/oracle_check.py --emit conformance/oracle` writes 30 packages, their
 throwaway keys and their expected verdicts to disk — 239 files, 287 KB. Then it
 re-verifies the **written copies**, not the in-memory ones, and refuses to report
 success if the bytes on disk no longer produce the declared answers.
 
 ```
-emitted 28 cases to conformance/oracle; round-trip mismatches: 0
+emitted 30 cases to conformance/oracle; round-trip mismatches: 0
 ```
 
 It lands in a subdirectory of `conformance/` on purpose: that directory already holds

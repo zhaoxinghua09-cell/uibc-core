@@ -22,7 +22,7 @@ verifier that refuses malformed input).
 | Language of the verifier | Python (first) **and JavaScript (second, independent)** | Python only |
 | Verifier modules | 25 | 40 |
 | Test files / test functions | 30 / 527 | 95 / 1189 |
-| Conformance material | 28 packages (18 must-reject, 1 control, 9 must-accept), shipped with per-case `expected.json` and rebuildable byte for byte | 1,952 cases in 55 sets under `vectors/`, referenced by tests, in neither the sdist nor the wheel |
+| Conformance material | 30 packages (20 must-reject, 1 control, 9 must-accept), shipped with per-case `expected.json`, two of them carrying the outside input S9 and S19 need, and rebuildable byte for byte | 1,952 cases in 55 sets under `vectors/`, referenced by tests, in neither the sdist nor the wheel |
 | Second implementation is a **CI gate** | Yes — `second-implementation` job, 18 of 20 checks, 36/36 identical FAIL sets | No second implementation to gate |
 | Hostile-input suite | `tools/redteam_robustness.py`, 10 cases, table in `docs/ROBUSTNESS.md` | `tests/test_json_nesting_vectors.py`, `tests/test_verify_bounds.py`, `tests/test_parse.py` |
 | Deep-nesting ceiling | **512 levels, both implementations, refuses with S11** | 128 levels, refuses at parse time |
@@ -134,7 +134,7 @@ committee, a standards reader or a customer treats as evidence.
    exactly, checked by `tests/test_oracle_reproducible.py` with a control at
    another epoch. AAC's byte-reproduction tests are tied to a Unix checkout
    (measured above: 17 of their sets fail on Windows for that reason alone).
-   This is a claim about 28 cases being checkable, not about 28 being much.
+   This is a claim about 30 cases being checkable, not about 30 being much.
 3. **A hostile-input table where each row is a verdict.** Ten cases, both
    implementations, three properties (no crash, a verdict, a refusal), and the
    document explains why the two verdict lists may differ without being
@@ -180,7 +180,7 @@ Four columns, each measuring *what is published*, not capability:
 | SCC-1 (Watts) | 0 public; **15** prose obligations; the document says a user-supplied record holds 88 frozen vectors | no verifier found | claims Python/TS agreement | partly |
 | Asqav (Marques) | 0; **8** Cedar templates + **4** worked requests | no (Cedar engine not vendored) | no | partly |
 | AAS-1 | **1** worked example; **12** audit assertions | no | no | partly (ISA/ISAE mapping) |
-| this project | **28** (18 must-reject, 1 control, 9 must-accept), shipped with per-case `expected.json` | yes (zero dependencies) | yes (V1–V9) | yes: 18 rejects carry a basis, 5 a verbatim clause |
+| this project | **30** (20 must-reject, 1 control, 9 must-accept), shipped with per-case `expected.json` | yes (zero dependencies) | yes (V1–V9) | yes: 20 rejects carry a basis, 5 a verbatim clause |
 
 What the table now supports, and nothing more: **three of the five publish an
 offline-runnable corpus with per-case expected verdicts** (this project 28,
@@ -204,7 +204,7 @@ was a sentence that made the gap look like a margin. What is actually true:
 
 - AAC's corpus is **larger by two orders of magnitude**, and split across 55
   sets with their own owning specs, so a reader can see which requirement each
-  case belongs to. This project's 28 cases are one flat list.
+  case belongs to. This project's 30 cases are one flat list.
 - AAC implements the same corpus in **four languages** (Python, TypeScript, Go,
   Rust); this project has Python and a JavaScript second implementation.
 - Measured here on Windows, AAC's Python suite gave **4,486 passed, 18 failed,
@@ -225,7 +225,7 @@ was a sentence that made the gap look like a margin. What is actually true:
 The one thing this project now has that neither of the other two runnable
 corpora has: the corpus is **rebuildable byte for byte** from the tool
 (`SOURCE_DATE_EPOCH=1794700800 python tools/oracle_check.py --emit <dir>`,
-checked by `tests/test_oracle_reproducible.py`). That is a claim about 28 cases,
+checked by `tests/test_oracle_reproducible.py`). That is a claim about 30 cases,
 not about being ahead.
 
 

@@ -16,7 +16,7 @@
 | S6 | seal signature | 是 | 21 | 1 | 36 |
 | S7 | evidence index metadata | 否 | 6 | 1 | 16 |
 | S8 | package checkpoint head | 否 | 8 | 2 | 24 |
-| S9 | head pinned out-of-band | 否 | 8 | 1 | 28 |
+| S9 | head pinned out-of-band | 否 | 9 | 1 | 30 |
 | S10 | attestation closure declared | 否 | 6 | 2 | 9 |
 | S11 | strict serialization | 是 | 6 | 1 | 18 |
 | S12 | timestamp and identifier strictness | 是 | 11 | 2 | 20 |
@@ -26,7 +26,7 @@
 | S16 | external timestamp (RFC 3161) | 否 | 9 | 4 | 19 |
 | S17 | linear receipt chain | 否 | 7 | 2 | 16 |
 | S18 | policy artefact resolution | 否 | 9 | 2 | 15 |
-| S19 | freshness state | 否 | 3 | 1 | 9 |
+| S19 | freshness state | 否 | 4 | 1 | 11 |
 
 出厂包判定：`INCONCLUSIVE`，走到 8/20 项（未签名的包停在 S6，后面不越过去）。
 

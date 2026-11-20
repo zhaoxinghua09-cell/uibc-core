@@ -105,6 +105,16 @@
       "case": "oracle-s07-index-metadata",
       "check": "S7",
       "basis": "own_choice"
+    },
+    {
+      "case": "oracle-s09-rollback-pin",
+      "check": "S9",
+      "basis": "borrowed_idea"
+    },
+    {
+      "case": "oracle-s19-stale-state",
+      "check": "S19",
+      "basis": "borrowed_idea"
     }
   ]
 }

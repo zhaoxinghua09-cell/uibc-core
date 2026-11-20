@@ -11,6 +11,7 @@ the corpus is lying and must not be published.
 
 import json
 import os
+import tempfile
 import unittest
 
 from uibc_core.verify import verify
@@ -50,7 +51,24 @@ class TestCommittedCorpus(unittest.TestCase):
                 self.assertTrue(os.path.isdir(case_dir), "missing case directory")
                 key = (bytes.fromhex(self.keys[row["case"]])
                        if row.get("mode") == "strict" else None)
-                report = verify(case_dir, key=key)
+                # S9 and S19 are decided by input the package cannot carry; the
+                # corpus ships it in expected.json so the case stays checkable
+                # without the reader inventing a head or a memory.
+                extra = {}
+                state_tmp = None
+                if row.get("expect_head"):
+                    extra["expect_head"] = row["expect_head"]
+                if row.get("state"):
+                    fd, state_tmp = tempfile.mkstemp(prefix="state-", suffix=".json")
+                    os.close(fd)
+                    with open(state_tmp, "w", encoding="utf-8", newline="\n") as f:
+                        json.dump(row["state"], f, indent=1, sort_keys=True)
+                    extra["state_file"] = state_tmp
+                try:
+                    report = verify(case_dir, key=key, **extra)
+                finally:
+                    if state_tmp and os.path.exists(state_tmp):
+                        os.remove(state_tmp)
                 self.assertEqual(row["expected_verdict"], report["result"],
                                  "%s: verdict drifted" % row["case"])
                 if row["kind"] == "reject":

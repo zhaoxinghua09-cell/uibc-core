@@ -1,0 +1,22 @@
+{
+  "entries": [
+    {
+      "evidence_id": "baf2072b-013d-57bd-a6bc-a23ee017400d",
+      "type": "ACTION",
+      "path": "files/oracle-s19-stale-state-0.txt",
+      "content_hash": "8d7160eb6b0b4469a83d6a2a6bdd7bf44399c2cdc41218e93e5765adb50dbb20",
+      "created_at": "2026-11-15T00:00:00Z",
+      "media_type": "text/plain",
+      "note": "n0"
+    },
+    {
+      "evidence_id": "51c5597c-3025-5be2-967b-cbb855a25aea",
+      "type": "ACTION",
+      "path": "files/oracle-s19-stale-state-1.txt",
+      "content_hash": "6e0f7712ec81c8ada83c0ab1f4f673f9ee8169cb1d12a1cc72e0ee0b4f552881",
+      "created_at": "2026-11-15T00:00:00Z",
+      "media_type": "text/plain",
+      "note": "n1"
+    }
+  ]
+}

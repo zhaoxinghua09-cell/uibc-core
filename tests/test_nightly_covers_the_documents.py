@@ -13,10 +13,19 @@ is a warning and never a pass).
 """
 
 import os
-import re
+
+import pytest
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WORKFLOW = os.path.join(REPO, ".github", "workflows", "release-integrity.yml")
+
+# The sdist ships the package, not `.github`. Measured 2026-11-20 (twice, in two
+# different test files): an unguarded read here reports "the nightly is not wired"
+# when the only fact is that an unpacked archive never had a workflow. The guard
+# belongs on the module, not on each test.
+pytestmark = pytest.mark.skipif(
+    not os.path.isfile(WORKFLOW),
+    reason=".github/workflows is not shipped in the sdist; this guard runs in a checkout")
 
 def _text():
     with open(WORKFLOW, encoding="utf-8") as handle:
@@ -68,6 +77,6 @@ def test_the_status_gate_reads_the_same_file_it_writes():
     assert "--check" in tool
     # The generator writes the page with io.open(..., "w"); the nightly must never
     # call that path, only --check, or a wrong page would be silently corrected.
-    assert "\"w\"" in tool and "PAGE" in tool, "the generator writes the page"
+    assert '"w"' in tool and "PAGE" in tool, "the generator writes the page"
     text = _text()
     assert "run python tools/status_page.py" in text

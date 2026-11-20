@@ -40,8 +40,10 @@ DIMENSIONS = [
 ]
 
 HUMAN_ONLY = [
-    ("push a version tag", "the signature, timestamp and attachment chain has never run on a "
-                           "published release; the next tag is where it is exercised"),
+    ("configure the release signing key", "the timestamp and attachment chain has now run on the "
+                                           "published v0.4.1 release; what is left is "
+                                           "UIBC_RELEASE_SEED_HEX, a repository-admin setting that "
+                                           "hands the project a private key to keep"),
     ("send the two reproduction invitations", "Templeman and Stone; the external node count "
                                                "does not move without them"),
     ("approve edits to 29 historical phrases", "the archived bundle still carries production-sounding "

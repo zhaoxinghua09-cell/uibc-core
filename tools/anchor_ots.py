@@ -40,21 +40,43 @@ def _digest(path):
         return hashlib.sha256(f.read()).digest()
 
 
-def stamp(path, calendar=CALENDARS[0], out=None):
-    from opentimestamps.calendar import RemoteCalendar
-    from opentimestamps.core.serialize import BytesSerializationContext
+def stamp(path, calendars=CALENDARS, out=None, submit=None):
+    """Submit the digest, trying each calendar in turn.
 
+    Measured 2026-11-20: `alice` and `finney` both answered 503 while `bob`
+    answered normally. A single hard-coded calendar therefore turns one
+    operator's outage into a claim that OpenTimestamps is unavailable,
+    which is false. Every attempt is recorded, and the one that answered is
+    named in the result, so an absent proof never reads as "nobody could
+    have witnessed this".
+    """
     digest = _digest(path)
-    cal = RemoteCalendar(calendar)
-    ts = cal.submit(digest, timeout=30)
-    ctx = BytesSerializationContext()
-    ts.serialize(ctx)
-    blob = ctx.getbytes()
-    out = out or (path + ".ots")
-    with open(out, "wb") as f:
-        f.write(blob)
-    return {"out": out, "calendar": calendar, "digest_sha256": digest.hex(),
-            "bytes": len(blob)}
+    tried = []
+    for calendar in calendars:
+        try:
+            if submit is None:
+                from opentimestamps.calendar import RemoteCalendar
+                ts = RemoteCalendar(calendar).submit(digest, timeout=30)
+            else:
+                ts = submit(calendar, digest)
+        except Exception as exc:  # noqa: BLE001 - any calendar failure is data
+            tried.append({"calendar": calendar, "error": "%s: %s" % (
+                type(exc).__name__, str(exc)[:80])})
+            continue
+        # Imported only once something answered, so that "nobody answered" stays
+        # reportable even where the library itself is missing.
+        from opentimestamps.core.serialize import BytesSerializationContext
+        ctx = BytesSerializationContext()
+        ts.serialize(ctx)
+        blob = ctx.getbytes()
+        out = out or (path + ".ots")
+        with open(out, "wb") as f:
+            f.write(blob)
+        tried.append({"calendar": calendar, "ok": True})
+        return {"out": out, "calendar": calendar, "digest_sha256": digest.hex(),
+                "bytes": len(blob), "tried": tried}
+    raise RuntimeError("no calendar accepted the digest: " + "; ".join(
+        "%s (%s)" % (t["calendar"], t["error"]) for t in tried))
 
 
 def inspect(proof_path):
@@ -151,18 +173,25 @@ def main(argv=None):
     ap.add_argument("--verify", metavar="FILE")
     ap.add_argument("--upgrade", metavar="PROOF", help="upgrade an existing .ots proof")
     ap.add_argument("--proof")
-    ap.add_argument("--calendar", default=CALENDARS[0])
+    ap.add_argument("--calendar", default=None,
+                    help="use this calendar only (default: all three, in order)")
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args(argv)
 
     if args.stamp:
-        info = stamp(args.stamp, calendar=args.calendar)
+        cal_list = (args.calendar,) if args.calendar else CALENDARS
+        try:
+            info = stamp(args.stamp, calendars=cal_list)
+        except RuntimeError as exc:
+            print(json.dumps({"status": "no_calendar_answered",
+                              "reason": str(exc)[:400]}, indent=2))
+            return 3
         print(json.dumps(info, ensure_ascii=False, indent=2))
         print("status=pending_calendar (no Bitcoin block attestation yet)")
         return 0
 
     if args.upgrade:
-        info = upgrade(args.upgrade, calendar=args.calendar)
+        info = upgrade(args.upgrade, calendar=args.calendar or CALENDARS[0])
         print(json.dumps(info, ensure_ascii=False, indent=2))
         if info["bitcoin_block"]:
             print("status=bitcoin_attested (block header NOT cross-checked here)")

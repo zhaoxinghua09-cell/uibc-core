@@ -98,12 +98,12 @@ def test_absent_dimension_row_carries_no_checker_and_status_word_is_literal():
     page = sp.render(f, missing)
     assert "| quorum threshold authorisation | **absent** | — |" in page
     labels = [h[0] for h in sp.HUMAN_ONLY]
-    assert "push a version tag" in labels
+    assert "configure the release signing key" in labels
     assert any("invitation" in x for x in labels)
     assert any("historical" in x for x in labels)
 
 def test_the_human_only_list_names_the_three_things():
     labels = [h[0] for h in sp.HUMAN_ONLY]
-    assert "push a version tag" in labels
+    assert "configure the release signing key" in labels
     assert any("invitation" in x for x in labels)
     assert any("historical" in x for x in labels)

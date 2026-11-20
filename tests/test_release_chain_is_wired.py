@@ -112,11 +112,24 @@ def test_every_optional_artifact_is_attached_only_when_it_exists():
     assert "not attached (absent)" in text
 
 
-def test_the_documents_do_not_claim_the_chain_has_run_on_a_release():
+def test_the_documents_say_the_chain_ran_once_and_do_not_claim_more_than_that():
+    """The premise flipped on 2026-11-20 when the chain actually ran.
+
+    Before that, this test asserted the documents said it had *not* run — that was
+    the honest state then. Workflow run 44671945364 attached a FreeTSA token to
+    v0.4.1, so the sentence became false. The test now holds the new claim to the
+    same standard: the documents must say it ran once, must name the run, and must
+    not claim a signature the release does not carry.
+    """
     protocol = open(os.path.join(REPO, "docs", "LAB-PROTOCOL.md"), encoding="utf-8").read()
     state = open(os.path.join(REPO, "docs", "COMPETITIVE-STATE.md"), encoding="utf-8").read()
-    assert "has not run on a published release yet" in protocol
-    assert "发布侧未验证" in state or "not yet exercised" in state.lower()
+    assert "has not run on a published release yet" not in protocol
+    assert "44671945364" in protocol
+    assert "anchored" in protocol
+    # No signature is on the release, so no document may say one is.
+    assert "UIBC_RELEASE_SEED_HEX" in protocol
+    assert "已实现、本地实测通过、发布侧未验证" not in state
+    assert "三件缺一" in state
     # The stale sentence this fixed: a page saying we ship no signature at all while a
     # tool that signs sits in the tree.
     assert "没有签名、没有 OTS、没有 RFC 3161" not in state

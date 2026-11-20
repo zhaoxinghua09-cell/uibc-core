@@ -148,10 +148,18 @@ their verifier: ok=True
 本轮补的是这一层里我们做得到的：`tools/release_lab_bundle.py` 在发版时把三种对照实跑一遍，产出
 `uibc-lab-bundle-<v>.json` + `receipt.json` + `CORPUS-DIGESTS.txt`，工作流在打 tag 时挂到 release。
 
-**仍然落后的一半（写清）**：他们的 `.sig` / `.sig.ots` / `.sig.tsr` 已经挂在已发布的 release 上；我们的
-`tools/anchor_release_digests.py` 能签能锚（Ed25519、FreeTSA、OTS），发版工作流也在打 tag 时签名并尝试两个锚，
-缺密钥时挂 `UNSIGNED.txt`——**但这条链尚未在任何已发布的 release 上实际跑过**，下一次 tag 才是第一次。
-当前状态应读作"已实现、本地实测通过、发布侧未验证"，不是"已经对齐"。
+**落后与追平的现状（2026-11-20 复核一次，按行写清）**：他们三件齐（`.sig` + `.sig.ots` + `.sig.tsr`）
+挂在已发布的 release 上。我们的 `v0.4.1` release 现在也有三件中的两件：
+
+| 件 | 他们 | 我们（`v0.4.1` release 实读） |
+| --- | --- | --- |
+| `CORPUS-DIGESTS.txt` | 有 | 有（287 B，`8b3818af…`） |
+| RFC 3161 令牌 `.tsr` | 有 | **有**（`anchor_freetsa.tsr` 4,643 B，FreeTSA，匿名离线验 `verified: true` / `problems: []`） |
+| OpenTimestamps `.ots` | 有（`.sig.ots`） | **无**（日历可达性不足 + 依赖此前未装，工作流已补装并改为三历法逐个回退；下一次运行为准） |
+| 分离签名 `.sig` | 有 | **无**（缺 `UIBC_RELEASE_SEED_HEX`，挂 `UNSIGNED.txt`） |
+
+所以当前状态读作"三件缺一，且缺的是签名"，不是"已经对齐"。缺哪件在 `ANCHORS.json` 上逐项写明，
+不靠文档自述；`python tools/check_release_anchors.py` 一条命令即可复核我们已挂的那一件。
 
 ### 2026-11-20 实测（配置层）：他们写"改动怎么被决定"，我们只有一行 CODEOWNERS
 

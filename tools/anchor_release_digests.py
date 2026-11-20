@@ -145,6 +145,28 @@ def _detail_line(text):
     return line[:200]
 
 
+def _json_block(text):
+    """The first JSON object in a child's output, or None.
+
+    The stamper prints JSON and then a `status=` line, and on failure prints a
+    JSON reason instead of a traceback tail, so the reason is parseable rather
+    than being the last line of a stack trace.
+    """
+    import json as _json
+    body = text or ""
+    start = body.find("{")
+    if start < 0:
+        return None
+    end = body.rfind("}")
+    if end <= start:
+        return None
+    try:
+        value = _json.loads(body[start:end + 1])
+    except ValueError:
+        return None
+    return value if isinstance(value, dict) else None
+
+
 def anchor(path, out_dir, tsa="freetsa", offline=False):
     """Try TSA and OTS; record what actually happened for each."""
     status = {"file": os.path.basename(path), "file_sha256": _sha256_file(path)}
@@ -166,15 +188,19 @@ def anchor(path, out_dir, tsa="freetsa", offline=False):
             status["tsa"] = {"state": "unanchored", "detail": _detail_line(out)}
 
         code, out = _run([sys.executable, os.path.join(_HERE, "anchor_ots.py"), "--stamp", path])
+        blob = _json_block(out)
         if code == 0:
+            calendar = blob.get("calendar") if blob else None
             text = out.lower()
             if "pending_calendar" in text or "pending calendar" in text:
                 status["ots"] = {"state": "pending_calendar",
-                                 "detail": "a calendar attestation, not a Bitcoin block"}
+                                 "detail": "calendar attestation from %s, not a Bitcoin block"
+                                 % (calendar or "an unnamed calendar")}
             else:
                 status["ots"] = {"state": "anchored", "detail": _detail_line(out)}
         else:
-            status["ots"] = {"state": "unavailable", "detail": _detail_line(out)}
+            reason = (blob or {}).get("reason") or _detail_line(out)
+            status["ots"] = {"state": "unavailable", "detail": str(reason)[:200]}
 
     out = os.path.join(out_dir, "ANCHORS.json")
     with open(out, "w", encoding="utf-8", newline="\n") as f:

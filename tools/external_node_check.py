@@ -48,8 +48,18 @@ def _run(cmd):
 
 
 def _independent(pkg):
-    script = os.path.join(ROOT, "independent_verifier", "iverify.py")
-    return _run([sys.executable, script, pkg])
+    # Import the verifier rather than shelling out to iverify.py. The file had no
+    # __main__ block, so `python iverify.py <pkg>` exited 0 unconditionally and every
+    # caller that read the exit code recorded "independent=PASS" without any check
+    # having run (measured 2026-11-21, on three value-level probes).
+    try:
+        from independent_verifier.iverify import independent_verify
+    except Exception:
+        return 2, 0
+    t0 = time.time()
+    rep = independent_verify(pkg)
+    rc = {"PASS": 0, "FAIL": 1}.get(rep.get("result"), 2)
+    return rc, round((time.time() - t0) * 1000)
 
 
 def _reference(pkg):
@@ -90,8 +100,13 @@ def probes(pkg):
     for name, rel, mutate in cases:
         p = _mutate(pkg, rel, mutate)
         res, ms, _ = _reference(p)
+        ind_rc, ind_ms = _independent(p)
         out.append({"probe": name, "result": res, "ms": ms,
-                    "expected": "FAIL", "ok": res == "FAIL"})
+                    "expected": "FAIL",
+                    "reference_rejected": res == "FAIL",
+                    "independent_rejected": ind_rc == 1,
+                    "independent_exit": ind_rc,
+                    "ok": res == "FAIL" and ind_rc == 1})
     return out
 
 

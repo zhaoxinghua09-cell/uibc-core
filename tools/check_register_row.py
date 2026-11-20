@@ -60,6 +60,10 @@ SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 # version of this pattern used \d and rejected every real commit — the self-test
 # cases caught it, which is the only reason it is written this way now.
 SHA_ANY_RE = re.compile(r"^[0-9a-fA-F]{7,40}$")
+# Same hex rule, but allowed to sit inside a cell: "uibc-core @ 46ca378" is
+# specific enough and is the form the submit guidance produces. An anchored
+# pattern rejected its own documented format.
+SHA_EMBEDDED_RE = re.compile(r"(?<![0-9a-zA-Z])[0-9a-fA-F]{7,40}(?![0-9a-zA-Z])")
 
 # Phrases that mean "I ran it and the numbers matched". Anything else in the
 # result column is treated as a disagreement list, which is allowed.
@@ -150,7 +154,11 @@ def check_row_shape(cells: list[str], header: list[str], where: str) -> list[str
     subject = get("subject (commit)")
     if not subject:
         problems.append(f"{where}: 'subject (commit)' is empty")
-    elif not (SHA_ANY_RE.match(subject) or "v0." in subject or "fixture" in subject):
+    elif not (SHA_ANY_RE.match(subject) or SHA_EMBEDDED_RE.search(subject)
+              or "v0." in subject or "fixture" in subject):
+        # `SHA_EMBEDDED_RE`, because people write "uibc-core @ 46ca378" and that
+        # is perfectly specific. An anchored pattern here rejected its own
+        # documented format and taught a would-be submitter nothing.
         problems.append(
             f"{where}: 'subject (commit)' is {subject!r}; expected a commit prefix "
             "or something that names a version explicitly"

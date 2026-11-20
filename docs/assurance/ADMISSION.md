@@ -72,6 +72,26 @@ exists to prevent.
 - anything about dependencies or the transitive graph;
 - that a third party admitted it. The key is whoever ran the command.
 
+## The same source produced two different wheels (measured)
+
+Building this repository's wheel on two machines, from the same commit `e83d93f`, gave:
+
+| machine | bytes | sha256 |
+|---|---|---|
+| Windows 11 / Python 3.13.15 | 128763 | `d9becab959e8b093…` |
+| Linux 6.6.95 / Python 3.12.11 | 128999 | `14edf0f4300bc33f…` |
+
+Both admitted PASS with 33 members. **The artifact is not byte-reproducible**, and that is
+the reason this tool seals the artifact rather than its source: any claim of the shape
+"from this source anyone can rebuild the identical package" is false for a wheel by
+default (timestamps, zip metadata, compression). A signature over source would tell you
+nothing about the bytes you are about to install; a hash over those bytes tells you
+exactly which ones were admitted.
+
+Anyone publishing reproducible-build claims should be asked for the machine, the
+toolchain and the build flags — the two rows above are what "same input" produces without
+them.
+
 ## Directory artifacts, stated precisely
 
 A directory has no single byte sequence, so rather than invent an archive format and then

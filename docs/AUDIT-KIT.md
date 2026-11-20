@@ -103,7 +103,7 @@ The OpenTimestamps proof, `CORPUS-DIGESTS.txt.ots` (172 bytes), contains one **c
 
 This page was rewritten three times on 2026-11-20 (workflow runs `44669496764`, `44671945364`, `44674184958`), and each rewrite changed the digest list, so a token verified against `8b3818af…` at 04:05 stopped matching at 04:24. The job now refuses to replace a published asset unless `replace=true` is passed, and prints both digests when it does. `v0.4.1` is frozen as of `44674184958`.
 
-What this establishes: an independent party signed that digest at that time, and the bytes on the page today are the bytes that were signed. What it does not: that FreeTSA is trustworthy, that we produced those bytes, or that the digest list covers every asset. There is **no** signature (`.sig`) on this corpus — `UIBC_RELEASE_SEED_HEX` is not configured, so the page carries `UNSIGNED.txt`. The OTS proof is a calendar attestation only. Both limits are stated in `ANCHORS.json` rather than glossed over.
+What this establishes: an independent party signed that digest at that time, and the bytes on the page today are the bytes that were signed. What it does not: that FreeTSA is trustworthy, that we produced those bytes, or that the digest list covers every asset. This page carries **no** signature (`.sig`) — `v0.4.1` predates the release signing key, so it ships `UNSIGNED.txt`; a page with a `.sig` is checked against the `key_id` recorded in `anchors/release-signing-key.json`, because a signature verified with the key that travels inside it proves integrity and not identity. The OTS proof is a calendar attestation only. Both limits are stated in `ANCHORS.json` rather than glossed over.
 
 ## What this kit does not establish
 

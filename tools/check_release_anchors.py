@@ -103,7 +103,52 @@ def verify_dir(directory, tag="v0.4.1"):
         return 1, lines + ["token attests a different digest than the published file"]
     lines.append("OK           %s: an independent TSA signed the published digest, and it matches"
                  % tag)
+
+    # The token is only one witness. When a signature is also on the page, check it
+    # against the key this repository records, because a signature verified with a
+    # public key that travels inside the signature proves integrity and nothing about
+    # who signed. Measured 2026-11-20: v0.4.1 predates the signing key, so this branch
+    # is exercised by the first release after it.
+    sig = os.path.join(directory, "CORPUS-DIGESTS.txt.sig")
+    pinned = _pinned_key()
+    if not os.path.isfile(sig):
+        lines.append("signature    none published (the page carries UNSIGNED.txt); "
+                     "not a failure, but nothing identifies the publisher either")
+        return 0, lines
+    code, out = _verify_sig(sig, digest_path)
+    if code is None:
+        return 3, lines + ["could not run the signature verifier: %s" % out]
+    sigblob = _json_block(out)
+    if code != 0 or not sigblob:
+        return 1, lines + ["signature does not verify: %s" % (out.strip().splitlines() or [""])[-1][:160]]
+    key_id = str(sigblob.get("key_id", ""))
+    lines.append("signature    key_id %s, file_sha256 %s" % (key_id, sigblob.get("file_sha256")))
+    if pinned and key_id != pinned:
+        return 1, lines + ["signature uses key_id %s, but this repository records %s"
+                           % (key_id, pinned)]
+    if not pinned:
+        return 1, lines + ["the signature verified but no key is recorded in "
+                           "anchors/release-signing-key.json, so the signer is unidentified"]
     return 0, lines
+
+
+def _pinned_key():
+    """key_id recorded in anchors/release-signing-key.json, or None."""
+    path = os.path.join(ROOT, "anchors", "release-signing-key.json")
+    if not os.path.isfile(path):
+        return None
+    with open(path, encoding="utf-8") as handle:
+        return (json.load(handle) or {}).get("key_id") or None
+
+
+def _verify_sig(sig, data):
+    try:
+        proc = subprocess.run([sys.executable, os.path.join(ROOT, "tools", "anchor_release_digests.py"),
+                               "verify", "--sig", sig, "--file", data],
+                              capture_output=True, text=True, timeout=90)
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        return None, str(exc)
+    return proc.returncode, (proc.stdout or "") + (proc.stderr or "")
 
 
 def _verify_token(token, data, cabundle):

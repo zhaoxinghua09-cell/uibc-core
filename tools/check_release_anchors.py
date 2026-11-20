@@ -411,10 +411,18 @@ def main(argv=None):
             if os.path.isfile(rec):
                 with open(rec, encoding="utf-8") as handle:
                     block = (json.load(handle) or {}).get("bitcoin") or {}
-            label = ("block %s, merkle root %s…" % (block.get("block_height"),
-                                                    str(block.get("merkle_root", ""))[:12])
-                     if block else "no block recorded")
-            lines.append("bitcoin      proof bound to the published digest; %s" % label)
+            # Bound is not the same as proved: until now the block height was
+            # printed because a record said so. Walk the proof from the digest
+            # through every operation to the merkle root and compare that root
+            # with the one the record names, so the claim rests on arithmetic.
+            sys.path.insert(0, os.path.join(ROOT, "tools"))
+            import ots_merkle
+            walked = ots_merkle.verify(held_ots, os.path.join(data_dir, "CORPUS-DIGESTS.txt"),
+                                       block)
+            for line in walked["lines"]:
+                lines.append("ots          " + line)
+            if walked["exit"]:
+                code = max(code, walked["exit"])
 
     if args.json:
         print(json.dumps({"tag": args.tag, "exit": code, "lines": lines}, indent=2))

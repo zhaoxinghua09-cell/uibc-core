@@ -30,7 +30,16 @@ import urllib.request
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REPO_SLUG = "zhaoxinghua09-cell/uibc-core"
-VERSION = "0.4.1"
+def _declared_version():
+    """The version this repository ships, so this checker cannot verify an old asset."""
+    import io as _io
+    import re as _re
+    path = os.path.join(REPO, "pyproject.toml")
+    text = _io.open(path, encoding="utf-8").read()
+    return _re.search(r'version *= *"([^"]+)"', text).group(1)
+
+
+VERSION = _declared_version()
 RAW_URL = ("https://github.com/%s/raw/main/conformance/uibc-conformance-%s.zip"
            % (REPO_SLUG, VERSION))
 RELEASE_URL = ("https://github.com/%s/releases/download/v%s/uibc-conformance-%s.zip"

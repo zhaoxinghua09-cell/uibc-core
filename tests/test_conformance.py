@@ -20,7 +20,15 @@ for p in (_REPO, os.path.join(_REPO, "tools")):
 import run_conformance as rc  # noqa: E402
 
 CONF = os.path.join(_REPO, "conformance")
+REPO_ROOT = os.path.dirname(CONF)
 MANIFEST = os.path.join(CONF, "manifest.json")
+
+def _declared():
+    """The version the archive under test carries, read from pyproject.toml."""
+    import re
+    text = open(os.path.join(REPO_ROOT, "pyproject.toml"), encoding="utf-8").read()
+    return re.search(r'version *= *"([^"]+)"', text).group(1)
+
 
 
 def load():
@@ -54,7 +62,8 @@ class TestConformanceSuite(unittest.TestCase):
         man = load()
         tmp = tempfile.mkdtemp(prefix="uibc-cc-zip-")
         try:
-            with zipfile.ZipFile(os.path.join(CONF, man["archive"])) as z:
+            name = "uibc-conformance-%s.zip" % _declared()
+            with zipfile.ZipFile(os.path.join(CONF, name)) as z:
                 z.extractall(tmp)
             for case in man["cases"]:
                 pkg = os.path.join(tmp, case["path"])

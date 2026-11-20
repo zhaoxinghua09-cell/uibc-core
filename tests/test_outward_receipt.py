@@ -12,6 +12,16 @@ import sys
 import unittest
 
 _REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+
+def _declared_version():
+    """Tests name the archive the repository actually ships, not a frozen string."""
+    import re
+    text = open(os.path.join(_REPO, "pyproject.toml"), encoding="utf-8").read()
+    return re.search(r'version *= *"([^"]+)"', text).group(1)
+
+
+_VER = _declared_version()
+
 sys.path.insert(0, os.path.join(_REPO, "tools"))
 import check_outward_receipt as chk  # noqa: E402
 
@@ -86,11 +96,11 @@ class TestTheFrontPageDoesNotRot(unittest.TestCase):
             text = f.read()
         self.assertIn("docs/AUDIT-KIT.md", text)
         self.assertIn("docs/RECEIPT-FORMAT.md", text)
-        self.assertIn("conformance/uibc-conformance-0.4.1.zip", text)
+        self.assertIn("conformance/uibc-conformance-%s.zip" % _VER, text)
 
     def test_readme_quotes_the_archive_digest_it_actually_ships(self):
         """A stale digest on the front page is worse than no digest."""
-        with open(os.path.join(_REPO, "conformance", "uibc-conformance-0.4.1.zip"), "rb") as f:
+        with open(os.path.join(_REPO, "conformance", ("uibc-conformance-%s.zip" % _VER)), "rb") as f:
             digest = hashlib.sha256(f.read()).hexdigest()
         with open(os.path.join(_REPO, "README.md"), encoding="utf-8") as f:
             text = f.read()

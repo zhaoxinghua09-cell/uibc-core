@@ -13,6 +13,15 @@ import tempfile
 import pytest
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+def _declared_version():
+    import re
+    text = open(os.path.join(REPO, "pyproject.toml"), encoding="utf-8").read()
+    return re.search(r'version *= *"([^"]+)"', text).group(1)
+
+
+_VER = _declared_version()
+
 sys.path.insert(0, os.path.join(REPO, "tools"))
 
 import check_outsider_entry as entry  # noqa: E402
@@ -21,7 +30,7 @@ import check_outsider_entry as entry  # noqa: E402
 def clone_repo(tmp_path):
     """A copy of just the files the checker reads, so tests can corrupt them."""
     for rel in ("README.md", os.path.join("docs", "AUDIT-KIT.md"),
-                os.path.join("anchors", "pins", "uibc-conformance-0.4.1.sha256"),
+                os.path.join("anchors", "pins", "uibc-conformance-%s.sha256" % _VER),
                 "conformance"):
         src = os.path.join(REPO, rel)
         dst = os.path.join(str(tmp_path), rel)
@@ -45,15 +54,15 @@ def test_the_real_repository_passes(monkeypatch):
 def test_the_documented_url_is_the_pinned_archive(tmp_path, monkeypatch):
     repo = clone_repo(tmp_path)
     monkeypatch.setattr(entry, "REPO", repo)
-    pin = entry.read_pin("0.4.1")
-    assert pin["path"].endswith("uibc-conformance-0.4.1.zip")
+    pin = entry.read_pin(_VER)
+    assert pin["path"].endswith("uibc-conformance-%s.zip" % _VER)
     assert entry.RAW_URL.endswith(pin["path"].split("/")[-1])
     assert "/zhaoxinghua09-cell/uibc-core/" in entry.RAW_URL
 
 
 def test_a_tampered_archive_is_refused(tmp_path, monkeypatch):
     repo = clone_repo(tmp_path)
-    archive = os.path.join(repo, "conformance", "uibc-conformance-0.4.1.zip")
+    archive = os.path.join(repo, "conformance", ("uibc-conformance-%s.zip" % _VER))
     with open(archive, "ab") as fh:
         fh.write(b"\x00")
     assert run_checker(repo, monkeypatch) == 1
@@ -61,8 +70,13 @@ def test_a_tampered_archive_is_refused(tmp_path, monkeypatch):
 
 def test_a_pin_naming_a_different_archive_is_refused(tmp_path, monkeypatch):
     repo = clone_repo(tmp_path)
-    pin = os.path.join(repo, "anchors", "pins", "uibc-conformance-0.4.1.sha256")
-    text = open(pin, encoding="utf-8").read().replace("228000 bytes", "227999 bytes")
+    pin = os.path.join(repo, "anchors", "pins", "uibc-conformance-%s.sha256" % _VER)
+    # the pin is "<sha256>  <path>"; flipping one hex digit must be refused
+    import re
+    text = open(pin, encoding="utf-8").read()
+    digest = re.search(r"([0-9a-f]{64})", text)
+    d = digest.group(1)
+    text = text.replace(d, ("0" if d[0] != "0" else "1") + d[1:], 1)
     open(pin, "w", encoding="utf-8", newline="\n").write(text)
     assert run_checker(repo, monkeypatch) == 1
 
@@ -97,7 +111,7 @@ def test_the_release_asset_must_be_named(tmp_path, monkeypatch):
 
 def test_a_missing_pin_exits_three_not_one(tmp_path, monkeypatch):
     repo = clone_repo(tmp_path)
-    os.unlink(os.path.join(repo, "anchors", "pins", "uibc-conformance-0.4.1.sha256"))
+    os.unlink(os.path.join(repo, "anchors", "pins", "uibc-conformance-%s.sha256" % _VER))
     assert run_checker(repo, monkeypatch) == 3
 
 
@@ -117,7 +131,7 @@ def test_an_unreachable_network_is_unmeasured_not_a_failure(monkeypatch):
 
 def test_a_probe_that_serves_other_bytes_is_a_failure(monkeypatch):
     def wrong_probe(pin, attempts=3):
-        return ["the URL served 1 bytes, the pin says 228000"], 1
+        return [("the URL served 1 bytes, the pin says %s" % os.path.basename(entry.PIN)) if False else "the URL served 1 bytes"], 1
 
     monkeypatch.setattr(entry, "probe", wrong_probe)
     assert entry.main(["--probe"]) == 1
@@ -140,6 +154,6 @@ def test_the_probe_prefers_curl(monkeypatch):
 
     import subprocess
     monkeypatch.setattr(subprocess, "run", fake_run)
-    reasons, served = entry.probe(entry.read_pin("0.4.1"), attempts=1)
+    reasons, served = entry.probe(entry.read_pin(_VER), attempts=1)
     assert reasons is None and served is None
     assert os.path.basename(seen["cmd"][0]).lower() in ("curl", "curl.exe")

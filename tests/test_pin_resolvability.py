@@ -25,6 +25,16 @@ import re
 import unittest
 
 _REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+
+def _declared_version():
+    """Tests name the archive the repository actually ships, not a frozen string."""
+    import re
+    text = open(os.path.join(_REPO, "pyproject.toml"), encoding="utf-8").read()
+    return re.search(r'version *= *"([^"]+)"', text).group(1)
+
+
+_VER = _declared_version()
+
 PINS = os.path.join(_REPO, "anchors", "pins")
 ENTRY = re.compile(r"^([0-9a-f]{64})\s+(\S+)\s*$")
 
@@ -81,7 +91,7 @@ class TestPinsAreResolvable(unittest.TestCase):
         AUDIT-KIT shows, or the two documents disagree about where the bytes are."""
         with open(os.path.join(_REPO, "docs", "AUDIT-KIT.md"), encoding="utf-8") as f:
             audit = f.read()
-        with open(os.path.join(PINS, "uibc-conformance-0.4.1.sha256"),
+        with open(os.path.join(PINS, "uibc-conformance-%s.sha256" % _VER),
                   encoding="utf-8") as f:
             pin = f.read()
         entries = _entries(pin)

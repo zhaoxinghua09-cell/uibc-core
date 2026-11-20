@@ -48,9 +48,11 @@ def test_the_exporter_opens_no_zip_for_writing():
         r"ZipFile\([^)]*,\s*[\"']w", source)
 
 
-def test_the_exporter_points_at_the_tool_that_builds_the_archive():
-    source = code_only(EXPORTER)
-    assert "build_conformance_bundle.py" in source
+def test_the_manifest_carries_no_archive_path():
+    import json
+    manifest = json.load(io.open(os.path.join(REPO, "conformance", "manifest.json"),
+                                 encoding="utf-8"))
+    assert "archive" not in manifest
 
 
 def test_a_pin_wins_over_replace():

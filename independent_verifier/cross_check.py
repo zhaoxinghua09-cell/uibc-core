@@ -28,6 +28,27 @@ FIXTURES = ["clean", "tampered", "deleted", "duplicated",
 # S1..S6 (reference) <-> V1..V6 (independent) semantic mapping
 CHECK_MAP = {"S1": "V1", "S2": "V2", "S3": "V3", "S4": "V4", "S5": "V5", "S6": "V6"}
 
+# Both sides answer INCONCLUSIVE on these two fixtures, and that is the three-valued
+# semantics working, not a missing check. Say per row which input could not be
+# established, so a reader does not have to guess from the verdict alone.
+INCONCLUSIVE_REASONS = {
+    "clean":
+        "V6/S6: the shipped clean fixture carries no seal, and no key was supplied, so "
+        "provenance is unattested while the evidence chain is intact. Both implementations "
+        "answer INCONCLUSIVE for the whole package; the strict case "
+        "xcheck-clean-strict (signed with a supplied key) is the PASS counterpart.",
+    "malicious":
+        "V6/S6: the fixture is an HMAC-sealed self-consistent forgery. Without the owner "
+        "key there is no input that could distinguish it from a genuine package, so the "
+        "seal check returns INCONCLUSIVE rather than PASS; a call that supplies the owner "
+        "key turns it into FAIL. Nothing here is left to implement.",
+    "malicious-keyswap":
+        "V6/S6: Ed25519 signature verifies against the key recorded inside the package, and "
+        "no key was supplied out-of-band, so 'who signed it' cannot be established. "
+        "INCONCLUSIVE is the correct answer to the question actually asked; supplying "
+        "pubkey (S6 pinning) turns it into FAIL.",
+}
+
 
 def reference_checks(report):
     return {c["id"]: c["result"] for c in report["checks"]}
@@ -104,6 +125,20 @@ def main():
     mismatches = [r for r in all_rows if r[5] == "MISMATCH"]
     print(f"\nchecks compared: {len(all_rows)}, mismatches: {len(mismatches)}")
     print("AGREEMENT: " + ("PASS - spec determinism holds" if all_ok else "FAIL - SPEC BUG"))
+
+    # W3: name the input that could not be established, per INCONCLUSIVE row.
+    inc_rows = sorted({r[0].split(":", 1)[-1] for r in all_rows
+                       if r[1] == "ALL" and r[3] == "INCONCLUSIVE" and r[4] == "INCONCLUSIVE"})
+    if inc_rows:
+        print("\nINCONCLUSIVE rows - why, per fixture "
+              "(three-valued semantics, not a gap):")
+        for fx in inc_rows:
+            why = INCONCLUSIVE_REASONS.get(fx)
+            if why:
+                print(f"  [{fx}] {why}")
+            else:
+                print(f"  [{fx}] no annotation yet - see INCONCLUSIVE_REASONS in this file")
+
     return 0 if all_ok else 1
 
 

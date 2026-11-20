@@ -32,12 +32,25 @@ mistake — pretending nothing was accepted.
    so a valid signature proves internal consistency and nothing about who signed it.
    This is why the report carries `trust_level=unanchored` and why the gate policy is
    `PASS + anchored` rather than `PASS`.
+   **Why `pinned` rejects it:** `S6` compares the seal's recorded `public_key` against the
+   key supplied out-of-band and fails on any difference (`uibc_core/verify.py`, the
+   `pubkey is not None and bytes(pubkey) != pub` branch). With a key supplied, the substituted
+   signer is caught; without one, there is nothing to compare against.
+   A second implementation that verifies the seal but never compares it with a supplied key
+   will therefore report `PASS` for `M17` in `pinned` mode while ours reports `FAIL`.
+   That gap is a missing key-pinning check on the second side, not a defect here — and it is
+   the one disagreement in the table below that a reader is most likely to hit first.
 2. `M20` whole-package rollback, `open` and `pinned`: an older package is self-consistent
    and correctly signed. Nothing inside it can detect that it was installed over a newer
    one. Only a head observed outside the package (`--expect-head`) catches it — that is
    check `S9`. The same limit is stated independently in
    `draft-ruvalcaba-nhe-audit-00`: an unkeyed chain proves internal linkage, and a party
    able to rebuild the whole chain can produce a consistent alternative.
+   **Where the responsibility sits:** freshness and version monotonicity are the *caller's*
+   layer, not the package's. A package can only be judged against a head it did not author;
+   deciding whether that head is current is the two-clock rule (`docs/` on the two clocks),
+   i.e. the relying party's clock and the log's clock. Accepting `M20` in `open`/`pinned`
+   is therefore a declared boundary of this layer, not an unfinished check.
 
 **What each case attacks.**
 
@@ -93,9 +106,13 @@ so a disagreement can be located, not merely counted.
 
 | case | ours | second impl. | why |
 |---|---|---|---|
+| M17 key substitution, `pinned` | FAIL | PASS | second impl. verifies the seal but does not compare it with the key supplied out-of-band (no S6/V6 pinning) |
 | M18 root extra file | FAIL | PASS | no "undeclared file in package root" check (S1) |
 | M19 index metadata edited | FAIL | PASS | no index-metadata digest check (S7) |
 | M21 unsigned log truncated | FAIL | INCONCLUSIVE | no checkpoint head (S8) |
+
+In `open` mode `M17` is **not** a disagreement: both implementations accept it, and both
+should, because no key was supplied to either of them.
 
 That is the corpus doing its job: it found that **our own second implementation lags
 the first on three checks** — something "8/8 agreement on fixtures" could never have

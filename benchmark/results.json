@@ -1,9 +1,15 @@
 {
   "meta": {
-    "generated_at_utc": "2026-11-17T06:41:11Z",
+    "generated_at_utc": "2026-11-20T07:58:36Z",
     "source": "tools/out/mutation_benchmark.json",
     "expected": "benchmark/expected.json",
-    "spec_id": "uibc-core/0.3.0-proposal@f163c2466861"
+    "spec_id": "uibc-core/0.3.3-proposal@ba0e02c98a65",
+    "corpus_anchor": {
+      "base_open": "PASS",
+      "base_pinned": "PASS",
+      "base_must_be": "PASS",
+      "anchor_ok": true
+    }
   },
   "summary": {
     "open": {
@@ -206,6 +212,7 @@
           "accepted": false,
           "failed_checks": [
             "S3",
+            "S12",
             "S8",
             "S6"
           ],
@@ -216,6 +223,7 @@
           "accepted": false,
           "failed_checks": [
             "S3",
+            "S12",
             "S8",
             "S6"
           ],
@@ -332,6 +340,7 @@
           "accepted": false,
           "failed_checks": [
             "S4",
+            "S12",
             "S7",
             "S8"
           ],
@@ -342,6 +351,7 @@
           "accepted": false,
           "failed_checks": [
             "S4",
+            "S12",
             "S7",
             "S8"
           ],
@@ -357,6 +367,7 @@
           "verdict": "FAIL",
           "accepted": false,
           "failed_checks": [
+            "S12",
             "S7",
             "S8",
             "S5"
@@ -367,6 +378,7 @@
           "verdict": "FAIL",
           "accepted": false,
           "failed_checks": [
+            "S12",
             "S7",
             "S8",
             "S5"
@@ -545,5 +557,11 @@
       }
     }
   ],
+  "corpus_anchor": {
+    "base_open": "PASS",
+    "base_pinned": "PASS",
+    "base_must_be": "PASS",
+    "anchor_ok": true
+  },
   "defects": []
 }

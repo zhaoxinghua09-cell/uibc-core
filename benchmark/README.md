@@ -19,6 +19,8 @@ Output ends with two numbers per mode. They are deliberately different:
 | `pinned` | public key out-of-band (`--pubkey`) | 1 / 21 (4.8%) | M20 | **0** |
 | `head-pinned` | public key **and** checkpoint head out-of-band (`--expect-head`) | 0 / 21 (0.0%) | — | **0** |
 
+(21 mutated members plus 1 unmutated anchor = 22 scored members; the anchor must PASS.)
+
 - **acceptance rate** = how many mutations passed, period.
 - **undocumented acceptance** = those *not* explained by a channel the mode lacks.
 
@@ -26,18 +28,45 @@ Only the second is a defect. Quoting the first without the second invites a read
 mistake a design boundary for a bug; quoting only the second invites the opposite
 mistake — pretending nothing was accepted.
 
+**The third number: the corpus anchor.**
+
+The unmutated package is part of the corpus and **must PASS** (`base_open` / `base_pinned`,
+carried into `results.json` as `corpus_anchor`). Without it a verifier that refuses every
+input scores a perfect 0/21 acceptance rate and looks flawless while being useless; the
+anchor makes that score 0/22 instead. `run.py` exits non-zero when the anchor is not PASS,
+because once the base fails, every rate below it is a number about nothing.
+
+This is the property a mutation suite has to state rather than imply: the corpus contains
+a member that must be **accepted**, and each of the 21 is **one mutation from that member**.
+`benchmark/corpus/manifest.json` records the base digest and, per case, exactly which field
+was changed. So "refuse everything" and "accept everything" both score badly; only a
+verifier that reads each field separately scores well.
+
 **The two documented boundaries, stated plainly.**
 
 1. `M17` key substitution, `open` only: the key is read out of the package under test,
    so a valid signature proves internal consistency and nothing about who signed it.
    This is why the report carries `trust_level=unanchored` and why the gate policy is
    `PASS + anchored` rather than `PASS`.
+   **Why `pinned` rejects it:** `S6` compares the seal's recorded `public_key` against the
+   key supplied out-of-band and fails on any difference (`uibc_core/verify.py`, the
+   `pubkey is not None and bytes(pubkey) != pub` branch). With a key supplied, the substituted
+   signer is caught; without one, there is nothing to compare against.
+   A second implementation that verifies the seal but never compares it with a supplied key
+   will therefore report `PASS` for `M17` in `pinned` mode while ours reports `FAIL`.
+   That gap is a missing key-pinning check on the second side, not a defect here — and it is
+   the one disagreement in the table below that a reader is most likely to hit first.
 2. `M20` whole-package rollback, `open` and `pinned`: an older package is self-consistent
    and correctly signed. Nothing inside it can detect that it was installed over a newer
    one. Only a head observed outside the package (`--expect-head`) catches it — that is
    check `S9`. The same limit is stated independently in
    `draft-ruvalcaba-nhe-audit-00`: an unkeyed chain proves internal linkage, and a party
    able to rebuild the whole chain can produce a consistent alternative.
+   **Where the responsibility sits:** freshness and version monotonicity are the *caller's*
+   layer, not the package's. A package can only be judged against a head it did not author;
+   deciding whether that head is current is the two-clock rule (`docs/` on the two clocks),
+   i.e. the relying party's clock and the log's clock. Accepting `M20` in `open`/`pinned`
+   is therefore a declared boundary of this layer, not an unfinished check.
 
 **What each case attacks.**
 
@@ -93,9 +122,13 @@ so a disagreement can be located, not merely counted.
 
 | case | ours | second impl. | why |
 |---|---|---|---|
+| M17 key substitution, `pinned` | FAIL | PASS | second impl. verifies the seal but does not compare it with the key supplied out-of-band (no S6/V6 pinning) |
 | M18 root extra file | FAIL | PASS | no "undeclared file in package root" check (S1) |
 | M19 index metadata edited | FAIL | PASS | no index-metadata digest check (S7) |
 | M21 unsigned log truncated | FAIL | INCONCLUSIVE | no checkpoint head (S8) |
+
+In `open` mode `M17` is **not** a disagreement: both implementations accept it, and both
+should, because no key was supplied to either of them.
 
 That is the corpus doing its job: it found that **our own second implementation lags
 the first on three checks** — something "8/8 agreement on fixtures" could never have

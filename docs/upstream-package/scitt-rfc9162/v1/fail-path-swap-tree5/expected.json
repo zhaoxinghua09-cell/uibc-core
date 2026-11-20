@@ -1,0 +1,19 @@
+{
+  "description": "Order tamper on a 4|1 split at the left edge, the smallest tree with two siblings in the path.",
+  "inclusion_path": [
+    "c4c3e1574a3148c834d4f64273f4aacbb6ab67db6c4e5527adb25658b3d18528",
+    "5024c3f15949f4c010692f560aec9572dc7a08f29b3f18d37f36e461b9826d08",
+    "476f3cbbab17bccdeb972e38224b3c1a49a032236bdb9243f1ab990d6971b68e"
+  ],
+  "leaf_entry": {
+    "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+    "digest_hex": "5f6358068616b71b159020070817cdbde808e03c30f7104d714875cae5fa95fe",
+    "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: fail-path-swap-tree5 :: leaf 0",
+    "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a206661696c2d706174682d737761702d7472656535203a3a206c6561662030"
+  },
+  "leaf_index": 0,
+  "reconstructed_root": "bed720d19bfe02319260fcfd3aa46d83c7d5e75b09c1d66468f075e084429202",
+  "result": "INVALID_INCLUSION_PATH",
+  "root_true": "01a6c5ff96cc3807b1a38533cd232545c0ee9105789676ea72fc747846861ba7",
+  "tree_size": 5
+}

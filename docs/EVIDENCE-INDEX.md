@@ -2,18 +2,18 @@
 
 每条检查对应到：验证器里的定义、覆盖它的测试、指向它的红队攻击、以及提到它的文档。**重新生成即可复核**，不会随记忆漂移。
 
-**测试套件：916 个用例**（本页由生成器现数，别处只引用本页，不再抄写这个数字）。
+**测试套件：1015 个用例**（本页由生成器现数，别处只引用本页，不再抄写这个数字）。
 
 
 | 检查 | 名称 | 出厂包是否走到 | 测试 | 红队 | 文档 |
 |---|---|---|---|---|---|
 | S0 | verifier robustness | 否 | 5 | 0 | 10 |
-| S1 | package structure | 是 | 13 | 1 | 33 |
+| S1 | package structure | 是 | 14 | 1 | 33 |
 | S2 | identity consistency | 是 | 9 | 1 | 21 |
 | S3 | lifecycle state machine + semantics | 是 | 10 | 1 | 20 |
 | S4 | evidence integrity | 是 | 22 | 3 | 43 |
 | S5 | evidence root | 是 | 12 | 3 | 34 |
-| S6 | seal signature | 是 | 23 | 1 | 38 |
+| S6 | seal signature | 是 | 24 | 1 | 38 |
 | S7 | evidence index metadata | 否 | 6 | 1 | 17 |
 | S8 | package checkpoint head | 否 | 8 | 2 | 26 |
 | S9 | head pinned out-of-band | 否 | 9 | 1 | 31 |

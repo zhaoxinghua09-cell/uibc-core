@@ -1,0 +1,17 @@
+{
+  "description": "tree_size=17, leaf_index=16: the single tail leaf of a 16|1 split.",
+  "inclusion_path": [
+    "d1e63a221c71564ec27218df197bb9cdfffb710019332554b7cc9057cc217f03"
+  ],
+  "leaf_entry": {
+    "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+    "digest_hex": "0649a0bd441cf6985e9634d071e169b580f034114a421fc8cc00b785d0bcc280",
+    "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: valid-tree17-index16 :: leaf 16",
+    "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a2076616c69642d7472656531372d696e6465783136203a3a206c656166203136"
+  },
+  "leaf_index": 16,
+  "reconstructed_root": "5b4c1777f75566de2548d1f31894606d7fe355e4d19d26820b1b30f67d25efce",
+  "result": "VALID",
+  "root_true": "5b4c1777f75566de2548d1f31894606d7fe355e4d19d26820b1b30f67d25efce",
+  "tree_size": 17
+}

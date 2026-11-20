@@ -1,0 +1,22 @@
+{
+  "description": "tree_size=64: full binary tree of depth 6, right-most leaf; every sibling is on the left.",
+  "inclusion_path": [
+    "64c5a924d2a7702029bda214d874bb21c4848fbce9238d3dab067d4980b2bacf",
+    "f1d8ed2e6fd6e2f93565e7536b043023125d12bd05711732b8b460c4fce8cdf0",
+    "405cd20e95ebc27d3fc4d0dd7fa794bbd07ad33dc59219093e2134ec5b6385f8",
+    "8a0574a48568ad7c487e007dd9ec9de32eee02b392d5d0f9824df3bc97a4cb5a",
+    "b9495a243e2eed8ec0dc9284f7365f740803536bb5759f9081777e8b4734cbed",
+    "f373c5a6dbb98ba5d21b009aaba4544727da7626cbf10a5d3d80c6275b77c0ca"
+  ],
+  "leaf_entry": {
+    "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+    "digest_hex": "ca3f4773445c4aee105ded7430d38f5596def5d2a8679a0130738bdc3da948b8",
+    "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: valid-tree64-index63 :: leaf 63",
+    "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a2076616c69642d7472656536342d696e6465783633203a3a206c656166203633"
+  },
+  "leaf_index": 63,
+  "reconstructed_root": "e91ddf36e67bc0c5d41bc2a701eadf6ad5397de22e0ec43742e19057638f8f27",
+  "result": "VALID",
+  "root_true": "e91ddf36e67bc0c5d41bc2a701eadf6ad5397de22e0ec43742e19057638f8f27",
+  "tree_size": 64
+}

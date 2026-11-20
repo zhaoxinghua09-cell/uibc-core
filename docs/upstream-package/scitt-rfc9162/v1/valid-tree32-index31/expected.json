@@ -1,0 +1,21 @@
+{
+  "description": "tree_size=32, leaf_index=31: full binary tree, all right edges.",
+  "inclusion_path": [
+    "ca2d1af41eeb680877957ee9478e608903d5dd87b53cddd311ee807c4c1ecca9",
+    "560b2d78cded67899a9dbec03e1f40ef15b6d5fcbf9385573b85282257da2406",
+    "e0cca8f883fabb96c0e62c3924572777b078454347bf130621a4ba523109cd7f",
+    "1d08278dfd0700213869591684e0bbbe6f57df0525c7a55f8b3fbec3fe8911fd",
+    "eb92d8f79125576ceceb1b60f2b3f6f8df6cd6d6480490153e2e65e158cd7e00"
+  ],
+  "leaf_entry": {
+    "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+    "digest_hex": "d21c55a4b02829f8c3824a7959a7d46d47c293219dec72564fe363f764929249",
+    "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: valid-tree32-index31 :: leaf 31",
+    "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a2076616c69642d7472656533322d696e6465783331203a3a206c656166203331"
+  },
+  "leaf_index": 31,
+  "reconstructed_root": "15baa44e82a0337d862948daec7e074399ed56014786d8ddd19c3f240a451bd1",
+  "result": "VALID",
+  "root_true": "15baa44e82a0337d862948daec7e074399ed56014786d8ddd19c3f240a451bd1",
+  "tree_size": 32
+}

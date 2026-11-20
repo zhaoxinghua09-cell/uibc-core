@@ -1,0 +1,17 @@
+{
+  "description": "tree_size=3, leaf_index=2: the right subtree has size 1, so the path is uneven.",
+  "inclusion_path": [
+    "d4c416bdf0c818f475a63a6b69d998dd2c1ba71326f266a44f3d85dd6862c4e4"
+  ],
+  "leaf_entry": {
+    "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+    "digest_hex": "2762edeec6fd01ad5c0d7df6bade62df63bbbbe654e735f4d8f02c68829bb25c",
+    "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: valid-tree3-index2 :: leaf 2",
+    "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a2076616c69642d74726565332d696e64657832203a3a206c6561662032"
+  },
+  "leaf_index": 2,
+  "reconstructed_root": "3b0fb0cf93f700ac8873c6a71c3a816ab5ca82e7014f32d9b43c3d7b95ab1e30",
+  "result": "VALID",
+  "root_true": "3b0fb0cf93f700ac8873c6a71c3a816ab5ca82e7014f32d9b43c3d7b95ab1e30",
+  "tree_size": 3
+}

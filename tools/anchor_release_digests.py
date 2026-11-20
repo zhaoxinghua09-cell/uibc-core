@@ -121,6 +121,30 @@ def _run(argv, timeout=40):
         return None, str(exc)
 
 
+def _detail_line(text):
+    """The last line of a child's output, with machine paths reduced to filenames.
+
+    ANCHORS.json is published on the release, so a line like
+    `RESULT_JSON=C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\...\\anchor_freetsa.json`
+    leaks a local layout into the artifact and tells a reader nothing they can use.
+    Measured 2026-11-20, dry run of the release steps: the value was an absolute path
+    that would differ on the CI machine and on every reader's machine.
+    """
+    body = (text or "").strip()
+    line = body.splitlines()[-1] if body else "no output"
+    if "=" in line:
+        key, value = line.split("=", 1)
+        value = value.strip()
+        # Windows drive path or POSIX absolute path: publish the name only. Both
+        # separators are normalised before the basename, because a Windows path handed
+        # to a POSIX `basename` comes back whole — measured in CI on 2026-11-20, where
+        # the test for a Windows path failed on Linux for exactly that reason.
+        if value.startswith("/") or (len(value) > 2 and value[1] == ":" and value[2] in "\\/"):
+            name = value.replace("\\", "/").rstrip("/").rsplit("/", 1)[-1]
+            line = "%s=%s" % (key, name)
+    return line[:200]
+
+
 def anchor(path, out_dir, tsa="freetsa", offline=False):
     """Try TSA and OTS; record what actually happened for each."""
     status = {"file": os.path.basename(path), "file_sha256": _sha256_file(path)}
@@ -132,10 +156,9 @@ def anchor(path, out_dir, tsa="freetsa", offline=False):
         code, out = _run([sys.executable, os.path.join(_HERE, "anchor_tsa.py"),
                           "--head-file", path, "--out-dir", out_dir, "--tsa", tsa])
         if code == 0:
-            status["tsa"] = {"state": "anchored", "detail": out.strip().splitlines()[-1][:200]}
+            status["tsa"] = {"state": "anchored", "detail": _detail_line(out)}
         else:
-            status["tsa"] = {"state": "unanchored",
-                             "detail": (out or "no output").strip().splitlines()[-1][:200]}
+            status["tsa"] = {"state": "unanchored", "detail": _detail_line(out)}
 
         code, out = _run([sys.executable, os.path.join(_HERE, "anchor_ots.py"), "--stamp", path])
         if code == 0:
@@ -144,10 +167,9 @@ def anchor(path, out_dir, tsa="freetsa", offline=False):
                 status["ots"] = {"state": "pending_calendar",
                                  "detail": "a calendar attestation, not a Bitcoin block"}
             else:
-                status["ots"] = {"state": "anchored", "detail": out.strip().splitlines()[-1][:200]}
+                status["ots"] = {"state": "anchored", "detail": _detail_line(out)}
         else:
-            status["ots"] = {"state": "unavailable",
-                             "detail": (out or "no output").strip().splitlines()[-1][:200]}
+            status["ots"] = {"state": "unavailable", "detail": _detail_line(out)}
 
     out = os.path.join(out_dir, "ANCHORS.json")
     with open(out, "w", encoding="utf-8", newline="\n") as f:

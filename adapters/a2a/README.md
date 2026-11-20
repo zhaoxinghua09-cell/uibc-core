@@ -61,9 +61,17 @@ Extra surfaces in this mode:
 | `gateway/discover` / `GET /agents?q=` | 6.2.1, 6.2.2 a | lookup, enabled-only, ranking basis and score returned |
 | `GET /agent-record.json` | 7.2.1 b | Agent Card + registration merged into one record |
 | `X-AUIB-Trace-Id` & co. | 7.3.1 d, 9.1.2 a/d | inherited from upstream, generated when absent, echoed back |
+| `gateway/transform` | 7.2.2 a/b/e | JSON ↔ XML with type markers and a round-trip gate; drift is refused, not forwarded |
+| `gateway/route` / `gateway/routes` | 8.1.1 a/b, 8.1.2 a/b | versioned route table with pointer rollback; routing decisions return threshold, candidates and score |
+| `gateway/specs` | 7.1.1 b | tool descriptor parse + validation (name, description, inputSchema, required) |
+| `gateway/journal` | 9.1.1 a–d | JSONL access journal; query by trace / agent / method / time window (no message bodies) |
+| `GET /metrics` | 8.2.1 a/b | request counters, error rate, p50/p95 latency, over-budget count |
+| `gateway/backup` | 6.3.1 a/c, 6.3.2 a/b | snapshot with SHA-256 manifest, incremental mode, corruption alarm, verified restore |
+| `gateway/registry/update` | 6.1.1 c | metadata edit: re-validate, hold for approval, then apply with a diff in the journal |
+| `gateway/templates` | 6.1.1 d | scenario registration templates (medical-device, government-service) that must pass the real validator |
 
 Clause-by-clause status, gaps included: `docs/CROSSWALK-ISC-0174.md`, regenerated
-by `tools/gateway_conformance.py` (18 live probes, loopback, no mocks).
+by `tools/gateway_conformance.py` (33 live probes, loopback, no mocks).
 
 ## Verifying with a DID instead of a key
 

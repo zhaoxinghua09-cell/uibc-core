@@ -43,6 +43,9 @@ from uibc_core import cli as ucli                      # noqa: E402
 from uibc_core.signing import ed_generate_seed         # noqa: E402
 from adapters.a2a import registry as reg               # noqa: E402
 from adapters.a2a import state as st                   # noqa: E402
+from adapters.a2a import templates as tpl_mod          # noqa: E402
+from adapters.a2a import transform as tf_mod           # noqa: E402
+from adapters.a2a import specs as specs_mod            # noqa: E402
 from adapters.a2a.server import A2AAdapter, make_handler  # noqa: E402
 
 STANDARD = "T/ISC 0174-2026"
@@ -115,7 +118,15 @@ def run_probes(tmp):
         "org/endpoint/credential/scope binding checks: %s" % binding)
 
     card = os.path.join(REPO, "adapters", "a2a", "agent-card.json")
-    adapter = A2AAdapter(tmp, card, registry=report)
+    registry_path = os.path.join(tmp, "registry.json")
+    with open(registry_path, "w", encoding="utf-8") as handle:
+        json.dump({"schema": "uibc-a2a-registry/1", "agents": [_record()]},
+                  handle, ensure_ascii=False)
+    lifecycle_path = os.path.join(tmp, "lifecycle.json")
+    adapter = A2AAdapter(tmp, card, registry=registry_path,
+                         lifecycle_state=lifecycle_path,
+                         journal_path=os.path.join(tmp, "journal.jsonl"),
+                         backup_root=os.path.join(tmp, "backups"))
     adapter.lifecycle.enable(AGENT_ID)
     srv = ThreadingHTTPServer(("127.0.0.1", 0), make_handler(adapter))
     port = srv.server_address[1]
@@ -135,13 +146,14 @@ def run_probes(tmp):
         except urllib.error.HTTPError as exc:
             return exc.code, json.loads(exc.read().decode("utf-8")), exc.headers
 
-    def get(path):
+    def get(path, raw=False):
         req = urllib.request.Request("http://127.0.0.1:%d%s" % (port, path))
         try:
             with urllib.request.urlopen(req, timeout=10) as resp:
-                return resp.status, json.loads(resp.read().decode("utf-8"))
+                body = resp.read().decode("utf-8", "replace")
+                return resp.status, (body if raw else json.loads(body))
         except urllib.error.HTTPError as exc:
-            return exc.code, {}
+            return exc.code, ("" if raw else {})
 
     try:
         status, payload, _ = post("uibc/verify", {"package": "good.uibc", "agent": AGENT_ID})
@@ -226,6 +238,104 @@ def run_probes(tmp):
         log = [e for e in adapter.access_log if e["trace"] == "conformance-trace-01"]
         add("P14_access_log", bool(log),
             "forwarded call left an access record with trace id")
+
+        # -- 7.2.2 conversion -------------------------------------------------
+        converted = adapter.dispatch("gateway/transform", {
+            "payload": {"a": [1, {"b": True}], "c": None}, "target": "xml"})
+        add("P16_convert_roundtrip",
+            converted.get("ok") is True and converted.get("roundtrip") == "ok",
+            "JSON->XML conversion round-tripped and compared")
+
+        xml = tf_mod.json_to_xml({"count": 1})
+        corrupted = xml.replace('json-type="int"', 'json-type="str"')
+        add("P17_drift_detected",
+            tf_mod.xml_to_json(corrupted) != {"count": 1},
+            "a type-flipped message fails the semantic comparison (7.2.2 e)")
+
+        # -- 7.3.1 c) header mapping ------------------------------------------
+        mapped = tpl_mod.map_headers(
+            {"X-AUIB-Trace-Id": "t-1", "X-AUIB-Timestamp": "2026-11-20T00:00:00Z"},
+            "mcp")
+        add("P18_header_map",
+            mapped["headers"].get("X-MCP-Trace-Id") == "t-1"
+            and [u["slot"] for u in mapped["unmappable"]] == ["timestamp"],
+            "cross-protocol map translates trace id and declares the slot it cannot fill")
+
+        # -- 8.1.1 route versions ---------------------------------------------
+        adapter.dispatch("gateway/routes", {"op": "add", "routes": [
+            {"agent": AGENT_ID, "match": {"service": "uibc"}}], "note": "probe"})
+        rolled = adapter.dispatch("gateway/routes", {"op": "rollback", "version": 1})
+        add("P19_route_rollback",
+            rolled["current"] == 1 and adapter.routes.current_version == 1,
+            "route table rolled back to version 1 with history kept")
+
+        # -- 8.1.2 explainable routing ----------------------------------------
+        hit = adapter.dispatch("gateway/route", {"text": "verify a uibc package"})
+        add("P20_route_explainable",
+            hit.get("decision") == AGENT_ID and hit.get("threshold") is not None
+            and hit.get("candidates") and "jaccard" in hit.get("basis", ""),
+            "decision returned with threshold, candidates, score and basis")
+        miss = adapter.dispatch("gateway/route", {"text": "明天的天气如何",
+                                                  "threshold": 0.9})
+        add("P21_route_threshold_holds", miss.get("decision") is None,
+            "below-threshold request refuses to name an agent")
+
+        # -- 8.2.1 metrics ------------------------------------------------------
+        status, text = get("/metrics", raw=True)
+        add("P22_metrics_exposed", status == 200 and isinstance(text, str)
+            and "uibc_gateway_requests_total" in text,
+            "/metrics serves counters and latency quantiles")
+
+        # -- 9.1.1 journal ------------------------------------------------------
+        entries = adapter.journal.query(trace="conformance-trace-01")
+        add("P23_journal_query", entries["total"] >= 1,
+            "journal answers a trace-id query with %d record(s)" % entries["total"])
+
+        # -- 6.1.1 c/d edit + templates ----------------------------------------
+        pending = adapter.dispatch("gateway/registry/update", {
+            "agent": AGENT_ID, "patch": {"name": "uibc-verifier-2"}})
+        add("P24_edit_needs_review",
+            pending.get("pending_review") is True and pending.get("applied") is False,
+            "metadata change is held until approved (6.1.1 c)")
+        rejected = adapter.dispatch("gateway/registry/update", {
+            "agent": AGENT_ID, "patch": {"endpoint": ""}, "approve": True})
+        add("P25_edit_revalidates",
+            rejected.get("ok") is False and rejected["errors"][0]["code"] == "R1",
+            "invalid edit is rejected before it can be applied")
+        template = adapter.dispatch("gateway/templates", {"id": "medical-device"})
+        add("P26_template_validates",
+            template["validation"]["ok"] is True,
+            "published template passes the same validator as real registrations")
+
+        # -- 6.3.1 / 6.3.2 backup, corruption detection, verified restore ------
+        adapter.dispatch("gateway/backup", {"op": "create"})
+        verify = adapter.dispatch("gateway/backup", {"op": "verify"})
+        add("P27_backup_verifies", verify["ok"] is True,
+            "snapshot verified against its own SHA-256 manifest (%d file(s))"
+            % verify.get("checked", 0))
+
+        with open(lifecycle_path, "w", encoding="utf-8") as handle:
+            handle.write("{broken")
+        alert = adapter.dispatch("gateway/backup", {"op": "detect"})
+        add("P28_corruption_alerts", alert["alert"] is True and alert["broken"] >= 1,
+            "corrupt live state raises the 6.3.2 a) alarm (%d finding(s))"
+            % len(alert["drift"]))
+
+        restore = adapter.dispatch("gateway/backup", {"op": "restore"})
+        add("P29_restore_verified",
+            restore["ok"] is True and restore["verified_files"] >= 1,
+            "restore refuses unverified snapshots and repaired %d file(s)"
+            % len(restore.get("restored") or []))
+
+        # -- 7.1.1 b) model interface descriptor -------------------------------
+        good = adapter.dispatch("gateway/specs", {"descriptor": specs_mod.MCP_EXAMPLE})
+        bad = adapter.dispatch("gateway/specs", {
+            "descriptor": {"name": "x", "description": "?",
+                           "inputSchema": {"type": "array"}}})
+        add("P30_spec_validation",
+            good["ok"] is True and bad["ok"] is False
+            and any(e["code"] == "D4" for e in bad["errors"]),
+            "tool descriptor parsed and rejected when malformed (D4 on non-object schema)")
     finally:
         srv.shutdown()
     return probes
@@ -246,10 +356,15 @@ def clauses():
          "r": ["P2_binding"], "g": "绑定为“校验一致性”（主机名/签发者/状态/范围），非链上注册"},
         {"c": "6.1.1 c)", "k": "宜", "axis": "身份分发",
          "t": "支持元数据在线编辑且变更需审核",
-         "s": "MISSING", "e": "-", "g": "无编辑接口；注册是一次性文件加载"},
+         "s": "PARTIAL",
+         "e": "gateway/registry/update：先校验→待审→approve 才落地，全程进 journal",
+         "r": ["P24_edit_needs_review", "P25_edit_revalidates"],
+         "g": "审核只是单点 approve 布尔确认 + 留痕，没有多人审批流转；变更也未写回注册文件"},
         {"c": "6.1.1 d)", "k": "宜", "axis": "身份分发",
          "t": "提供面向行业/场景的元数据模板",
-         "s": "MISSING", "e": "-", "g": "无模板；字段集仅一套"},
+         "s": "PASS",
+         "e": "adapters/a2a/templates.py（medical-device / government-service，模板本身过同一校验器）",
+         "r": ["P26_template_validates"], "g": ""},
         {"c": "6.1.2 a)", "k": "宜", "axis": "身份分发",
          "t": "为每个智能体生成网关内唯一、可跨域解析的标识",
          "s": "PARTIAL", "e": "uibc_core/did.py；our DID: " + AGENT_ID,
@@ -285,10 +400,16 @@ def clauses():
          "g": "无限流/鉴权：任何人都能查这张表"},
         {"c": "6.3.1", "k": "应", "axis": "身份分发",
          "t": "身份与操作数据定时/主动备份，加密存储，增量+全量",
-         "s": "MISSING", "e": "-", "g": "无注册库持久化之外的备份机制"},
+         "s": "PARTIAL",
+         "e": "adapters/a2a/backup.py：全量/增量快照 + SHA-256 清单；gateway/backup",
+         "r": ["P27_backup_verifies"],
+         "g": "6.3.1 b) 加密存储未实现：零依赖不自造密码学，manifest 里如实记 encrypted=false"},
         {"c": "6.3.2", "k": "应", "axis": "身份分发",
          "t": "故障自动检测、告警、快速恢复、跨域容灾",
-         "s": "MISSING", "e": "-", "g": "无容灾设计；状态文件损坏即丢状态"},
+         "s": "PARTIAL",
+         "e": "backup.detect_corruption（哈希漂移 + JSON 不可解析 → 告警）+ 校验后恢复；gateway/backup",
+         "r": ["P28_corruption_alerts", "P29_restore_verified"],
+         "g": "无跨域标识解析数据与授权策略的容灾；无自动定时备份调度（需外部 cron）"},
         {"c": "6.3.3", "k": "应", "axis": "身份分发",
          "t": "注册/操作数据加密存储传输并脱敏",
          "s": "PARTIAL", "e": "传输可置于 TLS 反代后（deploy/）",
@@ -300,8 +421,10 @@ def clauses():
          "r": ["P3_forward_verified"], "g": ""},
         {"c": "7.1.1 b)", "k": "应", "axis": "协议适配",
          "t": "支持通用模型接口定义规范（如 MCP/OpenAPI）的解析与校验",
-         "s": "MISSING", "e": "mcp_server/ 是我们的服务端，不是网关侧解析",
-         "g": "网关不解析任何模型接口规范；接入即转发"},
+         "s": "PARTIAL",
+         "e": "adapters/a2a/specs.py：工具描述符解析与校验（名称/描述/inputSchema/required）",
+         "r": ["P30_spec_validation"],
+         "g": "只覆盖工具描述符（MCP/function-calling 形态）；不解析完整 OpenAPI 文档"},
         {"c": "7.1.2 a)", "k": "应", "axis": "协议适配",
          "t": "支持 TCP 与 HTTP/HTTPS 传输；宜 WebSocket/SSE/gRPC",
          "s": "PASS", "e": "ThreadingHTTPServer + JSON-RPC over HTTP",
@@ -316,18 +439,25 @@ def clauses():
          "r": ["P10_agent_record"], "g": ""},
         {"c": "7.2.2 a)-b)", "k": "应", "axis": "协议适配",
          "t": "异构消息格式（JSON/XML）自动识别转换且语义保持",
-         "s": "MISSING", "e": "-", "r": [],
-         "g": "只走 JSON。补 XML 转换是一整块工作，故按缺项记，不按“部分”记"},
+         "s": "PASS",
+         "e": "adapters/a2a/transform.py：json↔xml + 逐元素类型标记 + 往返比对",
+         "r": ["P16_convert_roundtrip"],
+         "g": "只覆盖 JSON 与 XML 两种（a 项“至少”满足）；其他格式一律拒绝而不是猜"},
         {"c": "7.2.2 e)", "k": "宜", "axis": "协议适配",
          "t": "消息转换结果语义一致性校验，失败拒绝并记安全事件",
-         "s": "MISSING", "e": "-", "g": "无转换即无此校验"},
+         "s": "PASS",
+         "e": "transform.convert 往返不一致即抛 SemanticDrift；server 记录 semantic-drift 事件并拒绝转发",
+         "r": ["P17_drift_detected"], "g": ""},
         {"c": "7.3.1 a)", "k": "应", "axis": "协议适配",
          "t": "统一的应用层消息扩展头规范（注册、跨域转发）",
          "s": "PARTIAL", "e": "server.TRACE_HEADERS 定义 5 个头",
          "g": "未固化为规范文档，无第二个网关实测互认"},
         {"c": "7.3.1 c)", "k": "应", "axis": "协议适配",
          "t": "跨协议扩展头字段映射规则",
-         "s": "MISSING", "e": "-", "g": "无跨协议映射（只有一种协议）"},
+         "s": "PASS",
+         "e": "templates.HEADER_MAP（http/a2a/mcp 三列）；填不上的槽位显式列入 unmappable",
+         "r": ["P18_header_map"],
+         "g": "映射目标是我们自定义的槽位名（X-MCP-*），不是对方规范里的既定字段"},
         {"c": "7.3.1 d)", "k": "宜", "axis": "协议适配",
          "t": "跨网关扩展头最小公共字段（源/目标/请求/追踪/版本/时间戳）",
          "s": "PASS", "e": "X-AUIB-Trace-Id 等 5 字段 + 透传实测",
@@ -339,27 +469,37 @@ def clauses():
         # 8 路由寻址
         {"c": "8.1.1 a)", "k": "应", "axis": "路由寻址",
          "t": "路由规则版本管理与回滚",
-         "s": "MISSING", "e": "-", "g": "单端点直转，无路由表可版本化"},
+         "s": "PASS",
+         "e": "adapters/a2a/router.py RouteTable：不可变版本快照 + 指针回滚 + 可落盘；gateway/routes",
+         "r": ["P19_route_rollback"],
+         "g": "回滚是移动指针，不重写历史；无并发写冲突检测（单进程假设）"},
         {"c": "8.1.1 b)", "k": "宜", "axis": "路由寻址",
          "t": "基于标识/服务名/API 路径的静态路由",
-         "s": "PARTIAL", "e": "注册表内按 agent id 定位端点",
-         "g": "无路径级路由；一个 agent 只映射一个端点"},
+         "s": "PASS",
+         "e": "RouteTable.match(agent/service/api)，前缀匹配 + 命中字段回传",
+         "g": ""},
         {"c": "8.1.2 a)", "k": "应", "axis": "路由寻址",
          "t": "自然语言请求解析并匹配到智能体",
          "s": "PARTIAL", "e": "关键词匹配 + 能力标签",
          "g": "无句法/语义解析，长句匹配会漏"},
         {"c": "8.1.2 b)", "k": "应", "axis": "路由寻址",
          "t": "语义路由决策可解释：依据、得分、候选集、阈值、日志",
-         "s": "PARTIAL", "e": "ranking/score/matched_on 全部回传，可打印",
-         "r": ["P9b_ranking_explainable"],
-         "g": "未输出阈值；无候选集截断说明"},
+         "s": "PASS",
+         "e": "router.semantic_route 回传 threshold/candidates/score/basis/log_entry；低于阈值拒绝指派",
+         "r": ["P20_route_explainable", "P21_route_threshold_holds"],
+         "g": "打分用 Jaccard 词重合，是词面而非向量语义；对同义改写会低分"},
         {"c": "8.2.1 a)", "k": "应", "axis": "路由寻址",
          "t": "满足约定的消息转发时延指标",
-         "s": "PARTIAL", "e": "tools/latency_probe.py、tools/latency_per_call.py",
-         "g": "有测量工具，无网关内 SLO 断言与超时策略"},
+         "s": "PASS",
+         "e": "metrics 记录每次调用时延与 p50/p95，并统计超预算次数（--latency-budget-ms）",
+         "r": ["P22_metrics_exposed"],
+         "g": "预算是我们自己声明的 250ms，尚未与对方约定数值；无超时熔断"},
         {"c": "8.2.1 b)", "k": "应", "axis": "路由寻址",
          "t": "吞吐/延迟/错误率实时监控与可视化",
-         "s": "MISSING", "e": "-", "g": "仅有 access_log 可事后统计，无实时指标"},
+         "s": "PARTIAL",
+         "e": "GET /metrics（Prometheus 文本 + JSON snapshot），含请求量/错误率/延迟分位/超预算",
+         "r": ["P22_metrics_exposed"],
+         "g": "有指标输出与文本展示，无图表面板与长期趋势分析"},
         {"c": "8.2.2", "k": "宜", "axis": "路由寻址",
          "t": "AI 报文解析与转发加速、流式透传、内容感知路由",
          "s": "MISSING", "e": "-", "g": "未实现，且不该在没有压测前宣称"},
@@ -370,7 +510,10 @@ def clauses():
          "r": ["P14_access_log"], "g": "进程内列表，重启即丢；未落盘"},
         {"c": "9.1.1 b)-d)", "k": "宜", "axis": "安全防护",
          "t": "日志集中存储、检索、维度组合查询、关联分析",
-         "s": "MISSING", "e": "-", "g": "无日志后端"},
+         "s": "PARTIAL",
+         "e": "adapters/a2a/journal.py：JSONL 落盘 + trace/agent/method/时间窗组合过滤；gateway/journal",
+         "r": ["P23_journal_query"],
+         "g": "无集中日志后端；关联分析只做到按 trace 串链路，没有异常聚合"},
         {"c": "9.1.2 a)", "k": "应", "axis": "安全防护",
          "t": "跨智能体分布式链路追踪，每次调用全局唯一追踪标识",
          "s": "PASS", "e": "X-AUIB-Trace-Id 生成/继承 + 回传",

@@ -224,6 +224,7 @@ def main(argv=None):
     v = sub.add_parser("verify")
     v.add_argument("--sig", required=True)
     v.add_argument("--file", default=None)
+    v.add_argument("--json", action="store_true")
 
     a = sub.add_parser("anchor")
     a.add_argument("--file", required=True)
@@ -248,6 +249,19 @@ def main(argv=None):
 
     if args.cmd == "verify":
         reasons = verify_file(args.sig, args.file)
+        # A verifier that only prints prose cannot be consumed by another check.
+        # check_release_anchors reads this as JSON, so it has to be able to ask for it.
+        if getattr(args, "json", False):
+            sidecar = json.load(open(args.sig, encoding="utf-8"))
+            print(json.dumps({
+                "verified": not reasons,
+                "key_id": sidecar.get("key_id"),
+                "file_sha256": sidecar.get("file_sha256"),
+                "file_bytes": sidecar.get("file_bytes"),
+                "public_key_b64": sidecar.get("public_key_b64"),
+                "problems": reasons,
+            }, indent=2, sort_keys=True))
+            return 0 if not reasons else 1
         if reasons:
             print("NOT VERIFIED — %d reason(s):" % len(reasons))
             for r in reasons:

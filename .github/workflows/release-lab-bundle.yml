@@ -47,8 +47,16 @@ jobs:
           echo "tag=$ref" >> "$GITHUB_OUTPUT"
           echo "version=${ref#v}" >> "$GITHUB_OUTPUT"
 
+      # A tag names one commit, so its release must be one set of bytes. Measured
+      # 2026-11-20: a dispatch of the same tag rebuilt CORPUS-DIGESTS.txt to a different
+      # digest than the tag push, because the bundle stamped the wall clock. The epoch
+      # is the tag's commit time, which does not move.
       - name: Build the bundle and measure the controls
         run: |
+          if [ -z "$SOURCE_DATE_EPOCH" ]; then
+            export SOURCE_DATE_EPOCH="$(git log -1 --format=%ct)"
+          fi
+          echo "SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH" >> "$GITHUB_ENV"
           python tools/release_lab_bundle.py --version "${{ steps.v.outputs.version }}" --out release
 
       - name: Refuse a bundle that does not recompute

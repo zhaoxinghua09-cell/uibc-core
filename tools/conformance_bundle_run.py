@@ -179,10 +179,14 @@ def _public(rows):
 def main():
     ap = argparse.ArgumentParser()
     pyz = os.path.join(HERE, "uibc_core.pyz")
+    bundled = os.path.isfile(pyz)
     default_verify = ('"%s" "%s" verify {pkg}' % (sys.executable, pyz)
-                      if os.path.isfile(pyz)
+                      if bundled
                       else sys.executable + " -m uibc_core.cli verify {pkg}")
     ap.add_argument("--verify", default=default_verify)
+    ap.add_argument("--allow-installed", action="store_true",
+                    help="accept a verifier installed in this Python when the archive "
+                         "carries none; without it that case is a setup failure (exit 3)")
     ap.add_argument("--json", action="store_true")
     ap.add_argument("--receipt", default="receipt.json",
                     help="where to write the run receipt; '' to skip")
@@ -192,6 +196,25 @@ def main():
 
     if not os.path.isdir(CASES):
         sys.exit("error: cases/ not found next to this script; unzip the archive first")
+
+    # Measured 2026-11-20: the archive's own control ("a machine without the verifier
+    # must exit 3") went green on a runner that had `uibc-core` pip-installed, because
+    # this script fell back to `python -m uibc_core.cli`. The fallback made "the archive
+    # carries its verifier" true only on machines that did not need it. So the fallback
+    # is no longer silent: with no bundled verifier, running this script as-is is a
+    # setup failure, not a conformance result.
+    if not bundled and not a.allow_installed and a.verify == default_verify:
+        sys.stderr.write(
+            "\nThis archive carries no verifier of its own (uibc_core.pyz is absent), so "
+            "there is nothing here to run.\n"
+            "That is a setup problem, not a verdict about the corpus: refusing to write a "
+            "receipt that would read as failures.\n\n"
+            "Either point this runner at a verifier you have:\n"
+            "    python run.py --verify \"uibc verify {pkg}\"\n"
+            "or say out loud that you accept one installed in %s:\n"
+            "    python run.py --allow-installed\n"
+            % sys.executable)
+        sys.exit(3)
 
     rows = run_all(a.verify)
     passed = sum(1 for r in rows if r["ok"])
@@ -240,11 +263,27 @@ def main():
                        "independent audit: the corpus, the manifest and this runner "
                        "are all authored by the project."),
             "run_by": a.run_by or None,
-            "when_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            # A receipt is normally stamped with the clock. When the caller fixes
+            # SOURCE_DATE_EPOCH -- as the release workflow does, so one tag means one
+            # set of bytes -- the stamp follows it. Measured 2026-11-20: this one field
+            # made a re-run of the same tag produce a different receipt, and therefore
+            # a different CORPUS-DIGESTS.txt.
+            "when_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ",
+                                      time.gmtime(int(os.environ["SOURCE_DATE_EPOCH"])
+                                                  if os.environ.get("SOURCE_DATE_EPOCH")
+                                                  else None)),
             "command": a.verify,
+            # Whether the thing that judged the cases came out of this archive or out
+            # of the machine's site-packages. A reader who cares about "no install
+            # needed" needs to see which it was.
+            "verifier_kind": "bundled" if bundled else "installed",
             "python": sys.version.split()[0],
             "platform": platform.platform(),
             "verifier_version": verifier_version(a.verify),
+            # Which verifier answered: the one inside this archive, or one this
+            # machine happened to have. The two are not the same evidence.
+            "verifier_source": ("bundled with the archive" if bundled
+                                else "installed in the Python that ran this"),
             "manifest_sha256": sha256(MANIFEST) if os.path.isfile(MANIFEST) else None,
             "cases": len(public_rows), "passed": passed,
             "rows": public_rows,

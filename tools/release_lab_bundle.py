@@ -98,13 +98,24 @@ def measure(archive, version, workroot):
     pyz = os.path.join(c, "uibc_core.pyz")
     if os.path.isfile(pyz):
         os.remove(pyz)
-    proc_c = _run([sys.executable, "run.py"], cwd=c, env=env_clean)
-    if proc_c.returncode != 3:
-        raise SystemExit("scenario C exited %d, not 3 — an environment failure was not told apart "
-                         "from a corpus result" % proc_c.returncode)
-    if os.path.isfile(os.path.join(c, "receipt.json")):
-        raise SystemExit("scenario C wrote a receipt: 0/36 from a missing verifier is publishable "
-                         "as 'the corpus fails everything'")
+
+    # Measured 2026-11-20: on a machine where `uibc-core` is importable, this control
+    # read green while measuring nothing -- the runner fell back to the installed
+    # package, so "no verifier available" was never true. A control that cannot be
+    # exhibited must be reported as unmeasured, not as passed.
+    installed = _run([sys.executable, "-c", "import uibc_core"], cwd=c, env=env_clean).returncode == 0
+    if installed:
+        scenario_c = ("unmeasured: this machine had uibc_core importable, so 'no verifier "
+                      "available' could not be arranged")
+    else:
+        proc_c = _run([sys.executable, "run.py"], cwd=c, env=env_clean)
+        if proc_c.returncode != 3:
+            raise SystemExit("scenario C exited %d, not 3 — an environment failure was not told "
+                             "apart from a corpus result" % proc_c.returncode)
+        if os.path.isfile(os.path.join(c, "receipt.json")):
+            raise SystemExit("scenario C wrote a receipt: 0/36 from a missing verifier is "
+                             "publishable as 'the corpus fails everything'")
+        scenario_c = ("measured: exit 3 and no receipt when only the archive is present")
 
     shutil.copy2(receipt_a, os.path.join(workroot, "receipt.json"))
 
@@ -144,7 +155,7 @@ def measure(archive, version, workroot):
             "hostile": {"what": "a verifier that answers PASS to everything",
                         "result": "%d/%d" % (hostile["passed"], total), "cases_total": total},
             "negative": {"what": "the bundled verifier removed, none installed",
-                         "result": "exit %d, no receipt written" % proc_c.returncode},
+                         "result": scenario_c},
         },
         "limits": [
             "one corpus for one version",

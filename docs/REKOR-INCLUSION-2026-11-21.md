@@ -91,12 +91,40 @@ The same tool, same rules, verifies the DFR (`dfr.derappar.at`) entry
 origin. The defect was in the reading, so it was in every reading we did, ours
 and theirs.
 
+## Consistency between tree sizes
+
+Inclusion answers "is this entry in that tree". It does not answer "is that tree
+an extension of the tree signed an hour ago" — a log could show a valid inclusion
+at every size and still have rewritten history between them. Rekor serves a
+consistency proof at `/api/v1/log/proof?firstSize=&lastSize=`, and the tool verifies
+it:
+
+```bash
+python tools/verify_rekor_inclusion.py --consistency --from receipt.json
+```
+
+A receipt from this tool carries its checkpoint text, so a receipt is a usable
+earlier head. On 2026-11-21, folding 20 nodes from `3906098540` to `3906098796`
+reproduces the current head's root exactly (`40ec802d…416`), and **both**
+checkpoints' signatures verify against the log key, under the same origin
+(`rekor.sigstore.dev - 1193050959916656506`).
+
+The fold is a port of `transparency-dev/merkle` `proof/verify.go` (Apache-2.0),
+not a rewrite of it; the tests check it against an independent construction of
+RFC 6962's `SUBPROOF`, including the base case that includes the earlier tree's
+root when the recursion descends into a non-perfect subtree. That base case is
+where a hand-written verifier silently accepts a one-node-short proof — the same
+class of mistake as the leaf hash wrong twice.
+
+Heads under a different origin are **not** compared: Rekor lists inactive shards
+with their own tree ids and sizes, and a consistency proof across a shard
+boundary is not a claim this tool makes.
+
 ## What this does not prove
 
-- **Nothing about consistency between tree sizes.** Inclusion at one `treeSize`
-  says the entry is in that tree; it does not say that tree is an extension of the
-  tree at any earlier size. A consistency proof is the missing step, and the tool
-  does not attempt one.
+- **Nothing about consistency across shards.** Rekor has inactive shards with their
+  own tree ids; a proof that the active tree extends any shard's tree is not
+  checked, and is not what `--consistency` claims.
 - **The meaning of `entry.logIndex` is not established.** We record the
   difference and use the proof's index. Anyone who knows the intended semantics
   should say so, and the tool's comment will follow the answer, not lead it.

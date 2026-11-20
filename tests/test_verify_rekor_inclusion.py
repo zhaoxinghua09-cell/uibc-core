@@ -244,3 +244,89 @@ def test_missing_cryptography_is_reported_not_crashed(mod, log_key, monkeypatch)
     out = mod.check_entry(entry, pem)
     assert out["checkpoint"]["signature_verified"] is None
     assert "uibc-core[verify]" in out["checkpoint"]["signature"]["why"]
+
+
+# --- consistency between tree sizes ------------------------------------------
+# Inclusion says "this leaf is in that tree". Consistency says "that earlier tree
+# is a prefix of this later one". Different claims; the portal used to only make
+# the first. These tests build MTH and consistency proofs from the RFC 6962
+# definition, so the ported fold is checked against an independent construction.
+
+
+def mth(ls):
+    if not ls:
+        return hashlib.sha256(b"").digest()
+    if len(ls) == 1:
+        return ls[0]
+    k = 1
+    while k * 2 < len(ls):
+        k *= 2
+    return node(mth(ls[:k]), mth(ls[k:]))
+
+
+def consistency_proof(m, leaves, complete=True):
+    """SUBPROOF(m, D[n], b) from RFC 6962 section 2.1.2.
+
+    The third argument matters: when the earlier tree is not a perfect subtree of
+    the later one, the recursion descends into it with b=false and the base case
+    then *includes* the earlier tree's own root as one of the nodes. Dropping it
+    produces a proof that is one node shorter and that no verifier should accept
+    — which is exactly what the fold reports when it is fed one.
+    """
+    n = len(leaves)
+    if m == n:
+        return [] if complete else [mth(leaves)]
+    k = 1
+    while k * 2 < n:
+        k *= 2
+    if m <= k:
+        return consistency_proof(m, leaves[:k], complete) + [mth(leaves[k:])]
+    return consistency_proof(m - k, leaves[k:], False) + [mth(leaves[:k])]
+
+
+LEAVES = [hashlib.sha256(b"\x00" + ("leaf-%d" % i).encode()).digest() for i in range(70)]
+
+
+@pytest.mark.parametrize("m,n", [(1, 2), (2, 3), (3, 5), (4, 7), (7, 9), (9, 16),
+                                (16, 17), (17, 33), (32, 64), (33, 65), (64, 70), (35, 70)])
+def test_consistency_holds_for_every_shape(mod, m, n):
+    proof = consistency_proof(m, LEAVES[:n])
+    folded = mod.root_from_consistency_proof(m, n, proof, mth(LEAVES[:m]))
+    assert folded == mth(LEAVES[:n])
+
+
+def test_a_wrong_earlier_root_is_caught(mod):
+    proof = consistency_proof(9, LEAVES[:16])
+    bad = bytearray(mth(LEAVES[:9]))
+    bad[0] ^= 0xff
+    with pytest.raises(ValueError):
+        mod.root_from_consistency_proof(9, 16, proof, bytes(bad))
+
+
+def test_a_truncated_proof_is_caught(mod):
+    proof = consistency_proof(9, LEAVES[:16])
+    with pytest.raises(ValueError):
+        mod.root_from_consistency_proof(9, 16, proof[:-1], mth(LEAVES[:9]))
+
+
+def test_equal_sizes_need_an_empty_proof(mod):
+    assert mod.root_from_consistency_proof(16, 16, [], mth(LEAVES[:16])) == mth(LEAVES[:16])
+    with pytest.raises(ValueError):
+        mod.root_from_consistency_proof(16, 16, [b"\x00" * 32], mth(LEAVES[:16]))
+
+
+def test_a_shrinking_tree_is_not_a_consistency_claim(mod):
+    with pytest.raises(ValueError):
+        mod.root_from_consistency_proof(16, 9, [], mth(LEAVES[:16]))
+
+
+def test_receipt_checkpoint_text_can_be_used_later(mod, log_key):
+    """The receipt must carry its checkpoint text, or a later consistency run
+    has nothing signed to compare against."""
+    key, pem = log_key
+    entry = make_entry(BODIES, 3)
+    proof = entry["verification"]["inclusionProof"]
+    proof["checkpoint"] = signed_checkpoint(
+        key, "rekor.sigstore.dev - 1", len(BODIES), base64.b64encode(bytes.fromhex(proof["rootHash"])).decode())
+    out = mod.check_entry(entry, pem)
+    assert out["checkpoint"]["text"] == proof["checkpoint"]

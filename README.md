@@ -416,6 +416,23 @@ both modes + attacker-key column).
 任何偏差即以非零码退出。散文写的 Expected 列永远"不会失败"，矩阵才会——
 上面那句 `S4+S6` 的错述，正是靠着这道门禁才被发现。
 
+## Admit an artifact you did not build
+
+`verify` answers a question about a **UIBC package**. If what you have is a wheel, a zip,
+a tarball or a skill directory, one command turns it into a sealed package and gives you a
+verdict about the exact bytes:
+
+```
+python tools/admit_package.py --artifact dist/pkg-1.0.whl --out /tmp/admitted/pkg-1.0 \
+       --agent-id pkg-1.0 --owner <you> --key owner.ed25519 --pinned owner.ed25519.pub
+```
+
+It hashes the artifact and every member, seals the binding with your key, and verifies
+open and pinned. A PASS means *the bytes you hold are the bytes that were sealed* — not
+that the artifact is safe. No scan, no execution, no dependency graph; the record says so
+in its own `not_covered` list. Details and a measured example:
+[`docs/assurance/ADMISSION.md`](docs/assurance/ADMISSION.md).
+
 ## Reproduce the published numbers in one command
 
 If you do not want to take our arithmetic on trust, there is one command that re-derives it

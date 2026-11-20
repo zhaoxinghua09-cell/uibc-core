@@ -93,7 +93,11 @@ true`, `problems: []`); OpenTimestamps reported `unavailable` because the client
 and the report says exactly that.
 
 The workflow signs only when `UIBC_RELEASE_SEED_HEX` exists and ships `UNSIGNED.txt` when it does
-not. **This chain has not run on a published release yet** — the next tag is its first exercise,
+not. It also **opens the release if the tag has none**, because `gh release upload` has nowhere to
+put a file otherwise: measured 2026-11-20, the repository carried a `v0.4.1` tag and no `v0.4.1`
+release, which is why the newest asset for this corpus was still `0.4.0`. Before that step existed,
+"push a tag" and "a release exists" were two different acts and only the first was automated.
+**This chain has not run on a published release yet** — the next tag is its first exercise,
 and until then it is "implemented and measured locally", not "in place".
 
 ## What this protocol is not

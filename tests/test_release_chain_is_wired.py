@@ -59,6 +59,30 @@ def test_both_anchors_are_attempted_and_their_state_is_shown():
     assert "release/ANCHORS.json" in text
 
 
+def test_the_workflow_opens_a_release_when_the_tag_has_none():
+    """A tag push does not create a release, and `gh release upload` fails without one.
+
+    Measured 2026-11-20: the repository carried a v0.4.1 tag and no v0.4.1 release, which
+    is why the newest release asset for this corpus was 0.4.0 — the workflow had nowhere
+    to attach. The step must check first and create only when the check fails.
+    """
+    text = workflow()
+    assert "gh release view" in text
+    assert "gh release create" in text
+    assert "--generate-notes" in text
+    view_at = text.index("gh release view")
+    create_at = text.index("gh release create")
+    assert view_at < create_at, "the view check must come before the create"
+    # `if gh release view ...` on one line, then the create inside the else branch.
+    assert re.search(r"if\s+gh release view", text), "the view must be the condition itself"
+    assert "else" in text[view_at:create_at], "the create must sit in the else branch"
+
+
+def test_the_attach_step_uses_the_same_tag_the_check_used():
+    text = workflow()
+    assert text.count("${{ steps.v.outputs.tag }}") >= 3
+
+
 def test_every_optional_artifact_is_attached_only_when_it_exists():
     text = workflow()
     for artifact in ("CORPUS-DIGESTS.txt.sig", "anchor_freetsa.tsr", "anchor_freetsa_ca.pem",

@@ -81,6 +81,23 @@ jobs:
         run: |
           if [ -f release/ANCHORS.json ]; then cat release/ANCHORS.json; else echo "no ANCHORS.json"; fi
 
+      # A tag push alone does not create a release, and `gh release upload` fails when
+      # there is none. Measured 2026-11-20: the repository had a v0.4.1 tag and no v0.4.1
+      # release, which is why the only release asset for this corpus was 0.4.0. This step
+      # opens the release if the tag has none, so the four artifacts have somewhere to go.
+      - name: Open the release if the tag has none
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh release view "${{ steps.v.outputs.tag }}" > /dev/null 2>&1; then
+            echo "release already exists for ${{ steps.v.outputs.tag }}"
+          else
+            gh release create "${{ steps.v.outputs.tag }}" \
+              --title "${{ steps.v.outputs.tag }}" \
+              --generate-notes
+            echo "created release ${{ steps.v.outputs.tag }}"
+          fi
+
       - name: Attach to the release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

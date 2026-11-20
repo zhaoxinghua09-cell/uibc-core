@@ -153,10 +153,25 @@ class ReceiptTest(unittest.TestCase):
         got = {n: g for n, _w, _g, g in rows}
         for f in ("receipt_sha256", "subject.sha256", "subject.bytes",
                   "subject.members", "subject.name"):
-            self.assertTrue(got[f], f)
+            self.assertEqual(got[f], True, f)
         # And it must not pretend the decision was checked: eight fields need
         # the package, and they have to be reported as NOT CHECKABLE.
         self.assertEqual(sum(1 for v in got.values() if v is None), 8)
+
+    def test_a_renamed_download_is_not_a_failure(self):
+        # Found on the second machine: copying the same wheel to another
+        # filename flipped subject.name to MISMATCH and dropped the whole
+        # verdict, which would fail the most ordinary case there is — a
+        # browser saving "pkg (1).whl". The name is a note; the bytes decide.
+        renamed = os.path.join(self.tmp, "demo-1.0 (1).whl")
+        import shutil
+        shutil.copyfile(self.art, renamed)
+        r = vd.load_receipt(self.receipt_path)
+        rows, ok = vd.compare_artifact(renamed, r)
+        self.assertTrue(ok)
+        got = {n: g for n, _w, _g, g in rows}
+        self.assertEqual(got["subject.name"], "note")
+        self.assertEqual(got["subject.sha256"], True)
 
     def test_artifact_mode_rejects_a_different_file(self):
         other = os.path.join(self.tmp, "other.txt")

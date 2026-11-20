@@ -1,0 +1,29 @@
+{
+  "attests": {
+    "bytes": 287,
+    "file": "CORPUS-DIGESTS.txt",
+    "sha256": "153f9b898878aaa9da97c7a496dd22af124d9bb3112ec5fede0a04eff94df033"
+  },
+  "bitcoin": {
+    "block_hash": "000000000000000000007ddf132324102bbf6e36153b9e94a2502ac6134cd6df",
+    "block_height": 976684,
+    "block_time_utc": "2026-11-20T04:46:13Z",
+    "merkle_root": "6fce2db8a60d50b8b927ba6f88edfebe2c030792b7d7afb21e95b19ce494adb4"
+  },
+  "kind": "uibc-bitcoin-attestation-v0",
+  "not_checked_here": "the block header itself is not walked; the merkle root is compared against a public explorer, and that comparison is recorded rather than re-run by this repository",
+  "proof": {
+    "bytes": 1168,
+    "container": "DetachedTimestampFile (standard)",
+    "file": "CORPUS-DIGESTS.txt.ots",
+    "sha256": "d107ecd530641fe0dd6dde7f63c16dfd7b13d7abf4cf7635d1ab3dec9bc3fa8e"
+  },
+  "tag": "v0.4.1",
+  "verified_against": {
+    "checked_at": "2026-11-20T07:2x UTC",
+    "result": "the attestation's merkle root equals the block's merkle root, and the block's height and hash agree",
+    "source": "blockstream.info: /api/block-height/976684 then /api/block/<hash>"
+  },
+  "what_it_establishes": "the digest the page serves existed before block 976684's time. It does not say who published it, and it does not say the workflow behaved.",
+  "why_not_on_the_page": "the page's own CORPUS-DIGESTS.txt.ots (172 bytes) is a bare serialized tree; the official ots client refuses it as 'not a timestamp file', so it could never be upgraded through the standard route. The page is frozen, so the standard container with the block attestation lives here instead."
+}

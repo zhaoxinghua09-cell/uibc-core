@@ -42,12 +42,33 @@ No passing-test count appears here on purpose: it changes every day, and a numbe
 - **answer the two invitations when they come back** — both went out on 2026-11-20 (Templeman by email from the 126 mailbox, Stone as a public issue on swarmsync-ai/aivs-spec); a reply is a human voice, and the external count does not move until one arrives
 - **approve edits to 29 historical phrases** — the archived bundle still carries production-sounding phrases a checker refuses in anything new
 
-## Reproduce
+## Verify it yourself
+
+Every command below runs offline and needs no account. The anchors are the evidence that this repository's own words are not the only witness.
 
 ```bash
-python tools/status_page.py --check     # is this page still true
-python tools/check_adoption.py         # 0 measured zero, 3 a bucket was not asked
-python tools/settlement_boundary.py    # six questions, no payment claim in the docs
-python tools/check_scitt_crosswalk.py  # 18 rows against the vendored draft
+# is this page still true
+python tools/status_page.py --check
+
+# the frozen page against its pin, its token, its signature and its block
+python tools/check_release_anchors.py
+
+# walk the proof to the merkle root without the opentimestamps library; the three arguments are the files in anchors/attestations/v0.4.1/
+python tools/ots_merkle.py <proof> --data <file> --block-json <record>
+
+# every release carries a record of what it holds
+python tools/check_release_pins.py
+
+# both documented URLs still serve the pinned archive
+python tools/check_outsider_entry.py --probe
+
+# 0 measured zero, 3 a bucket was not asked
+python tools/check_adoption.py
+
+# six questions, no payment claim in the docs
+python tools/settlement_boundary.py
+
+# 18 rows against the vendored draft
+python tools/check_scitt_crosswalk.py
 ```
 

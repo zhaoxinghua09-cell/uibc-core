@@ -109,3 +109,40 @@ def test_the_human_only_list_names_the_three_things():
     assert any("invitation" in x for x in labels)
     assert any("historical" in x for x in labels)
     assert any("historical" in x for x in labels)
+
+
+def test_every_reproduce_command_names_a_tool_that_exists():
+    assert sp.REPRODUCE, "the page must list commands"
+    for command, comment in sp.REPRODUCE:
+        path = sp._tool_path(command)
+        assert path.startswith("tools/"), command
+        assert os.path.isfile(os.path.join(REPO, path)), command
+        assert comment, "a command without a reason is noise"
+
+
+def test_the_page_reaches_the_anchors_not_only_the_corpus_checks():
+    """Measured 2026-11-20: the block was reachable in the repository and unreachable
+    from the page a reader lands on -- the reproduce block named four tools and no
+    anchor check at all."""
+    commands = "\n".join(row[0] for row in sp.REPRODUCE)
+    assert "tools/check_release_anchors.py" in commands
+    assert "tools/ots_merkle.py" in commands
+    assert "tools/check_release_pins.py" in commands
+    assert "tools/check_outsider_entry.py" in commands
+
+
+def test_a_vanished_tool_makes_the_page_stale(tmp_path, monkeypatch):
+    f, missing = sp.facts(REPO)
+    page = sp.render(f, missing)
+    (tmp_path / "STATUS.md").write_text(page, encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(sp, "facts", lambda root: (f, missing))
+    monkeypatch.setattr(sp, "_missing_reproduce_tools", lambda root: ["python tools/gone.py"])
+    assert sp.main(["--check"]) == 1
+
+
+def test_an_unpacked_archive_without_tools_is_not_called_stale(tmp_path, monkeypatch):
+    """An sdist ships no `tools/`; a check that invented a failure there would fail
+    every archive build for a fact about the archive, not about the page."""
+    assert sp._missing_reproduce_tools(str(tmp_path)) == []
+

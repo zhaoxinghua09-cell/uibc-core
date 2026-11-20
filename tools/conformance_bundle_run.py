@@ -96,7 +96,19 @@ def verifier_version(command):
 
 def call_verifier(command, pkg):
     argv = _split(command.replace("{pkg}", pkg))
-    proc = subprocess.run(argv, capture_output=True, text=True, timeout=180)
+    # A command that cannot be started is an environment fact, not a verdict. Without
+    # this catch, `--verify "uibc verify {pkg}"` on a machine without uibc raised
+    # FileNotFoundError and the runner died with a traceback and exit 1 - measured
+    # 2026-11-20 against the shipped 0.4.1 archive, which promised exit 3 for a
+    # verifier that is not installed. Reported as unparsed so the preflight below
+    # turns it into exit 3 with no receipt.
+    try:
+        proc = subprocess.run(argv, capture_output=True, text=True, timeout=180)
+    except OSError as exc:
+        return {"result": "FAIL", "checks": [], "unparsed": True,
+                "verifier_unstartable": True, "returncode": None,
+                "stderr": "verifier could not be started: %s: %s"
+                          % (type(exc).__name__, exc)}
     try:
         out = json.loads(proc.stdout)
     except json.JSONDecodeError:
@@ -189,10 +201,13 @@ def main():
     # write a receipt that would read as "36 failures".
     if not any(r["verifier_parsed"] for r in rows):
         first = rows[0] if rows else {}
+        unstartable = first.get("verifier_unstartable")
         sys.stderr.write(
             "\nNo verifier output was parseable in any case, so this is not a "
             "conformance result.\n"
-            "Command run: %s\n" % a.verify
+            + ("The verifier command could not be started at all: %s\n"
+               % first.get("verifier_stderr", "") if unstartable else "")
+            + "Command run: %s\n" % a.verify
             + ("stderr (last 400 chars):\n%s\n" % first.get("verifier_stderr", "")
                if first.get("verifier_stderr") else "")
             + "The reference verifier is probably not installed for this Python "

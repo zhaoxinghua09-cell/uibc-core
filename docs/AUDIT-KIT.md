@@ -107,6 +107,13 @@ The repository now holds a standard container over the same tree, upgraded: `anc
 
 What the block establishes: the digest existed before 04:46:13Z. What it does not: who published it, or that the workflow behaved. `check_release_anchors.py` binds the repository proof to the bytes the page serves today before printing the block.
 
+And the height is not quoted from a record any more. `tools/ots_merkle.py` walks the proof itself -- the file's digest, then every append/prepend/sha256 in the tree, seventy-three operations -- and compares the merkle root it reaches with the root the record names, trying both byte orders and saying which one matched. It is standard library only, so it runs where `opentimestamps` has never been installed:
+
+    python tools/ots_merkle.py anchors/attestations/v0.4.1/CORPUS-DIGESTS.txt.ots \
+        --data CORPUS-DIGESTS.txt --block-json anchors/attestations/v0.4.1/BITCOIN-ATTESTATION.json
+
+One flipped byte anywhere in the path, a proof offered with the wrong file, or a record naming a different root each end in `NOT ACCEPTABLE`. `check_release_anchors.py` runs this walk before it prints a block, so the line it prints is arithmetic, not testimony.
+
 `anchors/pins/uibc-release-v0.4.1.json` records the nine assets and their digests as they stood at the freeze. `check_release_anchors.py` compares the live page against that file and fails on a changed, missing or unpinned asset, and a scheduled job runs that comparison nightly — because until it existed, a rewrite of the same tag left every check green.
 
 Every release, not just this one: `tools/check_release_pins.py` enumerates all tags and asks whether each carries a record. A **repository pin** (`anchors/pins/uibc-release-<tag>.json`) is the strong form, because the page cannot rewrite it. A **self pin** (`uibc-release-pin.json` on the release, written by the publishing workflow from the page it had just published) is weaker on purpose: it travels with the page, so it catches accidents and not forgeries. A release with neither is reported as unpinned and the nightly job fails, because a page nobody pinned cannot be told apart from a page that was quietly rewritten.

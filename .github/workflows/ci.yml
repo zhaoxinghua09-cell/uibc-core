@@ -115,6 +115,29 @@ jobs:
           echo "collected: $n"
           test "$n" -ge 500
 
+  # REPRODUCTION-REGISTER.md states that a row must be reproducible from what it
+  # states (rule 4). Until this job existed, that was prose: a row could carry a
+  # 6-character hash and look exactly as authoritative as a real one. This job
+  # makes the file fail when a row cannot be checked, including the row a
+  # stranger opens as a PR.
+  register-self-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: "3.13"
+
+      - name: The checker's own tests
+        run: |
+          python tools/check_register_row.py --self-test
+          python -m pytest tests/test_register_row.py -q
+
+      - name: Every row in the shipped register is well formed
+        run: python tools/check_register_row.py --register REPRODUCTION-REGISTER.md
+
   second-implementation:
     runs-on: ubuntu-latest
     steps:

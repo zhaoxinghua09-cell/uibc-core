@@ -42,6 +42,28 @@ Then send the generated `reproduction_receipt_*.md` (or the four fields below) w
 
 Rows are added by the runner, by opening a PR that appends a line to the table below.
 
+## Before you open that PR
+
+The register's rule 4 says a row must be reproducible from what it states. That is
+checked now, not trusted:
+
+```
+python tools/check_register_row.py --register REPRODUCTION-REGISTER.md
+python tools/check_register_row.py --receipt <receipt.json> \
+       --claim-commit <commit> --claim-sha256 <sha256 of that file>
+```
+
+The first command validates every row; CI runs it on every pull request, so a row with
+a six-character hash, a blank affiliation, or a claim of agreement that never names
+the command will fail before a maintainer reads it. The second cross-checks your own
+receipt against what your row claims.
+
+A **disagreement is not a failure.** Rule 1 keeps those. The checker rejects rows that
+cannot be checked, not rows that say something inconvenient.
+
+You can also open the issue form "Reproduction receipt"; the maintainer will ask you
+to convert it into a PR row, and rule 3 still applies — the row is yours, not ours.
+
 ## Register
 
 | date | who | affiliation | subject (commit) | result | receipt sha256 | notes |

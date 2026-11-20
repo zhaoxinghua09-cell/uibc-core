@@ -65,10 +65,18 @@ def stamp(path, calendars=CALENDARS, out=None, submit=None):
             continue
         # Imported only once something answered, so that "nobody answered" stays
         # reportable even where the library itself is missing.
+        # The standard container, not a bare tree: measured 2026-11-20, a bare tree
+        # is refused by the official client ("is not a timestamp file"), which made
+        # the published proof readable only by this repository's own tool.
         from opentimestamps.core.serialize import BytesSerializationContext
         ctx = BytesSerializationContext()
         ts.serialize(ctx)
         blob = ctx.getbytes()
+        # Wrap it ourselves, so the container format does not depend on which
+        # attributes this version of the library happens to expose.
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import ots_container
+        blob = ots_container.bare_to_standard(blob, digest)
         out = out or (path + ".ots")
         with open(out, "wb") as f:
             f.write(blob)
@@ -79,19 +87,39 @@ def stamp(path, calendars=CALENDARS, out=None, submit=None):
         "%s (%s)" % (t["calendar"], t["error"]) for t in tried))
 
 
-def inspect(proof_path):
+def inspect(proof_path, data_path=None):
     """Return a description of every attestation in the proof.
 
-    The proof's first message is the timestamped digest, so it is passed in as
-    the initial message rather than guessed.
+    When `data_path` is given, the proof must answer for *that* file. Until
+    2026-11-20 it did not: the initial message was taken from the proof's own
+    first 32 bytes, so a proof belonging to a different file walked happily and
+    listed its attestations as if they were this file's.
     """
     from opentimestamps.core.serialize import BytesDeserializationContext
-    from opentimestamps.core.timestamp import Timestamp
+    from opentimestamps.core.timestamp import DetachedTimestampFile, Timestamp
 
     with open(proof_path, "rb") as f:
         blob = f.read()
-    ctx = BytesDeserializationContext(blob)
-    ts = Timestamp.deserialize(ctx, blob[:32])
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import ots_container
+    if data_path:
+        digest = ots_container.digest_of_file(data_path)
+        if ots_container.is_standard(blob):
+            if not ots_container.binds(blob, digest):
+                raise RuntimeError("the proof answers for another digest, not for %s"
+                                   % os.path.basename(data_path))
+        elif not ots_container.is_standard(blob):
+            # A bare tree: it carries no digest, so it can only be attached to one,
+            # and attaching it to the wrong file is indistinguishable. Refuse rather
+            # than guess when the caller asked for a binding.
+            raise RuntimeError("the proof has no standard header, so it cannot be "
+                               "bound to %s; re-wrap it with --wrap"
+                               % os.path.basename(data_path))
+        ctx = BytesDeserializationContext(blob)
+        ts = DetachedTimestampFile.deserialize(ctx).timestamp
+    else:
+        ctx = BytesDeserializationContext(blob)
+        ts = Timestamp.deserialize(ctx, blob[:32])
     found = []
 
     def walk(t, depth=0):
@@ -176,7 +204,35 @@ def main(argv=None):
     ap.add_argument("--calendar", default=None,
                     help="use this calendar only (default: all three, in order)")
     ap.add_argument("--json", action="store_true")
+    ap.add_argument("--wrap", metavar="BARE_PROOF",
+                    help="wrap a bare tree in the standard container: needs --proof and --out")
+    ap.add_argument("--out", metavar="FILE", help="where --wrap writes")
     args = ap.parse_args(argv)
+
+    if args.wrap:
+        # A bare tree is what the old writer produced. Wrapping changes the container,
+        # not the evidence, and needs no calendar -- so it works offline.
+        if not (args.proof or args.out):
+            print("--wrap needs --data FILE and --out FILE")
+            return 2
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import ots_container
+        blob = open(args.wrap, "rb").read()
+        digest = ots_container.digest_of_file(args.proof)
+        if not args.out:
+            print("--wrap needs --out")
+            return 2
+        if ots_container.is_standard(blob):
+            print("refused: this proof already carries a standard header")
+            return 1
+        wrapped = ots_container.bare_to_standard(blob, digest)
+        open(args.out, "wb").write(wrapped)
+        print("wrapped %d bytes -> %d bytes, bound to %s"
+              % (len(blob), len(wrapped), os.path.basename(args.proof)))
+        if not ots_container.binds(wrapped, digest):
+            print("internal error: the wrapper did not produce a bound proof")
+            return 3
+        return 0
 
     if args.stamp:
         cal_list = (args.calendar,) if args.calendar else CALENDARS
@@ -203,7 +259,7 @@ def main(argv=None):
         if not args.proof:
             print("--proof is required with --verify")
             return 2
-        atts = inspect(args.proof)
+        atts = inspect(args.proof, args.verify)
         block = [a for a in atts if a["kind"] == "BitcoinBlockHeaderAttestation"]
         calendar = [a for a in atts if a["kind"] == "PendingAttestation"]
         doc = {"file": args.verify, "proof": args.proof,

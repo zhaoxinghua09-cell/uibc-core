@@ -390,6 +390,32 @@ def main(argv=None):
                     lines.append("pin          all %d assets match the pin recorded at freeze"
                                  % len(live))
 
+    # The digest's own Bitcoin anchor, when the repository holds one. The page's
+    # proof is a bare tree the official client refuses; this one is a standard
+    # container, bound to the very bytes downloaded above.
+    held_ots = os.path.join(ROOT, "anchors", "attestations", args.tag,
+                            "CORPUS-DIGESTS.txt.ots")
+    if os.path.isfile(held_ots):
+        sys.path.insert(0, os.path.join(ROOT, "tools"))
+        import ots_container
+        data_dir = str(args.dir) if args.dir else directory
+        digest = ots_container.digest_of_file(os.path.join(data_dir, "CORPUS-DIGESTS.txt"))
+        blob = open(held_ots, "rb").read()
+        if not ots_container.binds(blob, digest):
+            lines.append("bitcoin      the repository proof does not answer for the published "
+                         "digest; refusing it")
+            code = max(code, 1)
+        else:
+            rec = os.path.join(os.path.dirname(held_ots), "BITCOIN-ATTESTATION.json")
+            block = None
+            if os.path.isfile(rec):
+                with open(rec, encoding="utf-8") as handle:
+                    block = (json.load(handle) or {}).get("bitcoin") or {}
+            label = ("block %s, merkle root %s…" % (block.get("block_height"),
+                                                    str(block.get("merkle_root", ""))[:12])
+                     if block else "no block recorded")
+            lines.append("bitcoin      proof bound to the published digest; %s" % label)
+
     if args.json:
         print(json.dumps({"tag": args.tag, "exit": code, "lines": lines}, indent=2))
     else:

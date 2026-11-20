@@ -34,6 +34,11 @@ jobs:
       - name: Run test suite
         run: python -m pytest tests -q
 
+      - name: The status page still matches its sources
+        # STATUS.md is generated; this step is what keeps it from drifting into a claim.
+        # Exit 0 current, 1 stale, 3 a source unreadable - all three fail the job.
+        run: python tools/status_page.py --check
+
   # Measured 2026-11-19: 15 of the 16 skipped tests were skipping for one reason only -
   # `.[verify]` does not carry agent-action-capsule, langchain-core, opentimestamps-client,
   # pynostr or coincurve, so the interop, live-agent, anchor and RFC 3161-proof checks had

@@ -9,6 +9,9 @@ and it is unrelated to the UIBCDF computational-biology organisation.
 > **有人验过吗？先看 [EVIDENCE-INDEX.md](EVIDENCE-INDEX.md)** — 按 L1 自我复现／L2 异体审查／L3 第二实现／L3.5 外部语料／L4 外部节点分级；外部节点当前为 **1**（[EXTERNAL-NODE-001](external-review/EXTERNAL-NODE-001.md)：异体机、无特权、按 README 逐字跑，首跑即复现了我们自己报的 S4/S5 分歧），其余三行仍为 0。
 >
 > **不知道从哪进？先看 [STRUCTURE.md](STRUCTURE.md)** — 五层地图（规范／实现／工具／验证／存证）与三条阅读路线。
+>
+> **想知道现在到底到哪一步？看 [STATUS.md](STATUS.md)** — 一页纸，每个数字都由 `python tools/status_page.py` 从仓库里算出来，
+> 它和仓库对不上时 `--check` 会红；六个维度的"我们缺什么"逐条列出，不留形容词。
 
 ## Verify it yourself — one command, no install, no account
 

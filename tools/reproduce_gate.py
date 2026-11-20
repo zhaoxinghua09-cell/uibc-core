@@ -79,8 +79,11 @@ def git_head(repo):
     return "UNAVAILABLE"
 
 
+PROBE_TARGETS = (("1.1.1.1", 443), ("github.com", 443), ("1.1.1.1", 53))
+
+
 def network_probe():
-    """Record whether the machine *could* reach the network. Info, never a failure.
+    """Record whether *this* probe could reach anything. Info, never a failure.
 
     This used to be a hard comparison: "reachable -> REPRODUCTION FAILED". Running
     the gate on a second machine with ordinary internet access made the size of
@@ -88,13 +91,21 @@ def network_probe():
     REPRODUCTION FAILED while every number matched, because reachability is a
     property of their machine, not of this run. What the claim needs is evidence
     about what the run *did*, which is NetGuard below.
+
+    It is also only a probe: a firewall can allow one port and drop another, so
+    "no target answered" is reported as exactly that. The word "blocked" would
+    claim more than was measured — a machine whose port 22 works fine can
+    honestly produce this result.
     """
-    try:
-        s = socket.create_connection(("1.1.1.1", 443), timeout=3)
-        s.close()
-        return "reachable", "reachable"
-    except Exception as e:
-        return "blocked", "blocked (%s)" % type(e).__name__
+    last = None
+    for host, port in PROBE_TARGETS:
+        try:
+            s = socket.create_connection((host, port), timeout=3)
+            s.close()
+            return True, "reachable (%s:%s answered)" % (host, port)
+        except Exception as e:
+            last = "%s:%s %s" % (host, port, type(e).__name__)
+    return False, "no probe target answered (last: %s)" % last
 
 
 class NetGuard:
@@ -436,7 +447,7 @@ def main():
     lines.append("| python | %s |" % platform.python_version())
     lines.append("| os | %s |" % platform.platform())
     lines.append("| wall clock | %.1f s |" % (time.time() - start))
-    lines.append("| network reachable on this machine | %s |" % net_note)
+    lines.append("| network probe on this machine (info only, never fails) | %s |" % net_note)
     lines.append("| outbound attempts by the driver | %d (loopback %d) |" % (net_attempts, guard.loopback))
     lines.append("| credentials used | none (no token, no account, no registry call) |")
     lines.append("")
@@ -510,7 +521,8 @@ def main():
     open(base + ".md", "w", encoding="utf-8").write(md)
     json.dump({"generated": stamp, "subject": head, "uibc": uibc_version,
                "python": platform.python_version(),
-               "network": {"reachable": reach, "driver_attempts": net_attempts,
+               "network": {"probe_answered": reach, "probe": net_note,
+                           "driver_attempts": net_attempts,
                            "loopback_attempts": guard.loopback},
                "fixture_rows": len(rows), "mismatches": hard,
                "corpus": corpus_v, "conformance": conf_v,

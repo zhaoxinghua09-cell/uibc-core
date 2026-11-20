@@ -165,3 +165,36 @@ def test_the_repository_records_a_signing_key():
     assert key["alg"] == "ed25519"
     assert len(key["key_id"]) == 16
     assert "nowhere in this repository" in key["where_the_private_half_is"]
+
+
+def test_the_pin_matches_an_unchanged_page(tmp_path):
+    import shutil as _shutil
+    pin = os.path.join(ROOT, "anchors", "pins", "uibc-release-v0.4.1.json")
+    assert os.path.isfile(pin)
+    blob = json.load(open(pin, encoding="utf-8"))
+    live = {a["name"]: a["sha256"] for a in blob["assets"]}
+    bad, lines = cra.check_pin("v0.4.1", live)
+    assert bad == 0
+    assert not lines
+
+
+def test_a_changed_asset_is_a_drift():
+    pin = json.load(open(os.path.join(ROOT, "anchors", "pins",
+                                      "uibc-release-v0.4.1.json"), encoding="utf-8"))
+    live = {a["name"]: a["sha256"] for a in pin["assets"]}
+    live["CORPUS-DIGESTS.txt"] = "0" * 64
+    bad, lines = cra.check_pin("v0.4.1", live)
+    assert bad == 1
+    assert any(line.startswith("changed    CORPUS-DIGESTS.txt") for line in lines)
+
+
+def test_a_missing_asset_and_an_unpinned_one_are_both_reported():
+    pin = json.load(open(os.path.join(ROOT, "anchors", "pins",
+                                      "uibc-release-v0.4.1.json"), encoding="utf-8"))
+    live = {a["name"]: a["sha256"] for a in pin["assets"]}
+    live.pop("anchor_freetsa.tsr")
+    live["surprise.bin"] = "f" * 64
+    bad, lines = cra.check_pin("v0.4.1", live)
+    assert bad == 2
+    assert any("missing    anchor_freetsa.tsr" in line for line in lines)
+    assert any("unpinned   surprise.bin" in line for line in lines)

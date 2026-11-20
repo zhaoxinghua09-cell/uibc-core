@@ -37,6 +37,58 @@ RELEASE = "https://github.com/zhaoxinghua09-cell/uibc-core/releases/download"
 FILES = ("CORPUS-DIGESTS.txt", "anchor_freetsa.tsr", "anchor_freetsa_ca.pem")
 
 
+
+PIN = os.path.join(ROOT, "anchors", "pins", "uibc-release-{tag}.json")
+REPO = "zhaoxinghua09-cell/uibc-core"
+
+
+def _live_manifest(tag):
+    """name -> sha256 of every asset on the release, read through gh.
+
+    gh is preferred because it answers from the API without downloading 400 KB of
+    assets; a machine without gh falls back to hashing what it downloads.
+    """
+    gh = shutil.which("gh")
+    if not gh:
+        return None
+    proc = subprocess.run([gh, "api", "repos/%s/releases/tags/%s" % (REPO, tag),
+                           "--jq", '.assets[] | .name + " " + (.digest // "")'],
+                          capture_output=True, text=True, timeout=60)
+    if proc.returncode != 0:
+        return None
+    manifest = {}
+    for line in (proc.stdout or "").splitlines():
+        parts = line.split()
+        if len(parts) == 2 and parts[1].startswith("sha256:"):
+            manifest[parts[0]] = parts[1].split(":", 1)[1]
+        elif parts:
+            manifest[parts[0]] = ""
+    return manifest
+
+
+def check_pin(tag, live):
+    """Compare the live release against anchors/pins/uibc-release-<tag>.json."""
+    path = PIN.format(tag=tag)
+    if not os.path.isfile(path):
+        return None, []
+    with open(path, encoding="utf-8") as handle:
+        pin = json.load(handle)
+    expected = {a["name"]: a["sha256"] for a in pin.get("assets", [])}
+    lines, bad = [], 0
+    for name, digest in sorted(expected.items()):
+        if name not in live:
+            lines.append("missing    %s (pinned, not on the page)" % name)
+            bad += 1
+        elif live[name] and live[name] != digest:
+            lines.append("changed    %s: pinned %s… now %s…" % (name, digest[:12], live[name][:12]))
+            bad += 1
+    for name in sorted(set(live) - set(expected)):
+        lines.append("unpinned   %s is on the page but not in the pin" % name)
+        bad += 1
+    return bad, lines
+
+
+
 def _fetch(url, dest, attempts=3, timeout=45):
     """Download with curl when it exists, urllib otherwise.
 
@@ -179,6 +231,8 @@ def main(argv=None):
     ap.add_argument("--tag", default="v0.4.1")
     ap.add_argument("--dir", help="directory that already holds the three files")
     ap.add_argument("--json", action="store_true")
+    ap.add_argument("--no-pin", action="store_true",
+                    help="skip the comparison against anchors/pins/uibc-release-<tag>.json")
     args = ap.parse_args(argv)
 
     if args.dir:
@@ -193,6 +247,25 @@ def main(argv=None):
             print("NOT MEASURED - %s" % exc)
             return 3
         code, lines = verify_dir(directory, tag=args.tag)
+
+    # The token proves a digest was signed. It does not prove the page still serves
+    # those bytes: this workflow rewrote the same tag three times on 2026-11-20, and
+    # nothing would have said so. The pin turns that into a comparison.
+    if not args.no_pin:
+        live = _live_manifest(args.tag)
+        if live is None:
+            lines.append("pin          not checked: gh unavailable or the release unreadable")
+        else:
+            bad, plines = check_pin(args.tag, live)
+            if bad is None:
+                lines.append("pin          no pin file for %s; nothing to compare" % args.tag)
+            else:
+                lines.extend(plines)
+                if bad:
+                    code = max(code, 1)
+                else:
+                    lines.append("pin          all %d assets match the pin recorded at freeze"
+                                 % len(live))
 
     if args.json:
         print(json.dumps({"tag": args.tag, "exit": code, "lines": lines}, indent=2))

@@ -1,0 +1,63 @@
+name: Release integrity
+
+# A published release is supposed to be a fixed set of bytes. This job is the only
+# thing that would notice if it stopped being one: on 2026-11-20 the release workflow
+# rewrote the same tag three times and every check stayed green, because nothing
+# compared the page against what it had said the day before.
+
+on:
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.12"
+
+      # The timestamp is checked offline against the bytes the page serves, then the
+      # whole page is compared with anchors/pins/uibc-release-<tag>.json.
+      - name: Does the page still serve what it was pinned at?
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python -m pip install --quiet cryptography asn1crypto
+          set +e
+          python tools/check_release_anchors.py --json > anchors-report.json
+          code=$?
+          cat anchors-report.json
+          if [ "$code" -eq 1 ]; then
+            echo "::error::the release drifted from its pin, or its timestamp no longer verifies"
+            exit 1
+          fi
+          if [ "$code" -eq 3 ]; then
+            echo "::warning::could not measure today (network or tool missing); not a pass"
+          fi
+
+      # The documented entry points are probed anonymously: both URLs must serve the
+      # pinned archive, and no document may point at another version's asset.
+      - name: Can a stranger still walk in?
+        run: |
+          set +e
+          python tools/check_outsider_entry.py --probe
+          code=$?
+          if [ "$code" -eq 1 ]; then
+            echo "::error::a documented entry point no longer serves the pinned archive"
+            exit 1
+          fi
+          if [ "$code" -eq 3 ]; then
+            echo "::warning::entry probe inconclusive today"
+          fi
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: release-integrity-report
+          path: anchors-report.json

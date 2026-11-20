@@ -47,8 +47,8 @@ def test_the_documented_url_is_the_pinned_archive(tmp_path, monkeypatch):
     monkeypatch.setattr(entry, "REPO", repo)
     pin = entry.read_pin("0.4.1")
     assert pin["path"].endswith("uibc-conformance-0.4.1.zip")
-    assert entry.URL.endswith(pin["path"].split("/")[-1])
-    assert "/zhaoxinghua09-cell/uibc-core/" in entry.URL
+    assert entry.RAW_URL.endswith(pin["path"].split("/")[-1])
+    assert "/zhaoxinghua09-cell/uibc-core/" in entry.RAW_URL
 
 
 def test_a_tampered_archive_is_refused(tmp_path, monkeypatch):
@@ -71,18 +71,27 @@ def test_documents_that_omit_the_url_are_refused(tmp_path, monkeypatch):
     repo = clone_repo(tmp_path)
     for rel in ("README.md", os.path.join("docs", "AUDIT-KIT.md")):
         path = os.path.join(repo, rel)
-        text = open(path, encoding="utf-8").read().replace(entry.URL, "the usual place")
+        text = open(path, encoding="utf-8").read().replace(entry.RAW_URL, "the usual place")
         open(path, "w", encoding="utf-8", newline="\n").write(text)
     assert run_checker(repo, monkeypatch) == 1
 
 
-def test_a_document_pointing_at_a_nonexistent_release_asset_is_refused(tmp_path, monkeypatch):
+def test_a_document_pointing_at_another_versions_asset_is_refused(tmp_path, monkeypatch):
     repo = clone_repo(tmp_path)
     readme = os.path.join(repo, "README.md")
     text = open(readme, encoding="utf-8").read()
     text += ("\nOr: https://github.com/zhaoxinghua09-cell/uibc-core/releases/download/"
-             "v0.4.1/uibc-conformance-0.4.1.zip\n")
+             "v0.4.0/uibc-conformance-0.4.0.zip\n")
     open(readme, "w", encoding="utf-8", newline="\n").write(text)
+    assert run_checker(repo, monkeypatch) == 1
+
+
+def test_the_release_asset_must_be_named(tmp_path, monkeypatch):
+    repo = clone_repo(tmp_path)
+    for rel in ("README.md", os.path.join("docs", "AUDIT-KIT.md")):
+        path = os.path.join(repo, rel)
+        text = open(path, encoding="utf-8").read().replace(entry.RELEASE_URL, "the release page")
+        open(path, "w", encoding="utf-8", newline="\n").write(text)
     assert run_checker(repo, monkeypatch) == 1
 
 

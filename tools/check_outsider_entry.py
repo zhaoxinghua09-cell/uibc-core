@@ -10,8 +10,8 @@ reader who went looking for a `0.4.1` release asset found nothing.
 This tool holds the three things that failed together:
 
 1. the pinned archive on disk has the pinned bytes and the pinned hash;
-2. the URL the documents print points at that archive in this repository, at the
-   revision the pin names, and no document sends a reader to a release asset for a
+2. both URLs the documents print (raw and release) point at that archive, at the
+   revision the pin names, and no document sends a reader to an asset for a
    version that has none;
 3. with `--probe`, the URL answers anonymously and serves exactly the pinned bytes.
 
@@ -31,12 +31,16 @@ import urllib.request
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REPO_SLUG = "zhaoxinghua09-cell/uibc-core"
 VERSION = "0.4.1"
-URL = ("https://github.com/%s/raw/main/conformance/uibc-conformance-%s.zip"
-       % (REPO_SLUG, VERSION))
+RAW_URL = ("https://github.com/%s/raw/main/conformance/uibc-conformance-%s.zip"
+           % (REPO_SLUG, VERSION))
+RELEASE_URL = ("https://github.com/%s/releases/download/v%s/uibc-conformance-%s.zip"
+               % (REPO_SLUG, VERSION, VERSION))
 DOCS = ("README.md", os.path.join("docs", "AUDIT-KIT.md"))
-# Places a reader is told to go. A release asset for this version does not exist,
-# so a document naming one is sending them to a 404.
-FORBIDDEN = re.compile(r"releases?/download/[^)\s]*uibc-conformance-%s" % re.escape(VERSION))
+# A release asset named for a different version is a different corpus. Until 2026-11-20
+# the only such asset was 0.4.0, and pointing a reader at it would hand them 30 cases
+# while the page promised 36.
+FORBIDDEN = re.compile(
+    r"releases?/download/[^)\s]*uibc-conformance-(?!%s)[0-9][0-9.]*\.zip" % re.escape(VERSION))
 
 
 def read_pin(version):
@@ -83,24 +87,32 @@ def check_local(pin):
 def check_docs(pin):
     reasons = []
     shown = 0
+    releases_named = 0
     for rel in DOCS:
         path = os.path.join(REPO, rel)
         if not os.path.isfile(path):
             reasons.append("%s is missing" % rel)
             continue
         text = open(path, encoding="utf-8").read()
-        if URL in text:
+        # The raw URL must be there: it is the path that needs no login and no token.
+        if RAW_URL not in text:
+            reasons.append("%s does not print the raw download URL" % rel)
+        else:
             shown += 1
+        # Since 2026-11-20 the release page carries the same archive. Saying so is part
+        # of the entry point being findable; saying it must not replace the raw path.
+        if RELEASE_URL in text:
+            releases_named += 1
         if pin["sha256"][:12] not in text:
             reasons.append("%s does not print the pinned hash prefix %s" % (rel, pin["sha256"][:12]))
         m = FORBIDDEN.search(text)
         if m:
-            reasons.append("%s sends the reader to a release asset that does not exist: %s"
+            reasons.append("%s sends the reader to a release asset for a different version: %s"
                            % (rel, m.group(0)))
-        if "no** release asset for" not in text and "no release asset for" not in text:
-            reasons.append("%s does not say that no release asset exists for %s" % (rel, VERSION))
     if shown < len(DOCS):
-        reasons.append("the documented URL appears in %d of %d documents" % (shown, len(DOCS)))
+        reasons.append("the raw URL appears in %d of %d documents" % (shown, len(DOCS)))
+    if releases_named == 0:
+        reasons.append("no document names the release asset that now carries this archive")
     return reasons
 
 
@@ -128,7 +140,7 @@ def probe(pin, attempts=3):
             os.close(fd)
             try:
                 proc = subprocess.run([curl, "-fsSL", "--retry", "2", "--retry-all-errors",
-                                       "--max-time", "90", "-o", tmp, URL],
+                                       "--max-time", "90", "-o", tmp, RAW_URL],
                                       capture_output=True, text=True)
                 if proc.returncode == 0:
                     body = open(tmp, "rb").read()
@@ -142,7 +154,7 @@ def probe(pin, attempts=3):
         else:
             try:
                 req = urllib.request.Request(
-                    URL, headers={"User-Agent": "uibc-outsider-entry/1"})
+                    RAW_URL, headers={"User-Agent": "uibc-outsider-entry/1"})
                 with urllib.request.urlopen(req, timeout=90) as resp:
                     body = resp.read()
             except Exception as exc:  # noqa: BLE001 - the reason is the output
@@ -182,15 +194,15 @@ def main(argv=None):
         reasons += extra
 
     print("pin      %s %d bytes" % (pin["sha256"][:16] + "...", pin["bytes"] or -1))
-    print("url      %s" % URL)
+    print("url      %s" % RAW_URL)
     if served is not None:
         print("served   %d bytes over the network" % served)
     if reasons:
         for reason in reasons:
             print("NOT ACCEPTABLE - %s" % reason)
         return 1
-    print("ACCEPTABLE - the documented entry point serves the pinned archive, "
-          "and no document points at a release asset that does not exist")
+    print("ACCEPTABLE - both documented URLs are present, the archive matches the pin, "
+          "and no document points at another version's asset")
     return 0
 
 

@@ -83,6 +83,27 @@ def test_the_attach_step_uses_the_same_tag_the_check_used():
     assert text.count("${{ steps.v.outputs.tag }}") >= 3
 
 
+def test_the_archive_itself_is_attached():
+    """Measured 2026-11-20: the first real run uploaded five files and no archive, so a
+    reader on the release page still could not download the corpus."""
+    text = workflow()
+    assert "release/uibc-conformance-${{ steps.v.outputs.version }}.zip" in text
+
+
+def test_the_anchors_have_their_dependency_installed():
+    """Without asn1crypto the TSA request cannot be built at all: measured 2026-11-20,
+    the published ANCHORS.json said `NameError: name 'tsp' is not defined`."""
+    text = workflow()
+    assert "pip install" in text
+    assert "asn1crypto" in text
+
+
+def test_an_unstartable_verifier_is_not_a_tsa_refusal():
+    tool = open(os.path.join(REPO, "tools", "anchor_release_digests.py"), encoding="utf-8").read()
+    assert 'elif code == 3' in tool
+    assert '"state": "unavailable"' in tool
+
+
 def test_every_optional_artifact_is_attached_only_when_it_exists():
     text = workflow()
     for artifact in ("CORPUS-DIGESTS.txt.sig", "anchor_freetsa.tsr", "anchor_freetsa_ca.pem",

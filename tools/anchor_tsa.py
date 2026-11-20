@@ -82,7 +82,13 @@ def main():
     digest = hashlib.sha256(raw).digest()
     cfg = TSAS[args.tsa]
 
-    req = build_request(digest)
+    # A missing asn1crypto is a broken environment, not a TSA refusal. Report it the
+    # same way an unreachable TSA is reported, with the dependency named.
+    try:
+        req = build_request(digest)
+    except RuntimeError as e:
+        print(json.dumps({"status": "unavailable", "reason": str(e)}, ensure_ascii=False))
+        return 3
     try:
         r = urllib.request.Request(cfg["url"], data=req, method="POST",
                                    headers={"Content-Type": "application/timestamp-query"})

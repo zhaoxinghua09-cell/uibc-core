@@ -16,6 +16,13 @@ except Exception:  # pragma: no cover - environment dependent
 
 
 def build_request(digest: bytes, sha_alg: str = "sha256") -> bytes:
+    # Without asn1crypto there is no `tsp` to name. Say so, instead of raising
+    # NameError: measured on 2026-11-20 in the release workflow, whose job installed
+    # no extras - the anchor step recorded `NameError: name 'tsp' is not defined`
+    # as the reason a token was missing, which reads like a code defect rather than
+    # a missing dependency.
+    if not HAVE_ASN1:
+        raise RuntimeError("asn1crypto is unavailable: pip install asn1crypto")
     req = tsp.TimeStampReq({
         "version": "v1",
         "message_imprint": {

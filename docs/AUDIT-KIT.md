@@ -46,10 +46,13 @@ Expected: `strict 36/36`, a `receipt.json`, exit 0. Measured this way on 2026-11
 unzip → run, `PYTHONPATH` empty, nothing installed): the archive came down as 228,000 bytes with
 that hash, and the run printed `strict 36/36` with `verifier_version 0.4.1 / cases 36 / passed 36`.
 
-Note what does **not** exist: there is no release asset for `0.4.1`. The newest release is `v0.4.0`
-and its single asset is `uibc-conformance-0.4.0.zip`, which is not this corpus. The URL above is
-therefore the entry point, and `tools/check_outsider_entry.py` fails if the documented URL and the
-pinned bytes drift apart. The commands below need the
+Note what changed on 2026-11-20: the release page used to carry no archive for this corpus at all —
+the only release asset anywhere was `uibc-conformance-0.4.0.zip`, a 30-case archive under a different
+version. Running the release workflow for the existing `v0.4.1` tag attached
+`uibc-conformance-0.4.1.zip` (228,000 bytes, the pin's hash) to
+`https://github.com/zhaoxinghua09-cell/uibc-core/releases/download/v0.4.1/uibc-conformance-0.4.1.zip`.
+Both that and the raw URL above serve the same bytes; `tools/check_outsider_entry.py` fails if either
+disappears from the documents, or if a document points at an asset for a different version. The commands below need the
 repository, because they rebuild the suite rather than run it.
 
 ```

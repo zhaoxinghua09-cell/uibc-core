@@ -1,0 +1,126 @@
+{
+  "schema_version": "2020-12",
+  "profile_version": "0.1.0-draft",
+  "subject": {
+    "name": "uibc-core",
+    "version": "0.4.1",
+    "commit": "59ce19cb2372c55c3b4af5239b2ab43ad3c88519",
+    "released_at": "2026-11-19T08:50:55Z"
+  },
+  "corpus": {
+    "id": "mutation-corpus-500",
+    "cases": 500,
+    "families_count": 17,
+    "sha256": "2d23a543b9147ba46d9aceeea80c1c40aacdf8cd04ff0e206014975fad35bc1a",
+    "rows_sha256": "015ca69a98588d3f74e818e84f7238102eaee76ce69f4df78fd104edf44f9e47",
+    "generator": "tools/mutation_corpus.py",
+    "deterministic": true,
+    "external_reviewed": false
+  },
+  "modes": [
+    {
+      "mode": "open",
+      "accepted": 60,
+      "total": 500,
+      "false_accept_rate": 0.12,
+      "denominator_note": "Full corpus. All 60 acceptances come from two families only: keyswap 40 and rollback 20.",
+      "accepted_by_family": { "keyswap": 40, "rollback": 20 }
+    },
+    {
+      "mode": "pinned",
+      "accepted": 20,
+      "total": 500,
+      "false_accept_rate": 0.04,
+      "denominator_note": "Full corpus. All 20 acceptances are the rollback family.",
+      "accepted_by_family": { "rollback": 20 }
+    },
+    {
+      "mode": "head-pinned",
+      "accepted": 0,
+      "total": 60,
+      "false_accept_rate": 0.0,
+      "denominator_note": "60 of 500. Only the rollback family has a head-pinned variant. This is NOT 0/500 and must not be quoted as such.",
+      "accepted_by_family": {}
+    }
+  ],
+  "families": [
+    { "family": "blob-byte", "n": 98, "accepted_open": 0, "accepted_pinned": 0, "caught_by": { "S4": 98, "S8": 98 } },
+    { "family": "sig-byte", "n": 64, "accepted_open": 0, "accepted_pinned": 0, "caught_by": { "S6": 64 } },
+    { "family": "keyswap", "n": 40, "accepted_open": 40, "accepted_pinned": 0, "caught_by": { "S6": 40 } },
+    { "family": "manifest-scalar", "n": 40, "accepted_open": 0, "accepted_pinned": 0, "caught_by": { "S6": 40, "S12": 7, "S5": 4, "S8": 4, "S7": 4 } },
+    { "family": "truncation", "n": 40, "accepted_open": 0, "accepted_pinned": 0, "caught_by": { "S8": 40, "S6": 20 } },
+    { "family": "lifecycle-ts", "n": 30, "accepted_open": 0, "accepted_pinned": 0, "caught_by": { "S3": 30, "S12": 30, "S6": 30, "S8": 29 } },
+    { "family": "evidence-add", "n": 24, "accepted_open": 0, "accepted_pinned": 0, "caught_by": { "S4": 24, "S12": 24, "S7": 24, "S8": 24 } },
+    { "family": "index-metadata", "n": 24, "accepted_open": 0, "accepted_pinned": 0, "caught_by": { "S7": 24, "S8": 24 } },
+    { "family": "lifecycle-insert", "n": 24, "accepted_open": 0, "accepted_pinned": 0, "caught_by": { "S3": 24, "S8": 24, "S6": 24 } },
+    { "family": "manifest-extra", "n": 24, "accepted_open": 0, "accepted_pinned": 0, "caught_by": { "S6": 24 } },
+    { "family": "root-extra", "n": 24, "accepted_open": 0, "accepted_pinned": 0, "caught_by": { "S1": 24 } },
+    { "family": "rollback", "n": 20, "accepted_open": 20, "accepted_pinned": 20, "caught_by": {} },
+    { "family": "lifecycle-actor", "n": 16, "accepted_open": 0, "accepted_pinned": 0, "caught_by": { "S3": 16, "S6": 16, "S8": 8 } },
+    { "family": "identity-scalar", "n": 12, "accepted_open": 0, "accepted_pinned": 0, "caught_by": { "S6": 12, "S3": 6 } },
+    { "family": "manifest-delete", "n": 8, "accepted_open": 0, "accepted_pinned": 0, "caught_by": { "S6": 8, "S5": 1 } },
+    { "family": "evidence-drop", "n": 6, "accepted_open": 0, "accepted_pinned": 0, "caught_by": { "S8": 5, "S5": 5, "S6": 4, "S12": 2, "S7": 2, "S1": 1, "S2": 1 } },
+    { "family": "lifecycle-drop", "n": 6, "accepted_open": 0, "accepted_pinned": 0, "caught_by": { "S8": 6, "S6": 6, "S3": 1 } }
+  ],
+  "convention": {
+    "verdicts": ["PASS", "FAIL", "INCONCLUSIVE", "NOT_APPLICABLE"],
+    "not_applicable_denominator": "excluded",
+    "empty_log": "INCONCLUSIVE",
+    "unknown_field": "FAIL",
+    "pass_implies_granted": false,
+    "binary_collapse_disclosure": "If a caller collapses three verdicts into PASS/FAIL, INCONCLUSIVE must be reported as FAIL, never as PASS. Collapsing INCONCLUSIVE into PASS reproduces the failure mode documented in arXiv 2604.17125, where the same gate reported 11.70% or 1.51% false positives depending purely on the convention."
+  },
+  "claims": {
+    "assured": [
+      { "statement": "Canonical bytes hash to the digest the manifest claims", "check": "S4" },
+      { "statement": "The seal verifies against the stated Ed25519 key", "check": "S6" },
+      { "statement": "The evidence set is complete relative to the declared index", "check": "S7/S8" },
+      { "statement": "The lifecycle sequence is monotone and correctly ordered", "check": "S3" },
+      { "statement": "Declared identities and scalars are internally consistent", "check": "S1/S6" },
+      { "statement": "The package is byte-identical to an earlier acceptance, when a head is pinned", "check": "head-pinned" }
+    ],
+    "not_assured": [
+      "That the content is true (integrity is not authenticity)",
+      "That a witness saw it (no timestamp anchoring required to PASS)",
+      "That the signing event was authorized (signature validity is not authority)",
+      "That the producer is trustworthy",
+      "That nothing was omitted (completeness is checked against a declared index, not reality)",
+      "That no out-of-band execution occurred (no runtime observation)",
+      "That revocation and expiry were considered (not reachable from verify in the current implementation)",
+      "That the judge is independent (a verdict is a machine output; who ran it is a separate fact)"
+    ]
+  },
+  "reproduction": {
+    "commands": [
+      "python tools/mutation_corpus.py --out /tmp/corpus.json",
+      "python tools/corpus_selfcheck.py --receipt my-receipt.md",
+      "python tools/conformance_vectors.py --check",
+      "python tools/conformance_check.py"
+    ],
+    "expected_exit": 0,
+    "receipt_fields": ["commit", "python_version", "wall_clock", "rows_sha256", "verdict", "mismatch_count"]
+  },
+  "receipts": [
+    {
+      "date": "2026-11-12",
+      "who": "Takao Sato (Poke-nushi), VATE reader — does not import uibc-core",
+      "scope": "18 S4/S5/S6 comparisons; 22 conditions, 66 comparisons, receiving example pinned to v0.3.0; reseal with and without expected key",
+      "result": "All agree; reseal case not_assessed without key, key-mismatch reported with published key",
+      "registration": "self_registered"
+    }
+  ],
+  "known_gaps": [
+    "17 families were chosen by the authors; no external party has reviewed the list for what it omits.",
+    "Not first of this shape: draft-sirkkavaara-vaara-receipt-03 ships public vectors with its own independent checker; arXiv:2608.16178 reports 500 adversarial trials at a 100% detection rate. What is added here is per-case verdict disclosure for an offline package verifier.",
+    "Zero third-party reproduction receipts for the mutation corpus so far."
+  ],
+  "prohibited_claims": [
+    "certified",
+    "compliant",
+    "approved",
+    "audited by",
+    "verified by a third party (unless a named third party published a receipt)",
+    "secure",
+    "a false-accept rate quoted without mode, denominator and corpus hash"
+  ]
+}

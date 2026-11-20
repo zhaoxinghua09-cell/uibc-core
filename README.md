@@ -9,6 +9,9 @@ and it is unrelated to the UIBCDF computational-biology organisation.
 > **有人验过吗？先看 [EVIDENCE-INDEX.md](EVIDENCE-INDEX.md)** — 按 L1 自我复现／L2 异体审查／L3 第二实现／L3.5 外部语料／L4 外部节点分级；外部节点当前为 **1**（[EXTERNAL-NODE-001](external-review/EXTERNAL-NODE-001.md)：异体机、无特权、按 README 逐字跑，首跑即复现了我们自己报的 S4/S5 分歧），其余三行仍为 0。
 >
 > **不知道从哪进？先看 [STRUCTURE.md](STRUCTURE.md)** — 五层地图（规范／实现／工具／验证／存证）与三条阅读路线。
+>
+> **想知道现在到底到哪一步？看 [STATUS.md](STATUS.md)** — 一页纸，每个数字都由 `python tools/status_page.py` 从仓库里算出来，
+> 它和仓库对不上时 `--check` 会红；六个维度的"我们缺什么"逐条列出，不留形容词。
 
 ## Verify it yourself — one command, no install, no account
 
@@ -379,7 +382,42 @@ both modes + attacker-key column).
 任何偏差即以非零码退出。散文写的 Expected 列永远"不会失败"，矩阵才会——
 上面那句 `S4+S6` 的错述，正是靠着这道门禁才被发现。
 
+## Reproduce the published numbers in one command
+
+If you do not want to take our arithmetic on trust, there is one command that re-derives it
+locally, offline, with no account:
+
+```
+python tools/reproduce_gate.py --repo . --uibc <path-to-uibc[.exe]> \
+       --profile docs/assurance/far-profile.json --out receipts
+```
+
+It does five things and prints one receipt:
+
+| step | what it re-derives |
+|---|---|
+| environment | python, uibc version (read from `pyproject.toml`, with the source stated), git HEAD (three-level fallback; `UNAVAILABLE` if it truly cannot tell), and a probe that records whether the network was reachable during the run |
+| fixture matrix | **8 packages × 3 pinning conventions = 24 comparisons**, each against `fixtures-v041/RESULTS.json`, comparing the whole non-PASS set and not just PASS/FAIL |
+| corpus | regenerates the 500-case corpus and compares row hashes |
+| vectors | `tools/conformance_vectors.py --check` |
+| denominators | re-adds every published per-family count and every mode's accepted count against the corpus file, including the `0/60` head-pinned denominator that must never be quoted as `0/500` |
+| convention axis | rebuilds artifacts sealed under a superseded scheme (which a current verifier genuinely cannot judge), then reports the same case set under `strict` / `lenient` / `excluded` — the 500-case corpus has no such verdicts, so on it all three readings return 12.0% and the axis would otherwise look flat |
+
+Exit code is 0 only if every comparison matches; a single disagreement prints expected vs
+observed and exits non-zero. The tool never repairs its own inputs — a reproduction script that
+can pass by adjusting what it compares reproduces nothing.
+
+The receipt states, in its own text, that it is **self-issued**: running it proves the numbers
+reproduce on that machine, not that an independent party checked them. To get from "reproduces"
+to "checked by someone else", see `REPRODUCTION-REGISTER.md` — the rows there are written by the
+people who ran it, and disagreements stay in the file.
+
+Timing on a laptop: ~30 s (21 s of that is the corpus hashing). If it ever takes much longer,
+the corpus or the fixtures have grown and the README claim is stale.
+
 ## Memory Migration Fixtures (UIBC-MEM)
+
+
 
 `python fixtures/generate_memory_fixtures.py` —— 22 个具名威胁，打的是可验证
 记忆迁移（M0 输入结构 / M1 条目完整 + 四项 Preservation）：重复、注入、换 id、

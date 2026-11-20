@@ -1,0 +1,20 @@
+{
+  "description": "The last sibling is replaced with 32 zero bytes; only the final fold differs.",
+  "inclusion_path": [
+    "65e65d81267d718438f41589048941ea8f2db1395fcc937b4b9467bfaf86f0c9",
+    "030f713e8152c15f6f54194933a36871e7d41d44400e0c6d8811b8032d174558",
+    "97cee1761fb113a0e3fb9eea3846e7972ab3f553c69cfe06a2b42e6a275944a1",
+    "0000000000000000000000000000000000000000000000000000000000000000"
+  ],
+  "leaf_entry": {
+    "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+    "digest_hex": "7e87cccbbcd3f8d3c148f2418800d8051c77446c92c2ed90f1ad1ac1714234c9",
+    "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: fail-tampered-path-last :: leaf 9",
+    "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a206661696c2d74616d70657265642d706174682d6c617374203a3a206c6561662039"
+  },
+  "leaf_index": 9,
+  "reconstructed_root": "7d6c2d0729c9b6db6c5fe395bb988726cd8ccc62440ccab7b75c1119745f6378",
+  "result": "INVALID_INCLUSION_PATH",
+  "root_true": "7a3ba56e57ec80883be6a1372fb5fb2f1905a4d8cdd2355959a28a8d9e51b3ce",
+  "tree_size": 16
+}

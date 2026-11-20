@@ -1,0 +1,21 @@
+{
+  "description": "tree_size=31, leaf_index=15: deepest interior leaf of a 16|15 split.",
+  "inclusion_path": [
+    "2b5e7de83dda1110df4f77d1c9d64fde707146a1f758b4439ccd73abe3a0b798",
+    "e55b5fcaba59e62ea6cc1bdd05bb0599e9fb0dc0884752d3a7b44bc602ef7556",
+    "67a3555069d4797dcebacb354348fa1f796a39bb0a7d4a4ab03a6ab35c85f1a3",
+    "f5a5cbbeeefac61c9b8fe025846d6230ee44d5bd670b8e8ff99cd9005d757dfb",
+    "8fd6c3ac77ecb8efc1de5617e6649bb67b01f34a481412efd0a4d6224cc8be53"
+  ],
+  "leaf_entry": {
+    "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+    "digest_hex": "594560b3ff86fc3d8bbed328e4f2be8f76d86c66474419930732230f64cfbc85",
+    "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: valid-tree31-index15 :: leaf 15",
+    "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a2076616c69642d7472656533312d696e6465783135203a3a206c656166203135"
+  },
+  "leaf_index": 15,
+  "reconstructed_root": "a8df8708bd33b2c2538fa7de425e50796414e4fa3f8ecc3d0d265a2613bdc368",
+  "result": "VALID",
+  "root_true": "a8df8708bd33b2c2538fa7de425e50796414e4fa3f8ecc3d0d265a2613bdc368",
+  "tree_size": 31
+}

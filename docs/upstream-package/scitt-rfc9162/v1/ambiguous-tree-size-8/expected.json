@@ -1,0 +1,22 @@
+{
+  "alt_root_equal": true,
+  "alt_tree_size": 9,
+  "description": "tree_size=8, leaf_index=2: the same path folds identically at tree_size=9. Together with the 7|8 instance this shows the ambiguity runs in both directions; each instance here was found by exhaustive search, not by hand.",
+  "inclusion_path": [
+    "a68c8ad61fd0b7fc8349095c5e1bfc24cc083891eb8f51267461f95931ea6dd8",
+    "3da4df5df1fa881a2ddb5027ae1244d85bdce9f3ed49b25b48bca118f5b5786f",
+    "589a8a440626e11fe3df2f877d6de4db1a787a3f9acac7a8f1ad2ddd78ee50d6"
+  ],
+  "leaf_entry": {
+    "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+    "digest_hex": "25f2acd9989c10569288c0395bed0b74c5ef5a03dedb6d97108e7401ea197929",
+    "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: ambiguous-tree-size-8 :: leaf 2",
+    "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a20616d626967756f75732d747265652d73697a652d38203a3a206c6561662032"
+  },
+  "leaf_index": 2,
+  "note": "the size-8 fold consumes the same three siblings; no additional node is read, so the root is identical",
+  "reconstructed_root": "f88be0b73b5f0052cd649c592153039ef89af386346db0d2dcd961143ac26987",
+  "result": "VALID_BUT_SIZE_UNAUTHENTICATED",
+  "root_true": "f88be0b73b5f0052cd649c592153039ef89af386346db0d2dcd961143ac26987",
+  "tree_size": 8
+}

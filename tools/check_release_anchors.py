@@ -105,7 +105,11 @@ def check_pin(tag, live, resolve=None):
         elif live[name] != digest:
             lines.append("changed    %s: pinned %s… now %s…" % (name, digest[:12], live[name][:12]))
             bad += 1
-    for name in sorted(set(live) - set(expected)):
+    # A pin records the page it froze, so the page's own pin file is legitimately
+    # absent from it: make_release_pin lists that name under "excluded". Ignoring the
+    # key instead of the convention is what made v0.5.0 report an unpinned asset.
+    excluded = set(pin.get("excluded") or [])
+    for name in sorted(set(live) - set(expected) - excluded):
         if not live[name]:
             # An asset the pin never saw, whose bytes this check cannot measure.
             lines.append("unpinned   %s is on the page but not in the pin, and reports no digest"
@@ -344,14 +348,39 @@ def _json_block(text):
     return value if isinstance(value, dict) else None
 
 
+def _newest_pinned_tag():
+    """The release this repository pinned most recently, so the default is not frozen.
+
+    Measured 2026-11-20: the default was the string "v0.4.1", so after v0.5.0 was published
+    the tool verified the *previous* release and labelled the numbers with its tag.
+    """
+    pins = os.path.join(ROOT, "anchors", "pins")
+    best = None
+    for name in sorted(os.listdir(pins)) if os.path.isdir(pins) else []:
+        if not (name.startswith("uibc-release-") and name.endswith(".json")):
+            continue
+        try:
+            blob = json.loads(open(os.path.join(pins, name), encoding="utf-8").read())
+        except (ValueError, OSError):
+            continue
+        stamp = blob.get("frozen_at") or blob.get("recorded_at") or ""
+        tag = blob.get("tag") or name[len("uibc-release-"):-len(".json")]
+        if best is None or stamp > best[0]:
+            best = (stamp, tag)
+    return best[1] if best else "v0.4.1"
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("--tag", default="v0.4.1")
+    ap.add_argument("--tag", default=None,
+                    help="default: the newest release pin in anchors/pins")
     ap.add_argument("--dir", help="directory that already holds the three files")
     ap.add_argument("--json", action="store_true")
     ap.add_argument("--no-pin", action="store_true",
                     help="skip the comparison against anchors/pins/uibc-release-<tag>.json")
     args = ap.parse_args(argv)
+    if args.tag is None:
+        args.tag = _newest_pinned_tag()
 
     if args.dir:
         code, lines = verify_dir(args.dir, tag=args.tag)

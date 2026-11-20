@@ -83,6 +83,31 @@ working directory. That is enforced by a test
 "third party can recompute" would quietly mean "third party on the same disk can
 recompute".
 
+## The stranger's case: artifact + receipt, no package
+
+The full recomputation needs the sealed package, which is ours. Somebody who downloaded a
+wheel has the file and (at most) the published receipt. So there is a second mode:
+
+```
+python tools/verify_decision.py --artifact pkg-1.0.whl --receipt pkg-1.0.decision.json
+```
+
+Four fields are checkable from the file alone — `subject.name`, `subject.sha256`,
+`subject.bytes`, `subject.members` — plus the receipt's own hash. The remaining eight
+(`package_root` and the seven decision fields) are printed as **NOT CHECKABLE**, not as
+passes:
+
+```
+**MATCH on every checkable field** — 8 field(s) could not be checked without the sealed
+package: package_root, decision, reason, verify_result, gate_version, verifier_version,
+revocation, dispute. What is proven here is narrower than the full recomputation, and the
+report says so instead of printing a bare MATCH.
+```
+
+This is the honest half of "the decision applies to your download": it proves *the receipt
+is about this file*, and it refuses to imply *the decision was redone*. A different file
+turns `subject.sha256`, `subject.bytes` and `subject.members` red and exits 1.
+
 ## Boundaries
 
 - **Scope**: the receipt covers the package tree and the gate's answer on it. It does not

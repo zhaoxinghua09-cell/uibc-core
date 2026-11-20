@@ -63,7 +63,7 @@ def recompute(pkg, py, pubkey=None):
 
 
 def compare(pkg, receipt, py, pubkey=None):
-    """Field-by-field comparison. Returns (rows, ok)."""
+    """Field-by-field comparison against the sealed package. Returns (rows, ok)."""
     rows = []
     ok, computed = receipt_integrity(receipt)
     rows.append(("receipt_sha256", receipt.get("receipt_sha256"), computed, ok))
@@ -78,32 +78,73 @@ def compare(pkg, receipt, py, pubkey=None):
         if f == "verifier_version":
             got = (gate.get("verify_report") or {}).get("verifier_version")
         rows.append((f, want, got, want == got))
-    all_ok = all(r[3] for r in rows)
+    all_ok = all(r[3] for r in rows if r[3] is not None)
+    return rows, all_ok
+
+
+def compare_artifact(artifact, receipt):
+    """Check the receipt against the artifact alone — what a stranger holds.
+
+    Somebody who downloaded a wheel has the file and (maybe) our published
+    receipt; they do not have the sealed package we built around it. Four
+    fields are still checkable from the file: its name, its bytes, its sha256
+    and the member count. The rest require the package, and this function
+    marks them NOT CHECKABLE rather than guessing.
+    """
+    rows = []
+    ok, computed = receipt_integrity(receipt)
+    rows.append(("receipt_sha256", receipt.get("receipt_sha256"), computed, ok))
+    kind, digest, size, members = ap.inventory(artifact)
+    subject = receipt.get("subject") or {}
+    rows.append(("subject.sha256", subject.get("sha256"), digest,
+                 subject.get("sha256") == digest))
+    rows.append(("subject.bytes", subject.get("bytes"), size,
+                 subject.get("bytes") == size))
+    rows.append(("subject.members", subject.get("members"), len(members),
+                 subject.get("members") == len(members)))
+    rows.append(("subject.name", subject.get("name"), os.path.basename(artifact),
+                 subject.get("name") == os.path.basename(artifact)))
+    for f in ("package_root",) + FIELDS:
+        rows.append((f, receipt.get(f), "needs the sealed package", None))
+    all_ok = all(r[3] for r in rows if r[3] is not None)
     return rows, all_ok
 
 
 def _fmt(v):
+    if v is None:
+        return "not checked"
     s = json.dumps(v, sort_keys=True, ensure_ascii=False) if not isinstance(v, str) else v
     return s if len(s) <= 72 else s[:69] + "..."
 
 
-def render(rows, ok, receipt_path, pkg):
+def _verdict(good):
+    return {True: "MATCH", False: "MISMATCH", None: "NOT CHECKABLE"}[good]
+
+
+def render(rows, ok, receipt_path, subject_path, subject_label):
     lines = ["# Decision recomputation", ""]
     lines.append("| field | receipt says | this machine says | result |")
     lines.append("|---|---|---|---|")
     for name, want, got, good in rows:
         lines.append("| %s | `%s` | `%s` | **%s** |"
-                     % (name, _fmt(want), _fmt(got), "MATCH" if good else "MISMATCH"))
+                     % (name, _fmt(want), _fmt(got), _verdict(good)))
     lines.append("")
     lines.append("receipt: `%s`" % receipt_path)
-    lines.append("package: `%s`" % pkg)
+    lines.append("%s: `%s`" % (subject_label, subject_path))
+
     lines.append("")
-    if ok:
+    unchecked = [r[0] for r in rows if r[3] is None]
+    if ok and unchecked:
+        lines.append("**MATCH on every checkable field** — %d field(s) could not be checked without "
+                     "the sealed package: %s. What is proven here is narrower than the full "
+                     "recomputation, and the report says so instead of printing a bare MATCH."
+                     % (len(unchecked), ", ".join(unchecked)))
+    elif ok:
         lines.append("**MATCH** — every field recomputed on these bytes. This says the receipt "
                      "describes what the gate says now; it does not say the original ALLOW/DENY "
                      "was correct, and it does not say the artifact is good.")
     else:
-        bad = [r[0] for r in rows if not r[3]]
+        bad = [r[0] for r in rows if r[3] is False]
         lines.append("**MISMATCH** — these fields differ: %s" % ", ".join(bad))
         if "receipt_sha256" in bad:
             lines.append("")
@@ -114,7 +155,9 @@ def render(rows, ok, receipt_path, pkg):
 
 def main(argv=None):
     p = argparse.ArgumentParser(description="recompute a published admission decision")
-    p.add_argument("--package", required=True)
+    g = p.add_mutually_exclusive_group(required=True)
+    g.add_argument("--package", help="the sealed package the decision was made on")
+    g.add_argument("--artifact", help="just the artifact (wheel/zip/tar/file): the stranger's case")
     p.add_argument("--receipt", required=True)
     p.add_argument("--python", default=sys.executable,
                    help="interpreter that can import uibc_core")
@@ -127,17 +170,25 @@ def main(argv=None):
     except (OSError, ValueError, ReceiptError) as e:
         print("RECEIPT ERROR: %s" % e, file=sys.stderr)
         return 2
-    if not os.path.isdir(a.package):
-        print("RECEIPT ERROR: package directory not found: %s" % a.package, file=sys.stderr)
-        return 2
-    rows, ok = compare(a.package, receipt, a.python, a.pubkey)
+    if a.artifact:
+        if not os.path.exists(a.artifact):
+            print("RECEIPT ERROR: artifact not found: %s" % a.artifact, file=sys.stderr)
+            return 2
+        rows, ok = compare_artifact(a.artifact, receipt)
+        label, subject = "artifact", a.artifact
+    else:
+        if not os.path.isdir(a.package):
+            print("RECEIPT ERROR: package directory not found: %s" % a.package, file=sys.stderr)
+            return 2
+        rows, ok = compare(a.package, receipt, a.python, a.pubkey)
+        label, subject = "package", a.package
     if a.json:
-        print(json.dumps({"ok": ok,
+        print(json.dumps({"ok": ok, "mode": label,
                           "fields": [{"field": n, "receipt": w, "live": g, "match": o}
                                      for n, w, g, o in rows]},
                          indent=2, sort_keys=True, ensure_ascii=False, default=str))
     else:
-        print(render(rows, ok, a.receipt, a.package))
+        print(render(rows, ok, a.receipt, subject, label))
     return 0 if ok else 1
 
 

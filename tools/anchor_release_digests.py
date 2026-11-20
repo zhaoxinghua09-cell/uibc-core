@@ -191,6 +191,8 @@ def anchor(path, out_dir, tsa="freetsa", offline=False):
         blob = _json_block(out)
         if code == 0:
             calendar = blob.get("calendar") if blob else None
+            if isinstance(calendar, str):
+                calendar = calendar.replace("https://", "").replace("http://", "").rstrip("/")
             text = out.lower()
             if "pending_calendar" in text or "pending calendar" in text:
                 status["ots"] = {"state": "pending_calendar",

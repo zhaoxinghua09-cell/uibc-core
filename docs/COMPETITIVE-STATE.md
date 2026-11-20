@@ -151,15 +151,14 @@ their verifier: ok=True
 **落后与追平的现状（2026-11-20 复核一次，按行写清）**：他们三件齐（`.sig` + `.sig.ots` + `.sig.tsr`）
 挂在已发布的 release 上。我们的 `v0.4.1` release 现在也有三件中的两件：
 
-| 件 | 他们 | 我们（`v0.4.1` release 实读） |
+| 件 | 他们 | 我们（`v0.4.1` release 实读，2026-11-20 04:24 UTC） |
 | --- | --- | --- |
-| `CORPUS-DIGESTS.txt` | 有 | 有（287 B，`8b3818af…`） |
-| RFC 3161 令牌 `.tsr` | 有 | **有**（`anchor_freetsa.tsr` 4,643 B，FreeTSA，匿名离线验 `verified: true` / `problems: []`） |
-| OpenTimestamps `.ots` | 有（`.sig.ots`） | **无**（日历可达性不足 + 依赖此前未装，工作流已补装并改为三历法逐个回退；下一次运行为准） |
+| `CORPUS-DIGESTS.txt` | 有 | 有（287 B，`153f9b89…`） |
+| RFC 3161 令牌 `.tsr` | 有 | **有**（4,645 B，FreeTSA，Linux 上离线验 `verified: true` / `problems: []`，attested = 该页摘要） |
+| OpenTimestamps 证明 | 有（`.sig.ots`） | **有，但只是日历证明**（172 B，`pending_calendar`，0 个比特币区块证明；本项目不把它叫"已锚定"） |
 | 分离签名 `.sig` | 有 | **无**（缺 `UIBC_RELEASE_SEED_HEX`，挂 `UNSIGNED.txt`） |
 
-所以当前状态读作"三件缺一，且缺的是签名"，不是"已经对齐"。缺哪件在 `ANCHORS.json` 上逐项写明，
-不靠文档自述；`python tools/check_release_anchors.py` 一条命令即可复核我们已挂的那一件。
+所以当前状态读作"四件里三件在，缺签名；其中一件只是日历证明"，不是"已经对齐"。日用 `python tools/check_release_anchors.py` 一条命令即可复核第一二件是否仍与那页字节一致；`v0.4.1` 已冻结（同日工作流三次重写同一 tag 的资产，现已改为默认拒绝覆盖）。
 
 ### 2026-11-20 实测（配置层）：他们写"改动怎么被决定"，我们只有一行 CODEOWNERS
 

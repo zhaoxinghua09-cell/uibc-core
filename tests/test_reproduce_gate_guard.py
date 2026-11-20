@@ -24,6 +24,16 @@ def test_the_receipt_does_not_fail_on_a_machine_with_internet():
     assert "outbound attempt(s)" in src
 
 
+def test_the_probe_does_not_claim_the_machine_is_offline():
+    # A firewall can allow one port and drop another: on the Windows box where
+    # this was found, port 22 worked (the repo had just been cloned over ssh)
+    # while the probe's port answered nothing, and the old wording printed
+    # "blocked". The probe reports what it observed, not what the machine is.
+    src = open(TOOL, encoding="utf-8").read()
+    assert 'return "blocked"' not in src
+    assert "no probe target answered" in src
+
+
 def test_the_failure_list_is_built_after_every_step_runs():
     # A previous version appended the convention-axis failure before resetting
     # `hard = []`, silently discarding it. Guard against the reset moving again.

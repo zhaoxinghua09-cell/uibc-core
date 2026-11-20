@@ -390,7 +390,7 @@ both modes + attacker-key column).
 ## Reproduce the published numbers in one command
 
 If you do not want to take our arithmetic on trust, there is one command that re-derives it
-locally, offline, with no account:
+locally, without needing the network, and with no account:
 
 ```
 python tools/reproduce_gate.py --repo . --uibc <path-to-uibc[.exe]> \
@@ -401,7 +401,7 @@ It does five things and prints one receipt:
 
 | step | what it re-derives |
 |---|---|
-| environment | python, uibc version (read from `pyproject.toml`, with the source stated), git HEAD (three-level fallback; `UNAVAILABLE` if it truly cannot tell), and a probe that records whether the network was reachable during the run |
+| environment | python, uibc version (read from `pyproject.toml`, with the source stated), git HEAD (three-level fallback; `UNAVAILABLE` if it truly cannot tell), whether any probe target answered (information, never a failure), and the number of outbound connection attempts **the driver process made** during the run |
 | fixture matrix | **8 packages × 3 pinning conventions = 24 comparisons**, each against `fixtures-v041/RESULTS.json`, comparing the whole non-PASS set and not just PASS/FAIL |
 | corpus | regenerates the 500-case corpus and compares row hashes |
 | vectors | `tools/conformance_vectors.py --check` |

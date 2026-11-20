@@ -41,6 +41,24 @@ jobs:
             echo "::warning::could not measure today (network or tool missing); not a pass"
           fi
 
+      # The prior question, for every tag at once: does each release carry a record
+      # of what it holds? A release with no pin cannot be told apart from one that
+      # was rewritten afterwards, and v0.4.1 was rewritten three times on 2026-11-20.
+      - name: Does every release carry a pin?
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set +e
+          python tools/check_release_pins.py
+          code=$?
+          if [ "$code" -eq 1 ]; then
+            echo "::error::a release is unpinned, or its page differs from its pin"
+            exit 1
+          fi
+          if [ "$code" -eq 3 ]; then
+            echo "::warning::could not enumerate every release today"
+          fi
+
       # The documented entry points are probed anonymously: both URLs must serve the
       # pinned archive, and no document may point at another version's asset.
       - name: Can a stranger still walk in?

@@ -174,3 +174,17 @@ jobs:
               echo "not attached (absent): $f"
             fi
           done
+
+      # A pin written by a human from memory is not a record. This step reads the
+      # page it has just published and writes uibc-release-pin.json, which travels
+      # with the release; the repository pin under anchors/pins/ is the stronger
+      # form, because the page cannot rewrite it.
+      - name: Record what this release holds
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python tools/make_release_pin.py --tag "${{ steps.v.outputs.tag }}" \
+            --out "release/uibc-release-pin.json"
+          gh release upload "${{ steps.v.outputs.tag }}" \
+            "release/uibc-release-pin.json"
+          echo "pin: release/uibc-release-pin.json is on the release"

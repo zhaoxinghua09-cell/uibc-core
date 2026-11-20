@@ -65,6 +65,49 @@ Measured run on 2026-11-20, Windows 11 / Python 3.13.15, 33-member wheel:
 After flipping byte 4 of the sealed wheel: `package_root`, `decision`, `reason`,
 `verify_result` all `MISMATCH`, exit 1.
 
+### A second machine, and a copy at another path (measured 2026-11-20)
+
+Linux 6.6.95 / Python 3.12.11, fresh clone of `a7210af`, fresh venv, wheel built there:
+
+| run | result |
+|---|---|
+| admit the wheel just built (129387 B, sha256 `16a15b28d5c7…`) | `ALLOW`, `package_root 24f0f7c6b85a…`, receipt written |
+| `verify_decision.py` on the same package | all rows `MATCH`, exit 0 |
+| same bytes copied to a different directory, then checked | all rows `MATCH`, exit 0 |
+
+The receipt contains **no absolute path** — not the package, not the temp dir, not the
+wheel name with a separator. Measured on the written file: zero occurrences of the
+working directory. That is enforced by a test
+(`test_the_receipt_carries_no_machine_specific_paths`) and by
+`test_a_package_copied_to_another_path_keeps_the_same_root`, because otherwise
+"third party can recompute" would quietly mean "third party on the same disk can
+recompute".
+
+## The stranger's case: artifact + receipt, no package
+
+The full recomputation needs the sealed package, which is ours. Somebody who downloaded a
+wheel has the file and (at most) the published receipt. So there is a second mode:
+
+```
+python tools/verify_decision.py --artifact pkg-1.0.whl --receipt pkg-1.0.decision.json
+```
+
+Four fields are checkable from the file alone — `subject.name`, `subject.sha256`,
+`subject.bytes`, `subject.members` — plus the receipt's own hash. The remaining eight
+(`package_root` and the seven decision fields) are printed as **NOT CHECKABLE**, not as
+passes:
+
+```
+**MATCH on every checkable field** — 8 field(s) could not be checked without the sealed
+package: package_root, decision, reason, verify_result, gate_version, verifier_version,
+revocation, dispute. What is proven here is narrower than the full recomputation, and the
+report says so instead of printing a bare MATCH.
+```
+
+This is the honest half of "the decision applies to your download": it proves *the receipt
+is about this file*, and it refuses to imply *the decision was redone*. A different file
+turns `subject.sha256`, `subject.bytes` and `subject.members` red and exits 1.
+
 ## Boundaries
 
 - **Scope**: the receipt covers the package tree and the gate's answer on it. It does not

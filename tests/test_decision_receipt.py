@@ -126,6 +126,61 @@ class ReceiptTest(unittest.TestCase):
         self.assertTrue(fields["receipt_sha256"])   # internally consistent
         self.assertFalse(fields["package_root"])    # but not these bytes
 
+    def test_the_receipt_carries_no_machine_specific_paths(self):
+        # A receipt with a local path in it would only verify on the machine
+        # that wrote it, which quietly turns "third party can recompute" into
+        # "third party on the same disk can recompute". Guard the property.
+        raw = open(self.receipt_path, encoding="utf-8").read()
+        self.assertNotIn(self.tmp, raw)
+        self.assertNotIn(self.out, raw)
+        r = vd.load_receipt(self.receipt_path)
+        self.assertEqual(r["tool"], "decision_receipt/1.0")
+        self.assertEqual(len(r["package_root"]), 64)
+
+    def test_a_package_copied_to_another_path_keeps_the_same_root(self):
+        pkg2 = os.path.join(self.tmp, "pkg_copy")
+        import shutil
+        shutil.copytree(self.out, pkg2)
+        fields, ok = self._rows(pkg=pkg2)
+        self.assertTrue(ok, fields)
+
+    # --- the stranger's case: artifact + receipt, no package -----------------
+
+    def test_artifact_mode_matches_the_wheel_without_the_package(self):
+        r = vd.load_receipt(self.receipt_path)
+        rows, ok = vd.compare_artifact(self.art, r)
+        self.assertTrue(ok)
+        got = {n: g for n, _w, _g, g in rows}
+        for f in ("receipt_sha256", "subject.sha256", "subject.bytes",
+                  "subject.members", "subject.name"):
+            self.assertTrue(got[f], f)
+        # And it must not pretend the decision was checked: eight fields need
+        # the package, and they have to be reported as NOT CHECKABLE.
+        self.assertEqual(sum(1 for v in got.values() if v is None), 8)
+
+    def test_artifact_mode_rejects_a_different_file(self):
+        other = os.path.join(self.tmp, "other.txt")
+        open(other, "w", encoding="utf-8").write("not the sealed artifact\n")
+        rows, ok = vd.compare_artifact(other, vd.load_receipt(self.receipt_path))
+        self.assertFalse(ok)
+        got = {n: g for n, _w, _g, g in rows}
+        self.assertFalse(got["subject.sha256"])
+        self.assertFalse(got["subject.bytes"])
+        # A file is one member; the receipt describes a two-member wheel.
+        self.assertFalse(got["subject.members"])
+
+    def test_artifact_mode_says_how_much_it_could_not_check(self):
+        proc = subprocess.run([sys.executable,
+                               os.path.join(HERE, "tools", "verify_decision.py"),
+                               "--artifact", self.art, "--receipt", self.receipt_path,
+                               "--python", sys.executable],
+                              capture_output=True, text=True)
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+        self.assertIn("MATCH on every checkable field", proc.stdout)
+        self.assertIn("could not be checked", proc.stdout)
+        # A bare "MATCH" here would overstate: the decision fields were not redone.
+        self.assertNotIn("**MATCH** — every field recomputed", proc.stdout)
+
     def test_verify_decision_exits_nonzero_and_names_the_field(self):
         pkg2 = os.path.join(self.tmp, "pkg_cli")
         ap.admit(self.art, pkg2, "demo-1.0", "alice", sys.executable,

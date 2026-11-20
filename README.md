@@ -441,6 +441,13 @@ python tools/verify_decision.py --package /tmp/admitted/pkg-1.0 \
        --receipt /tmp/admitted/pkg-1.0.decision.json --pubkey owner.ed25519.pub
 ```
 
+If you have only the artifact and our receipt (no package), the same tool checks the four
+fields that can be checked without it and labels the other eight `NOT CHECKABLE`:
+
+```
+python tools/verify_decision.py --artifact dist/pkg-1.0.whl --receipt pkg-1.0.decision.json
+```
+
 A PASS means *the bytes you hold are the bytes that were sealed* — not that the artifact is
 safe. No scan, no execution, no dependency graph; the record says so in its own
 `not_covered` list. Details and a measured example:

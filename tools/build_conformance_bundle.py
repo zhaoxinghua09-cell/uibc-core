@@ -31,7 +31,7 @@ VERSION must be digits and dots, like 0.4.2. With no argument it builds 0.4.1.
 
 A pinned archive is never overwritten with different bytes: if a pin exists for
 VERSION and the new build differs from what is on disk, the build is refused.
-`--replace` only overwrites an archive that has no pin.
+`--replace` only overwrites an archive that has no pin; a pin always wins.
 """
 
 
@@ -167,7 +167,12 @@ def main():
     if os.path.isfile(out):
         old = hashlib.sha256(read(out)).hexdigest()
         pinned = os.path.isfile(pin_path(version))
-        if old != digest and pinned and not replace:
+        # A pin wins over --replace. Measured 2026-11-20: this condition used to read
+        # `and not replace`, so passing the flag overwrote the pinned 0.4.1 archive --
+        # 711fa82c... (228,000 bytes) became 37afab99... (231,280 bytes) in one command,
+        # while the docstring promised `--replace` only touches an archive with no pin.
+        # Every receipt, token and invitation quotes that old hash.
+        if old != digest and pinned:
             os.unlink(tmp_out)
             print("refused: %s is pinned and this build has different bytes" % out)
             print("  on disk %s" % old)

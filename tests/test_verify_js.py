@@ -132,6 +132,35 @@ class TestJavaScriptVerifier(unittest.TestCase):
         finally:
             shutil.rmtree(tmp, ignore_errors=True)
 
+    def test_invalid_utf8_bytes_short_circuit_in_both_languages(self):
+        """Invalid UTF-8 embedded in a string value still parses as JSON after
+        replacement chars, so the byte-level scan is the only refusal. Both
+        verifiers must stop at S11 instead of running the later structural
+        checks on bytes that never became JSON.
+        """
+        tmp = tempfile.mkdtemp(prefix="uibc-utf8-")
+        try:
+            pkg = os.path.join(tmp, "utf8.uibc")
+            shutil.copytree(os.path.join(_REPO, "fixtures", "clean.uibc"), pkg)
+            mp = os.path.join(pkg, "manifest.json")
+            raw = open(mp, "rb").read().decode("utf-8")
+            raw = raw.replace('"status": "SUBMITTED"',
+                              '"status": "SUB\xff\xfeITTED"')
+            open(mp, "wb").write(raw.encode("latin-1"))
+
+            py_report = python_verify(pkg)
+            js_report = js(pkg)
+
+            self.assertEqual(py_report["result"], "FAIL")
+            self.assertEqual(js_report["result"], "FAIL")
+            self.assertIn("S11", failed(js_report))
+            # Short-circuit: no later structural check may judge the package
+            # once the bytes are not readable JSON.
+            later = [c["id"] for c in js_report["checks"] if c["id"] != "S11"]
+            self.assertEqual(later, [], js_report["checks"])
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
     def test_a_real_rfc3161_token_is_verified_and_every_mutation_is_refused(self):
         """The one witness we cannot mint.
 

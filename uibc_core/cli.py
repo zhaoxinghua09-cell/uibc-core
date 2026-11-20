@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 
 import hashlib
 from . import locking
+from . import ed25519 as _ed
 from .canonical import evidence_root, hash_file
 from .signing import (ALGORITHM, ALGORITHM_ED25519, ed_generate_seed,
                       ed_key_id, ed_public_key, ed_seal_sign, generate_key,
@@ -475,6 +476,70 @@ def cmd_cert_verify(args):
     sys.exit(0 if report["result"] == "PASS" else 1)
 
 
+def cmd_revoke(args):
+    """Write a signed revocation.json.
+
+    The point of signing this file is to let somebody who never held the owner's
+    secret decide whether the owner really voided the package. With an Ed25519
+    seed the revocation is verifiable by any third party who has the public key;
+    with an HMAC key only the owner can check it, and the gate will HOLD for
+    everybody else - so the file says which one it is, and so does the gate.
+    """
+    import base64
+    import hashlib
+    import hmac
+    import json
+    import time as _time
+
+    pkg = os.path.abspath(args.path)
+    man_path = os.path.join(pkg, "manifest.json")
+    if not os.path.isfile(man_path):
+        sys.exit(f"error: manifest.json not found in {pkg}")
+    with open(man_path, encoding="utf-8") as f:
+        manifest = json.load(f)
+    root = manifest.get("evidence_root")
+    if not root:
+        sys.exit("error: manifest has no evidence_root; nothing to revoke")
+
+    kind, secret = _load_seal_key(args.key)
+    body = {
+        "revocation_id": args.id or ("r-" + hashlib.sha256(
+            (root + _time.strftime("%Y%m%d%H%M%S", _time.gmtime())).encode()
+        ).hexdigest()[:16]),
+        "target_root": root,
+        "reason_code": args.reason_code,
+        "revoked_at": _time.strftime("%Y-%m-%dT%H:%M:%SZ", _time.gmtime()),
+    }
+    # Everything except `signature` is signed - including algorithm and key_id.
+    # Signing a subset and adding fields afterwards is how a valid signature
+    # ends up failing verification (measured: first implementation signed only
+    # the four base fields and the gate, which strips only `signature`, could
+    # not reproduce the bytes).
+    if kind == "ed25519":
+        body["algorithm"] = "Ed25519"
+        body["key_id"] = ed_key_id(_ed.publickey(secret))
+        payload = json.dumps(body, sort_keys=True, separators=(",", ":"),
+                             ensure_ascii=False).encode("utf-8")
+        body["signature"] = base64.b64encode(_ed.sign(secret, payload)).decode("ascii")
+    else:
+        body["algorithm"] = "HMAC-SHA256"
+        body["key_id"] = key_id(secret)
+        payload = json.dumps(body, sort_keys=True, separators=(",", ":"),
+                             ensure_ascii=False).encode("utf-8")
+        body["signature"] = base64.b64encode(
+            hmac.new(secret, payload, hashlib.sha256).digest()).decode("ascii")
+
+    out = os.path.abspath(args.out)
+    if os.path.exists(out):
+        sys.exit(f"error: {out} already exists (refusing to overwrite a revocation)")
+    with open(out, "w", encoding="utf-8", newline="\n") as f:
+        json.dump(body, f, indent=2, sort_keys=True)
+        f.write("\n")
+    print(json.dumps({"written": out, "algorithm": body["algorithm"],
+                      "target_root": root, "revocation_id": body["revocation_id"],
+                      "key_id": body["key_id"]}, indent=2))
+
+
 def cmd_gate(args):
     from .gate import gate
     pkg = os.path.abspath(args.path)
@@ -669,6 +734,16 @@ def main():
     p.add_argument("--dispute", default=None, metavar="FILE",
                    help="dispute.json overlay (governance.md section 1)")
     p.set_defaults(func=cmd_gate)
+
+    p = sub.add_parser("revoke", help="issue a revocation.json for a package (governance 3)")
+    p.add_argument("path", help="package to revoke (reads its manifest evidence_root)")
+    p.add_argument("--key", required=True, metavar="KEYFILE",
+                   help="owner key: ed25519: seed file (asymmetric) or 64-hex (HMAC)")
+    p.add_argument("--out", required=True, metavar="FILE", help="where to write revocation.json")
+    p.add_argument("--reason-code", default="OWNER_REQUEST",
+                   choices=["KEY_COMPROMISED", "EVIDENCE_INVALID", "OWNER_REQUEST"])
+    p.add_argument("--id", default=None, metavar="REVOCATION_ID")
+    p.set_defaults(func=cmd_revoke)
 
     p = sub.add_parser("demo", help="one-command end-to-end demo (build/seal/verify/tamper/catch)")
     p.set_defaults(func=cmd_demo)

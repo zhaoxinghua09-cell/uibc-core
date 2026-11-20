@@ -488,6 +488,29 @@ function strictScan(bytes) {
   } catch {
     return ["not valid UTF-8"];
   }
+  // Nesting ceiling mirroring verify._nesting_too_deep (MAX_NESTING=512):
+  // count brackets outside string literals; an over-deep input is one fatal
+  // serialization problem, not something the later checks should unwrap.
+  const MAX_NESTING = 512;
+  let depth = 0, deepest = 0, inStr = false, esc = false;
+  for (const ch of text) {
+    if (inStr) {
+      if (esc) esc = false;
+      else if (ch === "\\") esc = true;
+      else if (ch === '"') inStr = false;
+      continue;
+    }
+    if (ch === '"') inStr = true;
+    else if (ch === "[" || ch === "{") {
+      depth++;
+      if (depth > deepest) deepest = depth;
+      if (deepest > MAX_NESTING) break;
+    } else if (ch === "]" || ch === "}") {
+      if (depth > 0) depth--;
+    }
+  }
+  if (deepest > MAX_NESTING)
+    return [`nested deeper than ${MAX_NESTING} levels (reached ${deepest}), refusing to parse`];
   const dups = [];
   let parseError = null;
   // Minimal recursive-descent scan: validates structure, collects the
@@ -555,7 +578,11 @@ function strictScan(bytes) {
     }
     if (c === '"') { scanString(); return; }
     const rest = text.slice(pos);
-    const m = rest.match(/^(true|false|null|NaN|Infinity|-Infinity|-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)/);
+    // RFC 8259 has no NaN / Infinity / -Infinity literal; reject them here at
+    // the byte scan so they land on S11 instead of reaching later checks.
+    const constMatch = rest.match(/^(NaN|Infinity|-Infinity)\b/);
+    if (constMatch) throw new Error(`not a JSON number: ${constMatch[1]}`);
+    const m = rest.match(/^(true|false|null|-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)/);
     if (!m) throw new Error("bad value");
     pos += m[0].length;
   }
@@ -979,6 +1006,30 @@ async function _verifyImpl(files, opts) {
   recordBool("S11", "strict serialization", s11Problems.length === 0,
     s11Problems.length ? s11Problems.slice(0, 4).join("; ")
       : "UTF-8, no duplicate member names, no raw control characters");
+
+  // Fatal serialization problems short-circuit, mirroring verify.py:353-368.
+  // Bytes that are not a readable package cannot be judged by a later check, so
+  // stop here with the one verdict that is true and do not run S1/S2/... after.
+  // Fatal wording follows the Python verifier's actual _fatal set; a repeated
+  // member name alone is not a fatal short-circuit there.
+  const S11_FATAL = /not valid UTF-8|not parseable JSON|nested deeper than/;
+  if (s11Problems.some(p => S11_FATAL.test(p))) {
+    return {
+      verifier_id: "uibc-core-browser-verifier",
+      verifier_version: "0.3.3",
+      spec_version: "uibc-core/0.3.3-proposal",
+      spec_id: "browser-port",
+      result: "FAIL",
+      trust_level: "unattested",
+      key_custody: null,
+      subject: null,
+      checks,
+      root_algorithm: ROOT_ALGORITHM,
+      assurance: "unattested",
+      warnings: [],
+      note: "the bytes are not a readable package, so no other check could be judged",
+    };
+  }
 
   const missing = REQUIRED_FILES.filter(f => !files.has(f));
   let manifest = {}, identity = {}, lifecycle = {}, index = { entries: [] };

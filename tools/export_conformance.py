@@ -223,20 +223,14 @@ def export():
     }
     with open(os.path.join(OUT, "manifest.json"), "w", encoding="utf-8") as f:
         json.dump(manifest, f, ensure_ascii=False, indent=2)
-    # One archive rather than 200 loose files: the cases are regenerable, and a
-    # reader who wants them can unpack in one step.
-    zpath = os.path.join(OUT, "uibc-conformance-0.4.0.zip")
-    if os.path.exists(zpath):
-        os.remove(zpath)
-    with zipfile.ZipFile(zpath, "w", zipfile.ZIP_DEFLATED) as z:
-        for case in manifest["cases"]:
-            root = os.path.join(OUT, case["path"])
-            for r, _d, files in os.walk(root):
-                for name in files:
-                    full = os.path.join(r, name)
-                    rel = os.path.relpath(full, root)
-                    z.write(full, os.path.join("cases", os.path.basename(case["path"]), rel))
-    manifest["archive"] = "uibc-conformance-0.4.0.zip"
+    # No archive is written here. Measured 2026-11-20: this block wrote
+    # `uibc-conformance-0.4.0.zip` unconditionally -- it removed the file first -- and
+    # 0.4.0 is a *published* release asset with a pin (`9a1ca72f...`, 114,576 bytes).
+    # Running the exporter to rebuild the corpus therefore rewrote published bytes,
+    # silently, and the late pin then described a page that no longer existed. The
+    # cases are repository files; `build_conformance_bundle.py` now reads them from
+    # `conformance/cases/` and nothing has to be packed twice.
+    manifest["archive"] = "built by tools/build_conformance_bundle.py, not here"
     with open(os.path.join(OUT, "manifest.json"), "w", encoding="utf-8") as f:
         json.dump(manifest, f, ensure_ascii=False, indent=2)
     return manifest

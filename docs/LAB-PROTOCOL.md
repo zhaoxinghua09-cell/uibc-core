@@ -104,7 +104,7 @@ attached five files without the archive; the second attached a FreeTSA token ove
 `153f9b89…` and the token verified twenty minutes earlier no longer described the page. Re-running
 a workflow under a fixed tag silently republishes different bytes, so the job now refuses to
 replace a published asset unless it is told to (`replace=true`), and prints the old and new digest
-when it does. **`v0.4.1` is frozen as of run `44674184958`; publishing again means a new tag.**
+when it does. **`v0.4.1` is frozen as of run `44674184958`; publishing again means a new tag.** A pin outranks the flag: the configured version's pin is checked first, and a differing build is refused even with `replace=true` (measured 2026-11-20: the flag used to bypass the check and rewrote `0.4.1`).
 
 State of that frozen page, measured from a clone on Linux with
 `python tools/check_release_anchors.py` (exit 0):

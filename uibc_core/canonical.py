@@ -27,6 +27,38 @@ JCS rules implemented here:
 import json
 import math
 import hashlib
+from decimal import Decimal
+
+
+def _es_double_str(x) -> str:
+    """ECMAScript Number::toString for a finite non-integer-valued double.
+
+    Two places where Python's own repr disagrees with ECMAScript, both of them
+    silently correct-looking and both of them hash-changing:
+
+      * exponent padding: repr(1e-07) == '1e-07', ECMAScript says '1e-7'
+        (no leading zero in the exponent).
+      * the fixed/exponent threshold: ECMAScript prints values with 1e-6 <= |x|
+        < 1e21 in plain decimal form, so 1e-6 is '0.000001', not '1e-06'.
+
+    A verifier holding a JCS implementation from another language compares
+    bytes, so getting either of these wrong makes the same document hash two
+    different ways across implementations. Found 2026-11-20 by comparing our
+    Python path against our own JavaScript path (tools/verify-js): Python said
+    '1e-07'/'1e-06' where JavaScript said '1e-7'/'0.000001'.
+    """
+    d = Decimal(repr(x))
+    if 1e-6 <= abs(x) < 1e21:
+        t = format(d, "f")
+        if "." in t:
+            t = t.rstrip("0").rstrip(".")
+        return t
+    t = format(d, "e")                      # e.g. '1E+21' / '1e-7'
+    sep = "E" if "E" in t else "e"
+    mant, _, exp = t.partition(sep)
+    sign = exp[:1] if exp[:1] in "+-" else "+"
+    digits = exp.lstrip("+-").lstrip("0") or "0"
+    return mant.lower() + "e" + sign + digits
 
 
 def _jcs_number_str(x) -> str:
@@ -44,19 +76,13 @@ def _jcs_number_str(x) -> str:
             raise ValueError("JCS: NaN/Infinity are not valid JSON numbers")
         if x == 0.0:
             return "0"
-        s = json.dumps(x)
-        if "e" in s or "E" in s:
-            # Python emits exponent form for 1e20..; ECMAScript keeps the fixed
-            # form for whole numbers with <= 21 integer digits. Normalise that
-            # single edge so the two agree.
-            if x.is_integer():
-                iv = int(x)
-                if 1 <= len(str(iv)) <= 21:
-                    return str(iv)
-            return s
-        if s.endswith(".0"):
-            return s[:-2]
-        return s
+        if x.is_integer():
+            iv = int(x)
+            if abs(iv) < 2 ** 53:
+                return str(iv)
+            if 1 <= len(str(abs(iv))) <= 21:
+                return str(iv)          # ECMAScript keeps the fixed form up to 1e21
+        return _es_double_str(x)
     raise TypeError("JCS: unsupported number type %r" % (type(x),))
 
 

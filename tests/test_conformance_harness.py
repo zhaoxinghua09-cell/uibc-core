@@ -7,6 +7,7 @@ gate fix, applied to the tool that collects outside reports.
 """
 import json
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -31,7 +32,15 @@ class TestPositiveControl(unittest.TestCase):
                   os.path.join(REPO, "conformance", "adapters", "reference_python.py"))])
         self.assertEqual(out.returncode, 0, out.stdout + out.stderr)
         self.assertIn("ROOTS-AGREE", out.stdout)
-        self.assertIn("30/30", out.stdout)
+        # Do not hard-code the vector count: the corpus is append-only and grew from
+        # 30 to 41, which broke an earlier `assertIn("30/30")` without anything being
+        # wrong. Read the two numbers out of the receipt and require them to be equal
+        # and non-zero instead.
+        m = re.search(r"root agreement\s*:\s*(\d+)/(\d+)", out.stdout)
+        self.assertIsNotNone(m, out.stdout)
+        agree, total = int(m.group(1)), int(m.group(2))
+        self.assertGreater(total, 0, out.stdout)
+        self.assertEqual(agree, total, out.stdout)
 
 
 class TestNegativeControl(unittest.TestCase):

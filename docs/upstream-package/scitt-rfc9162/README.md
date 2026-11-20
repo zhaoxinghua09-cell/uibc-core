@@ -2,16 +2,22 @@
 # scitt-rfc9162 test vectors (v1)
 
 A self-contained, append-only set of **RFC 9162 SHA-256 hash-tree and
-inclusion-path** vectors: **30 vectors in six classes** — 17 `VALID`, 5
+inclusion-path** vectors: **41 vectors in six classes** — 21 `VALID`, 12
 `INVALID_INCLUSION_PATH`, 2 `INVALID_LEAF_INDEX`, 1 `INVALID_LEAF_DIGEST`, 1
 `INVALID_TREE_SIZE`, and 4 `VALID_BUT_SIZE_UNAUTHENTICATED` (the ambiguity
 class, described below). Class counts are computed from the vectors themselves
 (`manifest.json` → `class_counts`), not typed in by hand.
 
-Tree shapes covered: 1, 2, 3, 4, 5, 6, 7, 8, 9, 15, 16, 17, 31, 32 leaves;
-indices include left edge, right edge, interior, and the single tail leaf of a
-`2^n | 1` split. Every shape was chosen to exercise a different fold branch,
-not to reach a round number.
+Tree shapes covered: 1, 2, 3, 4, 5, 6, 7, 8, 9, 15, 16, 17, 31, 32, 33, 63, 64,
+65 leaves; indices include left edge, right edge, interior, and the single tail
+leaf of a `2^n | 1` split. Every shape was chosen to exercise a different fold
+branch, not to reach a round number.
+
+The seven path-structure vectors (`fail-path-short*`, `fail-path-swap*`) isolate
+two properties that a verifier can check separately and get wrong separately:
+**length** (a dropped sibling leaves the fold one level below the root) and
+**order** (two siblings exchanged keep byte count and length identical, so only a
+verifier that actually folds catches it).
 
 > **A mismatch against your implementation is exactly the report these authors
 > want.** Agreement on *rejection* is as load-bearing as agreement on

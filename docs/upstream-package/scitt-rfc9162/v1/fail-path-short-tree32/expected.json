@@ -1,0 +1,20 @@
+{
+  "description": "One sibling dropped on the right edge of a full 32-leaf tree: the last fold is missing, which is the case a length-only check misses.",
+  "inclusion_path": [
+    "e5f8de859e67a2a23b25d21c3dff1616d9bfc3e9afccac367785af6c389890c8",
+    "b5170a4249a95b8d43e97d0a419419fd3036dc8acebe7949913f4e11e6949de2",
+    "4a39ea7389e42f0a65d309f6177379f5003074dc7765c13f035aff6d390164c5",
+    "827f55a54cd32b03874be16be6d25c37ab2c3642f3759330c1e43abee1a2fb9b"
+  ],
+  "leaf_entry": {
+    "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+    "digest_hex": "02f3d82ce1456efd92dcd69904b4b82d748343bfea1b697eca34a2f6a658594b",
+    "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: fail-path-short-tree32 :: leaf 31",
+    "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a206661696c2d706174682d73686f72742d747265653332203a3a206c656166203331"
+  },
+  "leaf_index": 31,
+  "reconstructed_root": "4fb8c54f4644f90afafe7f02e50610ff66a6cd5a16e379af80804624c3a920d7",
+  "result": "INVALID_INCLUSION_PATH",
+  "root_true": "c2961ad73496219057ae2fe7a4d450a8b5d3a4fe99af25560e2a91c23f75767d",
+  "tree_size": 32
+}

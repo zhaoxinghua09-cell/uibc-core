@@ -1,0 +1,17 @@
+{
+  "description": "Same one-sibling-short tamper on a 2|1 split, to show it is not size-8 specific.",
+  "inclusion_path": [
+    "9dca133df776728010c08829d9d2fa477743b900ddd85630683ec0bf782962de"
+  ],
+  "leaf_entry": {
+    "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+    "digest_hex": "33662b0e03be032ddb91d2ca86a52a18bb4555cfe0fbfa5d45e51f333733e2e0",
+    "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: fail-path-short-tree3 :: leaf 1",
+    "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a206661696c2d706174682d73686f72742d7472656533203a3a206c6561662031"
+  },
+  "leaf_index": 1,
+  "reconstructed_root": "64c1d47d6a757ada5311f1d996a27e1697599d415782dabf6016d0bbe7a22e08",
+  "result": "INVALID_INCLUSION_PATH",
+  "root_true": "5a22e81f30761c4bf77ec510484862bf095b1e92ecd2fd26d99e72e25bdc742c",
+  "tree_size": 3
+}

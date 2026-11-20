@@ -1,0 +1,17 @@
+{
+  "description": "A size-7 path with both a dropped sibling and an unbalanced split: isolates length from tree shape.",
+  "inclusion_path": [
+    "4545455b665a6e849d89715e9151eee5bcee11e0bc275913e40b103c9990ad6f"
+  ],
+  "leaf_entry": {
+    "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+    "digest_hex": "d58a0d8a5e62c6829a90f980b047b9cc980d8a42cab7c0c8ecb9db315463a3d1",
+    "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: fail-path-short-tampered :: leaf 6",
+    "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a206661696c2d706174682d73686f72742d74616d7065726564203a3a206c6561662036"
+  },
+  "leaf_index": 6,
+  "reconstructed_root": "240c439ef4857a5029a8d343eb9215d04d3a5d645a6eb8c26e214f8c33e54a35",
+  "result": "INVALID_INCLUSION_PATH",
+  "root_true": "a018f96ea666f3021e51a7471154281ff85289e149ed0a915fc0efe2a8e0c513",
+  "tree_size": 7
+}

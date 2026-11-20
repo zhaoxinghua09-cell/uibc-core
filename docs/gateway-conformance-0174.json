@@ -1,7 +1,7 @@
 {
   "standard": "T/ISC 0174-2026",
   "standard_url": "https://www.isc.org.cn/profile/2026/10/30/1e2b29f9-8aab-438a-9114-e8eadc5f04cd.pdf",
-  "generated_at": "2026-11-20T12:50:08.388043+00:00",
+  "generated_at": "2026-11-20T13:15:41.148994+00:00",
   "clauses": [
     {
       "c": "6.1.1 a)",
@@ -365,9 +365,12 @@
       "k": "宜",
       "axis": "路由寻址",
       "t": "AI 报文解析与转发加速、流式透传、内容感知路由",
-      "s": "MISSING",
-      "e": "-",
-      "g": "未实现，且不该在没有压测前宣称"
+      "s": "PARTIAL",
+      "e": "adapters/a2a/accel.py 重复请求缓存（键含包指纹）+ gateway/cache 实测命中率；探针现跑首调/缓存调 p50",
+      "r": [
+        "P33_repeat_cache_measured"
+      ],
+      "g": "只对字节完全相同的重复请求生效；不解析模型报文、不流式透传、不做内容感知路由"
     },
     {
       "c": "9.1.1 a)",
@@ -429,9 +432,12 @@
       "k": "应",
       "axis": "安全防护",
       "t": "识别提示词注入、指令篡改、身份伪造",
-      "s": "PARTIAL",
-      "e": "tools/redteam_suite.py 16 例；guardrail 规则；DID 验签",
-      "g": "未内联到网关转发路径，需外挂执行"
+      "s": "PASS",
+      "e": "adapters/a2a/guard.py 内联网关转发路径（12 类规则）+ tools/redteam_suite.py 16 例 + DID 验签",
+      "r": [
+        "P32_injection_blocked"
+      ],
+      "g": "规则式识别，召回受规则库限制，未知变体可能漏检；拒绝只记类别与摘要，不落原文"
     },
     {
       "c": "9.1.4 a)-b)",
@@ -439,26 +445,35 @@
       "axis": "安全防护",
       "t": "TLS 保障机密性完整性；对端证书校验与双向认证",
       "s": "PARTIAL",
-      "e": "部署层可置于 TLS 反代（deploy/）",
-      "g": "适配器自身只监听 HTTP；无 mTLS 对端校验"
+      "e": "deploy/nginx-gateway.conf（TLS1.2+ / ssl_verify_client on / 对端 CA / 深度上限）+ tools/check_deploy_hardening.py 静态校验",
+      "r": [
+        "P34_deploy_hardening_linted"
+      ],
+      "g": "适配器自身仍只监听 HTTP；mTLS 由部署侧反代执行，需运维签发并部署证书后才真正生效"
     },
     {
       "c": "9.1.5 a)-c)",
       "k": "应",
       "axis": "安全防护",
       "t": "ACL 报文过滤、限速与清洗、安全域隔离",
-      "s": "MISSING",
-      "e": "-",
-      "g": "网络层能力，非本适配器职责；需部署侧声明"
+      "s": "PARTIAL",
+      "e": "deploy/nginx-gateway.conf：geo ACL 白名单 + limit_req/limit_conn + /metrics 独立安全域；tools/check_deploy_hardening.py 校验指令在场",
+      "r": [
+        "P34_deploy_hardening_linted"
+      ],
+      "g": "网络层由部署侧执行，适配器不自称具备；配置需按真实对端网段替换后才算生效"
     },
     {
       "c": "9.2.1 a)-b)",
       "k": "应",
       "axis": "安全防护",
       "t": "每请求身份验证与权限校验；差异化权限",
-      "s": "PARTIAL",
-      "e": "agent 状态校验（403）+ authorization.scopes 声明",
-      "g": "scopes 只被校验存在，未按 scope 拒绝越权调用"
+      "s": "PASS",
+      "e": "adapters/a2a/scopes.py：每请求按 method 绑定权限，取 record 的 authorization.scopes 判定；调用方声明 scope 时双重判定；拒绝 HTTP 403 且记 clause",
+      "r": [
+        "P31_scope_enforced"
+      ],
+      "g": "调用方未声明 scope 时按传输层对端身份放行（basis=transport-peer），对端身份由反代 mTLS 承担；权限未按任务动态最小化"
     },
     {
       "c": "9.2.2 a)-b)",
@@ -471,14 +486,14 @@
     }
   ],
   "counts": {
-    "PASS": 19,
+    "PASS": 21,
     "PARTIAL": 22,
-    "MISSING": 2
+    "MISSING": 0
   },
   "counts_required": {
-    "PASS": 15,
-    "PARTIAL": 18,
-    "MISSING": 1
+    "PASS": 17,
+    "PARTIAL": 17,
+    "MISSING": 0
   },
   "total": 43,
   "total_required": 34,
@@ -495,13 +510,13 @@
     },
     "路由寻址": {
       "PASS": 4,
-      "PARTIAL": 2,
-      "MISSING": 1
+      "PARTIAL": 3,
+      "MISSING": 0
     },
     "安全防护": {
-      "PASS": 2,
-      "PARTIAL": 7,
-      "MISSING": 1
+      "PASS": 4,
+      "PARTIAL": 6,
+      "MISSING": 0
     }
   },
   "probes": {
@@ -636,8 +651,24 @@
     "P30_spec_validation": {
       "ok": true,
       "detail": "tool descriptor parsed and rejected when malformed (D4 on non-object schema)"
+    },
+    "P31_scope_enforced": {
+      "ok": true,
+      "detail": "caller presenting a scope the record does not grant is refused: HTTP 403, clause 9.2.1 a)"
+    },
+    "P32_injection_blocked": {
+      "ok": true,
+      "detail": "override payload refused before verification, no payload text in the refusal (categories=['prompt-override'])"
+    },
+    "P33_repeat_cache_measured": {
+      "ok": true,
+      "detail": "identical repeats served from cache: hits=11 misses=2 hit_rate=0.8462; measured first=0.566ms cached_p50=0.472ms (in-process)"
+    },
+    "P34_deploy_hardening_linted": {
+      "ok": true,
+      "detail": "deploy config carries mTLS + ACL + rate/connection limits: 12/12 directive(s)"
     }
   },
-  "probes_passed": 33,
-  "probes_total": 33
+  "probes_passed": 37,
+  "probes_total": 37
 }

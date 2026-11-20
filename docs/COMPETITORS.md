@@ -19,10 +19,10 @@ verifier that refuses malformed input).
 | First published | 4 releases, latest 2026-11-15 | 23 releases, latest 2026-11-18 |
 | Specification | In this repo: `drafts/draft-zhao-uibc-evidence-chain-00.md`, **not submitted** | IETF Internet-Draft `draft-mih-scitt-agent-action-capsule`, referenced from the package itself |
 | Licence | Apache-2.0 | BSD-3-Clause |
-| Language of the verifier | Python (first) **and JavaScript (second, independent)** | Python only |
-| Verifier modules | 25 | 40 |
-| Test files / test functions | 30 / 527 | 95 / 1189 |
-| Conformance material | 30 packages (20 must-reject, 1 control, 9 must-accept), shipped with per-case `expected.json`, two of them carrying the outside input S9 and S19 need, and rebuildable byte for byte | 1,952 cases in 55 sets under `vectors/`, referenced by tests, in neither the sdist nor the wheel |
+| Language of the verifier | Python (first) **and JavaScript (second, independent)** | Python, TypeScript, Go and Rust, all driven by the same vector corpus |
+| Verifier modules | 27 | 40 |
+| Test files / test functions | 131 / 816 | 95 / 1189 |
+| Conformance material | 30 packages (20 must-reject, 1 control, 9 must-accept), shipped with per-case `expected.json`, two of them carrying the outside input S9 and S19 need, rebuildable byte for byte, and every must-reject case naming its basis in `docs/GROUNDS.md` | 1,952 cases in 55 sets under `vectors/`, referenced by tests, in neither the sdist nor the wheel |
 | Second implementation is a **CI gate** | Yes — `second-implementation` job, 18 of 20 checks, 36/36 identical FAIL sets | No second implementation to gate |
 | Hostile-input suite | `tools/redteam_robustness.py`, 10 cases, table in `docs/ROBUSTNESS.md` | `tests/test_json_nesting_vectors.py`, `tests/test_verify_bounds.py`, `tests/test_parse.py` |
 | Deep-nesting ceiling | **512 levels, both implementations, refuses with S11** | 128 levels, refuses at parse time |
@@ -33,7 +33,7 @@ verifier that refuses malformed input).
 Re-run the machine-checkable half:
 
 ```
-python3 tools/check_doc_facts.py            # ours: 527 tests, 20 checks, 36 cases
+python3 tools/check_doc_facts.py            # ours: 816 tests, 27 modules, 20 checks
 python3 tools/redteam_robustness.py         # ours: 10 of 10 refused
 python3 tools/cross_impl_check.py --json    # ours: 36 of 36 identical
 ```
@@ -123,12 +123,23 @@ committee, a standards reader or a customer treats as evidence.
 
 ## Where this project is ahead, also stated plainly
 
-1. **Every must-reject case names what it rejects.** AAC's 55 sets say which
-   specification owns them; no case says which sentence of it, so a reader who
-   wants to argue with a verdict has to argue with the behaviour. Here each of the
-   18 reject cases carries a basis, and five carry a clause quote that
-   `tools/check_grounds.py` re-finds in the vendored draft. This is the column
-   where the comparison is not close, and it is the only one.
+1. **Every must-reject case names what it rests on, and the page is generated.**
+   All twenty must-reject cases carry a basis; five quote a sentence that
+   `tools/check_grounds.py` re-finds in the vendored draft. `docs/GROUNDS.md`
+   renders that table from the data and `tests/test_grounds_page.py` fails if the
+   page and the data disagree, so a reader can open one page and argue with a
+   verdict on its own terms.
+
+   The correction this item needed: an earlier version of this section said AAC
+   "says which specification owns them; no case says which sentence". Measured on
+   their 0.17.0 checkout, that understated them. 28 of 828 vector JSON files carry
+   a `section`/`sections` label, across 10 of 55 sets, and the labels are real
+   document sections (`x402-v0.md §6.2`, `composed/v1: Members and Outcomes`).
+   What none of them do is quote a sentence of the document. So the difference is
+   not "they name nothing, we name a sentence": it is **sections on 10 of 55 sets
+   against a quoted sentence on 5 of 20 cases, with the quotation re-found by a
+   tool**. Narrower than what this section claimed yesterday, and still the only
+   column where the counts are ours to lose.
 2. **The corpus is rebuildable byte for byte.** `SOURCE_DATE_EPOCH=1794700800
    python tools/oracle_check.py --emit <dir>` reproduces `conformance/oracle`
    exactly, checked by `tests/test_oracle_reproducible.py` with a control at
@@ -144,9 +155,9 @@ committee, a standards reader or a customer treats as evidence.
    Python's `cryptography`, and red-teamed against seven token mutations.
 
 Explicitly **not** ahead, now that the numbers are in: corpus size (1,952 against
-28), number of implementations (AAC runs the same corpus in Python, TypeScript,
+30), number of implementations (AAC runs the same corpus in Python, TypeScript,
 Go and Rust; this project has Python and JavaScript), test count (4,486 executed
-there against 768 here), and specification standing.
+there against 816 here), and specification standing.
 
 
 ## What "ahead" does not mean here

@@ -16,16 +16,50 @@ import hashlib
 import io
 import json
 import os
+import re
 import sys
 import zipfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, ".."))
 CONF = os.path.join(REPO, "conformance")
-
-VERSION = sys.argv[1] if len(sys.argv) > 1 else "0.4.1"
-OUT = os.path.join(CONF, "uibc-conformance-%s.zip" % VERSION)
 FIXED = (1980, 1, 1, 0, 0, 0)
+
+USAGE = """usage: build_conformance_bundle.py [VERSION] [--replace]
+
+VERSION must be digits and dots, like 0.4.2. With no argument it builds 0.4.1.
+
+A pinned archive is never overwritten with different bytes: if a pin exists for
+VERSION and the new build differs from what is on disk, the build is refused.
+`--replace` only overwrites an archive that has no pin.
+"""
+
+
+def parse_args(argv):
+    """Validate before anything is written.
+
+    Measured 2026-11-20: `--help` was read as a version and produced
+    `uibc-conformance---help.zip` (229,084 bytes, 294 files) inside the repository,
+    because the version was taken from argv with no check at all.
+    """
+    if any(a in ("-h", "--help") for a in argv):
+        return None, False
+    positional = [a for a in argv if not a.startswith("--")]
+    unknown = [a for a in argv if a.startswith("--") and a != "--replace"]
+    if unknown:
+        raise SystemExit("unknown option %s\n\n%s" % (unknown[0], USAGE))
+    version = positional[0] if positional else "0.4.1"
+    if len(positional) > 1:
+        raise SystemExit("expected at most one version\n\n%s" % USAGE)
+    if not re.fullmatch(r"\d+\.\d+\.\d+", version):
+        raise SystemExit(
+            "'%s' is not a version. It must look like 0.4.2, and nothing is built "
+            "from a value this does not validate.\n\n%s" % (version, USAGE))
+    return version, "--replace" in argv
+
+
+def pin_path(version):
+    return os.path.join(REPO, "anchors", "pins", "uibc-conformance-%s.sha256" % version)
 
 
 def read_cases():
@@ -87,6 +121,11 @@ def add(z, name, data):
 
 
 def main():
+    version, replace = parse_args(sys.argv[1:])
+    if version is None:
+        print(USAGE)
+        return 0
+    out = os.path.join(CONF, "uibc-conformance-%s.zip" % version)
     manifest_raw = read(os.path.join(CONF, "manifest.json"))
     manifest = json.loads(manifest_raw.decode("utf-8"))
     cases = read_cases()
@@ -110,7 +149,11 @@ def main():
                   for c in manifest["cases"]],
     }
 
-    with zipfile.ZipFile(OUT, "w", zipfile.ZIP_DEFLATED) as z:
+    # Build beside the target and decide before replacing anything: a pinned archive
+    # whose bytes would change is refused, because every published hash, receipt and
+    # invitation cites it.
+    tmp_out = out + ".tmp"
+    with zipfile.ZipFile(tmp_out, "w", zipfile.ZIP_DEFLATED) as z:
         for name in sorted(cases):
             add(z, name, cases[name])
         add(z, "manifest.json", manifest_raw)
@@ -120,10 +163,30 @@ def main():
         add(z, "README.md", readme)
         add(z, "uibc_core.pyz", build_pyz())
 
-    digest = hashlib.sha256(read(OUT)).hexdigest()
-    print("wrote %s" % OUT)
+    digest = hashlib.sha256(read(tmp_out)).hexdigest()
+    if os.path.isfile(out):
+        old = hashlib.sha256(read(out)).hexdigest()
+        pinned = os.path.isfile(pin_path(version))
+        if old != digest and pinned and not replace:
+            os.unlink(tmp_out)
+            print("refused: %s is pinned and this build has different bytes" % out)
+            print("  on disk %s" % old)
+            print("  this run %s" % digest)
+            print("A pinned version names one set of bytes. Build a new version instead,")
+            print("or delete the pin deliberately if the old hash was never published.")
+            return 3
+        if old == digest:
+            os.unlink(tmp_out)
+            print("identical: rebuilding %s produced the same bytes (%s)" % (version, digest))
+            return 0
+        if not pinned and not replace:
+            os.unlink(tmp_out)
+            print("refused: %s exists and has no pin; pass --replace to overwrite it" % out)
+            return 3
+    os.replace(tmp_out, out)
+    print("wrote %s" % out)
     print("cases: %d  size: %d  sha256: %s"
-          % (len(cases), os.path.getsize(OUT), digest))
+          % (len(cases), os.path.getsize(out), digest))
     return 0
 
 

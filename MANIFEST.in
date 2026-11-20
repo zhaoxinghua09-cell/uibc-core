@@ -13,6 +13,10 @@
 # than guessing which ones matter.
 
 include README.md LICENSE NOTICE NOTICE.md CITATION.cff CITATION.bib codemeta.json
+# The register is part of what the package says about itself, and a test reads it
+# from the archive. Shipping tests/ without the file a test opens is the same
+# failure class as the .github gap that made main red between #288 and #294.
+include REPRODUCTION-REGISTER.md
 
 graft uibc_core
 graft tests

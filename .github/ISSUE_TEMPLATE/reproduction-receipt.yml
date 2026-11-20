@@ -1,0 +1,88 @@
+name: Reproduction receipt
+description: "You ran tools/reproduce_gate.py and have a receipt. This records it so a number can be quoted with its provenance."
+title: "[reproduction receipt] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **What this is for.** `REPRODUCTION-REGISTER.md` lists people who ran the published
+        numbers and said what happened. Rule 3 in that file says the maintainer never fills
+        in someone else's row. This form is how a row gets filled by the person who ran it.
+
+        **Run this first.** From the repository, with your receipt:
+
+        ```
+        python tools/check_register_row.py --receipt <receipt.json> \
+               --claim-commit <commit you ran against> --claim-sha256 <sha256 of the file>
+        ```
+
+        If it prints `RECEIPT NOT ACCEPTABLE`, paste that output here instead of a row.
+        A refused receipt is a useful report; a hand-written "all good" is not.
+
+        **What a row does not mean.** It does not endorse the subject, certify the tool, or
+        rank anybody. It means: one command produced this output on a machine you name,
+        and the file you attached hashes to the value you gave.
+
+  - type: input
+    id: ran_against
+    attributes:
+      label: "Commit you ran against"
+      description: "Full or short SHA of the uibc-core checkout you executed. Not your own HEAD."
+      placeholder: "3a9dfae"
+    validations:
+      required: true
+
+  - type: input
+    id: runner
+    attributes:
+      label: "Who ran it"
+      description: "Name or handle, as you want it to appear in the register."
+    validations:
+      required: true
+
+  - type: dropdown
+    id: affiliation
+    attributes:
+      label: "Affiliation"
+      description: "Rule 5 wants this declared, not inferred. Judges never see where you work until you say it."
+      options:
+        - "none — no employment, contract or payment relationship with the subject or maintainer"
+        - "contributor to this repository"
+        - "employed by or contracted to the subject"
+        - "paid reviewer"
+        - "other (explain in the result field)"
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: "Environment"
+      description: "OS, Python version, uibc version, and whether you installed from a fresh clone, a wheel, or a source tree you had already modified."
+      placeholder: "Windows 11 / Python 3.13.15 / uibc 0.4.1 / fresh clone, clean venv"
+    validations:
+      required: true
+
+  - type: textarea
+    id: result
+    attributes:
+      label: "Result"
+      description: "Either `ALL COMPARISONS MATCH`, or the exact list of disagreements. Partial honesty is worth more here than a clean claim."
+      placeholder: "ALL COMPARISONS MATCH — 24 fixture comparisons, corpus hashes, 29 vectors, three denominators, convention axis 24/34."
+    validations:
+      required: true
+
+  - type: input
+    id: receipt_sha256
+    attributes:
+      label: "sha256 of the receipt file"
+      description: "64 lowercase hex characters. This is what makes the row checkable rather than assertable."
+      placeholder: "210eb3e31f097b65bd0a7903162d56684ca45e60ff032e74d32526a9e469e70d"
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: "Anything that differs from a plain run"
+      description: "Local modifications, skipped steps, machine quirks, or the fact that you did not finish. A row that hides this is worse than no row."

@@ -1,35 +1,53 @@
 {
   "name": "uibc-verifier",
-  "description": "UIBC Core verification agent: verifies sealed evidence packages (S1-S6), issues gate decisions (ALLOW/DENY/HOLD), and checks certificates. Read-only per docs/api-scope.md v1.0.",
-  "url": "http://localhost:0/uibc-a2a/",
-  "version": "0.1.0-proposal",
+  "description": "UIBC verification agent: verifies sealed evidence packages (S1-S6), returns ALLOW/DENY/HOLD gate decisions, and checks certificates. Read-only per docs/api-scope.md v1.0: it verifies packages on the operator's own disk and never writes to a caller's package.",
+  "url": "http://127.0.0.1:8899/a2a/",
+  "version": "0.3.0",
+  "protocolVersion": "0.3.0",
+  "preferredTransport": "JSONRPC",
+  "supportedInterfaces": [
+    {
+      "protocolBinding": "JSONRPC",
+      "url": "http://127.0.0.1:8899/a2a/",
+      "protocolVersion": "1.0"
+    }
+  ],
   "capabilities": {
     "streaming": false,
-    "pushNotifications": false
+    "pushNotifications": false,
+    "extendedAgentCard": false,
+    "extensions": []
   },
+  "defaultInputModes": ["application/json"],
+  "defaultOutputModes": ["application/json"],
+  "securitySchemes": {},
   "skills": [
     {
       "id": "verify_package",
       "name": "Verify UIBC package",
-      "description": "Run S1-S6 verification on a .uibc package directory. Strict mode requires the owner key (key_hex). Returns PASS/FAIL with per-check detail.",
-      "tags": ["verification", "evidence", "audit"]
+      "description": "Run S1-S6 verification on a .uibc package directory. In Ed25519 mode verification needs only the DID the package names -- no key handed over out of band. Returns PASS/FAIL with per-check detail.",
+      "tags": ["verification", "evidence", "audit", "ed25519", "did"],
+      "examples": ["verify package", "verify package against did:key:z6Mk..."]
     },
     {
       "id": "gate_check",
       "name": "Gate decision",
       "description": "Return a governed decision ALLOW/DENY/HOLD (exit 0/2/3 semantics) for a package, honoring signed revocations. Disputes annotate, never silently block.",
-      "tags": ["governance", "gate"]
+      "tags": ["governance", "gate"],
+      "examples": ["gate check on a package whose owner was revoked mid-run"]
     },
     {
       "id": "cert_verify",
       "name": "Verify certificate",
       "description": "Check a UIBC certificate (C1-C7) and optionally its binding to a package.",
-      "tags": ["certificate"]
+      "tags": ["certificate"],
+      "examples": ["verify certificate and its binding to a package"]
     }
   ],
   "provider": {
     "organization": "uibc-core project",
     "url": "https://github.com/zhaoxinghua09-cell/uibc-core"
   },
-  "note": "skeleton: url is a placeholder; no A2A server is running. Do not integrate against this card yet."
+  "documentationUrl": "https://github.com/zhaoxinghua09-cell/uibc-core/blob/main/adapters/a2a/MAPPING.md",
+  "note": "Self-hosted endpoint. The url above is the default local bind; the operator must substitute a reachable address before anyone integrates against it. Reachability is the operator's claim, not this file's."
 }

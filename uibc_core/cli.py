@@ -19,6 +19,7 @@ from .signing import (ALGORITHM, ALGORITHM_ED25519, ed_generate_seed,
 from .verify import verify
 from . import verify as verify_mod
 from . import lifecycle
+from . import did as did_mod
 from . import SPEC_VERSION, __version__
 
 REQUIRED = ["manifest.json", "identity.json", "lifecycle.json", "evidence/index.json"]
@@ -98,6 +99,16 @@ def cmd_register(args):
         "previous_event": None,
         "signature": None,   # signing not ratified in v0.1
     }
+    # A DID that cannot be independently resolved is worse than no DID at all:
+    # it looks like a claim about control that nobody can check. Refuse at
+    # write time rather than let a typo become a verification failure later.
+    if getattr(args, "did", None):
+        method, _ = did_mod.parse(args.did)
+        if method not in did_mod.SUPPORTED_METHODS:
+            raise SystemExit(
+                "error: did:%s has no public resolution rule in this build "
+                "(supported: %s)"
+                % (method, ", ".join("did:" + m for m in did_mod.SUPPORTED_METHODS)))
     ident = {
         "schema": SPEC_VERSION,
         "agent_id": agent_id,
@@ -109,7 +120,8 @@ def cmd_register(args):
     }
     # v1.1 optional fields, only written when supplied, so older packages
     # stay readable and unchanged.
-    for field in ("principal_type", "logical_agent_id", "run_id", "key_custody"):
+    for field in ("principal_type", "logical_agent_id", "run_id", "key_custody",
+                  "did"):
         value = getattr(args, field, None)
         if value:
             ident[field] = value
@@ -231,6 +243,20 @@ def _load_seal_key(path):
             sys.exit(f"error: Ed25519 seed must be 32 bytes: {path}")
         return "ed25519", seed
     return "hmac", _load_key(path)
+
+
+def _pubkey_from_did(value):
+    """Resolve a DID to the Ed25519 key it publishes.
+
+    This is the point of binding to a DID: the verifier checks the seal against
+    the key the *DID* names, instead of being handed a key out of band and
+    asked to trust whoever handed it over.
+    """
+    try:
+        public_key, _kid = did_mod.resolve_ed25519_key(value)
+    except (did_mod.DIDError, OSError, ValueError) as exc:
+        sys.exit("error: cannot resolve %s: %s" % (value, exc))
+    return public_key
 
 
 def _load_pubkey(path):
@@ -547,6 +573,10 @@ def cmd_gate(args):
         sys.exit(f"error: package dir not found: {pkg}")
     key = _load_key(args.key) if args.key else None
     pubkey = _load_pubkey(args.pubkey) if getattr(args, "pubkey", None) else None
+    if getattr(args, "did", None):
+        if pubkey is not None:
+            sys.exit("error: --did and --pubkey both pin a key; pass one of them")
+        pubkey = _pubkey_from_did(args.did)
     report = gate(pkg, key=key, pubkey=pubkey,
                   revocation_path=args.revocation, dispute_path=args.dispute)
     print(json.dumps(report, ensure_ascii=False, indent=2))
@@ -579,6 +609,12 @@ def cmd_verify(args):
         sys.exit(f"error: package dir not found: {pkg}")
     key = _load_key(args.key) if args.key else None
     pubkey = _load_pubkey(args.pubkey) if getattr(args, "pubkey", None) else None
+    # A DID pins the key as a file would -- but the key travels with the DID
+    # rather than with the message, so a third party needs nothing from us.
+    if getattr(args, "did", None):
+        if pubkey is not None:
+            sys.exit("error: --did and --pubkey both pin a key; pass one of them")
+        pubkey = _pubkey_from_did(args.did)
     report = verify(pkg, key=key, pubkey=pubkey,
                     expect_head=getattr(args, "expect_head", None),
                     strict=getattr(args, "strict", False),
@@ -663,6 +699,11 @@ def main():
     p.add_argument("--key-custody", dest="key_custody", default=None,
                    choices=["self_held", "platform_held", "household_held",
                             "threshold", "kms", "hsm", "session_delegated"])
+    # Optional DID binding. Only methods whose resolution rule is public
+    # (did:key / did:web) are accepted: binding an identity to a DID nobody
+    # can independently resolve proves nothing about who controls it.
+    p.add_argument("--did", default=None,
+                   help="bind this identity to a DID (did:key or did:web)")
     p.set_defaults(func=cmd_register)
 
     p = sub.add_parser("event", help="append lifecycle event")
@@ -701,6 +742,9 @@ def main():
     p.add_argument("--pubkey", default=None, metavar="PUBFILE",
                    help="pinned Ed25519 public key (hex file): the seal's recorded "
                         "public key must match it, else S6 FAILS")
+    p.add_argument("--did", default=None, metavar="DID",
+                   help="pin the key by DID instead of a file (did:key resolves "
+                        "offline; did:web over https)")
     p.add_argument("--expect-head", dest="expect_head", default=None, metavar="HEAD",
                    help="pin the package checkpoint_head observed elsewhere: a "
                         "mismatch FAILS S9, which is the only way to catch a rollback "
@@ -749,6 +793,8 @@ def main():
                    help="hex owner key: strict verify + revocation signature check")
     p.add_argument("--pubkey", default=None, metavar="PUBFILE",
                    help="pinned Ed25519 public key (hex file) for the verify step")
+    p.add_argument("--did", default=None, metavar="DID",
+                   help="pin the key by DID instead of a file (did:key / did:web)")
     p.add_argument("--revocation", default=None, metavar="FILE",
                    help="revocation.json overlay (governance.md section 3)")
     p.add_argument("--dispute", default=None, metavar="FILE",

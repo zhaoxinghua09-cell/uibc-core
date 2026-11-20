@@ -23,6 +23,7 @@ import argparse
 import hashlib
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -37,14 +38,32 @@ FILES = ("CORPUS-DIGESTS.txt", "anchor_freetsa.tsr", "anchor_freetsa_ca.pem")
 
 
 def _fetch(url, dest, attempts=3, timeout=45):
-    last = None
+    """Download with curl when it exists, urllib otherwise.
+
+    Measured 2026-11-20 on Windows: `curl.exe` fetched all three files while
+    `urllib.request` timed out on the same URLs (`WinError 10060`), which made this
+    checker report NOT MEASURED on a machine that could reach the release. A check
+    that fails because of its own HTTP client is worse than no check, so curl goes
+    first and urllib is only the fallback for machines without it.
+    """
+    curl = shutil.which("curl")
+    if curl:
+        for _ in range(attempts):
+            proc = subprocess.run([curl, "-fsSL", "--max-time", str(timeout), "-o", dest, url],
+                                  capture_output=True, text=True)
+            if proc.returncode == 0 and os.path.isfile(dest):
+                return os.path.getsize(dest)
+        last = "curl exited %s" % proc.returncode
+    else:
+        last = None
+
     for _ in range(attempts):
         try:
             with urllib.request.urlopen(url, timeout=timeout) as response:
                 body = response.read()
             with open(dest, "wb") as handle:
                 handle.write(body)
-            return body
+            return len(body)
         except (urllib.error.URLError, OSError) as exc:
             last = exc
     raise RuntimeError("could not download %s: %s" % (url.rsplit("/", 1)[-1], last))

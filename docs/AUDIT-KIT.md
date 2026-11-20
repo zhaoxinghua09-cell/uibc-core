@@ -97,9 +97,13 @@ curl -fL -O https://github.com/zhaoxinghua09-cell/uibc-core/releases/download/v0
 python tools/anchor_tsa.py --verify anchor_freetsa.tsr --data CORPUS-DIGESTS.txt --cabundle anchor_freetsa_ca.pem
 ```
 
-or, with the repository, in one step: `python tools/check_release_anchors.py` (0 verified, 1 refused, 3 not measured). Measured 2026-11-20: `verified: true`, `signature_verified: true`, `problems: []`, `gen_time` 2026-11-20T04:05:27Z, serial 171991794, attested digest `8b3818af643a35eebe795397acce8ba47bbfc718117146dd9f6cf4af0a9628ab`, which is the SHA-256 of the `CORPUS-DIGESTS.txt` the same release serves.
+or, with the repository, in one step: `python tools/check_release_anchors.py` (0 verified, 1 refused, 3 not measured). Measured 2026-11-20 from a clone on Linux: `verified: true`, `signature_verified: true`, `problems: []`, `gen_time` 2026-11-20T04:24:44Z, serial 172003659, attested digest `153f9b898878aaa9da97c7a496dd22af124d9bb3112ec5fede0a04eff94df033`, which is the SHA-256 of the `CORPUS-DIGESTS.txt` the same release serves.
 
-What this establishes: an independent party signed that digest at that time, and the bytes on the page today are the bytes that were signed. What it does not: that FreeTSA is trustworthy, that we produced those bytes, or that the digest list covers every asset. There is **no** signature (`.sig`) on this corpus — `UIBC_RELEASE_SEED_HEX` is not configured, so the page carries `UNSIGNED.txt` — and **no** OpenTimestamps proof, because the calendar answers were unreliable (two of three returned 503 on 2026-11-20); both absences are stated in `ANCHORS.json` rather than glossed over.
+The OpenTimestamps proof, `CORPUS-DIGESTS.txt.ots` (172 bytes), contains one **calendar** attestation and no Bitcoin block attestation — `pending_calendar`, not an anchor. `tools/anchor_ots.py --verify` says so in those words; a reader who wants a block-level check has to upgrade the proof later and cross-check the header, which this project does not do.
+
+This page was rewritten three times on 2026-11-20 (workflow runs `44669496764`, `44671945364`, `44674184958`), and each rewrite changed the digest list, so a token verified against `8b3818af…` at 04:05 stopped matching at 04:24. The job now refuses to replace a published asset unless `replace=true` is passed, and prints both digests when it does. `v0.4.1` is frozen as of `44674184958`.
+
+What this establishes: an independent party signed that digest at that time, and the bytes on the page today are the bytes that were signed. What it does not: that FreeTSA is trustworthy, that we produced those bytes, or that the digest list covers every asset. There is **no** signature (`.sig`) on this corpus — `UIBC_RELEASE_SEED_HEX` is not configured, so the page carries `UNSIGNED.txt`. The OTS proof is a calendar attestation only. Both limits are stated in `ANCHORS.json` rather than glossed over.
 
 ## What this kit does not establish
 

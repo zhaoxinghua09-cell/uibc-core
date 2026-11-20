@@ -124,15 +124,27 @@ def test_the_documents_say_the_chain_ran_once_and_do_not_claim_more_than_that():
     protocol = open(os.path.join(REPO, "docs", "LAB-PROTOCOL.md"), encoding="utf-8").read()
     state = open(os.path.join(REPO, "docs", "COMPETITIVE-STATE.md"), encoding="utf-8").read()
     assert "has not run on a published release yet" not in protocol
-    assert "44671945364" in protocol
+    assert "44674184958" in protocol
+    assert "frozen" in protocol
     assert "anchored" in protocol
     # No signature is on the release, so no document may say one is.
     assert "UIBC_RELEASE_SEED_HEX" in protocol
     assert "已实现、本地实测通过、发布侧未验证" not in state
-    assert "三件缺一" in state
+    assert "四件里三件在" in state
     # The stale sentence this fixed: a page saying we ship no signature at all while a
     # tool that signs sits in the tree.
     assert "没有签名、没有 OTS、没有 RFC 3161" not in state
+
+
+def test_the_workflow_refuses_to_rewrite_a_published_release():
+    """Measured 2026-11-20: three runs of this workflow rewrote one tag's assets, and the
+    digest list changed under a token an outsider had already verified."""
+    workflow = open(os.path.join(REPO, ".github", "workflows", "release-lab-bundle.yml"),
+                    encoding="utf-8").read()
+    assert "Refuse to rewrite a published release unless asked" in workflow
+    assert "re-run with replace=true to accept it" in workflow
+    assert "github.event.inputs.replace" in workflow
+    assert "stale: $name is on the release but this run did not produce one" in workflow
 
 
 def test_the_demo_seed_is_still_refused_by_the_tool():

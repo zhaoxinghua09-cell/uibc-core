@@ -65,6 +65,24 @@ Measured run on 2026-11-20, Windows 11 / Python 3.13.15, 33-member wheel:
 After flipping byte 4 of the sealed wheel: `package_root`, `decision`, `reason`,
 `verify_result` all `MISMATCH`, exit 1.
 
+### A second machine, and a copy at another path (measured 2026-11-20)
+
+Linux 6.6.95 / Python 3.12.11, fresh clone of `a7210af`, fresh venv, wheel built there:
+
+| run | result |
+|---|---|
+| admit the wheel just built (129387 B, sha256 `16a15b28d5c7…`) | `ALLOW`, `package_root 24f0f7c6b85a…`, receipt written |
+| `verify_decision.py` on the same package | all rows `MATCH`, exit 0 |
+| same bytes copied to a different directory, then checked | all rows `MATCH`, exit 0 |
+
+The receipt contains **no absolute path** — not the package, not the temp dir, not the
+wheel name with a separator. Measured on the written file: zero occurrences of the
+working directory. That is enforced by a test
+(`test_the_receipt_carries_no_machine_specific_paths`) and by
+`test_a_package_copied_to_another_path_keeps_the_same_root`, because otherwise
+"third party can recompute" would quietly mean "third party on the same disk can
+recompute".
+
 ## Boundaries
 
 - **Scope**: the receipt covers the package tree and the gate's answer on it. It does not

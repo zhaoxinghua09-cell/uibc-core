@@ -126,6 +126,24 @@ class ReceiptTest(unittest.TestCase):
         self.assertTrue(fields["receipt_sha256"])   # internally consistent
         self.assertFalse(fields["package_root"])    # but not these bytes
 
+    def test_the_receipt_carries_no_machine_specific_paths(self):
+        # A receipt with a local path in it would only verify on the machine
+        # that wrote it, which quietly turns "third party can recompute" into
+        # "third party on the same disk can recompute". Guard the property.
+        raw = open(self.receipt_path, encoding="utf-8").read()
+        self.assertNotIn(self.tmp, raw)
+        self.assertNotIn(self.out, raw)
+        r = vd.load_receipt(self.receipt_path)
+        self.assertEqual(r["tool"], "decision_receipt/1.0")
+        self.assertEqual(len(r["package_root"]), 64)
+
+    def test_a_package_copied_to_another_path_keeps_the_same_root(self):
+        pkg2 = os.path.join(self.tmp, "pkg_copy")
+        import shutil
+        shutil.copytree(self.out, pkg2)
+        fields, ok = self._rows(pkg=pkg2)
+        self.assertTrue(ok, fields)
+
     def test_verify_decision_exits_nonzero_and_names_the_field(self):
         pkg2 = os.path.join(self.tmp, "pkg_cli")
         ap.admit(self.art, pkg2, "demo-1.0", "alice", sys.executable,

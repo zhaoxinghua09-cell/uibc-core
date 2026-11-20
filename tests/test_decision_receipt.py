@@ -212,5 +212,93 @@ class ReceiptTest(unittest.TestCase):
         self.assertIn("MISMATCH", proc.stdout)
 
 
+class OverlayReceiptTest(unittest.TestCase):
+    """The DENY an overlay causes has to be recomputable, not just recorded.
+
+    A receipt that says `DENY` because of a revocation was, until now, a claim
+    the reader had to trust: the verify verdict could be redone from the bytes,
+    but the overlay could not. Here the receipt also pins the revocation's
+    canonical body digest, so three inputs (package, receipt, revocation.json,
+    plus the owner's public key) redo the whole decision.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.tmp = tempfile.mkdtemp(prefix="overlay_rec_")
+        cls.art = _make_artifact(cls.tmp)
+        cls.seed = os.path.join(cls.tmp, "owner.key")
+        subprocess.run([sys.executable, "-m", "uibc_core.cli", "keygen",
+                        "--out", cls.seed, "--ed25519"], check=True,
+                       capture_output=True)
+        cls.pub = cls.seed + ".pub"
+        cls.pkg = os.path.join(cls.tmp, "pkg")
+        cls.clean = ap.admit(cls.art, cls.pkg, "overlay-rec", "alice",
+                             sys.executable, key=cls.seed, pinned=cls.pub)
+        cls.rev = os.path.join(cls.tmp, "rev.json")
+        subprocess.run([sys.executable, "-m", "uibc_core.cli", "revoke", cls.pkg,
+                        "--key", cls.seed, "--out", cls.rev], check=True,
+                       capture_output=True)
+        gate = ap._gate_dict(sys.executable, cls.pkg, cls.pub, revocation=cls.rev)
+        cls.overlay = ap._revocation_evidence(sys.executable, cls.rev)
+        cls.receipt = ap.build_receipt(cls.pkg, cls.clean["inventory"], gate,
+                                       cls.clean["disclosure"],
+                                       cls.clean["verdicts"], overlay=cls.overlay)
+        cls.receipt_path = os.path.join(cls.tmp, "pkg.decision.json")
+        ap.write_receipt(cls.receipt_path, cls.receipt)
+
+    def _rows(self, receipt=None, revocation="default"):
+        rev = self.rev if revocation == "default" else revocation
+        rows, ok = vd.compare(self.pkg, receipt or self.receipt, sys.executable,
+                              self.pub, rev)
+        return {name: good for name, _w, _g, good in rows}, ok
+
+    def test_the_overlay_deny_is_recomputable_from_four_files(self):
+        fields, ok = self._rows()
+        self.assertTrue(ok, fields)
+        self.assertEqual(self.receipt["decision"], "DENY")
+        self.assertEqual(self.receipt["verify_result"], "PASS")
+        # The bytes never moved: the DENY came from the overlay.
+        self.assertEqual(self.receipt["package_root"],
+                         ap.package_root(self.pkg))
+        for name in ("overlay.body_sha256", "overlay.key_id",
+                     "overlay.target_root", "overlay.revocation_id"):
+            self.assertIs(fields[name], True, name)
+
+    def test_without_the_revocation_file_the_deny_is_not_checkable(self):
+        # An honest reader who forgot one input must not be told the receipt
+        # lied: decision/reason/overlay become NOT CHECKABLE, and the report
+        # says the result is narrower.
+        fields, ok = self._rows(revocation=None)
+        self.assertTrue(ok, fields)
+        for name in ("decision", "reason", "revocation", "overlay.body_sha256"):
+            self.assertIsNone(fields[name], name)
+        self.assertIs(fields["package_root"], True)
+        self.assertIs(fields["verify_result"], True)
+
+    def test_editing_the_pinned_digest_is_caught_after_resealing(self):
+        bad = json.loads(json.dumps(self.receipt))
+        bad["overlay"]["body_sha256"] = "0" * 64
+        body = {k: v for k, v in bad.items() if k != "receipt_sha256"}
+        import hashlib
+        bad["receipt_sha256"] = hashlib.sha256(ap.canonical_bytes(body)).hexdigest()
+        fields, ok = self._rows(receipt=bad)
+        self.assertFalse(ok)
+        red = [k for k, v in fields.items() if v is False]
+        self.assertEqual(red, ["overlay.body_sha256"],
+                         "the self-hash alone would pass a forged overlay")
+
+    def test_editing_the_revocation_body_breaks_the_signature(self):
+        tampered = json.load(open(self.rev, encoding="utf-8"))
+        tampered["reason_code"] = "EVIDENCE_INVALID"
+        path = os.path.join(self.tmp, "tampered_rev.json")
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(tampered, f, indent=2, sort_keys=True)
+        fields, ok = self._rows(revocation=path)
+        self.assertFalse(ok)
+        self.assertIs(fields["decision"], False)      # DENY -> HOLD
+        self.assertIs(fields["overlay.body_sha256"], False)
+        self.assertIs(fields["overlay.reason_code"], False)
+
+
 if __name__ == "__main__":
     unittest.main()

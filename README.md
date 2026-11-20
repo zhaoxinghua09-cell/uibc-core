@@ -448,6 +448,17 @@ fields that can be checked without it and labels the other eight `NOT CHECKABLE`
 python tools/verify_decision.py --artifact dist/pkg-1.0.whl --receipt pkg-1.0.decision.json
 ```
 
+When the decision was a `DENY` caused by a revocation, the receipt also pins that overlay
+(`overlay.body_sha256`, `key_id`, `target_root`), so the overlay — not just the verify
+verdict — is recomputable. Four files are enough: package, receipt, `revocation.json` and
+the owner's public key.
+
+```
+python tools/verify_decision.py --package /tmp/admitted/pkg-1.0 \
+       --receipt /tmp/admitted/pkg-1.0.decision.json \
+       --pubkey owner.ed25519.pub --revocation revocation.json
+```
+
 A PASS means *the bytes you hold are the bytes that were sealed* — not that the artifact is
 safe. No scan, no execution, no dependency graph; the record says so in its own
 `not_covered` list. Details and a measured example:

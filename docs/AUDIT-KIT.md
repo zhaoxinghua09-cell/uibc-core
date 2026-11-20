@@ -16,6 +16,14 @@ python run.py
 
 If the verifier is not installed for the Python you are using, `run.py` **exits 3 and writes no receipt** — 36 rows of `FAIL` with no parseable output look exactly like a corpus that fails everything, and that is not a result. Found by walking this page as a stranger on 2026-11-20.
 
+One case that promised the same thing and did not deliver it: if the command you hand to `--verify`
+**cannot be started at all** (`--verify "uibc verify {pkg}"` on a machine where `uibc` is not on
+`PATH`), the **shipped 0.4.1 archive exits 1 with a traceback and writes no receipt** — measured
+2026-11-20. The build template now catches that and exits 3 with the reason on stderr, so any archive
+built after that change behaves as promised; the shipped 0.4.1 predates it. Both facts are written
+here rather than fixed silently in the prose, because changing the bytes of a pinned archive would
+make every pin and every receipt cite a hash that no longer exists.
+
 What that is not: a self-run. 36/36 here was produced by the maintainer on one machine. It becomes a third-party reproduction only when someone else runs this same hash elsewhere and publishes the receipt.
 
 **Sunset clause (self-binding).** If no unrelated party has run this archive hash and published a receipt by **2027-05-19**, the public catalogue line "re-runnable by an outsider" is downgraded to "self-run only", and this section is edited to say so rather than left standing. The clause is written before the outcome is known, which is the only thing that makes it a commitment instead of a footnote. Same form as `draft-templeman-scitt-measurement-capsule-00` §The Experiment, which puts external recomputation into its acceptance criteria and states the draft is withdrawn if none occurs.

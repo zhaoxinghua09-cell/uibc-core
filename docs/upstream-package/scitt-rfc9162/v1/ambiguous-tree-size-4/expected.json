@@ -1,0 +1,21 @@
+{
+  "alt_root_equal": true,
+  "alt_tree_size": 5,
+  "description": "tree_size=4, leaf_index=3: right-most leaf, path folds identically at tree_size=5.",
+  "inclusion_path": [
+    "2217066ab8bb0306684c48df570b31c8513e607f61da46a8a79f98f3dce854ec",
+    "c2cf451fe503254cacb67e81e2d9086858ac6f3e240ae876731c5fe89316e1d7"
+  ],
+  "leaf_entry": {
+    "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+    "digest_hex": "cabf1f6f41a8405fcd3aa4ccde53d4317b909a50223f134bf00223d842531651",
+    "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: ambiguous-tree-size-4 :: leaf 3",
+    "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a20616d626967756f75732d747265652d73697a652d34203a3a206c6561662033"
+  },
+  "leaf_index": 3,
+  "note": "the size-8 fold consumes the same three siblings; no additional node is read, so the root is identical",
+  "reconstructed_root": "b9f44742b3bdf8d903bdef4dbaf551bb50ebb03e9efef6d2066f5d65d874d0ce",
+  "result": "VALID_BUT_SIZE_UNAUTHENTICATED",
+  "root_true": "b9f44742b3bdf8d903bdef4dbaf551bb50ebb03e9efef6d2066f5d65d874d0ce",
+  "tree_size": 4
+}

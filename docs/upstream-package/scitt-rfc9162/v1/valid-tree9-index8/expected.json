@@ -1,0 +1,17 @@
+{
+  "description": "tree_size=9, leaf_index=8: split 8|1, so the tail leaf carries a short path.",
+  "inclusion_path": [
+    "50bfa2670123060334dda77052150007780c11b1339db9c6044fcda487094b50"
+  ],
+  "leaf_entry": {
+    "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+    "digest_hex": "525f9e1289d606b1c6493ce962b5c944f700ef9873291157362708baeddcfa15",
+    "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: valid-tree9-index8 :: leaf 8",
+    "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a2076616c69642d74726565392d696e64657838203a3a206c6561662038"
+  },
+  "leaf_index": 8,
+  "reconstructed_root": "373e47b59e5bcd85be031c21cad64f4a98f3e27bdd09f95dc040eeafa6fcfc50",
+  "result": "VALID",
+  "root_true": "373e47b59e5bcd85be031c21cad64f4a98f3e27bdd09f95dc040eeafa6fcfc50",
+  "tree_size": 9
+}

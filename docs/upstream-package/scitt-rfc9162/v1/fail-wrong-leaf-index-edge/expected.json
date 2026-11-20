@@ -1,0 +1,20 @@
+{
+  "description": "Left-most leaf paired with the right-most leaf's path on the same tree.",
+  "inclusion_path": [
+    "8a4f69312cfb8faed539dacdd547575d8d8d8899c8648325af589bef822c32ca",
+    "44b806172104c802d4d605a3de1512dcc9ba8d95fa538807b4c56232a12496cd",
+    "4e4ee2e94c1c12e2888d0aa5d807f5ba53a9bfbec62bdfea647058daf2d04c2a",
+    "bbb7db0cbd8bdc4fc2a27600b542fe655221859d2e207ec91a66d1a91f0e7eb7"
+  ],
+  "leaf_entry": {
+    "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+    "digest_hex": "8a4f69312cfb8faed539dacdd547575d8d8d8899c8648325af589bef822c32ca",
+    "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: fail-wrong-leaf-index-edge :: leaf 0",
+    "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a206661696c2d77726f6e672d6c6561662d696e6465782d65646765203a3a206c6561662030"
+  },
+  "leaf_index": 0,
+  "reconstructed_root": "edb1e971d2510a0f967c566f07dae2c83dd4e37bceff0483f9e4a97316b68877",
+  "result": "INVALID_LEAF_INDEX",
+  "root_true": "b2d7cd42a43f7cf700bc7a7e677912c049e5d7af0ac473da2e38d128e145e2d9",
+  "tree_size": 16
+}

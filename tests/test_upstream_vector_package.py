@@ -29,9 +29,38 @@ class TestPackageShape(unittest.TestCase):
 
     def test_every_vector_has_expected_json(self):
         manifest = json.loads(_read("manifest.json"))
-        self.assertEqual(len(manifest["vectors"]), 6)
+        # The manifest must list exactly the cases the builder knows about. This used
+        # to be a hard-coded 6, which hid the real defect: the committed manifest had
+        # 6 while the builder knew 5, so a plain `build` run would have dropped a
+        # vector from the manifest and left its directory orphaned.
+        sys.path.insert(0, REPO)
+        from tools.build_scitt_vector_package import CASES
+        self.assertEqual(len(manifest["vectors"]), len(CASES))
+        self.assertGreaterEqual(len(CASES), 25, "the corpus shrank without anyone saying so")
         for v in manifest["vectors"]:
             self.assertTrue(os.path.isfile(os.path.join(PKG, v["dir"], "expected.json")))
+        self.assertEqual(sorted(v["id"] for v in manifest["vectors"]),
+                         sorted(c[0] for c in CASES))
+
+    def test_package_bytes_are_line_ending_independent(self):
+        # Build wrote its files through text mode without newline="\n" until
+        # 2026-11-20, which means Windows produced CRLF and Linux produced LF from
+        # the same script. The committed blob was CRLF, so --check-drift passed on
+        # Windows and failed on every Linux CI runner. A "reproducible on any
+        # platform" package cannot have platform-dependent bytes, so this pins LF.
+        for root, _dirs, files in os.walk(PKG):
+            for f in files:
+                p = os.path.join(root, f)
+                with open(p, "rb") as fh:
+                    self.assertNotIn(b"\r", fh.read(), os.path.relpath(p, PKG))
+
+    def test_committed_bytes_are_what_the_builder_produces(self):
+        out = subprocess.run(
+            [sys.executable, os.path.join(REPO, "tools", "build_scitt_vector_package.py"),
+             "--check-drift"],
+            capture_output=True, text=True, cwd=REPO, timeout=180)
+        self.assertEqual(out.returncode, 0, out.stdout + out.stderr)
+        self.assertIn("CONSISTENT", out.stdout)
 
     def test_checksums_cover_the_manifest_and_every_vector(self):
         listed = [l.split("  ", 1)[1] for l in _read("SHA256SUMS").splitlines() if l.strip()]

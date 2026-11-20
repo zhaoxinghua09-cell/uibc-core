@@ -1,0 +1,22 @@
+{
+  "description": "tree_size=63 = 32|31: last leaf of the left subtree in a two-level unbalanced tree.",
+  "inclusion_path": [
+    "5ac92f7dcf62ea9ee090e0aefb165e373028c3a41804bab36da1fd5b3f2f54c5",
+    "ccaf9fe7af3c407ca1f35c404eef3c329eb9414d33734ca6968000d0bf78d35d",
+    "f614c4a92eec37016428fd1f7039f88cc1fdacdca4c5efad8bae8654045ecff0",
+    "5b2f3d7a2c4524d0399bee30b4a8fd2f8f246c53651cf9a4a8cafdc13fa8b26d",
+    "7922cd264a3acc6c5136cde42e18499700bf23603ffa81cc546ec6b512acc1b1",
+    "783029919b1633b8fb9ddf381f03586343cbd1024ea8fae18ebe5f54a54639f6"
+  ],
+  "leaf_entry": {
+    "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+    "digest_hex": "0870beab569663d0d22e52d43fe2841d384b31d34ee7262d79529b5549498e89",
+    "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: valid-tree63-index31 :: leaf 31",
+    "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a2076616c69642d7472656536332d696e6465783331203a3a206c656166203331"
+  },
+  "leaf_index": 31,
+  "reconstructed_root": "9fafdfa4b4627426951a27f252b5c25e7a00bfb4dabd62ea1de76fbec8c5f59a",
+  "result": "VALID",
+  "root_true": "9fafdfa4b4627426951a27f252b5c25e7a00bfb4dabd62ea1de76fbec8c5f59a",
+  "tree_size": 63
+}

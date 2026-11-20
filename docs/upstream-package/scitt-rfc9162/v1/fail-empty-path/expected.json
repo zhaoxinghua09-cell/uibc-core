@@ -1,0 +1,15 @@
+{
+  "description": "tree_size=5 with an empty inclusion path: reconstructed root is the leaf digest.",
+  "inclusion_path": [],
+  "leaf_entry": {
+    "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+    "digest_hex": "cc0347d35cddb8efe2c5b6f8aeaddb19b04bf96ad52211e2de25260554f25041",
+    "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: fail-empty-path :: leaf 2",
+    "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a206661696c2d656d7074792d70617468203a3a206c6561662032"
+  },
+  "leaf_index": 2,
+  "reconstructed_root": "cc0347d35cddb8efe2c5b6f8aeaddb19b04bf96ad52211e2de25260554f25041",
+  "result": "INVALID_INCLUSION_PATH",
+  "root_true": "ef471e6481531d0ff54999be117310b3d41cf9ccc2fcfe30c442be6d6998fc0a",
+  "tree_size": 5
+}

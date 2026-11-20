@@ -97,8 +97,22 @@ not. It also **opens the release if the tag has none**, because `gh release uplo
 put a file otherwise: measured 2026-11-20, the repository carried a `v0.4.1` tag and no `v0.4.1`
 release, which is why the newest asset for this corpus was still `0.4.0`. Before that step existed,
 "push a tag" and "a release exists" were two different acts and only the first was automated.
-**This chain has not run on a published release yet** — the next tag is its first exercise,
-and until then it is "implemented and measured locally", not "in place".
+**It has now run on a published release, once.** Workflow run `44671945364` (2026-11-20,
+`gh workflow run release-lab-bundle.yml -f tag=v0.4.1 --ref main`) attached
+`anchor_freetsa.tsr` (4,643 B) and `anchor_freetsa_ca.pem` (5,107 B) to `v0.4.1`, and its
+`ANCHORS.json` records `tsa: {"state": "anchored", ...}`. Read back over the anonymous release
+URL and verified offline: `signature_verified: true`, `problems: []`, `gen_time`
+2026-11-20T04:05:27Z, serial 171991794, attested digest
+`8b3818af643a35eebe795397acce8ba47bbfc718117146dd9f6cf4af0a9628ab` — the SHA-256 of the
+`CORPUS-DIGESTS.txt` the same release serves. `python tools/check_release_anchors.py` re-runs
+that check in one command and exits 0/1/3.
+
+The first workflow run, 20 minutes earlier, had recorded `unanchored` with
+`NameError: name 'tsp' is not defined` — a missing package, not a TSA refusal; the fix is in
+`#306`. Two of the three OpenTimestamps calendars (`alice`, `finney`) answered HTTP 503 on
+2026-11-20 while `bob` answered, so the stamper now tries all three in order and names the one
+that answered instead of reporting the first outage as "unavailable". The signature is still
+absent: `UIBC_RELEASE_SEED_HEX` is not configured, and `UNSIGNED.txt` is what the page carries.
 
 ## What this protocol is not
 

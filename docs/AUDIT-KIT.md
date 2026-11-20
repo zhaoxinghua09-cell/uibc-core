@@ -86,6 +86,21 @@ The suite is 36 packages derived from one correct package, each broken in exactl
 
 If you write your own verifier, point this at it. That is the single most useful contribution anyone can make to this project, and it is the one thing we cannot do for ourselves.
 
+## Question 3.5: is the publication timestamp checkable without trusting us?
+
+The release page carries the digest file, a FreeTSA RFC 3161 token over it, and the FreeTSA certificate. All three download anonymously, and the token verifies offline:
+
+```bash
+curl -fL -O https://github.com/zhaoxinghua09-cell/uibc-core/releases/download/v0.4.1/CORPUS-DIGESTS.txt
+curl -fL -O https://github.com/zhaoxinghua09-cell/uibc-core/releases/download/v0.4.1/anchor_freetsa.tsr
+curl -fL -O https://github.com/zhaoxinghua09-cell/uibc-core/releases/download/v0.4.1/anchor_freetsa_ca.pem
+python tools/anchor_tsa.py --verify anchor_freetsa.tsr --data CORPUS-DIGESTS.txt --cabundle anchor_freetsa_ca.pem
+```
+
+or, with the repository, in one step: `python tools/check_release_anchors.py` (0 verified, 1 refused, 3 not measured). Measured 2026-11-20: `verified: true`, `signature_verified: true`, `problems: []`, `gen_time` 2026-11-20T04:05:27Z, serial 171991794, attested digest `8b3818af643a35eebe795397acce8ba47bbfc718117146dd9f6cf4af0a9628ab`, which is the SHA-256 of the `CORPUS-DIGESTS.txt` the same release serves.
+
+What this establishes: an independent party signed that digest at that time, and the bytes on the page today are the bytes that were signed. What it does not: that FreeTSA is trustworthy, that we produced those bytes, or that the digest list covers every asset. There is **no** signature (`.sig`) on this corpus — `UIBC_RELEASE_SEED_HEX` is not configured, so the page carries `UNSIGNED.txt` — and **no** OpenTimestamps proof, because the calendar answers were unreliable (two of three returned 503 on 2026-11-20); both absences are stated in `ANCHORS.json` rather than glossed over.
+
 ## What this kit does not establish
 
 | Not established | Why it matters |

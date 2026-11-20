@@ -28,6 +28,8 @@
     "accept-resubmitted": "1ba464addfb9c4fd593cba1e481798bb3fcd88424fc887418890e9f059c44331",
     "accept-typed-evidence": "e1664754f5b69febfef7c5651dd6085ef5396a5b8320e7bfdf73a189c65c2e1e",
     "accept-lifecycle-events": "ea231e4dc3cfdba22f2c4626878355a2d8bb0c06f4e95eae04e017d6a27430c4",
-    "accept-anchored-policy": "b077561416692ca6b390333549b61e51f34cbbad3226c7855fc73b114cb37d18"
+    "accept-anchored-policy": "b077561416692ca6b390333549b61e51f34cbbad3226c7855fc73b114cb37d18",
+    "oracle-s09-rollback-pin": "4042ad3767b79b2dca762b09e3567ba743492bb8f40404cdf24f93410d4377df",
+    "oracle-s19-stale-state": "1179771d4798e7fe34cfdbdffb2a25f7d3da6bf7a6df4b19f6b2b88870403c07"
   }
 }

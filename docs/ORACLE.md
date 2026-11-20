@@ -94,7 +94,7 @@ thinner than the reject side and is reported as such.
 | oracle-s16-token-byte | one byte flipped in the RFC 3161 token | FAIL | S16 |
 | oracle-s17-receipt-body | first receipt body edited | FAIL | S17 |
 | oracle-s18-policy-artefact | policy artefact edited after sealing | FAIL | S18 |
-| oracle-s19-regressed | sequence 3 presented against a remembered 5, both validly sealed | FAIL | S19 |
+| oracle-s19-stale-state | sequence 3 presented against a remembered 5, both validly sealed | FAIL | S19 |
 
 ## The three cases that needed more than a mutation
 
@@ -226,10 +226,16 @@ measured: of 17 checks the hostile corpus exercises, the second implementation
           and can never reach 8 (S10,S11,S13,S14,S15,S16,S17,S18)
 ```
 
-S9 and S19 do not appear because the corpus contains no package that fails them — they are
-exercised by separate blocks with bespoke construction, and a check that no case reaches is
-indistinguishable from one that does not exist (which is the same lesson as the `19` count
-above).
+S9 and S19 were absent from the package list when these numbers were taken: no package can
+fail them on its own, because S9 needs a head observed elsewhere and S19 needs what the
+verifier remembered last time. Both now have a case — `oracle-s09-rollback-pin` and
+`oracle-s19-stale-state` ship that outside input as data in `expected.json` — but the
+numbers above were measured before that, on the hostile packages alone, and are left as
+measured. What was measured on the two new cases is narrower: the second implementation
+returns `INCONCLUSIVE` on both, which is what it returns on any sound package, so it decides
+neither check. A check that no case reaches is indistinguishable from one that does not
+exist (the same lesson as the `19` count above), which is why those two are in the corpus
+now instead of in a footnote.
 
 So the honest description of the second implementation is: **it can decide nine of the
 seventeen checks this corpus exercises, and on the other eight it now says `INCONCLUSIVE`
@@ -274,13 +280,13 @@ Every measurement above runs inside one process, on packages that exist only for
 duration of a test. That is useful and it is not consumable: an outsider cannot run our
 tooling to check our answers.
 
-`python tools/oracle_check.py --emit conformance/oracle` writes 28 packages, their
+`python tools/oracle_check.py --emit conformance/oracle` writes 30 packages, their
 throwaway keys and their expected verdicts to disk — 239 files, 287 KB. Then it
 re-verifies the **written copies**, not the in-memory ones, and refuses to report
 success if the bytes on disk no longer produce the declared answers.
 
 ```
-emitted 28 cases to conformance/oracle; round-trip mismatches: 0
+emitted 30 cases to conformance/oracle; round-trip mismatches: 0
 ```
 
 It lands in a subdirectory of `conformance/` on purpose: that directory already holds

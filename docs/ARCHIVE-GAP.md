@@ -64,7 +64,7 @@ record("S1" …) record("S2" …) record("S3" …) record("S4" …) record("S5" 
 | 归档提交 | `2c82d55feb2a`（当时的 `main` 头） |
 | 文件 | `uibc-core-src-2c82d55feb2a.zip`(1,978,070 B)、`uibc-oracle-corpus-0.4.2.zip`(106,713 B)、`README.md`(1,983 B)、`SHA256SUMS.txt`(268 B) |
 | 源码归档里的 `verify.py` | 含 S1–S19 与 S0 兜底 |
-| 语料归档 | 28 例（18 必拒 / 1 对照 / 9 必通过），自带零依赖验证器与 runner |
+| 语料归档 | 30 例（20 必拒 / 1 对照 / 9 必通过），自带零依赖验证器与 runner；其中 S9、S19 两例把外部输入（`expect_head`、`state`）写进 `expected.json` |
 
 **这个 DOI 能背书什么**：源码树的每一项检查、语料的每一次判定。**不能背书什么**：语料只触发了 19 项里的 15 项；S9、S19 用代码内自定构造，不在语料里。这句话写进了归档 README 与描述，不在附录里。
 

@@ -126,9 +126,15 @@ def split_note(checkpoint: str) -> tuple[bytes, list[tuple[str, bytes]]]:
 
 def verify_checkpoint_signature(checkpoint: str, key_pem: bytes) -> dict:
     """Verify the checkpoint's ECDSA signature against the log's public key."""
-    from cryptography.hazmat.primitives import hashes
-    from cryptography.hazmat.primitives.asymmetric import ec
-    from cryptography.hazmat.primitives.serialization import load_pem_public_key
+    try:
+        from cryptography.hazmat.primitives import hashes
+        from cryptography.hazmat.primitives.asymmetric import ec
+        from cryptography.hazmat.primitives.serialization import load_pem_public_key
+    except ImportError:
+        # The core is stdlib-only; the signature check is part of the `verify` extra.
+        # Say so instead of crashing in the middle of a verification run.
+        return {"verified": None, "curve": None, "signers": [],
+                "why": 'cryptography is not installed; run: pip install "uibc-core[verify]"'}
 
     body, sigs = split_note(checkpoint)
     key = load_pem_public_key(key_pem)
@@ -250,8 +256,9 @@ def main(argv: list[str] | None = None) -> int:
         print("receipt written: %s" % args.out)
     else:
         print(text)
-    print("verified=%s  proof.index=%s  entry.index=%s"
-          % (receipt["verified"], receipt["proof_log_index"], receipt["entry_log_index"]),
+    print("verified=%s  proof.index=%s  entry.index=%s  checkpoint.signature=%s"
+          % (receipt["verified"], receipt["proof_log_index"], receipt["entry_log_index"],
+             receipt["checkpoint"]["signature_verified"] if receipt["checkpoint"] else "no checkpoint"),
           file=sys.stderr)
     return 0 if receipt["verified"] else 1
 

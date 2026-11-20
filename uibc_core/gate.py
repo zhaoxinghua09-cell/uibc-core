@@ -19,12 +19,14 @@ Honest scope:
   - gate() never mutates the package. Read-only, like verify().
 """
 
+import base64
 import hmac
 import json
 import os
 
+from . import ed25519 as _ed
 from .canonical import hash_file  # noqa: F401  (re-exported for tools)
-from .signing import ALGORITHM, key_id  # noqa: F401  (key_id re-exported for CLI)
+from .signing import (ALGORITHM, ALGORITHM_ED25519, ed_key_id, key_id)  # noqa: F401
 from .verify import verify
 
 
@@ -39,22 +41,53 @@ def _canonical_sig_payload(body: dict) -> bytes:
                       ensure_ascii=False).encode("utf-8")
 
 
-def _check_revocation(rev: dict, manifest: dict, key) -> tuple:
-    """Return (status, detail). status in {"REVOKED", "MISMATCH", "UNVERIFIABLE", "MALFORMED"}."""
+def _check_revocation(rev: dict, manifest: dict, key, pubkey=None) -> tuple:
+    """Return (status, detail). status in {"REVOKED", "MISMATCH", "UNVERIFIABLE", "MALFORMED"}.
+
+    Two signature algorithms are accepted, and which one is used has to be
+    stated in the file rather than guessed:
+
+      * ``HMAC-SHA256`` (v0.2) - symmetric, needs ``--key``. Only the owner can
+        verify, so a third party cannot check a revocation at all.
+      * ``Ed25519`` (v0.3) - asymmetric, needs the signer's ``--pubkey``. This
+        is the one that lets somebody who never held the owner's secret check
+        that the owner really revoked the package.
+
+    Anything else - unknown algorithm, missing key material, signature that
+    does not verify - is UNVERIFIABLE, which HOLDs. It is never treated as
+    "no revocation present".
+    """
     for field in ("revocation_id", "target_root", "signature", "revoked_at"):
         if not rev.get(field):
             return "MALFORMED", f"revocation missing field {field!r}"
     if rev.get("target_root") != manifest.get("evidence_root"):
         return "MISMATCH", ("revocation targets a different evidence_root: "
                             f"{rev.get('target_root')!r} != {manifest.get('evidence_root')!r}")
-    if rev.get("algorithm", ALGORITHM) != ALGORITHM:
-        return "UNVERIFIABLE", f"unknown revocation algorithm {rev.get('algorithm')!r}"
-    if key is None:
-        return "UNVERIFIABLE", ("revocation present but no --key provided: "
-                               "cannot verify (HOLD, never silently trusted)")
-    if not _verify_body(key, rev):
-        return "UNVERIFIABLE", "revocation signature invalid for supplied key"
-    return "REVOKED", f"valid revocation by key_id {rev.get('key_id', '?')}"
+    algorithm = rev.get("algorithm", ALGORITHM)
+    if algorithm == ALGORITHM:
+        if key is None:
+            return "UNVERIFIABLE", ("revocation present but no --key provided: "
+                                    "cannot verify (HOLD, never silently trusted)")
+        if not _verify_body(key, rev):
+            return "UNVERIFIABLE", "revocation signature invalid for supplied key"
+        return "REVOKED", f"valid revocation by key_id {rev.get('key_id', '?')}"
+    if algorithm == ALGORITHM_ED25519:
+        if pubkey is None:
+            return "UNVERIFIABLE", ("Ed25519-signed revocation present but no --pubkey "
+                                    "provided: cannot verify (HOLD, never silently trusted)")
+        if rev.get("key_id") and rev["key_id"] != ed_key_id(pubkey):
+            return "UNVERIFIABLE", ("revocation key_id does not match the pinned public "
+                                    f"key ({rev.get('key_id', '?')})")
+        try:
+            sig = base64.b64decode(rev.get("signature", ""), validate=True)
+        except Exception:
+            return "UNVERIFIABLE", "revocation signature is not valid base64"
+        if not _ed.verify(pubkey, _canonical_sig_payload(rev), sig):
+            return "UNVERIFIABLE", "revocation signature invalid for the pinned public key"
+        return "REVOKED", ("valid Ed25519 revocation by key_id "
+                           f"{rev.get('key_id', ed_key_id(pubkey))}")
+    return "UNVERIFIABLE", f"unknown revocation algorithm {algorithm!r}"
+
 
 
 def _verify_body(key, rev: dict) -> bool:
@@ -98,7 +131,8 @@ def gate(package_dir: str, key: bytes = None,
     if revocation_path:
         try:
             revocation = dict(zip(("status", "detail"),
-                                  _check_revocation(_load_json(revocation_path), manifest, key)))
+                                  _check_revocation(_load_json(revocation_path), manifest,
+                                                    key, pubkey)))
         except (OSError, ValueError):
             revocation = {"status": "MALFORMED", "detail": "revocation file unreadable/invalid JSON"}
 

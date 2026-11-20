@@ -455,9 +455,13 @@ safe. No scan, no execution, no dependency graph; the record says so in its own
 tamper controls: [`docs/assurance/DECISION-RECEIPT.md`](docs/assurance/DECISION-RECEIPT.md).
 
 The decision layer can also take a package back: `tools/demo_revocation.py` runs the gate
-four times on one unchanged package and shows `ALLOW` without an overlay, `DENY` with a
-valid owner revocation, and `HOLD` (never `ALLOW`) when the revocation cannot be verified —
-[`docs/assurance/REVOCATION-DEMO.md`](docs/assurance/REVOCATION-DEMO.md).
+eight times over two unchanged packages (one HMAC-sealed, one Ed25519-sealed) and shows
+`ALLOW` without an overlay, `DENY` with a valid owner revocation, and `HOLD` (never `ALLOW`)
+when the revocation cannot be verified. Revocations can now be signed **asymmetrically**:
+`uibc revoke --key owner.key --out revocation.json` signs with the Ed25519 seed, and the
+gate checks it against `--pubkey` — so a third party holding only the public key can confirm
+the owner really voided the package. HMAC-signed revocations still work for v0.2-era
+packages. Details: [`docs/assurance/REVOCATION-DEMO.md`](docs/assurance/REVOCATION-DEMO.md).
 
 ## Reproduce the published numbers in one command
 

@@ -71,12 +71,12 @@ def cli(py, *args):
                           capture_output=True, text=True, timeout=180)
 
 
-def build_package(py, work, key_path):
+def build_package(py, work, key_path, pkg=None):
     art = os.path.join(work, "demo-1.0.zip")
     with zipfile.ZipFile(art, "w") as z:
         z.writestr("demo/__init__.py", "print('demo')\n")
         z.writestr("demo/core.py", "def f():\n    return 42\n")
-    pkg = os.path.join(work, "pkg")
+    pkg = pkg or os.path.join(work, "pkg")
     if os.path.exists(pkg):
         shutil.rmtree(pkg)
     steps = [["init", pkg],
@@ -152,14 +152,69 @@ def main(argv=None):
     run("revocation signed by another key", "HOLD", ["--key", owner, "--revocation", rev_forged])
     after = tree_hash(pkg)
 
-    ok = (all(r["decision"] == r["expected"] for r in runs) and before == after)
+    # --- the asymmetric path (v0.3): revocation any third party can check ----
+    ed_owner = os.path.join(a.work, "owner.ed25519")
+    if not os.path.exists(ed_owner):
+        r = cli(py, "keygen", "--out", ed_owner, "--ed25519")
+        if r.returncode != 0:
+            print("SETUP ERROR: ed25519 keygen failed: %s" % (r.stderr or r.stdout),
+                  file=sys.stderr)
+            return 2
+    ed_pkg = os.path.join(a.work, "pkg-ed25519")
+    if os.path.exists(ed_pkg):
+        shutil.rmtree(ed_pkg)
+    build_package(py, a.work, ed_owner, pkg=ed_pkg)
+    ed_before = tree_hash(ed_pkg)
+
+    ed_rev = os.path.join(a.work, "revocation-ed25519.json")
+    if os.path.exists(ed_rev):
+        os.remove(ed_rev)
+    r = cli(py, "revoke", ed_pkg, "--key", ed_owner, "--out", ed_rev)
+    if r.returncode != 0:
+        print("SETUP ERROR: revoke failed: %s" % (r.stderr or r.stdout), file=sys.stderr)
+        return 2
+    ed_other = os.path.join(a.work, "other.ed25519")
+    if not os.path.exists(ed_other):
+        cli(py, "keygen", "--out", ed_other, "--ed25519")
+    ed_rev_other = os.path.join(a.work, "revocation-ed25519-other.json")
+    if os.path.exists(ed_rev_other):
+        os.remove(ed_rev_other)
+    cli(py, "revoke", ed_pkg, "--key", ed_other, "--out", ed_rev_other)
+
+    def run_on(p, label, expect_decision, args):
+        r = cli(py, "gate", p, *args)
+        try:
+            rep = json.loads(r.stdout)
+        except ValueError:
+            rep = {"decision": "UNPARSEABLE", "reason": (r.stderr or r.stdout)[:200]}
+        runs.append({"label": label, "decision": rep.get("decision"),
+                     "reason": rep.get("reason"), "verify_result": rep.get("verify_result"),
+                     "exit": r.returncode, "expected": expect_decision,
+                     "keys": {k: rep.get(k) for k in ("revocation", "dispute")}})
+
+    run_on(ed_pkg, "ed25519 package, no overlay", "ALLOW",
+           ["--pubkey", ed_owner + ".pub"])
+    run_on(ed_pkg, "ed25519 revocation, pinned pubkey", "DENY",
+           ["--pubkey", ed_owner + ".pub", "--revocation", ed_rev])
+    run_on(ed_pkg, "ed25519 revocation signed by another key", "HOLD",
+           ["--pubkey", ed_owner + ".pub", "--revocation", ed_rev_other])
+    run_on(ed_pkg, "ed25519 revocation, no pubkey", "HOLD",
+           ["--revocation", ed_rev])
+    ed_after = tree_hash(ed_pkg)
+
+    ok = (all(r["decision"] == r["expected"] for r in runs)
+          and before == after and ed_before == ed_after)
     out = {"tool": TOOL, "package": pkg, "evidence_root": root,
            "tree_hash_before": before, "tree_hash_after": after,
-           "package_unchanged": before == after, "runs": runs, "ok": ok}
+           "package_unchanged": before == after,
+           "ed25519_package": ed_pkg, "ed25519_tree_before": ed_before,
+           "ed25519_tree_after": ed_after,
+           "ed25519_package_unchanged": ed_before == ed_after,
+           "runs": runs, "ok": ok}
     if a.json:
         print(json.dumps(out, indent=2, sort_keys=True, ensure_ascii=False))
     else:
-        print("# Revocation overlay, four runs on one package")
+        print("# Revocation overlay: eight runs on two packages (HMAC, then Ed25519)")
         print("")
         print("| run | decision | expected | exit | reason |")
         print("|---|---|---|---|---|")
@@ -173,7 +228,7 @@ def main(argv=None):
               % ("yes" if before == after else "NO"))
         print("")
         if ok:
-            print("**OK** — all four runs behaved as documented, and the bytes never moved.")
+            print("**OK** — all eight runs behaved as documented, and neither package moved.")
         else:
             print("**MISMATCH** — at least one run did not behave as documented.")
     return 0 if ok else 1

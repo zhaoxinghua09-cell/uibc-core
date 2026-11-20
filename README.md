@@ -33,7 +33,10 @@ sha256sum corpus.zip   # 711fa82c9f183066cfae6441a4fe3fc27fcc516b25f2a976cad5e0d
 unzip -q corpus.zip -d corpus && cd corpus && python run.py
 ```
 
-There is **no** release asset for `0.4.1` (the newest release, `v0.4.0`, carries `uibc-conformance-0.4.0.zip`, which is not this corpus) — the URL above is the entry point, and if it ever stops resolving that is a defect we want reported, not something to work around. The build is deterministic for a given tree, but "rebuilding gives the same bytes" is true only from the tree the archive was built from: `0.4.1` came out of commit `d72c4f9`, and the runner template was fixed for the unstartable-verifier case afterwards, so rebuilding `0.4.1` from today's tree yields a different archive (`083c0dbc…`). The builder now refuses to overwrite a pinned archive and prints both hashes instead (measured 2026-11-20, exit 3).
+The release page also carries the same bytes, attached on 2026-11-20 by the release workflow:
+`https://github.com/zhaoxinghua09-cell/uibc-core/releases/download/v0.4.1/uibc-conformance-0.4.1.zip`.
+Either URL serves this hash; the older `v0.4.0` asset is a **different** corpus (30 cases) and not
+this one. The build is deterministic for a given tree, but "rebuilding gives the same bytes" is true only from the tree the archive was built from: `0.4.1` came out of commit `d72c4f9`, and the runner template was fixed for the unstartable-verifier case afterwards, so rebuilding `0.4.1` from today's tree yields a different archive (`083c0dbc…`). The builder now refuses to overwrite a pinned archive and prints both hashes instead (measured 2026-11-20, exit 3).
 
 No repository, no network, no `pip install`: the archive carries its own verifier as a single file (`uibc_core.pyz`), and `run.py` uses it. Expected tail `strict 36/36` in about six seconds, and a `receipt.json` you can publish. A verifier that answers PASS to everything scores **6/36**, so refusing nothing does not pass.
 

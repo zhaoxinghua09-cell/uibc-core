@@ -79,3 +79,21 @@ def test_anchor_writes_no_absolute_path_into_the_published_json(tmp_path, monkey
     written = json.loads(open(out, encoding="utf-8").read())
     flat = json.dumps(written)
     assert str(tmp_path) not in flat
+
+def test_a_missing_asn1crypto_is_a_named_dependency_not_a_nameerror():
+    """Measured 2026-11-20 in the release workflow: ANCHORS.json recorded
+    `NameError: name 'tsp' is not defined` instead of naming the missing package."""
+    import uibc_core.tsa as tsa
+
+    class Stub:
+        HAVE_ASN1 = False
+
+    original = tsa.HAVE_ASN1
+    try:
+        tsa.HAVE_ASN1 = False
+        with pytest.raises(RuntimeError) as excinfo:
+            tsa.build_request(b"x")
+        assert "asn1crypto" in str(excinfo.value)
+        assert "pip install" in str(excinfo.value)
+    finally:
+        tsa.HAVE_ASN1 = original

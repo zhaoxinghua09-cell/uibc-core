@@ -26,6 +26,16 @@ jobs:
         with:
           python-version: "3.12"
 
+      # The anchors need asn1crypto. Measured 2026-11-20 on the first real run of this
+      # workflow: the job installed nothing, so the token could not even be requested
+      # and ANCHORS.json recorded `NameError: name 'tsp' is not defined` - a dependency
+      # missing, published as if it were a defect. Failure here is recorded, not fatal.
+      - name: Install what the anchors need
+        continue-on-error: true
+        run: |
+          python -m pip install --quiet asn1crypto cryptography \
+            || echo "could not install asn1crypto; ANCHORS.json will say unavailable"
+
       - name: Work out the version
         id: v
         run: |
@@ -103,6 +113,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release upload "${{ steps.v.outputs.tag }}" \
+            "release/uibc-conformance-${{ steps.v.outputs.version }}.zip" \
             "release/uibc-lab-bundle-${{ steps.v.outputs.version }}.json" \
             "release/CORPUS-DIGESTS.txt" \
             "release/receipt.json" \

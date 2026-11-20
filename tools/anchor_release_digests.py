@@ -157,6 +157,11 @@ def anchor(path, out_dir, tsa="freetsa", offline=False):
                           "--head-file", path, "--out-dir", out_dir, "--tsa", tsa])
         if code == 0:
             status["tsa"] = {"state": "anchored", "detail": _detail_line(out)}
+        elif code == 3:
+            # 3 means the environment cannot build a request at all (asn1crypto absent).
+            # Measured 2026-11-20 in the release workflow, where that had been recorded
+            # as `unanchored` with a NameError, which reads like a TSA refusing us.
+            status["tsa"] = {"state": "unavailable", "detail": _detail_line(out)}
         else:
             status["tsa"] = {"state": "unanchored", "detail": _detail_line(out)}
 

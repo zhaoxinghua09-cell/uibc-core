@@ -90,3 +90,57 @@ python3 tools/export_conformance.py   # rebuilds cases/, manifest.json and the a
 ```
 
 Expectations come from `tools/outsider_audit.py`, so the suite and the audit report cannot drift apart.
+
+## Decision vectors: the layer above verify
+
+The 36 cases above answer *"does your verifier refuse a broken package?"* They say nothing
+about what happens one layer up — `ALLOW` / `DENY` / `HOLD`, and what a revocation overlay
+does to that answer. That layer is where a revocation gets silently ignored, so a second
+implementer needs fixed inputs there too.
+
+`conformance/decisions/` holds seven packages with their overlays and their expected
+decisions:
+
+| case | what | expected |
+|---|---|---|
+| 01 | correct package, no overlay | `ALLOW` / 0 |
+| 02 | correct package + valid owner revocation | `DENY` / 2 |
+| 03 | correct package + revocation, no anchor supplied | `HOLD` / 3 |
+| 04 | correct package + revocation signed by another key | `HOLD` / 3 |
+| 05 | correct package + a revocation belonging to another package | `HOLD` / 3 |
+| 06 | one byte appended to an evidence file | `DENY` / 2 |
+| 07 | tampered package + valid owner revocation | `DENY` / 2 |
+
+Run it against this repo's gate:
+
+```bash
+python3 tools/run_decision_vectors.py
+```
+
+Or against any other implementation:
+
+```bash
+python3 tools/run_decision_vectors.py \
+    --gate "python3 my_gate.py {pkg} --revocation {overlay} --pubkey {anchor}"
+```
+
+Your command prints JSON with `decision` (and optionally `exit_code`; if absent, the
+process exit code is used). Flags for files a case does not carry are **dropped**, so one
+command serves all seven cases: `--revocation {overlay}` disappears on case 01, and
+`--pubkey {anchor}` disappears on case 03. The convention is the ordinary `--flag value`
+(or `--flag=value`) shape; a command that cannot be expressed that way can be given a
+second, plain form with `--gate-plain`.
+
+This runner defect was found by running it: pointed at our own CLI with both flags, two
+cases scored as errors and the summary read **5/7** — indistinguishable from a broken gate.
+Absent flags are now stripped, and `test_external_mode_through_the_cli_scores_seven_of_seven`
+pins it so the next edit cannot quietly reintroduce it.
+
+**Two negative controls, measured** (see `tests/test_decision_vectors.py`): a gate that
+answers `ALLOW` to everything scores **1/7**; a gate that answers `DENY` to everything
+scores **3/7** — and it is wrong on both `HOLD` cases, because *"cannot verify"* is not
+*"not revoked"*. A suite that a permissive stub can pass would be decoration.
+
+The seeds are not shipped: rebuilding the suite produces the same cases in shape with
+different keys, so it is reproducible as a *test*, not as *bytes*.
+

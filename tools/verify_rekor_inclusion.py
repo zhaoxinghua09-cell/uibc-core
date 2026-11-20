@@ -44,12 +44,19 @@ import urllib.request
 
 ENTRY_BY_UUID = "https://rekor.sigstore.dev/api/v1/log/entries/%s"
 ENTRY_BY_INDEX = "https://rekor.sigstore.dev/api/v1/log/entries?logIndex=%d"
+LOG_PUBLIC_KEY = "https://rekor.sigstore.dev/api/v1/log/publicKey"
 
 
 def fetch(url: str) -> dict:
     req = urllib.request.Request(url, headers={"User-Agent": "uibc-rekor-inclusion"})
     with urllib.request.urlopen(req, timeout=60) as resp:
         return json.loads(resp.read())
+
+
+def fetch_text(url: str) -> bytes:
+    req = urllib.request.Request(url, headers={"User-Agent": "uibc-rekor-inclusion"})
+    with urllib.request.urlopen(req, timeout=60) as resp:
+        return resp.read()
 
 
 def leaf_hash(body: bytes) -> bytes:
@@ -88,7 +95,63 @@ def checkpoint_root(checkpoint: str) -> tuple[str, int, str]:
     return origin, size, root_hex
 
 
-def check_entry(entry: dict) -> dict:
+DASH = "\u2014 "  # the em dash that opens a signature line in the signed-note format
+
+
+def split_note(checkpoint: str) -> tuple[bytes, list[tuple[str, bytes]]]:
+    """Split a signed note into (signed bytes, [(name, signature bytes), ...]).
+
+    The signed bytes are the three text lines each terminated by a newline, i.e. up
+    to and including the newline that ends the root line; the blank line and the
+    ``— name base64`` lines are not signed. The signature bytes start with a 4-byte
+    key id (here the log id) followed by the raw signature (DER ECDSA for Rekor).
+    """
+    text = checkpoint.replace("\r\n", "\n")
+    lines = text.split("\n")
+    first_sig = next((i for i, line in enumerate(lines) if line.startswith(DASH)), None)
+    if first_sig is None:
+        raise ValueError("checkpoint carries no signature line")
+    body = "\n".join(lines[:first_sig])
+    if not body.endswith("\n"):
+        body += "\n"
+    sigs = []
+    for line in lines[first_sig:]:
+        if not line.startswith(DASH):
+            continue
+        rest = line[len(DASH):]
+        name, _, b64 = rest.partition(" ")
+        sigs.append((name, base64.b64decode(b64.strip())))
+    return body.encode(), sigs
+
+
+def verify_checkpoint_signature(checkpoint: str, key_pem: bytes) -> dict:
+    """Verify the checkpoint's ECDSA signature against the log's public key."""
+    from cryptography.hazmat.primitives import hashes
+    from cryptography.hazmat.primitives.asymmetric import ec
+    from cryptography.hazmat.primitives.serialization import load_pem_public_key
+
+    body, sigs = split_note(checkpoint)
+    key = load_pem_public_key(key_pem)
+    if not isinstance(key, ec.EllipticCurvePublicKey):
+        return {"verified": False, "why": "the log key is not an EC public key",
+                "curve": None, "signers": []}
+    results = []
+    for name, raw in sigs:
+        if len(raw) < 5:
+            results.append({"name": name, "key_id": None, "verified": False})
+            continue
+        key_id, sig = raw[:4].hex(), raw[4:]
+        try:
+            key.verify(sig, body, ec.ECDSA(hashes.SHA256()))
+            ok = True
+        except Exception:  # noqa: BLE001 - any verification failure is "not verified"
+            ok = False
+        results.append({"name": name, "key_id": key_id, "verified": ok})
+    return {"verified": any(r["verified"] for r in results),
+            "curve": key.curve.name, "signers": results}
+
+
+def check_entry(entry: dict, key_pem: bytes | None = None) -> dict:
     body = base64.b64decode(entry["body"])
     proof = entry["verification"]["inclusionProof"]
     path = [bytes.fromhex(h) for h in proof["hashes"]]
@@ -116,16 +179,35 @@ def check_entry(entry: dict) -> dict:
         origin, size, root_hex = checkpoint_root(checkpoint)
         out["checkpoint"] = {"origin": origin, "tree_size": size, "root": root_hex,
                              "root_equals_proof_root": root_hex == proof["rootHash"]}
+        if key_pem:
+            sig = verify_checkpoint_signature(checkpoint, key_pem)
+            out["checkpoint"]["signature"] = sig
+            out["checkpoint"]["signature_verified"] = sig["verified"]
+        else:
+            out["checkpoint"]["signature_verified"] = None
     else:
         out["checkpoint"] = None
 
     folds = out["folds_against"].get("proof_log_index", {}).get("match")
     cp_ok = out["checkpoint"]["root_equals_proof_root"] if out["checkpoint"] else True
-    out["verified"] = bool(folds and cp_ok)
+    sig_ok = out["checkpoint"]["signature_verified"] if out["checkpoint"] else None
+    out["verified"] = bool(folds and cp_ok and sig_ok is not False)
     if not folds:
         out["why_not"] = ("the proof does not fold to its own root against its own index; "
                           "if entry_log_index differs, folding against it is never correct")
     return out
+
+
+def load_log_key(path: str = "") -> bytes | None:
+    """The log's public key: from a local PEM file, else from the log, else None."""
+    if path:
+        with open(path, "rb") as fh:
+            return fh.read()
+    try:
+        return fetch_text(LOG_PUBLIC_KEY)
+    except Exception as exc:  # noqa: BLE001 - offline use is legitimate
+        print("checkpoint signature not verified (no log key: %s)" % exc, file=sys.stderr)
+        return None
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -135,6 +217,11 @@ def main(argv: list[str] | None = None) -> int:
     g.add_argument("--log-index", type=int)
     g.add_argument("--file")
     ap.add_argument("--out", default="")
+    ap.add_argument("--log-key", default="",
+                    help="PEM file for the log's public key (offline use); "
+                         "otherwise fetched from %s" % LOG_PUBLIC_KEY)
+    ap.add_argument("--no-signature", action="store_true",
+                    help="skip checkpoint signature verification (root comparison only)")
     args = ap.parse_args(argv)
 
     try:
@@ -155,7 +242,7 @@ def main(argv: list[str] | None = None) -> int:
         print("entry carries no inclusion proof", file=sys.stderr)
         return 2
 
-    receipt = check_entry(entry)
+    receipt = check_entry(entry, None if args.no_signature else load_log_key(args.log_key))
     text = json.dumps(receipt, indent=2, sort_keys=True)
     if args.out:
         with open(args.out, "w", encoding="utf-8", newline="\n") as fh:

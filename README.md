@@ -355,10 +355,39 @@ python independent_verifier/cross_check.py  # 独立第二实现交叉核验（7
 - 《UIBC 工程实现摘录 v0.1.0》
 - SPEC 提案：`docs/SPEC-PROPOSAL-v0.1.md`（v0.2 增补见文末）
 
-## Golden Fixtures (archive SS30)
+## Golden Fixtures
 
-Benchmark as executable evidence — eight mutation categories, each a runnable,
-owner-signed submission.uibc package:
+**Two sets, and the difference matters if you are about to run one command.**
+
+```
+fixtures-v041/   current. v0.4.1 Ed25519 packages, three pinning modes, RESULTS.json.
+                 This is the set the one-command reproducer compares against.
+fixtures/        archive. v0.3.0 HMAC-era packages, kept byte-identical as a record.
+```
+
+**If you run `uibc verify fixtures/clean.uibc` on the shipped v0.4.1 verifier you will
+get `INCONCLUSIVE`, not the `PASS` printed in the table below.** That is not a bug:
+`clean` was sealed in a superseded scheme (HMAC-SHA256 owner seal, v0.3.0), and a
+current verifier genuinely has nothing to check it against. Measured on 2026-11-20
+at `dbe171a`, all eight archived packages, open mode:
+
+| archived fixture | observed under v0.4.1 |
+|---|---|
+| `clean` | INCONCLUSIVE |
+| `tampered` / `deleted` / `duplicated` / `reordered` / `migrated` | FAIL |
+| `malicious` / `malicious-keyswap` | INCONCLUSIVE |
+
+The FAILs are the useful part of the archive: those mutations break integrity
+checks that still run, so they are detected regardless of era. The INCONCLUSIVEs
+are honest ignorance, not leniency — head-pinned mode exists precisely so that
+"cannot judge" is a third answer instead of a guess.
+
+The table below is the **v0.3.0-era record** (`fixtures/EXPECTED.md`): what the
+v0.3.0 verifier observed, kept unchanged. Read it as history. For the current set —
+including the two rows where an unpinned verifier *accepts* a package a stranger
+sealed — see `fixtures-v041/README.md`.
+
+### archive: v0.3.0-era matrix (fixtures/)
 
 ```text
 fixtures/              open 模式        strict(--key) 模式   变异

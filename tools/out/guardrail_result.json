@@ -1,8 +1,8 @@
 {
   "meta": {
     "probe": "guardrail-shim",
-    "uibc_core": "D:\\Workbuddy\\uibc-core-local",
-    "generated_at_utc": "2026-11-17T05:59:59Z"
+    "uibc_core": "C:\\Users\\Administrator\\Doubao\\tmp\\gate_public_20261120",
+    "generated_at_utc": "2026-11-20T10:20:33Z"
   },
   "policy": {
     "name": "guardrail-v1",
@@ -111,7 +111,7 @@
       "result": "PASS",
       "entries": 5,
       "phantom_entries": 4,
-      "head": "7469a2b73c76aeeb6b7ba35ca6fd75e113a8facb8bb867e67b27d6904445da78",
+      "head": "9f9b85f8500a7606d7f01d5cec51c2ff461622a83f624cb6a3346977dcf8b23f",
       "scope": "internal consistency of the local ledger only; unsigned, unwitnessed, no external anchor",
       "problems": []
     }

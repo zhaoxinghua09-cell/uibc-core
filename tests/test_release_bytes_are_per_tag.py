@@ -15,9 +15,16 @@ import json
 import os
 import subprocess
 import sys
+
+import pytest
 import tempfile
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+_WORKFLOW = os.path.join(REPO, ".github", "workflows", "release-lab-bundle.yml")
+_ARCHIVE = os.path.join(REPO, "conformance", "uibc-conformance-0.4.1.zip")
+pytestmark = pytest.mark.skipif(
+    not os.path.isfile(_WORKFLOW) or not os.path.isfile(_ARCHIVE),
+    reason="needs the workflow file and a published archive; an sdist has neither")
 sys.path.insert(0, os.path.join(REPO, "tools"))
 
 import lab_manifest  # noqa: E402

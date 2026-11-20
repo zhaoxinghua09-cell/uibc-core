@@ -20,6 +20,7 @@ Honest scope:
 """
 
 import base64
+import hashlib
 import hmac
 import json
 import os
@@ -39,6 +40,17 @@ def _canonical_sig_payload(body: dict) -> bytes:
     core = {k: v for k, v in body.items() if k != "signature"}
     return json.dumps(core, sort_keys=True, separators=(",", ":"),
                       ensure_ascii=False).encode("utf-8")
+
+
+def revocation_body_sha256(body: dict) -> str:
+    """sha256 over the canonical revocation body (everything except `signature`).
+
+    One implementation, called by the signer, the gate and the receipt
+    recomputation. Two copies of this canonicalization is exactly how a valid
+    signature stops verifying (measured, #319): the signer signed four fields
+    while the verifier canonicalized six.
+    """
+    return hashlib.sha256(_canonical_sig_payload(body)).hexdigest()
 
 
 def _check_revocation(rev: dict, manifest: dict, key, pubkey=None) -> tuple:

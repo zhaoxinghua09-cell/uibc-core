@@ -491,6 +491,8 @@ def cmd_revoke(args):
     import json
     import time as _time
 
+    from .gate import _canonical_sig_payload
+
     pkg = os.path.abspath(args.path)
     man_path = os.path.join(pkg, "manifest.json")
     if not os.path.isfile(man_path):
@@ -518,14 +520,12 @@ def cmd_revoke(args):
     if kind == "ed25519":
         body["algorithm"] = "Ed25519"
         body["key_id"] = ed_key_id(_ed.publickey(secret))
-        payload = json.dumps(body, sort_keys=True, separators=(",", ":"),
-                             ensure_ascii=False).encode("utf-8")
+        payload = _canonical_sig_payload(body)
         body["signature"] = base64.b64encode(_ed.sign(secret, payload)).decode("ascii")
     else:
         body["algorithm"] = "HMAC-SHA256"
         body["key_id"] = key_id(secret)
-        payload = json.dumps(body, sort_keys=True, separators=(",", ":"),
-                             ensure_ascii=False).encode("utf-8")
+        payload = _canonical_sig_payload(body)
         body["signature"] = base64.b64encode(
             hmac.new(secret, payload, hashlib.sha256).digest()).decode("ascii")
 
@@ -551,6 +551,26 @@ def cmd_gate(args):
                   revocation_path=args.revocation, dispute_path=args.dispute)
     print(json.dumps(report, ensure_ascii=False, indent=2))
     sys.exit(report["exit_code"])
+
+
+def cmd_revocation_digest(args):
+    """Print the canonical body digest a decision receipt pins.
+
+    A reader handed `revocation.json` can recompute this with the same command
+    the receipt was written with - one canonicalization, called by the signer,
+    the gate and the reader, instead of three copies that drift apart (#319).
+    """
+    from .gate import revocation_body_sha256
+    path = os.path.abspath(args.file)
+    if not os.path.isfile(path):
+        sys.exit(f"error: revocation file not found: {path}")
+    with open(path, encoding="utf-8") as f:
+        body = json.load(f)
+    out = {k: body.get(k) for k in
+           ("revocation_id", "target_root", "reason_code", "revoked_at",
+            "algorithm", "key_id")}
+    out["body_sha256"] = revocation_body_sha256(body)
+    print(json.dumps(out, ensure_ascii=False, indent=2, sort_keys=True))
 
 
 def cmd_verify(args):
@@ -744,6 +764,11 @@ def main():
                    choices=["KEY_COMPROMISED", "EVIDENCE_INVALID", "OWNER_REQUEST"])
     p.add_argument("--id", default=None, metavar="REVOCATION_ID")
     p.set_defaults(func=cmd_revoke)
+
+    p = sub.add_parser("revocation-digest",
+                       help="canonical body digest of a revocation.json (what a receipt pins)")
+    p.add_argument("file", metavar="FILE")
+    p.set_defaults(func=cmd_revocation_digest)
 
     p = sub.add_parser("demo", help="one-command end-to-end demo (build/seal/verify/tamper/catch)")
     p.set_defaults(func=cmd_demo)

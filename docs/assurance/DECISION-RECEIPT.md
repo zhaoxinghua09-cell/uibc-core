@@ -115,6 +115,52 @@ code: the first version compared the name like any other field, so `cp wheel.whl
 flipped the whole verdict to `MISMATCH`. The control is now a test
 (`test_a_renamed_download_is_not_a_failure`).
 
+## The overlay is recomputable too
+
+Until this round, the receipt recorded `revocation: {status: REVOKED}` but could not prove
+it: a reader could redo the verify verdict on the bytes, and had to **take our word for the
+part that turned a PASS into a DENY** — which is exactly the part worth checking, and the
+only capability here that a competitor does not have at all.
+
+Now the receipt pins the overlay:
+
+```json
+"overlay": {
+  "revocation_id": "r-abb042d4c930a9d6",
+  "target_root": "3364e90c…",
+  "body_sha256": "6459e594…",
+  "key_id": "2a82cdf4…",
+  "algorithm": "Ed25519",
+  "reason_code": "OWNER_REQUEST"
+}
+```
+
+`body_sha256` is the sha256 of the canonical revocation body (everything except
+`signature`) — computed by `uibc revocation-digest`, i.e. by the **same** canonicalization
+the signer and the gate use. A second implementation here would be the #319 bug in slow
+motion: two canonicalizations drift, and a valid signature stops verifying.
+
+A reader holding four files — package, receipt, `revocation.json`, owner's `--pubkey` —
+now redoes the whole decision:
+
+```
+python tools/verify_decision.py --package pkg --receipt pkg.decision.json \
+    --pubkey owner.key.pub --revocation revocation.json
+```
+
+Measured on this repository:
+
+| control | result |
+|---|---|
+| four files, nothing edited | **MATCH** on 15 fields, `decision DENY` reproduced, exit 0 |
+| the revocation file not supplied | decision/reason/overlay printed **NOT CHECKABLE**, `MATCH on every checkable field`, exit 0 |
+| receipt's `body_sha256` edited and the receipt re-hashed | only `overlay.body_sha256` red, exit 1 — the self-hash alone would have passed the forgery |
+| revocation body edited (`OWNER_REQUEST` → `EVIDENCE_INVALID`) | signature no longer verifies → gate `HOLD`; `decision`, `overlay.body_sha256`, `overlay.reason_code` red, exit 1 |
+
+The second row is a deliberate choice: a reader who forgot an input must **not** be accused
+of holding a lying receipt. The tool says the result is narrower and names what is
+missing, instead of printing `MISMATCH` for its own absent input.
+
 ## Boundaries
 
 - **Scope**: the receipt covers the package tree and the gate's answer on it. It does not
@@ -137,3 +183,15 @@ flipped the whole verdict to `MISMATCH`. The control is now a test
 **伪造者改完再重算哈希** → 回执自洽但 `package_root` 对不上——所以光验自哈希不够，
 根必须从磁盘上的包现算。它不证明 `ALLOW` 判得对，只证明"这份回执说的就是这些字节现在的结果"。
 证据等级不动：同一持有人复现仍是 E2。
+
+**本轮新增（覆盖层也可复算）**：回执原来只记录"撤销 → `REVOKED`"，读者只能信——因为
+把 `PASS` 翻成 `DENY` 的那一步恰恰最值得查，也是对手完全没有的那条能力。现在回执多一段
+`overlay`，钉住撤销体的规范哈希（`body_sha256`，由 `uibc revocation-digest` 算，与签名方、
+gate **共用同一套规范化**，避免 #319 那种"两份规范化各写一份"的坑）。
+读者拿四个文件（包、回执、`revocation.json`、owner 公钥）就能自己重做整个判决，
+实测四种对照：四件齐全 → 15 字段全 `MATCH`、`DENY` 复现、exit 0；**不给撤销文件** →
+相关字段打 `NOT CHECKABLE` 而不是 `MISMATCH`（读者漏了输入，不该被指控为伪造）、
+exit 0 且明说"比全量复算窄"；改回执里的 `body_sha256` 再自算哈希 → **只有那一行红**；
+改撤销体（`OWNER_REQUEST`→`EVIDENCE_INVALID`）→ 签名验不过、gate 转 `HOLD`，
+`decision`/`body_sha256`/`reason_code` 三行红，exit 1。
+

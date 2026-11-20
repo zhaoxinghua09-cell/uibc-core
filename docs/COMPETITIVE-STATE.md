@@ -156,7 +156,7 @@ their verifier: ok=True
 | `CORPUS-DIGESTS.txt` | 有 | 有（287 B，`153f9b89…`） |
 | RFC 3161 令牌 `.tsr` | 有 | **有**（4,645 B，FreeTSA，Linux 上离线验 `verified: true` / `problems: []`，attested = 该页摘要） |
 | OpenTimestamps 证明 | 有（`.sig.ots`） | **有，但只是日历证明**（172 B，`pending_calendar`，0 个比特币区块证明；本项目不把它叫"已锚定"） |
-| 分离签名 `.sig` | 有 | **无**（缺 `UIBC_RELEASE_SEED_HEX`，挂 `UNSIGNED.txt`） |
+| 分离签名 `.sig` | 有 | **此页无**（`v0.4.1` 早于签名密钥，故挂 `UNSIGNED.txt`）；密钥已于 2026-11-20 配置并公开公钥（`key_id 179c615aef27cbcd`，见 `anchors/release-signing-key.json`），下一个 tag 起带签名 |
 
 所以当前状态读作"四件里三件在，缺签名；其中一件只是日历证明"，不是"已经对齐"。日用 `python tools/check_release_anchors.py` 一条命令即可复核第一二件是否仍与那页字节一致；`v0.4.1` 已冻结（同日工作流三次重写同一 tag 的资产，现已改为默认拒绝覆盖）。
 

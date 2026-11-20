@@ -123,8 +123,14 @@ The first run of the same workflow had recorded `unanchored` with
 `NameError: name 'tsp' is not defined`, a missing package rather than a TSA refusal (fixed in
 `#306`); the first stamp attempt also found two of the three OpenTimestamps calendars answering
 HTTP 503, so the stamper now tries all three and names the one that answered (fixed in `#308`).
-The signature is still absent: `UIBC_RELEASE_SEED_HEX` is not configured, and `UNSIGNED.txt`
-is what the page carries.
+`v0.4.1` still carries `UNSIGNED.txt`, because it was published before a signing key existed. On
+2026-11-20 one was configured: `UIBC_RELEASE_SEED_HEX` is now a repository secret, the key's public
+half is recorded in `anchors/release-signing-key.json` (`key_id 179c615aef27cbcd`, Ed25519), and a
+local sign-and-verify round trip with that key produced `VERIFIED — signature over digests.txt
+holds against the recorded public key`. **`v0.4.1` was not re-signed**: re-signing means rewriting
+a frozen page, and a page that changes to acquire a signature is worse than a page that says it has
+none. The first tag published after this carries `.sig`, and `tools/check_release_anchors.py` will
+refuse a `.sig` whose `key_id` differs from the one in the repository.
 
 ## What this protocol is not
 

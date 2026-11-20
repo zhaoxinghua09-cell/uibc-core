@@ -40,12 +40,14 @@ DIMENSIONS = [
 ]
 
 HUMAN_ONLY = [
-    ("configure the release signing key", "the timestamp and attachment chain has now run on the "
-                                           "published v0.4.1 release; what is left is "
-                                           "UIBC_RELEASE_SEED_HEX, a repository-admin setting that "
-                                           "hands the project a private key to keep"),
-    ("send the two reproduction invitations", "Templeman and Stone; the external node count "
-                                               "does not move without them"),
+    ("decide whether v0.4.1 is ever re-signed", "adding a signature means rewriting a page frozen on "
+                                                 "2026-11-20; the key exists now, so this is a choice "
+                                                 "and not a capability gap"),
+    ("answer the two invitations when they come back", "both went out on 2026-11-20 (Templeman by email "
+                                                        "from the 126 mailbox, Stone as a public issue on "
+                                                        "swarmsync-ai/aivs-spec); a reply is a human voice, "
+                                                        "and the external count does not move until one "
+                                                        "arrives"),
     ("approve edits to 29 historical phrases", "the archived bundle still carries production-sounding "
                                                "phrases a checker refuses in anything new"),
 ]

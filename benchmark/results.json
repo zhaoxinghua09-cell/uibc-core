@@ -1,9 +1,9 @@
 {
   "meta": {
-    "generated_at_utc": "2026-11-20T07:11:47Z",
+    "generated_at_utc": "2026-11-20T07:51:52Z",
     "source": "tools/out/mutation_benchmark.json",
     "expected": "benchmark/expected.json",
-    "spec_id": "uibc-core/0.3.3-proposal@ec3a13ee3bc8",
+    "spec_id": "uibc-core/0.3.3-proposal@ba0e02c98a65",
     "corpus_anchor": {
       "base_open": "PASS",
       "base_pinned": "PASS",

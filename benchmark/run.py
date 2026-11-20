@@ -80,13 +80,25 @@ def main():
             "undocumented_accept_rate_pct": round(100.0 * undoc / max(len(rows), 1), 1),
         }
 
+    # The anchor that stops a refuse-everything verifier scoring well: the
+    # unmutated package is in the corpus and must PASS. Without it a verifier
+    # that rejects all 21 mutations reports a perfect acceptance rate while
+    # being useless. The verdict comes from the benchmark run, not from this
+    # file, so it cannot be asserted here.
+    anchor = {"base_open": observed.get("meta", {}).get("base_open"),
+              "base_pinned": observed.get("meta", {}).get("base_pinned"),
+              "base_must_be": "PASS",
+              "anchor_ok": observed.get("meta", {}).get("base_pinned") == "PASS"}
+
     doc = {"meta": {"generated_at_utc": __import__("time").strftime(
                 "%Y-%m-%dT%H:%M:%SZ", __import__("time").gmtime()),
             "source": "tools/out/mutation_benchmark.json",
             "expected": "benchmark/expected.json",
-            "spec_id": _spec_id()},
-           "summary": summary, "rows": rows, "defects": defects}
-    with open(OUT, "w", encoding="utf-8") as f:
+            "spec_id": _spec_id(),
+            "corpus_anchor": anchor},
+           "summary": summary, "rows": rows,
+           "corpus_anchor": anchor, "defects": defects}
+    with open(OUT, "w", encoding="utf-8", newline="\n") as f:
         json.dump(doc, f, ensure_ascii=False, indent=2)
 
     print("\n%-6s %-34s %-12s %-12s %-12s" % ("id", "mutation", "open", "pinned", "head-pinned"))
@@ -106,12 +118,18 @@ def main():
 
     print("\n* accepted by design: the mode lacks the observation channel that "
           "case needs (key outside the package / head outside the package)")
+    print("corpus anchor: base(open)=%s base(pinned)=%s (must be PASS; "
+          "a verifier that refuses everything scores 0/22, not 22/22)"
+          % (anchor["base_open"], anchor["base_pinned"]))
     for mode in MODES:
         s = summary[mode]
         print("%-12s accepted %d/%d (%.1f%%) | documented %s | UNDOCUMENTED %d"
               % (mode, s["accepted"], s["total"], s["acceptance_rate_pct"],
                  s["documented_accepts"], s["undocumented_accepts"]))
     print("\nRESULT_JSON=" + OUT)
+    if not anchor["anchor_ok"]:
+        print("!! 基线未 PASS：接受率数字不可引用，先修基线")
+        return 1
     return 0 if not defects else 1
 
 

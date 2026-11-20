@@ -28,6 +28,43 @@ Discovery endpoints (GET):
 - `/healthz` - `{"status":"ok"}` only. Reachability checks must not be able to
   claim verification capability.
 
+## Gateway mode: registration metadata + lifecycle (T/ISC 0174)
+
+Run with `--registry` and the adapter stops being a bare verifier endpoint and
+starts behaving like the gateway T/ISC 0174-2026 describes:
+
+```
+python adapters/a2a/server.py --packages ./examples --port 8899 \
+    --registry registry.json --lifecycle-state lifecycle.json
+```
+
+- `registry.json` is validated at startup (0174 6.1.1 a/b); the process refuses
+  to start on a half-valid registry instead of forwarding on one. Required
+  fields: `name`, `id` (DID), `capabilities`, `protocols`, `endpoint`,
+  `organization`; optional but checked when present: `vc`, `authorization`,
+  `state`.
+- every `uibc/*` call must then name `params.agent`, and that agent must be
+  `enabled` **at the moment of the call**. Suspend is enforced per request with
+  HTTP 403 / `-32001` and `data.clause = "6.1.3b"` - not by hiding the agent from
+  a list, and not only after a restart.
+- `resume` re-runs the binding checks (credential status and expiry, organization
+  identifier, authorization scopes) and refuses unless all of them are a positive
+  yes. A flag flip is not a resumption.
+- states persist to `--lifecycle-state`, so a suspend survives a restart.
+
+Extra surfaces in this mode:
+
+| Surface | Clause | What it does |
+| --- | --- | --- |
+| `gateway/registry` (RPC) | 6.1.1 | validation report, errors and warnings included |
+| `gateway/state` (RPC) | 6.1.3 | state snapshot + audit count |
+| `gateway/discover` / `GET /agents?q=` | 6.2.1, 6.2.2 a | lookup, enabled-only, ranking basis and score returned |
+| `GET /agent-record.json` | 7.2.1 b | Agent Card + registration merged into one record |
+| `X-AUIB-Trace-Id` & co. | 7.3.1 d, 9.1.2 a/d | inherited from upstream, generated when absent, echoed back |
+
+Clause-by-clause status, gaps included: `docs/CROSSWALK-ISC-0174.md`, regenerated
+by `tools/gateway_conformance.py` (18 live probes, loopback, no mocks).
+
 ## Verifying with a DID instead of a key
 
 Before v0.3 a caller who wanted a real (non-HMAC) verdict had to be handed the

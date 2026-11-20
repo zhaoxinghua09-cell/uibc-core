@@ -125,9 +125,16 @@ python3 tools/run_decision_vectors.py \
 ```
 
 Your command prints JSON with `decision` (and optionally `exit_code`; if absent, the
-process exit code is used). `{overlay}` / `{anchor}` are only substituted on cases that
-have them, so a command whose flags are missing a case's file is reported as an error
-rather than silently scored.
+process exit code is used). Flags for files a case does not carry are **dropped**, so one
+command serves all seven cases: `--revocation {overlay}` disappears on case 01, and
+`--pubkey {anchor}` disappears on case 03. The convention is the ordinary `--flag value`
+(or `--flag=value`) shape; a command that cannot be expressed that way can be given a
+second, plain form with `--gate-plain`.
+
+This runner defect was found by running it: pointed at our own CLI with both flags, two
+cases scored as errors and the summary read **5/7** — indistinguishable from a broken gate.
+Absent flags are now stripped, and `test_external_mode_through_the_cli_scores_seven_of_seven`
+pins it so the next edit cannot quietly reintroduce it.
 
 **Two negative controls, measured** (see `tests/test_decision_vectors.py`): a gate that
 answers `ALLOW` to everything scores **1/7**; a gate that answers `DENY` to everything

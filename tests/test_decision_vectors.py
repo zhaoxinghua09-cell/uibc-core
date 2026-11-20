@@ -73,6 +73,22 @@ class DecisionVectorTest(unittest.TestCase):
         self.assertIn("03", red)
         self.assertIn("05", red)
 
+    def test_external_mode_through_the_cli_scores_seven_of_seven(self):
+        # The runner's external path is what a stranger uses. Pointing it at our
+        # own CLI caught a defect in the *runner*: one template with both
+        # `--revocation` and `--pubkey` could not serve a case that carries only
+        # one of them, so two cases scored as errors and the run read 5/7 —
+        # which looks exactly like a broken gate. The flags of absent files are
+        # now dropped, and this test pins that.
+        tmpl = "%s -m uibc_core.cli gate {pkg} --revocation {overlay} --pubkey {anchor}"
+        proc = subprocess.run([sys.executable,
+                               os.path.join(TOOLS, "run_decision_vectors.py"),
+                               "--gate", tmpl % sys.executable, "--json"],
+                              capture_output=True, text=True)
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+        out = json.loads(proc.stdout)
+        self.assertEqual(out["passed"], out["total"])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -358,10 +358,39 @@ python independent_verifier/cross_check.py  # 独立第二实现交叉核验（7
 - 《UIBC 工程实现摘录 v0.1.0》
 - SPEC 提案：`docs/SPEC-PROPOSAL-v0.1.md`（v0.2 增补见文末）
 
-## Golden Fixtures (archive SS30)
+## Golden Fixtures
 
-Benchmark as executable evidence — eight mutation categories, each a runnable,
-owner-signed submission.uibc package:
+**Two sets, and the difference matters if you are about to run one command.**
+
+```
+fixtures-v041/   current. v0.4.1 Ed25519 packages, three pinning modes, RESULTS.json.
+                 This is the set the one-command reproducer compares against.
+fixtures/        archive. v0.3.0 HMAC-era packages, kept byte-identical as a record.
+```
+
+**If you run `uibc verify fixtures/clean.uibc` on the shipped v0.4.1 verifier you will
+get `INCONCLUSIVE`, not the `PASS` printed in the table below.** That is not a bug:
+`clean` was sealed in a superseded scheme (HMAC-SHA256 owner seal, v0.3.0), and a
+current verifier genuinely has nothing to check it against. Measured on 2026-11-20
+at `dbe171a`, all eight archived packages, open mode:
+
+| archived fixture | observed under v0.4.1 |
+|---|---|
+| `clean` | INCONCLUSIVE |
+| `tampered` / `deleted` / `duplicated` / `reordered` / `migrated` | FAIL |
+| `malicious` / `malicious-keyswap` | INCONCLUSIVE |
+
+The FAILs are the useful part of the archive: those mutations break integrity
+checks that still run, so they are detected regardless of era. The INCONCLUSIVEs
+are honest ignorance, not leniency — head-pinned mode exists precisely so that
+"cannot judge" is a third answer instead of a guess.
+
+The table below is the **v0.3.0-era record** (`fixtures/EXPECTED.md`): what the
+v0.3.0 verifier observed, kept unchanged. Read it as history. For the current set —
+including the two rows where an unpinned verifier *accepts* a package a stranger
+sealed — see `fixtures-v041/README.md`.
+
+### archive: v0.3.0-era matrix (fixtures/)
 
 ```text
 fixtures/              open 模式        strict(--key) 模式   变异
@@ -390,21 +419,40 @@ both modes + attacker-key column).
 任何偏差即以非零码退出。散文写的 Expected 列永远"不会失败"，矩阵才会——
 上面那句 `S4+S6` 的错述，正是靠着这道门禁才被发现。
 
+## Admit an artifact you did not build
+
+`verify` answers a question about a **UIBC package**. If what you have is a wheel, a zip,
+a tarball or a skill directory, one command turns it into a sealed package and gives you a
+verdict about the exact bytes:
+
+```
+python tools/admit_package.py --artifact dist/pkg-1.0.whl --out /tmp/admitted/pkg-1.0 \
+       --agent-id pkg-1.0 --owner <you> --key owner.ed25519 --pinned owner.ed25519.pub
+```
+
+It hashes the artifact and every member, seals the binding with your key, and verifies
+open and pinned. A PASS means *the bytes you hold are the bytes that were sealed* — not
+that the artifact is safe. No scan, no execution, no dependency graph; the record says so
+in its own `not_covered` list. Details and a measured example:
+[`docs/assurance/ADMISSION.md`](docs/assurance/ADMISSION.md).
+
 ## Reproduce the published numbers in one command
 
 If you do not want to take our arithmetic on trust, there is one command that re-derives it
-locally, offline, with no account:
+locally, without needing the network, and with no account:
 
 ```
 python tools/reproduce_gate.py --repo . --uibc <path-to-uibc[.exe]> \
        --profile docs/assurance/far-profile.json --out receipts
 ```
 
-It does five things and prints one receipt:
+It does five things and prints one receipt. What the receipt claims about the network —
+and the four things it deliberately does not claim — is stated separately in
+[`docs/assurance/NETWORK-SCOPE.md`](docs/assurance/NETWORK-SCOPE.md).
 
 | step | what it re-derives |
 |---|---|
-| environment | python, uibc version (read from `pyproject.toml`, with the source stated), git HEAD (three-level fallback; `UNAVAILABLE` if it truly cannot tell), and a probe that records whether the network was reachable during the run |
+| environment | python, uibc version (read from `pyproject.toml`, with the source stated), git HEAD (three-level fallback; `UNAVAILABLE` if it truly cannot tell), whether any probe target answered (information, never a failure), and the number of outbound connection attempts **the driver process made** during the run |
 | fixture matrix | **8 packages × 3 pinning conventions = 24 comparisons**, each against `fixtures-v041/RESULTS.json`, comparing the whole non-PASS set and not just PASS/FAIL |
 | corpus | regenerates the 500-case corpus and compares row hashes |
 | vectors | `tools/conformance_vectors.py --check` |

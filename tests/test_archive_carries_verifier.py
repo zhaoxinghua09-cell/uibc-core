@@ -55,7 +55,13 @@ class TestArchiveCarriesItsVerifier(unittest.TestCase):
         proc = subprocess.run([sys.executable, pyz, "verify", case],
                               capture_output=True, text=True, timeout=120)
         out = json.loads(proc.stdout)
-        self.assertIn(out["result"], ("PASS", "INCONCLUSIVE"), proc.stderr[-300:])
+        # Exactly INCONCLUSIVE, not "PASS or INCONCLUSIVE". The old assertion
+        # accepted either, which is the shape of a test that cannot fail: it
+        # tolerated the documented `clean -> PASS` and the real behaviour
+        # disagreeing for as long as they liked. `fixtures/clean.uibc` is a
+        # v0.3.0 HMAC-sealed package; a 0.4.1 verifier has nothing to check the
+        # seal against, and reading it as PASS would be the wrong answer.
+        self.assertEqual(out["result"], "INCONCLUSIVE", proc.stderr[-300:])
         ver = subprocess.run([sys.executable, pyz, "--version"],
                              capture_output=True, text=True, timeout=60)
         self.assertEqual(ver.returncode, 0)

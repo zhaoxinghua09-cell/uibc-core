@@ -5,7 +5,8 @@
 Written for a reader who does not trust us. It runs only local, offline, account-free
 steps and prints a receipt a third party can quote:
 
-  1. environment     python, uibc version, git HEAD, and a probe proving no network was used
+  1. environment     python, uibc version, git HEAD, network reachability (info only),
+                     and the number of outbound connection attempts the driver made
   2. fixture matrix  8 packages x 3 pinning conventions, compared against RESULTS.json
   3. corpus selfcheck  regenerates the 500-case corpus and compares row hashes
   4. conformance     runs the shipped consistency vectors
@@ -78,14 +79,159 @@ def git_head(repo):
     return "UNAVAILABLE"
 
 
+PROBE_TARGETS = (("1.1.1.1", 443), ("github.com", 443), ("1.1.1.1", 53))
+
+
 def network_probe():
-    """A closed socket is evidence for 'this ran offline', not a failure."""
+    """Record whether *this* probe could reach anything. Info, never a failure.
+
+    This used to be a hard comparison: "reachable -> REPRODUCTION FAILED". Running
+    the gate on a second machine with ordinary internet access made the size of
+    that mistake obvious — the tool would greet almost every outsider with
+    REPRODUCTION FAILED while every number matched, because reachability is a
+    property of their machine, not of this run. What the claim needs is evidence
+    about what the run *did*, which is NetGuard below.
+
+    It is also only a probe: a firewall can allow one port and drop another, so
+    "no target answered" is reported as exactly that. The word "blocked" would
+    claim more than was measured — a machine whose port 22 works fine can
+    honestly produce this result.
+    """
+    last = None
+    for host, port in PROBE_TARGETS:
+        try:
+            s = socket.create_connection((host, port), timeout=3)
+            s.close()
+            return True, "reachable (%s:%s answered)" % (host, port)
+        except Exception as e:
+            last = "%s:%s %s" % (host, port, type(e).__name__)
+    return False, "no probe target answered (last: %s)" % last
+
+
+class NetGuard:
+    """Count outbound connection attempts the driver process makes while it runs.
+
+    Installing this is the difference between "we say it is offline" and "here is
+    the count". Loopback is allowed and counted separately, because a run that
+    talks to 127.0.0.1 is not reaching the network.
+
+    Boundary, stated rather than implied: child processes (`uibc verify`, pytest,
+    the corpus builder) are separate processes and are not instrumented by this
+    guard. The receipt therefore says "driver attempted N", not "the whole run
+    attempted N". Over-claiming here would repeat the same failure in a new shape.
+    """
+
+    def __init__(self):
+        self.attempts = 0
+        self.loopback = 0
+        self.samples = []
+        self._orig_connect = None
+        self._orig_create = None
+        self._in_create = False
+
+    @staticmethod
+    def _is_loopback(host):
+        if host in ("localhost", "::1", "0.0.0.0"):
+            return True
+        if isinstance(host, str) and host.startswith("127."):
+            return True
+        return False
+
+    def install(self):
+        self._orig_connect = socket.socket.connect
+        self._orig_create = socket.create_connection
+        self._in_create = False
+        guard = self
+
+        def connect(self_sock, address, *a, **k):
+            # create_connection() calls socket.connect() internally. Counting at
+            # both layers counted one attempt as two, which the positive control
+            # caught: a guard that says 2 when the answer is 1 is a guard whose
+            # zero cannot be trusted either.
+            if not guard._in_create:
+                host = address[0] if isinstance(address, tuple) and address else address
+                if guard._is_loopback(host):
+                    guard.loopback += 1
+                else:
+                    guard.attempts += 1
+                    if len(guard.samples) < 5:
+                        guard.samples.append(str(host))
+            return guard._orig_connect(self_sock, address, *a, **k)
+
+        def create_connection(address, *a, **k):
+            host = address[0] if isinstance(address, tuple) and address else address
+            if guard._is_loopback(host):
+                guard.loopback += 1
+            else:
+                guard.attempts += 1
+                if len(guard.samples) < 5:
+                    guard.samples.append(str(host))
+            guard._in_create = True
+            try:
+                return guard._orig_create(address, *a, **k)
+            finally:
+                guard._in_create = False
+
+        socket.socket.connect = connect
+        socket.create_connection = create_connection
+
+    def uninstall(self):
+        if self._orig_connect is not None:
+            socket.socket.connect = self._orig_connect
+        if self._orig_create is not None:
+            socket.create_connection = self._orig_create
+
+
+def self_test():
+    """Controls that prove the network guard can count, not just report zero.
+
+    A counter that always reads 0 is indistinguishable from a counter that works
+    on a run that never left the host. These controls are what makes the receipt's
+    "0 outbound attempts" a measurement instead of a decoration.
+    """
+    failures = 0
+
+    g = NetGuard()
+    g.install()
     try:
-        s = socket.create_connection(("1.1.1.1", 443), timeout=3)
-        s.close()
-        return False, "reachable"
-    except Exception as e:
-        return True, "blocked (%s)" % type(e).__name__
+        socket.create_connection(("1.1.1.1", 443), timeout=3).close()
+    except Exception:
+        pass
+    finally:
+        g.uninstall()
+    if g.attempts == 1:
+        print("ok   one outbound attempt counts as one (%s)" % g.samples)
+    else:
+        failures += 1
+        print("FAIL one outbound attempt counted as %d" % g.attempts)
+
+    g2 = NetGuard()
+    g2.install()
+    try:
+        socket.create_connection(("127.0.0.1", 9), timeout=1)
+    except Exception:
+        pass
+    finally:
+        g2.uninstall()
+    if g2.attempts == 0 and g2.loopback == 1:
+        print("ok   loopback is separated from network use")
+    else:
+        failures += 1
+        print("FAIL loopback handling: outbound=%d loopback=%d" % (g2.attempts, g2.loopback))
+
+    orig_create = socket.create_connection
+    orig_connect = socket.socket.connect
+    g3 = NetGuard()
+    g3.install()
+    g3.uninstall()
+    if socket.create_connection is orig_create and socket.socket.connect is orig_connect:
+        print("ok   socket layer restored after uninstall")
+    else:
+        failures += 1
+        print("FAIL socket not restored")
+
+    print("\nSELF-TEST", "PASS" if failures == 0 else "FAIL (%d)" % failures)
+    return 0 if failures == 0 else 1
 
 
 def fixture_matrix(repo, uibc):
@@ -225,16 +371,24 @@ def convention_axis(repo, uibc, outdir):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--repo", required=True)
-    ap.add_argument("--uibc", required=True)
+    ap.add_argument("--repo")
+    ap.add_argument("--uibc")
     ap.add_argument("--out", default=".")
     ap.add_argument("--profile", default=None, help="path to far-profile.json (default: auto-detect)")
+    ap.add_argument("--self-test", action="store_true",
+                    help="run the network-guard controls and exit; needs no repository")
     a = ap.parse_args()
+    if a.self_test:
+        return self_test()
+    if not a.repo or not a.uibc:
+        ap.error("--repo and --uibc are required unless --self-test is given")
     repo = os.path.abspath(a.repo)
     start = time.time()
     stamp = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
 
-    offline, net_note = network_probe()
+    reach, net_note = network_probe()
+    guard = NetGuard()
+    guard.install()
     # `uibc --version` does not exist; asking for it returns an argparse error and
     # would have recorded a usage message as a version string. Read the declared
     # version instead, and label where it came from.
@@ -257,9 +411,14 @@ def main():
     conf_v, conf_out = conformance(repo, sys.executable)
     den_v, den_rows, den_notes = denominators(repo, a.profile)
     cav_rows, cav_notes, cav_ok = convention_axis(repo, a.uibc, a.out or ".")
-    if not cav_ok:
-        hard.append(("convention", "axis", "builder or crosswalk failed"))
+    guard.uninstall()
+    net_attempts = guard.attempts
+    net_samples = guard.samples
 
+    # Build the failure list once every step has run. The previous version
+    # appended the convention failure *before* resetting the list with `hard = []`,
+    # so a failed convention axis was silently discarded — a bug that let the
+    # receipt claim ALL COMPARISONS MATCH while a whole section had failed.
     hard = []
     hard += fx_mismatch
     if corpus_v != "MATCH":
@@ -269,9 +428,13 @@ def main():
     for r in den_rows:
         if r[3] == "MISMATCH":
             hard.append(("denominators", r[0], "%s vs %s" % (r[1], r[2])))
-    if not offline:
-        # Not a failure of correctness, but it voids the "ran offline" claim.
-        hard.append(("environment", "network", "network reachable during run"))
+    if not cav_ok:
+        hard.append(("convention", "axis", "builder or crosswalk failed"))
+    if net_attempts:
+        # This one *is* about the run, not the machine: something in this process
+        # tried to reach the network. Whether the attempt succeeded is irrelevant.
+        hard.append(("environment", "network", "%d outbound attempt(s): %s"
+                     % (net_attempts, ", ".join(net_samples))))
 
     lines = []
     lines.append("# Gate reproduction receipt (self-issued, not third-party)")
@@ -284,8 +447,14 @@ def main():
     lines.append("| python | %s |" % platform.python_version())
     lines.append("| os | %s |" % platform.platform())
     lines.append("| wall clock | %.1f s |" % (time.time() - start))
-    lines.append("| network during run | %s |" % net_note)
+    lines.append("| network probe on this machine (info only, never fails) | %s |" % net_note)
+    lines.append("| outbound attempts by the driver | %d (loopback %d) |" % (net_attempts, guard.loopback))
     lines.append("| credentials used | none (no token, no account, no registry call) |")
+    lines.append("")
+    lines.append("> Reachability is a property of the machine and never fails this run. The")
+    lines.append("> attempts line is a property of the run: the driver process would have")
+    lines.append("> counted any attempt to leave the host. Child processes are not")
+    lines.append("> instrumented, so this reads 'driver attempted N', not 'the whole run did'.")
     lines.append("")
     lines.append("## 1. Fixture matrix — 8 packages x 3 pinning conventions")
     lines.append("")
@@ -351,7 +520,10 @@ def main():
     base = os.path.join(a.out, "reproduction_receipt_%s" % time.strftime("%Y%m%d_%H%M%S"))
     open(base + ".md", "w", encoding="utf-8").write(md)
     json.dump({"generated": stamp, "subject": head, "uibc": uibc_version,
-               "python": platform.python_version(), "uibc": uibc_version, "network": net_note,
+               "python": platform.python_version(),
+               "network": {"probe_answered": reach, "probe": net_note,
+                           "driver_attempts": net_attempts,
+                           "loopback_attempts": guard.loopback},
                "fixture_rows": len(rows), "mismatches": hard,
                "corpus": corpus_v, "conformance": conf_v,
                "receipt_sha256": sha256_bytes(md.encode("utf-8"))},

@@ -7,26 +7,26 @@
 
 | 检查 | 名称 | 出厂包是否走到 | 测试 | 红队 | 文档 |
 |---|---|---|---|---|---|
-| S0 | verifier robustness | 否 | 5 | 0 | 10 |
-| S1 | package structure | 是 | 14 | 1 | 33 |
+| S0 | verifier robustness | 否 | 5 | 0 | 11 |
+| S1 | package structure | 是 | 14 | 1 | 34 |
 | S2 | identity consistency | 是 | 9 | 1 | 21 |
-| S3 | lifecycle state machine + semantics | 是 | 10 | 1 | 20 |
-| S4 | evidence integrity | 是 | 22 | 3 | 43 |
-| S5 | evidence root | 是 | 12 | 3 | 34 |
-| S6 | seal signature | 是 | 24 | 1 | 38 |
-| S7 | evidence index metadata | 否 | 6 | 1 | 17 |
-| S8 | package checkpoint head | 否 | 8 | 2 | 26 |
-| S9 | head pinned out-of-band | 否 | 9 | 1 | 31 |
+| S3 | lifecycle state machine + semantics | 是 | 10 | 1 | 21 |
+| S4 | evidence integrity | 是 | 22 | 3 | 44 |
+| S5 | evidence root | 是 | 12 | 3 | 35 |
+| S6 | seal signature | 是 | 24 | 1 | 39 |
+| S7 | evidence index metadata | 否 | 6 | 1 | 19 |
+| S8 | package checkpoint head | 否 | 8 | 2 | 27 |
+| S9 | head pinned out-of-band | 否 | 9 | 1 | 32 |
 | S10 | attestation closure declared | 否 | 6 | 2 | 10 |
-| S11 | strict serialization | 是 | 7 | 1 | 19 |
-| S12 | timestamp and identifier strictness | 是 | 11 | 2 | 21 |
-| S13 | merkle inclusion proofs | 否 | 9 | 4 | 13 |
-| S14 | strict base64 | 否 | 5 | 2 | 8 |
-| S15 | anchor event resolution | 否 | 7 | 4 | 13 |
-| S16 | external timestamp (RFC 3161) | 否 | 9 | 4 | 20 |
-| S17 | linear receipt chain | 否 | 7 | 2 | 17 |
-| S18 | policy artefact resolution | 否 | 9 | 2 | 16 |
-| S19 | freshness state | 否 | 4 | 1 | 12 |
+| S11 | strict serialization | 是 | 7 | 1 | 20 |
+| S12 | timestamp and identifier strictness | 是 | 11 | 2 | 22 |
+| S13 | merkle inclusion proofs | 否 | 9 | 4 | 14 |
+| S14 | strict base64 | 否 | 5 | 2 | 9 |
+| S15 | anchor event resolution | 否 | 7 | 4 | 14 |
+| S16 | external timestamp (RFC 3161) | 否 | 9 | 4 | 21 |
+| S17 | linear receipt chain | 否 | 7 | 2 | 18 |
+| S18 | policy artefact resolution | 否 | 9 | 2 | 17 |
+| S19 | freshness state | 否 | 4 | 1 | 13 |
 
 出厂包判定：`INCONCLUSIVE`，走到 8/20 项（未签名的包停在 S6，后面不越过去）。
 

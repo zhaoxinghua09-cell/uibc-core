@@ -180,6 +180,28 @@ Three properties are measured, not asserted:
 A digest that depended on checkout order, hash seed or line endings would be a number two
 people cannot compare, which is worse than no number.
 
+### The other half: comparing two result files
+
+```bash
+python3 tools/compare_sut_results.py mine.json theirs.json [third.json …]
+```
+
+It prints one row per case with what every implementation answered, and exits `0` when they
+all agree, `1` when any case diverges, `2` when the files **cannot** be compared. The `2` is
+the point: a comparison engine that is generous with evidence is worse than none, so it
+refuses three situations outright —
+
+* **different corpus digests** — a difference between two files about different inputs is a
+  difference about inputs, and publishing it as an implementation difference would be false;
+* **files disagreeing on what was *expected*** — that is a corpus defect, and comparing
+  observations against two different expectations produces a number nobody can defend;
+* **the same label on two files** — either the same run twice, or an ambiguous name; the
+  table would be unreadable either way.
+
+Divergence is printed, never scored: every divergent case keeps both answers, and the
+output says the difference is a question about the specification rather than a verdict
+about either side.
+
 The seeds are not shipped: rebuilding the suite produces the same cases in shape with
 different keys, so it is reproducible as a *test*, not as *bytes*.
 

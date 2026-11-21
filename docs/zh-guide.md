@@ -75,6 +75,7 @@ python tools/latency_probe.py
 |---|---|---|
 | Windows / Python 3.13（2026-11-19） | median **19.74 ms** · p95 **26.64 ms** · max **38.75 ms** | median 18.42 ms，判定 `FAIL` |
 | Linux / Python 3.12（2026-11-20） | median **7.67 ms** · p95 **7.85 ms** · max **8.44 ms** | median 7.71 ms，判定 `FAIL` |
+| Linux / Python 3.12（2026-11-21，公网干净克隆复跑） | median **7.78 ms** · p95 **8.69 ms** · max **10.02 ms** | median 7.72 ms，判定 `FAIL` |
 
 **两点必须说清**：
 

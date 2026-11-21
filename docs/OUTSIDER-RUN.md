@@ -26,13 +26,13 @@
 
 `uibc-core` 是一个"智能体生命周期证据链"的开源实现。它的 README 第一屏写着这样一句：
 
-> **外部验证节点：1**
+> **外部验证节点：2**
 
-意思是：到目前为止，**只有一个不是我的人在自己的机器上把它跑通过**（见
-[`EXTERNAL-NODES.md`](EXTERNAL-NODES.md) 第一行；那是我们请来的同一工作组通信方，
-算第三方执行，不算无利害审计）。这一行是我们自己在维护的数字，所以它小得难看，也不美化。
+意思是：到目前为止，**只有两个不是我的人在自己的机器上把它跑通过**（见
+[`EXTERNAL-NODES.md`](EXTERNAL-NODES.md) 两行记录；两位都是我们请来的，算第三方执行，
+不算无利害审计）。这一行是我们自己在维护的数字，所以它小得难看，也不美化。
 
-你花三分钟跑一次，就能把这个数字从 1 变成 2。你的结果我们会原样公开，包括你失败的情况。
+你花三分钟跑一次，就能把这个数字从 2 变成 3。你的结果我们会原样公开，包括你失败的情况。
 
 ### 你需要什么
 
@@ -98,11 +98,11 @@ OK (skipped=<k>)
 
 `uibc-core` is an open-source implementation of an agent-lifecycle evidence chain. Its README says, on the first screen:
 
-> **external verification nodes: 1**
+> **external verification nodes: 2**
 
-Meaning: **nobody outside this project has yet run it on their own machine**. We publish that number ourselves; it is not verification.
+Meaning: **two people outside this project have run it on their own machines and sent the file back**. We publish that number ourselves; it is not verification.
 
-Three minutes of your time changes 0 into 1. We will publish your result as-is, including if it fails.
+Three minutes of your time changes 2 into 3. We will publish your result as-is, including if it fails.
 
 ### What you need
 

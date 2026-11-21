@@ -1,0 +1,11 @@
+{
+  "id": "F-010",
+  "date": "2026-11-21",
+  "category": "code",
+  "summary": "machine-readable report carried CJK text, and on Windows every consumer that pipes it turned the verdict into 'output was not JSON'",
+  "root_cause": "The explainability fields were written in Chinese because the surrounding documentation is Chinese. The report is a pipe product: subprocess readers decode stdout with the platform default (cp936 here), not guaranteed UTF-8. Nothing in the code said which of the two audiences a field is for.",
+  "detection": "tests/test_compare_sut_results and tests/test_decision_vectors failed with 'output was not JSON: ' while the same command printed valid JSON in a terminal. The difference was the decoder, not the verifier.",
+  "fix": "Machine-readable fields are ASCII English; Chinese stays in the human-facing `uibc explain` text. Stated as a rule in uibc_core/explain.py's module docstring.",
+  "lesson": "A report has two audiences with two encodings. Deciding per field which audience it serves is part of the schema, not a translation afterthought - and a CJK string in JSON is a portability defect that no unit test in-process can see.",
+  "fixture_ref": "uibc_core/explain.py docstring; tests/test_compare_sut_results.py"
+}

@@ -16,7 +16,7 @@ from .lifecycle import validate_lifecycle, validate_lifecycle_strict
 from .signing import (ALGORITHM, ALGORITHM_ED25519, b64decode_strict,
                       ed_key_id, ed_seal_verify_scoped, key_id, seal_verify)
 from . import SPEC_VERSION, VERIFIER_ID, __version__, spec_id
-from . import basis as _basis, freshness
+from . import basis as _basis, explain as _explain, freshness
 
 # Computed once per process: the label plus the bytes it names (see
 # __init__.spec_id). Reported so a reader can tell two builds of the same
@@ -1346,6 +1346,10 @@ def verify(package_dir: str, key: bytes = None, pubkey: bytes = None,
         # basis is filled in once, here, for every check that lacks it.
         for c in result.get("checks", []):
             c.setdefault("basis", _basis.for_check(c.get("id", "")))
+        # Same argument, one level down: evidence / reproduce / remediation /
+        # limitations are filled once here rather than in fourteen S6 branches.
+        # Fields only - decorate() never changes a result.
+        _explain.decorate(result, package_dir)
         return result
     except Exception as e:  # noqa: BLE001 - hostile input of any shape
         return {

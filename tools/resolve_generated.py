@@ -36,15 +36,28 @@ GENERATORS = {
 }
 
 
+def _git(args):
+    """Run git without assuming the name is executable.
+
+    On Windows git ships as a `.cmd` shim and CreateProcess cannot spawn a
+    `.cmd` without a shell, so a bare ["git", ...] raises WinError 2 on a
+    machine that does have git (measured 2026-11-21). Resolve first.
+    """
+    import shutil
+    exe = shutil.which("git")
+    prefix = ["git"]
+    if exe:
+        prefix = ["cmd", "/c", exe] if exe.lower().endswith((".cmd", ".bat")) else [exe]
+    return subprocess.run(prefix + args, cwd=REPO, capture_output=True, text=True)
+
+
 def conflicted_paths():
-    r = subprocess.run(["git", "diff", "--name-only", "--diff-filter=U"],
-                       cwd=REPO, capture_output=True, text=True)
+    r = _git(["diff", "--name-only", "--diff-filter=U"])
     return [p.strip() for p in r.stdout.splitlines() if p.strip()]
 
 
 def in_rebase():
-    gitdir = subprocess.run(["git", "rev-parse", "--git-dir"], cwd=REPO,
-                            capture_output=True, text=True).stdout.strip()
+    gitdir = _git(["rev-parse", "--git-dir"]).stdout.strip()
     return any(os.path.isdir(os.path.join(REPO, gitdir, d))
                for d in ("rebase-merge", "rebase-apply"))
 

@@ -25,7 +25,7 @@
 | A8 | 文本许可为 CC BY 4.0 | 读 `LICENSE` 与 README 许可节 | 两处一致，无"保留所有权利"残留 | 许可声明冲突，引用者会踩坑 |
 | A9 | 三仓首屏互链（定义→执行→技能） | 分别 grep 三仓 README | 每仓各含另外两仓的 `zh-guide` 链接 | 互链断了，"枢纽"不成立 |
 | A10 | 技能库规模 | 按仓内清单计数 | 与对外所称数字一致 | 数字注水 |
-| A11 | 整包复核延迟（median / p95 / max，**机器相关量**） | `python tools/latency_probe.py` | Windows/Py3.13：median **19.74** / p95 **26.64** / max **38.75**；Linux/Py3.12：median **7.67** / p95 **7.85** / max **8.44**（各 n=50）；同时打印 m_M12 `FAIL` 行 | 两机数量级不同属正常（机器相关）；若 m_M12 未被拒，比延迟不符更严重 |
+| A11 | 整包复核延迟（median / p95 / max，**机器相关量**） | `python tools/latency_probe.py` | Windows/Py3.13：median **19.74** / p95 **26.64** / max **38.75**；Linux/Py3.12：median **7.67** / p95 **7.85** / max **8.44**（2026-11-20）；同日复跑 **7.78** / **8.69** / **10.02**（2026-11-21，各 n=50）；同时打印 m_M12 `FAIL` 行 | 两机数量级不同属正常（机器相关）；若 m_M12 未被拒，比延迟不符更严重 |
 | A12 | 外部引用可达性 | `python tools/check_citations.py` | 逐条打印 HTTP 状态码（可达 200；403/反爬与超时分别标注） | 某条标"可达"实际不可达，等于引用造假 |
 | A13 | 红队 16 例：13 拒 / 1 灰区 / 2 定义域放行 | `python tools/redteam_suite.py` | RT05 `INCONCLUSIVE`；RT08、RT10 `PASS`；其余 `FAIL` | 出现新的 `PASS` 或新的 `INCONCLUSIVE` 说明拦截面变了，缺口节须重写 |
 | A14 | README 里的克隆命令照抄可跑通 | 原样执行 README 的 `git clone --depth 1 --branch main …`，再跑 `python tools/external_node_check.py` | 打印 `CONSISTENT` | 命令失败＝引用正确但操作错误，比 404 更隐蔽（2026-11-20 发现旧版写 `release/v1.1-precheck`，该分支不存在） |

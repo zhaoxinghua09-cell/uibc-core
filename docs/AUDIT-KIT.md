@@ -122,6 +122,8 @@ The repository now holds a standard container over the same tree, upgraded: `anc
 
 What the block establishes: the digest existed before 04:46:13Z. What it does not: who published it, or that the workflow behaved. `check_release_anchors.py` binds the repository proof to the bytes the page serves today before printing the block.
 
+The same route was run for the next release, after its block was mined. `anchors/attestations/v0.5.0/CORPUS-DIGESTS.txt.ots` (1,308 bytes, sha256 `f8e21693…`) answers for the published digest `9a3ffbbc…` and carries **`BitcoinBlockHeaderAttestation(976735)`** — merkle root `2fe8d00096f65b0a98749981e02f98fdb5ae4e7ad9e227f919d850d102af25a2`, block time `2026-11-20T14:17:33Z`. The page's own proof stays what it was at the freeze (272 bytes, `pending_calendar`): upgrading it would change published bytes, so the block-level proof lives in the repository and `ATTESTATION.json` says which is which. Measured 2026-11-21 on a clone: `python tools/check_release_anchors.py` prints `ACCEPTABLE`, with `ots chain bitcoin, height 976735` recomputed from the proof rather than quoted.
+
 And the height is not quoted from a record any more. `tools/ots_merkle.py` walks the proof itself -- the file's digest, then every append/prepend/sha256 in the tree, seventy-three operations -- and compares the merkle root it reaches with the root the record names, trying both byte orders and saying which one matched. It is standard library only, so it runs where `opentimestamps` has never been installed:
 
     python tools/ots_merkle.py anchors/attestations/v0.4.1/CORPUS-DIGESTS.txt.ots \

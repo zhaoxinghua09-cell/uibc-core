@@ -8,8 +8,8 @@
 | 检查 | 名称 | 出厂包是否走到 | 测试 | 红队 | 文档 |
 |---|---|---|---|---|---|
 | S0 | verifier robustness | 否 | 5 | 0 | 11 |
-| S1 | package structure | 是 | 14 | 1 | 34 |
-| S2 | identity consistency | 是 | 9 | 1 | 21 |
+| S1 | package structure | 是 | 14 | 1 | 36 |
+| S2 | identity consistency | 是 | 9 | 1 | 22 |
 | S3 | lifecycle state machine + semantics | 是 | 10 | 1 | 21 |
 | S4 | evidence integrity | 是 | 22 | 3 | 44 |
 | S5 | evidence root | 是 | 12 | 3 | 35 |
@@ -23,10 +23,10 @@
 | S13 | merkle inclusion proofs | 否 | 9 | 4 | 14 |
 | S14 | strict base64 | 否 | 5 | 2 | 9 |
 | S15 | anchor event resolution | 否 | 7 | 4 | 14 |
-| S16 | external timestamp (RFC 3161) | 否 | 9 | 4 | 21 |
-| S17 | linear receipt chain | 否 | 7 | 2 | 18 |
-| S18 | policy artefact resolution | 否 | 9 | 2 | 17 |
-| S19 | freshness state | 否 | 4 | 1 | 13 |
+| S16 | external timestamp (RFC 3161) | 否 | 9 | 4 | 22 |
+| S17 | linear receipt chain | 否 | 7 | 2 | 19 |
+| S18 | policy artefact resolution | 否 | 9 | 2 | 18 |
+| S19 | freshness state | 否 | 4 | 1 | 14 |
 
 出厂包判定：`INCONCLUSIVE`，走到 8/20 项（未签名的包停在 S6，后面不越过去）。
 

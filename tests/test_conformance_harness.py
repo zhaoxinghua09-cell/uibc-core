@@ -19,6 +19,12 @@ sys.path.insert(0, REPO)
 import tools.conformance_harness as h  # noqa: E402
 
 HARNESS = os.path.join(REPO, "tools", "conformance_harness.py")
+RECEIPT_CHECKER = os.path.join(REPO, "tools", "check_conformance_receipt.py")
+
+
+def _run_receipt(args, timeout=240):
+    return subprocess.run([sys.executable, RECEIPT_CHECKER] + args,
+                          capture_output=True, text=True, cwd=REPO, timeout=timeout)
 
 
 def _run(args, timeout=240):
@@ -73,6 +79,14 @@ class TestNegativeControl(unittest.TestCase):
         self.assertLess(receipt["verdict_agreement"], receipt["answered"])
         self.assertGreater(len(receipt["verdict_wording_only"]), 0)
         self.assertEqual(receipt["root_mismatches"], [])
+
+
+class TestReceiptIsCheckableNotTrusted(unittest.TestCase):
+    def test_receipt_checker_accepts_its_own_receipt_and_rejects_mutations(self):
+        out = _run_receipt(["--self-test"])
+        self.assertEqual(out.returncode, 0, out.stdout + out.stderr)
+        self.assertIn("passes", out.stdout)
+        self.assertEqual(out.stdout.count("self-test caught"), 4, out.stdout)
 
 
 class TestAdapterFailuresAreFindings(unittest.TestCase):

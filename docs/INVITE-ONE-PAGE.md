@@ -108,5 +108,11 @@ asking you to close.
 
 ---
 
+**What happens to your answer.** It is checked before anything else happens to it:
+`tools/check_conformance_receipt.py` re-derives every number in your receipt from
+its own rows and from the packaged vectors, and refuses a receipt that contradicts
+itself. If yours fails that check you get the specific contradiction back —
+"summary says 55/55, rows say 42/55" — rather than silence or a vague reply.
+
 *Prepared 2026-11-20. Not yet sent to anyone at the time of writing; sending is a
 separate, deliberate act.*

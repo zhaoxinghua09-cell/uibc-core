@@ -106,6 +106,27 @@ implementation**, and `evidence` = `blind` **only if you had not seen our expect
 results beforehand**. Both are recorded as you state them, and the published count
 is derived from the ledger, not typed into prose.
 
+## What happens to the receipt here
+
+A receipt is checked before it is filed, by `tools/check_conformance_receipt.py`:
+
+```bash
+python tools/check_conformance_receipt.py receipt.json
+```
+
+It re-derives every number in the receipt from its own rows and from the packaged
+vectors, and refuses a receipt that contradicts itself: a summary count that disagrees
+with the rows, a row naming a vector that does not exist here, a row whose
+`root_agreement` flag disagrees with the answer it records, or a partial run that does
+not say which vectors it skipped. Its own `--self-test` mutates a good receipt four
+ways and requires each to be caught.
+
+**What this can and cannot do.** It cannot verify what your program computed — that
+happened on your machine. It verifies that what you sent is internally consistent and
+that it describes this package's vectors rather than a stale copy. That is the
+difference between a receipt and a claim: a filer who is careless (or worse) now
+produces something that fails to check, instead of something that reads well.
+
 If you would rather not have your name filed, say so and the row will carry
 `who: "independent implementer (anonymous, at their request)"` with your receipt
 attached. The count still goes up; only the attribution is withheld.

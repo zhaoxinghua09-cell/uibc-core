@@ -84,6 +84,19 @@ class TestPackageSelfChecks(unittest.TestCase):
         self.assertEqual(out.returncode, 0, out.stdout + out.stderr)
         self.assertIn("CONSISTENT", out.stdout)
 
+    def test_the_algebra_agrees_on_every_shape_up_to_a_bound(self):
+        # The 55 vectors are chosen shapes; this sweeps all of them up to 16 with
+        # a self-test that must catch two mutations, so the sweep is alive in CI
+        # at a size where it costs nothing. The 64/128 runs live in the workflow.
+        out = subprocess.run(
+            [sys.executable, os.path.join(REPO, "tools",
+                                          "verify_tree_algebra_exhaustive.py"),
+             "--max-size", "16", "--self-test"],
+            capture_output=True, text=True, cwd=REPO, timeout=120)
+        self.assertEqual(out.returncode, 0, out.stdout + out.stderr)
+        self.assertIn("SWEEP-AGREES", out.stdout)
+        self.assertIn("self-test caught", out.stdout)
+
     def test_positives_match_and_negatives_differ(self):
         manifest = json.loads(_read("manifest.json"))
         for v in manifest["vectors"]:

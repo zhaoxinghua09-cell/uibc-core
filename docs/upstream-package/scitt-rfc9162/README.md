@@ -202,6 +202,37 @@ decoration, and this is the cheapest way to show the empty-tree rule, the
 leaf-input binding and the consistency length rule are enforced rather than
 described.
 
+## The shapes that are *not* in this corpus, and why that is answerable
+
+Fifty-five vectors cannot prove that the algebra works at size 10,000, and a
+reader should not have to take that on trust. So the repository ships a sweep
+that walks **every** shape up to a bound rather than every shape someone chose:
+
+```bash
+python tools/verify_tree_algebra_exhaustive.py --max-size 64 --self-test
+python tools/verify_tree_algebra_exhaustive.py --max-size 64 --dump /tmp/inst.json
+node tools/verify_tree_algebra_exhaustive.mjs /tmp/inst.json
+```
+
+| Bound | inclusion instances | consistency instances | disagreements |
+|---|---|---|---|
+| 64 (CI) | 2,080 (sizes 1..64, every index) | 2,080 (every 1 ≤ m ≤ n ≤ 64) | **0** |
+| 128 (run locally) | 8,256 | 8,256 | **0** |
+
+Two readings are compared: generation from `uibc_core`, verification from
+`tools/check_scitt_vectors_standalone.py`, which imports nothing from it. The
+Node sweep re-derives the roots again from the recorded bytes, so the second
+language confirms the path or proof is self-sufficient rather than agreeing with
+the program that produced it.
+
+`--self-test` zeroes one path node and one proof node and requires both to be
+caught: a sweep that cannot fail its own mutation is a loop, not a check.
+
+**What this does not prove.** It proves our two readings agree on everything up
+to 128 leaves. It does not prove either reading matches RFC 6962 — for that the
+23 external consistency cases and the 147 external arithmetic cases are the only
+evidence there is, and they are cited as external, not as ours.
+
 ## Tree construction (write it down, don't import it)
 
 ```

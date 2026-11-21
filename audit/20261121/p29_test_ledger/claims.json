@@ -1,0 +1,603 @@
+{
+  "repo": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\xlgd_audit\\uibc-core",
+  "claim_count": 40,
+  "actual": {
+    "collected": 642,
+    "passed": 617,
+    "skipped": 24,
+    "commit": "2eb97631c1202d892721faaf595f486adc3c9beb"
+  },
+  "drift": [
+    {
+      "file": "AGENTS.md",
+      "line": 34,
+      "kind": "N tests",
+      "numbers": [
+        "549"
+      ],
+      "text": "python -m unittest discover tests         # 549 tests，改动必跑（CI ci.yml 同逻辑）",
+      "claimed": 549
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 151,
+      "kind": "N tests",
+      "numbers": [
+        "529"
+      ],
+      "text": "- **529 tests green** (2 skipped), `check_doc_facts` 0 mismatches, second",
+      "claimed": 529
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 194,
+      "kind": "N OK",
+      "numbers": [
+        "527"
+      ],
+      "text": "- **They all pass once installed** (`527 OK (skipped=2)`, 42.4 s). Nothing in",
+      "claimed": 527
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 560,
+      "kind": "N tests",
+      "numbers": [
+        "305"
+      ],
+      "text": "- **The docs/ pages that describe the present now have to stay true.** `tools/check_doc_facts.py` scanned six top-level files; `docs/CONFORMANCE.md` said 305 te",
+      "claimed": 305
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 560,
+      "kind": "N tests",
+      "numbers": [
+        "305"
+      ],
+      "text": "- **The docs/ pages that describe the present now have to stay true.** `tools/check_doc_facts.py` scanned six top-level files; `docs/CONFORMANCE.md` said 305 te",
+      "claimed": 305
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 578,
+      "kind": "N tests",
+      "numbers": [
+        "122"
+      ],
+      "text": "- **The paper's own numbers were wrong in three places.** `paper/paper.md` claimed 122 tests (507 run), \"three modules\" within 24 files (25), and \"zero-dependen",
+      "claimed": 122
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 578,
+      "kind": "N tests",
+      "numbers": [
+        "507"
+      ],
+      "text": "- **The paper's own numbers were wrong in three places.** `paper/paper.md` claimed 122 tests (507 run), \"three modules\" within 24 files (25), and \"zero-dependen",
+      "claimed": 507
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 702,
+      "kind": "N/M",
+      "numbers": [
+        "288",
+        "288"
+      ],
+      "text": "reuses `uibc_core.merkle`. Corpus result at build time: 288/288",
+      "claimed": 288
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 702,
+      "kind": "N/M",
+      "numbers": [
+        "288",
+        "288"
+      ],
+      "text": "reuses `uibc_core.merkle`. Corpus result at build time: 288/288",
+      "claimed": 288
+    },
+    {
+      "file": "EVIDENCE-INDEX.md",
+      "line": 21,
+      "kind": "项通过",
+      "numbers": [
+        "328"
+      ],
+      "text": "| V1 | L1 | 主测试套件 | **328 项通过** | `python -m unittest discover tests`；`tools/release_status.py` |",
+      "claimed": 328
+    },
+    {
+      "file": "EVIDENCE-INDEX.md",
+      "line": 35,
+      "kind": "N/M",
+      "numbers": [
+        "288",
+        "288"
+      ],
+      "text": "3. **V4 的 288/288 不等于 V8 变 1**：前者是别人写的语料驱动我们的实现，后者是别人跑我们的节点并回传；两类主张不能互换。",
+      "claimed": 288
+    },
+    {
+      "file": "EVIDENCE-INDEX.md",
+      "line": 35,
+      "kind": "N/M",
+      "numbers": [
+        "288",
+        "288"
+      ],
+      "text": "3. **V4 的 288/288 不等于 V8 变 1**：前者是别人写的语料驱动我们的实现，后者是别人跑我们的节点并回传；两类主张不能互换。",
+      "claimed": 288
+    },
+    {
+      "file": "INTEROP-REGISTRY.md",
+      "line": 11,
+      "kind": "N/M",
+      "numbers": [
+        "143",
+        "143"
+      ],
+      "text": "| 我们（本仓库） | — | 复现公开语料 143 个向量 | 143/143 | [PR #85](https://github.com/zhaoxinghua09-cell/uibc-core/pull/85)、`docs/AER1-REPLAY-FULL.md` |",
+      "claimed": 143
+    },
+    {
+      "file": "INTEROP-REGISTRY.md",
+      "line": 11,
+      "kind": "N/M",
+      "numbers": [
+        "143",
+        "143"
+      ],
+      "text": "| 我们（本仓库） | — | 复现公开语料 143 个向量 | 143/143 | [PR #85](https://github.com/zhaoxinghua09-cell/uibc-core/pull/85)、`docs/AER1-REPLAY-FULL.md` |",
+      "claimed": 143
+    },
+    {
+      "file": "README.en.md",
+      "line": 57,
+      "kind": "N tests",
+      "numbers": [
+        "549"
+      ],
+      "text": "python -m unittest discover tests           # full suite, 549 cases (verified: `Ran 549 tests, OK (skipped=2)` with `.[verify,interop]`; `skipped=16` without it",
+      "claimed": 549
+    },
+    {
+      "file": "README.md",
+      "line": 26,
+      "kind": "N tests",
+      "numbers": [
+        "549"
+      ],
+      "text": "**Current state, including what we are short of:** 549 tests green on Linux / Python 3.12 (2 skipped with `.[verify,interop]`; it was 16 before that extra exist",
+      "claimed": 549
+    },
+    {
+      "file": "README.md",
+      "line": 37,
+      "kind": "tests passed",
+      "numbers": [
+        "288"
+      ],
+      "text": "| result | **288 vectors, 288 pass, 0 fail** · `rail: external` · `vectorsExecuted 288 of 288` · `suiteRefusals 0` · `reasonParityMismatch 0` |",
+      "claimed": 288
+    },
+    {
+      "file": "README.md",
+      "line": 48,
+      "kind": "N tests",
+      "numbers": [
+        "549"
+      ],
+      "text": "python -m unittest discover -s tests -p \"test_*.py\"        # 549 tests (Linux / Python 3.12, 2 skipped with .[verify,interop])",
+      "claimed": 549
+    },
+    {
+      "file": "README.md",
+      "line": 146,
+      "kind": "N tests",
+      "numbers": [
+        "549"
+      ],
+      "text": "> Reproduce: `python -m unittest discover -s tests -p \"test_*.py\"` (549 tests, Linux / Python 3.12) · `python independent_verifier/cross_check.py`.",
+      "claimed": 549
+    },
+    {
+      "file": "README.md",
+      "line": 255,
+      "kind": "N tests",
+      "numbers": [
+        "549"
+      ],
+      "text": "python -m unittest discover -s tests -p \"test_*.py\"   # 全量 549 用例（实测 `Ran 549 tests in ~42s, OK (skipped=2)`，Linux / Python 3.12.11，已装 `.[verify,interop]`；未装该 e",
+      "claimed": 549
+    }
+  ],
+  "claims": [
+    {
+      "file": "AGENTS.md",
+      "line": 34,
+      "kind": "N tests",
+      "numbers": [
+        "549"
+      ],
+      "text": "python -m unittest discover tests         # 549 tests，改动必跑（CI ci.yml 同逻辑）"
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 151,
+      "kind": "N tests",
+      "numbers": [
+        "529"
+      ],
+      "text": "- **529 tests green** (2 skipped), `check_doc_facts` 0 mismatches, second"
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 152,
+      "kind": "N/M",
+      "numbers": [
+        "36",
+        "36"
+      ],
+      "text": "implementation agrees on 36/36 cases with 30 named."
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 194,
+      "kind": "N OK",
+      "numbers": [
+        "527"
+      ],
+      "text": "- **They all pass once installed** (`527 OK (skipped=2)`, 42.4 s). Nothing in"
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 216,
+      "kind": "N/M",
+      "numbers": [
+        "36",
+        "36"
+      ],
+      "text": "re-checkability (second implementation, CI agreement assertion at 36/36,"
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 226,
+      "kind": "N/M",
+      "numbers": [
+        "000",
+        "20"
+      ],
+      "text": "measured at 100 / 1,000 / 5,000 / 20,000 evidence files. Python: 0.007 / 0.055 /"
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 233,
+      "kind": "N/M",
+      "numbers": [
+        "36",
+        "36"
+      ],
+      "text": "contradicting it in the one place the 36/36 conformance agreement never looked,"
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 416,
+      "kind": "N/M",
+      "numbers": [
+        "36",
+        "36"
+      ],
+      "text": "- Python: `strict 36/36   refused 30/36`"
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 416,
+      "kind": "N/M",
+      "numbers": [
+        "30",
+        "36"
+      ],
+      "text": "- Python: `strict 36/36   refused 30/36`"
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 417,
+      "kind": "N/M",
+      "numbers": [
+        "36",
+        "36"
+      ],
+      "text": "- JavaScript: `strict 36/36   refused 30/36`"
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 417,
+      "kind": "N/M",
+      "numbers": [
+        "30",
+        "36"
+      ],
+      "text": "- JavaScript: `strict 36/36   refused 30/36`"
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 498,
+      "kind": "N/M",
+      "numbers": [
+        "36",
+        "36"
+      ],
+      "text": "- Python: `strict 36/36   refused 30/36`"
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 498,
+      "kind": "N/M",
+      "numbers": [
+        "30",
+        "36"
+      ],
+      "text": "- Python: `strict 36/36   refused 30/36`"
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 499,
+      "kind": "N/M",
+      "numbers": [
+        "19",
+        "36"
+      ],
+      "text": "- JavaScript: `strict 19/36   refused 30/36`"
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 499,
+      "kind": "N/M",
+      "numbers": [
+        "30",
+        "36"
+      ],
+      "text": "- JavaScript: `strict 19/36   refused 30/36`"
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 553,
+      "kind": "N/M",
+      "numbers": [
+        "16",
+        "34"
+      ],
+      "text": "- **An independent JavaScript verifier** (`tools/verify-js/verify.mjs`): Node standard library only, no import of `uibc-core`, no npm package. It decides seven "
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 553,
+      "kind": "N/M",
+      "numbers": [
+        "29",
+        "34"
+      ],
+      "text": "- **An independent JavaScript verifier** (`tools/verify-js/verify.mjs`): Node standard library only, no import of `uibc-core`, no npm package. It decides seven "
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 560,
+      "kind": "N tests",
+      "numbers": [
+        "305"
+      ],
+      "text": "- **The docs/ pages that describe the present now have to stay true.** `tools/check_doc_facts.py` scanned six top-level files; `docs/CONFORMANCE.md` said 305 te"
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 560,
+      "kind": "N tests",
+      "numbers": [
+        "305"
+      ],
+      "text": "- **The docs/ pages that describe the present now have to stay true.** `tools/check_doc_facts.py` scanned six top-level files; `docs/CONFORMANCE.md` said 305 te"
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 566,
+      "kind": "N/M",
+      "numbers": [
+        "29",
+        "29"
+      ],
+      "text": "- **Five positive vectors in the conformance suite**, so it measures correctness instead of pessimism. Twenty-nine packages had to be refused and nothing had to"
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 568,
+      "kind": "N/M",
+      "numbers": [
+        "34",
+        "34"
+      ],
+      "text": "- `tests/test_conformance.py` asserts that a verifier refusing everything fails every positive case. Measured: always-PASS 5/34, always-FAIL naming S1 1/34, cur"
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 568,
+      "kind": "N/M",
+      "numbers": [
+        "29",
+        "34"
+      ],
+      "text": "- `tests/test_conformance.py` asserts that a verifier refusing everything fails every positive case. Measured: always-PASS 5/34, always-FAIL naming S1 1/34, cur"
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 568,
+      "kind": "N/M",
+      "numbers": [
+        "34",
+        "34"
+      ],
+      "text": "- `tests/test_conformance.py` asserts that a verifier refusing everything fails every positive case. Measured: always-PASS 5/34, always-FAIL naming S1 1/34, cur"
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 568,
+      "kind": "N/M",
+      "numbers": [
+        "29",
+        "34"
+      ],
+      "text": "- `tests/test_conformance.py` asserts that a verifier refusing everything fails every positive case. Measured: always-PASS 5/34, always-FAIL naming S1 1/34, cur"
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 578,
+      "kind": "N tests",
+      "numbers": [
+        "122"
+      ],
+      "text": "- **The paper's own numbers were wrong in three places.** `paper/paper.md` claimed 122 tests (507 run), \"three modules\" within 24 files (25), and \"zero-dependen"
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 578,
+      "kind": "N tests",
+      "numbers": [
+        "507"
+      ],
+      "text": "- **The paper's own numbers were wrong in three places.** `paper/paper.md` claimed 122 tests (507 run), \"three modules\" within 24 files (25), and \"zero-dependen"
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 599,
+      "kind": "N/M",
+      "numbers": [
+        "29",
+        "29"
+      ],
+      "text": "- **Conformance suite.** 29 packages, each correct and then broken in exactly one way, with the checks a verifier must report. `tools/run_conformance.py --verif"
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 702,
+      "kind": "N/M",
+      "numbers": [
+        "288",
+        "288"
+      ],
+      "text": "reuses `uibc_core.merkle`. Corpus result at build time: 288/288"
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 807,
+      "kind": "N tests",
+      "numbers": [
+        "16"
+      ],
+      "text": "- `tests/test_fixture_expectations.py` (16 tests) and"
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 808,
+      "kind": "N tests",
+      "numbers": [
+        "19"
+      ],
+      "text": "`tests/test_memory_fixtures.py` (19 tests) — gate tests in both directions"
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 901,
+      "kind": "N tests",
+      "numbers": [
+        "15"
+      ],
+      "text": "path-traversal rejection. 15 tests."
+    },
+    {
+      "file": "EVIDENCE-INDEX.md",
+      "line": 21,
+      "kind": "项通过",
+      "numbers": [
+        "328"
+      ],
+      "text": "| V1 | L1 | 主测试套件 | **328 项通过** | `python -m unittest discover tests`；`tools/release_status.py` |"
+    },
+    {
+      "file": "EVIDENCE-INDEX.md",
+      "line": 35,
+      "kind": "N/M",
+      "numbers": [
+        "288",
+        "288"
+      ],
+      "text": "3. **V4 的 288/288 不等于 V8 变 1**：前者是别人写的语料驱动我们的实现，后者是别人跑我们的节点并回传；两类主张不能互换。"
+    },
+    {
+      "file": "INTEROP-REGISTRY.md",
+      "line": 11,
+      "kind": "N/M",
+      "numbers": [
+        "143",
+        "143"
+      ],
+      "text": "| 我们（本仓库） | — | 复现公开语料 143 个向量 | 143/143 | [PR #85](https://github.com/zhaoxinghua09-cell/uibc-core/pull/85)、`docs/AER1-REPLAY-FULL.md` |"
+    },
+    {
+      "file": "README.en.md",
+      "line": 57,
+      "kind": "N tests",
+      "numbers": [
+        "549"
+      ],
+      "text": "python -m unittest discover tests           # full suite, 549 cases (verified: `Ran 549 tests, OK (skipped=2)` with `.[verify,interop]`; `skipped=16` without it"
+    },
+    {
+      "file": "README.md",
+      "line": 26,
+      "kind": "N tests",
+      "numbers": [
+        "549"
+      ],
+      "text": "**Current state, including what we are short of:** 549 tests green on Linux / Python 3.12 (2 skipped with `.[verify,interop]`; it was 16 before that extra exist"
+    },
+    {
+      "file": "README.md",
+      "line": 37,
+      "kind": "tests passed",
+      "numbers": [
+        "288"
+      ],
+      "text": "| result | **288 vectors, 288 pass, 0 fail** · `rail: external` · `vectorsExecuted 288 of 288` · `suiteRefusals 0` · `reasonParityMismatch 0` |"
+    },
+    {
+      "file": "README.md",
+      "line": 48,
+      "kind": "N tests",
+      "numbers": [
+        "549"
+      ],
+      "text": "python -m unittest discover -s tests -p \"test_*.py\"        # 549 tests (Linux / Python 3.12, 2 skipped with .[verify,interop])"
+    },
+    {
+      "file": "README.md",
+      "line": 146,
+      "kind": "N tests",
+      "numbers": [
+        "549"
+      ],
+      "text": "> Reproduce: `python -m unittest discover -s tests -p \"test_*.py\"` (549 tests, Linux / Python 3.12) · `python independent_verifier/cross_check.py`."
+    },
+    {
+      "file": "README.md",
+      "line": 255,
+      "kind": "N tests",
+      "numbers": [
+        "549"
+      ],
+      "text": "python -m unittest discover -s tests -p \"test_*.py\"   # 全量 549 用例（实测 `Ran 549 tests in ~42s, OK (skipped=2)`，Linux / Python 3.12.11，已装 `.[verify,interop]`；未装该 e"
+    }
+  ]
+}

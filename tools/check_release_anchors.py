@@ -264,17 +264,24 @@ def verify_dir(directory, tag="v0.4.1"):
             lines.append("signed_at    no timestamp on the signature: the publisher is "
                          "identified, the time is only asserted")
             return 0, lines
-        tok_code, tok_out = _verify_token(tok, held, ca)
+        # Measured 2026-11-21 on main: this branch verified the token against the
+        # signature file, and printed "the timestamp on the signature does not verify",
+        # because the stored token attests the digest, not the .sig (ATTESTATION.json:
+        # `timestamp_on_the_digest`). A token checked against the wrong bytes fails for a
+        # reason that is ours, so the reader is told the witness is broken when it is not.
+        tok_code, tok_out = _verify_token(tok, os.path.join(os.path.dirname(held),
+                                                            "CORPUS-DIGESTS.txt"), ca)
         if tok_code is None:
             return 3, lines + ["could not run the timestamp verifier: %s" % tok_out]
         tok_blob = _json_block(tok_out)
         if tok_code != 0 or not tok_blob or not tok_blob.get("verified"):
             problems = (tok_blob or {}).get("problems") or ["token does not verify"]
-            return 1, lines + ["the timestamp on the signature does not verify: %s"
+            return 1, lines + ["the timestamp on the digest does not verify: %s"
                                % "; ".join(map(str, problems))]
         info = tok_blob.get("info") or {}
         gen = str(info.get("gen_time", ""))
-        lines.append("signed_at    %s, attested by a third party (serial %s)"
+        lines.append("signed_at    %s, attested by a third party (serial %s); the token "
+                     "covers the digest, not the signature file"
                      % (gen, info.get("serial")))
         frozen = None
         pin_path = os.path.join(ROOT, "anchors", "pins", "uibc-release-%s.json" % tag)

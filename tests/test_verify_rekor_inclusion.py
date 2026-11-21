@@ -105,7 +105,10 @@ BODIES = [json.dumps({"kind": "hashedrekord", "n": i}, separators=(",", ":")).en
 def test_correct_leaf_and_index_verify(mod):
     entry = make_entry(BODIES, 3)
     out = mod.check_entry(entry)
-    assert out["verified"] is True
+    # 三值契约：没有日志公钥时签名无法判定，只能是 inconclusive，
+    # 不能因为"没查出问题"就报 verified（这正是 2026-11-21 修掉的 fail-open）
+    assert out["conclusion"] == "inconclusive"
+    assert out["verified"] is False
     assert out["folds_against"]["proof_log_index"]["match"] is True
     assert out["checkpoint"]["root_equals_proof_root"] is True
 
@@ -127,7 +130,8 @@ def test_entry_index_is_not_the_proof_index(mod):
     """
     entry = make_entry(BODIES, 3, entry_index=2)
     out = mod.check_entry(entry)
-    assert out["verified"] is True
+    assert out["conclusion"] == "inconclusive"   # 签名未查，故不是 verified
+    assert out["verified"] is False
     assert out["folds_against"]["proof_log_index"]["match"] is True
     assert out["folds_against"]["entry_log_index"]["match"] is False
 
@@ -199,7 +203,9 @@ def test_unsigned_checkpoint_is_reported_not_assumed(mod, log_key):
     entry = make_entry(BODIES, 3)
     out = mod.check_entry(entry)
     assert out["checkpoint"]["signature_verified"] is None
-    assert out["verified"] is True
+    assert out["conclusion"] == "inconclusive"
+    assert out["verified"] is False
+    assert mod._exit_for(out) == 3
 
 
 def test_a_forged_checkpoint_signature_is_caught(mod, log_key):

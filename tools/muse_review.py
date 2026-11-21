@@ -4,10 +4,10 @@
 
 原则（与 LGD-Eval 一致）：给评审方的是**可核验的事实包**，不是我们的结论。
 - 声明：只放 README 级窄声明 + 本轮实测数字；
-- 证据：五套脚本的机器可读结果摘要 + 红队 11 条 + 引用可达性 + 外人实跑；
+- 证据：五套脚本的机器可读结果摘要 + 红队用例（条数由结果 JSON 现算）+ 引用可达性 + 外人实跑；
 - 缺陷：把我们自己承认的阻断项原样列出，不美化。
 
-key 只在内存里，不打印、不落盘。
+key 只在内存里，不打印、不落盘；路径可用环境变量 `MUSE_KEY_FILE` 覆盖。
 用法： python tools/muse_review.py
 产出： <session>/发布前审查_Muse终审_20261117.md
 """
@@ -19,7 +19,7 @@ import urllib.request
 
 OUT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                    "tools", "out")
-KEY_PATH = r"D:\标准\新建文本文档.txt"
+KEY_PATH = os.environ.get("MUSE_KEY_FILE", r"D:\标准\新建文本文档.txt")
 API_URL = "https://api.siliconflow.cn/v1/chat/completions"
 MODEL = "deepseek-ai/DeepSeek-V3"
 RECEIPT = (r"C:\Users\SZYL\Doubao\chats\2026-11-17\new-chat-7"
@@ -69,30 +69,53 @@ def build_packet():
     lines.append("- COSE_Sign1 互验：%s/%s PASS（含 alg=-19 手工路径；主流库 pycose "
                  "拒绝 -19）" % (cose.get("summary", {}).get("pass"),
                                  cose.get("summary", {}).get("total")))
-    lines.append("- 红队 11 条（外部攻击视角）：")
+    lines.append("- 红队 %d 条（外部攻击视角；数字由 redteam_result.json 现算，不写死）："
+                 % len(rt_rows))
     for r in rt_rows:
         lines.append("  - %s %s → %s%s" % (
             r["id"], r["case"], r["result"],
             (" [" + ",".join(r["failed_checks"]) + "]" if r["failed_checks"] else "")))
-    lines.append("- 引用直达性：%s/%s 条现场取回 200；2 条为本机网络限制"
-                 "（其中 GitHub 仓库已 git clone 成功、EIP-8004 由服务端取回）。" % (
-                     cit_meta.get("reachable"), cit_meta.get("checked")))
+    lines.append("- 引用直达性：%s/%s 条现场取回（非 200 的 %s 条为站点反爬、%s 条为超时；"
+                 "超时项在另一网络可回 200，链接本身未变）。" % (
+                     cit_meta.get("reachable"), cit_meta.get("checked"),
+                     cit_meta.get("blocked"), cit_meta.get("unreachable")))
     lines.append("- EP-AEC 组链适配：%s" % (epaec.get("summary", {})))
     lines.append("- 门禁 PoC：%s" % (guard.get("summary", {}).get("ok")))
     lines.append("- 外人实跑（干净 venv，只给仓库）：本地树 %s；GitHub 公开仓 %s"
                  % (loc_runs, pub_runs))
     lines.append("")
     lines.append("## C. 我们自己承认的阻断项（不美化）")
-    lines.append("1. 公开 GitHub 仓库**不包含**本轮的 S7/S8/S9、21 类基准、COSE 互验、"
-                 "红队、门禁 PoC —— 外人现在 clone 到的是旧版本；")
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    wanted = ["tools/redteam_suite.py", "tools/mutation_benchmark.py",
+              "tools/cose_sign1_interop.py", "tools/guardrail_shim.py",
+              "tools/uibc_to_epaec.py", "tools/external_node_check.py",
+              "tools/check_citations.py", "docs/KNOWN-LIMITS.md"]
+    present = [w for w in wanted if os.path.exists(os.path.join(root, w))]
+    missing = [w for w in wanted if w not in present]
+    snap = []
+    for name in ("redteam_result.json", "citations_result.json",
+                 "mutation_benchmark.json", "external_node_result.json"):
+        p = os.path.join(OUT, name)
+        if os.path.exists(p):
+            import hashlib
+            h = hashlib.sha256(open(p, "rb").read()).hexdigest()[:12]
+            snap.append("%s(%d B, sha256:%s)" % (name, os.path.getsize(p), h))
+    lines.append("1. 公开仓库内的可复跑件：%d/%d 在库（%s）；缺：%s。评审看到的数字全部"
+                 "取自库内已提交的结果快照：%s —— 快照若未随套件刷新，读者看到的就是旧数字，"
+                 "这一点本身也是缺陷。" % (
+                     len(present), len(wanted), "、".join(present),
+                     "、".join(missing) if missing else "无", "；".join(snap)))
     lines.append("2. 从干净 clone 读 SPEC_VERSION 得到 `uibc-core/0.0.0-proposal`"
                  "（版本号依赖已安装的 dist 元数据）；")
     lines.append("3. 无独立见证人/透明日志联署，最强的锚定也只到 anchored，"
-                 "达不到 1F916 的 witnessed；")
+                 "达不到 1F916 的 witnessed；与 EP-AEC-02 的链式见证差距见 "
+                 "`docs/SPEC-PROPOSAL-v0.1.md` §5。")
     lines.append("4. 整包回滚只有带外 head 才查得到（S9），包内无法自证；")
-    lines.append("5. Windows 下未测符号链接逃逸（权限受限，记为未测而非通过）；")
+    lines.append("5. Windows 下未测符号链接逃逸（权限受限，记为未测而非通过）；"
+                 "Windows 干净克隆另有 2 例测试平台相关异常，名字见 `docs/KNOWN-LIMITS.md`。")
     lines.append("6. 只改行尾（CRLF）会被判 FAIL —— 哈希敏感的硬化代价，"
-                 "对「无害重排版」是误报。")
+                 "对「无害重排版」是误报；已列入 `docs/KNOWN-LIMITS.md` 第 1 条，"
+                 "处置是「不改判据、只标注」，不是「已修复」。")
     lines.append("")
     lines.append("## D. 要你回答的四件事")
     lines.append("1) 以 IETF/国际组织审阅者的眼光：以上 B 的事实，是否足以支撑 C 里"

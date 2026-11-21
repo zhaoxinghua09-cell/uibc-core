@@ -2,33 +2,33 @@
   "schema": "uibc-core/0.2.2-proposal",
   "events": [
     {
-      "event_id": "1bdbd77d-88f7-4661-9665-cec8fffc25e8",
+      "event_id": "9222e4cc-3f40-4229-9cc5-5e0bf61ec7cc",
       "event_type": "REGISTER",
       "agent_id": "fx-agent-001",
-      "timestamp": "2026-09-18T12:59:07Z",
+      "timestamp": "2026-11-06T06:21:02Z",
       "actor": "fixture-owner",
       "payload_hash": null,
       "previous_event": null,
       "signature": null
     },
     {
-      "event_id": "63612d2f-1ed4-4c7c-9176-b7449fd89a5e",
+      "event_id": "884963a6-8d8a-4530-8f21-b9bf31c00b9c",
       "event_type": "ACTIVATE",
       "agent_id": "fx-agent-001",
-      "timestamp": "2026-09-18T12:59:07Z",
+      "timestamp": "2026-11-06T06:21:02Z",
       "actor": "fixture-owner",
       "payload_hash": null,
-      "previous_event": "1bdbd77d-88f7-4661-9665-cec8fffc25e8",
+      "previous_event": "9222e4cc-3f40-4229-9cc5-5e0bf61ec7cc",
       "signature": null
     },
     {
-      "event_id": "73aedcf5-0585-4957-9b38-d96fecc27216",
+      "event_id": "18104797-8784-442e-82a3-0562e7f3ba48",
       "event_type": "UPDATE",
       "agent_id": "fx-agent-001",
-      "timestamp": "2026-09-18T12:59:07Z",
+      "timestamp": "2026-11-06T06:21:02Z",
       "actor": "fixture-owner",
       "payload_hash": null,
-      "previous_event": "63612d2f-1ed4-4c7c-9176-b7449fd89a5e",
+      "previous_event": "884963a6-8d8a-4530-8f21-b9bf31c00b9c",
       "signature": null
     }
   ]

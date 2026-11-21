@@ -1,0 +1,1176 @@
+
+
+
+
+Network Working Group                                J. A. Gomes Marques
+Internet-Draft                                                     Asqav
+Intended status: Informational                                5 May 2026
+Expires: 6 November 2026
+
+
+       Compliance Profile of Signed Action Receipts for AI Agents
+               draft-marques-asqav-compliance-receipts-01
+
+Abstract
+
+   This document defines a compliance profile of the signed action
+   receipt format used by AI agents to record machine-readable evidence
+   of access-control decisions.  The profile binds receipt fields to the
+   operational record-keeping obligations of Articles 12 and 26 of
+   Regulation (EU) 2024/1689 (the EU AI Act) and to the ICT-related
+   incident management requirements of Article 17 of Regulation (EU)
+   2022/2554 (DORA).  It does not redefine the wire format, the
+   canonicalization rule, or the signing algorithms of the underlying
+   receipt format.  It tightens a subset of the OPTIONAL fields to
+   REQUIRED, imposes a retention floor, mandates two-anchor
+   timestamping, and adds two extension fields.
+
+Status of This Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF).  Note that other groups may also distribute
+   working documents as Internet-Drafts.  The list of current Internet-
+   Drafts is at https://datatracker.ietf.org/drafts/current/.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   This Internet-Draft will expire on 6 November 2026.
+
+Copyright Notice
+
+   Copyright (c) 2026 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+
+
+
+
+
+
+Gomes Marques            Expires 6 November 2026                [Page 1]
+
+Internet-Draft         Compliance Receipts Profile              May 2026
+
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents (https://trustee.ietf.org/
+   license-info) in effect on the date of publication of this document.
+   Please review these documents carefully, as they describe your rights
+   and restrictions with respect to this document.
+
+Table of Contents
+
+   1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   3
+     1.1.  Profile, Not Fork . . . . . . . . . . . . . . . . . . . .   3
+     1.2.  Scope . . . . . . . . . . . . . . . . . . . . . . . . . .   4
+     1.3.  Why a Profile is Required . . . . . . . . . . . . . . . .   4
+   2.  Conventions and Definitions . . . . . . . . . . . . . . . . .   5
+   3.  Relationship to ACTA-RECEIPTS . . . . . . . . . . . . . . . .   5
+   4.  Receipt Field Profile . . . . . . . . . . . . . . . . . . . .   6
+     4.1.  Common Payload Fields . . . . . . . . . . . . . . . . . .   6
+       4.1.1.  type  . . . . . . . . . . . . . . . . . . . . . . . .   6
+       4.1.2.  issued_at . . . . . . . . . . . . . . . . . . . . . .   7
+       4.1.3.  issuer_id . . . . . . . . . . . . . . . . . . . . . .   7
+       4.1.4.  payload_digest (OPTIONAL upstream, REQUIRED in this
+               profile)  . . . . . . . . . . . . . . . . . . . . . .   7
+       4.1.5.  action_ref (OPTIONAL upstream, REQUIRED in this
+               profile)  . . . . . . . . . . . . . . . . . . . . . .   7
+       4.1.6.  sandbox_state (OPTIONAL upstream, REQUIRED for
+               High-Risk in this profile)  . . . . . . . . . . . . .   7
+       4.1.7.  iteration_id (OPTIONAL upstream, REQUIRED for
+               multi-step in this profile) . . . . . . . . . . . . .   8
+     4.2.  Decision Receipt Fields (type protectmcp:decision)  . . .   8
+       4.2.1.  reason (OPTIONAL upstream, REQUIRED for deny/rate_limit
+               in this profile)  . . . . . . . . . . . . . . . . . .   8
+       4.2.2.  policy_digest (OPTIONAL upstream, REQUIRED in this
+               profile)  . . . . . . . . . . . . . . . . . . . . . .   8
+     4.3.  Hash-Chain Linkage (OPTIONAL upstream, REQUIRED in this
+           profile)  . . . . . . . . . . . . . . . . . . . . . . . .   8
+     4.4.  Anchoring (No Upstream Equivalent)  . . . . . . . . . . .   9
+     4.5.  Extension Fields  . . . . . . . . . . . . . . . . . . . .   9
+   5.  EU AI Act Article 12 Binding  . . . . . . . . . . . . . . . .  10
+     5.1.  Article 12(1), automatic recording of events  . . . . . .  10
+     5.2.  Article 12(2)(a), identify situations that may present a
+           risk  . . . . . . . . . . . . . . . . . . . . . . . . . .  10
+     5.3.  Article 12(2)(b), facilitate the post-market
+           monitoring  . . . . . . . . . . . . . . . . . . . . . . .  10
+     5.4.  Article 12(2)(c), monitor the operation . . . . . . . . .  11
+     5.5.  Retention . . . . . . . . . . . . . . . . . . . . . . . .  11
+   6.  EU AI Act Article 26 Binding  . . . . . . . . . . . . . . . .  11
+     6.1.  Article 26(1), in accordance with the instructions for
+           use . . . . . . . . . . . . . . . . . . . . . . . . . . .  11
+     6.2.  Article 26(2), ensure human oversight . . . . . . . . . .  11
+
+
+
+Gomes Marques            Expires 6 November 2026                [Page 2]
+
+Internet-Draft         Compliance Receipts Profile              May 2026
+
+
+     6.3.  Article 26(5), monitor the operation  . . . . . . . . . .  11
+     6.4.  Article 26(6), keep the logs for at least six months  . .  11
+   7.  DORA Article 17 Binding . . . . . . . . . . . . . . . . . . .  11
+     7.1.  Article 17(1), ICT-related incident management process  .  12
+     7.2.  Article 17(2), classify ICT-related incidents . . . . . .  12
+     7.3.  Article 17(3), records of all ICT-related incidents . . .  12
+     7.4.  Retention . . . . . . . . . . . . . . . . . . . . . . . .  12
+   8.  Audit Pack Composition  . . . . . . . . . . . . . . . . . . .  12
+   9.  Verifier Behaviour  . . . . . . . . . . . . . . . . . . . . .  13
+     9.1.  Mandatory Checks  . . . . . . . . . . . . . . . . . . . .  13
+     9.2.  Optional Checks . . . . . . . . . . . . . . . . . . . . .  14
+     9.3.  Reporting . . . . . . . . . . . . . . . . . . . . . . . .  14
+   10. Security Considerations . . . . . . . . . . . . . . . . . . .  15
+     10.1.  Tamper Resistance  . . . . . . . . . . . . . . . . . . .  15
+     10.2.  Key Compromise . . . . . . . . . . . . . . . . . . . . .  15
+     10.3.  Retention and Long-Term Verifiability  . . . . . . . . .  15
+     10.4.  Privacy  . . . . . . . . . . . . . . . . . . . . . . . .  16
+     10.5.  Anchor Trust . . . . . . . . . . . . . . . . . . . . . .  16
+     10.6.  Replay . . . . . . . . . . . . . . . . . . . . . . . . .  16
+     10.7.  Cross-Regime Conflict  . . . . . . . . . . . . . . . . .  16
+     10.8.  Algorithm Agility  . . . . . . . . . . . . . . . . . . .  17
+   11. IANA Considerations . . . . . . . . . . . . . . . . . . . . .  17
+     11.1.  Compliance Receipt Extension Fields Registry . . . . . .  17
+     11.2.  Compliance Receipt Type Namespaces Registry  . . . . . .  18
+   12. Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  18
+   13. Normative References  . . . . . . . . . . . . . . . . . . . .  18
+   14. Informative References  . . . . . . . . . . . . . . . . . . .  19
+   Worked Example (Informative)  . . . . . . . . . . . . . . . . . .  20
+   Change Log  . . . . . . . . . . . . . . . . . . . . . . . . . . .  21
+     draft-marques-asqav-compliance-receipts-01  . . . . . . . . . .  21
+     draft-marques-asqav-compliance-receipts-00  . . . . . . . . . .  21
+   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .  21
+
+1.  Introduction
+
+1.1.  Profile, Not Fork
+
+   [ACTA-RECEIPTS] specifies a generic, signed receipt envelope for
+   recording machine-to-machine access control decisions made by AI
+   agents.  Section 2.2 of [ACTA-RECEIPTS] defines a common payload
+   field set in which all fields except type, issued_at, and issuer_id
+   are OPTIONAL.  Section 5.7 of [ACTA-RECEIPTS] introduces hash
+   chaining (previousReceiptHash) inside an optional Commitment Mode
+   extension.  [ACTA-RECEIPTS] does not define receipt retention, does
+   not require timestamping anchors, and does not bind to any regulatory
+   regime.
+
+   The author considered three options for this document.
+
+
+
+Gomes Marques            Expires 6 November 2026                [Page 3]
+
+Internet-Draft         Compliance Receipts Profile              May 2026
+
+
+   *  Option A, regulation-mapping informational doc only.  Rejected
+      because regulators do not, in practice, accept log records whose
+      semantics are negotiated bilaterally; field-level constraints are
+      needed.
+
+   *  Option B, fork-and-extend with a new wire format.  Rejected
+      because the [ACTA-RECEIPTS] envelope is sufficient for the
+      bindings in this document; a fork would fragment the small
+      ecosystem.
+
+   *  Option C, additive profile.  Adopted.  This document constrains
+      fields that [ACTA-RECEIPTS] leaves OPTIONAL, fixes their values
+      where regulation requires, and adds two extension fields with
+      reserved names.  The profile remains an additive overlay: a
+      Compliance Receipt is also a conformant [ACTA-RECEIPTS] receipt.
+
+   This document tracks [ACTA-RECEIPTS] revisions.  Field references in
+   this profile use upstream field names rather than upstream section
+   numbers wherever possible, to reduce the maintenance hazard if
+   upstream re-numbers sections in a future revision.
+
+1.2.  Scope
+
+   This document fills the regulatory binding gap for three obligations:
+   Article 12 (record-keeping) and Article 26 (deployer obligations) of
+   the EU AI Act, and Article 17 (ICT-related incident management) of
+   DORA.
+
+   A receipt that conforms to this profile is also a conformant
+   [ACTA-RECEIPTS] receipt.  A verifier that implements only
+   [ACTA-RECEIPTS] can still cryptographically validate a profile
+   receipt but cannot attest the additional compliance bindings.
+
+1.3.  Why a Profile is Required
+
+   Regulators and auditors do not accept log records whose semantics are
+   negotiated bilaterally between provider and deployer.  The records
+   must be machine-checkable, with field-level constraints that a third
+   party can verify without access to the provider's internal
+   documentation.  [ACTA-RECEIPTS] provides the wire format.  This
+   profile provides the field-level constraints, the retention floor,
+   the anchoring requirement, and the regime mapping.
+
+
+
+
+
+
+
+
+
+Gomes Marques            Expires 6 November 2026                [Page 4]
+
+Internet-Draft         Compliance Receipts Profile              May 2026
+
+
+2.  Conventions and Definitions
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+   "OPTIONAL" in this document are to be interpreted as described in BCP
+   14 [RFC2119] [RFC8174] when, and only when, they appear in all
+   capitals, as shown here.
+
+   The following terms are used in this document.
+
+   Action:  An operation performed by an AI agent that is subject to a
+      policy evaluation.  Examples include a tool invocation, an
+      external API call, a write to durable storage, and the issuance of
+      an irreversible instruction to another system.
+
+   Action Receipt:  A signed envelope conforming to [ACTA-RECEIPTS] that
+      records the policy evaluation result for a single Action.
+
+   Compliance Receipt:  An Action Receipt that additionally satisfies
+      the requirements of this profile.
+
+   Deployer:  As defined in Article 3(4) of [EU-AI-ACT].
+
+   High-Risk AI System:  As defined in Article 6 of [EU-AI-ACT].
+
+   Financial Entity:  As defined in Article 2(1) of [DORA].
+
+   Anchor:  An attestation by an independent timestamping or
+      transparency log that a given receipt or batch of receipts existed
+      at a point in time.  Anchors covered by this profile are RFC 3161
+      timestamp tokens [RFC3161] and OpenTimestamps [OPENTIMESTAMPS]
+      commitments.
+
+   Audit Pack:  A bundle of Compliance Receipts, the chain commitments
+      that link them, the public verification keys, the trust anchor
+      metadata, and the regime mapping required by Sections 5 through 7
+      of this document, packaged for delivery to a regulator or auditor.
+
+3.  Relationship to ACTA-RECEIPTS
+
+   This profile is an additive overlay on [ACTA-RECEIPTS].  It does not
+   modify the envelope, the canonicalization rule, the signature object,
+   or the algorithm registry of [ACTA-RECEIPTS].
+
+   The following normative statements apply.
+
+   *  Implementations of this profile MUST produce receipts that are
+      byte-for-byte verifiable by a conformant [ACTA-RECEIPTS] verifier.
+
+
+
+Gomes Marques            Expires 6 November 2026                [Page 5]
+
+Internet-Draft         Compliance Receipts Profile              May 2026
+
+
+   *  Implementations of this profile MUST NOT introduce new top-level
+      fields in the signed payload that conflict with names reserved by
+      [ACTA-RECEIPTS].
+
+   *  Implementations of this profile MAY use any signature algorithm
+      permitted by [ACTA-RECEIPTS], namely Ed25519 (mandatory-to-
+      implement), ES256, and ML-DSA-65.
+
+   *  Where [ACTA-RECEIPTS] marks a field OPTIONAL and this profile
+      marks the same field REQUIRED, the stricter requirement applies to
+      Compliance Receipts.
+
+   A receipt that fails any MUST clause of this profile is not a
+   Compliance Receipt.  It MAY still be a valid [ACTA-RECEIPTS] receipt.
+
+   This profile differentiates from [ACTA-RECEIPTS] on three axes:
+   mandatory hash-chain linkage (upstream Commitment Mode is OPTIONAL),
+   mandatory dual-anchoring with RFC 3161 and OpenTimestamps (upstream
+   mentions Sigstore Rekor only as informational), and a retention floor
+   tied to specific regulatory articles (upstream is silent on
+   retention).
+
+4.  Receipt Field Profile
+
+   This section enumerates fields defined by [ACTA-RECEIPTS] and states
+   the additional requirements that this profile places on them.  Field
+   names follow [ACTA-RECEIPTS] exactly.
+
+   The signed envelope MUST carry a signature projection at top level.
+   Implementations that already use the bare signature key for a base64
+   signature string MAY emit the projection under signatureObject
+   instead, with the same keys alg, kid, sig.  Anchors MUST be projected
+   into a top-level anchors array with a type discriminator and a value
+   field carrying the anchor bytes.  Flat-column implementations MUST
+   project on emission and Audit Pack export.
+
+4.1.  Common Payload Fields
+
+4.1.1.  type
+
+   Compliance Receipts MUST set type to a value drawn from the namespace
+   protectmcp:decision, protectmcp:restraint, or protectmcp:lifecycle,
+   or to an extension namespace registered for use with this profile.
+
+
+
+
+
+
+
+
+Gomes Marques            Expires 6 November 2026                [Page 6]
+
+Internet-Draft         Compliance Receipts Profile              May 2026
+
+
+4.1.2.  issued_at
+
+   REQUIRED upstream and in this profile.  The value MUST be an ISO 8601
+   timestamp with an explicit timezone.  The producing system MUST
+   source the value from a clock synchronized to a recognized time
+   authority and MUST NOT backdate the value.  Verifiers MUST reject
+   receipts whose issued_at is more than 300 seconds ahead of the
+   verifier's own clock.  Verifiers MUST NOT reject a receipt solely
+   because issued_at lies in the past; past skew is bounded by retention
+   (Section 5.5, Section 7.4), not freshness.  Historical receipts
+   within retention MUST verify on the same path as fresh ones.
+
+4.1.3.  issuer_id
+
+   REQUIRED upstream and in this profile.  The value MUST identify a
+   legal entity, not a natural person.  Where the producing system is
+   operated by a Deployer, the issuer_id MUST resolve, through the trust
+   anchor metadata in the Audit Pack, to a record naming the Deployer.
+
+4.1.4.  payload_digest (OPTIONAL upstream, REQUIRED in this profile)
+
+   REQUIRED for Compliance Receipts.  The associated payload that this
+   digest covers MUST be retained for the period mandated by the most
+   restrictive applicable regime in Sections 5 through 7 of this
+   document.  Implementations MUST NOT discard the underlying payload
+   while a receipt that references it is still within its retention
+   window.
+
+4.1.5.  action_ref (OPTIONAL upstream, REQUIRED in this profile)
+
+   REQUIRED for Compliance Receipts.  The value is a SHA-256 hash of the
+   canonical action representation as defined in [ACTA-RECEIPTS].  This
+   profile uses action_ref as the primary join key for cross-engine
+   reconstruction during an audit.
+
+4.1.6.  sandbox_state (OPTIONAL upstream, REQUIRED for High-Risk in this
+        profile)
+
+   REQUIRED for receipts produced by High-Risk AI Systems.  Upstream
+   defines sandbox_state as an OS-level containment status.  This
+   profile constrains the value to one of enabled, disabled, or
+   unavailable.  A Deployer that operates a High-Risk AI System and
+   produces a stream of receipts in which sandbox_state is consistently
+   disabled SHOULD treat that stream as a finding under Article 26 and
+   document the rationale in the Audit Pack metadata.
+
+
+
+
+
+
+Gomes Marques            Expires 6 November 2026                [Page 7]
+
+Internet-Draft         Compliance Receipts Profile              May 2026
+
+
+4.1.7.  iteration_id (OPTIONAL upstream, REQUIRED for multi-step in this
+        profile)
+
+   REQUIRED for multi-step agent workflows.  The value MUST be stable
+   across all receipts emitted within the same logical task or session
+   so that a regulator can reconstruct the full chain of Actions.
+   iteration_id is distinct from the upstream session_id field, which is
+   an opaque transport-layer session identifier.  A Compliance Receipt
+   MAY carry both: session_id for transport-level correlation and
+   iteration_id for logical-task correlation.
+
+4.2.  Decision Receipt Fields (type protectmcp:decision)
+
+   Wire value MUST be allow, deny, or rate_limit.  Implementations using
+   a different internal vocabulary (e.g. permit for allow) MUST
+   normalise on emission and on Audit Pack export.
+
+4.2.1.  reason (OPTIONAL upstream, REQUIRED for deny/rate_limit in this
+        profile)
+
+   REQUIRED for Compliance Receipts where decision is deny or
+   rate_limit.  The value MUST be a machine-readable reason code drawn
+   from a vocabulary documented in the Deployer's Audit Pack metadata.
+
+4.2.2.  policy_digest (OPTIONAL upstream, REQUIRED in this profile)
+
+   REQUIRED for Compliance Receipts.  The value MUST be of the form
+   sha256:<hex> and MUST reference a policy artefact that the Deployer
+   retains for the applicable retention window.  Verifiers MUST reject
+   Compliance Receipts whose policy_digest does not resolve in the Audit
+   Pack.
+
+4.3.  Hash-Chain Linkage (OPTIONAL upstream, REQUIRED in this profile)
+
+   Upstream Commitment Mode introduces previousReceiptHash as part of an
+   optional extension.  This profile makes the linkage REQUIRED.
+   Implementations MUST emit a previousReceiptHash field, populated as
+   specified by [ACTA-RECEIPTS] (lowercase hex SHA-256 of the JSON
+   Canonicalization Scheme [RFC8785] encoding of the predecessor
+   receipt).  The first receipt in a chain MUST set this field to the
+   all-zero SHA-256 value.  JSON key is the literal previousReceiptHash
+   (camelCase, case-sensitive); snake_case aliases MUST NOT appear on
+   the wire.
+
+   The chain hash covers the bytes the signature covers (signing_input
+   over payload); signature and anchors are NOT included.
+
+
+
+
+
+Gomes Marques            Expires 6 November 2026                [Page 8]
+
+Internet-Draft         Compliance Receipts Profile              May 2026
+
+
+   Implementations of [ACTA-RECEIPTS] that do not implement Commitment
+   Mode produce receipts that are not Compliance Receipts under this
+   profile.
+
+4.4.  Anchoring (No Upstream Equivalent)
+
+   [ACTA-RECEIPTS] mentions Sigstore Rekor only as an informational
+   example.  This profile imposes a normative dual-anchor requirement.
+
+   Compliance Receipts MUST be anchored.  An anchor is an [RFC3161]
+   timestamp token covering the signed envelope, an OpenTimestamps
+   commitment covering the envelope, or both.  Implementations SHOULD
+   emit both forms.  The anchor evidence MUST be retained alongside the
+   receipt for the applicable retention window.  Verifiers MUST reject
+   Compliance Receipts that lack at least one valid anchor.
+
+   An anchor MAY be attached after issuance if the receipt is persisted
+   with an unambiguous pending marker and the anchor lands within a
+   documented bound.  For [OPENTIMESTAMPS] the bound is the 7-day
+   calendar-to-block window.  [RFC3161] tokens MUST be obtained
+   synchronously.  A verifier MUST treat a pending receipt as non-
+   conformant once the bound elapses.
+
+   The anchor MAY cover an aggregate of receipts (for example, a Merkle
+   root over a batch) rather than each receipt individually, provided
+   that the inclusion proof linking the receipt to the aggregate is
+   retained alongside the receipt and the aggregate anchor.
+
+   Where the anchor type is [RFC3161], the full TimeStampResp DER bytes
+   (including TSA cert chain) MUST be retained.  Where the anchor type
+   is [OPENTIMESTAMPS], the upgrade path from the initial calendar
+   attestation to the Bitcoin block attestation MUST be performed within
+   seven days of issuance, and the upgraded proof MUST be retained
+   alongside the receipt.
+
+4.5.  Extension Fields
+
+   This profile defines two extension fields that MAY appear in the
+   signed payload alongside the fields defined by [ACTA-RECEIPTS].
+   Neither field is defined upstream.
+
+   risk_class:  A vocabulary term identifying the risk classification of
+      the Action under the Deployer's risk management documentation.
+      The vocabulary MUST be referenced in the Audit Pack metadata.
+
+   incident_class:  A vocabulary term identifying the ICT-related
+
+
+
+
+
+Gomes Marques            Expires 6 November 2026                [Page 9]
+
+Internet-Draft         Compliance Receipts Profile              May 2026
+
+
+      incident classification of the Action, drawn from the EBA / ESMA /
+      EIOPA Joint Final Report on the draft RTS and ITS (JC 2024-33), as
+      supplemented by Commission Delegated Regulation (EU) 2024/1772.
+      Implementations MUST publish their flattened mapping in the Audit
+      Pack manifest under Section 8.
+
+   Both fields MUST be encoded as JSON strings.  Both fields MUST be
+   covered by the signature in the same canonicalization regime as the
+   remainder of the payload.  Both fields are OPTIONAL at the syntactic
+   level but MAY be REQUIRED by the regime bindings in Sections 5
+   through 7 of this document.
+
+   Implementations MAY define additional extension fields.  Such fields
+   MUST NOT collide with names defined by [ACTA-RECEIPTS] or by this
+   document.  Implementations defining extension fields SHOULD register
+   them in the registry described in Section 11.
+
+5.  EU AI Act Article 12 Binding
+
+   Each subsection cites the operative phrase of Article 12 and binds it
+   to the receipt field that satisfies it.
+
+5.1.  Article 12(1), automatic recording of events
+
+   A Compliance Receipt MUST be produced for every Action that the High-
+   Risk AI System performs against an external resource.  Receipt
+   generation MAY be disabled only through a configuration change
+   recorded as a protectmcp:lifecycle Compliance Receipt.
+
+5.2.  Article 12(2)(a), identify situations that may present a risk
+
+   The combination of type, decision, reason, and policy_digest MUST be
+   sufficient for an auditor to identify, by query alone, receipts that
+   correspond to risk situations enumerated in the Deployer's risk
+   management documentation.  Where the Deployer classifies an Action as
+   risk-bearing, the receipt MUST carry a risk_class extension field.
+
+5.3.  Article 12(2)(b), facilitate the post-market monitoring
+
+   The hash-chain linkage required by Section 4.3 satisfies post-market
+   monitoring traceability.  The chain head MUST be made available to
+   the Provider and to the competent authority on request.
+
+
+
+
+
+
+
+
+
+Gomes Marques            Expires 6 November 2026               [Page 10]
+
+Internet-Draft         Compliance Receipts Profile              May 2026
+
+
+5.4.  Article 12(2)(c), monitor the operation
+
+   Any change to the policy artefact referenced by policy_digest SHALL
+   produce a new digest.  A change in policy_digest between two
+   otherwise-comparable Actions MAY be examined by the Deployer or by a
+   regulator as a candidate substantial-modification event under Article
+   43, and MUST be retained at least as long as the longest receipt in
+   the chain that references either digest.
+
+5.5.  Retention
+
+   Article 12 retention follows the Article 26(6) floor of 180 days
+   unless national law sets a longer period.  Where the Deployer is also
+   a Financial Entity, the DORA floor in Section 7 applies.
+
+6.  EU AI Act Article 26 Binding
+
+6.1.  Article 26(1), in accordance with the instructions for use
+
+   policy_digest MUST resolve through Section 8 to a retained artefact
+   (machine check).  The Deployer SHOULD demonstrate consistency with
+   the Provider's instructions for use (process check).  Inability to
+   perform the machine check is presumed non-compliance.
+
+6.2.  Article 26(2), ensure human oversight
+
+   For any Action whose decision is allow and whose agent_tier is
+   unknown or absent, the Deployer MUST ensure that the receipt is
+   either reviewed by a designated natural person within the period
+   required by national law, or that a follow-on protectmcp:lifecycle
+   Compliance Receipt records the absence of such review with reason.
+   Both records MUST themselves be Compliance Receipts.
+
+6.3.  Article 26(5), monitor the operation
+
+   A Deployer MUST be able to produce an Audit Pack covering any
+   contiguous time window since the High-Risk AI System became
+   operational.
+
+6.4.  Article 26(6), keep the logs for at least six months
+
+   Compliance Receipts under this binding MUST be retained for at least
+   180 days unless Union or national law sets a longer period.
+
+7.  DORA Article 17 Binding
+
+
+
+
+
+
+Gomes Marques            Expires 6 November 2026               [Page 11]
+
+Internet-Draft         Compliance Receipts Profile              May 2026
+
+
+7.1.  Article 17(1), ICT-related incident management process
+
+   A Compliance Receipt produced inside a Financial Entity's ICT
+   environment MAY serve as the canonical record of an Action that
+   triggered an ICT-related incident. action_ref MUST be carried into
+   the Financial Entity's incident workflow as the primary correlation
+   key.
+
+7.2.  Article 17(2), classify ICT-related incidents
+
+   For Actions classified as part of an ICT-related incident, the
+   producing system MUST emit incident_class whose value is drawn from
+   the classification vocabulary in the DORA implementing technical
+   standards.
+
+7.3.  Article 17(3), records of all ICT-related incidents
+
+   The hash chain required by Section 4.3 satisfies tamper-evident
+   logging.  The Financial Entity MUST be able to produce, on request,
+   the chain segment covering the period of an incident, together with
+   the anchor evidence that fixes the chain to wall-clock time.
+
+7.4.  Retention
+
+   Compliance Receipts under this binding MUST be retained for the
+   period required by applicable Union or national law, with 1825 days
+   from the date of the underlying Action serving as a common floor
+   consistent with the related ICT record-keeping provisions of [DORA].
+   Anchor evidence MUST be retained for the same period.  Verification
+   keys whose lifetime expires within the retention window MUST have
+   their public components retained so that historical signatures remain
+   verifiable.
+
+8.  Audit Pack Composition
+
+   This section is informative.  It describes the contents of an Audit
+   Pack as introduced in Section 2.
+
+   An Audit Pack contains the following items.
+
+   *  The set of Compliance Receipts covered by the requested time
+      window, in the canonical envelope form defined by [ACTA-RECEIPTS].
+
+   *  The chain commitments that link the receipts: for each receipt,
+      the value of previousReceiptHash and the recomputed digest of the
+      predecessor envelope.
+
+
+
+
+
+Gomes Marques            Expires 6 November 2026               [Page 12]
+
+Internet-Draft         Compliance Receipts Profile              May 2026
+
+
+   *  The anchor evidence: [RFC3161] tokens, OpenTimestamps proofs, or
+      both.  Each anchor item MUST be associated, by hash, with the
+      receipt or aggregate it covers.
+
+   *  The trust anchor metadata that identifies the Deployer or
+      Financial Entity associated with each issuer_id value.
+
+   *  The verification key material for every kid value present, in a
+      form that does not require online retrieval.
+
+   *  Vocabularies referenced by decision.reason, risk_class,
+      incident_class, and extension fields, embedded as JSON arrays with
+      a stable identifier.  The Audit Pack MUST expose a digest-
+      resolution facility that, given a policy_digest, returns the
+      retained artefact.
+
+   *  A regime mapping document that names which receipts the producer
+      asserts as evidence under Article 12, Article 26, or DORA Article
+      17.
+
+   *  The chain heads valid at the start and end of the time window,
+      signed by the Deployer or Financial Entity.
+
+   An Audit Pack MUST itself be signed per the [ACTA-RECEIPTS] algorithm
+   registry.  The manifest MUST include bundle_digest, bundle_signature,
+   bundle_public_key, and algorithm_registry_version.
+
+9.  Verifier Behaviour
+
+   A verifier conformant to this profile is referred to as a Compliance
+   Verifier.
+
+9.1.  Mandatory Checks
+
+   A Compliance Verifier MUST perform all of the following checks before
+   treating a receipt as a Compliance Receipt.
+
+   *  Verify the signature using the algorithm declared in
+      signature.alg, in accordance with [ACTA-RECEIPTS].
+
+   *  Resolve the verification key through one of the trust anchor
+      mechanisms required by [ACTA-RECEIPTS].  The verifier MUST NOT
+      trust a verification key embedded in the receipt envelope.
+
+   *  Verify that all fields marked REQUIRED by Section 4 are present
+      and well-formed.
+
+
+
+
+
+Gomes Marques            Expires 6 November 2026               [Page 13]
+
+Internet-Draft         Compliance Receipts Profile              May 2026
+
+
+   *  Verify the hash-chain linkage by recomputing the digest of the
+      immediately preceding envelope and comparing it to
+      previousReceiptHash.
+
+   *  Verify at least one anchor: an [RFC3161] token, an
+      [OPENTIMESTAMPS] commitment, or both.  The anchor MUST cover the
+      signed envelope as it appears in the receipt.  The verifier MUST
+      cryptographically re-verify the anchor against the signed
+      envelope; presence of anchor metadata without a successful
+      cryptographic check MUST NOT yield "valid".
+
+   *  Verify the future-skew bound on issued_at per Section 4.1.2.  Past
+      skew MUST NOT cause non-conformance when the receipt is within
+      retention.
+
+   *  Verify that policy_digest resolves through Section 8.  A digest of
+      the nonced policy-attestation form MUST NOT be treated as
+      policy_digest.  The verifier MUST recompute SHA-256(JCS(artefact))
+      and compare.
+
+   A receipt that fails any of these checks MUST be reported as non-
+   conformant.
+
+9.2.  Optional Checks
+
+   A Compliance Verifier MAY additionally perform any of the following.
+
+   *  Cross-check the issuer_id against an external registry of
+      Deployers or Financial Entities.
+
+   *  Resolve the policy artefact referenced by policy_digest and
+      compare it to a Provider-supplied reference policy.
+
+   *  Recompute the chain head and compare it to a Deployer-published
+      value.
+
+   *  Validate incident_class and risk_class extension values against
+      the vocabularies referenced in the Audit Pack.
+
+9.3.  Reporting
+
+   A Compliance Verifier SHOULD produce a structured report that
+   identifies, for each receipt verified, which regime bindings (Article
+   12, Article 26, DORA Article 17) it satisfies.  The report SHOULD
+   itself be signed using the same algorithm registry as
+   [ACTA-RECEIPTS].
+
+
+
+
+
+Gomes Marques            Expires 6 November 2026               [Page 14]
+
+Internet-Draft         Compliance Receipts Profile              May 2026
+
+
+10.  Security Considerations
+
+   This profile inherits all of the security considerations of
+   [ACTA-RECEIPTS].  The following considerations are specific to the
+   compliance binding.
+
+10.1.  Tamper Resistance
+
+   The hash-chain linkage required by Section 4.3 provides tamper-
+   evidence at the chain level.  An adversary who removes a receipt from
+   the middle of the chain MUST recompute and re-sign every subsequent
+   envelope.  The anchor evidence required by Section 4.4 binds segments
+   of the chain to wall-clock time, raising the cost of a re-signing
+   attack.
+
+   Implementations SHOULD anchor at intervals no longer than 24 hours.
+   Implementations operating under DORA Article 17 SHOULD anchor at
+   intervals no longer than one hour.
+
+   A deployment that uses only the signature, without chain linkage and
+   anchoring, can be rolled back by an insider with control of the
+   signing key for the period between the deletion and the next anchor.
+   The MUST clauses of Section 4.3 and Section 4.4 close that window.
+
+10.2.  Key Compromise
+
+   A Compliance Receipt is only as trustworthy as the key that signed
+   it.  On suspected compromise of an issuer key, the Deployer MUST
+   publish a revocation notice that names the key, the time of suspected
+   compromise, and the chain head at that time.  Receipts signed by the
+   compromised key after the named time MUST NOT be treated as
+   Compliance Receipts.
+
+   Verifiers MUST consult revocation metadata supplied with the Audit
+   Pack and MUST reject Compliance Receipts whose signing key was
+   revoked at or before issued_at.
+
+10.3.  Retention and Long-Term Verifiability
+
+   The 1825-day retention floor in Section 7 exceeds the typical
+   lifetime of an Ed25519 or ECDSA signing key.  Implementations SHOULD
+   use ML-DSA-65 (per [ACTA-RECEIPTS]) for receipts that are expected to
+   be verified after the cryptographic lifetime of classical signature
+   schemes ends.  Implementations MUST retain public key material for
+   the entire retention window.
+
+
+
+
+
+
+Gomes Marques            Expires 6 November 2026               [Page 15]
+
+Internet-Draft         Compliance Receipts Profile              May 2026
+
+
+10.4.  Privacy
+
+   [ACTA-RECEIPTS] prohibits the inclusion of raw prompts, tool
+   arguments, and credentials in the signed payload.  This profile
+   extends that prohibition to the extension fields defined in this
+   document.  The risk_class and incident_class values MUST be drawn
+   from controlled vocabularies and MUST NOT carry free-text personal
+   data.
+
+   Where the underlying Action references a data subject, the
+   payload_digest field MUST cover the data; the data itself MUST be
+   held in a separate store that respects the data subject's rights
+   under applicable law.  A request for erasure that is granted under
+   applicable data protection law MUST be reflected by deletion of the
+   referenced payload, not by deletion of the receipt; the receipt
+   remains as evidence that an Action occurred and was governed by a
+   named policy at a named time.
+
+10.5.  Anchor Trust
+
+   The trust assumptions of an anchor depend on the anchor type.
+   [RFC3161] timestamp tokens depend on the trust placed in the named
+   Time Stamping Authority.  OpenTimestamps commitments depend on the
+   inclusion of the commitment in a public Bitcoin block.  A Compliance
+   Verifier SHOULD treat the simultaneous presence of both anchor types
+   as stronger evidence than the presence of only one.
+
+10.6.  Replay
+
+   A Compliance Receipt is bound to a single Action via action_ref.
+   Replay of a Compliance Receipt against a different Action is
+   detectable by action_ref mismatch.  The 300-second issued_at skew
+   bound stated in Section 4.1.2 limits the window in which a freshly-
+   replayed receipt can be presented as recent.
+
+   A Compliance Verifier MUST treat two receipts that share the same
+   action_ref and the same issuer_id as a duplicate-emission event and
+   SHOULD investigate.
+
+10.7.  Cross-Regime Conflict
+
+   Where the same Action is in scope of more than one regime addressed
+   by this document, the producing system MUST satisfy the union of the
+   applicable requirements.  Where a SHOULD clause in one regime
+   conflicts with a MUST clause in another, the MUST clause prevails.
+   Where two MUST clauses conflict, the producing system MUST refuse to
+   issue the receipt and MUST log the refusal as a protectmcp:lifecycle
+   Compliance Receipt.
+
+
+
+Gomes Marques            Expires 6 November 2026               [Page 16]
+
+Internet-Draft         Compliance Receipts Profile              May 2026
+
+
+10.8.  Algorithm Agility
+
+   This profile inherits its algorithm registry from [ACTA-RECEIPTS].
+   Implementations MUST treat the verification of a historical receipt
+   according to the algorithm registry that was in force at issued_at,
+   not the registry in force at the time of verification, provided that
+   the signing key was not revoked.
+
+11.  IANA Considerations
+
+   This document requests two new IANA registries to support stable,
+   machine-checkable extensions to the Compliance Receipt format.
+
+11.1.  Compliance Receipt Extension Fields Registry
+
+   IANA is requested to create a new registry titled "Compliance Receipt
+   Extension Fields" under a new "Compliance Receipts" registry group.
+
+   Each entry contains:
+
+   *  Field Name: a JSON object key, lowercase ASCII letters, digits,
+      and underscore.
+
+   *  Description: a one-line summary of the field's purpose.
+
+   *  Reference: the document that defines the field's semantics.
+
+   *  Vocabulary: a URL or registry pointer for the controlled
+      vocabulary that field values are drawn from, or "free-form" if
+      none.
+
+   The registration policy is Specification Required, per [RFC8126].
+   The Designated Expert(s) SHOULD verify that the field name does not
+   collide with any field defined by [ACTA-RECEIPTS], that the Reference
+   is a stable, dereferenceable specification, and that the Vocabulary
+   is documented sufficiently for an independent verifier to validate
+   values.
+
+   Initial registry contents:
+
+   *  risk_class - Risk classification term under the Deployer's risk
+      management documentation - This document - Vocabulary referenced
+      in Audit Pack metadata.
+
+   *  incident_class - ICT-related incident classification term per DORA
+      implementing technical standards - This document - DORA
+      implementing technical standards.
+
+
+
+
+Gomes Marques            Expires 6 November 2026               [Page 17]
+
+Internet-Draft         Compliance Receipts Profile              May 2026
+
+
+11.2.  Compliance Receipt Type Namespaces Registry
+
+   IANA is requested to create a new registry titled "Compliance Receipt
+   Type Namespaces" under the same "Compliance Receipts" registry group.
+
+   Each entry contains:
+
+   *  Namespace: a colon-separated identifier prefix used as a value of
+      the type field, lowercase ASCII letters, digits, hyphen,
+      underscore, and colon.
+
+   *  Description: a one-line summary of the receipt category.
+
+   *  Reference: the document that defines the namespace.
+
+   The registration policy is Specification Required, per [RFC8126].
+   The Designated Expert(s) SHOULD verify that the namespace does not
+   collide with any namespace already registered or any namespace
+   reserved by [ACTA-RECEIPTS], and that the Reference is a stable
+   specification.
+
+   Initial registry contents:
+
+   *  protectmcp:decision - A receipt recording a policy evaluation
+      outcome (allow, deny, rate_limit) for an MCP-mediated tool call -
+      This document.
+
+   *  protectmcp:restraint - A receipt recording the application or
+      release of a restraint on an agent (e.g., quota, rate limit,
+      sandbox tightening) - This document.
+
+   *  protectmcp:lifecycle - A receipt recording an agent or system
+      lifecycle event (e.g., configuration change, key rotation,
+      oversight review) - This document.
+
+12.  Acknowledgements
+
+   The author thanks T.  Farley for [ACTA-RECEIPTS], on which this
+   profile is built.  This profile would not exist without the field
+   catalogue and envelope structure that the upstream draft defines.
+   The author also thanks the Asqav community for review of early
+   drafts.
+
+13.  Normative References
+
+
+
+
+
+
+
+Gomes Marques            Expires 6 November 2026               [Page 18]
+
+Internet-Draft         Compliance Receipts Profile              May 2026
+
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119,
+              DOI 10.17487/RFC2119, March 1997,
+              <https://www.rfc-editor.org/info/rfc2119>.
+
+   [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
+              2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
+              May 2017, <https://www.rfc-editor.org/info/rfc8174>.
+
+   [RFC3161]  Adams, C., Cain, P., Pinkas, D., and R. Zuccherato,
+              "Internet X.509 Public Key Infrastructure Time-Stamp
+              Protocol (TSP)", RFC 3161, DOI 10.17487/RFC3161, August
+              2001, <https://www.rfc-editor.org/info/rfc3161>.
+
+   [RFC8126]  Cotton, M., Leiba, B., and T. Narten, "Guidelines for
+              Writing an IANA Considerations Section in RFCs", BCP 26,
+              RFC 8126, DOI 10.17487/RFC8126, June 2017,
+              <https://www.rfc-editor.org/info/rfc8126>.
+
+   [OPENTIMESTAMPS]
+              OpenTimestamps, "OpenTimestamps Protocol", 2016,
+              <https://opentimestamps.org/>.
+
+   [ACTA-RECEIPTS]
+              Farley, T., "Signed Action Receipts for AI Agents", Work
+              in Progress, Internet-Draft, draft-farley-acta-signed-
+              receipts-01, 25 April 2026,
+              <https://datatracker.ietf.org/doc/draft-farley-acta-
+              signed-receipts/>.
+
+   [RFC8785]  Rundgren, A., Jordan, B., and S. Erdtman, "JSON
+              Canonicalization Scheme (JCS)", RFC 8785,
+              DOI 10.17487/RFC8785, June 2020,
+              <https://www.rfc-editor.org/info/rfc8785>.
+
+14.  Informative References
+
+   [EU-AI-ACT]
+              European Parliament and Council, "Regulation (EU)
+              2024/1689 (Artificial Intelligence Act)", 2024,
+              <https://eur-lex.europa.eu/eli/reg/2024/1689/oj>.
+
+   [DORA]     European Parliament and Council, "Regulation (EU)
+              2022/2554 (DORA)", 2022,
+              <https://eur-lex.europa.eu/eli/reg/2022/2554/oj>.
+
+
+
+
+
+
+Gomes Marques            Expires 6 November 2026               [Page 19]
+
+Internet-Draft         Compliance Receipts Profile              May 2026
+
+
+Worked Example (Informative)
+
+   This appendix illustrates a Compliance Receipt that satisfies the
+   Article 26 binding for a tool invocation by a High-Risk AI System
+   deployed by a Financial Entity.  Field values are abbreviated for
+   readability and are not cryptographically valid.
+
+   {
+     "type": "protectmcp:decision",
+     "issued_at": "2026-05-04T09:14:22.118Z",
+     "issuer_id": "did:web:example-bank.eu",
+     "action_ref": "sha256:c1f3a09a4d2e7f6b8c5a91e3d7b04f2a1c8e6f5d3b9a7c2e4f8d6b1a3c5e7f9d",
+     "iteration_id": "task-2026-05-04-01a3",
+     "tool_name": "ledger.post_entry",
+     "decision": "allow",
+     "reason": "policy:within_limits",
+     "policy_digest": "sha256:7b214e8c3d9f4a2b1e6c8f5a3d7b9e2c4f6a8d1b3e5c7f9a2d4b6e8c1f3a5d7b",
+     "agent_tier": "evidenced",
+     "required_tier": "evidenced",
+     "sandbox_state": "enabled",
+     "payload_digest": "sha256:0a44d2c8e3f5b7a9d1c4e6f8b2a5d7c9e1f3b5a7d9c2e4f6b8a1d3c5e7f9b2a4",
+     "previousReceiptHash": "f80c11a3b5d7e9c2f4a6b8d1e3c5f7a9b2d4e6c8f1a3b5d7e9c2f4a6b8d1e3c5",
+     "risk_class": "deployer:financial:medium",
+     "incident_class": null,
+     "signatureObject": {
+       "alg": "Ed25519",
+       "kid": "issuer:1B5qkP",
+       "sig": "..."
+     },
+     "anchors": [
+       {
+         "type": "rfc3161",
+         "tsa": "tsa.example.eu",
+         "serial": "01a3f8...",
+         "value": "..."
+       },
+       {
+         "type": "opentimestamps",
+         "status": "valid",
+         "value": "..."
+       }
+     ]
+   }
+
+   The above receipt satisfies the Article 26 binding because:
+
+   *  issuer_id resolves to a named Deployer in the Audit Pack;
+
+
+
+
+Gomes Marques            Expires 6 November 2026               [Page 20]
+
+Internet-Draft         Compliance Receipts Profile              May 2026
+
+
+   *  policy_digest resolves to a retained policy artefact;
+
+   *  sandbox_state is enabled, the High-Risk system constraint;
+
+   *  previousReceiptHash links the receipt into the chain;
+
+   *  both an [RFC3161] anchor and an [OPENTIMESTAMPS] anchor are
+      present.
+
+   A Compliance Verifier processing this receipt under the DORA Article
+   17 binding would additionally check that the receipt is retained for
+   the 1825-day window and that the incident_class field, where
+   applicable, is drawn from the implementing technical standards
+   vocabulary.
+
+Change Log
+
+draft-marques-asqav-compliance-receipts-01
+
+   Wire-shape alignment (decision/allow vocabulary; camelCase
+   previousReceiptHash; signature object; anchors array).  Asymmetric
+   forward-only skew.  Two-phase anchoring with bounded pending window.
+   Audit Pack manifest fields promoted to MUST.  DORA citation corrected
+   to JC 2024-33 + Reg (EU) 2024/1772.  Retention floors expressed in
+   days (180 / 1825).
+
+draft-marques-asqav-compliance-receipts-00
+
+   Initial version.  Defines a profile of [ACTA-RECEIPTS] that binds
+   receipt fields to EU AI Act Article 12, EU AI Act Article 26, and
+   DORA Article 17.
+
+Author's Address
+
+   Joao Andre Gomes Marques
+   Asqav
+   Portugal
+   Email: joaoagm90@gmail.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+Gomes Marques            Expires 6 November 2026               [Page 21]

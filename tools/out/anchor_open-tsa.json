@@ -1,0 +1,11 @@
+{
+  "status": "unanchored",
+  "tsa": "open-tsa",
+  "head_sha256": "4ad23d9153c33c77253b23e1f5938249cb6877de93eb7593dea26fa5f7fd6e98",
+  "tsr": "anchor_open-tsa.tsr",
+  "tsr_sha256": "ecb6a2961b8341108935c9e4818ab93ccf74533da2c23e514e700418ad134f95",
+  "info": {},
+  "problems": [
+    "CA bundle unavailable"
+  ]
+}

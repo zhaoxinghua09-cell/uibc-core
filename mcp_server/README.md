@@ -1,21 +1,31 @@
-# UIBC Core MCP Server (PROPOSAL, read-only)
+# UIBC Core MCP Server (read-only)
 
 Exposes UIBC verification as MCP tools so any MCP-capable AI client can
 verify packages without installing anything beyond this repo.
 
 Scope (per docs/api-scope.md decision v1.0): **read-only**. Verification,
 gate decisions, certificates, and package reads are exposed; all writes
-(init/register/evidence/submit/keygen) remain CLI-local — under the v0.2
-symmetric trust model a public write surface would be a key-management
-hazard, and it will be revisited with Ed25519 in v0.3.
+(init/register/evidence/submit/keygen) remain CLI-local — a public write
+surface would be a key-management hazard. Since v0.3, `verify_package`
+and `gate_check` also accept `pubkey_hex` to pin the expected Ed25519
+signer (a substituted key FAILS S6).
 
 ## Run
 
-From the repository root (zero dependencies):
+Installed from PyPI (zero dependencies):
 
 ```
-python -m mcp_server.server
+pip install uibc-core
+uibc-mcp
 ```
+
+From a source checkout:
+
+```
+python -m uibc_core.mcp_server
+```
+
+(Legacy path `python -m mcp_server.server` still works via a shim.)
 
 Register in an MCP client (example config):
 
@@ -24,7 +34,7 @@ Register in an MCP client (example config):
   "mcpServers": {
     "uibc-core": {
       "command": "python",
-      "args": ["-m", "mcp_server.server"],
+      "args": ["-m", "uibc_core.mcp_server"],
       "cwd": "/path/to/uibc-core"
     }
   }

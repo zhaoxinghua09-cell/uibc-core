@@ -1,0 +1,100 @@
+{
+  "label": "local_v14",
+  "repo": "D:\\Workbuddy\\uibc-core-local",
+  "generated_at_utc": "2026-11-17T05:40:42Z",
+  "interpreter": "D:\\Workbuddy\\_outsider_venv\\Scripts\\python.exe",
+  "steps": [
+    {
+      "cmd": "C:\\Users\\SZYL\\AppData\\Local\\Doubao\\User Data\\sandbox_runtime\\bases\\fa694f517e5995233c80a9a8db5212c2\\python\\python.exe -m venv --system-site-packages D:\\Workbuddy\\_outsider_venv",
+      "rc": 0,
+      "tail": [],
+      "secs": 3.3
+    }
+  ],
+  "runs": [
+    {
+      "name": "unittest",
+      "cmd": "D:\\Workbuddy\\_outsider_venv\\Scripts\\python.exe -m unittest discover -s tests -p test_*.py",
+      "rc": 0,
+      "tail": [
+        "",
+        "OK",
+        "<sys>:0: ResourceWarning: unclosed <socket.socket fd=172, family=2, type=1, proto=0, laddr=('127.0.0.1', 1572)>"
+      ],
+      "secs": 12.3
+    },
+    {
+      "name": "version",
+      "cmd": "D:\\Workbuddy\\_outsider_venv\\Scripts\\python.exe -c import uibc_core as u; print(u.SPEC_VERSION)",
+      "rc": 0,
+      "tail": [
+        "uibc-core/0.3.0-proposal"
+      ],
+      "secs": 0.0
+    },
+    {
+      "name": "cose_sign1_interop.py",
+      "cmd": "D:\\Workbuddy\\_outsider_venv\\Scripts\\python.exe tools\\cose_sign1_interop.py",
+      "rc": 0,
+      "tail": [
+        "RESULT_JSON=D:\\Workbuddy\\uibc-core-local\\tools\\out\\cose_sign1_result.json",
+        "",
+        "=== 9/9 PASS ==="
+      ],
+      "secs": 0.4
+    },
+    {
+      "name": "guardrail_shim.py",
+      "cmd": "D:\\Workbuddy\\_outsider_venv\\Scripts\\python.exe tools\\guardrail_shim.py",
+      "rc": 0,
+      "tail": [
+        "",
+        "5/5 符合策略预期",
+        "RESULT_JSON=D:\\Workbuddy\\uibc-core-local\\tools\\out\\guardrail_result.json"
+      ],
+      "secs": 0.3
+    },
+    {
+      "name": "mutation_benchmark.py",
+      "cmd": "D:\\Workbuddy\\_outsider_venv\\Scripts\\python.exe tools\\mutation_benchmark.py",
+      "rc": 0,
+      "tail": [
+        "",
+        "假接受率 open=9.5%  pinned=4.8%",
+        "RESULT_JSON=D:\\Workbuddy\\uibc-core-local\\tools\\out\\mutation_benchmark.json"
+      ],
+      "secs": 1.4
+    },
+    {
+      "name": "redteam_suite.py",
+      "cmd": "D:\\Workbuddy\\_outsider_venv\\Scripts\\python.exe tools\\redteam_suite.py",
+      "rc": 0,
+      "tail": [
+        "RT10  攻击者自洽重签（换钥）                                -> PASS            trust=unanchored",
+        "RT11  索引 type: ACTION→OUTPUT（M19 变体）             -> FAIL           S7,S8 trust=unanchored",
+        "RESULT_JSON=D:\\Workbuddy\\uibc-core-local\\tools\\out\\redteam_result.json"
+      ],
+      "secs": 1.1
+    },
+    {
+      "name": "uibc_to_epaec.py",
+      "cmd": "D:\\Workbuddy\\_outsider_venv\\Scripts\\python.exe tools\\uibc_to_epaec.py",
+      "rc": 0,
+      "tail": [
+        "",
+        "all expectations met: True",
+        "RESULT_JSON=D:\\Workbuddy\\uibc-core-local\\tools\\out\\epaec_result.json"
+      ],
+      "secs": 0.3
+    }
+  ],
+  "tools_present": [
+    "cose_sign1_interop.py",
+    "gen-sbom.py",
+    "guardrail_shim.py",
+    "mutation_benchmark.py",
+    "outsider_run.py",
+    "redteam_suite.py",
+    "uibc_to_epaec.py"
+  ]
+}

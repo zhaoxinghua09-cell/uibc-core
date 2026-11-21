@@ -1,0 +1,22 @@
+{
+  "entries": [
+    {
+      "evidence_id": "13a47b9a-a591-47f5-b485-710aca212b17",
+      "type": "ACTION",
+      "path": "files/_log.txt",
+      "content_hash": "54a09cb3bc85e5a0966718f34b88218a7eccbcb07960761a4ffd6958bd2c56b7",
+      "created_at": "2026-11-10T08:15:39Z",
+      "media_type": "text/plain",
+      "note": "sample action log (fictional)"
+    },
+    {
+      "evidence_id": "211c66c4-d9cb-43fb-ade7-0c55bb4cc615",
+      "type": "EVALUATION",
+      "path": "files/_eval.txt",
+      "content_hash": "6140233ffa382dcae22aed6de32a4a475e0be0d68a2116a358eb30d50db2e94e",
+      "created_at": "2026-11-10T08:15:39Z",
+      "media_type": "text/plain",
+      "note": "sample evaluation (fictional)"
+    }
+  ]
+}

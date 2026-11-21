@@ -1,0 +1,22 @@
+{
+  "entries": [
+    {
+      "evidence_id": "2f21ed42-864a-5e0e-b8f6-2e8148ee3789",
+      "type": "ACTION",
+      "path": "files/oracle-s18-policy-artefact-0.txt",
+      "content_hash": "7473554e27ffc21c7afd0088a89ff62e08e045d053203d03004a140fee48fcda",
+      "created_at": "2026-11-15T00:00:00Z",
+      "media_type": "text/plain",
+      "note": "n0"
+    },
+    {
+      "evidence_id": "c06d864a-ed82-53e7-85cd-e19ca79ac787",
+      "type": "ACTION",
+      "path": "files/oracle-s18-policy-artefact-1.txt",
+      "content_hash": "40168874f65b3da9f12e4841f558b81c9bdb7b195fce393791ec708e7c920ab6",
+      "created_at": "2026-11-15T00:00:00Z",
+      "media_type": "text/plain",
+      "note": "n1"
+    }
+  ]
+}

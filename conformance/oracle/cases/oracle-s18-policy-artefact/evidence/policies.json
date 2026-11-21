@@ -1,0 +1,8 @@
+{
+  "policies": [
+    {
+      "path": "evidence/policies/retention.json",
+      "digest": "sha256:bd859a9292040fda48b183eb08d6b47b9c61adf0f4666c4fcebb813c51bc8fb2"
+    }
+  ]
+}

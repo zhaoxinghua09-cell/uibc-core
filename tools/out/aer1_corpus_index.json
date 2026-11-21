@@ -1,0 +1,469 @@
+{
+  "format": "aer1-evaluated-corpus/1",
+  "kit_version": "1.5.7",
+  "distribution": "Zambo site corpus; upstream v1.5.6 plus versioned workflow-root vectors plus cross-version must-fail workflow-root vectors",
+  "draft": "draft-zambo-aer1-26",
+  "base_kit_version": "1.5.6",
+  "base_corpus_digest": "sha256:b9a740e75c1d01a666d952d6037f9816d791e9bc0bfcef55a4e0d43c02cceb87",
+  "vector_count": 143,
+  "check_count": 146,
+  "evaluated_set_digest": "sha256:60bf73f325793e16843370cfa24903bb0d017525cb297e42bebc35857e2db0d2",
+  "digest_algorithm": "SHA-256 of UTF-8 concatenation of path + NUL + lowercase SHA-256 of exact file bytes + LF, for evaluated vector files sorted by ASCII relative path. Excludes index, runners and license.",
+  "base_url": "https://zambo.dev/aer1/corpus/v1.5.7/",
+  "files": [
+    {
+      "path": "base/anchor-vectors.json",
+      "sha256": "15fe803468cc54a0bbddf04f592ac42fcbdb71d9353b91c8ef0b903557578fb8",
+      "vectors": 8,
+      "checks": 8
+    },
+    {
+      "path": "base/chain-vectors-v07.json",
+      "sha256": "d72b815585afdb075311da892f54041c9ffd5e7d875afbf32bd8165c3ca9ea94",
+      "vectors": 28,
+      "checks": 28
+    },
+    {
+      "path": "base/chain-vectors.json",
+      "sha256": "10de1cadb45b8d5c91ae94a601c6bb567aab59b26e89abbbb64af6896d3aba19",
+      "vectors": 7,
+      "checks": 7
+    },
+    {
+      "path": "base/commitment-vectors.json",
+      "sha256": "964169123c341176fe47cd87eb1c7af3d94b302241e55840ed7bcb382bc516ee",
+      "vectors": 8,
+      "checks": 8
+    },
+    {
+      "path": "base/id-binding-vectors.json",
+      "sha256": "78cb42cbc8be1306458f63e90e01f0e9201504ff5bf5d455a659631f21237009",
+      "vectors": 6,
+      "checks": 6
+    },
+    {
+      "path": "base/merkle-vectors.json",
+      "sha256": "8c76473616ba909fab61cdb96d3e432f3e91b322833716d494e7afc92ad13a25",
+      "vectors": 9,
+      "checks": 12
+    },
+    {
+      "path": "base/test-vectors/anchored/anchored-bad-id-version.json",
+      "sha256": "36d9c375fdcc49423e11d73aea78d8ffd69c80bb4400d57b48c7ca9aafbe1400",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/anchored/anchored-bad-leaf-hash.json",
+      "sha256": "5e8ea1918e69be2f26dfa2da6707ad6868797f9114d6d19a3c19189662e377e2",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/anchored/anchored-bad-timestamp.json",
+      "sha256": "a3b9b400b552777b6cdfb2ff60704682eb46b541ac59d79a0f310a79f424dbe5",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/anchored/anchored-missing-proof.json",
+      "sha256": "9afad2db7b553b9ada209dd86e9d7ed16c5243f8b89f6d932ce8c9978a0538e2",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/anchored/anchored-unresolvable-anchor.json",
+      "sha256": "7060532c55c6d01a9d420433f5578810993f428597edfcd1612996e140647473",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/anchored/anchored-valid.json",
+      "sha256": "03dcdc8be19340ce91ddc6f6fc6c98f2b8b2bc183b350c6c3f2b849bd0f52daf",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/invalid-profile/missing-inputs.json",
+      "sha256": "8041ed4574a7b26a44fa553d2dc93aebbe091a7257e16c10f828c8fbe9161b94",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/invalid/ax-base64-unpadded.json",
+      "sha256": "90d117c203b80b138777e516ccfcbd2477a76c797f038aa713ab1de59bcb0725",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/invalid/ax-feb29-1900.json",
+      "sha256": "b4023db4366e78183be18e8a5265b4614cfc2b0cd0cefe8c5bb1bdb9ccd58793",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/invalid/ax-feb29-non-leap.json",
+      "sha256": "3d773f1a9f0ef21b452e36bb6152d33371c696ebd34cda2f7c807362840101ff",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/invalid/ax-tool-empty-scope.json",
+      "sha256": "cc76d333b02e982ab5db0d9a2a1115a640c8122c334d79bd86242d87cfd97775",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/invalid/bad-created-at.json",
+      "sha256": "dccbd735cb36b69dde71bdd7b1c2389e7fd237ce3b2f29a56b0580c2fe2c6b6e",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/invalid/bad-id.json",
+      "sha256": "a9f8523eeaccfffa2014e3186c3f58a4fe84fffd4b5d84b99d5293c741e3f923",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/invalid/bad-offset-range.json",
+      "sha256": "9b95fd0759f4ed860c600bdf5f6f51c91759c75b2fc43f91dc47ed2bcc834e27",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/invalid/bad-provenance.json",
+      "sha256": "77ddc01eec7b7113070f6d11886e8e670c7a17787550902996aca4ee59d51430",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/invalid/bad-verification-status.json",
+      "sha256": "d966fd2201144c75022843260067fbe5c6204fca74c95939135c3522f973ef3b",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/invalid/base64-pad-bit.json",
+      "sha256": "320d5c77ba934f10cf58f781bb1cd64fca81c7318573dd0ac7b0037fe1dca223",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/invalid/base64-unpadded.json",
+      "sha256": "540be27e771e0250d912081ae6836a15b625ccd3851b970a8b46ebb8a3f9576b",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/invalid/bytes-not-base64.json",
+      "sha256": "d6ec1b14646d8d9ec517c15601e3b2ff304d2d5e9ff071e2813c2d0ee8d06921",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/invalid/duplicate-member-name.json",
+      "sha256": "998db2c1ac01ef86ac71d2b5c0a61d9b43adbe174c7bf71d068c8af2ab714702",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/invalid/feb29-1900.json",
+      "sha256": "fda0c98071b6b368ee22ae2e49ffc1fc8206177505accf5aebb8b8565aa44fe2",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/invalid/feb29-non-leap.json",
+      "sha256": "7583c4a1963f9e722b377701c511a8e65cae5b5b7c36777f23147aecb809add4",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/invalid/hash-bad-format.json",
+      "sha256": "36d6537681da8b38dc7fac2df360938e30f1b9c7a2e6e3156ddf8caa831279fd",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/invalid/hash-mismatch.json",
+      "sha256": "6037f4dd7abe55c8fcf88224e7fe02ef0ea7eccbde462d4f16263dc8557f9228",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/invalid/id-trailing-newline.json",
+      "sha256": "c762e701a43dde808a8c636bc5cca65a9dd13413f788c732cb3c323e82c9a57f",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/invalid/impossible-date.json",
+      "sha256": "13543933b5073c6d0a52df0621c73ae8189eeae9bc5cc31bb57b5c3134f47749",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/invalid/input-hash-key-order-20.json",
+      "sha256": "d1f0809e01a7f6d79100400083c13c935fece85695492f7a52373c6c381e9b54",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/invalid/input-hash-mismatch.json",
+      "sha256": "5c745d87db58d21ab577759eb83976988b59aa17830fb10eec2709e5603281a6",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/invalid/leap-second-created-at.json",
+      "sha256": "7de2f86121d25c098199f361a29ba29db733418a49738c4b072fbf0cb53b912f",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/invalid/lowercase-timestamp.json",
+      "sha256": "9badda72f3de29a1b1f88024a3404ff3ee8f85706d09574ccc47232b614ad09a",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/invalid/missing-output-hash.json",
+      "sha256": "cea9fc18f725b7a55f627f9347cd6da1b634892588bb163af7fbb49712c200d3",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/invalid/nil-uuid.json",
+      "sha256": "3fd21b593d8094c9e51a584aea7a088993f00cb5b22528818dfb26b6e6c7264b",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/invalid/non-utf8-bytes.json",
+      "sha256": "de44cf86810753d96eacbc20b07693f27759661921da1f3d6233fbbed31d57dd",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/invalid/payload-is-array.json",
+      "sha256": "47473c911b3811352ea32ed9b29dac7a9b6a735661281854d106d481315ffa50",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/invalid/payload-omits-issuer-claims.json",
+      "sha256": "5eefdff72210b2c047908cd7079966b56bea7d47e8786bbebef43afd0f3400d5",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/invalid/provenance-control-char.json",
+      "sha256": "fd4a9610ae1a9ee7deada0de63b4f7a2e70d6dc01f3f0b74111ee7c771f4c782",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/invalid/provenance-trailing-newline.json",
+      "sha256": "476a2bcc998e9dd9d7a43760bcb3b9851d6afed77f4e6b2baf6da76a2b6d1ba3",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/invalid/tampered-provenance.json",
+      "sha256": "60fe34e381b33b58150479dcd990943d86c26e9c05aec39f7bd0567f982772cd",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/invalid/timestamp-no-timezone.json",
+      "sha256": "221deb13a3c237c54c13af5139ae507dd6edc108937e7da29393f1d44431f0d4",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/invalid/tool-empty-name.json",
+      "sha256": "0ec508c84e748a29ebfe022e0cf1f86c05e6338345a06219534226b40c0b23ab",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/invalid/tool-not-object.json",
+      "sha256": "48d7101c5bea3da303322ed93c4dd693d3d6ccf5f9011a1cc80d896bd31d88a3",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/invalid/uppercase-id.json",
+      "sha256": "08d0d98a613c864682bb692a3743319fbfb1eb53dd257c8916ae97e8ec8a99e3",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/invalid/version-downgrade.json",
+      "sha256": "228160b1c6fa8985df13a11342fae58844dc05bd34a3017f344c8d08deb1d3b9",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/valid/bound-04.json",
+      "sha256": "f9a447049112554c475c99c78b77bf6c3bd142f7ae6e90deb35d5135bf67bdb9",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/valid/deep-nesting.json",
+      "sha256": "ac4aeb75626572922e80452e2f6843d11d408d3c7a7abbf0d8fddac502d4acda",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/valid/edge-numbers.json",
+      "sha256": "ef70b12a9f2f8a8478adfdbd5d5f27868241f85995012053d5cb26725ad56552",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/valid/empty-members.json",
+      "sha256": "b88a78eaf5596dd1d2f7d905823cb2fd65cd664b51087eedd3816fb343b317b4",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/valid/feb29-leap.json",
+      "sha256": "b2df61da76e75d12cf2ccdcaa496d05deaccca0b62fea78cab64f3b260d6ab2e",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/valid/fraction-one-digit.json",
+      "sha256": "8e70a6d38a03dba4e15437cb8183fc35479d58bbe738a35d1d9ec94153e91c67",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/valid/input-hash-multikey-20.json",
+      "sha256": "a4ac5c0973f0a90861d326fb00b5be728aefe3a2fc5017fa7b4647334117ac7d",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/valid/large-payload.json",
+      "sha256": "f3b7818b5b9668accadd03164784ce2c594f266e225f2a37c9715dcb101a8e39",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/valid/legacy-02.json",
+      "sha256": "7b2ab6a1fa7166a9bea9a6d86d75fb57c1bbf1b5bd14159ef609dbc7b80d8230",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/valid/legacy-03.json",
+      "sha256": "39d7781fc5054424b7f070cab225dcd010dd84a0de9a265238b7bb95163b40f9",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/valid/legacy-real-2.json",
+      "sha256": "b80604ba15697f2281ead8926335e0491c255aecc21c0bb8aca7553576242fc4",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/valid/maximum-offset-timestamp.json",
+      "sha256": "f313b4b7bf389e82c3b370e917a74ddc96a40b8201eb0ee19852e35b684ddcc4",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/valid/metadata-hash-non-ascii-tool.json",
+      "sha256": "3ca5bb484e04c11e699b17ab1fe06c110c844ebc207824180f6682822ed609d5",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/valid/optional-members-18.json",
+      "sha256": "922cd701e967dc6ce550f368f41083893a5891556460ce79212dbc241370350b",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/valid/real-04.json",
+      "sha256": "45c6af65806ad125d9ac33da9e13c737d89e1f2efde5c662cd7baa2db3ab51f8",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/valid/real-1-bare.json",
+      "sha256": "5b1999cd2f1083735658b022e468712f80b3126238dd69ee20e8b3f0e1016263",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/valid/receipt-01.json",
+      "sha256": "f6f2b532a70c1969a0e70a8342ad5a9fefa5810f163b930560b4bfffb9a24931",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/valid/receipt-02.json",
+      "sha256": "cd7fbaf943d691fb25761b14bec6cd26b9a8c001c4f5fc98ee86a5fd4e8178c7",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/valid/receipt-03-live.json",
+      "sha256": "c28e45d6d5ee4e532a1f2191e72fe2bccb70fe9d3ee746f54958f2e3e363dd6f",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/valid/typographic-unicode.json",
+      "sha256": "91a3d7fda2f82c3e19aeb25c712c1c44cc0a19c4c33d06bf86e6f58b2b99dcf1",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/test-vectors/valid/uuid-v1-core.json",
+      "sha256": "597522c8279f4012b983019bb5cbd61bcbcf5fb34388a876476767602cb6e568",
+      "vectors": 1,
+      "checks": 1
+    },
+    {
+      "path": "base/unicode-vectors.json",
+      "sha256": "e9d084c5c03076d522227fc4fba59b4647a89df86f6d1fa09c8f74f870feb08f",
+      "vectors": 5,
+      "checks": 5
+    },
+    {
+      "path": "workflow-merkle-seq-output-v1.json",
+      "sha256": "4915d874da5a62a7ab5780d95f2863266687b7007344ec4c4ede00c89c915ea5",
+      "vectors": 8,
+      "checks": 8
+    }
+  ],
+  "downloads": [
+    {
+      "path": "conformance.py",
+      "sha256": "4d18572ccac5ebf8ce3c2a4996eb4fdf18bd96517621cb93e9791e46adddad0d"
+    },
+    {
+      "path": "conformance.mjs",
+      "sha256": "9e13cabe9d7a4e0a5694b7e9058acd6c194ac812ccbd731ad7bd9f59930a293c"
+    },
+    {
+      "path": "base/conformance.py",
+      "sha256": "af30138281da5c843e5a75559cc21122805b1f3419ff986a55f656ac3e7012dc"
+    },
+    {
+      "path": "base/conformance.cjs",
+      "sha256": "e2b9fccfca305372bfae06c1db578b96208c8e41837da3718140355abadccebb"
+    },
+    {
+      "path": "LICENSE",
+      "sha256": "843e7e11c4711ae1e66c8eff554ba0834973e178032b2260f3c590df2a9bcea3"
+    }
+  ]
+}

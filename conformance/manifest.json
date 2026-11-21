@@ -1,0 +1,480 @@
+{
+  "format": "uibc-core/conformance/1",
+  "generated_by": "tools/export_conformance.py",
+  "base": "fixtures/clean.uibc (unsigned, so a correct copy is INCONCLUSIVE)",
+  "how_to_run": "python3 tools/run_conformance.py --verify \"<your verifier command>\"",
+  "rules": [
+    "A verifier passes a case only if it reports FAIL and names at least one of expected_checks.",
+    "Reporting FAIL for a case in this suite is the requirement; the exact reason strings are not testable across implementations.",
+    "A case with \"expect\": \"accept\" must not be refused; a verifier that refuses everything fails those.",
+    "Every mutated case started from a correct package and then broke exactly one thing."
+  ],
+  "cases": [
+    {
+      "id": "01",
+      "group": "positive",
+      "attack": "the shipped package, untouched",
+      "why": "no mutation at all: refusing this means the verifier rejects a correct package",
+      "expectation": "must be accepted",
+      "expect": "accept",
+      "expected_result": "INCONCLUSIVE",
+      "expected_checks": [],
+      "path": "cases/01-the-shipped-package-untouched",
+      "sha256": "03820ecb18906821c52cc7126c6b3223a78665fa3609931d62b23d98fe001ec5"
+    },
+    {
+      "id": "02",
+      "group": "positive",
+      "attack": "a package with its tree and chain appended",
+      "why": "tree and chain added correctly; S13 and S17 must pass",
+      "expectation": "must be accepted",
+      "expect": "accept",
+      "expected_result": "INCONCLUSIVE",
+      "expected_checks": [],
+      "path": "cases/02-a-package-with-its-tree-and-chain-appended",
+      "sha256": "02e11760833d0674a1385cc1bc8657fe52f51f2f9942fd2a5791115ee3cb4cb2"
+    },
+    {
+      "id": "03",
+      "group": "positive",
+      "attack": "a package with extended evidence appended",
+      "why": "base64, anchors and policies added correctly; S14, S15 and S18 must pass",
+      "expectation": "must be accepted",
+      "expect": "accept",
+      "expected_result": "INCONCLUSIVE",
+      "expected_checks": [],
+      "path": "cases/03-a-package-with-extended-evidence-appended",
+      "sha256": "3b8894e27a3b555353908534f22ce3ba0e35a15716bc7036a8ed29fbcc0792ae"
+    },
+    {
+      "id": "04",
+      "group": "positive",
+      "attack": "a package with a checkpoint appended",
+      "why": "checkpoint head added correctly; S8 must pass",
+      "expectation": "must be accepted",
+      "expect": "accept",
+      "expected_result": "INCONCLUSIVE",
+      "expected_checks": [],
+      "path": "cases/04-a-package-with-a-checkpoint-appended",
+      "sha256": "f45394c6b946c20ce72ea15e443befc399620986da81da7934c39838dc21464e"
+    },
+    {
+      "id": "05",
+      "group": "positive",
+      "attack": "a package with one more declared evidence file",
+      "why": "the extra file is added AND declared in the index, so S1 must not fail",
+      "expectation": "must be accepted",
+      "expect": "accept",
+      "expected_result": "INCONCLUSIVE",
+      "expected_checks": [],
+      "path": "cases/05-a-package-with-one-more-declared-evidence-file",
+      "sha256": "91faac0a5592b599878495483f83d4655e700551c528eada99dcbba384eef08a"
+    },
+    {
+      "id": "06",
+      "group": "positive",
+      "attack": "a package sealed with Ed25519",
+      "why": "an asymmetric seal a stranger can verify with no secret at all",
+      "expectation": "must be accepted",
+      "expect": "accept",
+      "expected_result": "PASS",
+      "expected_checks": [],
+      "path": "cases/06-a-package-sealed-with-ed25519",
+      "sha256": "1c182e0def20e0d9484425e54bcb5115df43b46d329f4da52fbb8db0b9f07ba1"
+    },
+    {
+      "id": "07",
+      "group": "core",
+      "attack": "flip one byte in evidence",
+      "why": "S4 recomputes hashes",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S4"
+      ],
+      "path": "cases/07-flip-one-byte-in-evidence",
+      "sha256": "b9a2954d139649d6b1f501e4008e02ce23be6f20353a9e984fdfd8919a22c5c9"
+    },
+    {
+      "id": "08",
+      "group": "core",
+      "attack": "truncate one evidence file",
+      "why": "same, shorter",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S4"
+      ],
+      "path": "cases/08-truncate-one-evidence-file",
+      "sha256": "eb28201ccd015d527ede55b567d3b0ca21cdfcb54197a86821eff6bce544059f"
+    },
+    {
+      "id": "09",
+      "group": "core",
+      "attack": "delete one evidence file",
+      "why": "index points at nothing",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S4"
+      ],
+      "path": "cases/09-delete-one-evidence-file",
+      "sha256": "f128522923fa1e83c5a84b51fca5ce0e2adbac10c432bd70be831a40d60aae5b"
+    },
+    {
+      "id": "10",
+      "group": "core",
+      "attack": "edit the evidence root",
+      "why": "S5 recomputes the root",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S5"
+      ],
+      "path": "cases/10-edit-the-evidence-root",
+      "sha256": "21de19c0d11ec3d6e3d9d97c2f682afcdbcb9351a54a6773e680f35ce0eb39f1"
+    },
+    {
+      "id": "11",
+      "group": "core",
+      "attack": "add an undeclared file",
+      "why": "S1 counts declarations",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S1"
+      ],
+      "path": "cases/11-add-an-undeclared-file",
+      "sha256": "39a17fc35d2c7bd81e9641c1852080faf9ced2bd753473dbc114e6ef3ff2fa60"
+    },
+    {
+      "id": "12",
+      "group": "core",
+      "attack": "duplicate a JSON member name",
+      "why": "S11 runs before parsing",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S11"
+      ],
+      "path": "cases/12-duplicate-a-json-member-name",
+      "sha256": "830b251cf4cbd77e1d9ac127956a89c360c4239e2c07be9e4c9e1ec09cd6902d"
+    },
+    {
+      "id": "13",
+      "group": "core",
+      "attack": "impossible calendar date",
+      "why": "S12 judges values",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S12",
+        "S3"
+      ],
+      "path": "cases/13-impossible-calendar-date",
+      "sha256": "43735d9ba95526e3cc920dedc7e1fbefe82e7507ed0ae76a91be240e2531ab6a"
+    },
+    {
+      "id": "14",
+      "group": "core",
+      "attack": "mismatch agent identity",
+      "why": "S2 compares across files",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S2"
+      ],
+      "path": "cases/14-mismatch-agent-identity",
+      "sha256": "e7cf4830de6e6574d380dbf501a81f331883070363db166ab5edd2f38fbd9d0b"
+    },
+    {
+      "id": "15",
+      "group": "core",
+      "attack": "drop the tail entry and file",
+      "why": "the root moves",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S5"
+      ],
+      "path": "cases/15-drop-the-tail-entry-and-file",
+      "sha256": "17633458fd6c2755e8d511142b74a69860cc9d7b40aa1ad5342b617bdf2cfde3"
+    },
+    {
+      "id": "16",
+      "group": "core",
+      "attack": "deregister an entry, keep the file",
+      "why": "undeclared evidence",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S12",
+        "S5"
+      ],
+      "path": "cases/16-deregister-an-entry-keep-the-file",
+      "sha256": "b757fb46ab08f2c758dc44ff1ee32df462ce2c84725ea82ecdcc62985f1b6570"
+    },
+    {
+      "id": "17",
+      "group": "core",
+      "attack": "tamper the seal",
+      "why": "S6 must not pass a broken seal",
+      "expectation": "NOT_PASS",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S6"
+      ],
+      "path": "cases/17-tamper-the-seal",
+      "sha256": "ddb7d1352046b93ac49448d20875cbadf4334ff3b9ab9690691be12ea0a2db15"
+    },
+    {
+      "id": "18",
+      "group": "tree-and-chain",
+      "attack": "replace merkle root",
+      "why": "S13 recomputes the root",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S13"
+      ],
+      "path": "cases/18-replace-merkle-root",
+      "sha256": "12e9f57b9af9d0d1c56ce638fd00bbb8115eaaa810b006957f4db3d98d56f323"
+    },
+    {
+      "id": "19",
+      "group": "tree-and-chain",
+      "attack": "inflate merkle size",
+      "why": "declared size vs leaves",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S13"
+      ],
+      "path": "cases/19-inflate-merkle-size",
+      "sha256": "3ac8632f4e9ca4bf5c22afed0f7cb99219cf985579e6411ed59270538d99299f"
+    },
+    {
+      "id": "20",
+      "group": "tree-and-chain",
+      "attack": "corrupt one inclusion proof",
+      "why": "proof must verify",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S13"
+      ],
+      "path": "cases/20-corrupt-one-inclusion-proof",
+      "sha256": "28f9ee0687520b1c460348c36ea6c98d566a6ffd98dc409bded15df3846fcb1c"
+    },
+    {
+      "id": "21",
+      "group": "tree-and-chain",
+      "attack": "swap a proof index",
+      "why": "index is recomputed",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S13"
+      ],
+      "path": "cases/21-swap-a-proof-index",
+      "sha256": "885260c069614f26c98ec32c284468df1ce9acab368af5c62b84ca9cd4a8adc2"
+    },
+    {
+      "id": "22",
+      "group": "tree-and-chain",
+      "attack": "edit a receipt body",
+      "why": "S17 recomputes the link",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S17"
+      ],
+      "path": "cases/22-edit-a-receipt-body",
+      "sha256": "c2baa0b7114b38d19ff71709d9428218ac6e2018153486f7e900117c470c599d"
+    },
+    {
+      "id": "23",
+      "group": "tree-and-chain",
+      "attack": "claim a genesis predecessor",
+      "why": "genesis is 64 zeros",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S17"
+      ],
+      "path": "cases/23-claim-a-genesis-predecessor",
+      "sha256": "50d54c2f27d7bd257b0a6b12ecb3f92e06eabbd18c5199eab592fdb4908f89e6"
+    },
+    {
+      "id": "24",
+      "group": "extended",
+      "attack": "strip base64 padding",
+      "why": "S14 decodes strictly",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S14"
+      ],
+      "path": "cases/24-strip-base64-padding",
+      "sha256": "4f57ce2e75788198d54d89e43e5552fe2254e90ace65092f4d4277069513ce44"
+    },
+    {
+      "id": "25",
+      "group": "extended",
+      "attack": "put a stray character in base64",
+      "why": "S14 rejects non-alphabet bytes",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S14"
+      ],
+      "path": "cases/25-put-a-stray-character-in-base64",
+      "sha256": "0a8aeb4d139cd644e7e7a0d8722425b021809808197fe6c387d94fbdc87cc2ff"
+    },
+    {
+      "id": "26",
+      "group": "extended",
+      "attack": "corrupt an anchor inclusion proof",
+      "why": "S15 re-verifies the proof",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S15"
+      ],
+      "path": "cases/26-corrupt-an-anchor-inclusion-proof",
+      "sha256": "ff8a6a36448b34f0cf84730251e7a69b8b0ae2d7e644bfbfd9a2c9ebece8fef8"
+    },
+    {
+      "id": "27",
+      "group": "extended",
+      "attack": "make a leaf hash a non-digest",
+      "why": "S15 judges values, not just structure",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S15"
+      ],
+      "path": "cases/27-make-a-leaf-hash-a-non-digest",
+      "sha256": "175f59f3b0b5163573957cde855a200b6c3134ce9490f3ebd03b6b12a0c24931"
+    },
+    {
+      "id": "28",
+      "group": "extended",
+      "attack": "date an anchor 30 February",
+      "why": "a legal time is required",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S15"
+      ],
+      "path": "cases/28-date-an-anchor-30-february",
+      "sha256": "ab9d25dff1c5fe40b01811e0f48af13d0e6f89865c49efbb314bc0c4ec2590fa"
+    },
+    {
+      "id": "29",
+      "group": "extended",
+      "attack": "anchor to a root we cannot recompute",
+      "why": "resolvable, not merely present",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S15"
+      ],
+      "path": "cases/29-anchor-to-a-root-we-cannot-recompute",
+      "sha256": "97bc8c7c36518a8eb6dd3c92cfbd8e628752403efe6a36266e5eb6a70c534fab"
+    },
+    {
+      "id": "30",
+      "group": "extended",
+      "attack": "edit a policy artefact",
+      "why": "S18 recomputes SHA-256 over JCS",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S18"
+      ],
+      "path": "cases/30-edit-a-policy-artefact",
+      "sha256": "86de072995e069d3382decdec7f8a4edfe7ac1ef43f1dc9b863b9e4e84716580"
+    },
+    {
+      "id": "31",
+      "group": "extended",
+      "attack": "point a policy digest at nothing",
+      "why": "an unresolvable digest is FAIL",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S18"
+      ],
+      "path": "cases/31-point-a-policy-digest-at-nothing",
+      "sha256": "6ffe1b5b66c3eb8e22069d81317682ffa30c12a47c5b016d98494753acb11ec1"
+    },
+    {
+      "id": "32",
+      "group": "checkpoint",
+      "attack": "rewrite index metadata, content untouched",
+      "why": "S7: a content hash cannot see a rewritten note",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S7",
+        "S8"
+      ],
+      "path": "cases/32-rewrite-index-metadata-content-untouched",
+      "sha256": "39bc9ede0ca332980726bc6f4fbb68ab2d7d605764f1c13e4069a9c39caa8b87"
+    },
+    {
+      "id": "33",
+      "group": "checkpoint",
+      "attack": "drop engine_build from the closure",
+      "why": "S10: five of six declared is not declared",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S10"
+      ],
+      "path": "cases/33-drop-engine-build-from-the-closure",
+      "sha256": "817b08e2d92eb8ba58ee49abd1f454ce16d9ce50d02c801314324a1cfacf41d4"
+    },
+    {
+      "id": "34",
+      "group": "checkpoint",
+      "attack": "truncate the lifecycle log",
+      "why": "S8: the shortened chain is still internally valid",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S8"
+      ],
+      "path": "cases/34-truncate-the-lifecycle-log",
+      "sha256": "3bff28e247488eb92ea34172d1eda5c52aa38f76c38b08a1ef27c61b6c75a31e"
+    },
+    {
+      "id": "35",
+      "group": "checkpoint",
+      "attack": "declare a closure digest that is not a digest",
+      "why": "S10: a declaration with a malformed value is no declaration",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S10"
+      ],
+      "path": "cases/35-declare-a-closure-digest-that-is-not-a-digest",
+      "sha256": "116661fc676eb3f1bc466d5830f6dccf0dfab0f5b21d9523e4fb6756333c9080"
+    },
+    {
+      "id": "36",
+      "group": "seal",
+      "attack": "flip one bit in an Ed25519 signature",
+      "why": "S6 verifies against the recorded public key",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S6"
+      ],
+      "path": "cases/36-flip-one-bit-in-an-ed25519-signature",
+      "sha256": "b0c68801698d5e503a79199a81d708a46f488ba5054c83e62efa79e84a5671d6"
+    }
+  ],
+  "skipped": []
+}

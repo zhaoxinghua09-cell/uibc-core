@@ -1,0 +1,40 @@
+{
+  "entries": [
+    {
+      "evidence_id": "e1e008ea-8675-4716-8341-d241f3a5541e",
+      "type": "INPUT",
+      "path": "files/change-description.md",
+      "content_hash": "55f2c98181785a2f20a4e43fbfde7a412c837a76e0c371f1b54a90dca562bbd6",
+      "created_at": "2026-11-18T00:10:25Z",
+      "media_type": "text/markdown",
+      "note": "fictional change evidence"
+    },
+    {
+      "evidence_id": "7fd37817-47c4-4b6b-bef9-249a5e3fcdcd",
+      "type": "EVALUATION",
+      "path": "files/evaluation-report.md",
+      "content_hash": "52e8c8c5077652abd5134bacc9e6df1c620fcf83959d13d76c15f2cb8d85d105",
+      "created_at": "2026-11-18T00:10:25Z",
+      "media_type": "text/markdown",
+      "note": "fictional change evidence"
+    },
+    {
+      "evidence_id": "9b66cef1-8693-417f-98f9-cd918ec13e1c",
+      "type": "HUMAN_DECISION",
+      "path": "files/approval-record.md",
+      "content_hash": "083a0eb837030f23ea5ca37455e43404652f5e497a7ccefb0a42f58d78c8622e",
+      "created_at": "2026-11-18T00:10:25Z",
+      "media_type": "text/markdown",
+      "note": "fictional change evidence"
+    },
+    {
+      "evidence_id": "863e9a71-730b-4a84-b023-4ff286016848",
+      "type": "RETIREMENT",
+      "path": "files/previous-version-manifest.md",
+      "content_hash": "aceba300d6f12c1015e24c1ddbdf652da2504d3ebe16399474e2747f73dbf6c9",
+      "created_at": "2026-11-18T00:10:25Z",
+      "media_type": "text/markdown",
+      "note": "fictional change evidence"
+    }
+  ]
+}

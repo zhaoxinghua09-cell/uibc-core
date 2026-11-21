@@ -1,0 +1,46 @@
+name: "Verify manifest bundle"
+description: "Recompute a SHA-256 manifest over a directory and fail on any mismatch, missing file, or unexpected extra file. Carries a self-test negative control (mutate one byte, the check must fail)."
+author: "Xinghua Zhao"
+branding:
+  icon: "shield"
+  color: "gray-dark"
+
+inputs:
+  manifest:
+    description: "Path to the manifest file (JSON: {\"files\": [{\"path\": ..., \"sha256\": ...}]} or plain sha256sum format)"
+    required: true
+  root:
+    description: "Root directory the manifest paths are relative to"
+    required: false
+    default: "."
+  allow_extra:
+    description: "Set to true to tolerate files present on disk but absent from the manifest"
+    required: false
+    default: "false"
+  negative_control:
+    description: "Set to true to run the self-test: mutate one byte of a listed file and require the check to fail"
+    required: false
+    default: "true"
+
+outputs:
+  verdict:
+    description: "PASS | MISMATCH | MISSING | EXTRA | ERROR"
+  checked:
+    description: "Number of files whose digest was recomputed"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Verify manifest bundle
+      shell: bash
+      env:
+        IN_MANIFEST: ${{ inputs.manifest }}
+        IN_ROOT: ${{ inputs.root }}
+        IN_ALLOW_EXTRA: ${{ inputs.allow_extra }}
+        IN_NEGCTL: ${{ inputs.negative_control }}
+      run: |
+        python "${{ github.action_path }}/entry.py" \
+          --manifest "$IN_MANIFEST" \
+          --root "$IN_ROOT" \
+          --allow-extra "$IN_ALLOW_EXTRA" \
+          --negative-control "$IN_NEGCTL"

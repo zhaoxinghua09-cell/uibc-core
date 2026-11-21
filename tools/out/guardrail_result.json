@@ -1,0 +1,119 @@
+{
+  "meta": {
+    "probe": "guardrail-shim",
+    "uibc_core": "C:\\Users\\Administrator\\Doubao\\tmp\\gate_public_20261120",
+    "generated_at_utc": "2026-11-20T10:20:33Z"
+  },
+  "policy": {
+    "name": "guardrail-v1",
+    "allow_when": {
+      "result": "PASS",
+      "trust_level": "anchored"
+    },
+    "hold_when": {
+      "result": "PASS",
+      "trust_level": [
+        "unanchored",
+        "unattested"
+      ]
+    },
+    "deny_when": {
+      "result": [
+        "FAIL",
+        "INCONCLUSIVE"
+      ]
+    }
+  },
+  "cases": [
+    {
+      "case": "clean + pinned key",
+      "expect": "ALLOW",
+      "result": "PASS",
+      "trust_level": "anchored",
+      "action": "ALLOW",
+      "ok": true,
+      "why": "PASS + anchored (key reached verifier out-of-band)",
+      "checks_failed": []
+    },
+    {
+      "case": "clean, key read from package",
+      "expect": "HOLD",
+      "result": "PASS",
+      "trust_level": "unanchored",
+      "action": "HOLD",
+      "ok": true,
+      "why": "PASS but unanchored: internal consistency only, require an out-of-band key or human review",
+      "checks_failed": []
+    },
+    {
+      "case": "evidence tampered after seal",
+      "expect": "DENY",
+      "result": "FAIL",
+      "trust_level": "anchored",
+      "action": "DENY",
+      "ok": true,
+      "why": "FAIL at S4,S5",
+      "checks_failed": [
+        "S4",
+        "S5"
+      ]
+    },
+    {
+      "case": "unsigned / unattested",
+      "expect": "DENY",
+      "result": "INCONCLUSIVE",
+      "trust_level": "unattested",
+      "action": "DENY",
+      "ok": true,
+      "why": "INCONCLUSIVE at S6",
+      "checks_failed": [
+        "S6"
+      ]
+    },
+    {
+      "case": "lifecycle sequence gap",
+      "expect": "DENY",
+      "result": "FAIL",
+      "trust_level": "anchored",
+      "action": "DENY",
+      "ok": true,
+      "why": "FAIL at S3",
+      "checks_failed": [
+        "S3"
+      ]
+    }
+  ],
+  "summary": {
+    "total": 5,
+    "ok": 5,
+    "policy": {
+      "name": "guardrail-v1",
+      "allow_when": {
+        "result": "PASS",
+        "trust_level": "anchored"
+      },
+      "hold_when": {
+        "result": "PASS",
+        "trust_level": [
+          "unanchored",
+          "unattested"
+        ]
+      },
+      "deny_when": {
+        "result": [
+          "FAIL",
+          "INCONCLUSIVE"
+        ]
+      }
+    },
+    "anchor_rule": "draft-maintainer-1f916-agent-record-01 S3.6",
+    "phantom_log": {
+      "result": "PASS",
+      "entries": 5,
+      "phantom_entries": 4,
+      "head": "9f9b85f8500a7606d7f01d5cec51c2ff461622a83f624cb6a3346977dcf8b23f",
+      "scope": "internal consistency of the local ledger only; unsigned, unwitnessed, no external anchor",
+      "problems": []
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "file": "CORPUS-DIGESTS.txt",
+  "file_sha256": "9a3ffbbcd1c516e005dcb1bb95f413fd166066df20ab88b4c0e9fe4ab395d86c",
+  "tsa": {
+    "state": "anchored",
+    "detail": "RESULT_JSON=release/anchor_freetsa.json"
+  },
+  "ots": {
+    "state": "pending_calendar",
+    "detail": "calendar attestation from alice.btc.calendar.opentimestamps.org, not a Bitcoin block"
+  }
+}

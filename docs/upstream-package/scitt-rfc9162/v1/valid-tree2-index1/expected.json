@@ -1,0 +1,17 @@
+{
+  "description": "tree_size=2, leaf_index=1: the sibling is consumed to the left of the leaf.",
+  "inclusion_path": [
+    "408adc960f960ad1586129115e8a34fc997d60c79daf6a1fe61d63743c940eb0"
+  ],
+  "leaf_entry": {
+    "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+    "digest_hex": "b263db0f5d7ae3496503d61f794a463362ad92b2b509b03a227cbc0bf64abec8",
+    "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: valid-tree2-index1 :: leaf 1",
+    "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a2076616c69642d74726565322d696e64657831203a3a206c6561662031"
+  },
+  "leaf_index": 1,
+  "reconstructed_root": "5e33db6d397bd0ecc0fe55e7c9e94ef7968cdac3d48100ad8f54076e051d8ccb",
+  "result": "VALID",
+  "root_true": "5e33db6d397bd0ecc0fe55e7c9e94ef7968cdac3d48100ad8f54076e051d8ccb",
+  "tree_size": 2
+}

@@ -1,0 +1,24 @@
+{
+  "attests": {
+    "bytes": 287,
+    "file": "CORPUS-DIGESTS.txt",
+    "file_in_repository": "anchors/attestations/v0.4.1/CORPUS-DIGESTS.txt",
+    "note": "the exact bytes the page served at freeze, so the signature verifies without the network",
+    "sha256": "153f9b898878aaa9da97c7a496dd22af124d9bb3112ec5fede0a04eff94df033"
+  },
+  "key_id": "179c615aef27cbcd",
+  "kind": "uibc-publisher-attestation-v0",
+  "signature": "CORPUS-DIGESTS.txt.sig",
+  "statement": "The Ed25519 key identified here signed this digest list. It identifies the publisher; it does not claim the release workflow was honest, and it was produced after publication rather than during it.",
+  "tag": "v0.4.1",
+  "timestamp_on_the_signature": {
+    "attests_file": "CORPUS-DIGESTS.txt.sig",
+    "ca": "anchor_freetsa_ca.pem",
+    "digest_hex": "e62dbea6a7bd8d477c90a649578e062d5ad198e0eda28198a2f3789cf6d69297",
+    "gen_time": "2026-11-20T07:00:46+00:00",
+    "serial": "172106544",
+    "token": "anchor_freetsa.tsr",
+    "why": "the signature says who; a third party that is not us says when. Without it, \"signed after publication\" is a sentence in this file, not a fact anyone can check."
+  },
+  "why_not_on_the_page": "the page was frozen on 2026-11-20T04:24:44Z and carries UNSIGNED.txt; adding a signature would rewrite the bytes the pin, the receipt and two invitations already quote"
+}

@@ -1,0 +1,88 @@
+{
+  "what": "The verifier that `pip install uibc-core` actually gives you",
+  "why": "pyproject.toml says 0.3.3 and PyPI carries 0.3.3, so the version string is not stale -- but the published verifier is not the one in this repository. Anyone who installs the package and then reads a claim about S7-S18 would be misled. This file records what was measured so the claim can be checked rather than remembered.",
+  "registry": "https://pypi.org/project/uibc-core/",
+  "sdist": "https://files.pythonhosted.org/packages/cc/51/fc6678d141245574d7e96504ede80e4f715e580699ad052002350fbad3b9/uibc_core-0.3.3.tar.gz",
+  "sdist_sha256": "0a97e2184c999729b5941cd10462a35750db246a86dcd11abdb4cbd59aa28d1b",
+  "version": "0.3.3",
+  "uploaded": "2026-11-15T14:24:23",
+  "verify_py_sha256": "1bec7fa3578a3bf8e8e4c9a372498512664f26615fe30c56a9b7905654fc24ab",
+  "verify_py_lines": 232,
+  "checks": [
+    "S1",
+    "S2",
+    "S3",
+    "S4",
+    "S5",
+    "S6"
+  ],
+  "how_measured": "downloaded the 0.3.3 sdist into a clean venv, then ran its verifier and the repository verifier on the SAME package built by tools/outsider_audit.py (build_v11 + build_ext + build_s16 + build_ckpt)",
+  "what_the_published_version_does_reproduce": [
+    "the shipped fixture's verdict: INCONCLUSIVE, six checks (S1-S6)",
+    "the link1 example's three verdicts: PASS / FAIL naming file S4 / INCONCLUSIVE, matching that example's README"
+  ],
+  "what_it_does_not": [
+    "S7-S10 (index metadata, whole-state checkpoint, out-of-band pin, attestation closure)",
+    "S13-S18 (merkle proofs, strict base64, anchor resolution, RFC 3161, receipt chain, policy artefacts)",
+    "tools/outsider_audit.py, the outside kit, the verify endpoint, the AAC export -- none is in the sdist"
+  ],
+  "limits_of_this_measurement": [
+    "It measures the published checks, not the published behaviour: a check id present in both trees may still differ in what it catches.",
+    "The example runs were made against this repository's example packages, not against copies shipped in the sdist."
+  ],
+  "checks_seen_on_the_example_packages": [
+    "S1",
+    "S2",
+    "S3",
+    "S4",
+    "S5",
+    "S6",
+    "S11",
+    "S12"
+  ],
+  "decisive_measurement": {
+    "what": "the same full-feature package (v1.1 lifecycle + merkle + anchor + RFC3161 + receipts + policies, built by tools/outsider_audit.py) fed to both verifiers",
+    "repository_result": {
+      "result": "INCONCLUSIVE",
+      "checks": [
+        "S1",
+        "S2",
+        "S3",
+        "S4",
+        "S5",
+        "S6",
+        "S7",
+        "S8",
+        "S10",
+        "S11",
+        "S12",
+        "S13",
+        "S14",
+        "S15",
+        "S16",
+        "S17",
+        "S18"
+      ],
+      "note": "S9 absent because no --expect-head was supplied"
+    },
+    "published_result": {
+      "result": "INCONCLUSIVE",
+      "checks": [
+        "S1",
+        "S2",
+        "S3",
+        "S4",
+        "S5",
+        "S6"
+      ]
+    },
+    "conclusion": "the published verifier does not know any of S7-S18 exist; it does not merely run fewer checks on a smaller package, it cannot see the fields those checks are about"
+  },
+  "git_tag": {
+    "name": "v0.3.3",
+    "commit": "251b10b30d8e",
+    "verify_py_sha256": "1bec7fa3578a3bf8e8e4c9a372498512664f26615fe30c56a9b7905654fc24ab",
+    "matches_the_sdist": true,
+    "note": "the published verifier is byte-identical to the one at the tag; the release was honest about what it shipped, the tree simply grew afterwards"
+  }
+}

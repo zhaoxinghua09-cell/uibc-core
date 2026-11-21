@@ -1,0 +1,88 @@
+name: Publish to PyPI
+
+on:
+  push:
+    tags: ["v*"]
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - name: Build sdist and wheel
+        run: |
+          python -m pip install --upgrade pip build
+          python -m build
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: dist
+          path: dist/
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+    env:
+      UV_PUBLISH_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: dist
+          path: dist/
+      - name: Publish (Trusted Publishing)
+        id: oidc
+        continue-on-error: true
+        uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3
+      - name: Publish (API token fallback)
+        if: steps.oidc.outcome == 'failure' && env.UV_PUBLISH_TOKEN != ''
+        continue-on-error: true
+        run: |
+          python -m pip install --upgrade pip uv
+          uv publish --token "$UV_PUBLISH_TOKEN"
+      - name: Verify the version is actually on PyPI
+        if: always()
+        env:
+          PKG: uibc-core
+          MANIFEST: pyproject.toml
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          python - <<'PY'
+          import json, os, re, sys, time, urllib.request
+          pkg = os.environ["PKG"]
+          want = (os.environ.get("TAG") or "").lstrip("v")
+          if not want:
+              # workflow_dispatch has no tag: fall back to the version declared in the manifest
+              txt = open(os.environ["MANIFEST"], encoding="utf-8").read()
+              m = re.search(r'^version\s*=\s*"([^"]+)"', txt, re.M)
+              want = m.group(1) if m else ""
+              print("no tag event; manifest says %s" % want)
+          if not want:
+              print("cannot determine a version to verify")
+              sys.exit(1)
+          op = urllib.request.build_opener()
+          for attempt in range(12):
+              try:
+                  with op.open("https://pypi.org/pypi/%s/json" % pkg, timeout=20) as r:
+                      have = list((json.load(r).get("releases") or {}).keys())
+                  if want in have:
+                      print("VERIFIED %s %s on PyPI" % (pkg, want))
+                      sys.exit(0)
+                  print("poll %d: %s not released yet (latest known: %s)" % (attempt + 1, want, have[-3:]))
+              except Exception as e:
+                  print("poll %d error: %s" % (attempt + 1, e))
+              time.sleep(10)
+          print("NOT ON PYPI: %s %s - the publish step reported success but published nothing" % (pkg, want))
+          sys.exit(1)
+          PY

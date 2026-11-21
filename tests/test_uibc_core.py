@@ -62,9 +62,35 @@ class TestCanonical(unittest.TestCase):
                 f.write(b"line1\r\nline2\r\n")
             self.assertNotEqual(hash_file(p1), hash_file(p2))
 
-    def test_known_limitation_float_forms(self):
-        # PROVISIONAL (pre-RFC8785): 1 vs 1.0 serialize differently - documented.
-        self.assertNotEqual(hash_obj({"a": 1}), hash_obj({"a": 1.0}))
+    def test_jcs_int_and_float_one_are_equivalent(self):
+        # RFC 8785 (JCS): 1 and 1.0 serialize identically - the provisional
+        # "1 != 1.0" limitation is gone, which is what makes UIBC hashes
+        # interoperable with every standard JCS tool.
+        self.assertEqual(hash_obj({"a": 1}), hash_obj({"a": 1.0}))
+
+
+    def test_rfc8785_sample_vector(self):
+        # Exact RFC 8785 sample object; validates key order, number forms
+        # (incl. 1e+30 / 1e-27 exponent and 4.5 / 0.002 fixed) and escaping.
+        obj = {"literals": [None, True, False],
+               "numbers": [333333333.3333333, 1e30, 4.5, 0.002, 1e-27],
+               "string": "€$\x0f\nA'B\"\\/"}
+        expected = ('{"literals":[null,true,false],'
+                    '"numbers":[333333333.3333333,1e+30,4.5,0.002,1e-27],'
+                    '"string":"€$\\u000f\\nA\'B\\"\\\\/"}')
+        self.assertEqual(canonicalize(obj).decode("utf-8"), expected)
+
+    def test_independent_canonical_matches(self):
+        # Determinism signal: the independently-written verifier's canonical
+        # bytes must equal the reference implementation's on varied inputs.
+        from independent_verifier.iverify import canon_bytes as i_canon
+        samples = [
+            {"a": 1, "b": [None, True, "x"], "c": {"z": 1, "a": 2}},
+            {"note": "有籍·有证·有门禁", "n": 1.5},
+            {"k": ["aa", "bb", "cc"]},
+        ]
+        for s in samples:
+            self.assertEqual(canonicalize(s), i_canon(s))
 
 
 class TestLifecycle(unittest.TestCase):
@@ -143,9 +169,20 @@ class TestVerifier(unittest.TestCase):
     def _checks(self, report):
         return {c["id"]: c["result"] for c in report["checks"]}
 
+    def _ed_seal(self, pkg):
+        """(Re)submit a package with a fresh Ed25519 seal (v0.3 public seal)."""
+        from uibc_core.signing import ed_generate_seed
+        kf = os.path.join(self.tmp, "owner.edkey")
+        with open(kf, "w", encoding="ascii") as f:
+            f.write("ed25519:" + ed_generate_seed().hex())
+        ucli.cmd_submit(type("A", (), {"path": pkg, "key": kf})())
+        return kf
+
     def test_clean_pass_and_discipline(self):
+        self._ed_seal(self.pkg)  # v0.3: a top-level PASS must be earned by a resolvable seal
         r = verify(self.pkg)
         self.assertEqual(r["result"], "PASS")
+        self.assertEqual(r["assurance"], "public-key")
         for field in ("scope", "limitations", "checked", "not_checked", "statement"):
             self.assertIn(field, r)
         self.assertIn("No violation was detected", r["statement"])
@@ -170,11 +207,16 @@ class TestVerifier(unittest.TestCase):
         self.assertEqual(self._checks(verify(self.pkg))["S2"], "FAIL")
 
     def test_unknown_evidence_type_S4(self):
+        # Was FAIL until 2026-11-19. A type the verifier does not know is not a
+        # violation: 0.3.3 accepted any string here, so a package sealed by that
+        # release cannot be said to have broken a rule that did not exist. FAIL
+        # would assert "I checked, and this is wrong"; the honest result is "I
+        # cannot judge this entry". See docs/MIGRATION-RESULTS.md (M1a).
         ip = os.path.join(self.pkg, "evidence", "index.json")
         idx = json.load(open(ip, encoding="utf-8"))
         idx["entries"][0]["type"] = "GOSSIP"
         json.dump(idx, open(ip, "w", encoding="utf-8"))
-        self.assertEqual(self._checks(verify(self.pkg))["S4"], "FAIL")
+        self.assertEqual(self._checks(verify(self.pkg))["S4"], "INCONCLUSIVE")
 
     def test_tamper_content_S4_root_inconclusive(self):
         ep = os.path.join(self.pkg, "evidence", "files", "e.txt")
@@ -196,7 +238,7 @@ class TestVerifier(unittest.TestCase):
         ucli.cmd_evidence(type("A", (), {"path": pkg2, "type": "OUTPUT",
                                          "file": src, "media_type": "text/plain",
                                          "note": "中文"})())
-        ucli.cmd_submit(type("A", (), {"path": pkg2})())
+        self._ed_seal(pkg2)
         self.assertEqual(verify(pkg2)["result"], "PASS")
 
     def test_duplicate_filename_autorenamed(self):
@@ -206,7 +248,7 @@ class TestVerifier(unittest.TestCase):
                                          "note": ""})())
         # re-seal: a new evidence entry after sealing invalidates the root,
         # so the package must be re-submitted before verify (by design).
-        ucli.cmd_submit(type("A", (), {"path": self.pkg})())
+        self._ed_seal(self.pkg)
         self.assertEqual(verify(self.pkg)["result"], "PASS")
 
     def test_stale_seal_fails_S5(self):
@@ -307,10 +349,14 @@ class TestSealVerification(unittest.TestCase):
     def _detail(self, report):
         return "; ".join(c["detail"] for c in report["checks"] if c["id"] == "S6")
 
-    def test_unsigned_open_passes_skip(self):
+    def test_unsigned_open_inconclusive(self):
+        """Seal v0.3: unsigned in open mode is INCONCLUSIVE at S6 and at the
+        top level (was: SKIP under a PASS). Internal consistency is not
+        provenance."""
         r = verify(self.pkg)
-        self.assertEqual(r["result"], "PASS")
-        self.assertEqual(self._s6(r), "SKIP")
+        self.assertEqual(r["result"], "INCONCLUSIVE")
+        self.assertEqual(self._s6(r), "INCONCLUSIVE")
+        self.assertEqual(r["assurance"], "unattested")
 
     def test_unsigned_strict_fails(self):
         r = verify(self.pkg, key=self.owner_key)
@@ -327,7 +373,9 @@ class TestSealVerification(unittest.TestCase):
     def test_signed_no_key_inconclusive(self):
         self._seal_with(self.owner_key)
         r = verify(self.pkg)
-        self.assertEqual(r["result"], "PASS")  # open mode: integrity only
+        # Seal v0.3: an HMAC seal a stranger cannot check caps the verdict
+        # at INCONCLUSIVE (through v0.2 it rode under a top-level PASS).
+        self.assertEqual(r["result"], "INCONCLUSIVE")
         self.assertEqual(self._s6(r), "INCONCLUSIVE")
 
     def test_manifest_forgery_detected_strict(self):
@@ -377,6 +425,10 @@ class TestCLIChain(unittest.TestCase):
             self.assertEqual(run("event", pkg, "--type", "ACTIVATE").returncode, 0)
             self.assertEqual(run("evidence", pkg, "--type", "ACTION", "--file", ef).returncode, 0)
             self.assertEqual(run("submit", pkg).returncode, 0)
+            # v0.3 happy path: seal publicly, then a stranger's verify exits 0
+            kf = os.path.join(tmp, "owner.key")
+            self.assertEqual(run("keygen", "--ed25519", "--out", kf).returncode, 0)
+            self.assertEqual(run("submit", pkg, "--key", kf).returncode, 0)
             self.assertEqual(run("verify", pkg).returncode, 0)
             self.assertEqual(run("inspect", pkg).returncode, 0)
             # re-init same path must fail

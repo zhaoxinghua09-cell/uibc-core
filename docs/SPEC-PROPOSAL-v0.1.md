@@ -29,7 +29,7 @@ v0.1 采用临时方案：sorted-keys / compact / UTF-8 JSON。
 ## 4. Evidence Root（v0.1 临时算法）
 
 ```
-evidence_root = SHA-256( canonical_json( sorted( [content_hash_1...content_hash_n] ) ) )
+evidence_root = SHA-256( RFC8785-JCS( sorted( [content_hash_1...content_hash_n] ) ) )  # canonical_json -> RFC 8785 JCS (v0.3.1)
 ```
 
 ## 5. 生命周期状态机（§11）
@@ -90,3 +90,19 @@ evidence_root = SHA-256( canonical_json( sorted( [content_hash_1...content_hash_
    fixtures/malicious-keyswap 为常设动机案例。
 3. Ed25519 + 公钥注册表 = v0.3 目标。
 4. 本节不构成 §19 意义上的 Certificate；Certificate 签发体系另行立项。
+
+## 5. 锚定强度：我们到 `anchored`，`EP-AEC-02` 要 `witnessed`
+
+本节是外审要求补的**差距声明**，不是能力声明。
+
+- 我们目前的锚定链：`seal.json` 签名 → `CORPUS-DIGESTS.txt` → FreeTSA 摘要时间戳（`anchored`）
+  → Bitcoin 区块锚（区块高度与 Merkle 根可由公开浏览器复核）。
+- `draft-schrock-ep-authorization-evidence-chain`（EP-AEC，-02，最新 -08）要求的是**链式见证**：
+  同一份摘要要有独立第三方在场并留可核验记录（`witnessed`）。
+- 差距：我们**没有**第二方为同一摘要联署，也没有透明日志的包含证明。因此：
+  - 可写：`anchored`（时间存在、区块在链上、任何人可复核）；
+  - 不可写：`witnessed`、`independent attestation`、与 EP-AEC-02 等价。
+- 组合验算：`tools/epaec_gate.py` 的组链适配结果只说明"我们的包能被 EP-AEC 的判定器接收并给出
+  预期裁决"，不说明我们满足它的见证要求。
+- 若要把 `anchored` 升级为 `witnessed`，需要的是**外部动作**（第二个机构对同一摘要签名或写入
+  透明日志），不是代码改动；在此之前，本规范不声称达到该强度。

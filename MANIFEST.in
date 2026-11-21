@@ -1,0 +1,52 @@
+# An sdist must be able to check itself.
+#
+# Measured 2026-11-19. The wheel and sdist first built from this repository
+# carried tests/ but not the data and tools those tests read. Unpacking the sdist
+# and running the suite collected 290 of 526 tests, with 6 failures and 97 errors,
+# every one of them "no such file". "526 tests green" was true of a git clone and
+# false of the package an installer receives.
+#
+# Fixing it took three passes, measured each time: 290 collected (6F/97E) ->
+# 475 collected (13F/57E) -> 482 collected (3F/35E) -> 526 collected, because
+# each pass only revealed the next missing directory. The list below is the
+# fourth pass, and it grafts every top-level directory a test can read rather
+# than guessing which ones matter.
+
+include README.md LICENSE NOTICE NOTICE.md CITATION.cff CITATION.bib codemeta.json
+# The register is part of what the package says about itself, and a test reads it
+# from the archive. Shipping tests/ without the file a test opens is the same
+# failure class as the .github gap that made main red between #288 and #294.
+include REPRODUCTION-REGISTER.md
+
+graft uibc_core
+graft tests
+graft fixtures
+graft tools
+graft conformance
+graft examples
+graft adapters
+graft ai
+graft anchors
+graft benchmark
+graft brand
+graft contest
+graft deploy
+graft docs
+graft drafts
+graft evidence
+graft failure_corpus
+graft independent_verifier
+graft lgd-core
+graft mcp_server
+graft paper
+graft registry
+graft registry_server
+graft timestamps
+
+# Built output and byte-code never belong in a source distribution.
+prune tools/out
+prune build
+prune dist
+prune uibc_core.egg-info
+global-exclude __pycache__
+global-exclude *.pyc

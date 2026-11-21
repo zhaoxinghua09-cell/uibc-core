@@ -1,0 +1,13 @@
+{
+  "entries": [
+    {
+      "evidence_id": "a0fdc7ba-0e37-51af-ace3-8e09f7a70c80",
+      "type": "ACTION",
+      "path": "files/oracle-clean-0.txt",
+      "content_hash": "04ac5c6efc909db0a9327bc6d13aeda8e19ef9041d36b211f5caf87ad92ae702",
+      "created_at": "2026-11-15T00:00:00Z",
+      "media_type": "text/plain",
+      "note": "n0"
+    }
+  ]
+}

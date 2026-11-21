@@ -1,0 +1,21 @@
+{
+  "algorithm": "rfc6962-sha256",
+  "size": 2,
+  "root": "8db9c2dd7adcb0097365a61b18e5aba594fbf06368f79651c4b3f7fccad59465",
+  "proofs": [
+    {
+      "index": 0,
+      "path": "files/oracle-s17-receipt-body-0.txt",
+      "proof": [
+        "aaf978b08e4f41a2ea26aa38f83152f5c166a8a5bebee660d2fa2e323ffb9fb6"
+      ]
+    },
+    {
+      "index": 1,
+      "path": "files/oracle-s17-receipt-body-1.txt",
+      "proof": [
+        "e34bd648ac3248f03ffbbde2d20b1e2e63f47f7c02a5961d461694d8e926b74d"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "algorithm": "Ed25519",
+  "key_id": "424a6474e5f2a57cdfaddd2e25085235338544d61ef22763573ae38b5a231da5",
+  "reason_code": "OWNER_REQUEST",
+  "revocation_id": "r-7bb3a32f6700e394",
+  "revoked_at": "2026-11-20T06:29:13Z",
+  "signature": "FkG68fHZcesPtEfIWd3PvgsCYBApmaI9a3VXz0vQviYW4rgMg7OZdQgIBlYGQ5GxAtE5FWRHKG4jHxex1497Cg==",
+  "target_root": "45842bf29d99b15ff5804214cab3d52e26c33a709469f8666ad0f482284af434"
+}

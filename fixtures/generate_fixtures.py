@@ -69,9 +69,9 @@ def build_base(pkg: str):
     ucli.cmd_event(_ns(path=pkg, type="UPDATE", actor="fixture-owner"))
     src1 = os.path.join(HERE, "action-log.txt")
     src2 = os.path.join(HERE, "run-summary.txt")
-    with open(src1, "w", encoding="utf-8") as f:
+    with open(src1, "w", encoding="utf-8", newline="\n") as f:
         f.write(ACTION_V1)
-    with open(src2, "w", encoding="utf-8") as f:
+    with open(src2, "w", encoding="utf-8", newline="\n") as f:
         f.write(SUMMARY)
     ucli.cmd_evidence(_ns(path=pkg, type="ACTION", file=src1,
                           media_type="text/plain", note="action log"))
@@ -102,7 +102,7 @@ def _read(path):
 
 
 def _write(path, obj):
-    with open(path, "w", encoding="utf-8") as f:
+    with open(path, "w", encoding="utf-8", newline="\n") as f:
         json.dump(obj, f, ensure_ascii=False, indent=2)
 
 
@@ -112,7 +112,7 @@ def mut_tampered(pkg):
     """ATTACK-002 Evidence Tampering (archive SS31): rewrite evidence content,
     leave recorded hash stale."""
     p = os.path.join(pkg, "evidence", "files", "action-log.txt")
-    with open(p, "w", encoding="utf-8") as f:
+    with open(p, "w", encoding="utf-8", newline="\n") as f:
         f.write("agent fx-agent executed db:read; result: 999999 rows; reviewed by NOBODY\n")
 
 
@@ -145,7 +145,7 @@ def mut_migrated(pkg):
     evidence content and update the index hash, but do NOT re-seal the
     manifest - the evidence root no longer matches."""
     p = os.path.join(pkg, "evidence", "files", "action-log.txt")
-    with open(p, "w", encoding="utf-8") as f:
+    with open(p, "w", encoding="utf-8", newline="\n") as f:
         f.write(ACTION_V2)
     idxp = os.path.join(pkg, "evidence", "index.json")
     idx = _read(idxp)
@@ -210,7 +210,8 @@ MUTATIONS = {
 # EXPECTED_MATRIX.
 # ---------------------------------------------------------------------------
 EXPECTED_OPEN = {
-    "clean": "PASS (S6 INCONCLUSIVE: seal present, no key to check it with)",
+    "clean": "INCONCLUSIVE (v0.3: S6 INCONCLUSIVE - seal present, no key to check it "
+                "with; an unresolved check now caps the top-level verdict)",
     "tampered": "FAIL (S4 hash mismatch; S5 INCONCLUSIVE - root not recomputable; "
                 "S6 PASS - the seal never covered evidence content)",
     "deleted": "FAIL (S4 missing evidence file; S5 INCONCLUSIVE; S6 PASS - seal untouched)",
@@ -219,10 +220,12 @@ EXPECTED_OPEN = {
     "reordered": "FAIL (S3 lifecycle L1/L4 violations; S6 PASS - lifecycle is outside the seal)",
     "migrated": "FAIL (S4 PASS - index hash was updated; S5 root mismatch vs the "
                 "unchanged manifest; S6 PASS)",
-    "malicious": "PASS in open mode (S6 INCONCLUSIVE -> integrity is unchecked "
-                 "cryptographically; use --key for strict)",
-    "malicious-keyswap": "PASS in open mode (S6 INCONCLUSIVE -> key substitution is "
-                         "UNDETECTABLE without the owner key)",
+    "malicious": "INCONCLUSIVE in open mode (v0.3: S6 INCONCLUSIVE caps the verdict - "
+                 "the forgery is not DETECTED without a key, but it no longer "
+                 "receives a top-level PASS either; use --key for strict)",
+    "malicious-keyswap": "INCONCLUSIVE in open mode (v0.3: S6 INCONCLUSIVE caps the "
+                         "verdict; key substitution remains UNDETECTABLE without the "
+                         "owner key or a pinned public key)",
 }
 
 EXPECTED_STRICT = {
@@ -249,16 +252,23 @@ EXPECTED_STRICT = {
 # a run. A mismatch therefore means one of two real things - the verifier drifted
 # or the prior was wrong - and both stop the build instead of printing quietly.
 #
-# Note the deliberately non-obvious cells: `clean[open]` is result=PASS while
-# S6=INCONCLUSIVE (an unanswerable check must not be laundered into a pass), and
-# `malicious[open]` is PASS while `malicious[strict]` is FAIL on the SAME package
-# - mode, not content, decides the verdict there.
+# v0.3 verdict-semantics change (2026-11, external review): through v0.2 the
+# top-level result was PASS whenever no check FAILed, so an INCONCLUSIVE S6
+# rode along under a PASS - stated in the detail line, but a reader (human or
+# machine) consuming only the top-level verdict saw provenance it could not
+# have had. An external reviewer demonstrated the consequence: a fully
+# self-consistent forgery verified "PASS" in open mode. From seal v0.3 the
+# verdict is three-valued - FAIL if any check FAILs, else INCONCLUSIVE if
+# any check is INCONCLUSIVE, else PASS - so exactly three cells changed,
+# all in open mode, all result-only (no check outcome moved): clean,
+# malicious, malicious-keyswap. `malicious[strict]` remains FAIL on the
+# SAME package - mode, not content, decides the verdict there.
 # ---------------------------------------------------------------------------
 P, F, I, S = "PASS", "FAIL", "INCONCLUSIVE", "SKIP"
 
 EXPECTED_MATRIX = {
     "clean": {
-        "open":     {"result": P, "checks": {"S1": P, "S2": P, "S3": P, "S4": P, "S5": P, "S6": I}},
+        "open":     {"result": I, "checks": {"S1": P, "S2": P, "S3": P, "S4": P, "S5": P, "S6": I}},
         "strict":   {"result": P, "checks": {"S1": P, "S2": P, "S3": P, "S4": P, "S5": P, "S6": P}},
         "attacker": {"result": F, "checks": {"S1": P, "S2": P, "S3": P, "S4": P, "S5": P, "S6": F}},
     },
@@ -288,12 +298,12 @@ EXPECTED_MATRIX = {
         "attacker": {"result": F, "checks": {"S1": P, "S2": P, "S3": P, "S4": P, "S5": F, "S6": F}},
     },
     "malicious": {
-        "open":     {"result": P, "checks": {"S1": P, "S2": P, "S3": P, "S4": P, "S5": P, "S6": I}},
+        "open":     {"result": I, "checks": {"S1": P, "S2": P, "S3": P, "S4": P, "S5": P, "S6": I}},
         "strict":   {"result": F, "checks": {"S1": P, "S2": P, "S3": P, "S4": P, "S5": P, "S6": F}},
         "attacker": {"result": F, "checks": {"S1": P, "S2": P, "S3": P, "S4": P, "S5": P, "S6": F}},
     },
     "malicious-keyswap": {
-        "open":     {"result": P, "checks": {"S1": P, "S2": P, "S3": P, "S4": P, "S5": P, "S6": I}},
+        "open":     {"result": I, "checks": {"S1": P, "S2": P, "S3": P, "S4": P, "S5": P, "S6": I}},
         "strict":   {"result": F, "checks": {"S1": P, "S2": P, "S3": P, "S4": P, "S5": P, "S6": F}},
         "attacker": {"result": P, "checks": {"S1": P, "S2": P, "S3": P, "S4": P, "S5": P, "S6": P}},
     },
@@ -423,7 +433,7 @@ lifecycle / S4 evidence hashes / S5 evidence root / S6 seal signature).
 These fixtures demonstrate detection within the observed evidence boundary of
 the v{__version__} verifier. They do not prove the absence of undetected attacks.
 """
-    with open(os.path.join(HERE, "EXPECTED.md"), "w", encoding="utf-8") as f:
+    with open(os.path.join(HERE, "EXPECTED.md"), "w", encoding="utf-8", newline="\n") as f:
         f.write(md)
     print("\nEXPECTED.md written")
 

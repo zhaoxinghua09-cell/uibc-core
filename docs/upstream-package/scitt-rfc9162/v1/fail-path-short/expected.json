@@ -1,0 +1,18 @@
+{
+  "description": "One sibling dropped from a size-8 path: folding stops a level below the root, so the reconstructed root is a subtree hash rather than the root.",
+  "inclusion_path": [
+    "ded346000e3eb2564a3ac9fa7707b043430e9ce2cdbb43db1570ad0d5bd21291",
+    "9b1036e0a3fc9fcd79211446c67fe0eacf80152d7f6ad1180345ca7dcdc3ac1e"
+  ],
+  "leaf_entry": {
+    "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+    "digest_hex": "8f935333a6032df134af8f7bb13f792520dd0d0cbc64b8f94b01b59f7a7141e5",
+    "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: fail-path-short :: leaf 2",
+    "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a206661696c2d706174682d73686f7274203a3a206c6561662032"
+  },
+  "leaf_index": 2,
+  "reconstructed_root": "68e2133123fa04fd7b28efbc6aa7a4c8b409aefc35438a904ea19106e9809fa1",
+  "result": "INVALID_INCLUSION_PATH",
+  "root_true": "fdddff29a51cc6d1318d5198e1cefaeed82f835b3f7c3baf088a4fe9f134582e",
+  "tree_size": 8
+}

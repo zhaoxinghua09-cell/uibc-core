@@ -1,0 +1,25 @@
+{
+  "schema": "uibc.eqms-verdict/1",
+  "subject": "mb-agent-001",
+  "verdict": "PASS",
+  "findings": [],
+  "counts": {
+    "records": 2,
+    "origins": 2
+  },
+  "origins": [
+    "rev-N",
+    "rev-N-1"
+  ],
+  "scope": "structural self-consistency of the assembled case only; does not judge behaviour, truthfulness of any producer, or completeness",
+  "input_audit": {
+    "digests_given": 2,
+    "digests_computed": 0
+  },
+  "not_claimed": [
+    "not a compliance judgement (PCCP/MDR/FDA or otherwise)",
+    "does not establish that any producer told the truth",
+    "does not establish completeness of the record set",
+    "digests computed from this export cannot prove absence of earlier edits"
+  ]
+}

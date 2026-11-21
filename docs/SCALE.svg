@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="360" viewBox="0 0 1040 360">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="190" y="34" font-family="Helvetica,Arial" font-size="15" fill="#111">Verification time by package size (lower is better)</text>
+<text x="16" y="88" font-family="Helvetica,Arial" font-size="13" fill="#333">verify() · Python</text>
+<rect x="190" y="70" width="4.0" height="14" fill="#2f6fd0" rx="2"/>
+<text x="202.0" y="81" font-family="Helvetica,Arial" font-size="11" fill="#444">100 evidence · 0.007 s · 23.6 MiB</text>
+<rect x="190" y="92" width="31.5" height="14" fill="#2f6fd0" rx="2"/>
+<text x="229.5" y="103" font-family="Helvetica,Arial" font-size="11" fill="#444">1,000 evidence · 0.055 s · 25.1 MiB</text>
+<rect x="190" y="114" width="161.3" height="14" fill="#2f6fd0" rx="2"/>
+<text x="359.3" y="125" font-family="Helvetica,Arial" font-size="11" fill="#444">5,000 evidence · 0.282 s · 31.2 MiB</text>
+<rect x="190" y="136" width="631.4" height="14" fill="#2f6fd0" rx="2"/>
+<text x="829.4" y="147" font-family="Helvetica,Arial" font-size="11" fill="#444">20,000 evidence · 1.104 s · 60.3 MiB</text>
+<text x="16" y="180" font-family="Helvetica,Arial" font-size="13" fill="#333">verify.mjs · JavaScript</text>
+<rect x="190" y="162" width="155.4" height="14" fill="#e08a2e" rx="2"/>
+<text x="353.4" y="173" font-family="Helvetica,Arial" font-size="11" fill="#444">1,000 evidence · 0.204 s · 70.3 MiB</text>
+<rect x="190" y="184" width="230.8" height="14" fill="#e08a2e" rx="2"/>
+<text x="428.8" y="195" font-family="Helvetica,Arial" font-size="11" fill="#444">5,000 evidence · 0.303 s · 104.1 MiB</text>
+<rect x="190" y="206" width="631.4" height="14" fill="#e08a2e" rx="2"/>
+<text x="829.4" y="217" font-family="Helvetica,Arial" font-size="11" fill="#444">20,000 evidence · 0.829 s · 221.7 MiB</text>
+<text x="16" y="342" font-family="Helvetica,Arial" font-size="11" fill="#777">Synthetic packages, unsigned (INCONCLUSIVE by design). JavaScript bars include Node start-up. Source: docs/SCALE.json</text>
+</svg>

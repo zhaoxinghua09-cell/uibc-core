@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="620" viewBox="0 0 1180 620">
+<rect width="1180" height="620" fill="#ffffff"/>
+<text x="40" y="46" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="26" fill="#1a1a1a" font-weight="bold" text-anchor="start">uibc-core 实证看板</text>
+<text x="40" y="72" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="13" fill="#6b6b6b" font-weight="normal" text-anchor="start">所有数字由 tools/ 下的脚本生成，可原样复跑；竞品事实见 docs/COMPETITOR-FACTS.json（含出处与核实日期）</text>
+<text x="40" y="110" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="16" fill="#1a1a1a" font-weight="bold" text-anchor="start">同一个包，三个渠道各报几项检查</text>
+<text x="40" y="160" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="13" fill="#6b6b6b" font-weight="normal" text-anchor="start">archive (DOI)</text>
+<rect x="230" y="144" width="82" height="22" fill="#1f5fa8" rx="2"/>
+<text x="498" y="160" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="14" fill="#1a1a1a" font-weight="bold" text-anchor="start">6</text>
+<text x="40" y="206" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="13" fill="#6b6b6b" font-weight="normal" text-anchor="start">package (pip)</text>
+<rect x="230" y="190" width="82" height="22" fill="#1f5fa8" rx="2"/>
+<text x="498" y="206" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="14" fill="#1a1a1a" font-weight="bold" text-anchor="start">6</text>
+<text x="40" y="252" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="13" fill="#6b6b6b" font-weight="normal" text-anchor="start">repository</text>
+<rect x="230" y="236" width="260" height="22" fill="#1f5fa8" rx="2"/>
+<text x="498" y="252" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="14" fill="#1a1a1a" font-weight="bold" text-anchor="start">19</text>
+<text x="40" y="288" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="12" fill="#6b6b6b" font-weight="normal" text-anchor="start">差在发布，不在代码：仓库有 19 项，发布件只到 6。</text>
+<text x="620" y="110" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="16" fill="#1a1a1a" font-weight="bold" text-anchor="start">十八项检查的依据从哪来</text>
+<rect x="620" y="132" width="173" height="34" fill="#1f5fa8"/>
+<text x="706" y="155" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="15" fill="#ffffff" font-weight="bold" text-anchor="middle">7</text>
+<rect x="793" y="132" width="197" height="34" fill="#7fa8d4"/>
+<text x="891" y="155" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="15" fill="#ffffff" font-weight="bold" text-anchor="middle">8</text>
+<rect x="990" y="132" width="98" height="34" fill="#d8d8d8"/>
+<text x="1039" y="155" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="15" fill="#1a1a1a" font-weight="bold" text-anchor="middle">4</text>
+<rect x="620" y="180" width="12" height="12" fill="#1f5fa8"/>
+<text x="638" y="191" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="12" fill="#6b6b6b" font-weight="normal" text-anchor="start">草案明文规定 7 项</text>
+<rect x="770" y="180" width="12" height="12" fill="#7fa8d4"/>
+<text x="788" y="191" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="12" fill="#6b6b6b" font-weight="normal" text-anchor="start">思想来源 8 项</text>
+<rect x="920" y="180" width="12" height="12" fill="#d8d8d8"/>
+<text x="938" y="191" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="12" fill="#6b6b6b" font-weight="normal" text-anchor="start">本项目自定 4 项</text>
+<text x="620" y="218" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="12" fill="#6b6b6b" font-weight="normal" text-anchor="start">标成「无」的四项，citation 字段是空字符串——</text>
+<text x="620" y="236" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="12" fill="#6b6b6b" font-weight="normal" text-anchor="start">写论文时不许给它们补一个看起来像的编号。</text>
+<text x="40" y="330" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="16" fill="#1a1a1a" font-weight="bold" text-anchor="start">同样 4 类攻击，各报出几条具体原因</text>
+<text x="40" y="364" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="13" fill="#6b6b6b" font-weight="normal" text-anchor="start">uibc-core</text>
+<rect x="250" y="350" width="280" height="24" fill="#1f5fa8" rx="2"/>
+<text x="540" y="368" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="15" fill="#1a1a1a" font-weight="bold" text-anchor="start">13</text>
+<text x="40" y="400" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="13" fill="#6b6b6b" font-weight="normal" text-anchor="start">agent-action-capsule</text>
+<rect x="250" y="386" width="107" height="24" fill="#b8532a" rx="2"/>
+<text x="540" y="404" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="15" fill="#1a1a1a" font-weight="bold" text-anchor="start">5</text>
+<text x="40" y="434" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="12" fill="#6b6b6b" font-weight="normal" text-anchor="start">别把它读成「更好」：他们一条原因覆盖整个 capsule，</text>
+<text x="40" y="452" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="12" fill="#6b6b6b" font-weight="normal" text-anchor="start">我们一条原因指向一个文件。粒度不同，条数才不同。</text>
+<text x="660" y="330" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="16" fill="#b8532a" font-weight="bold" text-anchor="start">外部第三方见证（我们落后的一项）</text>
+<text x="660" y="364" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="13" fill="#6b6b6b" font-weight="normal" text-anchor="start">我们</text>
+<rect x="760" y="350" width="2" height="22" fill="#1f5fa8" rx="2"/>
+<text x="1012" y="366" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="15" fill="#b8532a" font-weight="bold" text-anchor="start">0</text>
+<text x="660" y="400" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="13" fill="#6b6b6b" font-weight="normal" text-anchor="start">他们</text>
+<rect x="760" y="386" width="240" height="22" fill="#b8532a" rx="2"/>
+<text x="1012" y="402" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="15" fill="#1a1a1a" font-weight="bold" text-anchor="start">13</text>
+<text x="660" y="432" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="11" fill="#6b6b6b" font-weight="normal" text-anchor="start">（10 ran and verified, 2 agreed, 1 HOLD）</text>
+<text x="660" y="460" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="12" fill="#6b6b6b" font-weight="normal" text-anchor="start">已进入他人仓库：3 处</text>
+<text x="660" y="480" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="12" fill="#6b6b6b" font-weight="normal" text-anchor="start">在线验证端点：有</text>
+<text x="660" y="504" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="12" fill="#b8532a" font-weight="normal" text-anchor="start">这一栏我们输，图上不遮。</text>
+<line x1="40" y1="558" x2="1140" y2="558" stroke="#e2e2e2"/>
+<text x="40" y="584" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="11" fill="#6b6b6b" font-weight="normal" text-anchor="start">复跑：python3 tools/build_dashboard.py > docs/DASHBOARD.svg   （数据源：check_release_parity / compare_diagnostics / uibc_core.basis）</text>
+</svg>

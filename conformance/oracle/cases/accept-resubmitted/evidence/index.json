@@ -1,0 +1,13 @@
+{
+  "entries": [
+    {
+      "evidence_id": "a4b88219-4b42-5189-a434-d64387a6b453",
+      "type": "ACTION",
+      "path": "files/accept-resubmitted-log.txt",
+      "content_hash": "09c1e697582353c3862b25881312405229922a80f651f319d45adfbfa6a4299e",
+      "created_at": "2026-11-15T00:00:00Z",
+      "media_type": "text/plain",
+      "note": "log.txt"
+    }
+  ]
+}

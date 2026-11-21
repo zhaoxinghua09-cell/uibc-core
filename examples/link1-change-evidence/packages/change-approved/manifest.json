@@ -1,0 +1,9 @@
+{
+  "schema": "uibc-core/0.3.3-proposal",
+  "agent_id": "cardiopatch-cp2-change-evidence",
+  "agent_version": "1.2.0",
+  "created_at": "2026-11-18T00:10:25Z",
+  "evidence_count": 4,
+  "evidence_root": "6c9068ffa56150b873a86aeb997f3b7ab50457e64b203bde8d9e7b9c40fd7a84",
+  "status": "SUBMITTED"
+}

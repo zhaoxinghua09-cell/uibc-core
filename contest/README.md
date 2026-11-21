@@ -1,4 +1,10 @@
-# UIBC 赛事章程 v0.1（草案，待组委会审议）
+# UIBC 赛事章程 v0.2（草案，待组委会审议）
+
+> v0.2（2026-11-12）：对齐 uibc-core v0.3.0（Ed25519 公开封签、三值
+> 裁决、PyPI 分发）。内测三件未决的进度如实更新：自动编排 ✅
+> （contest/runner.py：指纹＋查重＋门禁＋存档一条命令）、真实指纹 ✅
+> （SimHash 标记＋人工定论，runner 内置）、组委会人工审核流程 ⏳
+> （仍待组委会走一遍——即本文与赛题集的终审，在主办方）。
 
 **全称**：Unified Interoperable Benchmark Contest（UIBC 赛事线）
 **赛季主题**：迁移的判定与问责（Judgment & Accountability under Migration）
@@ -34,7 +40,8 @@
 
 ## 身份链
 
-四规范（本目录 + 上游规范）→ 认证防伪（提交包 HMAC 封签）→ 成果 DOI
+四规范（本目录 + 上游规范）→ 认证防伪（提交包 Ed25519 公开封签＋
+评审端公钥钉扎）→ 成果 DOI
 存证（赛后）→ 理论回流（获奖作品回流为 fixtures / failure corpus /
 独立实现）。
 

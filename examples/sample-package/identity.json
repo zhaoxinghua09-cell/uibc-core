@@ -1,0 +1,9 @@
+{
+  "schema": "uibc-core/0.2.2-proposal",
+  "agent_id": "sample-support-agent",
+  "agent_type": "software-agent",
+  "owner": "sample-owner",
+  "created_at": "2026-11-10T08:15:39Z",
+  "status": "REGISTERED",
+  "version": "1.0.0"
+}

@@ -2,8 +2,8 @@
   "schema": "uibc-core/0.2.2-proposal",
   "agent_id": "fx-agent-001",
   "agent_version": "0.1.0",
-  "created_at": "2026-09-18T12:59:09Z",
+  "created_at": "2026-11-06T06:21:04Z",
   "evidence_count": 2,
-  "evidence_root": "0c80ee13d8eadb8347ccaa34f079da79d7ad3ccb1afc67f8cc3944031ac62fa7",
+  "evidence_root": "9469791a14085cb5d4a81b970b61fbb34ab9bad41114b4efa9f15381b9bcef50",
   "status": "SUBMITTED"
 }

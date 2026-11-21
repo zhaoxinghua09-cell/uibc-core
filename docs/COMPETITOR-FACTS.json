@@ -1,0 +1,16 @@
+{
+  "subject": "agent-action-capsule",
+  "version": "0.17.0",
+  "verified_on": "2026-11-18",
+  "source": "https://pypi.org/pypi/agent-action-capsule/json ; https://api.github.com/repos/action-state-group/agent-action-capsule ; raw.githubusercontent.com .../INTEROP.md ; .../IMPLEMENTATIONS.md",
+  "third_party_implementations": 13,
+  "third_party_detail": "10 ran and verified, 2 agreed, 1 HOLD",
+  "landed_in_other_repos": [
+    "ietf-wg-scitt/examples PR #3",
+    "projnanda/nandatown PR #197",
+    "projnanda/nandatown PR #200"
+  ],
+  "has_online_verifier": true,
+  "online_verifier": "https://verify.actionstate.ai",
+  "note": "Numbers here were read from the sources above on the date given. They are not updated by any tool; if this file is stale, the table it feeds is stale."
+}

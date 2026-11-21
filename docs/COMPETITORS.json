@@ -1,0 +1,21 @@
+{
+  "ours": {
+    "checks": 19,
+    "conformance_cases": 36,
+    "github_error": "HTTPError: HTTP Error 403: Forbidden",
+    "pypi_last_upload": "2026-11-18T17:19:15",
+    "pypi_latest": "0.4.0",
+    "pypi_releases": 5,
+    "pypi_requires_python": ">=3.10",
+    "stars": null,
+    "tests": 594
+  },
+  "peer": {
+    "github_error": "HTTPError: HTTP Error 403: Forbidden",
+    "pypi_last_upload": "2026-11-18T05:03:38",
+    "pypi_latest": "0.17.0",
+    "pypi_releases": 23,
+    "pypi_requires_python": ">=3.9",
+    "stars": null
+  }
+}

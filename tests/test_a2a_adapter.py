@@ -22,7 +22,7 @@ from uibc_core.signing import generate_key
 from adapters.a2a.server import A2AAdapter, make_handler  # noqa: E402
 
 
-def _make_pkg(tmp, name, key_hex=None):
+def _make_pkg(tmp, name, key_hex=None, ed=False):
     pkg = os.path.join(tmp, name)
     ucli.cmd_init(type("A", (), {"path": pkg})())
     ucli.cmd_register(type("A", (), {
@@ -39,6 +39,11 @@ def _make_pkg(tmp, name, key_hex=None):
         kf = os.path.join(tmp, name + ".key")
         with open(kf, "w", encoding="ascii") as f:
             f.write(key_hex)
+    if ed:
+        from uibc_core.signing import ed_generate_seed
+        kf = os.path.join(tmp, name + ".edkey")
+        with open(kf, "w", encoding="ascii") as f:
+            f.write("ed25519:" + ed_generate_seed().hex())
     ucli.cmd_submit(type("A", (), {"path": pkg, "key": kf})())
     return pkg
 
@@ -58,7 +63,8 @@ class A2AAdapterTests(unittest.TestCase):
     def setUpClass(cls):
         cls.tmp = tempfile.mkdtemp(prefix="a2a-")
         cls.key = generate_key()
-        _make_pkg(cls.tmp, "good.uibc")
+        # v0.3: "good" earns its open-mode PASS with a public Ed25519 seal
+        _make_pkg(cls.tmp, "good.uibc", ed=True)
         _make_pkg(cls.tmp, "sealed.uibc", cls.key.hex())
         # a tampered copy of good
         shutil.copytree(os.path.join(cls.tmp, "good.uibc"),

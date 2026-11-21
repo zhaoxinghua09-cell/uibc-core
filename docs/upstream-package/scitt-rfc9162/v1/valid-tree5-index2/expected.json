@@ -1,0 +1,19 @@
+{
+  "description": "tree_size=5, leaf_index=2: middle leaf of an unbalanced tree.",
+  "inclusion_path": [
+    "c27a74a465c2a37c7398e6258c6605d649e9573572fe0acf55c43f99eb97de49",
+    "65fe4354ee321ac76b55fb8622fc77e57c5f56e2fd77d6326ddcc690882fabdb",
+    "b4a579a686e9f1fe56f4424437ea87e3cf8381c33cc4a5c07a9fecefc58ef5f0"
+  ],
+  "leaf_entry": {
+    "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+    "digest_hex": "2cb5a1728fca12dd5f7a38ddd68f3d87d1f4078bd4a5a40b46034450584fa2e4",
+    "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: valid-tree5-index2 :: leaf 2",
+    "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a2076616c69642d74726565352d696e64657832203a3a206c6561662032"
+  },
+  "leaf_index": 2,
+  "reconstructed_root": "cdc407515d15225c05ba42565a2ed9c93cee32ab4eb5d93c2a439df113c63b4a",
+  "result": "VALID",
+  "root_true": "cdc407515d15225c05ba42565a2ed9c93cee32ab4eb5d93c2a439df113c63b4a",
+  "tree_size": 5
+}

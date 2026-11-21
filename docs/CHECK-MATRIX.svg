@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1164" height="804" viewBox="0 0 1164 804">
+<rect width="1164" height="804" fill="#fff"/>
+<text x="32" y="44" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="24" fill="#1a1a1a" font-weight="bold">每个攻击动了哪几项检查</text>
+<text x="32" y="70" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="12" fill="#6b6b6b">36 个攻击，32 个只让一项失败；右侧红格是一项攻击同时动了多项的地方，如实标出</text>
+<text x="315" y="122" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="11" fill="#6b6b6b" text-anchor="middle">S1</text>
+<text x="361" y="122" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="11" fill="#6b6b6b" text-anchor="middle">S2</text>
+<text x="407" y="122" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="11" fill="#6b6b6b" text-anchor="middle">S3</text>
+<text x="453" y="122" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="11" fill="#6b6b6b" text-anchor="middle">S4</text>
+<text x="499" y="122" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="11" fill="#6b6b6b" text-anchor="middle">S5</text>
+<text x="545" y="122" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="11" fill="#6b6b6b" text-anchor="middle">S6</text>
+<text x="591" y="122" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="11" fill="#6b6b6b" text-anchor="middle">S7</text>
+<text x="637" y="122" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="11" fill="#6b6b6b" text-anchor="middle">S8</text>
+<text x="683" y="122" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="11" fill="#6b6b6b" text-anchor="middle">S9</text>
+<text x="729" y="122" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="11" fill="#6b6b6b" text-anchor="middle">S10</text>
+<text x="775" y="122" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="11" fill="#6b6b6b" text-anchor="middle">S11</text>
+<text x="821" y="122" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="11" fill="#6b6b6b" text-anchor="middle">S12</text>
+<text x="867" y="122" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="11" fill="#6b6b6b" text-anchor="middle">S13</text>
+<text x="913" y="122" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="11" fill="#6b6b6b" text-anchor="middle">S14</text>
+<text x="959" y="122" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="11" fill="#6b6b6b" text-anchor="middle">S15</text>
+<text x="1005" y="122" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="11" fill="#6b6b6b" text-anchor="middle">S16</text>
+<text x="1051" y="122" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="11" fill="#6b6b6b" text-anchor="middle">S17</text>
+<text x="1097" y="122" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="11" fill="#6b6b6b" text-anchor="middle">S18</text>
+<text x="280" y="143" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end">flip one byte in evidence</text>
+<rect x="434" y="133" width="38" height="12" fill="#1f5fa8" rx="2"/>
+<text x="280" y="159" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end">truncate one evidence file</text>
+<rect x="434" y="149" width="38" height="12" fill="#1f5fa8" rx="2"/>
+<text x="280" y="175" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end">delete one evidence file</text>
+<rect x="434" y="165" width="38" height="12" fill="#1f5fa8" rx="2"/>
+<text x="280" y="191" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end">edit the evidence root</text>
+<rect x="480" y="181" width="38" height="12" fill="#1f5fa8" rx="2"/>
+<text x="280" y="207" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end">add an undeclared file</text>
+<rect x="296" y="197" width="38" height="12" fill="#1f5fa8" rx="2"/>
+<text x="280" y="223" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end">duplicate a JSON member name</text>
+<rect x="756" y="213" width="38" height="12" fill="#1f5fa8" rx="2"/>
+<text x="280" y="239" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end">impossible calendar date</text>
+<rect x="388" y="229" width="38" height="12" fill="#b8532a" rx="2"/>
+<rect x="802" y="229" width="38" height="12" fill="#b8532a" rx="2"/>
+<text x="280" y="255" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end">mismatch agent identity</text>
+<rect x="342" y="245" width="38" height="12" fill="#1f5fa8" rx="2"/>
+<text x="280" y="271" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end">drop the tail entry and file</text>
+<rect x="480" y="261" width="38" height="12" fill="#1f5fa8" rx="2"/>
+<text x="280" y="287" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end">deregister an entry, keep the file</text>
+<rect x="480" y="277" width="38" height="12" fill="#1f5fa8" rx="2"/>
+<text x="280" y="303" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end">tamper the seal</text>
+<rect x="526" y="293" width="38" height="12" fill="#1f5fa8" rx="2"/>
+<text x="280" y="319" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end">replace merkle root</text>
+<rect x="848" y="309" width="38" height="12" fill="#1f5fa8" rx="2"/>
+<text x="280" y="335" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end">inflate merkle size</text>
+<rect x="848" y="325" width="38" height="12" fill="#1f5fa8" rx="2"/>
+<text x="280" y="351" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end">corrupt one inclusion proof</text>
+<rect x="848" y="341" width="38" height="12" fill="#1f5fa8" rx="2"/>
+<text x="280" y="367" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end">swap a proof index</text>
+<rect x="848" y="357" width="38" height="12" fill="#1f5fa8" rx="2"/>
+<text x="280" y="383" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end">edit a receipt body</text>
+<rect x="1032" y="373" width="38" height="12" fill="#1f5fa8" rx="2"/>
+<text x="280" y="399" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end">claim a genesis predecessor</text>
+<rect x="1032" y="389" width="38" height="12" fill="#1f5fa8" rx="2"/>
+<text x="280" y="415" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end">strip base64 padding</text>
+<rect x="894" y="405" width="38" height="12" fill="#1f5fa8" rx="2"/>
+<text x="280" y="431" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end">put a stray character in base64</text>
+<rect x="894" y="421" width="38" height="12" fill="#1f5fa8" rx="2"/>
+<text x="280" y="447" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end">corrupt an anchor inclusion proof</text>
+<rect x="940" y="437" width="38" height="12" fill="#1f5fa8" rx="2"/>
+<text x="280" y="463" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end">make a leaf hash a non-digest</text>
+<rect x="940" y="453" width="38" height="12" fill="#1f5fa8" rx="2"/>
+<text x="280" y="479" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end">date an anchor 30 February</text>
+<rect x="940" y="469" width="38" height="12" fill="#1f5fa8" rx="2"/>
+<text x="280" y="495" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end">anchor to a root we cannot recompute</text>
+<rect x="940" y="485" width="38" height="12" fill="#1f5fa8" rx="2"/>
+<text x="280" y="511" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end">edit a policy artefact</text>
+<rect x="1078" y="501" width="38" height="12" fill="#1f5fa8" rx="2"/>
+<text x="280" y="527" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end">point a policy digest at nothing</text>
+<rect x="1078" y="517" width="38" height="12" fill="#1f5fa8" rx="2"/>
+<text x="280" y="543" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end">claim the token dates another file</text>
+<rect x="986" y="533" width="38" height="12" fill="#1f5fa8" rx="2"/>
+<text x="280" y="559" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end">misdeclare the token digest</text>
+<rect x="986" y="549" width="38" height="12" fill="#1f5fa8" rx="2"/>
+<text x="280" y="575" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end">flip one byte in the token</text>
+<rect x="986" y="565" width="38" height="12" fill="#1f5fa8" rx="2"/>
+<text x="280" y="591" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end">drop the CA bundle</text>
+<rect x="986" y="581" width="38" height="12" fill="#1f5fa8" rx="2"/>
+<text x="280" y="607" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end">rewrite index metadata, content untouched</text>
+<rect x="572" y="597" width="38" height="12" fill="#b8532a" rx="2"/>
+<rect x="618" y="597" width="38" height="12" fill="#b8532a" rx="2"/>
+<text x="280" y="623" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end">drop engine_build from the closure</text>
+<rect x="710" y="613" width="38" height="12" fill="#1f5fa8" rx="2"/>
+<text x="280" y="639" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end">truncate the lifecycle log</text>
+<rect x="618" y="629" width="38" height="12" fill="#1f5fa8" rx="2"/>
+<text x="280" y="655" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end">declare a closure digest that is not a diges</text>
+<rect x="710" y="645" width="38" height="12" fill="#1f5fa8" rx="2"/>
+<text x="280" y="671" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end">the true head against its own pin  (passes, as it should)</text>
+<text x="280" y="687" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end">a rolled-back package against the old pin</text>
+<rect x="664" y="677" width="38" height="12" fill="#1f5fa8" rx="2"/>
+<text x="280" y="703" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="10" fill="#b8532a" text-anchor="end">edit the last receipt's body  (not caught)</text>
+<text x="32" y="780" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, sans-serif" font-size="11" fill="#6b6b6b">复跑：python3 tools/check_matrix.py   （数据源：outsider_audit.py --json）</text>
+</svg>

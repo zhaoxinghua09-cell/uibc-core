@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-label="UIBC Core mark">
+  <title>UIBC Core</title>
+  <rect width="128" height="128" rx="20" fill="#0b1f33"/>
+  <path d="M64 18 104 34v34c0 24-18 40-40 46-22-6-40-22-40-46V34z" fill="none" stroke="#3fb6a8" stroke-width="4"/>
+  <rect x="44" y="46" width="40" height="8" rx="3" fill="#3fb6a8"/>
+  <rect x="44" y="62" width="40" height="8" rx="3" fill="#f2c14e"/>
+  <rect x="44" y="78" width="40" height="8" rx="3" fill="#e06666"/>
+  <circle cx="64" cy="100" r="4" fill="#e8eef4"/>
+</svg>

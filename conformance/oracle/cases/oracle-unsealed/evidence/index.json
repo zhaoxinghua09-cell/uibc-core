@@ -1,0 +1,13 @@
+{
+  "entries": [
+    {
+      "evidence_id": "8c99e0e4-6175-55d2-a0b2-582d994bf897",
+      "type": "ACTION",
+      "path": "files/oracle-unsealed-0.txt",
+      "content_hash": "8ee9e3d21bf4524ce5e2a8ceb1e0387ed93f5238e522e5c31bdab8ee10eb944c",
+      "created_at": "2026-11-15T00:00:00Z",
+      "media_type": "text/plain",
+      "note": "n0"
+    }
+  ]
+}

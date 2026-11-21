@@ -1,0 +1,498 @@
+{
+  "meta": {
+    "generated_at_utc": "2026-11-20T10:20:32Z",
+    "verifier": "uibc-core verify()",
+    "package": "mb-agent-001",
+    "base_open": "PASS",
+    "base_pinned": "PASS",
+    "note": "PASS 在 open 模式即视为'被接受'；INCONCLUSIVE / FAIL 均记未接受"
+  },
+  "summary": {
+    "open": {
+      "accepted": 2,
+      "total": 21,
+      "false_accept_rate": 9.5
+    },
+    "pinned": {
+      "accepted": 1,
+      "total": 21,
+      "false_accept_rate": 4.8
+    },
+    "head-pinned": {
+      "accepted": 0,
+      "total": 21,
+      "false_accept_rate": 0.0
+    }
+  },
+  "rows": [
+    {
+      "id": "M01 manifest.agent_id",
+      "mutation": "替换 agent_id 为 evil-agent",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S2",
+            "S6"
+          ],
+          "accepted": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S2",
+            "S6"
+          ],
+          "accepted": false
+        }
+      }
+    },
+    {
+      "id": "M02 manifest.evidence_root",
+      "mutation": "把证据根换成全 0",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S5",
+            "S6"
+          ],
+          "accepted": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S5",
+            "S6"
+          ],
+          "accepted": false
+        }
+      }
+    },
+    {
+      "id": "M03 manifest.agent_version",
+      "mutation": "改版本号",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S6"
+          ],
+          "accepted": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S6"
+          ],
+          "accepted": false
+        }
+      }
+    },
+    {
+      "id": "M04 manifest.status",
+      "mutation": "自封 APPROVED",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S6"
+          ],
+          "accepted": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S6"
+          ],
+          "accepted": false
+        }
+      }
+    },
+    {
+      "id": "M05 manifest 增字段",
+      "mutation": "伪造 human_approval=granted",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S6"
+          ],
+          "accepted": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S6"
+          ],
+          "accepted": false
+        }
+      }
+    },
+    {
+      "id": "M06 identity.owner",
+      "mutation": "换所有者",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S3",
+            "S6"
+          ],
+          "accepted": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S3",
+            "S6"
+          ],
+          "accepted": false
+        }
+      }
+    },
+    {
+      "id": "M07 identity.agent_type",
+      "mutation": "改代理类型",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S6"
+          ],
+          "accepted": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S6"
+          ],
+          "accepted": false
+        }
+      }
+    },
+    {
+      "id": "M08 lifecycle 时间戳",
+      "mutation": "把 ACTIVATE 时间改到 2030",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S3",
+            "S12",
+            "S8",
+            "S6"
+          ],
+          "accepted": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S3",
+            "S12",
+            "S8",
+            "S6"
+          ],
+          "accepted": false
+        }
+      }
+    },
+    {
+      "id": "M09 lifecycle actor",
+      "mutation": "把 REGISTER 的 actor 改成 attacker",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S3",
+            "S6"
+          ],
+          "accepted": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S3",
+            "S6"
+          ],
+          "accepted": false
+        }
+      }
+    },
+    {
+      "id": "M10 lifecycle 删首事件",
+      "mutation": "删 REGISTER（断链）",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S3",
+            "S8",
+            "S6"
+          ],
+          "accepted": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S3",
+            "S8",
+            "S6"
+          ],
+          "accepted": false
+        }
+      }
+    },
+    {
+      "id": "M11 lifecycle 插入事件",
+      "mutation": "追加非法 ACTIVATE",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S3",
+            "S8",
+            "S6"
+          ],
+          "accepted": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S3",
+            "S8",
+            "S6"
+          ],
+          "accepted": false
+        }
+      }
+    },
+    {
+      "id": "M12 证据内容改 1 字节",
+      "mutation": "改 action.log 中间字节",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S4",
+            "S8"
+          ],
+          "accepted": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S4",
+            "S8"
+          ],
+          "accepted": false
+        }
+      }
+    },
+    {
+      "id": "M13 证据扩表",
+      "mutation": "追加文件+条��（哈希自洽）",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S4",
+            "S12",
+            "S7",
+            "S8"
+          ],
+          "accepted": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S4",
+            "S12",
+            "S7",
+            "S8"
+          ],
+          "accepted": false
+        }
+      }
+    },
+    {
+      "id": "M14 证据删条",
+      "mutation": "从 index 删掉一条",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S12",
+            "S7",
+            "S8",
+            "S5"
+          ],
+          "accepted": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S12",
+            "S7",
+            "S8",
+            "S5"
+          ],
+          "accepted": false
+        }
+      }
+    },
+    {
+      "id": "M15 证据删文件",
+      "mutation": "删掉 run-summary.txt / eval.txt",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S4",
+            "S8"
+          ],
+          "accepted": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S4",
+            "S8"
+          ],
+          "accepted": false
+        }
+      }
+    },
+    {
+      "id": "M16 封签改 1 字节",
+      "mutation": "签名末字节翻转",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S6"
+          ],
+          "accepted": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S6"
+          ],
+          "accepted": false
+        }
+      }
+    },
+    {
+      "id": "M17 换钥重签（keyswap）",
+      "mutation": "攻击者公钥+攻击者私钥重签",
+      "modes": {
+        "open": {
+          "verdict": "PASS",
+          "failed_checks": [],
+          "accepted": true
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S6"
+          ],
+          "accepted": false
+        }
+      }
+    },
+    {
+      "id": "M18 包内外挂文件",
+      "mutation": "根目录加 notes.md",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S1"
+          ],
+          "accepted": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S1"
+          ],
+          "accepted": false
+        }
+      }
+    },
+    {
+      "id": "M19 索引元数据",
+      "mutation": "改 index 条目的 type/note（不动文件）",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S7",
+            "S8"
+          ],
+          "accepted": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S7",
+            "S8"
+          ],
+          "accepted": false
+        }
+      }
+    },
+    {
+      "id": "M20 整包回滚（装在旧包）",
+      "mutation": "用旧的自洽包替换当前状态",
+      "modes": {
+        "open": {
+          "verdict": "PASS",
+          "failed_checks": [],
+          "accepted": true
+        },
+        "pinned": {
+          "verdict": "PASS",
+          "failed_checks": [],
+          "accepted": true
+        },
+        "head-pinned": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S9"
+          ],
+          "accepted": false
+        }
+      }
+    },
+    {
+      "id": "M21 未封签包截断尾部",
+      "mutation": "删掉最后一条事件，manifest 仍写长链",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S8"
+          ],
+          "accepted": false
+        },
+        "head-pinned": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S8",
+            "S9"
+          ],
+          "accepted": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S8"
+          ],
+          "accepted": false
+        }
+      }
+    }
+  ]
+}

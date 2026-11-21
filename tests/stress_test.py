@@ -123,7 +123,11 @@ class StressTest(unittest.TestCase):
                 ucli.cmd_evidence(type("A", (), {
                     "path": pkg, "type": "ACTION", "file": src,
                     "media_type": "text/plain", "note": f"entry {i}"})())
-            ucli.cmd_submit(type("A", (), {"path": pkg})())
+            # seal v0.3: a top-level PASS must be earned by a resolvable
+            # seal - seal publicly (Ed25519) before verifying.
+            kf = os.path.join(tmp, "owner.edkey")
+            ucli.cmd_keygen(type("A", (), {"out": kf, "ed25519": True})())
+            ucli.cmd_submit(type("A", (), {"path": pkg, "key": kf})())
             build_time = time.perf_counter() - t0
 
             t0 = time.perf_counter()
@@ -176,6 +180,10 @@ class StressTest(unittest.TestCase):
                 self.assertEqual(run("evidence", pkg, "--type", "OUTPUT",
                                      "--file", fp).returncode, 0)
             self.assertEqual(run("submit", pkg).returncode, 0)
+            # seal v0.3: seal publicly (Ed25519) so open verify can PASS
+            kf = os.path.join(tmp, "owner.key")
+            self.assertEqual(run("keygen", "--ed25519", "--out", kf).returncode, 0)
+            self.assertEqual(run("submit", pkg, "--key", kf).returncode, 0)
             r = run("verify", pkg)
             total = time.perf_counter() - t0
             self.assertEqual(r.returncode, 0)

@@ -1,0 +1,23 @@
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareSourceCode",
+  "name": "UIBC — Uniform Identity-Behavior Chain",
+  "alternateName": "uibc-core",
+  "url": "https://github.com/zhaoxinghua09-cell/uibc-core",
+  "author": {
+    "@type": "Person",
+    "name": "Zhao Xinghua (Steven Zhao)",
+    "identifier": "https://orcid.org/0009-0001-0512-1237"
+  },
+  "codeRepository": "https://github.com/zhaoxinghua09-cell/uibc-core",
+  "programmingLanguage": "Python",
+  "description": "Machine-checkable norms for LGD: evidence-package manifest schema, validator, conformance vectors, and an independent verifier. Test counts and version numbers are deliberately omitted here because they date quickly; the current figures live in the repository README and docs/CONFORMANCE.md.",
+  "keywords": [
+    "agent evidence",
+    "verifiable evidence package",
+    "LGD",
+    "verifier"
+  ],
+  "license": "https://spdx.org/licenses/Apache-2.0.html",
+  "usageInfo": "Layered: code Apache-2.0 (see LICENSE); theory text, methodology and normative statements All Rights Reserved (see NOTICE.md)."
+}

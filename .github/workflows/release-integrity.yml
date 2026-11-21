@@ -1,0 +1,115 @@
+name: Release integrity
+
+# A published release is supposed to be a fixed set of bytes. This job is the only
+# thing that would notice if it stopped being one: on 2026-11-20 the release workflow
+# rewrote the same tag three times and every check stayed green, because nothing
+# compared the page against what it had said the day before.
+
+on:
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+
+      # The timestamp is checked offline against the bytes the page serves, then the
+      # whole page is compared with anchors/pins/uibc-release-<tag>.json.
+      - name: Does the page still serve what it was pinned at?
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python -m pip install --quiet cryptography asn1crypto
+          set +e
+          python tools/check_release_anchors.py --json > anchors-report.json
+          code=$?
+          cat anchors-report.json
+          if [ "$code" -eq 1 ]; then
+            echo "::error::the release drifted from its pin, or its timestamp no longer verifies"
+            exit 1
+          fi
+          if [ "$code" -eq 3 ]; then
+            echo "::warning::could not measure today (network or tool missing); not a pass"
+          fi
+
+      # The prior question, for every tag at once: does each release carry a record
+      # of what it holds? A release with no pin cannot be told apart from one that
+      # was rewritten afterwards, and v0.4.1 was rewritten three times on 2026-11-20.
+      - name: Does every release carry a pin?
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set +e
+          python tools/check_release_pins.py
+          code=$?
+          if [ "$code" -eq 1 ]; then
+            echo "::error::a release is unpinned, or its page differs from its pin"
+            exit 1
+          fi
+          if [ "$code" -eq 3 ]; then
+            echo "::warning::could not enumerate every release today"
+          fi
+
+      # The page about the page. STATUS.md is generated from repository files and is
+      # meant to be the one place a reader can trust without re-running anything; on
+      # 2026-11-20 a one-character drift in it (36 cases written as 35) was caught by
+      # `--check` and by nothing else, because no scheduled job ran it. Both doc gates
+      # below need only the checkout, so they cost seconds and run every night.
+      - name: Does the status page still match its sources?
+        run: |
+          set +e
+          python tools/status_page.py --check
+          code=$?
+          if [ "$code" -eq 1 ]; then
+            echo "::error::STATUS.md no longer matches the repository; run python tools/status_page.py"
+            exit 1
+          fi
+          if [ "$code" -eq 3 ]; then
+            echo "::warning::could not regenerate the status page today; not a pass"
+          fi
+
+      - name: Do the documents still agree with the files they cite?
+        run: |
+          set +e
+          python tools/check_doc_facts.py > doc-facts-report.json
+          code=$?
+          cat doc-facts-report.json
+          if [ "$code" -eq 1 ]; then
+            echo "::error::a document states a fact the repository no longer supports"
+            exit 1
+          fi
+          if [ "$code" -eq 3 ]; then
+            echo "::warning::could not measure the document facts today"
+          fi
+
+      # The documented entry points are probed anonymously: both URLs must serve the
+      # pinned archive, and no document may point at another version's asset.
+      - name: Can a stranger still walk in?
+        run: |
+          set +e
+          python tools/check_outsider_entry.py --probe
+          code=$?
+          if [ "$code" -eq 1 ]; then
+            echo "::error::a documented entry point no longer serves the pinned archive"
+            exit 1
+          fi
+          if [ "$code" -eq 3 ]; then
+            echo "::warning::entry probe inconclusive today"
+          fi
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: release-integrity-report
+          path: |
+            anchors-report.json
+            doc-facts-report.json

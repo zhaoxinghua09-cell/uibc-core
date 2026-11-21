@@ -1,0 +1,12 @@
+# SECBASE-01 D-2 批量链路（2026-10-12）——Dependency-Update-Tool 基线
+# G-07 五件套：github-actions + pip 双生态纳入依赖更新（Scorecard Dependency-Update-Tool 检查）
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"

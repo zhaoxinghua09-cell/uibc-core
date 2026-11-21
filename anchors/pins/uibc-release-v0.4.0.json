@@ -1,0 +1,18 @@
+{
+  "assets": [
+    {
+      "bytes": 114576,
+      "name": "uibc-conformance-0.4.0.zip",
+      "sha256": "9a1ca72fea75f8377919dad2602d7f6fd9e0f6803dbe88813074b2645ebef4c7"
+    }
+  ],
+  "excluded": [],
+  "kind": "uibc-release-pin-v0",
+  "meaning": "the page as it stands on recorded_at; this does not show what it held when it was published, only what it holds now",
+  "recorded_at": "2026-11-20T06:04:07Z",
+  "recorded_by": "a human, after the fact, not the publishing process",
+  "recorded_late": true,
+  "stronger_form": "anchors/pins/uibc-release-v0.4.0.json in the repository, which the page cannot rewrite",
+  "tag": "v0.4.0",
+  "why_excluded": "nothing is excluded: a human recorded this page, no pin asset was present"
+}

@@ -1,0 +1,21 @@
+{
+  "algorithm": "rfc6962-sha256",
+  "size": 2,
+  "root": "0000000000000000000000000000000000000000000000000000000000000000",
+  "proofs": [
+    {
+      "index": 0,
+      "path": "files/oracle-s13-merkle-root-0.txt",
+      "proof": [
+        "2e1a23b639f2d5d4f9e30867287ac7fc6a3dba658cd086ffd9196beaa974b144"
+      ]
+    },
+    {
+      "index": 1,
+      "path": "files/oracle-s13-merkle-root-1.txt",
+      "proof": [
+        "47837086cfc43b0a2ebf666359c11850257125b01b69e0629bd2026f5ec19994"
+      ]
+    }
+  ]
+}

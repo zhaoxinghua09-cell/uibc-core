@@ -1,0 +1,27 @@
+{
+  "status": "unanchored",
+  "tsa": "freetsa",
+  "head_sha256": "4ad23d9153c33c77253b23e1f5938249cb6877de93eb7593dea26fa5f7fd6e98",
+  "tsr": "anchor_freetsa.tsr",
+  "tsr_sha256": "b95e5c70a3b26c440deec9c0dca73bf928d8261ddff1dc393e22a6c1674d6a16",
+  "info": {
+    "gen_time": "2026-11-17T08:11:35+00:00",
+    "digest_hex": "4ad23d9153c33c77253b23e1f5938249cb6877de93eb7593dea26fa5f7fd6e98",
+    "serial": "169204872",
+    "policy": "1.2.3.4.1",
+    "tsa": {
+      "organization_name": "Free TSA",
+      "organizational_unit_name": "TSA",
+      "2.5.4.13": "This certificate digitally signs documents and time stamp requests made using the freetsa.org online services",
+      "common_name": "www.freetsa.org",
+      "email_address": "busilezas@mailbox.org",
+      "locality_name": "Wuerzburg",
+      "country_name": "DE",
+      "state_or_province_name": "Bayern"
+    },
+    "signature_verified": false
+  },
+  "problems": [
+    "signature check failed ()"
+  ]
+}

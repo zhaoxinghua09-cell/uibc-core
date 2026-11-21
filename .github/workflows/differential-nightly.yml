@@ -1,0 +1,123 @@
+name: differential nightly
+
+# Every night, publish the differential report and fail the job if either
+# denominator moves. Two numbers gate this: false_pass (a hostile package
+# our verifier accepted) and false_alarms (a clean package we rejected).
+# A report that only ever says PASS is a report that cannot fail.
+
+on:
+  schedule:
+    - cron: "23 18 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v4, pinned
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v5, pinned
+        with:
+          python-version: "3.12"
+
+      - name: Install
+        run: python -m pip install --upgrade pip && pip install ".[verify]"
+
+      - name: Produce the machine-readable report
+        run: python tools/oracle_check.py --json-out differential-report.json
+
+      - name: Gate on both denominators
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, sys
+          r = json.load(open("differential-report.json", encoding="utf-8"))
+          fps = r["hostile"]["false_pass"]
+          ref_alarms = r["accept"]["reference_false_alarms"]
+          ind_alarms = r["accept"]["independent_false_alarms"]
+          print(f"false_pass={fps} reference_false_alarms={ref_alarms} independent_false_alarms={ind_alarms}")
+          print(f"checks={r['checks_total']} exact_pairs={r['exact_pairs_count']} "
+                f"unmapped={len(r['unmapped_second_implementation_rules'])} verdict={r['verdict']}")
+          if fps != 0 or ref_alarms != 0 or ind_alarms != 0:
+              sys.exit(f"denominator moved: false_pass={fps} alarms={ref_alarms}/{ind_alarms}")
+          if r["verdict"] != "PASS":
+              sys.exit(f"verdict is {r['verdict']}, expected PASS")
+          PY
+
+      - name: Keep the report as an artifact
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4, pinned
+        with:
+          name: differential-report
+          path: differential-report.json
+          retention-days: 400
+
+  # The same verifier, pointed at a corpus we do not own. AER-1 publishes four
+  # directories (valid, invalid, invalid-profile, anchored) and states what it
+  # expects in each. If we stop agreeing with those expectations, that is a
+  # finding, not a flake - so the job goes red and says which directory moved.
+  cross-spec:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v4, pinned
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v5, pinned
+        with:
+          python-version: "3.12"
+
+      - name: Install
+        run: python -m pip install --upgrade pip && pip install ".[verify]"
+
+      - name: Fetch the corpus we do not own
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --depth 1 https://gitlab.com/rambozambodotdev/zambo kit
+          git -C kit rev-parse HEAD | tee kit-commit.txt
+          python - <<'PY'
+          import os
+          base = "kit/base/test-vectors"
+          for name in ("valid", "invalid", "invalid-profile", "anchored"):
+              n = len([f for f in os.listdir(os.path.join(base, name)) if f.endswith(".json")])
+              print(f"{name}: {n} receipts on disk")
+          PY
+
+      - name: Judge their receipts with our verifier
+        run: python tools/aer1_corpus_matrix.py --kit kit --json-out cross-spec-report.json
+
+      - name: Gate on directory agreement
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, sys
+          r = json.load(open("cross-spec-report.json", encoding="utf-8"))
+          for name, d in r["directories"].items():
+              print(f"{name:<16} files={d['files']:>3} accepted={d['accepted']:>3} "
+                    f"rejected={d['rejected']:>3} agree={d['agree']}")
+          total = sum(d["files"] for d in r["directories"].values())
+          print(f"receipts={total} directories={r['directories_agree']}/{r['directories_total']}")
+          if total == 0:
+              sys.exit("no receipts were judged - an empty run is not agreement")
+          if r["directories_agree"] != r["directories_total"]:
+              moved = [k for k, v in r["agreement"].items() if not v]
+              sys.exit(f"we no longer agree with AER-1 on: {', '.join(moved)}")
+          PY
+
+      - name: Keep the cross-spec report as an artifact
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4, pinned
+        with:
+          name: cross-spec-report
+          path: |
+            cross-spec-report.json
+            kit-commit.txt
+          retention-days: 400

@@ -1,0 +1,18 @@
+{
+  "description": "Happy path: tree_size=4, leaf_index=0 (left edge).",
+  "inclusion_path": [
+    "b6aab81c9f371b90cb164b4a7c3fe737c2729a1db93b61aebe6d25d39f36ac7e",
+    "8a140dce504d450b288ec8b80b84341703205227dbe76a00035c61d1d63cb2b9"
+  ],
+  "leaf_entry": {
+    "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+    "digest_hex": "d6bf52254c7b1da3f1d5d78c65957e4c4862fd1ab31997ae0b656bf9bf03d61d",
+    "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: valid-tree4-index0 :: leaf 0",
+    "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a2076616c69642d74726565342d696e64657830203a3a206c6561662030"
+  },
+  "leaf_index": 0,
+  "reconstructed_root": "67b8802e549abe4085a95a216c1093b231df1c861e7b9f487a14df1b813ef990",
+  "result": "VALID",
+  "root_true": "67b8802e549abe4085a95a216c1093b231df1c861e7b9f487a14df1b813ef990",
+  "tree_size": 4
+}

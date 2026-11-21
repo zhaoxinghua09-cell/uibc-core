@@ -1,0 +1,22 @@
+{
+  "entries": [
+    {
+      "evidence_id": "6347eca1-cd79-5586-8462-52f868020d7e",
+      "type": "ACTION",
+      "path": "files/oracle-s07-index-metadata-0.txt",
+      "content_hash": "376771108f0f5aa4633a2e5f087e3b69e92bef3e86796a370b54b4def4c0bd4d",
+      "created_at": "2026-11-15T00:00:00Z",
+      "media_type": "text/plain",
+      "note": "reviewed and approved by nobody"
+    },
+    {
+      "evidence_id": "1a178a26-5e45-541a-9dda-50a1c6651065",
+      "type": "ACTION",
+      "path": "files/oracle-s07-index-metadata-1.txt",
+      "content_hash": "999034ea0024211a1e5fd16fe4c343ceb6affb4c68b9c77c33390ab361c0bfd0",
+      "created_at": "2026-11-15T00:00:00Z",
+      "media_type": "text/plain",
+      "note": "n1"
+    }
+  ]
+}

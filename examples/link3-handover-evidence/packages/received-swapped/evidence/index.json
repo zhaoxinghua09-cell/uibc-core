@@ -1,0 +1,40 @@
+{
+  "entries": [
+    {
+      "evidence_id": "9c6fc952-491d-4a8e-b973-42e3ceacf4d0",
+      "type": "VERIFICATION",
+      "path": "files/design-verification-report.txt",
+      "content_hash": "59f36a06199b5373c54a7476a0f99c5b305f13fccf9def5c64b071a69c8f82f8",
+      "created_at": "2026-11-18T00:25:48Z",
+      "media_type": "text/plain",
+      "note": "fictional handover evidence"
+    },
+    {
+      "evidence_id": "3c8a23c5-856f-4255-be6d-dafbf007adca",
+      "type": "VERIFICATION",
+      "path": "files/software-test-summary.txt",
+      "content_hash": "444b0b03cac54f337074314724ed4c7dd1d297e45f0455b3d751324603ed8939",
+      "created_at": "2026-11-18T00:25:48Z",
+      "media_type": "text/plain",
+      "note": "fictional handover evidence"
+    },
+    {
+      "evidence_id": "2d711804-fa53-4c4b-968e-27c16d8e493d",
+      "type": "VERIFICATION",
+      "path": "files/risk-analysis-summary.txt",
+      "content_hash": "1cebef2834e007a3ecb14fb8a7edbce2aa15d725186f526c7eceed3bf2f58141",
+      "created_at": "2026-11-18T00:25:48Z",
+      "media_type": "text/plain",
+      "note": "fictional handover evidence"
+    },
+    {
+      "evidence_id": "115df91f-3be9-42b4-a725-ecfcfd48aa85",
+      "type": "VERIFICATION",
+      "path": "files/electrical-safety-summary.txt",
+      "content_hash": "cba904ca1e6350e42ce87c269b8907ed1a7aa4239c4b6db012312f4333563ff3",
+      "created_at": "2026-11-18T00:25:48Z",
+      "media_type": "text/plain",
+      "note": "fictional handover evidence"
+    }
+  ]
+}

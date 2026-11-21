@@ -40,3 +40,26 @@
 cd d:/Workbuddy/2026-09-17-20-24-56/uibc-core
 C:/Users/Administrator/.workbuddy/binaries/python/versions/3.13.12/python.exe -m unittest tests.stress_test -v
 ```
+
+## 扩展档：25 万 / 50 万事件（2026-11-18，第二环境）
+
+原报告最高到 10 万。这里把 b、c、f 三个场景推到 25 万与 50 万，目的只有一个：**看曲线是否守得住线性**，而不是报一个更漂亮的吞吐数。
+
+- 环境：Linux / Python 3.12.11 / 4 vCPU / 7 GB RAM（明显弱于上表的 i5-13400 / 32 GB）
+- 方法：与 `tests/stress_test.py` 相同的调用与计时方式（warm-up 不计入），未改动 `uibc_core` 源码
+
+| 场景 | 规模 | 耗时 | 速率 |
+|---|---|---|---|
+| evidence_root | 250,000 | 0.3419s | 731,171 hashes/s |
+| evidence_root | 500,000 | 0.6807s | 734,515 hashes/s |
+| validate_lifecycle | 250,000 | 0.0571s | 4,375,065 events/s（0.002s/万事件） |
+| validate_lifecycle | 500,000 | 0.1246s | 4,014,259 events/s（0.002s/万事件） |
+| tracemalloc 500k 链验证 | 500,000 | 0.2564s | 峰值 25.2 MB，净增量 +0.00 MB |
+
+**怎么读这张表**
+
+- 跨机器不可直接比速率：本机 73 万 hashes/s 低于上表 Windows 的 254 万，这是机器差异，不是回归。
+- 本环境内的线性度才是结论：evidence_root 规模翻倍，速率 731k → 735k（几乎不变）；validate_lifecycle 4.375M → 4.014M（降 8%）。两条曲线在 25 万→50 万区间没有出现拐点。
+- 内存：50 万事件链验证峰值 25.2 MB、净增量 +0.00 MB，说明上表"O(1) 附加内存"的结论在 5 倍规模上依然成立。
+
+**这不算什么**：同一作者的第二台机器，不是第三方节点，不计入 `external verification nodes`。

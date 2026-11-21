@@ -1,0 +1,22 @@
+{
+  "entries": [
+    {
+      "evidence_id": "348df884-c52a-5c37-b3e1-d5c7c57346bd",
+      "type": "ACTION",
+      "path": "files/oracle-s10-closure-0.txt",
+      "content_hash": "38f99146215284b2887aa3043600df88d053c02c38cf5eba90e63c4c44beb780",
+      "created_at": "2026-11-15T00:00:00Z",
+      "media_type": "text/plain",
+      "note": "n0"
+    },
+    {
+      "evidence_id": "7a4195b7-1286-5bed-9b5c-948b86e541f2",
+      "type": "ACTION",
+      "path": "files/oracle-s10-closure-1.txt",
+      "content_hash": "c752a30f231ef3dfa1691729a863b089a75f9447236bdcd5195957c148161dea",
+      "created_at": "2026-11-15T00:00:00Z",
+      "media_type": "text/plain",
+      "note": "n1"
+    }
+  ]
+}

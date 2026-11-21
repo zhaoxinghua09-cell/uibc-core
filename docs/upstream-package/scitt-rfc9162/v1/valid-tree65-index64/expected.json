@@ -1,0 +1,17 @@
+{
+  "description": "tree_size=65 = 64|1: the single tail leaf of a full tree plus one; path length 1 and the top split is the whole tree.",
+  "inclusion_path": [
+    "9b52175cadc44d6dee6a264dd784f94be5c87ad18d30135848da4394f416c57c"
+  ],
+  "leaf_entry": {
+    "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+    "digest_hex": "af82454ca4d3c5be6933c696e3cf5ea74e0b04a579f35d538533bddab843895b",
+    "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: valid-tree65-index64 :: leaf 64",
+    "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a2076616c69642d7472656536352d696e6465783634203a3a206c656166203634"
+  },
+  "leaf_index": 64,
+  "reconstructed_root": "378f2585a74238ac171d29032f9b531f9dd6aa7e891f2d95a73aa1876a18d715",
+  "result": "VALID",
+  "root_true": "378f2585a74238ac171d29032f9b531f9dd6aa7e891f2d95a73aa1876a18d715",
+  "tree_size": 65
+}

@@ -61,12 +61,19 @@ adjacent ecosystems do not specify.
 
 # Software design
 
-`uibc-core` is a zero-dependency Python package (stdlib only) with three modules:
-registry (identity records), evidence (hash/seal construction), and gates (state
-machine + validators). The CLI supports package creation, validation, and report
-emission; validation semantics are intentionally conservative and scoped (see
-Summary). Test coverage comprises 122 unit/integration tests and 7 subtests,
-executed in CI on both Python 3.12 and 3.13.
+`uibc-core` is a Python package whose verification core has no third-party
+dependency -- Ed25519, JCS canonicalisation, SHA-256 Merkle trees and DSSE
+signing envelopes are implemented in-repository on the standard library. The
+optional `[verify]` extra adds `cryptography` and `asn1crypto` for RFC 3161
+timestamp parsing; when they are absent the corresponding checks report
+INCONCLUSIVE rather than PASS, so the absence is visible instead of papered
+over. The code is organised in three layers -- registry (identity records),
+evidence (hash/seal construction) and gates (state machine + validators) --
+implemented across 28 modules. The CLI supports package creation, validation
+and report emission; validation semantics are intentionally conservative and
+scoped (see Summary). Test coverage comprises 520 unit/integration tests, skipping
+where the optional libraries or an external timestamp service are unavailable,
+executed in CI across Python 3.10-3.13.
 
 # Research impact statement
 

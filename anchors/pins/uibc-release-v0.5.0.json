@@ -1,0 +1,58 @@
+{
+  "assets": [
+    {
+      "bytes": 367,
+      "name": "ANCHORS.json",
+      "sha256": "fa2d282c8385a7d1456a80077f13fa2ec0dcd7f42dc65540e74b171655f9e50d"
+    },
+    {
+      "bytes": 287,
+      "name": "CORPUS-DIGESTS.txt",
+      "sha256": "9a3ffbbcd1c516e005dcb1bb95f413fd166066df20ab88b4c0e9fe4ab395d86c"
+    },
+    {
+      "bytes": 272,
+      "name": "CORPUS-DIGESTS.txt.ots",
+      "sha256": "a49c722cae3f26d1b64a11b2a8dee05ad829b6881d8dc30c92f0a1d18b0b547e"
+    },
+    {
+      "bytes": 467,
+      "name": "CORPUS-DIGESTS.txt.sig",
+      "sha256": "c4a89c07d42273ce0db0d19d69fa8d955bfc4c0c30cba71d558da5d51f2d9ce8"
+    },
+    {
+      "bytes": 4643,
+      "name": "anchor_freetsa.tsr",
+      "sha256": "b2fe3d30a0835fdcd06379a586fa1df052671b22ceb1e133eb3688fc00fc0f80"
+    },
+    {
+      "bytes": 5107,
+      "name": "anchor_freetsa_ca.pem",
+      "sha256": "b8201c19ae46a882ceb83ce58251662fa0e47b0ebff40d6bc025f3e4626ab51e"
+    },
+    {
+      "bytes": 8680,
+      "name": "receipt.json",
+      "sha256": "733bf754eb74371223743cfd885938e1ebdea2e9265fb838674306a21fe944e5"
+    },
+    {
+      "bytes": 231243,
+      "name": "uibc-conformance-0.5.0.zip",
+      "sha256": "ad2b73ccdd8e5606364372350fc35134d8efe897f0382b36dd4ee65af341bfc0"
+    },
+    {
+      "bytes": 210899,
+      "name": "uibc-lab-bundle-0.5.0.json",
+      "sha256": "54fc88eada1a872e4397645217af5050dcbe51cc0fb138885fe91b40ef41442c"
+    }
+  ],
+  "excluded": [
+    "uibc-release-pin.json"
+  ],
+  "kind": "uibc-release-pin-v0",
+  "recorded_at": "2026-11-20T10:43:34Z",
+  "recorded_by": "the release workflow, reading the page it had just published",
+  "stronger_form": "anchors/pins/uibc-release-v0.5.0.json in the repository, which the page cannot rewrite",
+  "tag": "v0.5.0",
+  "why_excluded": "a file cannot carry its own digest; every other asset is listed"
+}

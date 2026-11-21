@@ -1,0 +1,19 @@
+# banned_phrases.txt — 对外材料措辞门禁清单 v1.0 (2026-11-19)
+# 用法: python check_phrases.py <文件或目录>
+# 规则: 每行 "<正则>|||<替代写法说明>"；# 开头为注释
+# 依据: V2.8 §五 + V2.5 §2.3 R1 + V2.6 §2.1（校标效度为零，禁分数对比）
+
+third[- ]party verified|||改用 self-assessed / internal conformance check
+independent assessment|||改用 self-assessed
+certified by|||改用 conformance-checked (internal)
+adopted by (ITU|W3C|ISO|IEEE)|||改用 contributed to / submitted for discussion
+(approved|accepted) by (ITU|W3C|ISO|IEEE)|||改用 submitted / pending review / no decision recorded
+partner(ship)? with|||改用 referenced / corresponded with
+deployed in production|||改用 experimental environment
+in use by (a |our )?customer|||改用 local prototype
+independently reproduced (by|in)|||改用 two implementations cross-checked in CI
+(independent|neutral) (committee|governing board)|||改用 planned governance form
+(foundation|consortium) (established|founded)|||改用 planned governance form
+CC[ -]BY[ -]4\\.0|||LGD 理论实为 other-closed，见 IP 台账
+benchmark (lead|beat|outperform)s?|||改用逐项事实对比（语料数/实现数/深度上限/许可）
+downloads? (prove|show|indicate) (enterprise )?adoption|||改用 repository stars / downloads（不加推断）

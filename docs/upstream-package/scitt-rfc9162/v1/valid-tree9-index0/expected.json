@@ -1,0 +1,20 @@
+{
+  "description": "tree_size=9, leaf_index=0: the left subtree is full (8) and the tail is 1.",
+  "inclusion_path": [
+    "239ad3c62136b37564dee6f3724751c40da842ed76a38993c6a7f4afeb6c8bef",
+    "733ce6d38af00dd43c2557a36386cc83a5193cc1065edcb4312db93277699cc5",
+    "e6f31e43554a09950668a90b13e845faecb1ad2ce2e89c39392cbbd4204ce845",
+    "4e0d3d0ccb025eb4d6089f4490c098a698e99cd78b087c88d5ce31ba1786a6cb"
+  ],
+  "leaf_entry": {
+    "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+    "digest_hex": "10632a2126144c7d541191ea810180249752d96fb7ed60f9ff716aaedd37ba4d",
+    "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: valid-tree9-index0 :: leaf 0",
+    "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a2076616c69642d74726565392d696e64657830203a3a206c6561662030"
+  },
+  "leaf_index": 0,
+  "reconstructed_root": "e32e6d56e6d30ee7efacde1ac12304df6358c3a35b469a17fa1c0f9ffb88a2a3",
+  "result": "VALID",
+  "root_true": "e32e6d56e6d30ee7efacde1ac12304df6358c3a35b469a17fa1c0f9ffb88a2a3",
+  "tree_size": 9
+}

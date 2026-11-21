@@ -1,0 +1,15 @@
+{
+  "description": "Smallest tree: tree_size=1, empty inclusion path, root == leaf digest.",
+  "inclusion_path": [],
+  "leaf_entry": {
+    "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+    "digest_hex": "96e6ce00eb997c1b8780cef11d4b7cee47f213b989a6bbd8bc8ce1b720d64cfd",
+    "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: valid-tree1-index0 :: leaf 0",
+    "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a2076616c69642d74726565312d696e64657830203a3a206c6561662030"
+  },
+  "leaf_index": 0,
+  "reconstructed_root": "96e6ce00eb997c1b8780cef11d4b7cee47f213b989a6bbd8bc8ce1b720d64cfd",
+  "result": "VALID",
+  "root_true": "96e6ce00eb997c1b8780cef11d4b7cee47f213b989a6bbd8bc8ce1b720d64cfd",
+  "tree_size": 1
+}

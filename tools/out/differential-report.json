@@ -1,0 +1,456 @@
+{
+  "accept": {
+    "cases": 9,
+    "independent_false_alarms": 0,
+    "reference_false_alarms": 0
+  },
+  "blind_verdict": {
+    "independent": "INCONCLUSIVE",
+    "note": "the reference has a rule the second does not; the second must not answer PASS here",
+    "reference": "FAIL"
+  },
+  "cases": 30,
+  "cells_disagreeing_with_the_oracle": 0,
+  "checks_evaluated": [
+    "S1",
+    "S2",
+    "S3",
+    "S4",
+    "S5",
+    "S6",
+    "S7",
+    "S8",
+    "S9",
+    "S10",
+    "S11",
+    "S12",
+    "S13",
+    "S14",
+    "S15",
+    "S16",
+    "S17",
+    "S18",
+    "S19"
+  ],
+  "checks_total": 19,
+  "exact_pairs": [
+    {
+      "check": "S1",
+      "second_implementation_rule": "V1"
+    },
+    {
+      "check": "S2",
+      "second_implementation_rule": "V2"
+    },
+    {
+      "check": "S3",
+      "second_implementation_rule": "V3"
+    },
+    {
+      "check": "S4",
+      "second_implementation_rule": "V4"
+    },
+    {
+      "check": "S5",
+      "second_implementation_rule": "V5"
+    },
+    {
+      "check": "S6",
+      "second_implementation_rule": "V6"
+    }
+  ],
+  "exact_pairs_count": 6,
+  "generated_at": "2026-11-19T16:57:13+0800",
+  "hostile": {
+    "declined_to_judge": 9,
+    "false_pass": 0,
+    "total": 18
+  },
+  "per_case": [
+    {
+      "case": "oracle-clean",
+      "independent_first": "None",
+      "independent_matches_oracle": true,
+      "independent_verdict": "PASS",
+      "oracle_first": "None",
+      "oracle_verdict": "PASS",
+      "reference_first": "None",
+      "reference_matches_oracle": true,
+      "reference_verdict": "PASS"
+    },
+    {
+      "case": "oracle-tampered",
+      "independent_first": "S4",
+      "independent_matches_oracle": true,
+      "independent_verdict": "FAIL",
+      "oracle_first": "S4",
+      "oracle_verdict": "FAIL",
+      "reference_first": "S4",
+      "reference_matches_oracle": true,
+      "reference_verdict": "FAIL"
+    },
+    {
+      "case": "oracle-deleted",
+      "independent_first": "S4",
+      "independent_matches_oracle": true,
+      "independent_verdict": "FAIL",
+      "oracle_first": "S4",
+      "oracle_verdict": "FAIL",
+      "reference_first": "S4",
+      "reference_matches_oracle": true,
+      "reference_verdict": "FAIL"
+    },
+    {
+      "case": "oracle-duplicated",
+      "independent_first": "S5",
+      "independent_matches_oracle": true,
+      "independent_verdict": "FAIL",
+      "oracle_first": "S5",
+      "oracle_verdict": "FAIL",
+      "reference_first": "S5",
+      "reference_matches_oracle": true,
+      "reference_verdict": "FAIL"
+    },
+    {
+      "case": "oracle-unsealed",
+      "independent_first": "S6",
+      "independent_matches_oracle": true,
+      "independent_verdict": "FAIL",
+      "oracle_first": "S6",
+      "oracle_verdict": "FAIL",
+      "reference_first": "S6",
+      "reference_matches_oracle": true,
+      "reference_verdict": "FAIL"
+    },
+    {
+      "case": "oracle-s12-id-only",
+      "independent_first": "None",
+      "independent_matches_oracle": null,
+      "independent_verdict": "INCONCLUSIVE",
+      "oracle_first": "S12",
+      "oracle_verdict": "FAIL",
+      "reference_first": "S12",
+      "reference_matches_oracle": true,
+      "reference_verdict": "FAIL"
+    },
+    {
+      "case": "oracle-s01-undeclared-file",
+      "independent_first": "V7 (unmapped)",
+      "independent_matches_oracle": true,
+      "independent_verdict": "FAIL",
+      "oracle_first": "S1",
+      "oracle_verdict": "FAIL",
+      "reference_first": "S1",
+      "reference_matches_oracle": true,
+      "reference_verdict": "FAIL"
+    },
+    {
+      "case": "oracle-s02-identity",
+      "independent_first": "S2",
+      "independent_matches_oracle": true,
+      "independent_verdict": "FAIL",
+      "oracle_first": "S2",
+      "oracle_verdict": "FAIL",
+      "reference_first": "S2",
+      "reference_matches_oracle": true,
+      "reference_verdict": "FAIL"
+    },
+    {
+      "case": "oracle-s03-calendar",
+      "independent_first": "V9 (unmapped)",
+      "independent_matches_oracle": true,
+      "independent_verdict": "FAIL",
+      "oracle_first": "S3",
+      "oracle_verdict": "FAIL",
+      "reference_first": "S3",
+      "reference_matches_oracle": true,
+      "reference_verdict": "FAIL"
+    },
+    {
+      "case": "oracle-s08-log-truncated",
+      "independent_first": "n/a",
+      "independent_matches_oracle": null,
+      "independent_verdict": "n/a",
+      "oracle_first": "S8",
+      "oracle_verdict": "FAIL",
+      "reference_first": "S8",
+      "reference_matches_oracle": true,
+      "reference_verdict": "FAIL"
+    },
+    {
+      "case": "oracle-s10-closure",
+      "independent_first": "n/a",
+      "independent_matches_oracle": null,
+      "independent_verdict": "n/a",
+      "oracle_first": "S10",
+      "oracle_verdict": "FAIL",
+      "reference_first": "S10",
+      "reference_matches_oracle": true,
+      "reference_verdict": "FAIL"
+    },
+    {
+      "case": "oracle-s11-duplicate-member",
+      "independent_first": "n/a",
+      "independent_matches_oracle": null,
+      "independent_verdict": "n/a",
+      "oracle_first": "S11",
+      "oracle_verdict": "FAIL",
+      "reference_first": "S11",
+      "reference_matches_oracle": true,
+      "reference_verdict": "FAIL"
+    },
+    {
+      "case": "oracle-s13-merkle-root",
+      "independent_first": "n/a",
+      "independent_matches_oracle": null,
+      "independent_verdict": "n/a",
+      "oracle_first": "S13",
+      "oracle_verdict": "FAIL",
+      "reference_first": "S13",
+      "reference_matches_oracle": true,
+      "reference_verdict": "FAIL"
+    },
+    {
+      "case": "oracle-s14-base64-padding",
+      "independent_first": "n/a",
+      "independent_matches_oracle": null,
+      "independent_verdict": "n/a",
+      "oracle_first": "S14",
+      "oracle_verdict": "FAIL",
+      "reference_first": "S14",
+      "reference_matches_oracle": true,
+      "reference_verdict": "FAIL"
+    },
+    {
+      "case": "oracle-s15-anchor-time",
+      "independent_first": "n/a",
+      "independent_matches_oracle": null,
+      "independent_verdict": "n/a",
+      "oracle_first": "S15",
+      "oracle_verdict": "FAIL",
+      "reference_first": "S15",
+      "reference_matches_oracle": true,
+      "reference_verdict": "FAIL"
+    },
+    {
+      "case": "oracle-s16-token-byte",
+      "independent_first": "n/a",
+      "independent_matches_oracle": null,
+      "independent_verdict": "n/a",
+      "oracle_first": "S16",
+      "oracle_verdict": "FAIL",
+      "reference_first": "S16",
+      "reference_matches_oracle": true,
+      "reference_verdict": "FAIL"
+    },
+    {
+      "case": "oracle-s17-receipt-body",
+      "independent_first": "n/a",
+      "independent_matches_oracle": null,
+      "independent_verdict": "n/a",
+      "oracle_first": "S17",
+      "oracle_verdict": "FAIL",
+      "reference_first": "S17",
+      "reference_matches_oracle": true,
+      "reference_verdict": "FAIL"
+    },
+    {
+      "case": "oracle-s18-policy-artefact",
+      "independent_first": "n/a",
+      "independent_matches_oracle": null,
+      "independent_verdict": "n/a",
+      "oracle_first": "S18",
+      "oracle_verdict": "FAIL",
+      "reference_first": "S18",
+      "reference_matches_oracle": true,
+      "reference_verdict": "FAIL"
+    },
+    {
+      "case": "oracle-s07-index-metadata",
+      "independent_first": "n/a",
+      "independent_matches_oracle": null,
+      "independent_verdict": "n/a",
+      "oracle_first": "S7",
+      "oracle_verdict": "FAIL",
+      "reference_first": "S7",
+      "reference_matches_oracle": true,
+      "reference_verdict": "FAIL"
+    },
+    {
+      "case": "oracle-s09-rollback-pin",
+      "independent_first": "n/a",
+      "independent_matches_oracle": null,
+      "independent_verdict": "n/a",
+      "oracle_first": "S9",
+      "oracle_verdict": "FAIL",
+      "reference_first": "S9",
+      "reference_matches_oracle": true,
+      "reference_verdict": "FAIL"
+    },
+    {
+      "case": "oracle-s19-regressed",
+      "independent_first": "n/a",
+      "independent_matches_oracle": null,
+      "independent_verdict": "n/a",
+      "oracle_first": "S19",
+      "oracle_verdict": "FAIL",
+      "reference_first": "S19",
+      "reference_matches_oracle": true,
+      "reference_verdict": "FAIL"
+    },
+    {
+      "case": "accept-one-file",
+      "independent_first": "None",
+      "independent_matches_oracle": true,
+      "independent_verdict": "PASS",
+      "oracle_first": "—",
+      "oracle_verdict": "PASS",
+      "reference_first": "None",
+      "reference_matches_oracle": true,
+      "reference_verdict": "PASS"
+    },
+    {
+      "case": "accept-many-files",
+      "independent_first": "None",
+      "independent_matches_oracle": true,
+      "independent_verdict": "PASS",
+      "oracle_first": "—",
+      "oracle_verdict": "PASS",
+      "reference_first": "None",
+      "reference_matches_oracle": true,
+      "reference_verdict": "PASS"
+    },
+    {
+      "case": "accept-unicode-names",
+      "independent_first": "None",
+      "independent_matches_oracle": true,
+      "independent_verdict": "PASS",
+      "oracle_first": "—",
+      "oracle_verdict": "PASS",
+      "reference_first": "None",
+      "reference_matches_oracle": true,
+      "reference_verdict": "PASS"
+    },
+    {
+      "case": "accept-binary",
+      "independent_first": "None",
+      "independent_matches_oracle": true,
+      "independent_verdict": "PASS",
+      "oracle_first": "—",
+      "oracle_verdict": "PASS",
+      "reference_first": "None",
+      "reference_matches_oracle": true,
+      "reference_verdict": "PASS"
+    },
+    {
+      "case": "accept-large-text",
+      "independent_first": "None",
+      "independent_matches_oracle": true,
+      "independent_verdict": "PASS",
+      "oracle_first": "—",
+      "oracle_verdict": "PASS",
+      "reference_first": "None",
+      "reference_matches_oracle": true,
+      "reference_verdict": "PASS"
+    },
+    {
+      "case": "accept-resubmitted",
+      "independent_first": "None",
+      "independent_matches_oracle": true,
+      "independent_verdict": "PASS",
+      "oracle_first": "—",
+      "oracle_verdict": "PASS",
+      "reference_first": "None",
+      "reference_matches_oracle": true,
+      "reference_verdict": "PASS"
+    },
+    {
+      "case": "accept-typed-evidence",
+      "independent_first": "None",
+      "independent_matches_oracle": true,
+      "independent_verdict": "PASS",
+      "oracle_first": "—",
+      "oracle_verdict": "PASS",
+      "reference_first": "None",
+      "reference_matches_oracle": true,
+      "reference_verdict": "PASS"
+    },
+    {
+      "case": "accept-lifecycle-events",
+      "independent_first": "None",
+      "independent_matches_oracle": true,
+      "independent_verdict": "PASS",
+      "oracle_first": "—",
+      "oracle_verdict": "PASS",
+      "reference_first": "None",
+      "reference_matches_oracle": true,
+      "reference_verdict": "PASS"
+    },
+    {
+      "case": "accept-anchored-policy",
+      "independent_first": "None",
+      "independent_matches_oracle": true,
+      "independent_verdict": "INCONCLUSIVE",
+      "oracle_first": "—",
+      "oracle_verdict": "PASS",
+      "reference_first": "None",
+      "reference_matches_oracle": true,
+      "reference_verdict": "PASS"
+    }
+  ],
+  "rule_correspondence": [
+    {
+      "independent_first_failures": [
+        "V7"
+      ],
+      "independent_verdict": "FAIL",
+      "reference_first_failures": [
+        "S1"
+      ],
+      "reference_verdict": "FAIL",
+      "rule": "V7"
+    },
+    {
+      "independent_first_failures": [
+        "V8",
+        "V9"
+      ],
+      "independent_verdict": "FAIL",
+      "reference_first_failures": [
+        "S7",
+        "S8"
+      ],
+      "reference_verdict": "FAIL",
+      "rule": "V8"
+    },
+    {
+      "independent_first_failures": [
+        "V9"
+      ],
+      "independent_verdict": "FAIL",
+      "reference_first_failures": [
+        "S8"
+      ],
+      "reference_verdict": "FAIL",
+      "rule": "V9"
+    }
+  ],
+  "schema": "uibc-differential/1",
+  "second_implementation_rules": [
+    "V1",
+    "V2",
+    "V3",
+    "V4",
+    "V5",
+    "V6",
+    "V7",
+    "V8",
+    "V9"
+  ],
+  "unmapped_second_implementation_rules": [
+    "V7",
+    "V8",
+    "V9"
+  ],
+  "verdict": "PASS"
+}

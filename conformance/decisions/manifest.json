@@ -1,0 +1,94 @@
+{
+  "about": "Fixed inputs and fixed expectations for the decision layer (ALLOW/DENY/HOLD and the revocation overlay). The 36-case conformance suite covers verify(); this covers what a gate must answer on top of it.",
+  "cases": [
+    {
+      "expect": {
+        "decision": "ALLOW",
+        "exit": 0
+      },
+      "id": "01",
+      "pkg": "cases/01/pkg",
+      "what": "correct package, no overlay",
+      "why": "baseline: nothing is wrong, so the decision must not be a refusal"
+    },
+    {
+      "anchor": "cases/02/owner.pub",
+      "expect": {
+        "decision": "DENY",
+        "exit": 2
+      },
+      "id": "02",
+      "overlay": "cases/02/revocation.json",
+      "pkg": "cases/02/pkg",
+      "what": "correct package + valid owner revocation",
+      "why": "the overlay is the only reason to refuse here; verify itself still PASSes"
+    },
+    {
+      "expect": {
+        "decision": "HOLD",
+        "exit": 3
+      },
+      "id": "03",
+      "overlay": "cases/03/revocation.json",
+      "pkg": "cases/03/pkg",
+      "what": "correct package + revocation, verifier given no anchor",
+      "why": "unverifiable revocation must HOLD: 'cannot check' is not 'not revoked'"
+    },
+    {
+      "anchor": "cases/04/owner.pub",
+      "expect": {
+        "decision": "HOLD",
+        "exit": 3
+      },
+      "id": "04",
+      "overlay": "cases/04/revocation.json",
+      "pkg": "cases/04/pkg",
+      "what": "correct package + revocation signed by a different key",
+      "why": "a stranger's revocation is refused, and never counted as absent"
+    },
+    {
+      "anchor": "cases/05/owner.pub",
+      "expect": {
+        "decision": "HOLD",
+        "exit": 3
+      },
+      "id": "05",
+      "overlay": "cases/05/revocation.json",
+      "pkg": "cases/05/pkg",
+      "what": "correct package + a revocation belonging to another package",
+      "why": "target_root mismatch is checked before the signature and HOLDs"
+    },
+    {
+      "anchor": "cases/06/owner.pub",
+      "expect": {
+        "decision": "DENY",
+        "exit": 2
+      },
+      "id": "06",
+      "pkg": "cases/06/pkg",
+      "what": "one byte appended to an evidence file, no overlay",
+      "why": "S4 must fire; a verifier that misses this is useless for admission"
+    },
+    {
+      "anchor": "cases/07/owner.pub",
+      "expect": {
+        "decision": "DENY",
+        "exit": 2
+      },
+      "id": "07",
+      "overlay": "cases/07/revocation.json",
+      "pkg": "cases/07/pkg",
+      "what": "tampered package + valid owner revocation",
+      "why": "the documented order puts REVOKED first; two refusals must not flip the decision"
+    }
+  ],
+  "format": "uibc-core/decisions/1",
+  "generated_by": "tools/build_decision_vectors.py",
+  "rules": [
+    "A case passes when the decision and its exit code both match.",
+    "HOLD is never a pass for a DENY case: 'cannot verify' is not 'not revoked'.",
+    "Both halves matter: case 01 must be accepted, the rest must be refused.",
+    "Seeds are not shipped. Rebuilding produces the same cases in shape, with different keys and therefore different bytes.",
+    "Placeholders for an external runner: {pkg} {overlay} {anchor}; a case without an overlay or anchor simply omits the argument."
+  ]
+}

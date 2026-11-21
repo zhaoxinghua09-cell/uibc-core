@@ -1,0 +1,26 @@
+# uibc-conformance 0.4.1 - archive built from this repository
+
+711fa82c9f183066cfae6441a4fe3fc27fcc516b25f2a976cad5e0dd61b5135f  conformance/uibc-conformance-0.4.1.zip
+
+# 228000 bytes. Built by: python tools/build_conformance_bundle.py 0.4.1
+#
+# The path above is repository-relative on purpose. A pin naming only a basename
+# tells a reader what to hash but not where to get it; the hash is then
+# unresolvable for anyone who did not read an earlier conversation. Found by
+# testing a competitor's pin file on 2026-11-20: three of its four values
+# resolved, one did not, and the first question was "resolved where?".
+# tests/test_pin_resolvability.py now fails if a pin cannot be resolved.
+#
+# The build is deterministic (fixed timestamps, sorted entries): rebuilding from
+# the same inputs produces the same bytes and this same hash. Checked 2026-11-20.
+#
+# "The same inputs" includes the tree. This hash is reproduced only from commit
+# d72c4f9; a rebuild from a later tree gives 083c0dbc... because the runner
+# template was fixed afterwards for the case where a --verify command cannot
+# be started. Measured 2026-11-20: tools/build_conformance_bundle.py now refuses
+# to overwrite this file when the bytes differ, and exits 3 with both hashes.
+# Contents: cases/ (36 packages), manifest.json, expected.json, run.py, README.md.
+#
+# What it does not prove: 36/36 on the reference verifier is a self-run. A
+# third-party reproduction needs someone else to run this same hash on their
+# own machine and publish the receipt it writes.

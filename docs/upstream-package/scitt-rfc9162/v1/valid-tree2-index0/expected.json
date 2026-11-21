@@ -1,0 +1,17 @@
+{
+  "description": "tree_size=2, leaf_index=0: the only sibling is the left one.",
+  "inclusion_path": [
+    "eaeb063b2e808e81baf57cfdf9700210bfb04394409d58b169ee8808053ea60b"
+  ],
+  "leaf_entry": {
+    "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+    "digest_hex": "e63b94ae4675b078cebcf51d2e0cca9d645f023e986ce7824fa614985690e3e5",
+    "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: valid-tree2-index0 :: leaf 0",
+    "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a2076616c69642d74726565322d696e64657830203a3a206c6561662030"
+  },
+  "leaf_index": 0,
+  "reconstructed_root": "7aa766b688a8ae0aa2bcd14b5dec589615c9bcc8fe394aa337a9d7467e44a816",
+  "result": "VALID",
+  "root_true": "7aa766b688a8ae0aa2bcd14b5dec589615c9bcc8fe394aa337a9d7467e44a816",
+  "tree_size": 2
+}

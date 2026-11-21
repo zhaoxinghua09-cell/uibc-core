@@ -8,14 +8,34 @@ Report discipline (archive SS16/SS17):
 
 import json
 import os
+import re
+from datetime import datetime, timedelta, timezone
 
 from .canonical import evidence_root, hash_file
-from .lifecycle import validate_lifecycle
+from .lifecycle import validate_lifecycle, validate_lifecycle_strict
 from .signing import (ALGORITHM, ALGORITHM_ED25519, b64decode_strict,
-                      ed_key_id, ed_seal_verify, key_id, seal_verify)
-from . import SPEC_VERSION, VERIFIER_ID, __version__
+                      ed_key_id, ed_seal_verify_scoped, key_id, seal_verify)
+from . import SPEC_VERSION, VERIFIER_ID, __version__, spec_id
+from . import basis as _basis, freshness
+
+# Computed once per process: the label plus the bytes it names (see
+# __init__.spec_id). Reported so a reader can tell two builds of the same
+# version string apart.
+_SPEC_ID = spec_id()
 
 REQUIRED_FILES = ["manifest.json", "identity.json", "lifecycle.json", "evidence/index.json"]
+
+# draft-noa-scitt-ai-agent-receipt-00 Section 3 fixes this vocabulary; adopting
+# it verbatim means a uibc principal_type maps 1:1 into a NOA receipt.
+PRINCIPAL_TYPES = {"HUMAN", "SERVICE", "POLICY", "SANDBOX_SIM"}
+
+_POLICY_HASH_RE = re.compile(r"^(sha256:)?[0-9a-f]{64}$")
+_SHA256_ONLY = re.compile(r"^(sha256:)?[0-9a-f]{64}$")
+
+# draft-sharif-agent-audit-trail-03 Section 13.6: any component left outside the
+# attested set is a forgery channel. Declared, not verified - see S10.
+CLOSURE_FIELDS = ("model_weights", "tokenizer", "chat_template", "engine_build",
+                  "decoding", "numeric_env")
 
 EVIDENCE_TYPES = {
     "IDENTITY", "LIFECYCLE", "INPUT", "ACTION", "TOOL", "MEMORY", "OUTPUT",
@@ -23,14 +43,262 @@ EVIDENCE_TYPES = {
 }
 
 
+def _version_lt(current, floor):
+    """True when `current` is older than `floor`.
+
+    Numeric dotted comparison only, so the verifier keeps its zero-dependency
+    property: no `packaging` import on the verification path. Both sides here
+    are plain X.Y.Z strings produced by this package itself.
+    """
+    def key(v):
+        out = []
+        for part in str(v).split("."):
+            digits = "".join(ch for ch in part if ch.isdigit())
+            out.append(int(digits) if digits else 0)
+        return out
+
+    a, b = key(current), key(floor)
+    width = max(len(a), len(b))
+    a += [0] * (width - len(a))
+    b += [0] * (width - len(b))
+    return tuple(a) < tuple(b)
+
+# draft-maintainer-1f916-agent-record-01 Section 3.1: a signature proves
+# exactly what its custody disclosure permits it to prove, and verifiers MUST
+# surface custody alongside the signature result. Enum copied verbatim (with
+# "threshold(k,n)" kept as the literal family name).
+KEY_CUSTODY = {"self_held", "platform_held", "household_held", "threshold",
+               "kms", "hsm", "session_delegated"}
+
+
 def _load_json(path):
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
 
 
-def verify(package_dir: str, key: bytes = None, pubkey: bytes = None) -> dict:
-    """Verify a submission.uibc package directory. Returns a report dict.
+# S11 strict serialization (v1.1). Motivated by vectors the AER-1 conformance
+# corpus treats as must-fail and a plain json.load() silently accepts:
+#   * duplicate member names - RFC 8259 leaves it undefined, Python keeps the
+#     LAST one, so "{\"a\":1,\"a\":0}" verifies as if it said 0 while a reader
+#     sees 1 - a two-reader split, which is worse than either value;
+#   * raw control characters - invisible in an editor, meaningful to a parser;
+#   * bytes that are not valid UTF-8 - the spec is UTF-8 or it is nothing.
+# These are encoding-level, so they are checked on the bytes before any digest
+# comparison: a package that fails here must not reach the hash checks at all.
+_S11_FILES = ("manifest.json", "identity.json", "lifecycle.json",
+              "evidence/index.json")
 
+
+# A reader that recurses without a limit is a reader an attacker can kill with
+# a file. json.loads on 4000 levels of "[" raises RecursionError, and a
+# RecursionError is not a verdict: the caller learns nothing about the package.
+# A depth ceiling turns it back into one. Bounded input is not a hole in the
+# format; it is the format's own nesting being smaller than any real package.
+MAX_NESTING = 512
+
+
+def _nesting_too_deep(text, limit=MAX_NESTING):
+    """Return the depth reached if it exceeds the limit, else 0.
+
+    Counts braces outside string literals, so a brace inside a value does not
+    count and a 500-level package of strings is not refused for its strings.
+    """
+    depth = deepest = 0
+    in_string = False
+    escaped = False
+    for ch in text:
+        if in_string:
+            if escaped:
+                escaped = False
+            elif ch == "\\":
+                escaped = True
+            elif ch == '"':
+                in_string = False
+            continue
+        if ch == '"':
+            in_string = True
+        elif ch in "[{":
+            depth += 1
+            if depth > deepest:
+                deepest = depth
+                if deepest > limit:
+                    return deepest
+        elif ch in "]}":
+            if depth > 0:
+                depth -= 1
+    return 0
+
+
+def _strict_scan(path):
+    """Return a list of problems found by re-reading the file as bytes."""
+    problems = []
+    dups = []
+
+    def hook(pairs):
+        seen = set()
+        for k, _ in pairs:
+            if k in seen:
+                dups.append(k)
+            seen.add(k)
+        return dict(pairs)
+
+    try:
+        with open(path, "rb") as fh:
+            raw = fh.read()
+    except OSError:
+        return problems
+    try:
+        text = raw.decode("utf-8")
+    except UnicodeDecodeError:
+        return ["not valid UTF-8"]
+    reached = _nesting_too_deep(text)
+    if reached:
+        return ["nested deeper than %d levels (reached %d), refusing to parse"
+                % (MAX_NESTING, reached)]
+    # RFC 8259 has no NaN, Infinity or -Infinity literal. Python's json module
+    # accepts all three by default, which made a manifest carrying NaN pass S11
+    # and land on INCONCLUSIVE: the package was not found wrong because the
+    # bytes were never judged as JSON at all. A parser that is more permissive
+    # than the format is a parser that cannot refuse the format's violations.
+    def _no_constants(value):
+        raise ValueError("%s is not a JSON number (RFC 8259 has no such literal)" % value)
+
+    try:
+        json.loads(text, object_pairs_hook=hook, parse_constant=_no_constants)
+    except ValueError as e:
+        problems.append("not parseable JSON (%s)" % e)
+    for name in dups:
+        problems.append("duplicate member name %r" % name)
+    for ch in text:
+        if ord(ch) < 0x20 and ch not in "\t\n\r":
+            problems.append("raw control character U+%04X" % ord(ch))
+            break
+    return problems
+
+
+RFC3339 = re.compile(
+    r"^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(\.\d+)?(Z|[+-]\d{2}:\d{2})$")
+UUID_FORM = re.compile(r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-"
+                       r"[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
+TIME_KEYS = {"timestamp", "created_at", "updated_at", "at", "issued_at",
+             "effective_at", "observed_at"}
+ID_KEYS = {"agent_id", "event_id", "id", "owner", "logical_agent_id"}
+
+
+def _calendar_ok(y, m, d):
+    """True iff the date exists. 1900 is deliberately NOT a leap year."""
+    if not (1 <= m <= 12 and 1 <= d <= 31):
+        return False
+    days = [31, 29 if (y % 4 == 0 and (y % 100 != 0 or y % 400 == 0)) else 28,
+            31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+    return d <= days[m - 1]
+
+
+def _offset_ok(off):
+    if off == "Z":
+        return True
+    hh, mm = int(off[1:3]), int(off[4:6])
+    return hh <= 14 and mm < 60 and not (hh == 14 and mm)
+
+
+def _now_utc():
+    """Verifier clock, isolated so tests and callers can reason about it."""
+    return datetime.now(timezone.utc)
+
+
+def _semantic_problems(obj, path="", now=None, future_skew_s=300):
+    """S12: timestamps and identifiers, judged on values rather than on hashes.
+
+    Why a separate check: S4/S5/S7 all answer "was this byte changed?" - none of
+    them answers "is this value a legal time?". A log whose timestamps are
+    '2026-11-17T05:59:59' (no zone), 'feb29 1900', or a lowercase 't' hashes
+    perfectly and orders nothing. AER-1's corpus treats those as must-fail; we
+    had no counterpart before this check.
+
+    Policy choices, stated so they can be argued with:
+      * leap second (":60") is REJECTED - evidence timestamps are machine
+        generated, and a leap second in an evidence log has no defensible
+        ordering meaning;
+      * UUID-shaped identifiers must be lowercase and non-nil - two readers must
+        not disagree about whether 'ABC...' and 'abc...' are the same device;
+      * non-UUID identifiers (e.g. 'mb-agent-001') are left alone: our schema
+        allows them, so rejecting them would be a false positive.
+      * a timestamp more than 300 s ahead of the verifier's own clock is
+        REJECTED (draft-marques-asqav-compliance-receipts-01 4.1.2), while
+        a past timestamp is never rejected on age alone: an evidence log
+        that stops verifying once it is old is not an evidence log.
+        The bound is a parameter so a test can move the clock instead of
+        sleeping.
+    """
+    problems = []
+    if isinstance(obj, dict):
+        for k, v in obj.items():
+            child = path + "/" + str(k) if path else str(k)
+            if k in TIME_KEYS and isinstance(v, str):
+                m = RFC3339.match(v)
+                if not m:
+                    problems.append("%s: %r is not RFC 3339 (needs uppercase T, "
+                                    "a timezone, full seconds)" % (child, v[:40]))
+                else:
+                    y, mo, d = int(m.group(1)), int(m.group(2)), int(m.group(3))
+                    if not _calendar_ok(y, mo, d):
+                        problems.append("%s: %r is not a real calendar date"
+                                        % (child, v[:40]))
+                    if int(m.group(6)) > 59:
+                        problems.append("%s: %r has a leap second; not accepted "
+                                        "in evidence timestamps" % (child, v[:40]))
+                    if not _offset_ok(m.group(8)):
+                        problems.append("%s: %r has an out-of-range UTC offset"
+                                        % (child, v[:40]))
+                    if now is not None:
+                        # A record dated in the future is not "fresh": it is a
+                        # claim about a clock the producer does not control. The
+                        # bound is one-sided on purpose - see the policy note
+                        # above about past timestamps.
+                        try:
+                            ts = datetime.fromisoformat(v.replace("Z", "+00:00"))
+                        except ValueError:
+                            ts = None
+                        if ts is not None:
+                            if ts.tzinfo is None:
+                                ts = ts.replace(tzinfo=timezone.utc)
+                            ahead = (ts - now).total_seconds()
+                            if ahead > future_skew_s:
+                                problems.append(
+                                    "%s: %r is %.0f s in the future; the accepted "
+                                    "lead of the verifier's clock is %d s"
+                                    % (child, v[:40], ahead, future_skew_s))
+            if k in ID_KEYS and isinstance(v, str) and UUID_FORM.match(v):
+                if v != v.lower():
+                    problems.append("%s: %r is an uppercase UUID" % (child, v))
+                if v.replace("-", "").strip("0") == "":
+                    problems.append("%s: %r is the nil UUID" % (child, v))
+            if k in ID_KEYS and isinstance(v, str) and not UUID_FORM.match(v):
+                # v1.1: an identifier is bytes, not text. A trailing newline or
+                # padding space makes two identifiers that print identically
+                # compare differently - the exact cause of the AER-1 corpus
+                # classes the corpus calls id-trailing-newline / provenance-trailing-newline.
+                # Control characters are < 0x20 and DEL (0x7F). The space (0x20)
+                # is not one: "Xinghua Zhao" or "MedXpert Inc" are legitimate
+                # identifiers, and rejecting them is a false FAIL on a correct
+                # package - the mirror image of a silent PASS.
+                if v != v.strip() or any(ord(c) < 0x20 or ord(c) == 0x7F for c in v):
+                    problems.append("%s: identifier %r has surrounding whitespace "
+                                    "or a control character" % (child, v[:40]))
+            problems.extend(_semantic_problems(v, child, now=now,
+                                            future_skew_s=future_skew_s))
+    elif isinstance(obj, list):
+        for i, v in enumerate(obj):
+            problems.extend(_semantic_problems(
+                v, "%s[%d]" % (path, i), now=now,
+                future_skew_s=future_skew_s))
+    return problems
+
+
+def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
+                 expect_head: str = None, strict: bool = False,
+                 state_file: str = None) -> dict:
+    """Verify a submission.uibc package directory. Returns a report dict.
     Seal v0.3 verdict semantics (docs/verdict-and-seal-semantics.md):
 
     - The top-level result is three-valued: FAIL if any check FAILs, else
@@ -53,48 +321,780 @@ def verify(package_dir: str, key: bytes = None, pubkey: bytes = None) -> dict:
 
     def record(cid, name, passed, detail=""):
         nonlocal ok
-        checks.append({"id": cid, "name": name, "result": "PASS" if passed else "FAIL", "detail": detail})
+        # Every check carries the basis it is allowed to claim, so a caller can
+        # tell "this rule is in a draft" from "this rule is ours" without
+        # consulting a second document.
+        checks.append({"id": cid, "name": name, "result": "PASS" if passed else "FAIL",
+                       "detail": detail, "basis": _basis.for_check(cid)})
         if not passed:
             ok = False
 
-    # S1 structure
+    # S11 strict serialization runs FIRST, before any parse: if the bytes are not
+    # UTF-8, or carry a duplicate member name, the later checks must not be the
+    # ones that notice. Recorded here so the report still names the encoding
+    # problem even when json.load would have raised and the fail-closed wrapper
+    # would have collapsed everything into S0.
+    s11_problems = []
+    for rel in _S11_FILES:
+        for problem in _strict_scan(os.path.join(package_dir, rel)):
+            s11_problems.append("%s: %s" % (rel, problem))
+    record("S11", "strict serialization", not s11_problems,
+           "; ".join(s11_problems[:4]) if s11_problems else
+           "UTF-8, no duplicate member names, no raw control characters")
+
+    # Bytes that never became JSON, or that are nested past any package, cannot
+    # be judged by a single later check. Continuing used to mean the manifest
+    # arrived as a list and S1 called .get() on it, which the fail-closed
+    # wrapper turned into S0 - "the verifier broke" - hiding the check that did
+    # have an answer, and the answer was the right one. Stop here instead, with
+    # the one verdict that is true, and say why no other check appears.
+    _fatal = ("not valid UTF-8", "not parseable JSON", "nested deeper than",
+              "repeated member name")
+    if s11_problems and any(k in p for p in s11_problems for k in _fatal):
+        return {
+            "verifier_id": VERIFIER_ID,
+            "verifier_version": __version__,
+            "spec_version": SPEC_VERSION,
+            "spec_id": _SPEC_ID,
+            "result": "FAIL",
+            "trust_level": "unattested",
+            "key_custody": None,
+            "subject": None,
+            "checks": checks,
+            "failed_checks": 1,
+            "warnings": [],
+            "note": "the bytes are not a readable package, so no other "
+                    "check could be judged",
+        }
+
+    def _safe_load(rel):
+        try:
+            return _load_json(os.path.join(package_dir, rel))
+        except Exception:
+            return {}
+
+    # S1 structure: required files present AND nothing undeclared inside the
+    # package directory (v1.1 fix F4). Before this, a notes.md / README that
+    # contradicted the evidence could sit in the package root and no check
+    # noticed - one of the 18 mutations was accepted that way.
     missing = [f for f in REQUIRED_FILES if not os.path.isfile(os.path.join(package_dir, f))]
-    record("S1", "package structure", not missing,
-           f"missing: {missing}" if missing else "all required files present")
 
-    manifest = _load_json(os.path.join(package_dir, "manifest.json")) if not missing else {}
-    identity = _load_json(os.path.join(package_dir, "identity.json")) if not missing else {}
-    lifecycle = _load_json(os.path.join(package_dir, "lifecycle.json")) if not missing else {}
-    index = _load_json(os.path.join(package_dir, "evidence", "index.json")) if not missing else {"entries": []}
+    manifest = _safe_load("manifest.json") if not missing else {}
+    identity = _safe_load("identity.json") if not missing else {}
+    lifecycle = _safe_load("lifecycle.json") if not missing else {}
+    index = (_safe_load("evidence/index.json") if not missing else {"entries": []}) or {"entries": []}
 
-    # S2 identity consistency
+    # A manifest that parsed as an array is not a package with a missing field;
+    # it is a file of the wrong kind. Calling .get() on it raised AttributeError
+    # and the wrapper reported S0, which says the verifier broke - the wrong
+    # party. S1 is the check that owns "the structure is not the structure".
+    if not missing and not isinstance(manifest, dict):
+        record("S1", "package structure", False,
+               "manifest.json parsed as a %s, not a JSON object" % type(manifest).__name__)
+        return {
+            "verifier_id": VERIFIER_ID,
+            "verifier_version": __version__,
+            "spec_version": SPEC_VERSION,
+            "spec_id": _SPEC_ID,
+            "result": "FAIL",
+            "trust_level": "unattested",
+            "key_custody": None,
+            "subject": None,
+            "checks": checks,
+            "failed_checks": 1,
+            "warnings": [],
+            "note": "manifest.json is not a JSON object, so no other check "
+                    "could be judged",
+        }
+
+    declared = set(REQUIRED_FILES) | {"signatures/seal.json"}
+    for e in index.get("entries", []):
+        declared.add("evidence/" + str(e.get("path", "")).replace("\\", "/"))
+    # A package MAY carry the verifier able to judge it - parity with AIVS, which
+    # ships verify.py inside the bundle and needs no repository at all. The path
+    # is declared here and the hash is bound, so an embedded verifier can never
+    # be swapped for one that always answers PASS.
+    embedded = manifest.get("embedded_verifier") if isinstance(manifest, dict) else None
+    embedded_problems = []
+    if isinstance(embedded, dict) and embedded.get("path"):
+        rel = str(embedded["path"]).replace("\\", "/")
+        declared.add(rel)
+        full = os.path.join(package_dir, rel)
+        if not os.path.isfile(full):
+            embedded_problems.append(
+                f"embedded verifier declared but missing: {rel}")
+        elif embedded.get("sha256"):
+            got = hash_file(full)
+            want = str(embedded["sha256"]).strip().lower()
+            if got != want:
+                embedded_problems.append(
+                    f"embedded verifier hash mismatch: {rel} "
+                    f"(declared {want[:16]}..., found {got[:16]}...)")
+    os_junk = {"thumbs.db", ".ds_store", "desktop.ini"}
+    undeclared = []
+    if not missing and not manifest.get("allow_extra_files"):
+        for root, _dirs, files in os.walk(package_dir):
+            for name in files:
+                rel = os.path.relpath(os.path.join(root, name),
+                                      package_dir).replace("\\", "/")
+                if rel in declared or name.lower() in os_junk:
+                    continue
+                undeclared.append(rel)
+    # A stray file at the package root can contradict the evidence it sits
+    # next to, so it fails S1. Auxiliary files in sub-directories (e.g. the
+    # runtime hook's snapshots/ copies) are not evidence and are reported as
+    # "not covered by the evidence root" instead of failing the package.
+    root_extras = [u for u in undeclared if "/" not in u]
+    nested_extras = [u for u in undeclared if "/" in u]
+    # Anything sitting inside evidence/ is, by where it is, taken to be
+    # evidence. A file there that the index never promised is therefore a
+    # violation, not a harmless auxiliary: a reader would reasonably assume it
+    # is covered by the root, and it is not. Auxiliary files belong outside
+    # evidence/, where they stay a note.
+    # Files under evidence/ that the index never promised stay a note, not a
+    # failure: this format itself places structural members there (the anchor
+    # event, the policy artefacts, the receipt chain), and each is resolved by
+    # the check that owns it. Whether an uncommitted file in evidence/ should
+    # fail outright is a question for a format version, not a patch: tightening
+    # it here made every existing package fail.
+    evidence_extras = [u for u in nested_extras if u.startswith("evidence/")]
+    # Files the format itself places under evidence/ and resolves by their own
+    # check: the tree, the receipt chain, the anchor set, the policy artefacts.
+    _EVIDENCE_STRUCTURAL = {"evidence/merkle.json", "evidence/chain.json",
+                            "evidence/anchors.json", "evidence/policies.json"}
+    uncommitted = []
+    if strict:
+        uncommitted = [u for u in evidence_extras
+                       if u not in _EVIDENCE_STRUCTURAL
+                       and not u.startswith("evidence/policies/")]
+    aux_extras = [u for u in nested_extras if not u.startswith("evidence/")]
+    s1_detail = []
+    if embedded_problems:
+        s1_detail.extend(embedded_problems)
+    if missing:
+        s1_detail.append(f"missing: {missing}")
+    if root_extras:
+        s1_detail.append(f"undeclared files at package root: {sorted(root_extras)}")
+
+    if uncommitted:
+        s1_detail.append(f"uncommitted files under evidence/: {sorted(uncommitted)}")
+    elif evidence_extras:
+        if strict:
+            s1_detail.append(f"structural members under evidence/: "
+                             f"{sorted(evidence_extras)} (exempt by format)")
+        else:
+            s1_detail.append(f"note (lenient mode): {sorted(evidence_extras)} under "
+                             f"evidence/ are structural or uncommitted; pass --strict "
+                             f"to fail uncommitted ones")
+    if aux_extras:
+        s1_detail.append(f"note: {sorted(aux_extras)} outside evidence/, not covered "
+                         f"by the evidence root")
+    # Version floor (VERSIONING.md section 8). A package may state the minimum
+    # verifier version able to judge everything it contains. Below that floor we
+    # must not report PASS: 0.3.3 once returned PASS, exit 0, on a package
+    # carrying identity.key_custody="hsm" - a claim it never read (see
+    # docs/MIGRATION-RESULTS.md, M2c). The package is not at fault, so this is
+    # INCONCLUSIVE, not FAIL.
+    floor = manifest.get("min_verifier_version") if isinstance(manifest, dict) else None
+    _floor_ok = True
+    if isinstance(floor, str) and floor.strip() and _version_lt(__version__, floor):
+        _floor_ok = False
+        s1_detail.append(f"this package declares min_verifier_version={floor.strip()!r}; "
+                         f"verifier is {__version__}, below the floor - fields it "
+                         f"carries cannot be judged here")
+    if _floor_ok:
+        record("S1", "package structure",
+               not missing and not root_extras and not uncommitted
+               and not embedded_problems,
+               "; ".join(s1_detail) if s1_detail
+               else f"all required files present, no undeclared files "
+                    f"({len(declared)} declared)")
+    else:
+        checks.append({"id": "S1", "name": "package structure",
+                       "result": "INCONCLUSIVE", "detail": "; ".join(s1_detail),
+                       "basis": _basis.for_check("S1")})
+
+    # S2 identity consistency (+ v1.1 identity fields: principal_type enum
+    # aligned to draft-noa-scitt-ai-agent-receipt-00 Section 3, optional
+    # policy_hash which maps to GAR's cap_profile_hash, and the
+    # long-term-identity / single-run separation)
     agent_id_ok = bool(identity.get("agent_id")) and \
         manifest.get("agent_id") == identity.get("agent_id")
-    record("S2", "identity consistency", agent_id_ok,
-           f"identity.agent_id={identity.get('agent_id')!r}, manifest.agent_id={manifest.get('agent_id')!r}")
+    s2_problems = []
+    if not agent_id_ok:
+        s2_problems.append(f"identity.agent_id={identity.get('agent_id')!r}, "
+                           f"manifest.agent_id={manifest.get('agent_id')!r}")
+    principal = identity.get("principal_type")
+    if principal is not None and principal not in PRINCIPAL_TYPES:
+        s2_problems.append(f"identity.principal_type={principal!r} not in "
+                           f"{sorted(PRINCIPAL_TYPES)}")
+    policy_hash = manifest.get("policy_hash")
+    if policy_hash is not None and not _POLICY_HASH_RE.match(str(policy_hash)):
+        s2_problems.append(f"manifest.policy_hash={policy_hash!r} is not "
+                           f"'sha256:<64 hex>'")
+    logical = identity.get("logical_agent_id")
+    if logical is not None and str(identity.get("agent_id") or "") != str(logical) \
+            and not str(identity.get("agent_id") or "").startswith(str(logical)):
+        s2_problems.append(f"identity.agent_id={identity.get('agent_id')!r} does not "
+                           f"derive from logical_agent_id={logical!r}")
+    custody = identity.get("key_custody")
+    if custody is not None and custody not in KEY_CUSTODY:
+        s2_problems.append(f"identity.key_custody={custody!r} not in "
+                           f"{sorted(KEY_CUSTODY)}")
+    # Measured 2026-11-19: an event claiming a different agent_id was
+    # accepted (verdict INCONCLUSIVE, S2 and S3 both PASS). Nothing compared
+    # the events' own agent_id with the package identity, so a package could
+    # attribute its lifecycle to somebody else's agent and still be
+    # "consistent". S2 now reads the field it never read.
+    pkg_agent = str(manifest.get("agent_id") or identity.get("agent_id") or "")
+    for _ev in (lifecycle.get("events") or []):
+        _ev_agent = _ev.get("agent_id")
+        if _ev_agent is not None and pkg_agent and str(_ev_agent) != pkg_agent:
+            s2_problems.append(
+                "lifecycle event %r belongs to agent %r, not %r"
+                % (_ev.get("event_id"), _ev_agent, pkg_agent))
 
-    # S3 lifecycle state machine + chain
+    # Cross-sink admission (SCC-04, measured 2026-11-20 against
+    # draft-watts-scientific-constitutional-constraints-00 §11):
+    #   "A signed request for sink A is rejected by sink B, including the case
+    #    where every request-internal audience field agrees."
+    # The obligation is about *declared* audience versus the sink that receives
+    # it. Both fields are optional; when neither is present this package says
+    # nothing about sinks and S2 stays as it was. When both are present and
+    # disagree, no amount of internal consistency makes the request deliverable,
+    # because a request cannot widen its own audience by agreeing with itself.
+    _sink = manifest.get("sink_id")
+    _aud = manifest.get("audience")
+    if _sink is not None or _aud is not None:
+        if not isinstance(_sink, str) or not isinstance(_aud, str):
+            s2_problems.append(
+                f"manifest.sink_id={_sink!r} / manifest.audience={_aud!r}: both "
+                f"must be strings when either is present")
+        elif _sink != _aud:
+            s2_problems.append(
+                f"manifest.audience={_aud!r} does not name the receiving sink "
+                f"({_sink!r}); a request signed for another sink must not be "
+                f"deliverable even when its own fields agree with each other")
+
+    record("S2", "identity consistency", not s2_problems,
+           "; ".join(s2_problems) if s2_problems else
+           f"agent_id={identity.get('agent_id')!r} consistent"
+           + (f", principal_type={principal}" if principal else "")
+           + (f", policy_hash={str(policy_hash)[:16]}..." if policy_hash else "")
+           + (f", sink_id={_sink}" if _sink else ""))
+
+    # S3 lifecycle state machine + chain, plus the v1.1 semantic layer
+    # (L8 timestamps monotonic & plausible, L10 actor allow-list, L11 once-only
+    # ACTIVATE). Those three closed the last lifecycle blind spots measured by
+    # tools/mutation_benchmark.py.
     events = lifecycle.get("events", [])
     l_errors = validate_lifecycle(events)
-    record("S3", "lifecycle state machine", not l_errors, "; ".join(l_errors) or f"{len(events)} events, chain valid")
+    principals = {identity.get("owner"), identity.get("agent_id")} - {None}
+    l_strict = validate_lifecycle_strict(
+        events,
+        created_at=manifest.get("created_at") or identity.get("created_at"),
+        allowed_actors=principals or None,
+    )
+    record("S3", "lifecycle state machine + semantics", not (l_errors or l_strict),
+           "; ".join(l_errors + l_strict) or
+           f"{len(events)} events, chain valid, timestamps monotonic, actors authorised")
 
     # S4 evidence integrity: recompute content hashes from files
     entries = index.get("entries", [])
     s4_failures = []
+    s4_unknown = []
     recomputed_hashes = []
+    # Containment: an evidence entry must resolve to a real file inside evidence/.
+    # Without this a package can put a symlink at evidence/files/x and have us hash
+    # something that lives outside the package (RT03 in tools/redteam_suite.py hit
+    # exactly that on 2026-11-17: the verifier returned PASS).
+    evidence_dir_real = os.path.realpath(os.path.join(package_dir, "evidence"))
     for e in entries:
         p = os.path.join(package_dir, "evidence", e.get("path", ""))
         if not os.path.isfile(p):
             s4_failures.append(f"missing file {e.get('path')!r}")
+            continue
+        real = os.path.realpath(p)
+        if os.path.islink(p) or not (real == evidence_dir_real or
+                                     real.startswith(evidence_dir_real + os.sep)):
+            s4_failures.append(
+                f"evidence file {e.get('path')!r} resolves outside the evidence root")
             continue
         actual = hash_file(p)
         recomputed_hashes.append(actual)
         if actual != e.get("content_hash"):
             s4_failures.append(f"hash mismatch on {e.get('path')!r}")
         if e.get("type") not in EVIDENCE_TYPES:
-            s4_failures.append(f"unknown evidence type {e.get('type')!r}")
-    record("S4", "evidence integrity", not s4_failures,
-           f"{len(entries)} entries checked; " + ("; ".join(s4_failures) if s4_failures else "all hashes match"))
+            # Not a failure: 0.3.3 accepted any string for evidence.type (its
+            # --help listed no vocabulary at all), so a package sealed by that
+            # release cannot be said to have violated a rule that did not exist
+            # yet. FAIL asserts "I checked, and this is wrong"; here the honest
+            # report is "I do not know this type". Upgrade must not turn an
+            # honest package into a rejected one.
+            s4_unknown.append(e.get("type"))
+    # evidence_id: the index is read by position everywhere else, so a duplicate
+    # or a missing identifier costs nothing until somebody cites an id. The
+    # field-coverage audit listed this as unchecked; it is checked now - but as a
+    # SEMANTIC problem (S12), not a structural one (S4). Rationale (2026-11-19):
+    # a duplicated entry carries a readable file with a matching hash, so the
+    # evidence root can still be computed and the duplicate is then caught by the
+    # root itself (S5), which is what the corpus expects. Filing it under S4 made
+    # the reference answer INCONCLUSIVE on that fixture while the independent
+    # implementation answered FAIL - two implementations, two answers, one spec.
+    _ids = [e.get("evidence_id") for e in entries]
+    id_problems = []
+    for _i, _eid in enumerate(_ids):
+        if not (isinstance(_eid, str) and _eid.strip()):
+            id_problems.append(f"entry {_i} has no evidence_id")
+    _seen = set()
+    for _eid in _ids:
+        if isinstance(_eid, str) and _eid.strip():
+            if _eid in _seen:
+                id_problems.append(f"duplicate evidence_id {_eid!r}")
+            _seen.add(_eid)
+    if s4_failures:
+        record("S4", "evidence integrity", False,
+               f"{len(entries)} entries checked; " + "; ".join(s4_failures))
+    elif s4_unknown:
+        checks.append({"id": "S4", "name": "evidence integrity", "result": "INCONCLUSIVE",
+                       "detail": f"{len(entries)} entries checked, hashes match; unknown "
+                                 f"evidence type(s) {sorted(set(map(str, s4_unknown)))}: "
+                                 f"not a failure - the type vocabulary postdates this "
+                                 f"package, so these entries are not counted as checked"})
+    else:
+        record("S4", "evidence integrity", True,
+               f"{len(entries)} entries checked; all hashes match")
+
+    # S12 semantic strictness: timestamps must be real, ordered things and
+    # identifiers must be canonical. Runs on the parsed values, so it is
+    # deliberately separate from S11 (which runs on the bytes).
+    s12_problems = []
+    s12_problems.extend(id_problems)
+    for doc_name, doc in (("manifest.json", manifest), ("identity.json", identity),
+                          ("lifecycle.json", lifecycle),
+                          ("evidence/index.json", index)):
+        for problem in _semantic_problems(doc, now=_now_utc()):
+            s12_problems.append("%s: %s" % (doc_name, problem))
+
+    # A declared count that disagrees with the index is a contradiction inside
+    # the package: `evidence_count` is the number of entries a reader will
+    # find, and nothing else. This was missing until the JavaScript verifier
+    # reported it on a case the Python one passed -- the second implementation
+    # finding a hole in the first, which is the whole point of having one.
+    declared_count = manifest.get("evidence_count")
+    if declared_count is not None:
+        actual_count = len(entries)
+        if not isinstance(declared_count, int) or isinstance(declared_count, bool):
+            s12_problems.append("manifest.json: evidence_count=%r is not an integer"
+                               % (declared_count,))
+        elif declared_count != actual_count:
+            s12_problems.append("manifest.json: evidence_count says %d, index holds %d"
+                               % (declared_count, actual_count))
+    # payload_hash is written by every event and was read by no check (F-008,
+    # found by tools/check_field_coverage.py on 2026-11-19: replace the null with
+    # any string and every check still said what it said before). A declared hash
+    # is a claim; the shape of the claim is checkable even when the payload it
+    # names is not shipped. Saying so is weaker than checking it, and stronger
+    # than pretending the field does not exist.
+    _payload_hash_re = re.compile(r"\A[0-9a-f]{64}\Z")
+    for _i, _ev in enumerate(lifecycle.get("events") or []):
+        _ph = _ev.get("payload_hash")
+        if _ph is not None and not (isinstance(_ph, str) and _payload_hash_re.match(_ph)):
+            s12_problems.append(
+                "lifecycle.json: events[%d].payload_hash=%r is not 64 lowercase hex"
+                % (_i, _ph))
+
+    record("S12", "timestamp and identifier strictness", not s12_problems,
+           "; ".join(s12_problems[:4]) if s12_problems else
+           "timestamps are RFC 3339 with a zone; UUIDs are lowercase and non-nil")
+
+    # S13 Merkle inclusion (v1.1). A hash chain answers "was file N changed?";
+    # a Merkle tree answers "is this one file inside a set of size N that the
+    # manifest committed to, without handing over all N files?". The class had
+    # no counterpart in our code at all. Runs only when the package carries
+    # evidence/merkle.json - a package with no tree is not penalised for it.
+    merkle_file = os.path.join(package_dir, "evidence", "merkle.json")
+    if os.path.isfile(merkle_file):
+        from . import merkle as _mk
+        mdoc = _load_json(merkle_file)
+        s13_problems = []
+        order = sorted(entries, key=lambda e: e.get("path", ""))
+        leaves = []
+        for e in order:
+            p = os.path.join(package_dir, "evidence", e.get("path", ""))
+            try:
+                with open(p, "rb") as fh:
+                    leaves.append(_mk.leaf_hash(fh.read()))
+            except OSError:
+                s13_problems.append("cannot read evidence file %r" % e.get("path"))
+        root = _mk.root_hash(leaves)
+        if mdoc.get("algorithm") != "rfc6962-sha256":
+            s13_problems.append("algorithm %r is not rfc6962-sha256"
+                                % mdoc.get("algorithm"))
+        if mdoc.get("size") != len(leaves):
+            s13_problems.append("declared size %r != %d evidence leaves"
+                                % (mdoc.get("size"), len(leaves)))
+        if str(mdoc.get("root", "")).lower() != root.hex():
+            s13_problems.append("declared root does not match recomputed root")
+        proofs = mdoc.get("proofs") or []
+        for pr in proofs:
+            idx = pr.get("index")
+            path = pr.get("path")
+            want = [e for e in order if e.get("path") == path]
+            if not want:
+                s13_problems.append("proof names unknown evidence %r" % path)
+                continue
+            i = order.index(want[0])
+            if idx is not None and idx != i:
+                s13_problems.append("proof index for %r is %r, recomputed %d"
+                                    % (path, idx, i))
+            try:
+                pf = [bytes.fromhex(h) for h in (pr.get("proof") or [])]
+            except ValueError:
+                s13_problems.append("proof for %r has a non-hex sibling" % path)
+                continue
+            if i >= len(leaves):
+                # The declared order still lists this evidence, but its file is
+                # gone, so there is no leaf to prove. Report it instead of
+                # letting an IndexError escape: a missing file is exactly the
+                # case S13 must describe, not crash on.
+                s13_problems.append("proof names evidence %r whose file is absent"
+                                    % path)
+                continue
+            if not _mk.verify_inclusion(leaves[i], i, len(leaves), pf, root):
+                s13_problems.append("inclusion proof for %r does not verify" % path)
+        record("S13", "merkle inclusion proofs", not s13_problems,
+               "; ".join(s13_problems[:4]) if s13_problems else
+               "root %s... over %d leaves; %d inclusion proofs verified"
+               % (root.hex()[:16], len(leaves), len(proofs)))
+
+    # S14 strict base64 (v1.1). "Signature verifies" and "two decoders disagree
+    # about the bytes" are not exclusive: pad bits, missing padding and stray
+    # characters all decode permissively. Runs only on fields the package
+    # itself marks as base64 (keys ending _b64 / _base64 or named 'base64'),
+    # so a schema that does not use base64 cannot be false-flagged.
+    def _b64_fields(obj, path=""):
+        found = []
+        if isinstance(obj, dict):
+            for k, v in obj.items():
+                child = "%s/%s" % (path, k) if path else str(k)
+                if isinstance(v, str) and (str(k).endswith("_b64")
+                                           or str(k).endswith("_base64")
+                                           or str(k) == "base64"):
+                    found.append((child, v, str(k) == "base64_url"))
+                else:
+                    found.extend(_b64_fields(v, child))
+        elif isinstance(obj, list):
+            for i, v in enumerate(obj):
+                found.extend(_b64_fields(v, "%s[%d]" % (path, i)))
+        return found
+
+    from . import encoding as _enc
+    b64_problems = []
+    b64_count = 0
+    for doc_name, doc in (("manifest.json", manifest), ("identity.json", identity),
+                          ("lifecycle.json", lifecycle),
+                          ("evidence/index.json", index)):
+        for field, value, urlsafe in _b64_fields(doc):
+            b64_count += 1
+            for problem in _enc.problems(value, urlsafe=urlsafe):
+                b64_problems.append("%s:%s %s" % (doc_name, field, problem))
+    if b64_count:
+        record("S14", "strict base64", not b64_problems,
+               "; ".join(b64_problems[:4]) if b64_problems else
+               "%d declared base64 field(s) are canonical" % b64_count)
+
+    # S15 anchor event resolution (v1.1). S9 answers "is the head pinned
+    # out-of-band?"; it cannot answer "can I resolve this anchor to a leaf in a
+    # set I can recompute myself?". Runs only when the package carries
+    # evidence/anchors.json. An anchor naming an external log stays unresolved
+    # rather than being counted as checked: "I could not verify" is not "OK".
+    anchors_file = os.path.join(package_dir, "evidence", "anchors.json")
+    if os.path.isfile(anchors_file):
+        from . import anchor as _anchor
+        from . import merkle as _mk2
+        adoc = _load_json(anchors_file)
+        leaves = []
+        for e in sorted(entries, key=lambda x: x.get("path", "")):
+            p = os.path.join(package_dir, "evidence", e.get("path", ""))
+            try:
+                with open(p, "rb") as fh:
+                    leaves.append(_mk2.leaf_hash(fh.read()))
+            except OSError:
+                leaves = None
+                break
+        aroot = _mk2.root_hash(leaves) if leaves else None
+        a_problems, a_resolved, a_external = _anchor.check_document(
+            adoc, root=aroot, leaves=leaves)
+        record("S15", "anchor event resolution", not a_problems,
+               "; ".join(a_problems[:3]) if a_problems else
+               "%d anchor(s) resolved against the evidence Merkle root; "
+               "%d external anchor(s) unresolved by design" % (a_resolved, a_external))
+
+    # S16 external timestamp (v1.1). Everything above is witnessed by parties we
+    # choose: our tree, our head file, our pin. An RFC 3161 token is the one
+    # witness we cannot mint ourselves - it dates a digest with a key held by a
+    # third party. Runs only when the package carries evidence/external_anchor.json,
+    # and an unjudgeable token is INCONCLUSIVE, never PASS.
+    ext_file = os.path.join(package_dir, "evidence", "external_anchor.json")
+    if os.path.isfile(ext_file):
+        from . import tsa as _tsa
+        ext = _load_json(ext_file)
+        ext_problems = []
+        if not _tsa.HAVE_ASN1:
+            checks.append({"id": "S16", "name": "external timestamp (RFC 3161)",
+                           "result": "INCONCLUSIVE",
+                           "detail": "verifier lacks asn1crypto; a token in the package "
+                                     "cannot be judged, so it is not counted as checked"})
+            ok = False
+        else:
+            rel_data = ext.get("digest_of") or "manifest.json"
+            data_path = os.path.join(package_dir, rel_data)
+            tsr_path = ext.get("tsr") or ""
+            ca_path = ext.get("cabundle") or ""
+            body = b""
+            cabundle = b""
+            try:
+                with open(data_path, "rb") as fh:
+                    data_bytes = fh.read()
+            except OSError:
+                data_bytes = None
+                ext_problems.append("cannot read anchored file %r" % rel_data)
+            try:
+                with open(os.path.join(package_dir, tsr_path), "rb") as fh:
+                    body = fh.read()
+            except OSError:
+                ext_problems.append("cannot read token %r" % tsr_path)
+            try:
+                with open(os.path.join(package_dir, ca_path), "rb") as fh:
+                    cabundle = fh.read()
+            except OSError:
+                ext_problems.append("cannot read CA bundle %r" % ca_path)
+
+            declared_tsr_sha = ext.get("tsr_sha256")
+            if body and declared_tsr_sha:
+                import hashlib as _hl
+                if _hl.sha256(body).hexdigest() != declared_tsr_sha:
+                    ext_problems.append("token digest is not the declared tsr_sha256")
+
+            ext_info = {}
+            if not ext_problems and data_bytes is not None:
+                import hashlib as _hl
+                v_ok, ext_info, v_problems = _tsa.verify_token(
+                    body, _hl.sha256(data_bytes).digest(), cabundle)
+                if not v_ok:
+                    ext_problems.extend(v_problems)
+
+            if ext_problems:
+                record("S16", "external timestamp (RFC 3161)", False,
+                       "; ".join(ext_problems[:3]))
+            else:
+                record("S16", "external timestamp (RFC 3161)", True,
+                       "token dates %r at %s (%s, serial %s); signature verified offline"
+                       % (rel_data, ext_info.get("gen_time"),
+                          (ext_info.get("tsa") or {}).get("organization_name")
+                          if isinstance(ext_info.get("tsa"), dict) else "TSA",
+                          ext_info.get("serial")))
+
+    # S17 linear receipt chain (v1.1). S8/S9/S13 all commit a TREE: they answer
+    # "was this byte changed" and "is this leaf inside the set". None of them
+    # answers "is this record the successor of that record", which is what a
+    # regulator asks when one receipt is pulled out of the middle of a stream.
+    # draft-marques-asqav-compliance-receipts-01 section 4.3 makes the linear
+    # link mandatory (previousReceiptHash over the JCS of the predecessor) and
+    # section 8 requires the verifier to recompute it. Runs only when the
+    # package carries evidence/chain.json.
+    chain_file = os.path.join(package_dir, "evidence", "chain.json")
+    if os.path.isfile(chain_file):
+        from . import chain as _chain
+        cdoc = _load_json(chain_file)
+        c_problems, c_checked = _chain.check_chain(cdoc)
+        record("S17", "linear receipt chain", not c_problems,
+               "; ".join(c_problems[:3]) if c_problems else
+               "%d receipt(s) linked by previousReceiptHash over JCS; "
+               "genesis is 64 zeros" % c_checked)
+
+    # S18 policy artefact resolution (v1.1). A `policy_digest` nobody can
+    # resolve is a number, not evidence. draft-marques-asqav-compliance-receipts-01
+    # section 8 makes the verifier reject a receipt whose digest does not
+    # resolve, and section 4.2.4 defines the value as SHA-256 over the JCS of a
+    # retained artefact. Runs only when the package carries
+    # evidence/policies.json; any policy_digest declared in evidence/chain.json
+    # must resolve there.
+    policies_file = os.path.join(package_dir, "evidence", "policies.json")
+    if os.path.isfile(policies_file):
+        from . import policy as _policy
+        pdoc = _load_json(policies_file)
+        required = []
+        if os.path.isfile(chain_file):
+            required = _policy.declared_digests(_load_json(chain_file))
+        p_problems, p_resolved = _policy.check_policies(
+            package_dir, pdoc, required_digests=required)
+        record("S18", "policy artefact resolution", not p_problems,
+               "; ".join(p_problems[:3]) if p_problems else
+               "%d policy artefact(s) resolve to their declared SHA-256 over "
+               "JCS; %d digest(s) referenced by receipts resolved"
+               % (p_resolved, len(required)))
+
+    # S4b: index METADATA must match its committed digest (v1.1). Content
+    # hashes alone cannot see an entry's type/note/action_digest being
+    # rewritten; the index digest is carried in the sealed manifest.
+    index_digest_field = manifest.get("evidence_index_digest")
+    if index_digest_field:
+        from .canonical import index_metadata_digest as _imd
+        actual_index_digest = _imd(index)
+        if actual_index_digest != index_digest_field:
+            ok = False
+            checks.append({"id": "S7", "name": "evidence index metadata",
+                           "result": "FAIL",
+                           "detail": "evidence/index.json metadata does not match "
+                                     "the sealed evidence_index_digest "
+                                     f"(expected {str(index_digest_field)[:20]}..., "
+                                     f"actual {actual_index_digest[:20]}...)"})
+        else:
+            checks.append({"id": "S7", "name": "evidence index metadata",
+                           "result": "PASS",
+                           "detail": "index metadata matches evidence_index_digest"})
+
+    # S10 attestation closure (draft-sharif-agent-audit-trail-03 Section 13.6).    # AAT's point is that any component left outside the attested set is a
+    # forgery channel: weights, tokenizer, chat template, engine build, decoding
+    # configuration, numeric environment. We can only check that a submitter
+    # DECLARED all six and gave each a digest; whether those digests correspond
+    # to what actually ran is not decidable from a package, and saying otherwise
+    # would be the exact overclaim this project refuses elsewhere.
+    closure = manifest.get("closure")
+    if closure is not None:
+        missing = []
+        if not isinstance(closure, dict):
+            missing = ["closure is not an object"]
+        else:
+            for k in CLOSURE_FIELDS:
+                v = closure.get(k)
+                if not isinstance(v, str) or not _SHA256_ONLY.match(v):
+                    missing.append(k)
+        if missing:
+            ok = False
+            checks.append({"id": "S10", "name": "attestation closure declared",
+                           "result": "FAIL",
+                           "detail": "closure is incomplete or malformed: "
+                                     + ", ".join(missing)})
+        else:
+            checks.append({"id": "S10", "name": "attestation closure declared",
+                           "result": "PASS",
+                           "detail": "all 6 closure components declared with digests "
+                                     "(declaration only, contents are not verified)"})
+
+    # S8 / S9 checkpoint head over the WHOLE package state (v1.1).
+    # S8: manifest checkpoint vs what is on disk - catches a log that was
+    # shortened while the manifest still describes the longer state, which a
+    # bare hash chain cannot see (the shorter chain is still internally valid).
+    # S9: checkpoint pinned out-of-band - catches substitution with an older
+    # but perfectly self-consistent package. NOTHING inside the package can
+    # detect that; only an observation made elsewhere can.
+    from .canonical import checkpoint_head as _ch
+    from .canonical import index_metadata_digest as _imd2
+    from .canonical import lifecycle_head as _lh
+    actual_lc_head = _lh(events)
+    try:
+        actual_ckpt = _ch(actual_lc_head, evidence_root(recomputed_hashes),
+                          _imd2(index), len(entries))
+    except Exception as e:
+        # a NaN / non-ECMAScript number anywhere in the state we commit to
+        actual_ckpt = "sha256:uncomputable"
+        ok = False
+        checks.append({"id": "S8", "name": "package checkpoint head",
+                       "result": "FAIL",
+                       "detail": f"state is not canonicalizable ({type(e).__name__}: "
+                                 f"{str(e)[:60]}) - a hostile number such as NaN in "
+                                 "the manifest is itself a violation"})
+    ckpt_field = manifest.get("checkpoint_head")
+    if ckpt_field:
+        if actual_ckpt != ckpt_field:
+            ok = False
+            checks.append({"id": "S8", "name": "package checkpoint head",
+                           "result": "FAIL",
+                           "detail": "state does not match the sealed checkpoint_head "
+                                     f"(manifest {str(ckpt_field)[:20]}..., "
+                                     f"disk {actual_ckpt[:20]}...) - state truncated, "
+                                     "rolled back, or replaced after sealing"})
+        else:
+            checks.append({"id": "S8", "name": "package checkpoint head",
+                           "result": "PASS",
+                           "detail": f"checkpoint matches ({len(events)} event(s), "
+                                     f"{len(entries)} evidence item(s))"})
+    if expect_head:
+        if str(actual_ckpt) != str(expect_head):
+            ok = False
+            checks.append({"id": "S9", "name": "head pinned out-of-band",
+                           "result": "FAIL",
+                           "detail": "package checkpoint does not match the pinned "
+                                     f"--expect-head ({str(expect_head)[:20]}...) - "
+                                     "rollback to an older self-consistent package, "
+                                     "or a wrong pin"})
+        else:
+            checks.append({"id": "S9", "name": "head pinned out-of-band",
+                           "result": "PASS",
+                           "detail": "checkpoint matches the out-of-band pinned value"})
+
+    # S19 freshness state (opt-in). S9 needs the caller to know the head every
+    # time; this remembers it instead. Deliberately narrow: it says nothing
+    # about authenticity (that is S6) and nothing about correctness (that is
+    # S1-S5 and S8). A first observation is INCONCLUSIVE, never PASS - there is
+    # no high-water mark yet, so nothing has been established.
+    if state_file:
+        head_field = manifest.get("freshness_head") if isinstance(manifest, dict) else None
+        subject = manifest.get("agent_id") if isinstance(manifest, dict) else None
+        sequence = None
+        prev_head = None
+        if isinstance(head_field, dict):
+            subject = head_field.get("subject") or subject
+            sequence = head_field.get("sequence")
+            prev_head = head_field.get("prev_head")
+        if subject is None and isinstance(identity, dict):
+            subject = identity.get("agent_id")
+        state = None
+        if subject is None:
+            # Nothing to key a high-water mark on. Saying so is the only honest
+            # answer: guessing a subject would let two unrelated agents share
+            # one watermark.
+            checks.append({"id": "S19", "name": "freshness state",
+                           "result": "INCONCLUSIVE",
+                           "detail": "no agent_id or freshness_head.subject: a "
+                                     "high-water mark cannot be keyed to anything"})
+        else:
+            try:
+                state = freshness.load(state_file)
+            except Exception as exc:  # an unreadable state is not a verdict either
+                ok = False
+                checks.append({"id": "S19", "name": "freshness state",
+                               "result": "FAIL",
+                               "detail": f"state file unreadable: {exc}"})
+        if state is not None:
+            verdict10, detail10 = freshness.evaluate(
+                state, subject, actual_ckpt, sequence=sequence, prev_head=prev_head)
+            if verdict10 == "FAIL":
+                ok = False
+            checks.append({"id": "S19", "name": "freshness state",
+                           "result": verdict10, "detail": detail10})
+            if verdict10 == "PASS" or (verdict10 == "INCONCLUSIVE"
+                                        and subject not in state.get("subjects", {})):
+                # A first observation is reported as INCONCLUSIVE because nothing
+                # was compared, but it is remembered - otherwise the high-water
+                # mark could never start and every run would stay unplaceable.
+                try:
+                    freshness.record(state_file, subject, actual_ckpt, sequence=sequence)
+                except freshness.Busy as exc:
+                    # Not a pass and not a failure: this run's observation was not
+                    # recorded, so the next run cannot compare against it. Saying
+                    # which one that is beats pretending the write happened.
+                    checks.append({"id": "S19", "name": "freshness state",
+                                   "result": "INCONCLUSIVE",
+                                   "detail": f"observation not recorded: {exc}"})
+                except Exception as exc:
+                    ok = False
+                    checks.append({"id": "S19", "name": "freshness state",
+                                   "result": "FAIL",
+                                   "detail": f"state file not writable: {exc}"})
 
     # S5 evidence root
     if entries and not s4_failures:
@@ -108,11 +1108,22 @@ def verify(package_dir: str, key: bytes = None, pubkey: bytes = None) -> dict:
                        "detail": "skipped: evidence missing or S4 failed"})
 
     # S6 seal signature (v0.3: HMAC owner seals + Ed25519 public seals)
+    # Hostile input must never crash the verifier: a manifest containing NaN or
+    # an uncanonicalizable number raises inside JCS, and a crash is not a
+    # verdict (red-team RT06). Convert it into a FAIL on the check that needs
+    # canonical bytes.
     seal_path = os.path.join(package_dir, "signatures", "seal.json")
     has_seal = os.path.isfile(seal_path) and not missing
     assurance = "unattested"
     if has_seal:
-        seal = _load_json(seal_path)
+        try:
+            seal = _load_json(seal_path)
+        except Exception as e:
+            seal = None
+            ok = False
+            checks.append({"id": "S6", "name": "seal signature", "result": "FAIL",
+                           "detail": f"seal.json is not readable JSON: {type(e).__name__}"})
+    if has_seal and seal is not None:
         algo = seal.get("algorithm")
         if algo == ALGORITHM_ED25519:
             pub = b64decode_strict(seal.get("public_key"))
@@ -136,32 +1147,57 @@ def verify(package_dir: str, key: bytes = None, pubkey: bytes = None) -> dict:
                                "detail": "seal algorithm is Ed25519; the provided --key is an "
                                          "HMAC owner key and cannot check it - re-run without "
                                          "--key, or pin the signer with --pubkey"})
-            elif not ed_seal_verify(pub, identity, manifest, seal.get("signature", "")):
+            elif ed_seal_verify_scoped(pub, identity, manifest, lifecycle,
+                                        seal.get("signature", "")) is None:
                 ok = False
                 checks.append({"id": "S6", "name": "seal signature", "result": "FAIL",
-                               "detail": "Ed25519 signature invalid: identity/manifest do not "
-                                         "match the seal"})
+                               "detail": "Ed25519 signature invalid: identity/manifest"
+                                         "/lifecycle do not match the seal"})
             else:
+                coverage = ed_seal_verify_scoped(pub, identity, manifest, lifecycle,
+                                                 seal.get("signature", ""))
                 assurance = "public-key"
+                note = ("" if coverage == "lifecycle-bound" else
+                        " - LEGACY seal: covers identity+manifest only, "
+                        "lifecycle tampering is not signed (S3 semantics are the only guard)")
                 checks.append({"id": "S6", "name": "seal signature", "result": "PASS",
-                               "detail": f"Ed25519 seal valid (key_id {ed_key_id(pub)[:16]}...) - "
-                                         "third-party verifiable, no secret involved"})
+                               "detail": f"Ed25519 seal valid (key_id {ed_key_id(pub)[:16]}...) "
+                                         f"coverage={coverage}, third-party verifiable, no secret "
+                                         f"involved{note}"})
         elif algo == ALGORITHM:
-            if key is not None:
+            # Structural consistency before anything else: an HMAC seal has no
+            # public key, so a seal that carries one is relabelled (algorithm
+            # confusion, red-team RT04). Refuse it instead of reporting the softer
+            # "cannot check without a key".
+            if seal.get("public_key"):
+                ok = False
+                checks.append({"id": "S6", "name": "seal signature", "result": "FAIL",
+                               "detail": "seal declares HMAC-SHA256 but carries a "
+                                         "public_key - algorithm confusion / relabelled seal"})
+            elif key is not None:
                 kid = key_id(key)
                 if seal.get("key_id") != kid:
                     ok = False
                     checks.append({"id": "S6", "name": "seal signature", "result": "FAIL",
                                    "detail": "key mismatch: seal was not created by this key "
                                              "(possible key substitution or wrong key)"})
-                elif not seal_verify(key, identity, manifest, seal.get("signature", "")):
-                    ok = False
-                    checks.append({"id": "S6", "name": "seal signature", "result": "FAIL",
-                                   "detail": "signature invalid: identity/manifest do not match the seal"})
                 else:
-                    assurance = "owner-key"
-                    checks.append({"id": "S6", "name": "seal signature", "result": "PASS",
-                                   "detail": f"HMAC-SHA256 seal valid (key_id {kid[:16]}...)"})
+                    sig = seal.get("signature", "")
+                    coverage = None
+                    if lifecycle and seal_verify(key, identity, manifest, sig, lifecycle):
+                        coverage = "lifecycle-bound"
+                    elif seal_verify(key, identity, manifest, sig):
+                        coverage = "legacy"
+                    if coverage is None:
+                        ok = False
+                        checks.append({"id": "S6", "name": "seal signature", "result": "FAIL",
+                                       "detail": "signature invalid: identity/manifest/lifecycle "
+                                                 "do not match the seal"})
+                    else:
+                        assurance = "owner-key"
+                        checks.append({"id": "S6", "name": "seal signature", "result": "PASS",
+                                       "detail": f"HMAC-SHA256 seal valid (key_id {kid[:16]}..., "
+                                                 f"coverage={coverage})"})
             else:
                 checks.append({"id": "S6", "name": "seal signature", "result": "INCONCLUSIVE",
                                "detail": "HMAC seal present but no verification key provided "
@@ -192,11 +1228,30 @@ def verify(package_dir: str, key: bytes = None, pubkey: bytes = None) -> dict:
     else:
         result = "PASS"
 
+    if assurance == "public-key":
+        # An Ed25519 seal carries its own public key, so a plain open-mode
+        # verify uses a key the artifact itself supplies: internally
+        # consistent, not anchored. Only --pubkey - a channel the artifact
+        # does not control - earns "anchored".
+        trust_level = "anchored" if pubkey is not None else "unanchored"
+    elif assurance == "owner-key":
+        trust_level = "anchored"
+    else:
+        trust_level = "unattested"
+
     return {
         "verifier_id": VERIFIER_ID,
         "verifier_version": __version__,
         "spec_version": SPEC_VERSION,
+        "spec_id": _SPEC_ID,
         "result": result,
+        # Anchor rule (draft-maintainer-1f916-agent-record-01 Section 3.6):
+        # "A verification run is ANCHORED only when at least one key reached
+        # the verifier through a channel the artifact does not control." A
+        # key read out of the package proves internal consistency and nothing
+        # more, so it must not be reported as if it were provenance.
+        "trust_level": trust_level,
+        "key_custody": identity.get("key_custody"),
         "subject": manifest.get("agent_id"),
         "checks": checks,
         "root_algorithm": "sha256(canonical-json(sorted(content_hashes))) v0.1-provisional",
@@ -210,6 +1265,14 @@ def verify(package_dir: str, key: bytes = None, pubkey: bytes = None) -> dict:
             "HMAC-SHA256 seals (v0.2) are symmetric: verification requires the owner "
             "key. Ed25519 seals (v0.3) are third-party verifiable with the public key "
             "recorded in the seal.",
+            "Anchor rule: in open mode the seal's public key is read out of the "
+            "package under test, so a passing signature proves internal consistency "
+            "only ('unanchored'). 'anchored' requires an out-of-band key (--pubkey).",
+            "There is no independent witness or transparency-log countersignature, so "
+            "even an anchored run cannot reach the 'witnessed' strength. Truncation is "
+            "caught by the S8 checkpoint, and rollback only by S9 with a head observed "
+            "outside the package (--expect-head): nothing inside a package can detect "
+            "being replaced by an older self-consistent one.",
             "Key substitution is detectable only when verifying with the owner key "
             "(--key), a pinned public key (--pubkey), or out-of-band key pinning.",
             "Evidence Root algorithm is provisional (pending canonical serialization ratification).",
@@ -230,3 +1293,50 @@ def verify(package_dir: str, key: bytes = None, pubkey: bytes = None) -> dict:
                       "least one check could not be resolved within the observed "
                       "evidence boundary."),
     }
+
+
+def verify(package_dir: str, key: bytes = None, pubkey: bytes = None,
+           expect_head: str = None, strict: bool = False,
+           state_file: str = None) -> dict:
+    """Fail-closed wrapper: a verifier must return a verdict, never crash.
+
+    Red-team RT06 put a NaN into manifest.json. json accepts NaN, RFC 8785 does
+    not, so the canonicalizer raised inside S6 and the caller got a traceback.
+    A crash is not a verdict - and an attacker who can choose which inputs
+    crash the verifier can also choose which inputs never get reported.
+    """
+    try:
+        result = _verify_impl(package_dir, key=key, pubkey=pubkey,
+                              expect_head=expect_head, strict=strict,
+                              state_file=state_file)
+        result["strict"] = bool(strict)
+        # Some checks are appended from a dozen hand-written branches (S6 alone
+        # has fourteen). Rather than touch each one and still miss a path, the
+        # basis is filled in once, here, for every check that lacks it.
+        for c in result.get("checks", []):
+            c.setdefault("basis", _basis.for_check(c.get("id", "")))
+        return result
+    except Exception as e:  # noqa: BLE001 - hostile input of any shape
+        return {
+            "verifier_id": VERIFIER_ID,
+            "verifier_version": __version__,
+            "spec_version": SPEC_VERSION,
+        "spec_id": _SPEC_ID,
+            "result": "FAIL",
+            "trust_level": "unattested",
+            "key_custody": None,
+            "subject": None,
+            "checks": [{"id": "S0", "name": "verifier robustness",
+                        "result": "FAIL",
+                        "detail": f"{type(e).__name__}: {str(e)[:120]} - the package "
+                                  "could not be processed; treated as a violation, "
+                                  "never as a pass",
+                        "basis": _basis.for_check("S0")}],
+            "root_algorithm": "sha256(canonical-json(sorted(content_hashes))) v0.1-provisional",
+            "assurance": "unattested",
+            "scope": "Verifier robustness only: the package could not be processed.",
+            "limitations": ["No check could be completed on this input."],
+            "checked": [],
+            "not_checked": ["everything"],
+            "statement": "Input rejected before any check could complete.",
+        }

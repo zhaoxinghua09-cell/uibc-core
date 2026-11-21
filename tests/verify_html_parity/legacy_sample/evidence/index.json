@@ -1,0 +1,13 @@
+{
+  "entries": [
+    {
+      "evidence_id": "4985b9ca-a612-4066-bcd4-b9cdc22b3a26",
+      "type": "ACTION",
+      "path": "files/note.txt",
+      "content_hash": "5df7cac53d3df1f72aa71e820cc501774280f7b6efd17d54a0ab64a8a314db32",
+      "created_at": "2026-11-12T02:09:03Z",
+      "media_type": "text/plain",
+      "note": ""
+    }
+  ]
+}

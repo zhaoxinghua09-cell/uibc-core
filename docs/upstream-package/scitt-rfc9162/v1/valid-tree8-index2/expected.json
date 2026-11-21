@@ -1,0 +1,19 @@
+{
+  "description": "Happy path: tree_size=8, leaf_index=2; the reconstructed root equals root_true.",
+  "inclusion_path": [
+    "5bef669e5a0ba14b1db58a39d41bb438c3fb11053f45d824966549453224b31f",
+    "c4c3c7d13b5d9a028da1b598e16d982b8b598f3db128b3d15fe19cb3cb505ce1",
+    "cf218ced5c26c438cf240d87aad1308d1b1e8c3dc1599587dddb478238d80ea3"
+  ],
+  "leaf_entry": {
+    "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+    "digest_hex": "35b4a0689a7c5b013e6042280f2d0be685e62655d56308cf29155b18e6c77305",
+    "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: valid-tree8-index2 :: leaf 2",
+    "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a2076616c69642d74726565382d696e64657832203a3a206c6561662032"
+  },
+  "leaf_index": 2,
+  "reconstructed_root": "7437f94011c823b36de71de6d7f1b6c027204b65783292d27e31059f6bb61daa",
+  "result": "VALID",
+  "root_true": "7437f94011c823b36de71de6d7f1b6c027204b65783292d27e31059f6bb61daa",
+  "tree_size": 8
+}

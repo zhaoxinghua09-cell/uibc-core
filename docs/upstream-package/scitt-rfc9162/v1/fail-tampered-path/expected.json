@@ -1,0 +1,19 @@
+{
+  "description": "The first sibling is replaced with 32 zero bytes; reconstructed root differs.",
+  "inclusion_path": [
+    "0000000000000000000000000000000000000000000000000000000000000000",
+    "573d2a7abce98827fe5af819c55693934b7239cd9ac344e1e9f512ccfa8cba64",
+    "315673f57a45ab2c3177821f1ba698e070b333c2e74cb40149cd704623773f55"
+  ],
+  "leaf_entry": {
+    "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+    "digest_hex": "5ae7426ec1100a34396dcd8d4a4186f08e3321175f9089e972bf8a068a4489b6",
+    "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: fail-tampered-path :: leaf 2",
+    "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a206661696c2d74616d70657265642d70617468203a3a206c6561662032"
+  },
+  "leaf_index": 2,
+  "reconstructed_root": "99a2b1966982f3f0022ca514898cbb0644d187d653166267bb419dd0705b1293",
+  "result": "INVALID_INCLUSION_PATH",
+  "root_true": "cfdb1241c6fb6827b2b5e44e5eefcb87489da14a1e6256fc06a985434513c756",
+  "tree_size": 8
+}

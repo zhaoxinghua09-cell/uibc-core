@@ -1,0 +1,22 @@
+{
+  "entries": [
+    {
+      "evidence_id": "50b33c94-b2a7-52fb-8b36-142e5df8ab3e",
+      "type": "ACTION",
+      "path": "files/oracle-s01-undeclared-file-0.txt",
+      "content_hash": "320f7d2b082d2c5c51860f61193739993b9d7d2169b3043966f33d052389b9ed",
+      "created_at": "2026-11-15T00:00:00Z",
+      "media_type": "text/plain",
+      "note": "n0"
+    },
+    {
+      "evidence_id": "e91aa601-5a82-5b23-bad5-c7809e91bb00",
+      "type": "ACTION",
+      "path": "files/oracle-s01-undeclared-file-1.txt",
+      "content_hash": "7543ca65760bbe3ab501f84964335f75a39e319b699a61b516528bb8a89603c3",
+      "created_at": "2026-11-15T00:00:00Z",
+      "media_type": "text/plain",
+      "note": "n1"
+    }
+  ]
+}

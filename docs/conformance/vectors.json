@@ -1,0 +1,514 @@
+{
+  "schema": "uibc-core/conformance-vectors@3",
+  "generated_by": "tools/conformance_vectors.py",
+  "what_this_is": "Inputs and expected bytes for seven steps: canonical JSON, Ed25519 signatures, receipt envelope digests, the linear chain link, Merkle roots and inclusion paths (RFC 6962), policy artefact digests, and two anchor-binding cases against a real RFC 3161 token. It is not a full-receipt corpus and it does not contain a second implementation.",
+  "how_to_use": "For each vector, reproduce the expected value with your own implementation: canonical_json - compare bytes and SHA-256; ed25519_signature - verify with any Ed25519 library and compare the verdict; receipt_digest - hash the JCS bytes of the envelope; receipt_chain - recompute the links and compare the verdict; merkle_root - build the RFC 6962 tree and compare the root; merkle_inclusion - recompute the root from the leaf, index, size and path; policy_digest - hash the JCS bytes of the artefact; anchor_binding - hash the artifact and parse the token, then compare the messageImprint. A conforming implementation needs no code from us.",
+  "not_claimed": [
+    "that we publish a second implementation — we do not",
+    "that these vectors validate a receipt schema end to end — they do not; a receipt is a composite of steps that are published here and rules that are not",
+    "that passing them makes an implementation interoperable with our receipts — it makes seven steps comparable, not the whole format"
+  ],
+  "vectors": [
+    {
+      "id": "c01-empty-object",
+      "kind": "canonical_json",
+      "input": {},
+      "expected_canonical_utf8": "{}",
+      "expected_sha256_hex": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "check": "canonicalize(input) must equal expected_canonical_utf8 byte for byte, and sha256 of it must equal expected_sha256_hex"
+    },
+    {
+      "id": "c02-key-order",
+      "kind": "canonical_json",
+      "input": {
+        "b": 1,
+        "a": 2
+      },
+      "expected_canonical_utf8": "{\"a\":2,\"b\":1}",
+      "expected_sha256_hex": "d3626ac30a87e6f7a6428233b3c68299976865fa5508e4267c5415c76af7a772",
+      "check": "canonicalize(input) must equal expected_canonical_utf8 byte for byte, and sha256 of it must equal expected_sha256_hex"
+    },
+    {
+      "id": "c03-nested",
+      "kind": "canonical_json",
+      "input": {
+        "z": {
+          "y": [
+            3,
+            2,
+            1
+          ]
+        },
+        "a": "s"
+      },
+      "expected_canonical_utf8": "{\"a\":\"s\",\"z\":{\"y\":[3,2,1]}}",
+      "expected_sha256_hex": "0bfcb844a9fa9e9346a4a047b5b284bed87931a242763231d71869a6c5a4fbb5",
+      "check": "canonicalize(input) must equal expected_canonical_utf8 byte for byte, and sha256 of it must equal expected_sha256_hex"
+    },
+    {
+      "id": "c04-unicode",
+      "kind": "canonical_json",
+      "input": {
+        "name": "张 三",
+        "role": "агент"
+      },
+      "expected_canonical_utf8": "{\"name\":\"张 三\",\"role\":\"агент\"}",
+      "expected_sha256_hex": "7505c0da4192605d3840d33d259448e08dea8bcedeab269d29a0870eb48146ab",
+      "check": "canonicalize(input) must equal expected_canonical_utf8 byte for byte, and sha256 of it must equal expected_sha256_hex"
+    },
+    {
+      "id": "c05-numbers",
+      "kind": "canonical_json",
+      "input": {
+        "i": 7,
+        "f": 1.5,
+        "neg": -2,
+        "zero": 0
+      },
+      "expected_canonical_utf8": "{\"f\":1.5,\"i\":7,\"neg\":-2,\"zero\":0}",
+      "expected_sha256_hex": "0a724849362632941f6e7dd8e3ad3ad4a60aad3c86ed223d8c86435844566adb",
+      "check": "canonicalize(input) must equal expected_canonical_utf8 byte for byte, and sha256 of it must equal expected_sha256_hex"
+    },
+    {
+      "id": "c06-escapes",
+      "kind": "canonical_json",
+      "input": {
+        "q": "he said \"hi\"",
+        "nl": "a\nb",
+        "tab": "a\tb"
+      },
+      "expected_canonical_utf8": "{\"nl\":\"a\\nb\",\"q\":\"he said \\\"hi\\\"\",\"tab\":\"a\\tb\"}",
+      "expected_sha256_hex": "6eed5830b02e04471d1692c7461129ae74e9d5b65a151b5a813dfc97a776c37d",
+      "check": "canonicalize(input) must equal expected_canonical_utf8 byte for byte, and sha256 of it must equal expected_sha256_hex"
+    },
+    {
+      "id": "c07-bools-null",
+      "kind": "canonical_json",
+      "input": {
+        "t": true,
+        "f": false,
+        "n": null
+      },
+      "expected_canonical_utf8": "{\"f\":false,\"n\":null,\"t\":true}",
+      "expected_sha256_hex": "22e00dc2f7b01420f940fbdbfbdf34fa0667cc6500186495023ba37722cbd05e",
+      "check": "canonicalize(input) must equal expected_canonical_utf8 byte for byte, and sha256 of it must equal expected_sha256_hex"
+    },
+    {
+      "id": "c08-array-order",
+      "kind": "canonical_json",
+      "input": {
+        "xs": [
+          1,
+          "a",
+          null,
+          {
+            "k": "v"
+          }
+        ]
+      },
+      "expected_canonical_utf8": "{\"xs\":[1,\"a\",null,{\"k\":\"v\"}]}",
+      "expected_sha256_hex": "442a9f03e9cc454d7f171ffe15513f7394cd3bf4ed2221b67c82dd017860990b",
+      "check": "canonicalize(input) must equal expected_canonical_utf8 byte for byte, and sha256 of it must equal expected_sha256_hex"
+    },
+    {
+      "id": "c09-deep",
+      "kind": "canonical_json",
+      "input": {
+        "a": {
+          "b": {
+            "c": {
+              "d": [
+                {
+                  "e": 1
+                }
+              ]
+            }
+          }
+        }
+      },
+      "expected_canonical_utf8": "{\"a\":{\"b\":{\"c\":{\"d\":[{\"e\":1}]}}}}",
+      "expected_sha256_hex": "18daf33e34321c2d2974d31798276c8b0932db7e0e602b31c535d39253b626e2",
+      "check": "canonicalize(input) must equal expected_canonical_utf8 byte for byte, and sha256 of it must equal expected_sha256_hex"
+    },
+    {
+      "id": "c10-empty-containers",
+      "kind": "canonical_json",
+      "input": {
+        "o": {},
+        "a": []
+      },
+      "expected_canonical_utf8": "{\"a\":[],\"o\":{}}",
+      "expected_sha256_hex": "9bee7ebfc94b459dacb8cbc72cb2900e61f0aa42189df18329f84f92568f4f89",
+      "check": "canonicalize(input) must equal expected_canonical_utf8 byte for byte, and sha256 of it must equal expected_sha256_hex"
+    },
+    {
+      "id": "m01-ascii",
+      "kind": "ed25519_signature",
+      "seed_hex": "0000000000000000000000000000000000000000000000000000000000000001",
+      "public_key_hex": "4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29",
+      "message_utf8": "uibc conformance vector 01",
+      "message_hex": "7569626320636f6e666f726d616e636520766563746f72203031",
+      "signature_hex": "025748e24e6c37bd9c7faa7738dfe233522a0e34ca0d31ce01504721ec5e2a114c61a6756a2b2837692eb3b147edaf8b7a7408bb103a6db17d6d3dda88a08204",
+      "expected_verdict": "valid",
+      "check": "verify(public_key_hex, message, signature_hex) must return valid; no private key is published, only a throwaway seed for reproduction"
+    },
+    {
+      "id": "m02-utf8",
+      "kind": "ed25519_signature",
+      "seed_hex": "0000000000000000000000000000000000000000000000000000000000000001",
+      "public_key_hex": "4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29",
+      "message_utf8": "边界检查",
+      "message_hex": "e8beb9e7958ce6a380e69fa5",
+      "signature_hex": "e398dbb593eae010c0661cb752c464dcb15ad5058fa99ebb1a996eacd5c9c6441bc9bb1d6a98f51655a2f2748c9a2266cfe95e5f1e28e38a8f1939e95b79400e",
+      "expected_verdict": "valid",
+      "check": "verify(public_key_hex, message, signature_hex) must return valid; no private key is published, only a throwaway seed for reproduction"
+    },
+    {
+      "id": "m03-empty",
+      "kind": "ed25519_signature",
+      "seed_hex": "0000000000000000000000000000000000000000000000000000000000000001",
+      "public_key_hex": "4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29",
+      "message_utf8": "",
+      "message_hex": "",
+      "signature_hex": "7e1b9dc1e332c4238edcd07a68101474b640fdcb1b7b84fb711ac4bfbc85eb85a77480950d69398dcd19f61e1ea74d0f183cfbf34df8f6e7733ebfb9f944f106",
+      "expected_verdict": "valid",
+      "check": "verify(public_key_hex, message, signature_hex) must return valid; no private key is published, only a throwaway seed for reproduction"
+    },
+    {
+      "id": "r01-signature-other-message",
+      "kind": "ed25519_signature",
+      "public_key_hex": "4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29",
+      "message_hex": "7569626320636f6e666f726d616e636520766563746f7220303178",
+      "signature_hex": "025748e24e6c37bd9c7faa7738dfe233522a0e34ca0d31ce01504721ec5e2a114c61a6756a2b2837692eb3b147edaf8b7a7408bb103a6db17d6d3dda88a08204",
+      "expected_verdict": "invalid",
+      "check": "verify must reject: the signature was made over a different message"
+    },
+    {
+      "id": "r02-signature-tampered-byte",
+      "kind": "ed25519_signature",
+      "public_key_hex": "4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29",
+      "message_hex": "7569626320636f6e666f726d616e636520766563746f72203031",
+      "signature_hex": "025748e24e6c37bd9c7faa7738dfe233522a0e34ca0d31ce01504721ec5e2a114c61a6756a2b2837692eb3b147edaf8b7a7408bb103a6db17d6d3dda88a08205",
+      "expected_verdict": "invalid",
+      "check": "verify must reject: one signature byte flipped"
+    },
+    {
+      "id": "h01-receipt-minimal",
+      "kind": "receipt_digest",
+      "envelope": {
+        "receipt_id": "r-0001",
+        "issued_at": "2026-11-17T08:11:35Z",
+        "agent_id": "agent-0001",
+        "verdict": "PASS"
+      },
+      "expected_canonical_utf8": "{\"agent_id\":\"agent-0001\",\"issued_at\":\"2026-11-17T08:11:35Z\",\"receipt_id\":\"r-0001\",\"verdict\":\"PASS\"}",
+      "expected_sha256_hex": "48b911f67cb565b2e9c7dcc8e7b707855dcd9d1a7db7d642ad6faddbf1ab933e",
+      "check": "digest of a receipt envelope = sha256 over its RFC 8785 JCS bytes; canonicalize(envelope) must equal expected_canonical_utf8 and its sha256 must equal expected_sha256_hex"
+    },
+    {
+      "id": "h02-receipt-with-policy",
+      "kind": "receipt_digest",
+      "envelope": {
+        "receipt_id": "r-0002",
+        "issued_at": "2026-11-17T09:02:11Z",
+        "agent_id": "agent-0001",
+        "verdict": "HOLD",
+        "policy_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "previous_receipt_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+        "counts": {
+          "events": 12,
+          "failures": 1
+        }
+      },
+      "expected_canonical_utf8": "{\"agent_id\":\"agent-0001\",\"counts\":{\"events\":12,\"failures\":1},\"issued_at\":\"2026-11-17T09:02:11Z\",\"policy_digest\":\"sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"previous_receipt_hash\":\"0000000000000000000000000000000000000000000000000000000000000000\",\"receipt_id\":\"r-0002\",\"verdict\":\"HOLD\"}",
+      "expected_sha256_hex": "9ed65765c6098e69305a91481f26138e26296aa4489721780b2480eb79d77769",
+      "check": "digest of a receipt envelope = sha256 over its RFC 8785 JCS bytes; canonicalize(envelope) must equal expected_canonical_utf8 and its sha256 must equal expected_sha256_hex"
+    },
+    {
+      "id": "h03-receipt-unicode",
+      "kind": "receipt_digest",
+      "envelope": {
+        "receipt_id": "r-0003",
+        "issued_at": "2026-11-17T10:00:00Z",
+        "agent_id": "张三的 agent",
+        "note": "边界检查 —— 不转义"
+      },
+      "expected_canonical_utf8": "{\"agent_id\":\"张三的 agent\",\"issued_at\":\"2026-11-17T10:00:00Z\",\"note\":\"边界检查 —— 不转义\",\"receipt_id\":\"r-0003\"}",
+      "expected_sha256_hex": "9dd852a5783f102c0614fef76e1738664cf4bfa67f7c3f5a2ce65e1dcbfa8e8e",
+      "check": "digest of a receipt envelope = sha256 over its RFC 8785 JCS bytes; canonicalize(envelope) must equal expected_canonical_utf8 and its sha256 must equal expected_sha256_hex"
+    },
+    {
+      "id": "k01-chain-valid",
+      "kind": "receipt_chain",
+      "chain": {
+        "schema": "uibc-core/receipt-chain@1",
+        "receipts": [
+          {
+            "envelope": {
+              "receipt_id": "r-0001",
+              "issued_at": "2026-11-17T08:11:35Z",
+              "agent_id": "agent-0001",
+              "verdict": "PASS"
+            },
+            "previous_receipt_hash": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          {
+            "envelope": {
+              "receipt_id": "r-0002",
+              "issued_at": "2026-11-17T09:02:11Z",
+              "agent_id": "agent-0001",
+              "verdict": "HOLD",
+              "policy_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "previous_receipt_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+              "counts": {
+                "events": 12,
+                "failures": 1
+              }
+            },
+            "previous_receipt_hash": "48b911f67cb565b2e9c7dcc8e7b707855dcd9d1a7db7d642ad6faddbf1ab933e"
+          },
+          {
+            "envelope": {
+              "receipt_id": "r-0003",
+              "issued_at": "2026-11-17T10:00:00Z",
+              "agent_id": "张三的 agent",
+              "note": "边界检查 —— 不转义"
+            },
+            "previous_receipt_hash": "9ed65765c6098e69305a91481f26138e26296aa4489721780b2480eb79d77769"
+          }
+        ]
+      },
+      "expected_verdict": "valid",
+      "expected_digests": [
+        "48b911f67cb565b2e9c7dcc8e7b707855dcd9d1a7db7d642ad6faddbf1ab933e",
+        "9ed65765c6098e69305a91481f26138e26296aa4489721780b2480eb79d77769",
+        "9dd852a5783f102c0614fef76e1738664cf4bfa67f7c3f5a2ce65e1dcbfa8e8e"
+      ],
+      "check": "recompute each envelope digest; receipt[0].previous_receipt_hash must be 64 zeros; receipt[i].previous_receipt_hash must equal digest of receipt[i-1].envelope; verdict valid"
+    },
+    {
+      "id": "k02-chain-broken-link",
+      "kind": "receipt_chain",
+      "chain": {
+        "schema": "uibc-core/receipt-chain@1",
+        "receipts": [
+          {
+            "envelope": {
+              "receipt_id": "r-0001",
+              "issued_at": "2026-11-17T08:11:35Z",
+              "agent_id": "agent-0001",
+              "verdict": "PASS"
+            },
+            "previous_receipt_hash": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          {
+            "envelope": {
+              "receipt_id": "r-0002",
+              "issued_at": "2026-11-17T09:02:11Z",
+              "agent_id": "agent-0001",
+              "verdict": "HOLD",
+              "policy_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "previous_receipt_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+              "counts": {
+                "events": 12,
+                "failures": 1
+              }
+            },
+            "previous_receipt_hash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+          },
+          {
+            "envelope": {
+              "receipt_id": "r-0003",
+              "issued_at": "2026-11-17T10:00:00Z",
+              "agent_id": "张三的 agent",
+              "note": "边界检查 —— 不转义"
+            },
+            "previous_receipt_hash": "9ed65765c6098e69305a91481f26138e26296aa4489721780b2480eb79d77769"
+          }
+        ]
+      },
+      "expected_verdict": "invalid",
+      "expected_reason": "previous_receipt_hash_mismatch",
+      "expected_digests": [
+        "48b911f67cb565b2e9c7dcc8e7b707855dcd9d1a7db7d642ad6faddbf1ab933e",
+        "9ed65765c6098e69305a91481f26138e26296aa4489721780b2480eb79d77769",
+        "9dd852a5783f102c0614fef76e1738664cf4bfa67f7c3f5a2ce65e1dcbfa8e8e"
+      ],
+      "check": "the same chain with receipt[1].previous_receipt_hash replaced: the envelopes are untouched, so only the link is wrong; verdict invalid"
+    },
+    {
+      "id": "k03-chain-nonzero-genesis",
+      "kind": "receipt_chain",
+      "chain": {
+        "schema": "uibc-core/receipt-chain@1",
+        "receipts": [
+          {
+            "envelope": {
+              "receipt_id": "r-0001",
+              "issued_at": "2026-11-17T08:11:35Z",
+              "agent_id": "agent-0001",
+              "verdict": "PASS"
+            },
+            "previous_receipt_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "envelope": {
+              "receipt_id": "r-0002",
+              "issued_at": "2026-11-17T09:02:11Z",
+              "agent_id": "agent-0001",
+              "verdict": "HOLD",
+              "policy_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "previous_receipt_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+              "counts": {
+                "events": 12,
+                "failures": 1
+              }
+            },
+            "previous_receipt_hash": "48b911f67cb565b2e9c7dcc8e7b707855dcd9d1a7db7d642ad6faddbf1ab933e"
+          },
+          {
+            "envelope": {
+              "receipt_id": "r-0003",
+              "issued_at": "2026-11-17T10:00:00Z",
+              "agent_id": "张三的 agent",
+              "note": "边界检查 —— 不转义"
+            },
+            "previous_receipt_hash": "9ed65765c6098e69305a91481f26138e26296aa4489721780b2480eb79d77769"
+          }
+        ]
+      },
+      "expected_verdict": "invalid",
+      "expected_reason": "genesis_not_64_zeros",
+      "expected_digests": [
+        "48b911f67cb565b2e9c7dcc8e7b707855dcd9d1a7db7d642ad6faddbf1ab933e",
+        "9ed65765c6098e69305a91481f26138e26296aa4489721780b2480eb79d77769",
+        "9dd852a5783f102c0614fef76e1738664cf4bfa67f7c3f5a2ce65e1dcbfa8e8e"
+      ],
+      "check": "receipt[0] declares a predecessor it cannot have: a chain whose first link is not 64 zeros must be rejected"
+    },
+    {
+      "id": "a01-anchor-binds-the-shipped-file",
+      "kind": "anchor_binding",
+      "token_path": "tests/fixtures/anchor/freetsa.tsr",
+      "artifact_path": "tests/fixtures/anchor/anchored_head.json",
+      "expected_artifact_sha256_hex": "4ad23d9153c33c77253b23e1f5938249cb6877de93eb7593dea26fa5f7fd6e98",
+      "expected_verdict": "bound",
+      "check": "sha256 of artifact_path must equal expected_artifact_sha256_hex and the token's messageImprint must equal the same digest; parse the token with any ASN.1/RFC 3161 library"
+    },
+    {
+      "id": "a02-anchor-does-not-bind-another-file",
+      "kind": "anchor_binding",
+      "token_path": "tests/fixtures/anchor/freetsa.tsr",
+      "artifact_path": "tests/fixtures/anchor/ots_head.ots",
+      "expected_artifact_sha256_hex": null,
+      "expected_verdict": "not_bound",
+      "check": "the same token against a different file: the digests must disagree, and a verifier must say not_bound rather than bound"
+    },
+    {
+      "id": "l01-merkle-root-five-leaves",
+      "kind": "merkle_root",
+      "leaves_utf8": [
+        "evidence-1",
+        "evidence-2",
+        "evidence-3",
+        "evidence-4",
+        "evidence-5"
+      ],
+      "expected_root_hex": "6f66fefec5aa03cc6d1328deb8646c2b47b807bb204451ee036aea4cf6b72f96",
+      "check": "leaf = sha256(0x00 || leaf bytes); node = sha256(0x01 || left || right); split the list at the largest power of two below its length, promote an odd tail instead of duplicating it; root of 5 leaves must equal expected_root_hex"
+    },
+    {
+      "id": "l02-merkle-root-single-leaf",
+      "kind": "merkle_root",
+      "leaves_utf8": [
+        "only-leaf"
+      ],
+      "expected_root_hex": "05b6b0145f63ad831a6f233dce184e4dc4454ad3c589d834f5ba97c2531619ed",
+      "check": "a one-leaf tree's root is that leaf's hash, not sha256 of an inner node"
+    },
+    {
+      "id": "l03-inclusion-index-2",
+      "kind": "merkle_inclusion",
+      "leaves_utf8": [
+        "evidence-1",
+        "evidence-2",
+        "evidence-3",
+        "evidence-4",
+        "evidence-5"
+      ],
+      "leaf_utf8": "evidence-3",
+      "index": 2,
+      "size": 5,
+      "proof_hex": [
+        "c0b75f3a7d9d1b4acbab8737eb1c97706d6d73bca98a79ac6d2e8e3fac4efe62",
+        "a48a99e5bd399c041656bf145e1cd779019628ad2fd155cf93ef0de95f55da83",
+        "2012ef01da55cfa7716ea5de7e4f5aeec20c782ce6f09a0744695a094627a22a"
+      ],
+      "expected_root_hex": "6f66fefec5aa03cc6d1328deb8646c2b47b807bb204451ee036aea4cf6b72f96",
+      "expected_verdict": "included",
+      "check": "recompute the root from this leaf, its index, the tree size and the sibling path; it must equal expected_root_hex and the verdict must be included"
+    },
+    {
+      "id": "l04-inclusion-tampered-leaf",
+      "kind": "merkle_inclusion",
+      "leaves_utf8": [
+        "evidence-1",
+        "evidence-2",
+        "evidence-3",
+        "evidence-4",
+        "evidence-5"
+      ],
+      "leaf_utf8": "evidence-3-altered",
+      "index": 2,
+      "size": 5,
+      "proof_hex": [
+        "c0b75f3a7d9d1b4acbab8737eb1c97706d6d73bca98a79ac6d2e8e3fac4efe62",
+        "a48a99e5bd399c041656bf145e1cd779019628ad2fd155cf93ef0de95f55da83",
+        "2012ef01da55cfa7716ea5de7e4f5aeec20c782ce6f09a0744695a094627a22a"
+      ],
+      "expected_root_hex": "6f66fefec5aa03cc6d1328deb8646c2b47b807bb204451ee036aea4cf6b72f96",
+      "expected_verdict": "not_included",
+      "check": "the same path with one byte changed in the leaf: recomputed root must differ, verdict not_included"
+    },
+    {
+      "id": "l05-inclusion-wrong-index",
+      "kind": "merkle_inclusion",
+      "leaves_utf8": [
+        "evidence-1",
+        "evidence-2",
+        "evidence-3",
+        "evidence-4",
+        "evidence-5"
+      ],
+      "leaf_utf8": "evidence-3",
+      "index": 1,
+      "size": 5,
+      "proof_hex": [
+        "c0b75f3a7d9d1b4acbab8737eb1c97706d6d73bca98a79ac6d2e8e3fac4efe62",
+        "a48a99e5bd399c041656bf145e1cd779019628ad2fd155cf93ef0de95f55da83",
+        "2012ef01da55cfa7716ea5de7e4f5aeec20c782ce6f09a0744695a094627a22a"
+      ],
+      "expected_root_hex": "6f66fefec5aa03cc6d1328deb8646c2b47b807bb204451ee036aea4cf6b72f96",
+      "expected_verdict": "not_included",
+      "check": "the right leaf with the wrong index: a verifier must not accept it, because the index decides left/right at every step"
+    },
+    {
+      "id": "p01-policy-artefact-digest",
+      "kind": "policy_digest",
+      "artifact": {
+        "rules": [
+          {
+            "id": "R-1",
+            "effect": "HOLD",
+            "predicate": "missing_signature"
+          }
+        ],
+        "version": "2026-11",
+        "reviewer": "张三"
+      },
+      "expected_canonical_utf8": "{\"reviewer\":\"张三\",\"rules\":[{\"effect\":\"HOLD\",\"id\":\"R-1\",\"predicate\":\"missing_signature\"}],\"version\":\"2026-11\"}",
+      "expected_sha256_hex": "f99bcc1b3e8732e9b36c2dd0a5b1ed95e246232e50d5f3be2c29c03c600e544d",
+      "check": "a policy_digest is SHA-256 over the RFC 8785 JCS bytes of the retained artefact; canonicalize(artifact) must equal expected_canonical_utf8 and hash to expected_sha256_hex"
+    }
+  ]
+}

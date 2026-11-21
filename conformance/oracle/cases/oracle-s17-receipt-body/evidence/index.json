@@ -1,0 +1,22 @@
+{
+  "entries": [
+    {
+      "evidence_id": "19028be6-9de5-5c75-975c-d7da7237e046",
+      "type": "ACTION",
+      "path": "files/oracle-s17-receipt-body-0.txt",
+      "content_hash": "4e20da3244b321b363c6ff2edf2864020bb0eb573f94ed3395e6d21396e6a111",
+      "created_at": "2026-11-15T00:00:00Z",
+      "media_type": "text/plain",
+      "note": "n0"
+    },
+    {
+      "evidence_id": "51bea840-87ff-55b2-b6f9-d86a2cc7bb14",
+      "type": "ACTION",
+      "path": "files/oracle-s17-receipt-body-1.txt",
+      "content_hash": "b018547961b9825e007280c12c024a38763ef1f0a159d76f8c680a284dc112ac",
+      "created_at": "2026-11-15T00:00:00Z",
+      "media_type": "text/plain",
+      "note": "n1"
+    }
+  ]
+}

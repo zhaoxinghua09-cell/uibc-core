@@ -1,0 +1,674 @@
+{
+  "standard": "T/ISC 0174-2026",
+  "standard_url": "https://www.isc.org.cn/profile/2026/10/30/1e2b29f9-8aab-438a-9114-e8eadc5f04cd.pdf",
+  "generated_at": "2026-11-20T13:15:41.148994+00:00",
+  "clauses": [
+    {
+      "c": "6.1.1 a)",
+      "k": "应",
+      "axis": "身份分发",
+      "t": "提交完整注册元数据（名称/唯一标识/能力描述/支持协议/通信端点/所属组织）",
+      "s": "PASS",
+      "e": "adapters/a2a/registry.py R1-R7；tests/test_gateway_registry.py",
+      "r": [
+        "P1_valid_registry",
+        "P1b_rejects_bad_endpoint",
+        "P1c_rejects_non_did"
+      ],
+      "g": ""
+    },
+    {
+      "c": "6.1.1 b)",
+      "k": "应",
+      "axis": "身份分发",
+      "t": "元数据校验机制；宜绑定所属组织/服务端点/可验证凭据",
+      "s": "PASS",
+      "e": "registry.binding_report B1-B7；tests/test_gateway_registry.py#BindingTests",
+      "r": [
+        "P2_binding"
+      ],
+      "g": "绑定为“校验一致性”（主机名/签发者/状态/范围），非链上注册"
+    },
+    {
+      "c": "6.1.1 c)",
+      "k": "宜",
+      "axis": "身份分发",
+      "t": "支持元数据在线编辑且变更需审核",
+      "s": "PARTIAL",
+      "e": "gateway/registry/update：先校验→待审→approve 才落地，全程进 journal",
+      "r": [
+        "P24_edit_needs_review",
+        "P25_edit_revalidates"
+      ],
+      "g": "审核只是单点 approve 布尔确认 + 留痕，没有多人审批流转；变更也未写回注册文件"
+    },
+    {
+      "c": "6.1.1 d)",
+      "k": "宜",
+      "axis": "身份分发",
+      "t": "提供面向行业/场景的元数据模板",
+      "s": "PASS",
+      "e": "adapters/a2a/templates.py（medical-device / government-service，模板本身过同一校验器）",
+      "r": [
+        "P26_template_validates"
+      ],
+      "g": ""
+    },
+    {
+      "c": "6.1.2 a)",
+      "k": "宜",
+      "axis": "身份分发",
+      "t": "为每个智能体生成网关内唯一、可跨域解析的标识",
+      "s": "PARTIAL",
+      "e": "uibc_core/did.py；our DID: did:web:verify.medxpert.cn",
+      "g": "did:web 的 .well-known 尚未在公网发布，跨域解析实测缺一环"
+    },
+    {
+      "c": "6.1.2 b)",
+      "k": "宜",
+      "axis": "身份分发",
+      "t": "多种标识生成策略（随机/层级/密码学）",
+      "s": "PARTIAL",
+      "e": "did.py 支持 did:key（密码学）、did:web（层级域名）",
+      "g": "无随机标识策略；两种方法之外一律拒绝（有意，不猜）"
+    },
+    {
+      "c": "6.1.3 a)",
+      "k": "应",
+      "axis": "身份分发",
+      "t": "身份全生命周期闭环（注册/启用/停用/注销）",
+      "s": "PASS",
+      "e": "adapters/a2a/state.py；tests/test_gateway_lifecycle.py",
+      "r": [
+        "P6_resume_restores"
+      ],
+      "g": ""
+    },
+    {
+      "c": "6.1.3 b)",
+      "k": "应",
+      "axis": "身份分发",
+      "t": "状态变更即时生效：停用即阻断全部通信；恢复需重校验",
+      "s": "PASS",
+      "e": "每请求 require_active + 403；resume 重跑 B1-B7",
+      "r": [
+        "P5_suspend_blocks_immediately",
+        "P7_resume_refuses_expired"
+      ],
+      "g": ""
+    },
+    {
+      "c": "6.2.1 a)",
+      "k": "应",
+      "axis": "身份分发",
+      "t": "基于语义查询的标准接口，支持关键词精确/模糊查询",
+      "s": "PARTIAL",
+      "e": "server.search_agents（字段加权关键词，含模糊子串）",
+      "r": [
+        "P9b_ranking_explainable"
+      ],
+      "g": "是关键词加权，不是语义嵌入检索；称“语义”会过誉"
+    },
+    {
+      "c": "6.2.1 b)",
+      "k": "应",
+      "axis": "身份分发",
+      "t": "查询结果按相关性/可用性/延迟/历史表现排序",
+      "s": "PARTIAL",
+      "e": "按相关性得分排序 + name/id 稳定次序",
+      "g": "无可用性、延迟、历史表现三类指标参与排序"
+    },
+    {
+      "c": "6.2.2 a)",
+      "k": "应",
+      "axis": "身份分发",
+      "t": "查询结果过滤，仅返回授权可见的智能体",
+      "s": "PASS",
+      "e": "仅 enabled 状态进检索（_visible_records）",
+      "r": [
+        "P9_discover_respects_state"
+      ],
+      "g": ""
+    },
+    {
+      "c": "6.2.2 b)",
+      "k": "应",
+      "axis": "身份分发",
+      "t": "查询接口访问控制与限流",
+      "s": "PARTIAL",
+      "e": "limit 上限 100（MAX_DISCOVER_LIMIT）",
+      "g": "无限流/鉴权：任何人都能查这张表"
+    },
+    {
+      "c": "6.3.1",
+      "k": "应",
+      "axis": "身份分发",
+      "t": "身份与操作数据定时/主动备份，加密存储，增量+全量",
+      "s": "PARTIAL",
+      "e": "adapters/a2a/backup.py：全量/增量快照 + SHA-256 清单；gateway/backup",
+      "r": [
+        "P27_backup_verifies"
+      ],
+      "g": "6.3.1 b) 加密存储未实现：零依赖不自造密码学，manifest 里如实记 encrypted=false"
+    },
+    {
+      "c": "6.3.2",
+      "k": "应",
+      "axis": "身份分发",
+      "t": "故障自动检测、告警、快速恢复、跨域容灾",
+      "s": "PARTIAL",
+      "e": "backup.detect_corruption（哈希漂移 + JSON 不可解析 → 告警）+ 校验后恢复；gateway/backup",
+      "r": [
+        "P28_corruption_alerts",
+        "P29_restore_verified"
+      ],
+      "g": "无跨域标识解析数据与授权策略的容灾；无自动定时备份调度（需外部 cron）"
+    },
+    {
+      "c": "6.3.3",
+      "k": "应",
+      "axis": "身份分发",
+      "t": "注册/操作数据加密存储传输并脱敏",
+      "s": "PARTIAL",
+      "e": "传输可置于 TLS 反代后（deploy/）",
+      "g": "状态文件明文落盘；无脱敏处理"
+    },
+    {
+      "c": "7.1.1 a)",
+      "k": "应",
+      "axis": "协议适配",
+      "t": "支持 A2A 等主流智能体通信协议接入与转发",
+      "s": "PASS",
+      "e": "adapters/a2a/server.py；tests/test_a2a_adapter.py",
+      "r": [
+        "P3_forward_verified"
+      ],
+      "g": ""
+    },
+    {
+      "c": "7.1.1 b)",
+      "k": "应",
+      "axis": "协议适配",
+      "t": "支持通用模型接口定义规范（如 MCP/OpenAPI）的解析与校验",
+      "s": "PARTIAL",
+      "e": "adapters/a2a/specs.py：工具描述符解析与校验（名称/描述/inputSchema/required）",
+      "r": [
+        "P30_spec_validation"
+      ],
+      "g": "只覆盖工具描述符（MCP/function-calling 形态）；不解析完整 OpenAPI 文档"
+    },
+    {
+      "c": "7.1.2 a)",
+      "k": "应",
+      "axis": "协议适配",
+      "t": "支持 TCP 与 HTTP/HTTPS 传输；宜 WebSocket/SSE/gRPC",
+      "s": "PASS",
+      "e": "ThreadingHTTPServer + JSON-RPC over HTTP",
+      "g": "无 WebSocket/SSE/gRPC（宜项）"
+    },
+    {
+      "c": "7.2.1 a)",
+      "k": "应",
+      "axis": "协议适配",
+      "t": "跨协议的智能体服务发现，不同协议可统一检索定位",
+      "s": "PARTIAL",
+      "e": "统一检索数据结构已就位（/agents、agent-record）",
+      "g": "只有 A2A 一个协议域；无第二个协议接入，跨协议无从实测"
+    },
+    {
+      "c": "7.2.1 b)",
+      "k": "应",
+      "axis": "协议适配",
+      "t": "处理 Agent Card、Agent Record 等服务描述",
+      "s": "PASS",
+      "e": "agent-card.json + /agent-record.json（uibc-agent-record/1）",
+      "r": [
+        "P10_agent_record"
+      ],
+      "g": ""
+    },
+    {
+      "c": "7.2.2 a)-b)",
+      "k": "应",
+      "axis": "协议适配",
+      "t": "异构消息格式（JSON/XML）自动识别转换且语义保持",
+      "s": "PASS",
+      "e": "adapters/a2a/transform.py：json↔xml + 逐元素类型标记 + 往返比对",
+      "r": [
+        "P16_convert_roundtrip"
+      ],
+      "g": "只覆盖 JSON 与 XML 两种（a 项“至少”满足）；其他格式一律拒绝而不是猜"
+    },
+    {
+      "c": "7.2.2 e)",
+      "k": "宜",
+      "axis": "协议适配",
+      "t": "消息转换结果语义一致性校验，失败拒绝并记安全事件",
+      "s": "PASS",
+      "e": "transform.convert 往返不一致即抛 SemanticDrift；server 记录 semantic-drift 事件并拒绝转发",
+      "r": [
+        "P17_drift_detected"
+      ],
+      "g": ""
+    },
+    {
+      "c": "7.3.1 a)",
+      "k": "应",
+      "axis": "协议适配",
+      "t": "统一的应用层消息扩展头规范（注册、跨域转发）",
+      "s": "PARTIAL",
+      "e": "server.TRACE_HEADERS 定义 5 个头",
+      "g": "未固化为规范文档，无第二个网关实测互认"
+    },
+    {
+      "c": "7.3.1 c)",
+      "k": "应",
+      "axis": "协议适配",
+      "t": "跨协议扩展头字段映射规则",
+      "s": "PASS",
+      "e": "templates.HEADER_MAP（http/a2a/mcp 三列）；填不上的槽位显式列入 unmappable",
+      "r": [
+        "P18_header_map"
+      ],
+      "g": "映射目标是我们自定义的槽位名（X-MCP-*），不是对方规范里的既定字段"
+    },
+    {
+      "c": "7.3.1 d)",
+      "k": "宜",
+      "axis": "协议适配",
+      "t": "跨网关扩展头最小公共字段（源/目标/请求/追踪/版本/时间戳）",
+      "s": "PASS",
+      "e": "X-AUIB-Trace-Id 等 5 字段 + 透传实测",
+      "r": [
+        "P8_trace_inherited"
+      ],
+      "g": ""
+    },
+    {
+      "c": "7.3.2 a)",
+      "k": "应",
+      "axis": "协议适配",
+      "t": "协议版本协商机制",
+      "s": "PARTIAL",
+      "e": "X-AUIB-Protocol-Version 头已定义",
+      "g": "头只是声明，无协商算法与降级路径"
+    },
+    {
+      "c": "8.1.1 a)",
+      "k": "应",
+      "axis": "路由寻址",
+      "t": "路由规则版本管理与回滚",
+      "s": "PASS",
+      "e": "adapters/a2a/router.py RouteTable：不可变版本快照 + 指针回滚 + 可落盘；gateway/routes",
+      "r": [
+        "P19_route_rollback"
+      ],
+      "g": "回滚是移动指针，不重写历史；无并发写冲突检测（单进程假设）"
+    },
+    {
+      "c": "8.1.1 b)",
+      "k": "宜",
+      "axis": "路由寻址",
+      "t": "基于标识/服务名/API 路径的静态路由",
+      "s": "PASS",
+      "e": "RouteTable.match(agent/service/api)，前缀匹配 + 命中字段回传",
+      "g": ""
+    },
+    {
+      "c": "8.1.2 a)",
+      "k": "应",
+      "axis": "路由寻址",
+      "t": "自然语言请求解析并匹配到智能体",
+      "s": "PARTIAL",
+      "e": "关键词匹配 + 能力标签",
+      "g": "无句法/语义解析，长句匹配会漏"
+    },
+    {
+      "c": "8.1.2 b)",
+      "k": "应",
+      "axis": "路由寻址",
+      "t": "语义路由决策可解释：依据、得分、候选集、阈值、日志",
+      "s": "PASS",
+      "e": "router.semantic_route 回传 threshold/candidates/score/basis/log_entry；低于阈值拒绝指派",
+      "r": [
+        "P20_route_explainable",
+        "P21_route_threshold_holds"
+      ],
+      "g": "打分用 Jaccard 词重合，是词面而非向量语义；对同义改写会低分"
+    },
+    {
+      "c": "8.2.1 a)",
+      "k": "应",
+      "axis": "路由寻址",
+      "t": "满足约定的消息转发时延指标",
+      "s": "PASS",
+      "e": "metrics 记录每次调用时延与 p50/p95，并统计超预算次数（--latency-budget-ms）",
+      "r": [
+        "P22_metrics_exposed"
+      ],
+      "g": "预算是我们自己声明的 250ms，尚未与对方约定数值；无超时熔断"
+    },
+    {
+      "c": "8.2.1 b)",
+      "k": "应",
+      "axis": "路由寻址",
+      "t": "吞吐/延迟/错误率实时监控与可视化",
+      "s": "PARTIAL",
+      "e": "GET /metrics（Prometheus 文本 + JSON snapshot），含请求量/错误率/延迟分位/超预算",
+      "r": [
+        "P22_metrics_exposed"
+      ],
+      "g": "有指标输出与文本展示，无图表面板与长期趋势分析"
+    },
+    {
+      "c": "8.2.2",
+      "k": "宜",
+      "axis": "路由寻址",
+      "t": "AI 报文解析与转发加速、流式透传、内容感知路由",
+      "s": "PARTIAL",
+      "e": "adapters/a2a/accel.py 重复请求缓存（键含包指纹）+ gateway/cache 实测命中率；探针现跑首调/缓存调 p50",
+      "r": [
+        "P33_repeat_cache_measured"
+      ],
+      "g": "只对字节完全相同的重复请求生效；不解析模型报文、不流式透传、不做内容感知路由"
+    },
+    {
+      "c": "9.1.1 a)",
+      "k": "应",
+      "axis": "安全防护",
+      "t": "通信访问日志与异常事件日志",
+      "s": "PASS",
+      "e": "adapter.access_log（含 trace/agent/result）",
+      "r": [
+        "P14_access_log"
+      ],
+      "g": "进程内列表，重启即丢；未落盘"
+    },
+    {
+      "c": "9.1.1 b)-d)",
+      "k": "宜",
+      "axis": "安全防护",
+      "t": "日志集中存储、检索、维度组合查询、关联分析",
+      "s": "PARTIAL",
+      "e": "adapters/a2a/journal.py：JSONL 落盘 + trace/agent/method/时间窗组合过滤；gateway/journal",
+      "r": [
+        "P23_journal_query"
+      ],
+      "g": "无集中日志后端；关联分析只做到按 trace 串链路，没有异常聚合"
+    },
+    {
+      "c": "9.1.2 a)",
+      "k": "应",
+      "axis": "安全防护",
+      "t": "跨智能体分布式链路追踪，每次调用全局唯一追踪标识",
+      "s": "PASS",
+      "e": "X-AUIB-Trace-Id 生成/继承 + 回传",
+      "r": [
+        "P8_trace_inherited",
+        "P8b_trace_generated"
+      ],
+      "g": ""
+    },
+    {
+      "c": "9.1.2 d)",
+      "k": "应",
+      "axis": "安全防护",
+      "t": "跨协议转发时追踪上下文语义连续，优先透传上游标识",
+      "s": "PARTIAL",
+      "e": "同协议透传已实测",
+      "g": "跨协议路径不存在，故“跨协议连续”不可测"
+    },
+    {
+      "c": "9.1.3 a)",
+      "k": "应",
+      "axis": "安全防护",
+      "t": "对通信流量实时异常检测",
+      "s": "PARTIAL",
+      "e": "tools/guardrail_shim.py（请求级规则拦截）",
+      "g": "规则式、非流量模型；无基线学习"
+    },
+    {
+      "c": "9.1.3 b)",
+      "k": "应",
+      "axis": "安全防护",
+      "t": "识别提示词注入、指令篡改、身份伪造",
+      "s": "PASS",
+      "e": "adapters/a2a/guard.py 内联网关转发路径（12 类规则）+ tools/redteam_suite.py 16 例 + DID 验签",
+      "r": [
+        "P32_injection_blocked"
+      ],
+      "g": "规则式识别，召回受规则库限制，未知变体可能漏检；拒绝只记类别与摘要，不落原文"
+    },
+    {
+      "c": "9.1.4 a)-b)",
+      "k": "应",
+      "axis": "安全防护",
+      "t": "TLS 保障机密性完整性；对端证书校验与双向认证",
+      "s": "PARTIAL",
+      "e": "deploy/nginx-gateway.conf（TLS1.2+ / ssl_verify_client on / 对端 CA / 深度上限）+ tools/check_deploy_hardening.py 静态校验",
+      "r": [
+        "P34_deploy_hardening_linted"
+      ],
+      "g": "适配器自身仍只监听 HTTP；mTLS 由部署侧反代执行，需运维签发并部署证书后才真正生效"
+    },
+    {
+      "c": "9.1.5 a)-c)",
+      "k": "应",
+      "axis": "安全防护",
+      "t": "ACL 报文过滤、限速与清洗、安全域隔离",
+      "s": "PARTIAL",
+      "e": "deploy/nginx-gateway.conf：geo ACL 白名单 + limit_req/limit_conn + /metrics 独立安全域；tools/check_deploy_hardening.py 校验指令在场",
+      "r": [
+        "P34_deploy_hardening_linted"
+      ],
+      "g": "网络层由部署侧执行，适配器不自称具备；配置需按真实对端网段替换后才算生效"
+    },
+    {
+      "c": "9.2.1 a)-b)",
+      "k": "应",
+      "axis": "安全防护",
+      "t": "每请求身份验证与权限校验；差异化权限",
+      "s": "PASS",
+      "e": "adapters/a2a/scopes.py：每请求按 method 绑定权限，取 record 的 authorization.scopes 判定；调用方声明 scope 时双重判定；拒绝 HTTP 403 且记 clause",
+      "r": [
+        "P31_scope_enforced"
+      ],
+      "g": "调用方未声明 scope 时按传输层对端身份放行（basis=transport-peer），对端身份由反代 mTLS 承担；权限未按任务动态最小化"
+    },
+    {
+      "c": "9.2.2 a)-b)",
+      "k": "应/宜",
+      "axis": "安全防护",
+      "t": "最小权限原则；权限回收与到期预警",
+      "s": "PARTIAL",
+      "e": "revoke 立即断权（6.1.3 b）",
+      "g": "无按任务最小化；无到期前预警"
+    }
+  ],
+  "counts": {
+    "PASS": 21,
+    "PARTIAL": 22,
+    "MISSING": 0
+  },
+  "counts_required": {
+    "PASS": 17,
+    "PARTIAL": 17,
+    "MISSING": 0
+  },
+  "total": 43,
+  "total_required": 34,
+  "by_axis": {
+    "身份分发": {
+      "PASS": 6,
+      "PARTIAL": 9,
+      "MISSING": 0
+    },
+    "协议适配": {
+      "PASS": 7,
+      "PARTIAL": 4,
+      "MISSING": 0
+    },
+    "路由寻址": {
+      "PASS": 4,
+      "PARTIAL": 3,
+      "MISSING": 0
+    },
+    "安全防护": {
+      "PASS": 4,
+      "PARTIAL": 6,
+      "MISSING": 0
+    }
+  },
+  "probes": {
+    "P1_valid_registry": {
+      "ok": true,
+      "detail": "0 error(s), 0 warning(s)"
+    },
+    "P1b_rejects_bad_endpoint": {
+      "ok": true,
+      "detail": "endpoint without http(s) rejected: True"
+    },
+    "P1c_rejects_non_did": {
+      "ok": true,
+      "detail": "non-DID identifier rejected"
+    },
+    "P2_binding": {
+      "ok": true,
+      "detail": "org/endpoint/credential/scope binding checks: {'B1': True, 'B2': True, 'B4': True, 'B5': True, 'B6': True, 'B7': True}"
+    },
+    "P3_forward_verified": {
+      "ok": true,
+      "detail": "A2A call reached verification and returned PASS"
+    },
+    "P4_agent_required": {
+      "ok": true,
+      "detail": "call without registered agent refused (fail closed)"
+    },
+    "P5_suspend_blocks_immediately": {
+      "ok": true,
+      "detail": "next call after suspend -> HTTP 403, state suspended"
+    },
+    "P6_resume_restores": {
+      "ok": true,
+      "detail": "resume -> HTTP 200"
+    },
+    "P7_resume_refuses_expired": {
+      "ok": true,
+      "detail": "resume on expired credential refused: ['B6']"
+    },
+    "P8_trace_inherited": {
+      "ok": true,
+      "detail": "upstream trace id preserved in body and header"
+    },
+    "P8b_trace_generated": {
+      "ok": true,
+      "detail": "gateway-assigned trace id when upstream provides none"
+    },
+    "P9_discover_respects_state": {
+      "ok": true,
+      "detail": "suspended agent hidden (0), resumed agent visible (1)"
+    },
+    "P9b_ranking_explainable": {
+      "ok": true,
+      "detail": "ranking basis and per-hit score are in the response"
+    },
+    "P10_agent_record": {
+      "ok": true,
+      "detail": "unified Agent Record served"
+    },
+    "P11_healthz_minimal": {
+      "ok": true,
+      "detail": "healthz exposes status only (cannot over-claim capability)"
+    },
+    "P12_traversal": {
+      "ok": true,
+      "detail": "path traversal rejected"
+    },
+    "P13_unknown_method": {
+      "ok": true,
+      "detail": "unknown method rejected"
+    },
+    "P14_access_log": {
+      "ok": true,
+      "detail": "forwarded call left an access record with trace id"
+    },
+    "P16_convert_roundtrip": {
+      "ok": true,
+      "detail": "JSON->XML conversion round-tripped and compared"
+    },
+    "P17_drift_detected": {
+      "ok": true,
+      "detail": "a type-flipped message fails the semantic comparison (7.2.2 e)"
+    },
+    "P18_header_map": {
+      "ok": true,
+      "detail": "cross-protocol map translates trace id and declares the slot it cannot fill"
+    },
+    "P19_route_rollback": {
+      "ok": true,
+      "detail": "route table rolled back to version 1 with history kept"
+    },
+    "P20_route_explainable": {
+      "ok": true,
+      "detail": "decision returned with threshold, candidates, score and basis"
+    },
+    "P21_route_threshold_holds": {
+      "ok": true,
+      "detail": "below-threshold request refuses to name an agent"
+    },
+    "P22_metrics_exposed": {
+      "ok": true,
+      "detail": "/metrics serves counters and latency quantiles"
+    },
+    "P23_journal_query": {
+      "ok": true,
+      "detail": "journal answers a trace-id query with 1 record(s)"
+    },
+    "P24_edit_needs_review": {
+      "ok": true,
+      "detail": "metadata change is held until approved (6.1.1 c)"
+    },
+    "P25_edit_revalidates": {
+      "ok": true,
+      "detail": "invalid edit is rejected before it can be applied"
+    },
+    "P26_template_validates": {
+      "ok": true,
+      "detail": "published template passes the same validator as real registrations"
+    },
+    "P27_backup_verifies": {
+      "ok": true,
+      "detail": "snapshot verified against its own SHA-256 manifest (3 file(s))"
+    },
+    "P28_corruption_alerts": {
+      "ok": true,
+      "detail": "corrupt live state raises the 6.3.2 a) alarm (2 finding(s))"
+    },
+    "P29_restore_verified": {
+      "ok": true,
+      "detail": "restore refuses unverified snapshots and repaired 3 file(s)"
+    },
+    "P30_spec_validation": {
+      "ok": true,
+      "detail": "tool descriptor parsed and rejected when malformed (D4 on non-object schema)"
+    },
+    "P31_scope_enforced": {
+      "ok": true,
+      "detail": "caller presenting a scope the record does not grant is refused: HTTP 403, clause 9.2.1 a)"
+    },
+    "P32_injection_blocked": {
+      "ok": true,
+      "detail": "override payload refused before verification, no payload text in the refusal (categories=['prompt-override'])"
+    },
+    "P33_repeat_cache_measured": {
+      "ok": true,
+      "detail": "identical repeats served from cache: hits=11 misses=2 hit_rate=0.8462; measured first=0.566ms cached_p50=0.472ms (in-process)"
+    },
+    "P34_deploy_hardening_linted": {
+      "ok": true,
+      "detail": "deploy config carries mTLS + ACL + rate/connection limits: 12/12 directive(s)"
+    }
+  },
+  "probes_passed": 37,
+  "probes_total": 37
+}

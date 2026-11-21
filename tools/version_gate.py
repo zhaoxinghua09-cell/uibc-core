@@ -15,6 +15,7 @@
 from __future__ import annotations
 
 import argparse
+import re as _re2
 import json
 import pathlib
 import re
@@ -99,6 +100,13 @@ def main() -> int:
     pv, pv_src = pyproject_version()
     checks: list[tuple[str, str]] = [(pv_src, pv)]
     checks += manifest_versions()
+    # What the package itself reports. A verifier that stamps a different
+    # version into every report than the one it ships under is a fourth place
+    # for the same drift, and the one a reader is most likely to quote.
+    init = (ROOT / "uibc_core" / "__init__.py").read_text(encoding="utf-8")
+    m_init = _re2.search(r'^__version__\s*=\s*"([^"]+)"', init, _re2.M)
+    if m_init:
+        checks.append(("uibc_core/__init__.py __version__", m_init.group(1)))
 
     dist = None
     if not pv.startswith("attr:"):

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>uibc-core demo — 8 steps, 4 verdicts, measured 2026-11-18</title>
+<style>
+  :root{
+    --bg:#0f1720; --panel:#16202b; --line:#25333f; --ink:#e8eef4; --dim:#93a4b4;
+    --pass:#3fbf8f; --fail:#e0564f; --warn:#d9a441; --accent:#4aa8c0;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif}
+  .wrap{max-width:1080px;margin:0 auto;padding:36px 22px 64px}
+  header{border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:26px}
+  h1{font-size:26px;margin:0 0 8px;letter-spacing:-.2px}
+  .sub{color:var(--dim);font-size:14px}
+  .cmd{margin-top:14px;background:#0b121a;border:1px solid var(--line);border-radius:8px;
+       padding:10px 14px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;color:var(--accent)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(232px,1fr));gap:14px;margin-top:8px}
+  .step{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;
+        position:relative;cursor:pointer;transition:border-color .15s}
+  .step:hover,.step.on{border-color:var(--accent)}
+  .n{position:absolute;top:12px;right:14px;color:var(--dim);font-size:12px;font-variant-numeric:tabular-nums}
+  .t{font-weight:600;font-size:14px;margin:0 28px 8px 0}
+  .v{display:inline-block;font-family:ui-monospace,monospace;font-size:12px;font-weight:700;
+     padding:3px 9px;border-radius:5px;letter-spacing:.4px}
+  .p{background:rgba(63,191,143,.14);color:var(--pass);border:1px solid rgba(63,191,143,.35)}
+  .f{background:rgba(224,86,79,.14);color:var(--fail);border:1px solid rgba(224,86,79,.35)}
+  .s{background:rgba(217,164,65,.14);color:var(--warn);border:1px solid rgba(217,164,65,.35)}
+  .note{color:var(--dim);font-size:12.5px;margin-top:9px}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin-top:22px}
+  .panel h2{font-size:16px;margin:0 0 12px}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .two h3{font-size:13px;margin:0 0 8px;letter-spacing:.3px;text-transform:uppercase;color:var(--dim)}
+  ul{margin:0;padding-left:18px}
+  li{margin:5px 0;font-size:14px}
+  .prove li{border-left:2px solid var(--pass);padding-left:12px;list-style:none;margin-left:-18px}
+  .notprove li{border-left:2px solid var(--fail);padding-left:12px;list-style:none;margin-left:-18px}
+  .pair{background:rgba(74,168,192,.10);border:1px solid rgba(74,168,192,.3);border-radius:8px;
+        padding:12px 16px;margin-top:20px;font-size:14px}
+  .pair b{color:var(--accent)}
+  #detail{margin-top:20px;border:1px dashed var(--line);border-radius:10px;padding:16px 18px;
+          color:var(--dim);font-size:14px;min-height:74px}
+  #detail b{color:var(--ink)}
+  footer{margin-top:34px;color:var(--dim);font-size:12.5px;border-top:1px solid var(--line);padding-top:16px}
+  code{font-family:ui-monospace,monospace;font-size:12.5px;background:#0b121a;padding:1px 5px;border-radius:4px}
+  @media (max-width:640px){.two{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>One command, eight steps, four verdicts</h1>
+  <div class="sub">uibc-core · measured 2026-11-18 · exit code 0 · nothing left behind but a temporary directory</div>
+  <div class="cmd">python -m uibc_core.cli demo</div>
+</header>
+
+<div class="grid" id="steps">
+  <div class="step" data-k="1"><span class="n">1/8</span><p class="t">create a package skeleton</p><span class="v s">BUILD</span><p class="note">an empty submission, no claims yet</p></div>
+  <div class="step" data-k="2"><span class="n">2/8</span><p class="t">register the agent</span><span class="v s">BUILD</span><p class="note">owner + identity recorded as a REGISTER event</p></div>
+  <div class="step" data-k="3"><span class="n">3/8</span><p class="t">add evidence</p><span class="v s">BUILD</span><p class="note">one action log, its hash recorded</p></div>
+  <div class="step" data-k="4"><span class="n">4/8</span><p class="t">seal with a fresh Ed25519 key</span><span class="v s">BUILD</span><p class="note">evidence root computed into the manifest, then signed</p></div>
+  <div class="step" data-k="5"><span class="n">5/8</span><p class="t">a stranger verifies</p><span class="v p">PASS</span><p class="note">no key, no permission — public seal only; assurance reported as <code>public-key</code></p></div>
+  <div class="step" data-k="6"><span class="n">6/8</span><p class="t">evidence edited behind the owner's back</span><span class="v f">FAIL</span><p class="note">tampered content, caught by the recorded hash</p></div>
+  <div class="step" data-k="7"><span class="n">7/8</span><p class="t">stronger attack: recompute every hash, re-seal with the attacker's own key</span><span class="v p">PASS</span><p class="note">verified <em>unpinned</em> — a substituted key verifies against itself</p></div>
+  <div class="step" data-k="8"><span class="n">8/8</span><p class="t">the same forged package, pinned to the owner's public key</span><span class="v f">FAIL</span><p class="note">key substitution caught by pinning</p></div>
+</div>
+
+<div class="pair">
+  <b>Steps 7 and 8 are the pair a digest check cannot produce.</b>
+  A forgery that recomputes every hash and re-seals with its own key is internally consistent —
+  so <em>any</em> content-addressed scheme will report it valid unless the verifier knows which key it
+  expects. Pinning is what turns a <code>PASS</code> into a <code>FAIL</code>. Digests agree on bytes;
+  they do not decide what to refuse.
+</div>
+
+<div class="panel">
+  <h2>What this demo does and does not establish</h2>
+  <div class="two">
+    <div>
+      <h3>Establishes</h3>
+      <ul class="prove">
+        <li>tampering with recorded evidence is detected without any service, key or network</li>
+        <li>the same package verifies for an unrelated party who holds only the public seal</li>
+        <li>a full re-hash forgery is caught <em>only</em> when the verifier pins a key, and the tool says so instead of staying silent</li>
+        <li>assurance level is reported, not implied: integrity vs public-key vs pinned</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Does not establish</h3>
+      <ul class="notprove">
+        <li>that the owner is who the key claims — pinning is a trust decision made outside this demo</li>
+        <li>that any timestamp is anchored: the OpenTimestamps proof is still a <em>pending calendar statement</em>, not a Bitcoin block attestation</li>
+        <li>conformance to any external standard (AER-1, ASQAV, others)</li>
+        <li>that a verdict is correct in the world — only that recorded bytes did not change</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div id="detail">Click any step above for the exact line the tool printed.</div>
+
+<footer>
+  uibc-core (Apache-2.0) · <a href="https://github.com/zhaoxinghua09-cell/uibc-core" style="color:var(--accent)">github.com/zhaoxinghua09-cell/uibc-core</a><br>
+  Verdicts are measured, not illustrated: the demo exits 0 only when each step behaves as labelled.
+  Text in this page is generated from the run of 2026-11-18; if the demo changes, this page is wrong and should be regenerated.
+</footer>
+</div>
+
+<script>
+const D = {
+ "1":"<b>[1/8] create a package skeleton</b><br>The submission directory is created empty. Nothing is claimed at this point — a skeleton is not evidence.",
+ "2":"<b>[2/8] register agent (Registry)</b><br><code>registered agent 'demo-agent' (owner: alice)</code><br>The owner and identity are written as a REGISTER event, so later steps have an origin to point at.",
+ "3":"<b>[3/8] add evidence (Evidence)</b><br><code>evidence added: ACTION files\\report.txt (hash recorded)</code><br>The file itself is not the artifact of trust; its recorded hash is.",
+ "4":"<b>[4/8] generate an Ed25519 seal key + seal the package</b><br><code>submission sealed: agent=demo-agent evidence=1 root=f5a3c1fe…8ea51e83 | Ed25519 seal signed (key_id 5d17bdaa…)</code><br>The evidence root is computed into the manifest, then signed. The seed file is secret; the .pub file is meant to be published.",
+ "5":"<b>[5/8] a STRANGER verifies — no key, no permission, public seal only</b><br><code>result: PASS (expected PASS; assurance: public-key)</code><br>Note the assurance label: the tool reports which property the PASS covers rather than a bare PASS.",
+ "6":"<b>[6/8] tamper with the evidence behind the owner's back</b><br><code>result: FAIL (expected FAIL: tampered content)</code><br>No network, no service, no key involved — the recorded hash is enough to refuse.",
+ "7":"<b>[7/8] stronger attack: recompute every hash, re-seal with the attacker's own key</b><br><code>result: PASS (the attacker's seal is valid against the attacker's key - a substituted key verifies against itself)</code><br>This is the honest failure mode of content addressing: internal consistency is not provenance. Unpinned verification cannot tell the two apart, and says so.",
+ "8":"<b>[8/8] verify the same package PINNED to the owner's public key</b><br><code>result: FAIL (key substitution caught by pinning)</code><br>The same bytes that passed in step 7 now fail, because the verifier supplied the key it expects. This is the step that makes step 7 informative instead of alarming."
+};
+const steps=[...document.querySelectorAll('.step')], d=document.getElementById('detail');
+steps.forEach(s=>s.addEventListener('click',()=>{
+  steps.forEach(x=>x.classList.remove('on')); s.classList.add('on');
+  d.innerHTML=D[s.dataset.k];
+}));
+</script>
+</body>
+</html>

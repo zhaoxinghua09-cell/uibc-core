@@ -1,0 +1,19 @@
+{
+  "description": "First two siblings exchanged: byte count and path length are unchanged, the root differs. A verifier that validates shape but not order accepts this wrongly.",
+  "inclusion_path": [
+    "b2d1c06f2f12a01558599eb5fc3042da216e8610537bd5235c25f12a189b44ac",
+    "cce7987aa07c84b90b126a5d348ae6a21d8efb8ccea9843c4cd62a8643742718",
+    "7d59924c688a4934682f6b965047392359aae9be037379c7d71b8d4b4c238aae"
+  ],
+  "leaf_entry": {
+    "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+    "digest_hex": "254afaf89aca6b1b412cca7173a30201b6000fee044538d885577e89bb43fb80",
+    "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: fail-path-swap :: leaf 5",
+    "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a206661696c2d706174682d73776170203a3a206c6561662035"
+  },
+  "leaf_index": 5,
+  "reconstructed_root": "f20459bc60efe5076a7b5d70589365604a43de0385efa35a4e256417525365a2",
+  "result": "INVALID_INCLUSION_PATH",
+  "root_true": "738ff3734d042c169594d6bee17cc0e89b9a0a3ec56fff2e92f5e083cf182009",
+  "tree_size": 8
+}

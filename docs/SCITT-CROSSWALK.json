@@ -1,0 +1,147 @@
+{
+  "kind": "uibc-scitt-crosswalk-v0",
+  "source": {
+    "document": "docs/spec-sources/draft-noa-scitt-ai-agent-receipt-00.txt",
+    "title": "SCITT AI-Agent Action Receipts (individual draft, -00)",
+    "sections_read": ["3 Receipt structure", "4 COSE Signed Statement profile", "5 Hash-chaining", "6 Identity binding", "9 Policy-replay OUT OF SCOPE"],
+    "note": "Read from the vendored copy in this repository, not from memory. The draft is an individual submission, not an adopted standard; nothing here claims that it is."
+  },
+  "container": {
+    "ours": "JSON receipt + detached Ed25519 sidecar (.sig)",
+    "theirs": "COSE_Sign1 (CBOR tag 18) Signed Statement",
+    "interoperable": false
+  },
+  "flags": {
+    "registered_in_transparency_service": false,
+    "emits_cose_sign1": false,
+    "claims_scitt_conformance": false
+  },
+  "rows": [
+    {
+      "theirs": "spec (format identifier)",
+      "ours": "receipt.kind = \"uibc-conformance-run-receipt\"",
+      "status": "have",
+      "note": "Same role, different string. A reader that keys on \"noa.receipt/0.1\" will not find us.",
+      "cost": ""
+    },
+    {
+      "theirs": "id (receipt identifier)",
+      "ours": "no id field; the bytes are addressed by their sha256 in the lab bundle",
+      "status": "partial",
+      "note": "Addressable but not self-identifying: the digest lives in CORPUS-DIGESTS.txt, not in the receipt.",
+      "cost": "one field, plus a rule that it is the digest of the body"
+    },
+    {
+      "theirs": "ts (RFC 3339 UTC)",
+      "ours": "receipt.when_utc",
+      "status": "have",
+      "note": "Written by the runner at completion, second resolution, Z suffix.",
+      "cost": ""
+    },
+    {
+      "theirs": "scope.tenant + scope.chain",
+      "ours": "nothing",
+      "status": "absent",
+      "note": "We have no tenant and no per-issuer chain: a receipt belongs to whoever ran it.",
+      "cost": "requires an issuer identity and a chain head per tenant; without an operator this is a schema with no owner"
+    },
+    {
+      "theirs": "agent.id",
+      "ours": "receipt.run_by",
+      "status": "partial",
+      "note": "Free text, filled by the runner. The draft calls its own agent.id 'signer-asserted'; ours is runner-asserted and unsigned.",
+      "cost": ""
+    },
+    {
+      "theirs": "agent.model",
+      "ours": "nothing (receipt.python and receipt.platform record the environment, not the model)",
+      "status": "absent",
+      "note": "Deliberately not faked: naming a model would be a claim about which system produced behaviour we do not observe.",
+      "cost": "nothing payable: the receipt side cannot observe the model, so the field would be filled by the runner and would carry the same authority as run_by, which is none"
+    },
+    {
+      "theirs": "agent.principal (HUMAN | SERVICE | POLICY | SANDBOX_SIM)",
+      "ours": "nothing",
+      "status": "absent",
+      "note": "Our receipts do not classify who acted; run_by is a string with no enum.",
+      "cost": "one enum plus a rule that an unfilled principal fails closed"
+    },
+    {
+      "theirs": "action.id + action.canonical + action.riskClass",
+      "ours": "rows[].id + rows[].attack + rows[].verdict",
+      "status": "partial",
+      "note": "The action is a conformance case, identified by id and attack class; there is no risk class because a case is not a risky action.",
+      "cost": ""
+    },
+    {
+      "theirs": "action.paramsHash (hashes only, never raw inputs)",
+      "ours": "receipt.manifest_sha256 (the corpus, not the action parameters)",
+      "status": "absent",
+      "note": "Structurally the same idea - bind by digest, keep raw material out - applied to a different object. Not a substitute.",
+      "cost": "the corpus digest exists; an action-parameter digest does not, because we have no action parameters"
+    },
+    {
+      "theirs": "action.reversible + action.rollbackRef",
+      "ours": "nothing",
+      "status": "absent",
+      "note": "Verification is side-effect free, so there is nothing to roll back.",
+      "cost": "nothing payable: adding the field would create a column with no values to fill it"
+    },
+    {
+      "theirs": "governance.mode + verdict + ruleId + approval.by/at",
+      "ours": "rows[].verdict + rows[].reported (check names) + docs/DELEGATION.md for who was allowed",
+      "status": "partial",
+      "note": "Verdicts and rule names we have per case; an approval attached to a run we do not, except as a separate delegation record.",
+      "cost": ""
+    },
+    {
+      "theirs": "chain.seq + chain.prevHash + chain.hash, hash over JCS(body without hash and without signature)",
+      "ours": "same construction, different object: tools/anchor_release_digests.py signs sha256 over the canonical body minus the signature; the change ledger chains by previous_id",
+      "status": "partial",
+      "note": "Our receipt stream is not chained - each receipt stands alone, linked only by the corpus digest it names. The chaining exists for the change ledger, not for receipts.",
+      "cost": "a seq and prev_hash per receipt, and a rule that a gap fails closed"
+    },
+    {
+      "theirs": "hash-chaining detects in-band tampering and tail truncation, NOT equivocation (needs transparency registration)",
+      "ours": "the same limit, stated in docs/LAB-PROTOCOL.md: a bundle proves the bytes cannot be changed after the fact, not that a run happened",
+      "status": "have",
+      "note": "Both documents refuse to let chaining imply existence.",
+      "cost": ""
+    },
+    {
+      "theirs": "registration in a SCITT Transparency Service",
+      "ours": "none; we anchor to an RFC 3161 TSA and, where a client exists, OpenTimestamps",
+      "status": "absent",
+      "note": "A timestamp proves the bytes existed at a time; it does not prove a log accepted them. We say this rather than call a TSA a transparency service.",
+      "cost": "an operator, a log, a registration policy, and the receipt container the log expects"
+    },
+    {
+      "theirs": "identity manifest binding agent.id to authorized kid(s); without one, attribution is key-level only and MUST be surfaced",
+      "ours": "docs/DELEGATION.md binds a name and an id to a key for one hop; the checker prints 'identity unbound' when the key is not supplied out of band",
+      "status": "partial",
+      "note": "The draft's own rule - surface the limitation - is the rule we implemented. Ours covers one hop and one operation; theirs covers an agent's whole key set.",
+      "cost": "a manifest listing keys per identity, and a rule that an unlisted pairing is UNTRUSTED"
+    },
+    {
+      "theirs": "COSE_Sign1 container, alg = -19 Ed25519 mandatory, other algs rejected",
+      "ours": "detached Ed25519 sidecar with alg fixed to \"ed25519\" and any other alg refused",
+      "status": "partial",
+      "note": "The rejection rule is the same; the container is not. No CBOR, no COSE, no interop.",
+      "cost": "a CBOR encoder and a COSE_Sign1 path; until then 'compatible' is the wrong word"
+    },
+    {
+      "theirs": "deterministic CBOR, non-canonical encodings rejected by the verifier",
+      "ours": "JCS canonicalisation on write; parsed JSON on read, so we never see a non-canonical encoding to reject",
+      "status": "partial",
+      "note": "We canonicalise what we produce; we cannot reject what we never parse as bytes.",
+      "cost": "receipts verified as bytes rather than as parsed objects"
+    },
+    {
+      "theirs": "policy-replay explicitly OUT OF SCOPE for this revision",
+      "ours": "per-case replay is the product: 294 cases, three controls, an exit-code contract",
+      "status": "ours_only",
+      "note": "This is the one row where we do more: the draft defers replay to a later revision.",
+      "cost": ""
+    }
+  ]
+}

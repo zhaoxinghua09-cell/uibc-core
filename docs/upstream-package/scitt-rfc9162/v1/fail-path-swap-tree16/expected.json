@@ -1,0 +1,20 @@
+{
+  "description": "Same order tamper on an unbalanced 16-leaf tree, where one sibling sits above the split rather than beside the leaf.",
+  "inclusion_path": [
+    "5a5119eb167497e39fabce89ddd1abbfa4060f86ad2fe8c6a66513b177690588",
+    "4d2212fd49712e00e5085ca011b378c746e2ef4be4e500c37be80818580d7d68",
+    "44236aa3182a3a8642b873066a6ce9ba63d200edc840a8ab1af9e25dd23bbcdd",
+    "0d4018dd4bfd005708a475b3e139f1ae3836fec9f00aca20ae05726f6b994606"
+  ],
+  "leaf_entry": {
+    "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+    "digest_hex": "ac564a23bda39dfd298bc389a98ac6b575791088186cd4f4cf4621c0dfaafb6a",
+    "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: fail-path-swap-tree16 :: leaf 9",
+    "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a206661696c2d706174682d737761702d747265653136203a3a206c6561662039"
+  },
+  "leaf_index": 9,
+  "reconstructed_root": "6a6981fc78d1fa700b80fede91da6402ac83720cf3793dba96a3889c9217c04d",
+  "result": "INVALID_INCLUSION_PATH",
+  "root_true": "4b4c1e6f7f858663263f5d2bfebea7821bb6a4b52c53b0b2077c2c2e486e0128",
+  "tree_size": 16
+}

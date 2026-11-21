@@ -1,0 +1,18 @@
+{
+  "assets": [
+    {
+      "bytes": 672,
+      "name": "uibc-core-0.4.0.sha256",
+      "sha256": "147d6b3ba9b4a7374576282d5c6bc53c4f4947333ce50923b7dab21587a90653"
+    }
+  ],
+  "excluded": [],
+  "kind": "uibc-release-pin-v0",
+  "meaning": "the page as it stands on recorded_at; this does not show what it held when it was published, only what it holds now",
+  "recorded_at": "2026-11-20T06:04:22Z",
+  "recorded_by": "a human, after the fact, not the publishing process",
+  "recorded_late": true,
+  "stronger_form": "anchors/pins/uibc-release-release-pins-0.4.0.json in the repository, which the page cannot rewrite",
+  "tag": "release-pins-0.4.0",
+  "why_excluded": "nothing is excluded: a human recorded this page, no pin asset was present"
+}

@@ -1,0 +1,51 @@
+{
+  "schema": "uibc.eqms-records/1",
+  "system": "example-eqms (field names modelled on public vendor docs, not an integration)",
+  "subject": "agent:medxpert-assist",
+  "records": [
+    {
+      "origin": "eqms:rev-1.0.0",
+      "kind": "change_record",
+      "subject": "agent:medxpert-assist",
+      "at": "2026-10-02T09:14:00Z",
+      "seq": 1,
+      "payload": {
+        "change_id": "CC-1.0.0",
+        "modification_category": "initial-release",
+        "validation_dataset_ref": "dataset:ds-2026-09",
+        "performance_data": {
+          "sensitivity": 0.941,
+          "specificity": 0.887
+        },
+        "impact_assessment": "no new hazard identified",
+        "approved_by": "qa-lead@example",
+        "approved_at": "2026-10-02T09:14:00Z",
+        "device_version": "1.0.0"
+      },
+      "refs": []
+    },
+    {
+      "origin": "eqms:rev-1.1.0",
+      "kind": "change_record",
+      "subject": "agent:medxpert-assist",
+      "at": "2026-11-14T08:02:00Z",
+      "seq": 2,
+      "payload": {
+        "change_id": "CC-1.1.0",
+        "modification_category": "ai-model-retrain",
+        "validation_dataset_ref": "dataset:ds-2026-11",
+        "performance_data": {
+          "sensitivity": 0.948,
+          "specificity": 0.891
+        },
+        "impact_assessment": "threshold unchanged; labelling unchanged",
+        "approved_by": "qa-lead@example",
+        "approved_at": "2026-11-14T08:02:00Z",
+        "device_version": "1.1.0"
+      },
+      "refs": [
+        "sha256:eb5f8b35dda8fe7a57c01923c009181e332dfb55323819d900ec09602c004dd5"
+      ]
+    }
+  ]
+}

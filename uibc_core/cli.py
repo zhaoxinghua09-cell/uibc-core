@@ -1,6 +1,7 @@
 """uibc CLI (archive SS23): init / register / event / evidence / submit / verify / inspect."""
 
 import argparse
+import itertools
 import json
 import os
 import shutil
@@ -8,18 +9,56 @@ import sys
 import uuid
 from datetime import datetime, timezone
 
-from .canonical import hash_file
+import hashlib
+from . import locking
+from . import ed25519 as _ed
+from .canonical import evidence_root, hash_file
 from .signing import (ALGORITHM, ALGORITHM_ED25519, ed_generate_seed,
                       ed_key_id, ed_public_key, ed_seal_sign, generate_key,
                       key_id, seal_sign)
 from .verify import verify
+from . import verify as verify_mod
+from . import lifecycle
+from . import did as did_mod
 from . import SPEC_VERSION, __version__
 
 REQUIRED = ["manifest.json", "identity.json", "lifecycle.json", "evidence/index.json"]
 
 
 def _now() -> str:
+    """The time a package records.
+
+    A wall clock makes a package irreproducible: re-running the same commands
+    produces different bytes, so nobody else can check the published corpus by
+    rebuilding it. `SOURCE_DATE_EPOCH` (the reproducible-builds convention, in
+    seconds) pins the clock instead. Unset, this is the ordinary wall clock and
+    nothing about the format changes.
+    """
+    epoch = os.environ.get("SOURCE_DATE_EPOCH")
+    if epoch:
+        try:
+            stamp = datetime.fromtimestamp(int(epoch), timezone.utc)
+        except (TypeError, ValueError, OSError) as exc:
+            raise SystemExit(f"error: SOURCE_DATE_EPOCH={epoch!r} is not a unix timestamp: {exc}")
+        return stamp.strftime("%Y-%m-%dT%H:%M:%SZ")
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+_repro_counter = itertools.count()
+
+
+def _uuid() -> str:
+    """An identifier a rebuild reproduces.
+
+    Unset `UIBC_REPRO_SEED`, this is uuid4, as it always was. Set, the nth id a
+    process asks for is uuid5 of the seed and n - so a second run asking in the
+    same order gets the same ids. They stay unique inside a package because the
+    counter never repeats; what they stop being is unpredictable.
+    """
+    seed = os.environ.get("UIBC_REPRO_SEED")
+    if not seed:
+        return str(uuid.uuid4())
+    return str(uuid.uuid5(uuid.NAMESPACE_URL, "%s/%d" % (seed, next(_repro_counter))))
 
 
 def _write(path, obj):
@@ -49,7 +88,9 @@ def cmd_register(args):
     agent_id = args.agent_id
     now = _now()
     reg_event = {
-        "event_id": str(uuid.uuid4()),
+        "event_id": _uuid(),
+        "sequence_number": 0,      # v1.1: contiguous from 0; a gap is a
+                                   # suppression indicator (GAR -08 6.2)
         "event_type": "REGISTER",
         "agent_id": agent_id,
         "timestamp": now,
@@ -58,7 +99,17 @@ def cmd_register(args):
         "previous_event": None,
         "signature": None,   # signing not ratified in v0.1
     }
-    _write(os.path.join(pkg, "identity.json"), {
+    # A DID that cannot be independently resolved is worse than no DID at all:
+    # it looks like a claim about control that nobody can check. Refuse at
+    # write time rather than let a typo become a verification failure later.
+    if getattr(args, "did", None):
+        method, _ = did_mod.parse(args.did)
+        if method not in did_mod.SUPPORTED_METHODS:
+            raise SystemExit(
+                "error: did:%s has no public resolution rule in this build "
+                "(supported: %s)"
+                % (method, ", ".join("did:" + m for m in did_mod.SUPPORTED_METHODS)))
+    ident = {
         "schema": SPEC_VERSION,
         "agent_id": agent_id,
         "agent_type": args.agent_type,
@@ -66,8 +117,35 @@ def cmd_register(args):
         "created_at": now,
         "status": "REGISTERED",
         "version": args.version,
-    })
-    _write(os.path.join(pkg, "lifecycle.json"), {"schema": SPEC_VERSION, "events": [reg_event]})
+    }
+    # v1.1 optional fields, only written when supplied, so older packages
+    # stay readable and unchanged.
+    for field in ("principal_type", "logical_agent_id", "run_id", "key_custody",
+                  "did"):
+        value = getattr(args, field, None)
+        if value:
+            ident[field] = value
+    # The manifest is what S2 and S5 read. `register` used to write only
+    # identity and lifecycle, so a freshly built package verified S2=FAIL and
+    # S5=FAIL while printing "registered agent ..." -- measured, and hidden by
+    # every test that ran against a finished fixture. Write it here, under the
+    # package lock, with the root the empty index actually has.
+    with locking.package_lock(pkg):
+        index = _read(os.path.join(pkg, "evidence", "index.json"))
+        entries = index["entries"] if isinstance(index, dict) else index
+        content_hashes = [e["content_hash"] for e in entries]
+        manifest = {
+            "schema": SPEC_VERSION,
+            "agent_id": agent_id,
+            "agent_version": args.version,
+            "created_at": now,
+            "evidence_count": len(entries),
+            "evidence_root": evidence_root(content_hashes),
+            "status": "REGISTERED",
+        }
+        _write(os.path.join(pkg, "identity.json"), ident)
+        _write(os.path.join(pkg, "lifecycle.json"), {"schema": SPEC_VERSION, "events": [reg_event]})
+        locking.atomic_write_json(os.path.join(pkg, "manifest.json"), manifest)
     print(f"registered agent '{agent_id}' (owner: {args.owner}) at {now}")
 
 
@@ -75,12 +153,20 @@ def cmd_event(args):
     pkg = os.path.abspath(args.path)
     lc = _read(os.path.join(pkg, "lifecycle.json"))
     events = lc["events"]
+    # v1.1: default the actor to the identity owner instead of the literal
+    # string "owner" - the verifier now checks actors against the recorded
+    # principal set (L10), so a meaningless placeholder would be rejected.
+    actor = args.actor
+    if actor is None:
+        identity = _read(os.path.join(pkg, "identity.json"))
+        actor = identity.get("owner") or events[0].get("agent_id")
     events.append({
-        "event_id": str(uuid.uuid4()),
+        "event_id": _uuid(),
+        "sequence_number": len(events),
         "event_type": args.type,
         "agent_id": events[0]["agent_id"],
         "timestamp": _now(),
-        "actor": args.actor,
+        "actor": actor,
         "payload_hash": None,
         "previous_event": events[-1]["event_id"],
         "signature": None,
@@ -94,25 +180,35 @@ def cmd_evidence(args):
     src = os.path.abspath(args.file)
     if not os.path.isfile(src):
         sys.exit(f"error: file not found: {src}")
-    idx = _read(os.path.join(pkg, "evidence", "index.json"))
-    fname = os.path.basename(src)
-    rel = os.path.join("files", fname)
-    dst = os.path.join(pkg, "evidence", rel)
-    if os.path.exists(dst):
-        fname = f"{uuid.uuid4().hex[:8]}_{fname}"
+    # Read, copy, append and write as one critical section. Without this,
+    # two concurrent records both read the same index and the later write
+    # silently discards the earlier entry -- measured: 200 calls, 28 entries,
+    # 69 decode errors, package no longer verifies. See docs/CONCURRENCY.md.
+    with locking.package_lock(pkg):
+        idx = _read(os.path.join(pkg, "evidence", "index.json"))
+        entries = idx["entries"] if isinstance(idx, dict) else idx
+        fname = os.path.basename(src)
         rel = os.path.join("files", fname)
         dst = os.path.join(pkg, "evidence", rel)
-    shutil.copy2(src, dst)
-    idx["entries"].append({
-        "evidence_id": str(uuid.uuid4()),
-        "type": args.type,
-        "path": rel.replace("\\", "/"),
-        "content_hash": hash_file(dst),
-        "created_at": _now(),
-        "media_type": args.media_type,
-        "note": args.note or "",
-    })
-    _write(os.path.join(pkg, "evidence", "index.json"), idx)
+        while os.path.exists(dst):
+            fname = f"{_uuid()[:8]}_{fname}"
+            rel = os.path.join("files", fname)
+            dst = os.path.join(pkg, "evidence", rel)
+        shutil.copy2(src, dst)
+        entries.append({
+            "evidence_id": _uuid(),
+            "type": args.type,
+            "path": rel.replace("\\", "/"),
+            "content_hash": hash_file(dst),
+            "created_at": _now(),
+            "media_type": args.media_type,
+            "note": args.note or "",
+        })
+        if isinstance(idx, dict):
+            idx["entries"] = entries
+            locking.atomic_write_json(os.path.join(pkg, "evidence", "index.json"), idx)
+        else:
+            locking.atomic_write_json(os.path.join(pkg, "evidence", "index.json"), entries)
     print(f"evidence added: {args.type} {rel} (hash recorded)")
 
 
@@ -147,6 +243,20 @@ def _load_seal_key(path):
             sys.exit(f"error: Ed25519 seed must be 32 bytes: {path}")
         return "ed25519", seed
     return "hmac", _load_key(path)
+
+
+def _pubkey_from_did(value):
+    """Resolve a DID to the Ed25519 key it publishes.
+
+    This is the point of binding to a DID: the verifier checks the seal against
+    the key the *DID* names, instead of being handed a key out of band and
+    asked to trust whoever handed it over.
+    """
+    try:
+        public_key, _kid = did_mod.resolve_ed25519_key(value)
+    except (did_mod.DIDError, OSError, ValueError) as exc:
+        sys.exit("error: cannot resolve %s: %s" % (value, exc))
+    return public_key
 
 
 def _load_pubkey(path):
@@ -199,7 +309,8 @@ def cmd_submit(args):
     hashes = []
     for e in idx["entries"]:
         hashes.append(hash_file(os.path.join(pkg, "evidence", e["path"])))
-    from .canonical import evidence_root
+    from .canonical import (checkpoint_head, evidence_root, index_metadata_digest,
+                       lifecycle_head)
     root = evidence_root(hashes)
     manifest = {
         "schema": SPEC_VERSION,
@@ -210,21 +321,71 @@ def cmd_submit(args):
         "evidence_root": root,
         "status": "SUBMITTED",
     }
+    # v1.1: optional policy identity. Maps to noa-00's reserved policyHash and
+    # to GAR -08's cap_profile_hash, so one field serves both alignments.
+    if getattr(args, "policy_hash", None):
+        manifest["policy_hash"] = args.policy_hash
+    # v1.1: bind the evidence INDEX METADATA, not just the file contents.
+    # Without this, an entry's type/note/action_digest could be rewritten while
+    # every content hash still matched and every check still passed (the gap
+    # this repo's own mutation benchmark missed until M19 was added).
+    manifest["evidence_index_digest"] = index_metadata_digest(idx)
+    # v1.1: head commitment over the lifecycle log, so a silently shortened log
+    # is visible even when the package is unsigned, and so a verifier can pin
+    # the head out-of-band to catch whole-package rollback (check S9).
+    lc_events = _read(os.path.join(pkg, "lifecycle.json")).get("events", [])
+    lc_head = lifecycle_head(lc_events)
+    manifest["lifecycle_head"] = lc_head
+    manifest["checkpoint_head"] = checkpoint_head(
+        lc_head, root, manifest["evidence_index_digest"], len(idx["entries"]))
+    # Version floor (VERSIONING.md section 8): record the minimum verifier
+    # version able to judge everything this builder wrote. Without it a consumer
+    # cannot tell whether the PASS it just received came from a verifier that
+    # could see all the fields in the package - 0.3.3 certified a key_custody
+    # claim it never read (MIGRATION-RESULTS.md, M2c).
+    from . import __version__ as _builder_version
+    manifest["min_verifier_version"] = _builder_version
+    # Optional: carry the verifier inside the package, so an archive can be
+    # checked with nothing but Python - parity with AIVS, which ships verify.py
+    # in the bundle. The builder records path + hash; verify.py binds it in S1,
+    # so an embedded verifier cannot be swapped for one that always says PASS.
+    embedded_src = getattr(args, "embed_verifier", None)
+    if embedded_src:
+        src = os.path.abspath(embedded_src)
+        if not os.path.isfile(src):
+            sys.exit(f"error: embedded verifier not found: {embedded_src}")
+        dst_dir = os.path.join(pkg, "verify")
+        os.makedirs(dst_dir, exist_ok=True)
+        dst = os.path.join(dst_dir, "uibc_verify.py")
+        shutil.copyfile(src, dst)
+        manifest["embedded_verifier"] = {
+            "path": "verify/uibc_verify.py",
+            "sha256": hash_file(dst),
+            "built_by_verifier_version": _builder_version,
+            "note": "outside the evidence root; hash-bound by check S1",
+        }
     _write(os.path.join(pkg, "manifest.json"), manifest)
     msg = f"submission sealed: agent={identity['agent_id']} evidence={len(idx['entries'])} root={root}"
     if getattr(args, "key", None):
         kind, secret = _load_seal_key(args.key)
         sig_dir = os.path.join(pkg, "signatures")
         os.makedirs(sig_dir, exist_ok=True)
+        # v1.1: fold the lifecycle log into the signed payload so event
+        # timestamps / actors / appended events cannot be rewritten without
+        # breaking the seal (see tools/mutation_benchmark.py).
+        lc_path = os.path.join(pkg, "lifecycle.json")
+        lifecycle_payload = _read(lc_path) if os.path.isfile(lc_path) else None
+        signed_label = ("identity+manifest+lifecycle" if lifecycle_payload is not None
+                        else "identity+manifest")
         if kind == "ed25519":
-            sig, pub_b64 = ed_seal_sign(secret, identity, manifest)
+            sig, pub_b64 = ed_seal_sign(secret, identity, manifest, lifecycle_payload)
             pub = ed_public_key(secret)
             _write(os.path.join(sig_dir, "seal.json"), {
                 "schema": SPEC_VERSION,
                 "algorithm": ALGORITHM_ED25519,
                 "key_id": ed_key_id(pub),
                 "public_key": pub_b64,
-                "signed": "identity+manifest",
+                "signed": signed_label,
                 "signature": sig,
                 "created_at": _now(),
             })
@@ -234,8 +395,8 @@ def cmd_submit(args):
                 "schema": SPEC_VERSION,
                 "algorithm": ALGORITHM,
                 "key_id": key_id(secret),
-                "signed": "identity+manifest",
-                "signature": seal_sign(secret, identity, manifest),
+                "signed": signed_label,
+                "signature": seal_sign(secret, identity, manifest, lifecycle_payload),
                 "created_at": _now(),
             })
             msg += " | seal signed (key_id %s...)" % key_id(secret)[:16]
@@ -288,7 +449,8 @@ def cmd_demo(args):
     for e in idx["entries"]:
         e["content_hash"] = hash_file(os.path.join(forge, "evidence", e["path"]))
     _write(os.path.join(forge, "evidence", "index.json"), idx)
-    from .canonical import evidence_root
+    from .canonical import (checkpoint_head, evidence_root, index_metadata_digest,
+                       lifecycle_head)
     man = _read(os.path.join(forge, "manifest.json"))
     man["evidence_root"] = evidence_root([e["content_hash"] for e in idx["entries"]])
     _write(os.path.join(forge, "manifest.json"), man)
@@ -340,6 +502,70 @@ def cmd_cert_verify(args):
     sys.exit(0 if report["result"] == "PASS" else 1)
 
 
+def cmd_revoke(args):
+    """Write a signed revocation.json.
+
+    The point of signing this file is to let somebody who never held the owner's
+    secret decide whether the owner really voided the package. With an Ed25519
+    seed the revocation is verifiable by any third party who has the public key;
+    with an HMAC key only the owner can check it, and the gate will HOLD for
+    everybody else - so the file says which one it is, and so does the gate.
+    """
+    import base64
+    import hashlib
+    import hmac
+    import json
+    import time as _time
+
+    from .gate import _canonical_sig_payload
+
+    pkg = os.path.abspath(args.path)
+    man_path = os.path.join(pkg, "manifest.json")
+    if not os.path.isfile(man_path):
+        sys.exit(f"error: manifest.json not found in {pkg}")
+    with open(man_path, encoding="utf-8") as f:
+        manifest = json.load(f)
+    root = manifest.get("evidence_root")
+    if not root:
+        sys.exit("error: manifest has no evidence_root; nothing to revoke")
+
+    kind, secret = _load_seal_key(args.key)
+    body = {
+        "revocation_id": args.id or ("r-" + hashlib.sha256(
+            (root + _time.strftime("%Y%m%d%H%M%S", _time.gmtime())).encode()
+        ).hexdigest()[:16]),
+        "target_root": root,
+        "reason_code": args.reason_code,
+        "revoked_at": _time.strftime("%Y-%m-%dT%H:%M:%SZ", _time.gmtime()),
+    }
+    # Everything except `signature` is signed - including algorithm and key_id.
+    # Signing a subset and adding fields afterwards is how a valid signature
+    # ends up failing verification (measured: first implementation signed only
+    # the four base fields and the gate, which strips only `signature`, could
+    # not reproduce the bytes).
+    if kind == "ed25519":
+        body["algorithm"] = "Ed25519"
+        body["key_id"] = ed_key_id(_ed.publickey(secret))
+        payload = _canonical_sig_payload(body)
+        body["signature"] = base64.b64encode(_ed.sign(secret, payload)).decode("ascii")
+    else:
+        body["algorithm"] = "HMAC-SHA256"
+        body["key_id"] = key_id(secret)
+        payload = _canonical_sig_payload(body)
+        body["signature"] = base64.b64encode(
+            hmac.new(secret, payload, hashlib.sha256).digest()).decode("ascii")
+
+    out = os.path.abspath(args.out)
+    if os.path.exists(out):
+        sys.exit(f"error: {out} already exists (refusing to overwrite a revocation)")
+    with open(out, "w", encoding="utf-8", newline="\n") as f:
+        json.dump(body, f, indent=2, sort_keys=True)
+        f.write("\n")
+    print(json.dumps({"written": out, "algorithm": body["algorithm"],
+                      "target_root": root, "revocation_id": body["revocation_id"],
+                      "key_id": body["key_id"]}, indent=2))
+
+
 def cmd_gate(args):
     from .gate import gate
     pkg = os.path.abspath(args.path)
@@ -347,10 +573,34 @@ def cmd_gate(args):
         sys.exit(f"error: package dir not found: {pkg}")
     key = _load_key(args.key) if args.key else None
     pubkey = _load_pubkey(args.pubkey) if getattr(args, "pubkey", None) else None
+    if getattr(args, "did", None):
+        if pubkey is not None:
+            sys.exit("error: --did and --pubkey both pin a key; pass one of them")
+        pubkey = _pubkey_from_did(args.did)
     report = gate(pkg, key=key, pubkey=pubkey,
                   revocation_path=args.revocation, dispute_path=args.dispute)
     print(json.dumps(report, ensure_ascii=False, indent=2))
     sys.exit(report["exit_code"])
+
+
+def cmd_revocation_digest(args):
+    """Print the canonical body digest a decision receipt pins.
+
+    A reader handed `revocation.json` can recompute this with the same command
+    the receipt was written with - one canonicalization, called by the signer,
+    the gate and the reader, instead of three copies that drift apart (#319).
+    """
+    from .gate import revocation_body_sha256
+    path = os.path.abspath(args.file)
+    if not os.path.isfile(path):
+        sys.exit(f"error: revocation file not found: {path}")
+    with open(path, encoding="utf-8") as f:
+        body = json.load(f)
+    out = {k: body.get(k) for k in
+           ("revocation_id", "target_root", "reason_code", "revoked_at",
+            "algorithm", "key_id")}
+    out["body_sha256"] = revocation_body_sha256(body)
+    print(json.dumps(out, ensure_ascii=False, indent=2, sort_keys=True))
 
 
 def cmd_verify(args):
@@ -359,8 +609,54 @@ def cmd_verify(args):
         sys.exit(f"error: package dir not found: {pkg}")
     key = _load_key(args.key) if args.key else None
     pubkey = _load_pubkey(args.pubkey) if getattr(args, "pubkey", None) else None
-    report = verify(pkg, key=key, pubkey=pubkey)
+    # A DID pins the key as a file would -- but the key travels with the DID
+    # rather than with the message, so a third party needs nothing from us.
+    if getattr(args, "did", None):
+        if pubkey is not None:
+            sys.exit("error: --did and --pubkey both pin a key; pass one of them")
+        pubkey = _pubkey_from_did(args.did)
+    report = verify(pkg, key=key, pubkey=pubkey,
+                    expect_head=getattr(args, "expect_head", None),
+                    strict=getattr(args, "strict", False),
+                    state_file=getattr(args, "state_file", None))
     print(json.dumps(report, ensure_ascii=False, indent=2))
+    sys.exit(0 if report["result"] == "PASS" else 1)
+
+
+def cmd_explain(args):
+    """The same verifier, printed for a person.
+
+    `verify` emits JSON because scripts parse it. A JSON verdict is a poor way
+    to read a failure: the field that matters (`checks[].basis.citation`) sits
+    four levels down. This prints one line per check with its class and - where
+    one exists - the document that lets the rule claim anything at all.
+    """
+    from .basis import CLASS_LABEL
+    pkg = os.path.abspath(args.path)
+    if not os.path.isdir(pkg):
+        sys.exit(f"error: package dir not found: {pkg}")
+    key = _load_key(args.key) if getattr(args, "key", None) else None
+    pubkey = _load_pubkey(args.pubkey) if getattr(args, "pubkey", None) else None
+    report = verify(pkg, key=key, pubkey=pubkey,
+                    expect_head=getattr(args, "expect_head", None))
+    print(f"result: {report['result']}   verifier: {report['verifier_id']} "
+          f"{report['verifier_version']}")
+    print()
+    for c in report["checks"]:
+        b = c.get("basis") or {}
+        mark = "PASS" if c["result"] == "PASS" else c["result"]
+        cite = b.get("citation") or ""
+        src = ("[%s] %s" % (CLASS_LABEL.get(b.get("class", "none"), "无"), cite)
+               if cite else
+               "[%s] 本项目自定" % CLASS_LABEL.get(b.get("class", "none"), "无"))
+        print(f"{c['id']:<4} {mark:<12} {c['name']}")
+        print(f"     {src}")
+        if mark != "PASS":
+            print(f"     -> {c['detail']}")
+    print()
+    out = report.get("statement") or ""
+    if out:
+        print(out)
     sys.exit(0 if report["result"] == "PASS" else 1)
 
 
@@ -379,6 +675,10 @@ def cmd_inspect(args):
 
 def main():
     ap = argparse.ArgumentParser(prog="uibc", description="UIBC Core CLI v%s [PROPOSAL]" % __version__)
+    # --version exists so a bundled single-file build can state which version it
+    # is without importing the package: the conformance runner reads it to label
+    # a receipt correctly (run.py, 2026-11-20).
+    ap.add_argument("--version", action="version", version=__version__)
     sub = ap.add_subparsers(dest="cmd", required=True)
 
     p = sub.add_parser("init", help="create submission package skeleton")
@@ -387,14 +687,39 @@ def main():
     p = sub.add_parser("register", help="register agent (writes identity + REGISTER event)")
     p.add_argument("path"); p.add_argument("--agent-id", required=True)
     p.add_argument("--owner", required=True); p.add_argument("--agent-type", default="software-agent")
-    p.add_argument("--version", default="0.1.0"); p.set_defaults(func=cmd_register)
+    p.add_argument("--version", default="0.1.0")
+    # v1.1 identity fields (noa-00 compatible principal vocabulary, and the
+    # long-term-identity / single-run separation)
+    p.add_argument("--principal-type", dest="principal_type", default=None,
+                   choices=["HUMAN", "SERVICE", "POLICY", "SANDBOX_SIM"])
+    p.add_argument("--logical-agent-id", dest="logical_agent_id", default=None)
+    p.add_argument("--run-id", dest="run_id", default=None)
+    # 1F916 Section 3.1: custody disclosure travels with the signature, because
+    # a signature proves exactly what its custody permits it to prove.
+    p.add_argument("--key-custody", dest="key_custody", default=None,
+                   choices=["self_held", "platform_held", "household_held",
+                            "threshold", "kms", "hsm", "session_delegated"])
+    # Optional DID binding. Only methods whose resolution rule is public
+    # (did:key / did:web) are accepted: binding an identity to a DID nobody
+    # can independently resolve proves nothing about who controls it.
+    p.add_argument("--did", default=None,
+                   help="bind this identity to a DID (did:key or did:web)")
+    p.set_defaults(func=cmd_register)
 
     p = sub.add_parser("event", help="append lifecycle event")
-    p.add_argument("path"); p.add_argument("--type", required=True); p.add_argument("--actor", default="owner")
+    p.add_argument("path")
+    # choices, not free text: the verifier's L3 rejects any event_type outside this
+    # vocabulary with a FAIL. Accepting the word here and rejecting it there made a
+    # typo look like a bad package, so the writer refuses it first (see docs/ORACLE.md).
+    p.add_argument("--type", required=True, choices=lifecycle.EVENTS)
+    p.add_argument("--actor", default=None)
     p.set_defaults(func=cmd_event)
 
     p = sub.add_parser("evidence", help="add evidence file (hash recorded)")
-    p.add_argument("path"); p.add_argument("--type", required=True); p.add_argument("--file", required=True)
+    p.add_argument("path"); p.add_argument("--file", required=True)
+    # Same reason: an unknown evidence type makes S4 return INCONCLUSIVE, which reads
+    # to a user as "the verifier could not decide" when the real problem is a word.
+    p.add_argument("--type", required=True, choices=sorted(verify_mod.EVIDENCE_TYPES))
     p.add_argument("--media-type", default="text/plain"); p.add_argument("--note", default="")
     p.set_defaults(func=cmd_evidence)
 
@@ -403,6 +728,11 @@ def main():
     p.add_argument("--key", default=None, metavar="KEYFILE",
                    help="key file: write a seal signature (HMAC hex key, or an "
                         "ed25519: key file for a third-party-verifiable seal)")
+    p.add_argument("--embed-verifier", dest="embed_verifier", default=None,
+                   metavar="SCRIPT",
+                   help="copy a single-file verifier into the package as "
+                        "verify/uibc_verify.py and bind its hash in the manifest, "
+                        "so the package can be checked without this repository")
     p.set_defaults(func=cmd_submit)
 
     p = sub.add_parser("verify", help="verify package (exit 0 = PASS)")
@@ -412,7 +742,29 @@ def main():
     p.add_argument("--pubkey", default=None, metavar="PUBFILE",
                    help="pinned Ed25519 public key (hex file): the seal's recorded "
                         "public key must match it, else S6 FAILS")
+    p.add_argument("--did", default=None, metavar="DID",
+                   help="pin the key by DID instead of a file (did:key resolves "
+                        "offline; did:web over https)")
+    p.add_argument("--expect-head", dest="expect_head", default=None, metavar="HEAD",
+                   help="pin the package checkpoint_head observed elsewhere: a "
+                        "mismatch FAILS S9, which is the only way to catch a rollback "
+                        "to an older but self-consistent package")
+    p.add_argument("--strict", action="store_true",
+                   help="fail any file under evidence/ that the index never declared "
+                        "(the structural members the format places there are exempt)")
+    p.add_argument("--state-file", dest="state_file", default=None, metavar="JSON",
+                   help="remember the last accepted head here (S19). Compared on the "
+                        "next run, so a rollback is refused without the caller "
+                        "supplying --expect-head every time. First observation is "
+                        "INCONCLUSIVE, not PASS")
     p.set_defaults(func=cmd_verify)
+
+    p = sub.add_parser("explain", help="verify and print why, one check per line")
+    p.add_argument("path")
+    p.add_argument("--key", default=None, metavar="KEYFILE")
+    p.add_argument("--pubkey", default=None, metavar="PUBFILE")
+    p.add_argument("--expect-head", dest="expect_head", default=None, metavar="HEAD")
+    p.set_defaults(func=cmd_explain)
 
     p = sub.add_parser("keygen", help="generate a 256-bit seal key (hex file)")
     p.add_argument("--out", required=True, metavar="KEYFILE")
@@ -441,11 +793,28 @@ def main():
                    help="hex owner key: strict verify + revocation signature check")
     p.add_argument("--pubkey", default=None, metavar="PUBFILE",
                    help="pinned Ed25519 public key (hex file) for the verify step")
+    p.add_argument("--did", default=None, metavar="DID",
+                   help="pin the key by DID instead of a file (did:key / did:web)")
     p.add_argument("--revocation", default=None, metavar="FILE",
                    help="revocation.json overlay (governance.md section 3)")
     p.add_argument("--dispute", default=None, metavar="FILE",
                    help="dispute.json overlay (governance.md section 1)")
     p.set_defaults(func=cmd_gate)
+
+    p = sub.add_parser("revoke", help="issue a revocation.json for a package (governance 3)")
+    p.add_argument("path", help="package to revoke (reads its manifest evidence_root)")
+    p.add_argument("--key", required=True, metavar="KEYFILE",
+                   help="owner key: ed25519: seed file (asymmetric) or 64-hex (HMAC)")
+    p.add_argument("--out", required=True, metavar="FILE", help="where to write revocation.json")
+    p.add_argument("--reason-code", default="OWNER_REQUEST",
+                   choices=["KEY_COMPROMISED", "EVIDENCE_INVALID", "OWNER_REQUEST"])
+    p.add_argument("--id", default=None, metavar="REVOCATION_ID")
+    p.set_defaults(func=cmd_revoke)
+
+    p = sub.add_parser("revocation-digest",
+                       help="canonical body digest of a revocation.json (what a receipt pins)")
+    p.add_argument("file", metavar="FILE")
+    p.set_defaults(func=cmd_revocation_digest)
 
     p = sub.add_parser("demo", help="one-command end-to-end demo (build/seal/verify/tamper/catch)")
     p.set_defaults(func=cmd_demo)
@@ -459,3 +828,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

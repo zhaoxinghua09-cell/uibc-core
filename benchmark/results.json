@@ -1,0 +1,567 @@
+{
+  "meta": {
+    "generated_at_utc": "2026-11-20T07:58:36Z",
+    "source": "tools/out/mutation_benchmark.json",
+    "expected": "benchmark/expected.json",
+    "spec_id": "uibc-core/0.3.3-proposal@ba0e02c98a65",
+    "corpus_anchor": {
+      "base_open": "PASS",
+      "base_pinned": "PASS",
+      "base_must_be": "PASS",
+      "anchor_ok": true
+    }
+  },
+  "summary": {
+    "open": {
+      "accepted": 2,
+      "total": 21,
+      "acceptance_rate_pct": 9.5,
+      "documented_accepts": [
+        "M17",
+        "M20"
+      ],
+      "undocumented_accepts": 0,
+      "undocumented_accept_rate_pct": 0.0
+    },
+    "pinned": {
+      "accepted": 1,
+      "total": 21,
+      "acceptance_rate_pct": 4.8,
+      "documented_accepts": [
+        "M20"
+      ],
+      "undocumented_accepts": 0,
+      "undocumented_accept_rate_pct": 0.0
+    },
+    "head-pinned": {
+      "accepted": 0,
+      "total": 21,
+      "acceptance_rate_pct": 0.0,
+      "documented_accepts": [],
+      "undocumented_accepts": 0,
+      "undocumented_accept_rate_pct": 0.0
+    }
+  },
+  "rows": [
+    {
+      "id": "M01",
+      "mutation": "替换 agent_id 为 evil-agent",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "accepted": false,
+          "failed_checks": [
+            "S2",
+            "S6"
+          ],
+          "documented_by_design": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "accepted": false,
+          "failed_checks": [
+            "S2",
+            "S6"
+          ],
+          "documented_by_design": false
+        }
+      }
+    },
+    {
+      "id": "M02",
+      "mutation": "把证据根换成全 0",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "accepted": false,
+          "failed_checks": [
+            "S5",
+            "S6"
+          ],
+          "documented_by_design": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "accepted": false,
+          "failed_checks": [
+            "S5",
+            "S6"
+          ],
+          "documented_by_design": false
+        }
+      }
+    },
+    {
+      "id": "M03",
+      "mutation": "改版本号",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "accepted": false,
+          "failed_checks": [
+            "S6"
+          ],
+          "documented_by_design": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "accepted": false,
+          "failed_checks": [
+            "S6"
+          ],
+          "documented_by_design": false
+        }
+      }
+    },
+    {
+      "id": "M04",
+      "mutation": "自封 APPROVED",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "accepted": false,
+          "failed_checks": [
+            "S6"
+          ],
+          "documented_by_design": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "accepted": false,
+          "failed_checks": [
+            "S6"
+          ],
+          "documented_by_design": false
+        }
+      }
+    },
+    {
+      "id": "M05",
+      "mutation": "伪造 human_approval=granted",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "accepted": false,
+          "failed_checks": [
+            "S6"
+          ],
+          "documented_by_design": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "accepted": false,
+          "failed_checks": [
+            "S6"
+          ],
+          "documented_by_design": false
+        }
+      }
+    },
+    {
+      "id": "M06",
+      "mutation": "换所有者",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "accepted": false,
+          "failed_checks": [
+            "S3",
+            "S6"
+          ],
+          "documented_by_design": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "accepted": false,
+          "failed_checks": [
+            "S3",
+            "S6"
+          ],
+          "documented_by_design": false
+        }
+      }
+    },
+    {
+      "id": "M07",
+      "mutation": "改代理类型",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "accepted": false,
+          "failed_checks": [
+            "S6"
+          ],
+          "documented_by_design": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "accepted": false,
+          "failed_checks": [
+            "S6"
+          ],
+          "documented_by_design": false
+        }
+      }
+    },
+    {
+      "id": "M08",
+      "mutation": "把 ACTIVATE 时间改到 2030",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "accepted": false,
+          "failed_checks": [
+            "S3",
+            "S12",
+            "S8",
+            "S6"
+          ],
+          "documented_by_design": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "accepted": false,
+          "failed_checks": [
+            "S3",
+            "S12",
+            "S8",
+            "S6"
+          ],
+          "documented_by_design": false
+        }
+      }
+    },
+    {
+      "id": "M09",
+      "mutation": "把 REGISTER 的 actor 改成 attacker",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "accepted": false,
+          "failed_checks": [
+            "S3",
+            "S6"
+          ],
+          "documented_by_design": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "accepted": false,
+          "failed_checks": [
+            "S3",
+            "S6"
+          ],
+          "documented_by_design": false
+        }
+      }
+    },
+    {
+      "id": "M10",
+      "mutation": "删 REGISTER（断链）",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "accepted": false,
+          "failed_checks": [
+            "S3",
+            "S8",
+            "S6"
+          ],
+          "documented_by_design": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "accepted": false,
+          "failed_checks": [
+            "S3",
+            "S8",
+            "S6"
+          ],
+          "documented_by_design": false
+        }
+      }
+    },
+    {
+      "id": "M11",
+      "mutation": "追加非法 ACTIVATE",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "accepted": false,
+          "failed_checks": [
+            "S3",
+            "S8",
+            "S6"
+          ],
+          "documented_by_design": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "accepted": false,
+          "failed_checks": [
+            "S3",
+            "S8",
+            "S6"
+          ],
+          "documented_by_design": false
+        }
+      }
+    },
+    {
+      "id": "M12",
+      "mutation": "改 action.log 中间字节",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "accepted": false,
+          "failed_checks": [
+            "S4",
+            "S8"
+          ],
+          "documented_by_design": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "accepted": false,
+          "failed_checks": [
+            "S4",
+            "S8"
+          ],
+          "documented_by_design": false
+        }
+      }
+    },
+    {
+      "id": "M13",
+      "mutation": "追加文件+条��（哈希自洽）",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "accepted": false,
+          "failed_checks": [
+            "S4",
+            "S12",
+            "S7",
+            "S8"
+          ],
+          "documented_by_design": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "accepted": false,
+          "failed_checks": [
+            "S4",
+            "S12",
+            "S7",
+            "S8"
+          ],
+          "documented_by_design": false
+        }
+      }
+    },
+    {
+      "id": "M14",
+      "mutation": "从 index 删掉一条",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "accepted": false,
+          "failed_checks": [
+            "S12",
+            "S7",
+            "S8",
+            "S5"
+          ],
+          "documented_by_design": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "accepted": false,
+          "failed_checks": [
+            "S12",
+            "S7",
+            "S8",
+            "S5"
+          ],
+          "documented_by_design": false
+        }
+      }
+    },
+    {
+      "id": "M15",
+      "mutation": "删掉 run-summary.txt / eval.txt",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "accepted": false,
+          "failed_checks": [
+            "S4",
+            "S8"
+          ],
+          "documented_by_design": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "accepted": false,
+          "failed_checks": [
+            "S4",
+            "S8"
+          ],
+          "documented_by_design": false
+        }
+      }
+    },
+    {
+      "id": "M16",
+      "mutation": "签名末字节翻转",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "accepted": false,
+          "failed_checks": [
+            "S6"
+          ],
+          "documented_by_design": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "accepted": false,
+          "failed_checks": [
+            "S6"
+          ],
+          "documented_by_design": false
+        }
+      }
+    },
+    {
+      "id": "M17",
+      "mutation": "攻击者公钥+攻击者私钥重签",
+      "modes": {
+        "open": {
+          "verdict": "PASS",
+          "accepted": true,
+          "failed_checks": [],
+          "documented_by_design": true
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "accepted": false,
+          "failed_checks": [
+            "S6"
+          ],
+          "documented_by_design": false
+        }
+      }
+    },
+    {
+      "id": "M18",
+      "mutation": "根目录加 notes.md",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "accepted": false,
+          "failed_checks": [
+            "S1"
+          ],
+          "documented_by_design": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "accepted": false,
+          "failed_checks": [
+            "S1"
+          ],
+          "documented_by_design": false
+        }
+      }
+    },
+    {
+      "id": "M19",
+      "mutation": "改 index 条目的 type/note（不动文件）",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "accepted": false,
+          "failed_checks": [
+            "S7",
+            "S8"
+          ],
+          "documented_by_design": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "accepted": false,
+          "failed_checks": [
+            "S7",
+            "S8"
+          ],
+          "documented_by_design": false
+        }
+      }
+    },
+    {
+      "id": "M20",
+      "mutation": "用旧的自洽包替换当前状态",
+      "modes": {
+        "open": {
+          "verdict": "PASS",
+          "accepted": true,
+          "failed_checks": [],
+          "documented_by_design": true
+        },
+        "pinned": {
+          "verdict": "PASS",
+          "accepted": true,
+          "failed_checks": [],
+          "documented_by_design": true
+        },
+        "head-pinned": {
+          "verdict": "FAIL",
+          "accepted": false,
+          "failed_checks": [
+            "S9"
+          ],
+          "documented_by_design": false
+        }
+      }
+    },
+    {
+      "id": "M21",
+      "mutation": "删掉最后一条事件，manifest 仍写长链",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "accepted": false,
+          "failed_checks": [
+            "S8"
+          ],
+          "documented_by_design": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "accepted": false,
+          "failed_checks": [
+            "S8"
+          ],
+          "documented_by_design": false
+        },
+        "head-pinned": {
+          "verdict": "FAIL",
+          "accepted": false,
+          "failed_checks": [
+            "S8",
+            "S9"
+          ],
+          "documented_by_design": false
+        }
+      }
+    }
+  ],
+  "corpus_anchor": {
+    "base_open": "PASS",
+    "base_pinned": "PASS",
+    "base_must_be": "PASS",
+    "anchor_ok": true
+  },
+  "defects": []
+}

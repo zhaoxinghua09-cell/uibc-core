@@ -1,0 +1,19 @@
+{
+  "schema": "uibc-core/0.2.2-proposal",
+  "agent_id": "fx-agent-001",
+  "agent_version": "0.1.0",
+  "created_at": "2026-11-06T06:20:54Z",
+  "evidence_count": 2,
+  "evidence_root": "a9348d857ee5efb322db8c4e611f59e0a727116745987c5a9613f571f2e9287a",
+  "status": "SUBMITTED",
+  "evidence_index_digest": "sha256:d5bf0178993c578082275f3977efd8881e29b4937476ad048cb6b3b29363c0b3",
+  "closure": {
+    "model_weights": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "tokenizer": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "chat_template": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "engine_build": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "decoding": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "numeric_env": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  },
+  "checkpoint_head": "sha256:2935c3f497b00949bffc84b0b6f8c5db6a41ce192864b11b089a3aa4607323ef"
+}

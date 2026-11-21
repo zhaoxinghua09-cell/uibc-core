@@ -54,9 +54,9 @@ uibc verify demo.uibc                   # open mode: integrity checks only
 ## Running the tests (the outsider reproduction kit)
 
 ```bash
-python -m unittest discover tests           # full suite, 151 cases (verified: `Ran 151 tests, OK`)
+python -m unittest discover tests           # full suite (verified: `Ran N tests, OK (skipped=2)`, N pinned in `docs/EVIDENCE-INDEX.md` with `.[verify,interop]`; `skipped=16` without it, see `docs/SKIPPED.md`); on a Windows host a few cases cannot be collected and 24 are skipped - the number above is what the guard measures, not what a given host prints, and that difference is exactly what this PR makes visible
 python -m unittest tests.stress_test        # stress suite, 7 scenarios
-python independent_verifier/cross_check.py  # independent second implementation, 70 checks, 0 mismatches
+python independent_verifier/cross_check.py  # independent second implementation, 70 checks; quote the mismatch count your own run prints
 ```
 
 Zero third-party dependencies. `pip install -e .` is optional (it only gives

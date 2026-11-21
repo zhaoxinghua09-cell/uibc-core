@@ -1,0 +1,138 @@
+{
+  "meta": {
+    "what": "one corpus, two verifiers",
+    "contract": "adapter.py: verify(package_dir, pubkey_b64, expect_head) -> 'PASS' | 'FAIL' | 'INCONCLUSIVE'",
+    "boundary": "same repository, same author: demonstrates the contract, not independent judgement"
+  },
+  "corpus_cases": 21,
+  "agree": 21,
+  "rows": [
+    {
+      "id": "M01",
+      "ours": "FAIL",
+      "theirs": "FAIL",
+      "mutation": "manifest.agent_id 替换为 evil-agent"
+    },
+    {
+      "id": "M02",
+      "ours": "FAIL",
+      "theirs": "FAIL",
+      "mutation": "manifest.evidence_root 换成全 0"
+    },
+    {
+      "id": "M03",
+      "ours": "FAIL",
+      "theirs": "FAIL",
+      "mutation": "manifest.agent_version 改版本号"
+    },
+    {
+      "id": "M04",
+      "ours": "FAIL",
+      "theirs": "FAIL",
+      "mutation": "manifest.status 自封 APPROVED"
+    },
+    {
+      "id": "M05",
+      "ours": "FAIL",
+      "theirs": "FAIL",
+      "mutation": "manifest 增字段 human_approval=granted"
+    },
+    {
+      "id": "M06",
+      "ours": "FAIL",
+      "theirs": "FAIL",
+      "mutation": "identity.owner 换所有者"
+    },
+    {
+      "id": "M07",
+      "ours": "FAIL",
+      "theirs": "FAIL",
+      "mutation": "identity.agent_type 改代理类型"
+    },
+    {
+      "id": "M08",
+      "ours": "FAIL",
+      "theirs": "FAIL",
+      "mutation": "lifecycle ACTIVATE 时间改到 2030"
+    },
+    {
+      "id": "M09",
+      "ours": "FAIL",
+      "theirs": "FAIL",
+      "mutation": "lifecycle REGISTER 的 actor 改成 attacker"
+    },
+    {
+      "id": "M10",
+      "ours": "FAIL",
+      "theirs": "FAIL",
+      "mutation": "lifecycle 删首事件（断链）"
+    },
+    {
+      "id": "M11",
+      "ours": "FAIL",
+      "theirs": "FAIL",
+      "mutation": "lifecycle 追加非法 ACTIVATE"
+    },
+    {
+      "id": "M12",
+      "ours": "FAIL",
+      "theirs": "FAIL",
+      "mutation": "证据内容改 1 字节"
+    },
+    {
+      "id": "M13",
+      "ours": "FAIL",
+      "theirs": "FAIL",
+      "mutation": "证据扩表（追加文件+条目，哈希自洽）"
+    },
+    {
+      "id": "M14",
+      "ours": "FAIL",
+      "theirs": "FAIL",
+      "mutation": "证据从 index 删掉一条"
+    },
+    {
+      "id": "M15",
+      "ours": "FAIL",
+      "theirs": "FAIL",
+      "mutation": "删掉证据文件"
+    },
+    {
+      "id": "M16",
+      "ours": "FAIL",
+      "theirs": "FAIL",
+      "mutation": "封签签名末字节翻转"
+    },
+    {
+      "id": "M17",
+      "ours": "PASS",
+      "theirs": "PASS",
+      "mutation": "换钥重签（攻击者公钥 + 私钥）"
+    },
+    {
+      "id": "M18",
+      "ours": "FAIL",
+      "theirs": "FAIL",
+      "mutation": "包根加 notes.md（未声明文件）"
+    },
+    {
+      "id": "M19",
+      "ours": "FAIL",
+      "theirs": "FAIL",
+      "mutation": "索引元数据 type/note 改动（不动文件字节）"
+    },
+    {
+      "id": "M20",
+      "ours": "PASS",
+      "theirs": "PASS",
+      "mutation": "整包回滚（装回旧的自洽包）"
+    },
+    {
+      "id": "M21",
+      "ours": "FAIL",
+      "theirs": "FAIL",
+      "mutation": "未封签包截断尾部（manifest 仍写长链）"
+    }
+  ],
+  "disagreements": []
+}

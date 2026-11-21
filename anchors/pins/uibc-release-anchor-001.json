@@ -1,0 +1,18 @@
+{
+  "assets": [
+    {
+      "bytes": 623,
+      "name": "anchor.json",
+      "sha256": "26a224ac96b12f615c5c2cee0ecaa46c43430542cc3dcfa72d6b08124ca5efb3"
+    }
+  ],
+  "excluded": [],
+  "kind": "uibc-release-pin-v0",
+  "meaning": "the page as it stands on recorded_at; this does not show what it held when it was published, only what it holds now",
+  "recorded_at": "2026-11-20T06:04:24Z",
+  "recorded_by": "a human, after the fact, not the publishing process",
+  "recorded_late": true,
+  "stronger_form": "anchors/pins/uibc-release-anchor-001.json in the repository, which the page cannot rewrite",
+  "tag": "anchor-001",
+  "why_excluded": "nothing is excluded: a human recorded this page, no pin asset was present"
+}

@@ -1,0 +1,31 @@
+{
+  "what": "The verifier that the archived artifact actually contains",
+  "why": "The Zenodo DOI in CITATION.cff points at the 0.2.1 snapshot. Everything built after 2026-09-18 lives in the repository and in no archived artifact. Anyone who downloads the DOI and then reads a claim about S7-S18 would be misled, and the file exists so that the claim can be checked instead of remembered.",
+  "source_revision": "402ac6b3ce6e08bfd688d190ac434cd8c5cdc273",
+  "source_kind": "Software Heritage snapshot a901225b50ae3fe84f9f878b8c0d6b0399867e64 (main), which is the revision named in CITATION.cff",
+  "snapshot_date": "2026-09-18",
+  "version_declared": "0.2.1",
+  "verify_py_sha256": "78cc6439333d08c0baf7db906f0556d4572d66e5ba15ef64303b8cf55fb2ded5",
+  "verify_py_lines": 167,
+  "checks": [
+    "S1",
+    "S2",
+    "S3",
+    "S4",
+    "S5",
+    "S6"
+  ],
+  "how_measured": "curl raw.githubusercontent.com at that revision; grep for record(\"Sxx\" ...) and \"id\": \"Sxx\" in uibc_core/verify.py",
+  "limits_of_this_measurement": [
+    "It measures the verifier's CHECK IDS, not the package lifecycle, the auditor, the red-team stages or the interoperability exports.",
+    "None of tools/outsider_audit.py, the outside kit, the verify endpoint or the AAC export existed at that revision.",
+    "A count of ids is not a count of behaviour: S1-S6 at that revision also had less coverage than S1-S6 today."
+  ],
+  "git_tag": {
+    "name": "v0.2.1",
+    "commit": "f5d7b29b55ff4288effb18031e70bc7826efc48b",
+    "verify_py_sha256": "78cc6439333d08c0baf7db906f0556d4572d66e5ba15ef64303b8cf55fb2ded5",
+    "matches_this_baseline": true,
+    "note": "the tag points at a different commit from the archived snapshot, but the verifier the two carry is byte-identical; the archive is therefore rebuildable from git"
+  }
+}

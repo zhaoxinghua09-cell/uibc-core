@@ -1,0 +1,40 @@
+{
+  "label": "github_public",
+  "repo": "D:\\Workbuddy\\_pubtest",
+  "generated_at_utc": "2026-11-17T05:40:16Z",
+  "interpreter": "D:\\Workbuddy\\_outsider_venv\\Scripts\\python.exe",
+  "steps": [
+    {
+      "cmd": "C:\\Users\\SZYL\\AppData\\Local\\Doubao\\User Data\\sandbox_runtime\\bases\\fa694f517e5995233c80a9a8db5212c2\\python\\python.exe -m venv --system-site-packages D:\\Workbuddy\\_outsider_venv",
+      "rc": 0,
+      "tail": [],
+      "secs": 5.8
+    }
+  ],
+  "runs": [
+    {
+      "name": "unittest",
+      "cmd": "D:\\Workbuddy\\_outsider_venv\\Scripts\\python.exe -m unittest discover -s tests -p test_*.py",
+      "rc": 0,
+      "tail": [
+        "",
+        "OK",
+        "<sys>:0: ResourceWarning: unclosed <socket.socket fd=404, family=2, type=1, proto=0, laddr=('127.0.0.1', 1535)>"
+      ],
+      "secs": 12.9
+    },
+    {
+      "name": "version",
+      "cmd": "D:\\Workbuddy\\_outsider_venv\\Scripts\\python.exe -c import uibc_core as u; print(u.SPEC_VERSION)",
+      "rc": 0,
+      "tail": [
+        "uibc-core/0.0.0-proposal"
+      ],
+      "secs": 0.1
+    }
+  ],
+  "tools_present": [
+    "gen-sbom.py",
+    "version_gate.py"
+  ]
+}

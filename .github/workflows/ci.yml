@@ -15,6 +15,11 @@ jobs:
         python-version: ["3.10", "3.11", "3.12", "3.13"]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          # Full history: one test recomputes an outside host's figures at an
+          # older commit (8a95747). A shallow clone cannot name it, and a test
+          # that silently skips would be a test that cannot fail.
+          fetch-depth: 0
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
@@ -22,7 +27,233 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install test deps
-        run: python -m pip install --upgrade pip && pip install pytest
+        # The `verify` extra is installed on purpose: without it 17 tests exercise a
+        # fallback instead of the real verification path (measured on 3.12, 2026-11-17).
+        run: python -m pip install --upgrade pip && pip install pytest ".[verify]"
 
       - name: Run test suite
         run: python -m pytest tests -q
+
+      - name: The status page still matches its sources
+        # STATUS.md is generated; this step is what keeps it from drifting into a claim.
+        # Exit 0 current, 1 stale, 3 a source unreadable - all three fail the job.
+        run: python tools/status_page.py --check
+
+      - name: The documented way in still points at the pinned archive
+        # Measured 2026-11-20: the "run it without cloning" paragraph named no URL, and
+        # the only release carries a different archive. --probe needs the network and
+        # runs by hand; here the local pin and the documents are held together.
+        run: python tools/check_outsider_entry.py
+
+  # Measured 2026-11-19: 15 of the 16 skipped tests were skipping for one reason only -
+  # `.[verify]` does not carry agent-action-capsule, langchain-core, opentimestamps-client,
+  # pynostr or coincurve, so the interop, live-agent, anchor and RFC 3161-proof checks had
+  # never run in CI at all. They pass once those packages are present. This job installs
+  # them and fails if any skip still says "not installed", so a green matrix can no longer
+  # mean "the hard half was skipped".
+  test-with-extras:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          # Full history: one test recomputes an outside host's figures at an
+          # older commit (8a95747). A shallow clone cannot name it, and a test
+          # that silently skips would be a test that cannot fail.
+          fetch-depth: 0
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: "3.13"
+
+      - name: Install the suite with every optional dependency present
+        run: python -m pip install --upgrade pip && pip install pytest ".[verify,interop,conformance]"
+
+      - name: Run the whole suite and refuse a dependency-shaped skip
+        run: |
+          set -o pipefail
+          python -m pytest tests -q -rs | tee /tmp/pytest.txt
+          ! grep -E "not installed|pip install agent-action-capsule" /tmp/pytest.txt
+
+  # Measured 2026-11-19: the first 0.4.0 sdist carried tests/ but not the
+  # data they read. Unpacked, it collected 290 of 526 tests with 6 failures and
+  # 97 errors, every one of them "no such file". "526 tests green" was true of
+  # a git clone and false of the package an installer receives. This job makes
+  # a missing directory in MANIFEST.in fail the pull request instead.
+  sdist-self-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          # Full history: one test recomputes an outside host's figures at an
+          # older commit (8a95747). A shallow clone cannot name it, and a test
+          # that silently skips would be a test that cannot fail.
+          fetch-depth: 0
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: "3.13"
+
+      - name: Build an sdist
+        run: python -m pip install --upgrade pip build && python -m build --sdist
+
+      - name: Run the suite from the unpacked archive
+        run: |
+          mkdir -p /tmp/sd
+          tar xzf dist/uibc_core-*.tar.gz -C /tmp/sd
+          cd /tmp/sd/uibc_core-*
+          pip install pytest ".[verify]"
+          python -m pytest tests -q
+
+      - name: Assert the archive carried the whole suite
+        # A suite that silently collected fewer tests would still be green.
+        run: |
+          cd /tmp/sd/uibc_core-*
+          python -m pytest tests --collect-only -q > /tmp/collected.txt 2>&1 || true
+          n=$(grep -c "::" /tmp/collected.txt || true)
+          echo "collected: $n"
+          test "$n" -ge 500
+
+  # REPRODUCTION-REGISTER.md states that a row must be reproducible from what it
+  # states (rule 4). Until this job existed, that was prose: a row could carry a
+  # 6-character hash and look exactly as authoritative as a real one. This job
+  # makes the file fail when a row cannot be checked, including the row a
+  # stranger opens as a PR.
+  register-self-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: "3.13"
+
+      - name: The checker's own tests
+        run: |
+          python -m pip install --upgrade pip pytest
+          python tools/check_register_row.py --self-test
+          python -m pytest tests/test_register_row.py -q
+
+      - name: Every row in the shipped register is well formed
+        run: python tools/check_register_row.py --register REPRODUCTION-REGISTER.md
+
+  second-implementation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          # Full history: one test recomputes an outside host's figures at an
+          # older commit (8a95747). A shallow clone cannot name it, and a test
+          # that silently skips would be a test that cannot fail.
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: "3.13"
+
+      - name: Install test deps
+        run: python -m pip install --upgrade pip && pip install pytest ".[verify]"
+
+      - name: Node the runner already ships is enough
+        run: node --version
+
+      - name: Export the conformance suite
+        run: python tools/export_conformance.py
+
+      - name: Hostile input is a verdict, not a traceback
+        # Ten inputs that are not packages: not JSON, a NaN literal, 4000
+        # levels of nesting, invalid UTF-8, a path climbing out of the package,
+        # a symlink to the host, an empty directory, an 8 MB manifest. Both
+        # implementations must answer, and both must refuse. A crash is not a
+        # verdict, and "could not tell" about bytes nobody judged is the one
+        # wrong answer that looks honest.
+        run: python tools/redteam_robustness.py
+
+      - name: Two implementations, one set of failing checks
+        # Not the weaker "names an expected check": the same set, on all 36.
+        run: python tools/cross_impl_check.py --json | python3 -c "import json,sys; d=json.load(sys.stdin); assert d['agree_with_python']==d['cases'], d; print('agree', d['agree_with_python'], 'of', d['cases'])"
+
+      - name: Every check has an artefact that makes it fail
+        # Nineteen checks, and for each one a package (or, for S9 and S16, a
+        # mutation run by outsider_audit) that drives it to FAIL. A check
+        # nobody can make fail is decoration; this step refuses decoration.
+        run: python tools/check_falsifiability.py
+
+      - name: Two defects at once must not explain each other away
+        # One mutation at a time is measured everywhere else. Two together is a
+        # different question: a second change can supply exactly the consistency
+        # the first one broke. Fourteen mutations, every pair and every triple.
+        run: python tools/check_combinations.py --triples
+
+      - name: A forgery that agrees with itself
+        # Repairing a rewrite is arithmetic; a stranger can do it and sign with
+        # their own key. What has to survive is the sentence the verdict makes:
+        # PASS beside unanchored, never PASS alone.
+        run: python tools/composed_forgery.py
+
+      - name: An anchor must arrive from outside the bundle
+        # Build a publisher bundle, then check it the way a stranger would. The
+        # same package verified against its own key is PASS/unanchored; the anchor
+        # is what turns it into ANCHORED, so this step fails if either half stops
+        # mattering.
+        run: |
+          python tools/make_release_bundle.py --out /tmp/anchor-demo
+          python tools/anchor_check.py /tmp/anchor-demo
+
+      - name: One file, no install
+        # Build the zipapp, strip the path, and run it from an empty directory.
+        # "No install required" is a claim a stranger should be able to check,
+        # so CI checks it rather than the README asserting it.
+        run: |
+          python tools/build_zipapp.py --out /tmp/uibc.pyz
+          mkdir -p /tmp/isolated && cd /tmp/isolated
+          python /tmp/uibc.pyz explain "$GITHUB_WORKSPACE/fixtures/clean.uibc" | head -3
+
+      - name: The anchor in the tree still verifies
+        run: python -m pytest tests/test_published_anchor.py -q
+
+      - name: The dashboard and the runner agree on seven checks
+        run: python -m pytest tests/test_run_all_evidence.py -q
+
+      - name: The 0.4.0 pin is still plain sha256sum
+        run: python -m pytest tests/test_release_pin.py -q
+
+      - name: The anchor channel is named in exactly one place
+        run: python -m pytest tests/test_channel.py -q
+
+      - name: The witness constants still match what we cite
+        # Offline by design: the live check (tools/check_witnesses.py) needs three
+        # third-party services, and their outage must not colour our CI.
+        run: python -m pytest tests/test_witnesses.py -q
+
+      - name: The line of anchors, judged by both implementations
+        # Includes the end-to-end rehearsal: build, link, judge four questions
+        # with python and node in a stripped environment, under a second.
+        run: python -m pytest tests/test_chain_second_impl.py -q
+
+      - name: A stale anchor has to be distinguishable from a current one
+        # Six refusals and one STALE: gap, replay, rewritten predecessor, a
+        # first anchor claiming a predecessor, withheld anchors, rollback.
+        run: python -m pytest tests/test_anchor_chain.py -q
+
+      - name: The publisher check, done twice
+        # anchor_check.py and verify-js/anchor.mjs must reach the same verdict
+        # on the same bundle - agreement is the only reason to believe either.
+        run: python -m pytest tests/test_anchor_second_impl.py -q
+
+      - name: An anchor can carry a moment, and must not lie about it
+        # Offline against a real FreeTSA token shipped as a fixture; the four
+        # refusals (wrong bytes, no CA, wrong cover mode, missing half) are what
+        # make the optional block worth anything.
+        run: python -m pytest tests/test_anchor_check.py -q
+
+      - name: The second implementation must not drift
+        # A verifier written from the spec in another language, sharing no code
+        # with the first, is only worth something while it keeps agreeing. This
+        # step fails the build when it stops: an accepted package it rejects, a
+        # refused package it fails for an unrelated reason, or a check the
+        # Python side gained that the JavaScript side never carried.
+        run: python tools/assert_second_impl.py

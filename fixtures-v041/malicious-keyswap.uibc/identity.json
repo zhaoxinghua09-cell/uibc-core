@@ -1,0 +1,9 @@
+{
+  "schema": "uibc-core/0.3.3-proposal",
+  "agent_id": "fx-v41",
+  "agent_type": "software-agent",
+  "owner": "alice",
+  "created_at": "2026-11-19T16:30:50Z",
+  "status": "REGISTERED",
+  "version": "0.1.0"
+}

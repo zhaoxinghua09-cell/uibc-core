@@ -1,0 +1,25 @@
+{
+  "schema": "uibc-core/0.3.3-proposal",
+  "events": [
+    {
+      "event_id": "78e63329-f234-4048-a2ec-38c668805a0c",
+      "event_type": "REGISTER",
+      "agent_id": "cardiopatch-cp2-change-evidence",
+      "timestamp": "2026-11-18T00:10:25Z",
+      "actor": "meridian-medical-rd",
+      "payload_hash": null,
+      "previous_event": null,
+      "signature": null
+    },
+    {
+      "event_id": "ac8c3fa5-f680-4fea-8cd1-436ea51c5391",
+      "event_type": "ACTIVATE",
+      "agent_id": "cardiopatch-cp2-change-evidence",
+      "timestamp": "2026-11-18T00:10:25Z",
+      "actor": "meridian-medical-rd",
+      "payload_hash": null,
+      "previous_event": "78e63329-f234-4048-a2ec-38c668805a0c",
+      "signature": null
+    }
+  ]
+}

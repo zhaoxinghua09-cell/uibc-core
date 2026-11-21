@@ -1,0 +1,60 @@
+{
+  "note": "Byte identity of every document this repository quotes. sha256 is of the whole file as vendored; upstream_sha256 is what the publisher served when re-fetched, so a reader can re-download and compare without trusting this repository's copy.",
+  "documents": [
+    {
+      "file": "rfc3161.txt",
+      "title": "RFC 3161",
+      "url": "https://www.rfc-editor.org/rfc/rfc3161.txt",
+      "bytes": 54585,
+      "sha256": "39fd17644ff2d654bc83814a78b1c5b5e7517f496741f34ead5064943eb98240",
+      "upstream_bytes": 54585,
+      "upstream_sha256": "39fd17644ff2d654bc83814a78b1c5b5e7517f496741f34ead5064943eb98240",
+      "upstream_stable": true,
+      "local_equals_upstream": true
+    },
+    {
+      "file": "draft-noa-scitt-ai-agent-receipt-00.txt",
+      "title": "draft-noa-scitt-ai-agent-receipt-00",
+      "url": "https://www.ietf.org/archive/id/draft-noa-scitt-ai-agent-receipt-00.txt",
+      "bytes": 22216,
+      "sha256": "10e5d7ade5a7650348f85dac357c2db449d8329e2700ad0cf5ee8b3a1e0a921d",
+      "upstream_bytes": 22216,
+      "upstream_sha256": "10e5d7ade5a7650348f85dac357c2db449d8329e2700ad0cf5ee8b3a1e0a921d",
+      "upstream_stable": true,
+      "local_equals_upstream": true
+    },
+    {
+      "file": "draft-sharif-agent-audit-trail-03.txt",
+      "title": "draft-sharif-agent-audit-trail-03",
+      "url": "https://www.ietf.org/archive/id/draft-sharif-agent-audit-trail-03.txt",
+      "bytes": 95023,
+      "sha256": "2cfc02f692f9ea541a0b3716bba7ff708b56f07e2cab4c42bc801983985c6230",
+      "upstream_bytes": 95023,
+      "upstream_sha256": "2cfc02f692f9ea541a0b3716bba7ff708b56f07e2cab4c42bc801983985c6230",
+      "upstream_stable": true,
+      "local_equals_upstream": true
+    },
+    {
+      "file": "draft-marques-asqav-compliance-receipts-01.txt",
+      "title": "draft-marques-asqav-compliance-receipts-01",
+      "url": "https://www.ietf.org/archive/id/draft-marques-asqav-compliance-receipts-01.txt",
+      "bytes": 46529,
+      "sha256": "8b9a9248e4166b475b970d3e5ac6d07bf038f51dce55d03e2c174603074d39f2",
+      "upstream_bytes": 46529,
+      "upstream_sha256": "8b9a9248e4166b475b970d3e5ac6d07bf038f51dce55d03e2c174603074d39f2",
+      "upstream_stable": true,
+      "local_equals_upstream": true
+    },
+    {
+      "file": "draft-maintainer-1f916-agent-record-01.txt",
+      "title": "draft-maintainer-1f916-agent-record-01",
+      "url": "https://www.ietf.org/archive/id/draft-maintainer-1f916-agent-record-01.txt",
+      "bytes": 25584,
+      "sha256": "a0a138918dedcee44fb684fe164a0b449688de63562cce3f6a04c1719cfbda9c",
+      "upstream_bytes": 25584,
+      "upstream_sha256": "a0a138918dedcee44fb684fe164a0b449688de63562cce3f6a04c1719cfbda9c",
+      "upstream_stable": true,
+      "local_equals_upstream": true
+    }
+  ]
+}

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>UIBC Browser Verifier — verify an evidence package without installing anything</title>
-<meta name="description" content="Run the uibc-core S1-S6 verification in your browser: three-valued verdicts (PASS / FAIL / INCONCLUSIVE) and public Ed25519 seals. Nothing is uploaded.">
+<meta name="description" content="Run the full uibc-core verification (S1-S18) in your browser: three-valued verdicts (PASS / FAIL / INCONCLUSIVE), public Ed25519 seals with the lifecycle record bound into the seal. Nothing is uploaded.">
 <style>
   :root { --navy:#0b1f3a; --gold:#d4af37; --ink:#1a2332; --paper:#f7f5ef; }
   * { box-sizing: border-box; }
@@ -36,26 +36,28 @@
 <header>
   <h1>Verify a UIBC evidence package <span class="gold">— in your browser</span></h1>
   <p>在浏览器里验证一个 UIBC 证据包</p>
-  <p>The same S1–S6 checks and the same three-valued verdict as <code>uibc verify</code> (v0.3.0): PASS, FAIL, or an honest INCONCLUSIVE. Everything runs locally on this page — <strong>nothing is uploaded</strong>.</p>
-  <p>与命令行 <code>uibc verify</code>（v0.3.0）同一套 S1–S6 检查、同一个三值裁决：PASS、FAIL，或诚实的 INCONCLUSIVE。全部在本页本地运行，<strong>不上传任何数据</strong>。</p>
+  <p>The same checks as <code>uibc verify</code> 0.3.3 (S1–S18) and the same three-valued verdict: PASS, FAIL, or an honest INCONCLUSIVE. Since v1.1 the seal covers the lifecycle record too — truncating or rewriting the event chain now fails the seal check itself. Everything runs locally on this page — <strong>nothing is uploaded</strong>.</p>
+  <p>与命令行 <code>uibc verify</code> 0.3.3 同一套检查（S1–S18）、同一个三值裁决：PASS、FAIL，或诚实的 INCONCLUSIVE。v1.1 起封签覆盖生命周期记录——截断或改写事件链会直接被封签检查抓住。全部在本页本地运行，<strong>不上传任何数据</strong>。</p>
 </header>
 <main>
   <div class="card">
     <button class="gold" id="btnSample">Load the sample package · 载入样例包</button>
     <button id="btnTamper" disabled>Tamper its evidence · 篡改其中一份证据</button>
-    <p class="small">The sample is a real package, sealed with an Ed25519 public seal when this page was built. Tampering flips one byte of its evidence file — watch S4 turn FAIL. 样例是本页构建时用 Ed25519 公开封签真实签封的包；“篡改”会改动证据文件的一个字节，看 S4 如何变 FAIL。</p>
+    <p class="small">The sample is a real package built with the current release and sealed with an Ed25519 public seal. Tampering flips one byte of its evidence file — watch S4 turn FAIL. 样例是用当前版本真实构建、并以 Ed25519 公开封签签封的包；“篡改”会改动证据文件的一个字节，看 S4 如何变 FAIL。</p>
     <div id="drop">…or drop a package folder here, or pick it: 或把包文件夹拖到这里，或点选：
       <input type="file" id="folder" webkitdirectory multiple></div>
     <label for="pin">Pinned public key (optional, hex) · 钉扎公钥（可选，十六进制）</label>
     <input type="text" id="pin" placeholder="64 hex chars — a substituted signer key then FAILS S6">
     <label for="ownkey">Owner key for HMAC seals (optional, hex) · HMAC 所有者密钥（可选）</label>
-    <input type="text" id="ownkey" placeholder="64 hex chars — strict mode for v0.2 HMAC seals">
+    <input type="text" id="ownkey" placeholder="64 hex chars — for HMAC seals (legacy v0.2 and current)">
+    <label for="pinhead">Pinned checkpoint head (optional) · 钉扎检查点头（可选）</label>
+    <input type="text" id="pinhead" placeholder="sha256:… — an older, self-consistent rollback package then FAILS S9">
     <p><button id="btnRun" disabled>Verify · 开始验证</button></p>
   </div>
   <div id="out"></div>
   <div class="card small">
     <strong>How to make your own package · 自己做一个包</strong><br>
-    <code>pip install uibc-core==0.3.0</code>（on PyPI since 2026-11-12 · 已于 2026-11-12 上架）or from source:
+    <code>pip install uibc-core</code>（0.3.3 current · 当前版；on PyPI since 2026-11-12 · 已于 2026-11-12 上架）or from source:
     <code>git clone https://github.com/zhaoxinghua09-cell/uibc-core.git</code>, then
     <code>uibc demo</code> builds, seals, verifies, tampers and catches — one command.<br>
     Repository 仓库: <a href="https://github.com/zhaoxinghua09-cell/uibc-core">github.com/zhaoxinghua09-cell/uibc-core</a> ·
@@ -63,50 +65,177 @@
   </div>
 </main>
 <footer class="small">
-  <p><strong>Honest limits · 诚实边界</strong> — This page is a JavaScript port of the Python reference verifier; on the published fixture corpus its verdicts agree check-for-check with <code>uibc verify</code>. HMAC seals (v0.2) can only be checked with the owner key; without one they are INCONCLUSIVE, never silently passed. Ed25519 seals (v0.3) are verified publicly. Timestamps are not independently anchored. JSON numbers are formatted the JavaScript way; a package whose sealed JSON contains non-integer numbers may hash differently from the Python verifier. 本页是 Python 参考验证器的 JavaScript 移植版，在已发布夹具集上与 <code>uibc verify</code> 逐项一致。HMAC 封签（v0.2）无所有者密钥时只能判 INCONCLUSIVE，绝不放行；Ed25519 封签（v0.3）可公开验证。时间戳未做独立锚定。</p>
+  <p><strong>Honest limits · 诚实边界</strong> — This page is a JavaScript port of the Python reference verifier (uibc-core 0.3.3). On a 27-case parity corpus — the pristine demo package, every tamper class, legacy v0.3 seals, HMAC seals with and without the key, Merkle / receipt-chain / anchor / policy packages — its verdicts agree with <code>uibc verify</code> check-for-check; the corpus and the harness ship in the repository (<code>tests/verify_html_parity/</code>). Both sides canonicalize with RFC 8785 JCS, so sealed JSON hashes identically on either side. Declared limits: an RFC 3161 timestamp token (S16) is reported INCONCLUSIVE on this page, never PASS — the port does not parse DER tokens; the Python verifier without its optional dependency does the same. HMAC seals can only be checked with the owner key; without one they are INCONCLUSIVE, never silently passed. JSON integers beyond 2^53 lose precision in JavaScript and will not verify. Timestamps are checked for form and consistency, not independently anchored. 本页是 Python 参考验证器（uibc-core 0.3.3）的 JavaScript 移植版；在一个 27 例对照集上（原样演示包、各类篡改、v0.3 旧封签、带/不带密钥的 HMAC 封签、Merkle／收据链／锚定／策略包），其裁决与 <code>uibc verify</code> 逐项一致，对照集与测试脚本随仓库发布。两侧均按 RFC 8785 JCS 规范化，封签 JSON 的哈希完全一致。明示边界：RFC 3161 时间戳令牌（S16）在本页只判 INCONCLUSIVE、绝不 PASS——本移植版不解析 DER 令牌；Python 验证器在缺少可选依赖时同样如此。HMAC 封签无所有者密钥时只能判 INCONCLUSIVE，绝不放行。超过 2^53 的 JSON 整数在 JavaScript 中会丢精度、无法通过验证。时间戳只查形式与一致性，未做独立锚定。</p>
 </footer>
 <script>
 "use strict";
-/* uibc-verify.js — browser port of the uibc-core verifier (v0.3.0 semantics).
+/* uibc-verify.js — browser port of the uibc-core verifier (v1.1 / 0.3.3 semantics).
  *
- * Mirrors uibc_core/verify.py check-for-check (S1-S6) and the three-valued
- * verdict: FAIL if any check FAILs, else INCONCLUSIVE if any check is
- * INCONCLUSIVE, else PASS. Canonical JSON, evidence root, seal payload,
- * lifecycle rules L1-L7 and the Ed25519 equation [S]B == R + [H]A follow
- * uibc_core/canonical.py, signing.py, lifecycle.py and ed25519.py.
+ * Mirrors uibc_core/verify.py check-for-check (S1-S18, in the reference
+ * verifier's report order: S11, S1, S2, S3, S4, S12, S13, S14, S15, S16,
+ * S17, S18, S7, S10, S8, S9, S5, S6) and the three-valued verdict: FAIL if
+ * any check FAILs, else INCONCLUSIVE if any check is INCONCLUSIVE, else
+ * PASS. Canonical bytes follow uibc_core/canonical.py (RFC 8785 JCS as
+ * implemented there, including its number serialization), the seal payload
+ * follows signing.py (v1.1: identity+manifest+lifecycle, with the legacy
+ * v0.3 identity+manifest payload still accepted and reported as
+ * coverage=legacy), lifecycle rules L1-L12 follow lifecycle.py, and the
+ * Ed25519 equation [S]B == R + [H]A follows ed25519.py.
  *
  * Pure JavaScript, no dependencies, no network. SHA-256/SHA-512/HMAC use
  * WebCrypto; Ed25519 verification is implemented here with BigInt.
  *
- * Known edge: JSON number formatting follows JavaScript (Python formats
- * a float like 1.0 as "1.0"); packages whose sealed JSON contains
- * non-integer numbers may hash differently from the Python verifier.
+ * Declared port limits (also stated in the page footer):
+ *  - S16: an RFC 3161 token in a package is reported INCONCLUSIVE, never
+ *    PASS — this port does not parse DER tokens. The Python verifier with
+ *    asn1crypto installed can judge it.
+ *  - JSON integers beyond the ECMAScript safe range lose precision at
+ *    JSON.parse time in JavaScript; the Python verifier rejects them in
+ *    canonicalization. Packages are not expected to carry such values.
  */
-"use strict";
 
-/* ------------------------------------------------ canonical JSON + hash */
-function canonicalize(obj) {
-  if (obj === null || typeof obj !== "object") return JSON.stringify(obj);
-  if (Array.isArray(obj)) return "[" + obj.map(canonicalize).join(",") + "]";
-  const keys = Object.keys(obj).sort();
-  return "{" + keys.map(k => JSON.stringify(k) + ":" + canonicalize(obj[k])).join(",") + "}";
-}
+/* ------------------------------------------------------------- utilities */
 const _enc = new TextEncoder();
 function utf8(s) { return _enc.encode(s); }
 function hexOf(bytes) {
   return Array.from(bytes, b => b.toString(16).padStart(2, "0")).join("");
 }
-async function sha256Hex(data) {
-  const buf = await crypto.subtle.digest("SHA-256", data);
-  return hexOf(new Uint8Array(buf));
+function bytesOfHex(hex) {
+  const out = new Uint8Array(hex.length / 2);
+  for (let i = 0; i < out.length; i++) out[i] = parseInt(hex.substr(2 * i, 2), 16);
+  return out;
 }
+async function sha256Bytes(data) {
+  return new Uint8Array(await crypto.subtle.digest("SHA-256", data));
+}
+async function sha256Hex(data) { return hexOf(await sha256Bytes(data)); }
 async function sha512Bytes(data) {
-  const buf = await crypto.subtle.digest("SHA-512", data);
-  return new Uint8Array(buf);
+  return new Uint8Array(await crypto.subtle.digest("SHA-512", data));
 }
-function evidenceRoot(contentHashes) {
+/* Python-style repr for the values that appear in check details. */
+function pyRepr(v) {
+  if (v === null || v === undefined) return "None";
+  if (v === true) return "True";
+  if (v === false) return "False";
+  if (typeof v === "number") return String(v);
+  if (Array.isArray(v)) return "[" + v.map(pyRepr).join(", ") + "]";
+  const s = String(v);
+  let out = "'";
+  for (const ch of s) {
+    if (ch === "'") out += "\\'";
+    else if (ch === "\\") out += "\\\\";
+    else if (ch === "\n") out += "\\n";
+    else if (ch === "\r") out += "\\r";
+    else if (ch === "\t") out += "\\t";
+    else if (ch.codePointAt(0) < 0x20) out += "\\x" + ch.codePointAt(0).toString(16).padStart(2, "0");
+    else out += ch;
+  }
+  return out + "'";
+}
+function pyStr(v) { return v === null || v === undefined ? "None" : String(v); }
+
+/* --------------------------------------- canonical JSON (RFC 8785 / JCS)
+ * Mirrors uibc_core/canonical.py byte-for-byte, including _jcs_number_str:
+ * Python's float repr is the base, with the integral-exponent edge folded
+ * back to fixed form for values with at most 21 integer digits. */
+function _jcsNumberStr(x) {
+  if (typeof x !== "number") throw new TypeError("JCS: unsupported number type");
+  if (Number.isNaN(x) || !Number.isFinite(x))
+    throw new Error("JCS: NaN/Infinity are not valid JSON numbers");
+  if (x === 0) return "0";
+  if (Number.isInteger(x)) {
+    if (Math.abs(x) <= Number.MAX_SAFE_INTEGER) return String(x);
+    return String(x); // >= 1e21 prints in exponent form, as in Python
+  }
+  // Non-integer: shortest digits from JS, re-formatted the Python way.
+  const neg = x < 0;
+  const s = String(Math.abs(x));
+  let digits, exp; // value = digits[0].digits[1:] * 10^exp
+  if (s.includes("e")) {
+    const [m, e] = s.split("e");
+    exp = parseInt(e, 10);
+    digits = m.replace(".", "").replace(/0+$/, "");
+    if (digits === "") digits = "0";
+  } else if (s.startsWith("0.")) {
+    const frac = s.slice(2);
+    const lead = frac.match(/^0*/)[0].length;
+    digits = frac.slice(lead).replace(/0+$/, "");
+    if (digits === "") digits = "0";
+    exp = -lead - 1;
+  } else {
+    const dot = s.indexOf(".");
+    digits = (s.slice(0, dot) + s.slice(dot + 1)).replace(/0+$/, "");
+    if (digits === "") digits = "0";
+    exp = dot - 1;
+  }
+  let out;
+  if (exp <= -5) {
+    // Python repr exponent form: mantissa without trailing zeros, exponent
+    // always signed and zero-padded to two digits.
+    const mant = digits.length > 1 ? digits[0] + "." + digits.slice(1) : digits;
+    out = mant + "e" + (exp < 0 ? "-" : "+") + String(Math.abs(exp)).padStart(2, "0");
+  } else {
+    // Fixed form.
+    if (exp >= 0) {
+      if (digits.length > exp + 1)
+        out = digits.slice(0, exp + 1) + "." + digits.slice(exp + 1);
+      else
+        out = digits + "0".repeat(exp + 1 - digits.length);
+    } else {
+      out = "0." + "0".repeat(-exp - 1) + digits;
+    }
+  }
+  return (neg ? "-" : "") + out;
+}
+function canonicalize(obj) {
+  if (obj === null) return "null";
+  if (obj === true) return "true";
+  if (obj === false) return "false";
+  if (typeof obj === "number") return _jcsNumberStr(obj);
+  if (typeof obj === "string") return JSON.stringify(obj);
+  if (Array.isArray(obj)) return "[" + obj.map(canonicalize).join(",") + "]";
+  if (typeof obj === "object") {
+    const keys = Object.keys(obj).sort();
+    return "{" + keys.map(k => JSON.stringify(k) + ":" + canonicalize(obj[k])).join(",") + "}";
+  }
+  throw new TypeError("JCS: unsupported type " + typeof obj);
+}
+async function hashObj(obj) { return sha256Hex(utf8(canonicalize(obj))); }
+async function evidenceRoot(contentHashes) {
   return sha256Hex(utf8(canonicalize([...contentHashes].sort())));
 }
+async function indexMetadataDigest(index) {
+  const meta = [];
+  for (const e of (index.entries || [])) {
+    meta.push({
+      path: e && e.path !== null && e.path !== undefined ? String(e.path) : "",
+      type: e ? (e.type ?? null) : null,
+      note: e ? (e.note ?? null) : null,
+      action_digest: e ? (e.action_digest ?? null) : null,
+    });
+  }
+  meta.sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0));
+  return "sha256:" + await hashObj(meta);
+}
+async function lifecycleHead(events) {
+  const n = events.length;
+  const last = n ? events[n - 1] : null;
+  return "sha256:" + await hashObj({
+    count: n,
+    last_sequence_number: last ? (last.sequence_number ?? null) : null,
+    last_event_digest: last !== null && last !== undefined ? await hashObj(last) : null,
+  });
+}
+async function checkpointHead(lcHead, root, indexDigest, evidenceCount) {
+  return "sha256:" + await hashObj({
+    lifecycle_head: lcHead,
+    evidence_root: root,
+    evidence_index_digest: indexDigest,
+    evidence_count: evidenceCount,
+  });
+}
+
+/* ---------------------------------------------------------------- base64 */
 function b64DecodeStrict(text) {
   if (typeof text !== "string") return null;
   if (!/^[A-Za-z0-9+/]*={0,2}$/.test(text) || text.length % 4 !== 0) return null;
@@ -119,9 +248,42 @@ function b64DecodeStrict(text) {
 }
 function hexToBytes(hex) {
   if (typeof hex !== "string" || !/^[0-9a-fA-F]*$/.test(hex) || hex.length % 2) return null;
-  const out = new Uint8Array(hex.length / 2);
-  for (let i = 0; i < out.length; i++) out[i] = parseInt(hex.substr(2 * i, 2), 16);
-  return out;
+  return bytesOfHex(hex);
+}
+/* Strict base64 problems, mirroring uibc_core/encoding.py. */
+function b64Problems(value) {
+  const STD = new Set("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=");
+  if (typeof value !== "string") return ["not a string"];
+  if (value === "") return ["empty"];
+  for (const ch of value) {
+    if (!STD.has(ch)) return [`character ${pyRepr(ch)} is outside the base64 alphabet`];
+  }
+  const padded = value.endsWith("=");
+  const core = value.replace(/=+$/, "");
+  if (core.length % 4 === 1) return [`length ${value.length} cannot be base64 (4n or 4n+2,4n+3)`];
+  if (padded) {
+    if (value.length % 4 !== 0) return ["padded length is not a multiple of 4"];
+  } else {
+    if (value.length % 4 !== 0)
+      return [`unpadded input (length mod 4 = ${value.length % 4}); canonical base64 requires padding`];
+  }
+  let raw;
+  try {
+    const bin = atob(value);
+    raw = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) raw[i] = bin.charCodeAt(i);
+  } catch (e) {
+    return [`decoder rejected it (${e.message})`];
+  }
+  if (value.endsWith("=")) {
+    let re = "";
+    for (let i = 0; i < raw.length; i += 3) {
+      const chunk = raw.slice(i, i + 3);
+      re += btoa(String.fromCharCode(...chunk));
+    }
+    if (re !== value) return [`non-canonical: re-encode gives ${pyRepr(re)} (pad bits are not zero)`];
+  }
+  return [];
 }
 
 /* ------------------------------------------------------- Ed25519 (BigInt) */
@@ -144,8 +306,8 @@ function _xRecover(y) {
 }
 const _By = _mod(4n * _inv(5n));
 const _BxRaw = _xRecover(_By);
-const _Bx = (_BxRaw & 1n) === 0n ? _BxRaw : _mod(-_BxRaw); // base point: x is even
-const _B = [_Bx, _By, 1n, _mod(_Bx * _By)]; // extended coords (X, Y, Z, T)
+const _Bx = (_BxRaw & 1n) === 0n ? _BxRaw : _mod(-_BxRaw);
+const _B = [_Bx, _By, 1n, _mod(_Bx * _By)];
 function _edAdd(P, Q) {
   const A = _mod((P[1] - P[0]) * (Q[1] - Q[0]));
   const Bv = _mod((P[1] + P[0]) * (Q[1] + Q[0]));
@@ -206,13 +368,13 @@ async function ed25519Verify(pubkey, message, signature) {
     return _pointsEqual(left, right);
   } catch { return false; }
 }
-async function hmacVerify(keyBytes, message, sigBytes) {
+async function hmacSign(keyBytes, message) {
   const key = await crypto.subtle.importKey("raw", keyBytes,
-    { name: "HMAC", hash: "SHA-256" }, false, ["verify"]);
-  return crypto.subtle.verify("HMAC", key, sigBytes, message);
+    { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  return new Uint8Array(await crypto.subtle.sign("HMAC", key, message));
 }
 
-/* ---------------------------------------------------- lifecycle (L1-L7) */
+/* ---------------------------------------------------- lifecycle (L1-L12) */
 const _EVENTS = ["REGISTER", "ACTIVATE", "UPDATE", "TRANSFER", "DELEGATE",
   "MIGRATE", "SUSPEND", "RESUME", "REVOKE", "RETIRE"];
 const _TERMINAL = new Set(["REVOKE", "RETIRE"]);
@@ -221,14 +383,16 @@ function validateLifecycle(events) {
   const seenIds = new Set();
   let prevId = null, registered = false, prevType = null;
   events.forEach((ev, i) => {
-    const etype = ev.event_type, eid = ev.event_id;
+    const etype = ev ? ev.event_type : undefined;
+    const eid = ev ? ev.event_id : undefined;
     if (!_EVENTS.includes(etype))
       errors.push(`L3 unknown event_type '${etype}' at position ${i}`);
     if (seenIds.has(eid))
       errors.push(`L5 duplicate event_id '${eid}' at position ${i}`);
     seenIds.add(eid);
-    if ((ev.previous_event ?? null) !== prevId)
-      errors.push(`L4 previous_event chain broken at position ${i} (expected ${JSON.stringify(prevId)}, got ${JSON.stringify(ev.previous_event ?? null)})`);
+    const prev = ev ? (ev.previous_event ?? null) : null;
+    if (prev !== prevId)
+      errors.push(`L4 previous_event chain broken at position ${i} (expected ${pyRepr(prevId)}, got ${pyRepr(prev)})`);
     if (i === 0) {
       if (etype !== "REGISTER") errors.push("L1 first event must be REGISTER");
     } else if (!registered) {
@@ -245,66 +409,941 @@ function validateLifecycle(events) {
   });
   return errors;
 }
+/* ISO-8601 parse for L8/L9 ordering (naive values are read as UTC, as in
+ * lifecycle._parse_ts). Returns epoch milliseconds or null. */
+function parseTsMs(value) {
+  if (typeof value !== "string" || !value.trim()) return null;
+  const text = value.trim().replace(/Z/g, "+00:00");
+  const m = text.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2})(?::(\d{2})(?:\.(\d+))?)?)?\s*([+-]\d{2}:?\d{2})?$/);
+  if (!m) return null;
+  const [, Y, Mo, D, H, Mi, S, frac, off] = m;
+  const y = +Y, mo = +Mo, d = +D;
+  if (mo < 1 || mo > 12) return null;
+  const days = [31, (y % 4 === 0 && (y % 100 !== 0 || y % 400 === 0)) ? 29 : 28,
+    31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  if (d < 1 || d > days[mo - 1]) return null;
+  const h = H ? +H : 0, mi = Mi ? +Mi : 0, sec = S ? +S : 0;
+  if (h > 23 || mi > 59 || sec > 59) return null;
+  let ms = Date.UTC(y, mo - 1, d, h, mi, sec);
+  if (frac) ms += Math.round(parseFloat("0." + frac) * 1000);
+  if (off) {
+    const om = off.match(/^([+-])(\d{2}):?(\d{2})$/);
+    if (!om) return null;
+    const delta = (+om[2]) * 3600000 + (+om[3]) * 60000;
+    ms += om[1] === "+" ? -delta : delta;
+  }
+  return ms;
+}
+function validateLifecycleStrict(events, createdAt, allowedActors) {
+  const errors = [];
+  const boundary = createdAt ? parseTsMs(createdAt) : null;
+  const ceiling = boundary !== null ? boundary + 86400 * 1000 : null;
+  let prevTs = null;
+  const counts = {};
+  events.forEach((ev, i) => {
+    if (!ev || typeof ev !== "object" || Array.isArray(ev)) {
+      errors.push(`L8 event ${i} is not an object`);
+      return;
+    }
+    const ts = parseTsMs(ev.timestamp);
+    if (ts === null) {
+      errors.push(`L8 event ${i} has no parsible ISO-8601 timestamp (${pyRepr(ev.timestamp ?? null)})`);
+    } else {
+      if (new Date(ts).getUTCFullYear() < 1970)
+        errors.push(`L9 event ${i} timestamp predates 1970`);
+      if (prevTs !== null && ts < prevTs)
+        errors.push(`L8 event ${i} timestamp goes backwards (${ev.timestamp} < previous)`);
+      prevTs = ts;
+    }
+    if (ts !== null && ceiling !== null && ts > ceiling)
+      errors.push(`L9 event ${i} timestamp ${ev.timestamp} is later than manifest.created_at + 86400s (implausible: the log is sealed at creation time)`);
+    if (allowedActors !== null && allowedActors !== undefined) {
+      const actor = ev.actor ?? null;
+      if (!allowedActors.includes(actor))
+        errors.push(`L10 event ${i} actor ${pyRepr(actor)} is not an authorised principal ${pyRepr([...allowedActors].sort())}`);
+    }
+    const etype = ev.event_type;
+    counts[etype] = (counts[etype] || 0) + 1;
+    if (etype === "ACTIVATE" && counts[etype] > 1)
+      errors.push(`L11 duplicate ACTIVATE at position ${i} (${counts[etype]} occurrences of a once-only event)`);
+    if ("sequence_number" in ev) {
+      const seq = ev.sequence_number;
+      if (typeof seq !== "number" || !Number.isInteger(seq) || typeof seq === "boolean")
+        errors.push(`L12 event ${i} sequence_number is not an integer (${pyRepr(seq)})`);
+      else if (seq !== i)
+        errors.push(`L12 event ${i} sequence_number=${seq} breaks contiguity (expected ${i}): a gap in a sealed log indicates a suppressed event`);
+    }
+  });
+  return errors;
+}
+
+/* ------------------------------------------- S11 strict serialization
+ * Byte-level scan mirroring verify._strict_scan: invalid UTF-8, duplicate
+ * member names, raw control characters, unparseable JSON. */
+function strictScan(bytes) {
+  const problems = [];
+  let text;
+  try {
+    text = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+  } catch {
+    return ["not valid UTF-8"];
+  }
+  // Nesting ceiling mirroring verify._nesting_too_deep (MAX_NESTING=512):
+  // count brackets outside string literals; an over-deep input is one fatal
+  // serialization problem, not something the later checks should unwrap.
+  const MAX_NESTING = 512;
+  let depth = 0, deepest = 0, inStr = false, esc = false;
+  for (const ch of text) {
+    if (inStr) {
+      if (esc) esc = false;
+      else if (ch === "\\") esc = true;
+      else if (ch === '"') inStr = false;
+      continue;
+    }
+    if (ch === '"') inStr = true;
+    else if (ch === "[" || ch === "{") {
+      depth++;
+      if (depth > deepest) deepest = depth;
+      if (deepest > MAX_NESTING) break;
+    } else if (ch === "]" || ch === "}") {
+      if (depth > 0) depth--;
+    }
+  }
+  if (deepest > MAX_NESTING)
+    return [`nested deeper than ${MAX_NESTING} levels (reached ${deepest}), refusing to parse`];
+  const dups = [];
+  let parseError = null;
+  // Minimal recursive-descent scan: validates structure, collects the
+  // member names that repeat inside one object, in document order.
+  let pos = 0;
+  const len = text.length;
+  function skipWs() {
+    while (pos < len && (text[pos] === " " || text[pos] === "\t" || text[pos] === "\n" || text[pos] === "\r")) pos++;
+  }
+  function scanString() {
+    // text[pos] === '"'; returns the decoded string.
+    pos++;
+    let out = "";
+    while (pos < len) {
+      const c = text[pos];
+      if (c === '"') { pos++; return out; }
+      if (c === "\\") {
+        const e = text[pos + 1];
+        if (e === "u") { out += String.fromCharCode(parseInt(text.substr(pos + 2, 4), 16)); pos += 6; }
+        else {
+          const map = { '"': '"', "\\": "\\", "/": "/", b: "\b", f: "\f", n: "\n", r: "\r", t: "\t" };
+          if (!(e in map)) throw new Error("bad escape");
+          out += map[e]; pos += 2;
+        }
+      } else { out += c; pos++; }
+    }
+    throw new Error("unterminated string");
+  }
+  function scanValue() {
+    skipWs();
+    if (pos >= len) throw new Error("unexpected end");
+    const c = text[pos];
+    if (c === "{") {
+      pos++;
+      const seen = new Set();
+      skipWs();
+      if (text[pos] === "}") { pos++; return; }
+      for (;;) {
+        skipWs();
+        if (text[pos] !== '"') throw new Error("expected key");
+        const key = scanString();
+        if (seen.has(key)) dups.push(key);
+        seen.add(key);
+        skipWs();
+        if (text[pos] !== ":") throw new Error("expected colon");
+        pos++;
+        scanValue();
+        skipWs();
+        if (text[pos] === ",") { pos++; continue; }
+        if (text[pos] === "}") { pos++; return; }
+        throw new Error("expected , or }");
+      }
+    }
+    if (c === "[") {
+      pos++;
+      skipWs();
+      if (text[pos] === "]") { pos++; return; }
+      for (;;) {
+        scanValue();
+        skipWs();
+        if (text[pos] === ",") { pos++; continue; }
+        if (text[pos] === "]") { pos++; return; }
+        throw new Error("expected , or ]");
+      }
+    }
+    if (c === '"') { scanString(); return; }
+    const rest = text.slice(pos);
+    // RFC 8259 has no NaN / Infinity / -Infinity literal; reject them here at
+    // the byte scan so they land on S11 instead of reaching later checks.
+    const constMatch = rest.match(/^(NaN|Infinity|-Infinity)\b/);
+    if (constMatch) throw new Error(`not a JSON number: ${constMatch[1]}`);
+    const m = rest.match(/^(true|false|null|-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)/);
+    if (!m) throw new Error("bad value");
+    pos += m[0].length;
+  }
+  try {
+    scanValue();
+    skipWs();
+    if (pos !== len) throw new Error("trailing data");
+  } catch (e) {
+    parseError = e;
+  }
+  if (parseError) problems.push(`not parseable JSON (${parseError.message})`);
+  for (const name of dups) problems.push(`duplicate member name ${pyRepr(name)}`);
+  for (const ch of text) {
+    const code = ch.codePointAt(0);
+    if (code < 0x20 && ch !== "\t" && ch !== "\n" && ch !== "\r") {
+      problems.push("raw control character U+" + code.toString(16).toUpperCase().padStart(4, "0"));
+      break;
+    }
+  }
+  return problems;
+}
+/* Lenient loader mirroring verify._safe_load ({} on any failure), except
+ * that bare NaN/Infinity tokens — which Python's json accepts and JCS then
+ * rejects — are preserved as real non-finite numbers via sentinels, so the
+ * canonicalization checks fail the way the reference verifier's do. */
+const _NAN_SENTINEL = "\uE000uibc-nan";
+const _INF_SENTINEL = "\uE000uibc-inf";
+const _NINF_SENTINEL = "\uE000uibc-ninf";
+function _preserveNonFinite(text) {
+  let out = "", inStr = false, esc = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inStr) {
+      out += c;
+      if (esc) esc = false;
+      else if (c === "\\") esc = true;
+      else if (c === '"') inStr = false;
+      continue;
+    }
+    if (c === '"') { inStr = true; out += c; continue; }
+    if (text.startsWith("-Infinity", i)) { out += '"' + _NINF_SENTINEL + '"'; i += 8; continue; }
+    if (text.startsWith("Infinity", i)) { out += '"' + _INF_SENTINEL + '"'; i += 7; continue; }
+    if (text.startsWith("NaN", i)) { out += '"' + _NAN_SENTINEL + '"'; i += 2; continue; }
+    out += c;
+  }
+  return out;
+}
+function _restoreNonFinite(v) {
+  if (v === _NAN_SENTINEL) return NaN;
+  if (v === _INF_SENTINEL) return Infinity;
+  if (v === _NINF_SENTINEL) return -Infinity;
+  if (Array.isArray(v)) return v.map(_restoreNonFinite);
+  if (v && typeof v === "object") {
+    const out = {};
+    for (const k of Object.keys(v)) out[k] = _restoreNonFinite(v[k]);
+    return out;
+  }
+  return v;
+}
+function loadJsonLenient(bytes) {
+  const text = new TextDecoder("utf-8").decode(bytes);
+  return _restoreNonFinite(JSON.parse(_preserveNonFinite(text)));
+}
+function safeLoad(files, rel) {
+  if (!files.has(rel)) return {};
+  try {
+    const v = loadJsonLenient(files.get(rel));
+    return v && typeof v === "object" ? v : {};
+  } catch { return {}; }
+}
+
+/* ------------------------------------- S12 timestamp / identifier rules */
+const _RFC3339 = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(\.\d+)?(Z|[+-]\d{2}:\d{2})$/;
+const _UUID_FORM = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+const _TIME_KEYS = new Set(["timestamp", "created_at", "updated_at", "at", "issued_at", "effective_at", "observed_at"]);
+const _ID_KEYS = new Set(["agent_id", "event_id", "id", "owner", "logical_agent_id"]);
+function _calendarOk(y, m, d) {
+  if (!(1 <= m && m <= 12 && 1 <= d && d <= 31)) return false;
+  const days = [31, (y % 4 === 0 && (y % 100 !== 0 || y % 400 === 0)) ? 29 : 28,
+    31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  return d <= days[m - 1];
+}
+function _offsetOk(off) {
+  if (off === "Z") return true;
+  const hh = parseInt(off.slice(1, 3), 10), mm = parseInt(off.slice(4, 6), 10);
+  return hh <= 14 && mm < 60 && !(hh === 14 && mm !== 0);
+}
+function semanticProblems(obj, path, nowMs, out) {
+  path = path || "";
+  out = out || [];
+  if (obj && typeof obj === "object" && !Array.isArray(obj)) {
+    for (const k of Object.keys(obj)) {
+      const v = obj[k];
+      const child = path ? path + "/" + k : k;
+      if (_TIME_KEYS.has(k) && typeof v === "string") {
+        const m = v.match(_RFC3339);
+        if (!m) {
+          out.push(`${child}: ${pyRepr(v.slice(0, 40))} is not RFC 3339 (needs uppercase T, a timezone, full seconds)`);
+        } else {
+          if (!_calendarOk(+m[1], +m[2], +m[3]))
+            out.push(`${child}: ${pyRepr(v.slice(0, 40))} is not a real calendar date`);
+          if (parseInt(m[6], 10) > 59)
+            out.push(`${child}: ${pyRepr(v.slice(0, 40))} has a leap second; not accepted in evidence timestamps`);
+          if (!_offsetOk(m[8]))
+            out.push(`${child}: ${pyRepr(v.slice(0, 40))} has an out-of-range UTC offset`);
+          const ts = parseTsMs(v);
+          if (ts !== null && nowMs !== null && nowMs !== undefined) {
+            const ahead = (ts - nowMs) / 1000;
+            if (ahead > 300)
+              out.push(`${child}: ${pyRepr(v.slice(0, 40))} is ${Math.round(ahead)} s in the future; the accepted lead of the verifier's clock is 300 s`);
+          }
+        }
+      }
+      if (_ID_KEYS.has(k) && typeof v === "string") {
+        if (_UUID_FORM.test(v)) {
+          if (v !== v.toLowerCase())
+            out.push(`${child}: ${pyRepr(v)} is an uppercase UUID`);
+          if (v.replace(/-/g, "").replace(/^0+|0+$/g, "") === "")
+            out.push(`${child}: ${pyRepr(v)} is the nil UUID`);
+        } else if (v !== v.trim() || [...v].some(c => c.codePointAt(0) < 0x21)) {
+          out.push(`${child}: identifier ${pyRepr(v.slice(0, 40))} has surrounding whitespace or a control character`);
+        }
+      }
+      semanticProblems(v, child, nowMs, out);
+    }
+  } else if (Array.isArray(obj)) {
+    obj.forEach((v, i) => semanticProblems(v, `${path}[${i}]`, nowMs, out));
+  }
+  return out;
+}
+
+/* ------------------------------------------------------- Merkle (S13/S15) */
+async function merkleLeafHash(dataBytes) {
+  return sha256Bytes(new Uint8Array([0, ...dataBytes]));
+}
+async function merkleNodeHash(left, right) {
+  return sha256Bytes(new Uint8Array([1, ...left, ...right]));
+}
+function _largestPow2Below(n) {
+  let k = 1;
+  while (k * 2 < n) k *= 2;
+  return k;
+}
+async function merkleRootHash(leaves) {
+  leaves = [...leaves];
+  if (!leaves.length) return new Uint8Array(32);
+  if (leaves.length === 1) return leaves[0];
+  const k = _largestPow2Below(leaves.length);
+  return merkleNodeHash(await merkleRootHash(leaves.slice(0, k)),
+                        await merkleRootHash(leaves.slice(k)));
+}
+async function merkleVerifyInclusion(leaf, index, size, proof, root) {
+  try {
+    if (!Number.isInteger(size) || size <= 0) return false;
+    if (!(0 <= index && index < size)) return false;
+    let fn = index, sn = size - 1, r = leaf;
+    for (const sibling of proof) {
+      if (!(sibling instanceof Uint8Array) || sibling.length !== 32) return false;
+      if (fn % 2 === 1 || fn === sn) {
+        r = await merkleNodeHash(sibling, r);
+        while (fn % 2 === 0 && fn !== 0) { fn = Math.floor(fn / 2); sn = Math.floor(sn / 2); }
+      } else {
+        r = await merkleNodeHash(r, sibling);
+      }
+      fn = Math.floor(fn / 2); sn = Math.floor(sn / 2);
+    }
+    return hexOf(r) === hexOf(root) && sn === 0;
+  } catch { return false; }
+}
+
+/* ------------------------------------------------------------ chain (S17) */
+const _HEX64 = /^[0-9a-f]{64}$/;
+async function checkChain(doc) {
+  const problems = [];
+  let checked = 0;
+  if (!doc || typeof doc !== "object" || Array.isArray(doc))
+    return [["chain document is not an object"], 0];
+  const receipts = doc.receipts;
+  if (!Array.isArray(receipts) || !receipts.length)
+    return [["chain document carries no receipts"], 0];
+  let prevDigest = null;
+  for (let i = 0; i < receipts.length; i++) {
+    const item = receipts[i];
+    if (!item || typeof item !== "object" || Array.isArray(item)) {
+      problems.push(`receipt ${i} is not an object`);
+      continue;
+    }
+    const envelope = item.envelope;
+    const declared = item.previous_receipt_hash;
+    if (!envelope || typeof envelope !== "object" || Array.isArray(envelope)) {
+      problems.push(`receipt ${i} carries no envelope object`);
+      continue;
+    }
+    if (typeof declared !== "string" || !_HEX64.test(declared)) {
+      problems.push(`receipt ${i}: previous_receipt_hash is not 64 lowercase hex characters`);
+      continue;
+    }
+    const expected = i === 0 ? "0".repeat(64) : prevDigest;
+    if (i === 0 && declared !== "0".repeat(64))
+      problems.push(`receipt 0: previous_receipt_hash is ${declared.slice(0, 12)}..., but the first receipt of a chain must carry 64 zeros`);
+    else if (i > 0 && declared !== expected)
+      problems.push(`receipt ${i}: previous_receipt_hash is ${declared.slice(0, 12)}..., but the predecessor's digest is ${(expected || "").slice(0, 12)}...`);
+    try {
+      prevDigest = await hashObj(envelope);
+    } catch (exc) {
+      problems.push(`receipt ${i}: envelope cannot be canonicalized (${exc.message}); a chain is FAIL rather than inconclusive because the value is unjudgeable, not merely absent`);
+      prevDigest = null;
+      continue;
+    }
+    checked += 1;
+  }
+  return [problems, checked];
+}
+
+/* ----------------------------------------------------------- policy (S18) */
+function _parseDigest(value) {
+  if (typeof value !== "string") return null;
+  let v = value.trim();
+  if (v.startsWith("sha256:")) v = v.slice(7);
+  return _HEX64.test(v) ? v : null;
+}
+function declaredDigests(chainDoc) {
+  const out = [];
+  if (!chainDoc || typeof chainDoc !== "object") return out;
+  for (const item of (chainDoc.receipts || [])) {
+    if (!item || typeof item !== "object") continue;
+    const env = item.envelope;
+    if (env && typeof env === "object" && !Array.isArray(env)) {
+      const value = env.policy_digest;
+      if (typeof value === "string" && value) out.push(value);
+    }
+  }
+  return out;
+}
+async function checkPolicies(files, doc, requiredDigests) {
+  const problems = [];
+  let resolved = 0;
+  if (!doc || typeof doc !== "object" || Array.isArray(doc))
+    return [["policies document is not an object"], 0];
+  const items = doc.policies;
+  if (!Array.isArray(items) || !items.length)
+    return [["policies document lists no artefacts"], 0];
+  const known = {};
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
+    if (!item || typeof item !== "object" || Array.isArray(item)) {
+      problems.push(`policy ${i} is not an object`);
+      continue;
+    }
+    const declared = _parseDigest(item.digest);
+    const rel = item.path;
+    if (!declared) {
+      problems.push(`policy ${i}: digest is not sha256:<64 hex>`);
+      continue;
+    }
+    if (typeof rel !== "string" || !rel) {
+      problems.push(`policy ${i}: no path`);
+      continue;
+    }
+    if (!files.has(rel)) {
+      problems.push(`cannot read policy artefact ${pyRepr(rel)} (missing)`);
+      continue;
+    }
+    let body;
+    try {
+      body = loadJsonLenient(files.get(rel));
+    } catch (exc) {
+      problems.push(`policy artefact ${pyRepr(rel)} is not JSON (${exc.message}); the draft's digest is defined over its JCS encoding, so a non-JSON artefact needs a JSON projection shipped alongside`);
+      continue;
+    }
+    let actual;
+    try {
+      actual = await hashObj(body);
+    } catch (exc) {
+      problems.push(`policy ${i}: artefact is not JCS-serializable (${exc.message})`);
+      continue;
+    }
+    if (actual !== declared) {
+      problems.push(`policy ${i}: declared digest ${declared.slice(0, 12)}... but the artefact hashes to ${actual.slice(0, 12)}...`);
+      continue;
+    }
+    known[declared] = rel;
+    resolved += 1;
+  }
+  for (const digest of requiredDigests) {
+    const d = _parseDigest(digest);
+    if (d === null)
+      problems.push(`a receipt declares a malformed policy_digest ${pyRepr(digest)}`);
+    else if (!(d in known))
+      problems.push(`receipt declares policy_digest ${d.slice(0, 12)}... which does not resolve in the package`);
+  }
+  return [problems, resolved];
+}
+
+/* ----------------------------------------------------------- anchor (S15) */
+function _anchorTimestampProblem(value) {
+  if (typeof value !== "string") return "anchored_at is not a string";
+  const m = value.match(_RFC3339);
+  if (!m) return "anchored_at is not RFC 3339 with a zone";
+  if (!_calendarOk(+m[1], +m[2], +m[3])) return "anchored_at is not a real calendar date";
+  if (parseInt(m[6], 10) > 59) return "anchored_at carries a leap second";
+  const off = m[8];
+  if (off !== "Z") {
+    const hh = parseInt(off.slice(1, 3), 10), mm = parseInt(off.slice(4, 6), 10);
+    if (hh > 14 || mm > 59) return "anchored_at has an out-of-range UTC offset";
+  }
+  return null;
+}
+async function _anchorResolve(anchor, rootHex, leavesHex) {
+  const problems = [];
+  if (!anchor || typeof anchor !== "object" || Array.isArray(anchor))
+    return [false, ["anchor is not an object"]];
+  const aid = anchor.id;
+  if (typeof aid !== "string" || !aid.trim())
+    problems.push("anchor id is missing or empty");
+  const ver = anchor.version;
+  if (!Number.isInteger(ver) || ver < 1)
+    problems.push("anchor version must be an integer >= 1");
+  const leaf = anchor.leaf_hash;
+  if (typeof leaf !== "string" || !_HEX64.test(leaf))
+    problems.push("leaf_hash is not 64 lowercase hex characters");
+  const tsProblem = _anchorTimestampProblem(anchor.anchored_at);
+  if (tsProblem) problems.push(tsProblem);
+  const declaredRoot = anchor.root;
+  if (typeof declaredRoot !== "string" || !_HEX64.test(declaredRoot))
+    problems.push("root is not 64 lowercase hex characters");
+  const idx = anchor.index, sz = anchor.size;
+  if (!Number.isInteger(idx)) problems.push("index is not an integer");
+  if (!Number.isInteger(sz) || sz < 1) problems.push("size is not a positive integer");
+  const proof = anchor.proof;
+  if (!Array.isArray(proof) || !proof.length)
+    problems.push("proof is missing or empty");
+  if (rootHex !== null && rootHex !== undefined && typeof declaredRoot === "string") {
+    if (declaredRoot !== rootHex)
+      problems.push("declared root is not the root this package resolves to");
+  }
+  if (leavesHex !== null && leavesHex !== undefined && Number.isInteger(idx)) {
+    if (!(0 <= idx && idx < leavesHex.length))
+      problems.push("anchor index is outside the evidence set");
+    else if (typeof leaf === "string" && leaf !== leavesHex[idx])
+      problems.push("leaf_hash does not match the evidence leaf at that index");
+  }
+  if (problems.length) return [false, problems];
+  let siblings;
+  try {
+    siblings = proof.map(h => {
+      if (typeof h !== "string" || !/^[0-9a-fA-F]*$/.test(h) || h.length % 2) throw new Error("bad hex");
+      return bytesOfHex(h);
+    });
+  } catch {
+    return [false, ["proof contains a non-hex sibling"]];
+  }
+  const okInc = await merkleVerifyInclusion(bytesOfHex(leaf), idx, sz, siblings, bytesOfHex(declaredRoot));
+  if (!okInc) return [false, ["inclusion proof does not verify against the declared root"]];
+  return [true, []];
+}
+async function checkAnchors(doc, rootHex, leavesHex) {
+  const problems = [];
+  if (!doc || typeof doc !== "object" || Array.isArray(doc))
+    return [["anchors.json is not an object"], 0, 0];
+  const resolver = doc.resolver;
+  if (resolver !== "evidence-merkle") {
+    problems.push(`resolver ${pyRepr(resolver ?? null)} is not one we can resolve offline (supported: evidence-merkle)`);
+    return [problems, 0, 0];
+  }
+  const anchors = doc.anchors;
+  if (!Array.isArray(anchors) || !anchors.length)
+    return [["anchors list is missing or empty"], 0, 0];
+  let resolved = 0;
+  for (let i = 0; i < anchors.length; i++) {
+    const a = anchors[i];
+    const [ok, probs] = await _anchorResolve(a, rootHex, leavesHex);
+    if (ok) resolved += 1;
+    else problems.push(`anchor[${i}] ${(a && a.id) || "?"}: ${probs.join("; ")}`);
+  }
+  return [problems, resolved, 0];
+}
 
 /* --------------------------------------------------------- the verifier */
 const REQUIRED_FILES = ["manifest.json", "identity.json", "lifecycle.json", "evidence/index.json"];
+const S11_FILES = ["manifest.json", "identity.json", "lifecycle.json", "evidence/index.json"];
 const EVIDENCE_TYPES = new Set(["IDENTITY", "LIFECYCLE", "INPUT", "ACTION",
   "TOOL", "MEMORY", "OUTPUT", "EVALUATION", "HUMAN_DECISION", "VERIFICATION",
   "INCIDENT", "RETIREMENT"]);
+const PRINCIPAL_TYPES = new Set(["HUMAN", "SERVICE", "POLICY", "SANDBOX_SIM"]);
+const KEY_CUSTODY = new Set(["self_held", "platform_held", "household_held",
+  "threshold", "kms", "hsm", "session_delegated"]);
+const CLOSURE_FIELDS = ["model_weights", "tokenizer", "chat_template",
+  "engine_build", "decoding", "numeric_env"];
+const _SHA256_RE = /^(sha256:)?[0-9a-f]{64}$/;
+const ROOT_ALGORITHM = "sha256(canonical-json(sorted(content_hashes))) v0.1-provisional";
+
+function _docOrThrow(v, rel) {
+  if (!v || typeof v !== "object" || Array.isArray(v))
+    throw new Error(`AttributeError: ${rel} did not parse to an object`);
+  return v;
+}
+function _loadStrict(files, rel) {
+  // Mirrors verify._load_json: raises on any failure (-> S0 report).
+  return loadJsonLenient(files.get(rel));
+}
 
 /* files: Map<string, Uint8Array> with package-relative paths.
- * opts:  { keyHex, pubkeyHex } — owner key (strict HMAC mode) / pinned key. */
-async function verifyPackage(files, opts = {}) {
+ * opts:  { keyHex, pubkeyHex, expectHead } — owner key (strict HMAC mode),
+ *        pinned signer public key, pinned checkpoint head (S9). */
+async function _verifyImpl(files, opts) {
   const checks = [];
   const record = (id, name, result, detail) => checks.push({ id, name, result, detail });
-  const key = opts.keyHex ? hexToBytes(opts.keyHex) : null;
-  const pubkey = opts.pubkeyHex ? hexToBytes(opts.pubkeyHex) : null;
+  const recordBool = (id, name, passed, detail) =>
+    record(id, name, passed ? "PASS" : "FAIL", detail);
+  const key = opts.key || (opts.keyHex ? hexToBytes(opts.keyHex) : null);
+  const pubkey = opts.pubkey || (opts.pubkeyHex ? hexToBytes(opts.pubkeyHex) : null);
+  const expectHead = opts.expectHead || null;
+
+  // S11 strict serialization runs FIRST, before any parse.
+  const s11Problems = [];
+  for (const rel of S11_FILES) {
+    if (!files.has(rel)) continue;
+    for (const p of strictScan(files.get(rel))) s11Problems.push(`${rel}: ${p}`);
+  }
+  recordBool("S11", "strict serialization", s11Problems.length === 0,
+    s11Problems.length ? s11Problems.slice(0, 4).join("; ")
+      : "UTF-8, no duplicate member names, no raw control characters");
+
+  // Fatal serialization problems short-circuit, mirroring verify.py:353-368.
+  // Bytes that are not a readable package cannot be judged by a later check, so
+  // stop here with the one verdict that is true and do not run S1/S2/... after.
+  // Fatal wording follows the Python verifier's actual _fatal set; a repeated
+  // member name alone is not a fatal short-circuit there.
+  const S11_FATAL = /not valid UTF-8|not parseable JSON|nested deeper than/;
+  if (s11Problems.some(p => S11_FATAL.test(p))) {
+    return {
+      verifier_id: "uibc-core-browser-verifier",
+      verifier_version: "0.3.3",
+      spec_version: "uibc-core/0.3.3-proposal",
+      spec_id: "browser-port",
+      result: "FAIL",
+      trust_level: "unattested",
+      key_custody: null,
+      subject: null,
+      checks,
+      root_algorithm: ROOT_ALGORITHM,
+      assurance: "unattested",
+      warnings: [],
+      note: "the bytes are not a readable package, so no other check could be judged",
+    };
+  }
 
   const missing = REQUIRED_FILES.filter(f => !files.has(f));
-  record("S1", "package structure", missing.length ? "FAIL" : "PASS",
-    missing.length ? `missing: ${missing.join(", ")}` : "all required files present");
+  let manifest = {}, identity = {}, lifecycle = {}, index = { entries: [] };
+  if (!missing.length) {
+    manifest = _docOrThrow(safeLoad(files, "manifest.json"), "manifest.json");
+    identity = _docOrThrow(safeLoad(files, "identity.json"), "identity.json");
+    lifecycle = _docOrThrow(safeLoad(files, "lifecycle.json"), "lifecycle.json");
+    const idx = safeLoad(files, "evidence/index.json");
+    index = _docOrThrow(Object.keys(idx).length ? idx : { entries: [] }, "evidence/index.json");
+  }
+  const entries = index.entries ?? [];
+  if (!Array.isArray(entries)) throw new Error("AttributeError: index.entries is not a list");
+  const events = lifecycle.events ?? undefined;
+  if (!missing.length && events === undefined && "events" in lifecycle)
+    throw new Error("AttributeError: lifecycle.events is null");
+  const eventList = events === undefined ? [] : events;
+  if (!Array.isArray(eventList)) throw new Error("AttributeError: lifecycle.events is not a list");
 
-  const loadJson = (rel) => {
-    if (!files.has(rel)) return {};
-    try { return JSON.parse(new TextDecoder().decode(files.get(rel))); }
-    catch { return {}; }
-  };
-  const manifest = missing.length ? {} : loadJson("manifest.json");
-  const identity = missing.length ? {} : loadJson("identity.json");
-  const lifecycle = missing.length ? {} : loadJson("lifecycle.json");
-  const index = missing.length ? { entries: [] } : loadJson("evidence/index.json");
+  // S1 structure: required files + nothing undeclared at the package root.
+  const declared = new Set(REQUIRED_FILES);
+  declared.add("signatures/seal.json");
+  for (const e of entries) {
+    if (!e || typeof e !== "object" || Array.isArray(e))
+      throw new Error("AttributeError: index entry is not an object");
+    declared.add("evidence/" + String(e.path ?? "").replace(/\\/g, "/"));
+  }
+  const osJunk = new Set(["thumbs.db", ".ds_store", "desktop.ini"]);
+  const undeclared = [];
+  if (!missing.length && !manifest.allow_extra_files) {
+    for (const rel of files.keys()) {
+      if (declared.has(rel)) continue;
+      const base = rel.split("/").pop().toLowerCase();
+      if (osJunk.has(base)) continue;
+      undeclared.push(rel);
+    }
+  }
+  const rootExtras = undeclared.filter(u => !u.includes("/"));
+  const nestedExtras = undeclared.filter(u => u.includes("/"));
+  const s1Detail = [];
+  if (missing.length) s1Detail.push(`missing: ${pyRepr(missing)}`);
+  if (rootExtras.length) s1Detail.push(`undeclared files at package root: ${pyRepr([...rootExtras].sort())}`);
+  if (nestedExtras.length) s1Detail.push(`note: ${pyRepr([...nestedExtras].sort())} not covered by the evidence root`);
+  recordBool("S1", "package structure", !missing.length && !rootExtras.length,
+    s1Detail.length ? s1Detail.join("; ")
+      : `all required files present, no undeclared files (${declared.size} declared)`);
 
   // S2 identity consistency
-  const s2ok = Boolean(identity.agent_id) && manifest.agent_id === identity.agent_id;
-  record("S2", "identity consistency", s2ok ? "PASS" : "FAIL",
-    `identity.agent_id=${JSON.stringify(identity.agent_id)}, manifest.agent_id=${JSON.stringify(manifest.agent_id)}`);
+  const s2Problems = [];
+  const agentIdOk = Boolean(identity.agent_id) && manifest.agent_id === identity.agent_id;
+  if (!agentIdOk)
+    s2Problems.push(`identity.agent_id=${pyRepr(identity.agent_id ?? null)}, manifest.agent_id=${pyRepr(manifest.agent_id ?? null)}`);
+  const principal = identity.principal_type ?? null;
+  if (principal !== null && !PRINCIPAL_TYPES.has(principal))
+    s2Problems.push(`identity.principal_type=${pyRepr(principal)} not in ['HUMAN', 'POLICY', 'SANDBOX_SIM', 'SERVICE']`);
+  const policyHash = manifest.policy_hash ?? null;
+  if (policyHash !== null && !_SHA256_RE.test(String(policyHash)))
+    s2Problems.push(`manifest.policy_hash=${pyRepr(policyHash)} is not 'sha256:<64 hex>'`);
+  const logical = identity.logical_agent_id ?? null;
+  if (logical !== null && String(identity.agent_id ?? "") !== String(logical)
+      && !String(identity.agent_id ?? "").startsWith(String(logical)))
+    s2Problems.push(`identity.agent_id=${pyRepr(identity.agent_id ?? null)} does not derive from logical_agent_id=${pyRepr(logical)}`);
+  const custody = identity.key_custody ?? null;
+  if (custody !== null && !KEY_CUSTODY.has(custody))
+    s2Problems.push(`identity.key_custody=${pyRepr(custody)} not in ['household_held', 'hsm', 'kms', 'platform_held', 'self_held', 'session_delegated', 'threshold']`);
+  recordBool("S2", "identity consistency", s2Problems.length === 0,
+    s2Problems.length ? s2Problems.join("; ")
+      : `agent_id=${pyRepr(identity.agent_id ?? null)} consistent`
+        + (principal ? `, principal_type=${principal}` : "")
+        + (policyHash ? `, policy_hash=${String(policyHash).slice(0, 16)}...` : ""));
 
-  // S3 lifecycle
-  const events = lifecycle.events || [];
-  const lErrs = validateLifecycle(events);
-  record("S3", "lifecycle state machine", lErrs.length ? "FAIL" : "PASS",
-    lErrs.length ? lErrs.join("; ") : `${events.length} events, chain valid`);
+  // S3 lifecycle state machine + semantics
+  const lErrors = validateLifecycle(eventList);
+  const principals = new Set([identity.owner ?? null, identity.agent_id ?? null]);
+  principals.delete(null); principals.delete(undefined);
+  const lStrict = validateLifecycleStrict(
+    eventList,
+    manifest.created_at || identity.created_at || null,
+    principals.size ? [...principals] : null);
+  const lAll = [...lErrors, ...lStrict];
+  recordBool("S3", "lifecycle state machine + semantics", lAll.length === 0,
+    lAll.length ? lAll.join("; ")
+      : `${eventList.length} events, chain valid, timestamps monotonic, actors authorised`);
 
   // S4 evidence integrity
-  const entries = index.entries || [];
-  const s4failures = [];
+  const s4Failures = [];
   const recomputed = [];
   for (const e of entries) {
-    const p = "evidence/" + (e.path || "");
-    if (!files.has(p)) { s4failures.push(`missing file '${e.path}'`); continue; }
+    const rawPath = e.path ?? "";
+    if (typeof rawPath !== "string") throw new Error("TypeError: evidence path is not a string");
+    const p = "evidence/" + rawPath;
+    if (!files.has(p)) { s4Failures.push(`missing file ${pyRepr(rawPath)}`); continue; }
     const actual = await sha256Hex(files.get(p));
     recomputed.push(actual);
-    if (actual !== e.content_hash) s4failures.push(`hash mismatch on '${e.path}'`);
-    if (!EVIDENCE_TYPES.has(e.type)) s4failures.push(`unknown evidence type '${e.type}'`);
+    if (actual !== e.content_hash) s4Failures.push(`hash mismatch on ${pyRepr(rawPath)}`);
+    if (!EVIDENCE_TYPES.has(e.type)) s4Failures.push(`unknown evidence type ${pyRepr(e.type ?? null)}`);
   }
-  record("S4", "evidence integrity", s4failures.length ? "FAIL" : "PASS",
-    `${entries.length} entries checked; ` + (s4failures.length ? s4failures.join("; ") : "all hashes match"));
+  recordBool("S4", "evidence integrity", s4Failures.length === 0,
+    `${entries.length} entries checked; ` + (s4Failures.length ? s4Failures.join("; ") : "all hashes match"));
+
+  // S12 semantic strictness (timestamps / identifiers, on parsed values)
+  const s12Problems = [];
+  const nowMs = Date.now();
+  for (const [docName, doc] of [["manifest.json", manifest], ["identity.json", identity],
+                                ["lifecycle.json", lifecycle], ["evidence/index.json", index]]) {
+    for (const p of semanticProblems(doc, "", nowMs, [])) s12Problems.push(`${docName}: ${p}`);
+  }
+  recordBool("S12", "timestamp and identifier strictness", s12Problems.length === 0,
+    s12Problems.length ? s12Problems.slice(0, 4).join("; ")
+      : "timestamps are RFC 3339 with a zone; UUIDs are lowercase and non-nil");
+
+  // Sorted evidence entries (path order) shared by S13/S15.
+  const sortedEntries = [...entries].sort((a, b) => {
+    const pa = String(a.path ?? ""), pb = String(b.path ?? "");
+    return pa < pb ? -1 : pa > pb ? 1 : 0;
+  });
+
+  // S13 Merkle inclusion (only when the package carries evidence/merkle.json)
+  if (files.has("evidence/merkle.json")) {
+    const mdoc = _loadStrict(files, "evidence/merkle.json");
+    const s13 = [];
+    const leaves = [];
+    for (const e of sortedEntries) {
+      const p = "evidence/" + String(e.path ?? "");
+      if (!files.has(p)) { s13.push(`cannot read evidence file ${pyRepr(e.path ?? null)}`); continue; }
+      leaves.push(await merkleLeafHash(files.get(p)));
+    }
+    const root = await merkleRootHash(leaves);
+    const rootHexS = hexOf(root);
+    if (!mdoc || typeof mdoc !== "object" || Array.isArray(mdoc)) throw new Error("AttributeError: merkle doc");
+    if (mdoc.algorithm !== "rfc6962-sha256")
+      s13.push(`algorithm ${pyRepr(mdoc.algorithm ?? null)} is not rfc6962-sha256`);
+    if (mdoc.size !== leaves.length)
+      s13.push(`declared size ${pyRepr(mdoc.size ?? null)} != ${leaves.length} evidence leaves`);
+    if (String(mdoc.root ?? "").toLowerCase() !== rootHexS)
+      s13.push("declared root does not match recomputed root");
+    const proofs = mdoc.proofs || [];
+    for (const pr of proofs) {
+      if (!pr || typeof pr !== "object" || Array.isArray(pr)) throw new Error("AttributeError: proof entry");
+      const idx = pr.index ?? null;
+      const path = pr.path ?? null;
+      const wantAt = sortedEntries.findIndex(e => (e.path ?? null) === path);
+      if (wantAt < 0) { s13.push(`proof names unknown evidence ${pyRepr(path)}`); continue; }
+      if (idx !== null && idx !== wantAt)
+        s13.push(`proof index for ${pyRepr(path)} is ${pyRepr(idx)}, recomputed ${wantAt}`);
+      let pf;
+      try {
+        pf = (pr.proof || []).map(h => {
+          if (typeof h !== "string") throw new TypeError("not a string");
+          if (!/^[0-9a-fA-F]*$/.test(h) || h.length % 2) throw new Error("bad hex");
+          return bytesOfHex(h);
+        });
+      } catch (err) {
+        if (err instanceof TypeError) throw err;
+        s13.push(`proof for ${pyRepr(path)} has a non-hex sibling`);
+        continue;
+      }
+      if (!await merkleVerifyInclusion(leaves[wantAt], wantAt, leaves.length, pf, root))
+        s13.push(`inclusion proof for ${pyRepr(path)} does not verify`);
+    }
+    recordBool("S13", "merkle inclusion proofs", s13.length === 0,
+      s13.length ? s13.slice(0, 4).join("; ")
+        : `root ${rootHexS.slice(0, 16)}... over ${leaves.length} leaves; ${proofs.length} inclusion proofs verified`);
+  }
+
+  // S14 strict base64 (only when declared base64 fields exist)
+  const b64Probs = [];
+  let b64Count = 0;
+  const b64Fields = (obj, path, acc) => {
+    if (obj && typeof obj === "object" && !Array.isArray(obj)) {
+      for (const k of Object.keys(obj)) {
+        const v = obj[k];
+        const child = path ? `${path}/${k}` : k;
+        if (typeof v === "string" && (k.endsWith("_b64") || k.endsWith("_base64") || k === "base64"))
+          acc.push([child, v]);
+        else b64Fields(v, child, acc);
+      }
+    } else if (Array.isArray(obj)) {
+      obj.forEach((v, i) => b64Fields(v, `${path}[${i}]`, acc));
+    }
+    return acc;
+  };
+  for (const [docName, doc] of [["manifest.json", manifest], ["identity.json", identity],
+                                ["lifecycle.json", lifecycle], ["evidence/index.json", index]]) {
+    for (const [field, value] of b64Fields(doc, "", [])) {
+      b64Count += 1;
+      for (const p of b64Problems(value)) b64Probs.push(`${docName}:${field} ${p}`);
+    }
+  }
+  if (b64Count) {
+    recordBool("S14", "strict base64", b64Probs.length === 0,
+      b64Probs.length ? b64Probs.slice(0, 4).join("; ")
+        : `${b64Count} declared base64 field(s) are canonical`);
+  }
+
+  // S15 anchor event resolution (only when evidence/anchors.json is carried)
+  if (files.has("evidence/anchors.json")) {
+    const adoc = _loadStrict(files, "evidence/anchors.json");
+    let leaves = [];
+    let leavesOk = true;
+    for (const e of sortedEntries) {
+      const p = "evidence/" + String(e.path ?? "");
+      if (!files.has(p)) { leavesOk = false; break; }
+      leaves.push(await merkleLeafHash(files.get(p)));
+    }
+    let arootHex = null, leavesHex = null;
+    if (leavesOk) {
+      arootHex = hexOf(await merkleRootHash(leaves));
+      leavesHex = leaves.map(hexOf);
+    } else {
+      leaves = null;
+    }
+    const [aProblems, aResolved, aExternal] = await checkAnchors(adoc, arootHex, leavesHex);
+    recordBool("S15", "anchor event resolution", aProblems.length === 0,
+      aProblems.length ? aProblems.slice(0, 3).join("; ")
+        : `${aResolved} anchor(s) resolved against the evidence Merkle root; ${aExternal} external anchor(s) unresolved by design`);
+  }
+
+  // S16 external timestamp: declared port limit — a token is reported
+  // INCONCLUSIVE, never PASS (this port does not parse RFC 3161 tokens).
+  if (files.has("evidence/external_anchor.json")) {
+    _loadStrict(files, "evidence/external_anchor.json");
+    record("S16", "external timestamp (RFC 3161)", "INCONCLUSIVE",
+      "browser port does not parse RFC 3161 tokens; a token in the package cannot be judged here, so it is not counted as checked - run the Python verifier (uibc verify) for S16");
+  }
+
+  // S17 linear receipt chain (only when evidence/chain.json is carried)
+  let chainDoc = null;
+  if (files.has("evidence/chain.json")) {
+    chainDoc = _loadStrict(files, "evidence/chain.json");
+    const [cProblems, cChecked] = await checkChain(chainDoc);
+    recordBool("S17", "linear receipt chain", cProblems.length === 0,
+      cProblems.length ? cProblems.slice(0, 3).join("; ")
+        : `${cChecked} receipt(s) linked by previousReceiptHash over JCS; genesis is 64 zeros`);
+  }
+
+  // S18 policy artefact resolution (only when evidence/policies.json)
+  if (files.has("evidence/policies.json")) {
+    const pdoc = _loadStrict(files, "evidence/policies.json");
+    const required = files.has("evidence/chain.json") ? declaredDigests(chainDoc) : [];
+    const [pProblems, pResolved] = await checkPolicies(files, pdoc, required);
+    recordBool("S18", "policy artefact resolution", pProblems.length === 0,
+      pProblems.length ? pProblems.slice(0, 3).join("; ")
+        : `${pResolved} policy artefact(s) resolve to their declared SHA-256 over JCS; ${required.length} digest(s) referenced by receipts resolved`);
+  }
+
+  // S7 evidence index metadata (only when the manifest commits a digest)
+  const indexDigestField = manifest.evidence_index_digest ?? null;
+  if (indexDigestField) {
+    const actualIndexDigest = await indexMetadataDigest(index);
+    if (actualIndexDigest !== indexDigestField) {
+      record("S7", "evidence index metadata", "FAIL",
+        `evidence/index.json metadata does not match the sealed evidence_index_digest (expected ${String(indexDigestField).slice(0, 20)}..., actual ${actualIndexDigest.slice(0, 20)}...)`);
+    } else {
+      record("S7", "evidence index metadata", "PASS", "index metadata matches evidence_index_digest");
+    }
+  }
+
+  // S10 attestation closure declared (only when the manifest declares one)
+  const closure = manifest.closure ?? null;
+  if (closure !== null) {
+    let missingFields = [];
+    if (typeof closure !== "object" || Array.isArray(closure)) {
+      missingFields = ["closure is not an object"];
+    } else {
+      for (const k of CLOSURE_FIELDS) {
+        const v = closure[k];
+        if (typeof v !== "string" || !_SHA256_RE.test(v)) missingFields.push(k);
+      }
+    }
+    if (missingFields.length) {
+      record("S10", "attestation closure declared", "FAIL",
+        "closure is incomplete or malformed: " + missingFields.join(", "));
+    } else {
+      record("S10", "attestation closure declared", "PASS",
+        "all 6 closure components declared with digests (declaration only, contents are not verified)");
+    }
+  }
+
+  // S8 / S9 checkpoint head over the whole package state
+  const actualLcHead = await lifecycleHead(eventList);
+  let actualCkpt = null, ckptError = null;
+  try {
+    actualCkpt = await checkpointHead(actualLcHead, await evidenceRoot(recomputed),
+      await indexMetadataDigest(index), entries.length);
+  } catch (e) {
+    ckptError = e;
+    actualCkpt = "sha256:uncomputable";
+    record("S8", "package checkpoint head", "FAIL",
+      `state is not canonicalizable (${e.constructor.name}: ${String(e.message).slice(0, 60)}) - a hostile number such as NaN in the manifest is itself a violation`);
+  }
+  const ckptField = manifest.checkpoint_head ?? null;
+  if (ckptField) {
+    if (actualCkpt !== ckptField) {
+      record("S8", "package checkpoint head", "FAIL",
+        `state does not match the sealed checkpoint_head (manifest ${String(ckptField).slice(0, 20)}..., disk ${actualCkpt.slice(0, 20)}...) - state truncated, rolled back, or replaced after sealing`);
+    } else {
+      record("S8", "package checkpoint head", "PASS",
+        `checkpoint matches (${eventList.length} event(s), ${entries.length} evidence item(s))`);
+    }
+  }
+  if (expectHead) {
+    if (String(actualCkpt) !== String(expectHead)) {
+      record("S9", "head pinned out-of-band", "FAIL",
+        `package checkpoint does not match the pinned --expect-head (${String(expectHead).slice(0, 20)}...) - rollback to an older self-consistent package, or a wrong pin`);
+    } else {
+      record("S9", "head pinned out-of-band", "PASS", "checkpoint matches the out-of-band pinned value");
+    }
+  }
 
   // S5 evidence root
-  if (entries.length && !s4failures.length) {
+  if (entries.length && !s4Failures.length) {
     const computed = await evidenceRoot(recomputed);
-    record("S5", "evidence root", computed === manifest.evidence_root ? "PASS" : "FAIL",
-      `computed=${computed}, manifest=${manifest.evidence_root}`);
+    recordBool("S5", "evidence root", computed === (manifest.evidence_root ?? null),
+      `computed=${computed}, manifest=${pyStr(manifest.evidence_root ?? null)}`);
   } else {
     record("S5", "evidence root", "INCONCLUSIVE", "skipped: evidence missing or S4 failed");
   }
@@ -312,10 +1351,38 @@ async function verifyPackage(files, opts = {}) {
   // S6 seal signature
   let assurance = "unattested";
   const hasSeal = files.has("signatures/seal.json") && !missing.length;
-  const sealPayload = utf8(canonicalize({ identity, manifest }));
+  let seal = null, sealLoadError = null;
   if (hasSeal) {
-    const seal = loadJson("signatures/seal.json");
-    const algo = seal.algorithm;
+    try {
+      seal = _loadStrict(files, "signatures/seal.json");
+      if (!seal || typeof seal !== "object" || Array.isArray(seal))
+        throw new Error("AttributeError: seal is not an object");
+    } catch (e) {
+      sealLoadError = e;
+      record("S6", "seal signature", "FAIL", `seal.json is not readable JSON: ${e.constructor.name}`);
+    }
+  }
+  if (hasSeal && seal) {
+    const algo = seal.algorithm ?? null;
+    const sealPayload = async (withLifecycle) => {
+      const doc = { identity, manifest };
+      if (withLifecycle) doc.lifecycle = lifecycle;
+      return utf8(canonicalize(doc));
+    };
+    const edVerifyScoped = async (pub, sigBytes) => {
+      // Payload construction mirrors Python: a canonicalization failure
+      // (e.g. NaN in the manifest) propagates to the S0 wrapper, exactly
+      // as seal_payload raising inside seal_verify does in the CLI.
+      const payloadBound = await sealPayload(true);
+      const payloadLegacy = await sealPayload(false);
+      try {
+        if (await ed25519Verify(pub, payloadBound, sigBytes)) return "lifecycle-bound";
+      } catch { /* malformed signature material -> no match */ }
+      try {
+        if (await ed25519Verify(pub, payloadLegacy, sigBytes)) return "legacy";
+      } catch { /* same */ }
+      return null;
+    };
     if (algo === "Ed25519") {
       const pub = b64DecodeStrict(seal.public_key);
       if (!pub || pub.length !== 32) {
@@ -328,55 +1395,103 @@ async function verifyPackage(files, opts = {}) {
           "public key does not match the pinned --pubkey (possible key substitution or wrong pin)");
       } else if (key) {
         record("S6", "seal signature", "FAIL",
-          "seal algorithm is Ed25519; the provided key is an HMAC owner key and cannot check it — re-run without a key, or pin the signer with a public key");
-      } else if (!await ed25519Verify(pub, sealPayload, b64DecodeStrict(seal.signature || "") || new Uint8Array())) {
-        record("S6", "seal signature", "FAIL",
-          "Ed25519 signature invalid: identity/manifest do not match the seal");
+          "seal algorithm is Ed25519; the provided --key is an HMAC owner key and cannot check it - re-run without --key, or pin the signer with --pubkey");
       } else {
-        assurance = "public-key";
-        record("S6", "seal signature", "PASS",
-          `Ed25519 seal valid (key_id ${(await sha256Hex(pub)).slice(0, 16)}...) — third-party verifiable, no secret involved`);
+        const coverage = await edVerifyScoped(pub,
+          b64DecodeStrict(seal.signature || "") || new Uint8Array());
+        if (coverage === null) {
+          record("S6", "seal signature", "FAIL",
+            "Ed25519 signature invalid: identity/manifest/lifecycle do not match the seal");
+        } else {
+          assurance = "public-key";
+          const note = coverage === "lifecycle-bound" ? ""
+            : " - LEGACY seal: covers identity+manifest only, lifecycle tampering is not signed (S3 semantics are the only guard)";
+          record("S6", "seal signature", "PASS",
+            `Ed25519 seal valid (key_id ${(await sha256Hex(pub)).slice(0, 16)}...) coverage=${coverage}, third-party verifiable, no secret involved${note}`);
+        }
       }
     } else if (algo === "HMAC-SHA256") {
-      if (key) {
+      if (seal.public_key) {
+        record("S6", "seal signature", "FAIL",
+          "seal declares HMAC-SHA256 but carries a public_key - algorithm confusion / relabelled seal");
+      } else if (key) {
         const kid = await sha256Hex(key);
         if (seal.key_id !== kid) {
           record("S6", "seal signature", "FAIL",
             "key mismatch: seal was not created by this key (possible key substitution or wrong key)");
-        } else if (!await hmacVerify(key, sealPayload, b64DecodeStrict(seal.signature || "") || new Uint8Array())) {
-          record("S6", "seal signature", "FAIL",
-            "signature invalid: identity/manifest do not match the seal");
         } else {
-          assurance = "owner-key";
-          record("S6", "seal signature", "PASS", `HMAC-SHA256 seal valid (key_id ${kid.slice(0, 16)}...)`);
+          const sigBytes = b64DecodeStrict(seal.signature || "");
+          let coverage = null;
+          if (sigBytes) {
+            const payloadBound = await sealPayload(true);
+            const payloadLegacy = await sealPayload(false);
+            const mac1 = await hmacSign(key, payloadBound);
+            if (hexOf(mac1) === hexOf(sigBytes)) coverage = "lifecycle-bound";
+            if (!coverage) {
+              const mac0 = await hmacSign(key, payloadLegacy);
+              if (hexOf(mac0) === hexOf(sigBytes)) coverage = "legacy";
+            }
+          }
+          if (coverage === null) {
+            record("S6", "seal signature", "FAIL",
+              "signature invalid: identity/manifest/lifecycle do not match the seal");
+          } else {
+            assurance = "owner-key";
+            record("S6", "seal signature", "PASS",
+              `HMAC-SHA256 seal valid (key_id ${kid.slice(0, 16)}..., coverage=${coverage})`);
+          }
         }
       } else {
         record("S6", "seal signature", "INCONCLUSIVE",
-          "HMAC seal present but no verification key provided; symmetric seals cannot be checked publicly — an Ed25519 seal can");
+          "HMAC seal present but no verification key provided (--key); symmetric seals cannot be checked publicly - an Ed25519 seal can");
       }
     } else {
-      record("S6", "seal signature", "FAIL", `unknown seal algorithm ${JSON.stringify(algo)}`);
+      record("S6", "seal signature", "FAIL", `unknown seal algorithm ${pyRepr(algo)}`);
     }
-  } else if (key) {
-    record("S6", "seal signature", "FAIL",
-      "strict mode (owner key given): package is unsigned — owner demands a sealed submission");
-  } else {
-    record("S6", "seal signature", "INCONCLUSIVE",
-      "package unsigned: evidence chain is internally consistent but provenance is unattested");
+  } else if (!hasSeal || !sealLoadError) {
+    if (key) {
+      record("S6", "seal signature", "FAIL",
+        "strict mode (--key): package is unsigned - owner demands a sealed submission");
+    } else if (!hasSeal) {
+      record("S6", "seal signature", "INCONCLUSIVE",
+        "package unsigned: evidence chain is internally consistent but provenance is unattested");
+    }
   }
 
   const results = checks.map(c => c.result);
   const result = results.includes("FAIL") ? "FAIL"
     : results.includes("INCONCLUSIVE") ? "INCONCLUSIVE" : "PASS";
+  let trustLevel = "unattested";
+  if (assurance === "public-key") trustLevel = pubkey ? "anchored" : "unanchored";
+  else if (assurance === "owner-key") trustLevel = "anchored";
   return {
     verifier_id: "uibc-core-browser-verifier",
-    verifier_version: "0.3.0",
-    spec_version: "uibc-core/0.3.0-proposal",
+    verifier_version: "0.3.3",
+    spec_version: "uibc-core/0.3.3-proposal",
+    spec_id: "browser-port",
     result,
+    trust_level: trustLevel,
+    key_custody: identity.key_custody ?? null,
     subject: manifest.agent_id ?? null,
     checks,
-    root_algorithm: "sha256(canonical-json(sorted(content_hashes))) v0.1-provisional",
+    root_algorithm: ROOT_ALGORITHM,
     assurance,
+    scope: "Structure, identity consistency, lifecycle state machine, evidence content hashes, evidence root, and the seal signature of this submission package only. Ed25519 seals are verified publicly in every mode; HMAC seals only in strict --key mode.",
+    limitations: [
+      "HMAC-SHA256 seals (v0.2) are symmetric: verification requires the owner key. Ed25519 seals (v0.3) are third-party verifiable with the public key recorded in the seal.",
+      "Anchor rule: in open mode the seal's public key is read out of the package under test, so a passing signature proves internal consistency only ('unanchored'). 'anchored' requires an out-of-band key (--pubkey).",
+      "There is no independent witness or transparency-log countersignature, so even an anchored run cannot reach the 'witnessed' strength. Truncation is caught by the S8 checkpoint, and rollback only by S9 with a head observed outside the package (--expect-head): nothing inside a package can detect being replaced by an older self-consistent one.",
+      "Key substitution is detectable only when verifying with the owner key (--key), a pinned public key (--pubkey), or out-of-band key pinning.",
+      "Evidence Root algorithm is provisional (pending canonical serialization ratification).",
+      "Timestamps are not independently anchored.",
+      "Lifecycle event signatures (event.signature) are not ratified and not verified.",
+      "No behavioral evaluation is performed (Evaluation is out of verifier scope, archive SS15).",
+      "Browser port: RFC 3161 timestamp tokens (S16) are reported INCONCLUSIVE, never PASS; this port does not parse DER tokens.",
+    ],
+    checked: ["structure", "identity", "lifecycle", "evidence hashes", "evidence root"]
+      .concat(hasSeal || key ? ["seal signature"] : []),
+    not_checked: ["lifecycle event signatures", "external timestamp anchoring",
+      "behavioral evaluation", "memory fidelity/continuity"],
     statement: result === "PASS"
       ? "No violation was detected within the observed evidence boundary."
       : result === "FAIL"
@@ -385,11 +1500,37 @@ async function verifyPackage(files, opts = {}) {
   };
 }
 
+async function verifyPackage(files, opts = {}) {
+  try {
+    return await _verifyImpl(files, opts);
+  } catch (e) {
+    return {
+      verifier_id: "uibc-core-browser-verifier",
+      verifier_version: "0.3.3",
+      spec_version: "uibc-core/0.3.3-proposal",
+      spec_id: "browser-port",
+      result: "FAIL",
+      trust_level: "unattested",
+      key_custody: null,
+      subject: null,
+      checks: [{ id: "S0", name: "verifier robustness", result: "FAIL",
+        detail: `${e.constructor.name}: ${String(e.message).slice(0, 120)} - the package could not be processed; treated as a violation, never as a pass` }],
+      root_algorithm: ROOT_ALGORITHM,
+      assurance: "unattested",
+      scope: "Verifier robustness only: the package could not be processed.",
+      limitations: ["No check could be completed on this input."],
+      checked: [],
+      not_checked: ["everything"],
+      statement: "Input rejected before any check could complete.",
+    };
+  }
+}
+
 if (typeof module !== "undefined" && module.exports) {
   module.exports = { verifyPackage, canonicalize, ed25519Verify };
 }
 
-const SAMPLE = {"evidence/files/note.txt": "RGlzY2hhcmdlIHN1bW1hcnkgcmV2aWV3ZWQuIERldmljZTogQ2FyZGlvUGF0Y2ggQ1AtMi4gUmVzdWx0OiB3aXRoaW4gbGltaXRzLgo=", "evidence/index.json": "ewogICJlbnRyaWVzIjogWwogICAgewogICAgICAiZXZpZGVuY2VfaWQiOiAiNDk4NWI5Y2EtYTYxMi00MDY2LWJjZDQtYjljZGMyMmIzYTI2IiwKICAgICAgInR5cGUiOiAiQUNUSU9OIiwKICAgICAgInBhdGgiOiAiZmlsZXMvbm90ZS50eHQiLAogICAgICAiY29udGVudF9oYXNoIjogIjVkZjdjYWM1M2QzZGYxZjcyYWE3MWU4MjBjYzUwMTc3NDI4MGY3YjZlZmQxN2Q1NGEwYWI2NGE4YTMxNGRiMzIiLAogICAgICAiY3JlYXRlZF9hdCI6ICIyMDI2LTExLTEyVDAyOjA5OjAzWiIsCiAgICAgICJtZWRpYV90eXBlIjogInRleHQvcGxhaW4iLAogICAgICAibm90ZSI6ICIiCiAgICB9CiAgXQp9", "identity.json": "ewogICJzY2hlbWEiOiAidWliYy1jb3JlLzAuMy4wLXByb3Bvc2FsIiwKICAiYWdlbnRfaWQiOiAiZGVtby1hZ2VudC0wMDEiLAogICJhZ2VudF90eXBlIjogInNvZnR3YXJlLWFnZW50IiwKICAib3duZXIiOiAiZGVtby1vd25lciIsCiAgImNyZWF0ZWRfYXQiOiAiMjAyNi0xMS0xMlQwMjowOTowM1oiLAogICJzdGF0dXMiOiAiUkVHSVNURVJFRCIsCiAgInZlcnNpb24iOiAiMC4xLjAiCn0=", "lifecycle.json": "ewogICJzY2hlbWEiOiAidWliYy1jb3JlLzAuMy4wLXByb3Bvc2FsIiwKICAiZXZlbnRzIjogWwogICAgewogICAgICAiZXZlbnRfaWQiOiAiNTA0MjMwMWQtMmE5NC00NjYyLWI4OGUtYzhmMTFjNTI0NjBjIiwKICAgICAgImV2ZW50X3R5cGUiOiAiUkVHSVNURVIiLAogICAgICAiYWdlbnRfaWQiOiAiZGVtby1hZ2VudC0wMDEiLAogICAgICAidGltZXN0YW1wIjogIjIwMjYtMTEtMTJUMDI6MDk6MDNaIiwKICAgICAgImFjdG9yIjogImRlbW8tb3duZXIiLAogICAgICAicGF5bG9hZF9oYXNoIjogbnVsbCwKICAgICAgInByZXZpb3VzX2V2ZW50IjogbnVsbCwKICAgICAgInNpZ25hdHVyZSI6IG51bGwKICAgIH0KICBdCn0=", "manifest.json": "ewogICJzY2hlbWEiOiAidWliYy1jb3JlLzAuMy4wLXByb3Bvc2FsIiwKICAiYWdlbnRfaWQiOiAiZGVtby1hZ2VudC0wMDEiLAogICJhZ2VudF92ZXJzaW9uIjogIjAuMS4wIiwKICAiY3JlYXRlZF9hdCI6ICIyMDI2LTExLTEyVDAyOjA5OjAzWiIsCiAgImV2aWRlbmNlX2NvdW50IjogMSwKICAiZXZpZGVuY2Vfcm9vdCI6ICJlMTNmZWI1MjRhMDI1NjNlODQxMzZmMDA4NWM4ODI5ZWM4NDllMGE3NzQxNWRjODhkNTBhYTBjYTY0NmZmYTUwIiwKICAic3RhdHVzIjogIlNVQk1JVFRFRCIKfQ==", "signatures/seal.json": "ewogICJzY2hlbWEiOiAidWliYy1jb3JlLzAuMy4wLXByb3Bvc2FsIiwKICAiYWxnb3JpdGhtIjogIkVkMjU1MTkiLAogICJrZXlfaWQiOiAiN2Q3ZGZiYTZmNDRjNjY3NDJjMmZiYTYzNzM1OGZmYmJmOWYwNGU4YmNlZmM0NmI2YjkzZjI2YTgzMDFlMWQxMSIsCiAgInB1YmxpY19rZXkiOiAiRm1zRzk2WlMrcWZNdmNJWmhtejgyUVVEUDQrMk96eE1aQjJBaFRMT2hEcz0iLAogICJzaWduZWQiOiAiaWRlbnRpdHkrbWFuaWZlc3QiLAogICJzaWduYXR1cmUiOiAiR1Z5TU9odjhrTUxJd3ZyWlZwV1l4SkJjQW1iR2VyVkdYVUluZzdJZnpsRDVQRFBVQXFUdVZ2M3MxTjE4Yll4T0tUWjJTUkZYZ0NRa0hXdnc5aDY3QVE9PSIsCiAgImNyZWF0ZWRfYXQiOiAiMjAyNi0xMS0xMlQwMjowOTowM1oiCn0="};
+const SAMPLE = {"identity.json":"ewogICJzY2hlbWEiOiAidWliYy1jb3JlLzAuMy4zLXByb3Bvc2FsIiwKICAiYWdlbnRfaWQiOiAiZGVtby1hZ2VudCIsCiAgImFnZW50X3R5cGUiOiAic29mdHdhcmUtYWdlbnQiLAogICJvd25lciI6ICJhbGljZSIsCiAgImNyZWF0ZWRfYXQiOiAiMjAyNi0xMS0xN1QxNDo1Mjo0OVoiLAogICJzdGF0dXMiOiAiUkVHSVNURVJFRCIsCiAgInZlcnNpb24iOiAiMC4xLjAiCn0=","lifecycle.json":"ewogICJzY2hlbWEiOiAidWliYy1jb3JlLzAuMy4zLXByb3Bvc2FsIiwKICAiZXZlbnRzIjogWwogICAgewogICAgICAiZXZlbnRfaWQiOiAiNWNhZDQxY2QtNjJlYS00MmYzLThmZjQtMTk4NTg5Y2ZjZjE3IiwKICAgICAgInNlcXVlbmNlX251bWJlciI6IDAsCiAgICAgICJldmVudF90eXBlIjogIlJFR0lTVEVSIiwKICAgICAgImFnZW50X2lkIjogImRlbW8tYWdlbnQiLAogICAgICAidGltZXN0YW1wIjogIjIwMjYtMTEtMTdUMTQ6NTI6NDlaIiwKICAgICAgImFjdG9yIjogImFsaWNlIiwKICAgICAgInBheWxvYWRfaGFzaCI6IG51bGwsCiAgICAgICJwcmV2aW91c19ldmVudCI6IG51bGwsCiAgICAgICJzaWduYXR1cmUiOiBudWxsCiAgICB9CiAgXQp9","manifest.json":"ewogICJzY2hlbWEiOiAidWliYy1jb3JlLzAuMy4zLXByb3Bvc2FsIiwKICAiYWdlbnRfaWQiOiAiZGVtby1hZ2VudCIsCiAgImFnZW50X3ZlcnNpb24iOiAiMC4xLjAiLAogICJjcmVhdGVkX2F0IjogIjIwMjYtMTEtMTdUMTQ6NTI6NDlaIiwKICAiZXZpZGVuY2VfY291bnQiOiAxLAogICJldmlkZW5jZV9yb290IjogImY1YTNjMWZlMmFjOGFmMTcxNjNkMmVhOTJhMDNkZTY2MzMzNDIyNzE0NjI5NWM5NGQ4ZTVmNzkyOGVhNTFlODMiLAogICJzdGF0dXMiOiAiU1VCTUlUVEVEIiwKICAiZXZpZGVuY2VfaW5kZXhfZGlnZXN0IjogInNoYTI1Njo3ZjM5ZTA5ZTAwYTE4ZjkxYzBjMjkwODNmMmE5OWJhOTQ4Mzk5ZThlYTEzYzEyMTA4MDBlNzdhM2M1ZTNlYmQyIiwKICAibGlmZWN5Y2xlX2hlYWQiOiAic2hhMjU2OmVhZjZiYTA2MTgxYmM5ZWQ5NzUzZGUwMjFmNjgxNmE4ZGJiYTQ2N2QwZGNjOGYzMWU5NzFmYTBkMGVjMTNjODUiLAogICJjaGVja3BvaW50X2hlYWQiOiAic2hhMjU2OjdmZmUzZTNjN2Y1MWI1Yzk0ZDlhZTQwNzVhMDg2NjZkNjNmYmJiMjYzNWU1MTQ0MDQyMjQ1NzhjN2RkZTgwNWYiCn0=","evidence/index.json":"ewogICJlbnRyaWVzIjogWwogICAgewogICAgICAiZXZpZGVuY2VfaWQiOiAiMDE2ZDVkYmItYzE3Yi00ZDllLWIwMGEtNGNiZDA1MWFhZDA2IiwKICAgICAgInR5cGUiOiAiQUNUSU9OIiwKICAgICAgInBhdGgiOiAiZmlsZXMvcmVwb3J0LnR4dCIsCiAgICAgICJjb250ZW50X2hhc2giOiAiOGNjNzk3NTg0ODIwY2Y4MDY4NTU1MjcxOTgxMDEwZWQ3ZmViMGY3NDEzMWE5OWU1MWExZmUxNjkwODA2MTUyOCIsCiAgICAgICJjcmVhdGVkX2F0IjogIjIwMjYtMTEtMTdUMTQ6NTI6NDlaIiwKICAgICAgIm1lZGlhX3R5cGUiOiAidGV4dC9wbGFpbiIsCiAgICAgICJub3RlIjogIiIKICAgIH0KICBdCn0=","evidence/files/report.txt":"ZGVtbyBldmlkZW5jZTogYWdlbnQgYWN0aW9uIGxvZwo=","signatures/seal.json":"ewogICJzY2hlbWEiOiAidWliYy1jb3JlLzAuMy4zLXByb3Bvc2FsIiwKICAiYWxnb3JpdGhtIjogIkVkMjU1MTkiLAogICJrZXlfaWQiOiAiMzMwYzhiOTY3N2YzNmE3NGEwMzQzN2NlYzg3MDlhOGU4OGNjOGI3YWRiNDY1Y2U4NGI1ZWEwOTBiYTcwMTgzMiIsCiAgInB1YmxpY19rZXkiOiAiTEZ6WWQ1d21kdDB1N3RaODVwMVh0MjlRZ09JQ3N3MVh0Z1hXaGk3TldlZz0iLAogICJzaWduZWQiOiAiaWRlbnRpdHkrbWFuaWZlc3QrbGlmZWN5Y2xlIiwKICAic2lnbmF0dXJlIjogIkRQTjlkK1RXZ29SMmZCMlFsQjhKVERrT2svZFV5YmNmM2JRTEtNdFFKZzNreGZMN1htbTBhVlRmVUh3VUttRWJGOXBxWExvSzNrWmFEUm15Y2FCbEJBPT0iLAogICJjcmVhdGVkX2F0IjogIjIwMjYtMTEtMTdUMTQ6NTI6NDlaIgp9"};
 let currentFiles = null;
 function b64ToBytes(b64) { const bin = atob(b64); const out = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i); return out; }
 function sampleFiles() { const m = new Map(); for (const [k, v] of Object.entries(SAMPLE)) m.set(k, b64ToBytes(v)); return m; }
@@ -397,7 +1538,7 @@ const $ = id => document.getElementById(id);
 function ready(files) { currentFiles = files; $("btnRun").disabled = !files; }
 $("btnSample").onclick = () => { ready(sampleFiles()); $("btnTamper").disabled = false; $("out").innerHTML = "<p class='small'>Sample loaded. Press Verify. 样例已载入，点“开始验证”。</p>"; };
 $("btnTamper").onclick = () => {
-  const m = sampleFiles(); const k = "evidence/files/note.txt"; const b = m.get(k).slice(); b[0] = b[0] ^ 0xff; m.set(k, b);
+  const m = sampleFiles(); const k = "evidence/files/report.txt"; const b = m.get(k).slice(); b[0] = b[0] ^ 0xff; m.set(k, b);
   ready(m); $("out").innerHTML = "<p class='small'>Evidence byte flipped. Press Verify — S4 should FAIL. 证据已被改动一个字节，点“开始验证”，S4 应判 FAIL。</p>";
 };
 async function handleFileList(list) {
@@ -418,10 +1559,10 @@ $("btnRun").onclick = async () => {
   if (!currentFiles) return;
   $("btnRun").disabled = true; $("btnRun").textContent = "Verifying… 验证中…";
   try {
-    const report = await verifyPackage(currentFiles, { keyHex: $("ownkey").value.trim() || undefined, pubkeyHex: $("pin").value.trim() || undefined });
+    const report = await verifyPackage(currentFiles, { keyHex: $("ownkey").value.trim() || undefined, pubkeyHex: $("pin").value.trim() || undefined, expectHead: $("pinhead").value.trim() || undefined });
     const rows = report.checks.map(c => "<tr><td>" + c.id + "</td><td>" + c.name + "</td><td class='r-" + c.result + "'>" + c.result + "</td><td>" + c.detail.replace(/</g, "&lt;") + "</td></tr>").join("");
     $("out").innerHTML = "<div class='verdict " + report.result + "'>" + report.result + "</div>" +
-      "<p class='small'>" + report.statement + "<br>Subject 主体: " + (report.subject || "—") + " · Assurance 保证级别: " + report.assurance + " · Root algorithm 根算法: " + report.root_algorithm + "</p>" +
+      "<p class='small'>" + report.statement + "<br>Subject 主体: " + (report.subject || "—") + " · Assurance 保证级别: " + report.assurance + " · Trust 信任级别: " + report.trust_level + " · Root algorithm 根算法: " + report.root_algorithm + "</p>" +
       "<table><tr><th>Check</th><th>Name</th><th>Result</th><th>Detail</th></tr>" + rows + "</table>";
   } catch (err) {
     $("out").innerHTML = "<div class='verdict FAIL'>ERROR</div><p class='small'>" + String(err).replace(/</g, "&lt;") + "</p>";

@@ -1,0 +1,48 @@
+{
+  "schema": "uibc.eqms-records/1",
+  "subject": "mb-agent-001",
+  "records": [
+    {
+      "origin": "rev-N-1",
+      "kind": "uibc_package",
+      "subject": "mb-agent-001",
+      "at": "2026-11-17T05:59:59Z",
+      "seq": 1,
+      "digest": "sha256:ecdba289a1d48757599f5384a84c46ef7a834a6c07a8e39dedafc63b0f760f9f",
+      "payload": {
+        "label": "rev-N-1",
+        "spec_id": "uibc-core/0.3.0-proposal@f163c2466861",
+        "checkpoint_head": "sha256:0994bd460ad48844474e4a32f810d0ade2d1173e4ae50b8260fd2ddc736553ff",
+        "evidence_root": "ede0e057e94dd5a545433f3e7b9c5d8c676c6b260d41c27683e98104352e681b",
+        "evidence_count": 2,
+        "agent_version": "1.0.0",
+        "verify_result": "PASS",
+        "trust_level": "unanchored",
+        "anchored_key_match": null
+      },
+      "refs": []
+    },
+    {
+      "origin": "rev-N",
+      "kind": "uibc_package",
+      "subject": "mb-agent-001",
+      "at": "2026-11-17T05:59:59Z",
+      "seq": 2,
+      "digest": "sha256:84dd70e01b2331147aa13bca8491b312246efa7a7b0e1bb2bee3174c02b8fc43",
+      "payload": {
+        "label": "rev-N",
+        "spec_id": "uibc-core/0.3.0-proposal@f163c2466861",
+        "checkpoint_head": "sha256:0994bd460ad48844474e4a32f810d0ade2d1173e4ae50b8260fd2ddc736553ff",
+        "evidence_root": "ede0e057e94dd5a545433f3e7b9c5d8c676c6b260d41c27683e98104352e681b",
+        "evidence_count": 2,
+        "agent_version": "1.0.0",
+        "verify_result": "PASS",
+        "trust_level": "unanchored",
+        "anchored_key_match": null
+      },
+      "refs": [
+        "sha256:ecdba289a1d48757599f5384a84c46ef7a834a6c07a8e39dedafc63b0f760f9f"
+      ]
+    }
+  ]
+}

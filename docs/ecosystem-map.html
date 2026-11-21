@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent Evidence Ecosystem · 谁做到了什么（2026-11-17）</title>
+<style>
+:root{
+  --ink:#0f172a; --muted:#5b6b82; --line:#dbe3ec; --bg:#f6f8fb; --card:#ffffff;
+  --lead:#0e7c86; --ok:#1f7a4d; --part:#8a6a12; --none:#b4453a; --ours:#0b4f8a;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 "Segoe UI","Microsoft YaHei",system-ui,sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:36px 22px 64px}
+header{border-bottom:2px solid var(--ink);padding-bottom:18px;margin-bottom:26px}
+h1{font-size:30px;margin:0 0 8px;letter-spacing:-.01em}
+.sub{color:var(--muted);font-size:14px}
+.chip{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600;border:1px solid}
+.c-ok{color:var(--ok);border-color:#bcdcc9;background:#effaf3}
+.c-part{color:var(--part);border-color:#e6d9ae;background:#fdf7e7}
+.c-no{color:var(--none);border-color:#eccac6;background:#fdefee}
+.c-ours{color:var(--ours);border-color:#bcd3e8;background:#eef5fb}
+h2{font-size:19px;margin:34px 0 10px;padding-left:10px;border-left:4px solid var(--lead)}
+p.lead{color:var(--muted);margin:0 0 14px}
+table{width:100%;border-collapse:collapse;background:var(--card);box-shadow:0 1px 2px rgba(15,23,42,.06);font-size:13.5px}
+th,td{padding:10px 10px;border-bottom:1px solid var(--line);vertical-align:top;text-align:left}
+th{background:#eef2f7;font-weight:600;font-size:12.5px;position:sticky;top:0}
+td.name{font-weight:600;white-space:nowrap}
+td.name small{display:block;font-weight:400;color:var(--muted);font-size:11.5px}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:1px}
+.d-ok{background:var(--ok)}.d-part{background:var(--part)}.d-no{background:var(--none)}.d-ours{background:var(--ours)}
+.legend{display:flex;gap:18px;flex-wrap:wrap;margin:8px 0 14px;font-size:12.5px;color:var(--muted)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;margin-top:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 16px 14px;box-shadow:0 1px 2px rgba(15,23,42,.05)}
+.card h3{margin:0 0 8px;font-size:15px}
+.card p{margin:0;color:var(--muted);font-size:13px}
+.card .big{font-size:26px;font-weight:700;color:var(--lead);line-height:1.2;margin-bottom:6px}
+.callout{border:1px solid #e6d9ae;background:#fdf7e7;border-radius:10px;padding:16px 18px;margin-top:16px}
+.callout strong{color:#7a5b00}
+footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:12.5px}
+a{color:var(--ours);text-decoration:none;border-bottom:1px solid #c8d9e9}
+a:hover{border-bottom-color:var(--ours)}
+code{background:#eef2f7;padding:1px 5px;border-radius:4px;font-size:12.5px}
+@media (max-width:760px){table{font-size:12px}th,td{padding:8px 6px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>Agent Evidence Ecosystem：谁做到了什么</h1>
+  <div class="sub">截至 2026-11-17 · 每一格都来自该项目自己的公开文本 · 本机未安装其中任何包（行为列均为文档级，不是实测）</div>
+</header>
+
+<h2>一、全景：九个项目，六个已发布</h2>
+<p class="lead">已发布的按发布形态列出；"独立验证"一列是本文最重要的一列，因为它区分"我们声称"与"别人跑过"。</p>
+<div class="legend">
+  <span><span class="dot d-ok"></span>有且公开</span>
+  <span><span class="dot d-part"></span>部分/需自备</span>
+  <span><span class="dot d-no"></span>没有</span>
+  <span><span class="dot d-ours"></span>我方</span>
+</div>
+<table>
+<thead><tr>
+  <th style="width:150px">项目</th><th>阶段</th><th>签名/规范化</th><th>时间锚</th><th>日志与锚定</th><th style="width:190px">独立验证</th>
+</tr></thead>
+<tbody>
+<tr>
+  <td class="name">Tracekit<small>arXiv 2609.35659</small></td>
+  <td>MIT · <b>v1.4.1</b></td>
+  <td><span class="dot d-ok"></span>Ed25519 / RFC 8785</td>
+  <td><span class="dot d-part"></span>未声明外部时间</td>
+  <td><span class="dot d-ok"></span>RFC 6962 Merkle + C2SP signed notes + 见证 cosign</td>
+  <td><span class="dot d-ok"></span><b>Python + TypeScript 双验证器</b>（后者是单页浏览器）；63 包一致、33 伪造全拒</td>
+</tr>
+<tr>
+  <td class="name">Treeship<small>treeship.dev</small></td>
+  <td>Apache-2.0 · v0.31.14 · Rust</td>
+  <td><span class="dot d-ok"></span>Ed25519 / DSSE</td>
+  <td><span class="dot d-part"></span>未声明外部时间</td>
+  <td><span class="dot d-ok"></span>Merkle + 签名 checkpoint + <b>Rekor DSSE 条目</b></td>
+  <td><span class="dot d-ok"></span>离线按验证方自有信任根校验</td>
+</tr>
+<tr>
+  <td class="name">NovaFabric<small>novafabric.ai · arXiv 2609.12582</small></td>
+  <td><b>v0.108.0 experimental</b> · pip 可装</td>
+  <td><span class="dot d-ok"></span>DSSE / ECDSA P-256，算法由验证方钉住</td>
+  <td><span class="dot d-ok"></span>RFC 3161</td>
+  <td><span class="dot d-ok"></span>Merkle log + 见证 cosign + MMR</td>
+  <td><span class="dot d-part"></span>论文自陈"<b>尚未被独立实现验证器跑过</b>"</td>
+</tr>
+<tr>
+  <td class="name">agent-receipts<small>npm 0.1.3</small></td>
+  <td>MIT · v0.1.3</td>
+  <td><span class="dot d-ok"></span>Ed25519，算法写在信封里</td>
+  <td><span class="dot d-no"></span>无</td>
+  <td><span class="dot d-no"></span>无（Roadmap Phase 6）</td>
+  <td><span class="dot d-ok"></span><b>规范 + 8 条一致性向量 + Python 参考实现</b></td>
+</tr>
+<tr>
+  <td class="name">AIAuditLog<small>PyPI 0.1.0a3</small></td>
+  <td>alpha</td>
+  <td><span class="dot d-ok"></span>RFC 8785 + SHA-256 + 可选哈希链</td>
+  <td><span class="dot d-part"></span>checkpoint 可选 Ed25519 签名</td>
+  <td><span class="dot d-part"></span>无外部日志</td>
+  <td><span class="dot d-part"></span>schema 导出 + JSONL/SQLite</td>
+</tr>
+<tr>
+  <td class="name">fact0<small>fact0.io</small></td>
+  <td>experimental · MIT · 自托管</td>
+  <td><span class="dot d-part"></span>哈希链审计记录</td>
+  <td><span class="dot d-no"></span>无</td>
+  <td><span class="dot d-no"></span>无</td>
+  <td><span class="dot d-part"></span>签名导出文件可按外部公钥验；ZIP 本身不签</td>
+</tr>
+<tr>
+  <td class="name">Attested Logs<small>研究库 · AutoGen/LangGraph</small></td>
+  <td>研究型库</td>
+  <td><span class="dot d-ok"></span>Ed25519 逐消息 + SHA-256 链</td>
+  <td><span class="dot d-no"></span>无</td>
+  <td><span class="dot d-no"></span>Merkle checkpoint 计划中</td>
+  <td><span class="dot d-part"></span>"20+ 测试"，跨框架集成</td>
+</tr>
+<tr>
+  <td class="name">Vaara<small>PyPI 2.17.0（实测）</small></td>
+  <td>AGPL-3.0 · 2.17.0</td>
+  <td><span class="dot d-part"></span>哈希链 + 导出签名</td>
+  <td><span class="dot d-ok"></span><code>trail verify-anchor</code></td>
+  <td><span class="dot d-ok"></span><code>trail publish-head</code> 到公共透明日志（opt-in）</td>
+  <td><span class="dot d-part"></span>签名 zip 离线可验；<code>attest verify</code> 逐工具调用</td>
+</tr>
+<tr style="background:#f4f9fd">
+  <td class="name">uibc-core（我们）<small>公共仓 · release/v1.1-precheck</small></td>
+  <td>0.3.0 · Apache-2.0</td>
+  <td><span class="dot d-ours"></span>Ed25519 over DSSE PAE of JCS</td>
+  <td><span class="dot d-part"></span>RFC 3161 已验证；OTS 仅 pending 日历</td>
+  <td><span class="dot d-part"></span>Rekor 已写入；<b>包含证明未验过</b></td>
+  <td><span class="dot d-ours"></span>单一 Python 实现；匿名克隆 305 测试 + 红队 15 例</td>
+</tr>
+</tbody>
+</table>
+
+<h2>二、本机真跑：三家装上之后发生了什么</h2>
+<p class="lead">不是读文档。在 Windows + Python 3.13 上真实安装并执行；失败的照实写，不做产品评价。</p>
+<table>
+<thead><tr><th style="width:140px">包</th><th style="width:120px">装到的版本</th><th>跑了什么</th><th>结果</th></tr></thead>
+<tbody>
+<tr>
+  <td class="name">novafabric</td><td><b>0.108.0</b></td>
+  <td><code>nova capture</code> 三次（含 <code>--runner local --no-daemon</code>）、<code>seal init</code>、<code>verify</code>、<code>inspect</code></td>
+  <td><span class="chip c-no">路径未跑通</span> 每次都触发它自己的完整性守卫：<i>"the capsule directory was replaced while the workload ran … must not be trusted"</i>；<code>seal init</code> 建了身份但 capsule 仍无 <code>.seal/</code>，<code>verify</code> 拒绝；<code>inspect</code> 报 asset not found。我们没有去调试它的代码。</td>
+</tr>
+<tr>
+  <td class="name">vaara</td><td><b>2.17.0</b><small>AGPL-3.0</small></td>
+  <td><code>--help</code>、<code>trail --help</code>、<code>attest --help</code>、<code>keygen</code></td>
+  <td><span class="chip c-part">比旧页面多得多</span> 有 <code>trail export</code>（签名交付 zip）、<code>export-threshold</code>（k-of-n）、<code>verify</code>、<b><code>publish-head</code> 到公共透明日志</b>、<b><code>verify-anchor</code> 验外部时间锚</b>、<code>attest verify</code>。<b>我们此前写的"Vaara 无锚定"必须作废。</b></td>
+</tr>
+<tr>
+  <td class="name">aiauditlog<small>模块 ai_audit_log</small></td><td><b>0.2.0b1</b></td>
+  <td>import、<code>AuditRecorder</code>、<code>EventBuilder.create</code>、<code>ChainVerifier</code></td>
+  <td><span class="chip c-part">装得上，端到端未成立</span> 嵌套 pydantic 模型（<code>Source</code>/<code>Actor</code>/<code>Outcome(status=, code=)</code>），冒烟脚本每次卡在模型校验；<code>ChainVerifier</code> 存在。记"未成立"，不记成它的失败。</td>
+</tr>
+<tr><td class="name">treeship / tracekit</td><td>未安装</td><td>本轮未尝试</td><td>—</td></tr>
+</tbody>
+</table>
+<div class="callout">
+  <strong>这一格的分量：</strong>矩阵里第一次出现"竞品的可执行声明在它的主场之外跑不通"。写它必须和对我们自己的 Rekor 失败一样——<b>带复现的观察，不是对设计下判决</b>。
+</div>
+
+<h2>三、三个必须改口的判断</h2>
+<div class="cards">
+  <div class="card">
+    <div class="big">不是我们独有</div>
+    <h3>"外人能复跑"已是入场券</h3>
+    <p>Tracekit 已交付 <b>Python 与 TypeScript 两个验证器</b>（同一作者所写，TypeScript 版是单页浏览器），并自报 63 个包结论一致、33 个伪造全部拒绝——这是作者自报，不是第三方复现。它比我们已做的更强。</p>
+  </div>
+  <div class="card">
+    <div class="big">我们仍独有的</div>
+    <h3>公开一个"验不过"的结果</h3>
+    <p>我们的 Rekor 包含证明验不过，自写 RFC 6962 走法失败，第三方 <code>rekor_log_verifier</code> 用另一个根也失败。上表没有一家公开这种负面结果——他们只报通过的实验数。</p>
+  </div>
+  <div class="card">
+    <div class="big">最便宜的一步</div>
+    <h3>语言中立一致性语料</h3>
+    <p>agent-receipts 用 8 条向量做到"任何合规实现产出逐字节相同的签名"。我们只有 Python 测试。一份向量文件即可把"我们有测试"升级为"任何人不用我们的代码就能验我们"。</p>
+  </div>
+</div>
+
+<div class="callout">
+  <strong>"全面超越"在这里的正确含义：</strong>不可能意味着"别人都没有"。六个项目已发布或可安装。可做到的是三条——
+  ①六个维度上我们不沉默，落后就同句承认；
+  ②一个维度用证据领先：公开负面结果 + 复现命令；
+  ③一个维度从"声称"升级为"已演示"：第二实现或语言中立语料。
+</div>
+
+<h2>四、四视角外审：外部模型按四把不同的提问集，各评一份不同的件</h2>
+<p class="lead">不是"我方分四次写"，是 DeepSeek-V3（温度 0）按四套互不相同的提问，分别评了四份不同的被审件。四份回执原文存放于 <code>docs/external-review/</code>，账本 <code>seq=37..40</code> 哈希成链。</p>
+
+<div class="cards">
+  <div class="card">
+    <h3>专家视角 <span class="chip c-part">CONTINUE</span></h3>
+    <p><b>评的件：</b><code>docs/ECOSYSTEM-MAP.md</code><br>
+    <b>挑出的最狠一条：</b>整张表引的是 arXiv 个人稿，委员会读者第一句就是"这不是已采纳工作项"。<br>
+    <b>已改：</b>表头之上先声明来源属性；另补"未映射的标准"一节，写入 <b>ISO/IEC 23053</b>（此前我们根本没有）。</p>
+  </div>
+  <div class="card">
+    <h3>流程视角 <span class="chip c-part">CONTINUE</span></h3>
+    <p><b>评的件：</b><code>README.md</code><br>
+    <b>挑出的最狠一条：</b>最弱的复现步骤是"依赖一个可能移动或消失的 GitHub 分支"。<br>
+    <b>已改：</b>两个 Rekor 条目分别说明归属；给"已验证表"加了 <b>"你自己怎么查"</b> 一列（命令写在表里），并指出校验 SET 只需日志公钥、不需要 Sigstore 私有设施。</p>
+  </div>
+  <div class="card">
+    <h3>红队视角 <span class="chip c-part">CONTINUE</span></h3>
+    <p><b>评的件：</b><code>docs/INTEROP-MATRIX.md</code><br>
+    <b>挑出的最狠一条：</b>"要跑他们代码的格子标 not tested 而非 works"这句本身会被反用成"没测却宣称互通"。<br>
+    <b>已改：</b>补 agent-receipts 一致性语料的直达链接与路径（并注明"数量是他们自报、我们没跑"）；明写 <b>"公布失败"是缺陷、不是设计立场</b>。</p>
+  </div>
+  <div class="card">
+    <h3>外人视角 <span class="chip c-part">CONTINUE</span></h3>
+    <p><b>评的件：</b><code>README.md</code><br>
+    <b>挑出的最狠一条：</b><code>external verification nodes: 0</code> 让外人看到缺失，却没量化这意味着什么。<br>
+    <b>已改：</b>补一句"零 = 独立性全靠同一位作者的两份实现"；名字说明提到首屏最上。</p>
+  </div>
+</div>
+
+<div class="callout">
+<b>有一条建议被拒收。</b>外人视角给出的"最能提升试用意愿的一句话"是：<i>"Independent audits by [named entity] confirmed the verifier rejects all 15 attack vectors with zero false negatives."</i>
+这句话效果最好，但我们<b>没有</b>任何具名第三方审计——写上去就是编造背书。已记录在 <code>docs/REVIEW-LOG.md</code>：
+<b>接受一次评审，不等于接受它给的每一句话。</b>
+</div>
+
+<h2>五、我方覆盖度：12 个检查符现在到哪</h2>
+<p class="lead">这张表是我们自己的体检，不是竞品数据。305 测试、红队 15 例、引用直达 43/45。</p>
+<table>
+<thead><tr><th style="width:220px">维度</th><th>状态</th><th>证据在哪</th></tr></thead>
+<tbody>
+<tr><td>结构化信封 + 根</td><td><span class="chip c-ok">已测</span></td><td>S1/S11 严格序列化；<code>tests/</code></td></tr>
+<tr><td>身份与钉钥</td><td><span class="chip c-ok">已测</span></td><td>S2；只接受外部钉住的公钥</td></tr>
+<tr><td>线性回执链</td><td><span class="chip c-ok">已测</span></td><td>S17 <code>uibc_core/chain.py</code>，8 测试</td></tr>
+<tr><td>策略制品解析</td><td><span class="chip c-ok">已测</span></td><td>S18 <code>uibc_core/policy.py</code>，8 测试</td></tr>
+<tr><td>时间与偏斜</td><td><span class="chip c-ok">已测</span></td><td>S12，注入时钟，300s 上限，7 测试</td></tr>
+<tr><td>外部时间锚</td><td><span class="chip c-part">半</span></td><td>RFC 3161 已验证；OTS 仅 pending 日历</td></tr>
+<tr><td>透明日志包含证明</td><td><span class="chip c-no">未过</span></td><td>第三方实现同样失败，已公开</td></tr>
+<tr><td>跨实现验证</td><td><span class="chip c-part">半</span></td><td>语料 15 条，非本实现的检查器 15/15 复现；但仍无第二份完整实现</td></tr>
+<tr><td>语言中立一致性语料</td><td><span class="chip c-part">半</span></td><td><code>docs/conformance/vectors.json</code>：只覆盖规范化与 Ed25519，未覆盖回执结构/链/锚</td></tr>
+<tr><td>调用点拦截</td><td><span class="chip c-no">未做</span></td><td>无 MCP 代理</td></tr>
+<tr><td>回放</td><td><span class="chip c-no">未做</span></td><td>无</td></tr>
+<tr><td>引用直达</td><td><span class="chip c-part">43/45</span></td><td>2 条未达：iso.org 403、eips 超时（两条经外部出口实测 200）</td></tr>
+<tr><td>外人实测</td><td><span class="chip c-ok">已测</span></td><td>匿名克隆 <code>06ff25c</code> → 305 测试 OK；<code>66aa129</code> 起改经外部出口逐字段核对</td></tr>
+</tbody>
+</table>
+
+<h2>六、下一步（成本已标的四个动作）</h2>
+<table>
+<thead><tr><th style="width:260px">动作</th><th>目标</th><th>成本</th></tr></thead>
+<tbody>
+<tr><td>语料扩到回执结构/链/锚（已有 15 条，已覆盖规范化与签名）</td><td>补齐 agent-receipts 与 Tracekit 领先的那一维</td><td>约 2 天</td></tr>
+<tr><td>treeship 真跑（已实测：Windows 拒装 <code>EBADPLATFORM</code>）</td><td>需要 Linux/macOS 环境才能继续</td><td>约半天，换环境</td></tr>
+<tr><td>MCP 拦截点（代理写我方回执）</td><td>追平 Vaara 的调用现场</td><td>数天</td></tr>
+<tr><td>回放协议</td><td>追平 NovaFabric</td><td>数周，暂不建议</td></tr>
+</tbody>
+</table>
+
+<footer>
+数据日期 2026-11-17 · 我方证据：公共仓 <a href="https://github.com/zhaoxinghua09-cell/uibc-core">zhaoxinghua09-cell/uibc-core</a>（分支 release/v1.1-precheck，匿名克隆 06ff25c 全量测试通过；文档改动自 66aa129 起经外部出口逐字段核对）<br>
+同行来源：<a href="https://arxiv.org/html/2609.35659">Tracekit</a> · <a href="https://www.treeship.dev/">Treeship</a> · <a href="https://novafabric.ai/">NovaFabric</a> · <a href="https://arxiv.org/html/2609.12582">NovaFabric 论文</a> · <a href="https://www.npmjs.com/package/agent-receipts-cli">agent-receipts</a> · <a href="https://pypi.org/project/aiauditlog/">AIAuditLog</a> · <a href="https://fact0.io/">fact0</a> · <a href="https://pypi.org/project/vaara/">Vaara</a><br>
+竞品行为：矩阵行为其公开文本所述；"本机真跑"一节为实装实测结果（Windows / Python 3.13）。<b>反向列（他们验我们）全部未测。</b>引用即直达链接，无需二次跳转。
+</footer>
+</div>
+</body>
+</html>

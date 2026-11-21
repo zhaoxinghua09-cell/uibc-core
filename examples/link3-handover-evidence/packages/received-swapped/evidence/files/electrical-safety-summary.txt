@@ -1,0 +1,3 @@
+ELECTRICAL SAFETY SUMMARY - CardioPatch CP-2 (FICTIONAL)
+Document: ESS-CP2-007  Revision: 1  Status: APPROVED
+IEC 60601-1 test programme: all applicable clauses passed.

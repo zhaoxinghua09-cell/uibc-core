@@ -43,3 +43,21 @@ used for a real package. `uibc keygen --ed25519` generates a real one.
 it alongside the package.)
 
 Rebuild the sample with `python examples/build_example.py`.
+
+## A second worked example: the change-evidence pack
+
+`link1-change-evidence/` applies the same machinery to a model update:
+a four-file change evidence set (the PCCP side of a fictional device AI
+update), in three states — sealed, swapped after sealing, and never
+sealed — giving PASS / FAIL with the replaced file named / INCONCLUSIVE
+with the gate on HOLD. Start at `link1-change-evidence/README.md`.
+
+## A third worked example: the handover pack
+
+`link3-handover-evidence/` is the receiving-side story: a four-file
+evidence set for the same fictional device, checked the way a
+distributor or importer should check it on arrival — open, pinned to
+the manufacturer's public key, after a silent file swap, and after a
+full re-seal under a substitute key. Five runs, five verdicts,
+including the one only pinning can catch. Start at
+`link3-handover-evidence/README.md`.

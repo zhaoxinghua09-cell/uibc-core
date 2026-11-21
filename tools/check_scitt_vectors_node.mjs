@@ -26,9 +26,9 @@
 //   * SHA256SUMS matches every listed file byte-for-byte
 //
 // --self-test additionally proves the checks above are not vacuous: it feeds
-// the same checker three deliberately broken vectors (the empty-tree root
-// replaced by an all-zero digest, a size-0 fold result filled in, one leaf
-// digest moved) and exits 1 unless every one of them is caught. A harness that
+// the same checker eight deliberately broken vectors, including the empty-tree
+// constant used as the digest of an empty leaf input, and exits 1 unless every
+// one of them is caught. A harness that
 // cannot fail its own mutations is decoration.
 //
 // Exit code 1 on any disagreement.
@@ -205,7 +205,16 @@ function main() {
     const manifestVector = manifest.vectors.find((v) => v.expected_result.startsWith('VALID'));
     const validBase = JSON.parse(
       readFileSync(join(PKG, manifestVector.dir, 'expected.json'), 'utf8'));
+    // The pair of constants this corpus pins hardest: MTH({}) = SHA-256() and
+    // leaf_hash(b"") = SHA-256(0x00). An implementation that shares one constant
+    // for the other passes every non-empty vector and fails this probe.
+    const emptyLeafVector = manifest.vectors.find((v) => v.id === 'valid-empty-leaf');
+    const emptyLeafBase = JSON.parse(
+      readFileSync(join(PKG, emptyLeafVector.dir, 'expected.json'), 'utf8'));
     const probes = [
+      ['empty-tree root used as the digest of an empty leaf input',
+       { ...emptyLeafBase,
+         leaf_entry: { ...emptyLeafBase.leaf_entry, digest_hex: hex(EMPTY_ROOT) } }],
       ['empty root replaced by an all-zero digest',
        { ...base, root_true: '00'.repeat(32) }],
       ['size-0 fold result filled in',

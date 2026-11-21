@@ -22,12 +22,12 @@ Checks, for every vector in manifest.json:
     reconstructed_new_root, and VALID matches that rebuild
   * SHA256SUMS matches every listed file byte-for-byte
 
---self-test additionally proves these checks are not vacuous: seven deliberately
-broken vectors (all-zero empty root, a filled-in size-0 fold result, a size-0
-vector marked VALID, a leaf digest detached from its input, a consistency vector
-with a zeroed old root, one with a proof node too many, and one with the two
-sizes in the wrong order) are fed through the same code and must each be
-caught. Exit 1 if any probe slips through.
+--self-test additionally proves these checks are not vacuous: eight deliberately
+broken vectors (the empty-tree constant used as the digest of an empty leaf
+input, an all-zero empty root, a filled-in size-0 fold result, a size-0 vector
+marked VALID, a leaf digest detached from its input, a consistency vector with a
+zeroed old root, one with a proof node too many, and one with the two sizes in
+the wrong order) are fed through the same code and must each be caught. Exit 1 if any probe slips through.
 Exit code 1 on any disagreement.
 """
 import hashlib
@@ -179,7 +179,16 @@ def main():
         valid_tampered = dict(valid_base)
         valid_tampered["leaf_entry"] = dict(valid_base["leaf_entry"])
         valid_tampered["leaf_entry"]["digest_hex"] = "00" * 32
+        empty_leaf = next(v for v in manifest["vectors"]
+                          if v["id"] == "valid-empty-leaf")
+        with open(os.path.join(PKG, empty_leaf["dir"], "expected.json"),
+                  encoding="utf-8") as fh:
+            empty_leaf_base = json.load(fh)
         probes = [
+            ("empty-tree root used as the digest of an empty leaf input",
+             dict(empty_leaf_base,
+                  leaf_entry=dict(empty_leaf_base["leaf_entry"],
+                                  digest_hex=H(b"").hex()))),
             ("empty root replaced by an all-zero digest", dict(base, root_true="00" * 32)),
             ("size-0 fold result filled in",
              dict(base, reconstructed_root=base["leaf_entry"]["digest_hex"])),

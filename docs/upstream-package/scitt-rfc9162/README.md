@@ -2,8 +2,8 @@
 # scitt-rfc9162 test vectors (v1)
 
 A self-contained, append-only set of **RFC 9162 SHA-256 hash-tree** vectors:
-**inclusion paths and consistency proofs**, **55 vectors in seven classes** — 27
-`VALID` (21 inclusion, 6 consistency), 12 `INVALID_INCLUSION_PATH`, 7
+**inclusion paths and consistency proofs**, **57 vectors in seven classes** — 29
+`VALID` (23 inclusion, 6 consistency), 12 `INVALID_INCLUSION_PATH`, 7
 `INVALID_CONSISTENCY_PROOF`, 2 `INVALID_LEAF_INDEX`, 1 `INVALID_LEAF_DIGEST`, 2
 `INVALID_TREE_SIZE`, and 4 `VALID_BUT_SIZE_UNAUTHENTICATED` (the ambiguity
 class, described below). Class counts are computed from the vectors themselves
@@ -11,7 +11,7 @@ class, described below). Class counts are computed from the vectors themselves
 
 Each vector declares `kind` (`inclusion` or `consistency`) in its
 `expected.json`; a reader who only implements inclusion can skip the
-consistency half and still score 42 of the 55.
+consistency half and still score 44 of the 57.
 
 Tree shapes covered: 1, 2, 3, 4, 5, 6, 7, 8, 9, 15, 16, 17, 31, 32, 33, 63, 64,
 65 leaves; indices include left edge, right edge, interior, and the single tail
@@ -162,7 +162,7 @@ tree head, or an anchor whose signed payload carries both root and size).
 
 ```bash
 cd docs/upstream-package/scitt-rfc9162
-sha256sum -c SHA256SUMS                                  # 56/56 OK (`shasum -a 256 -c` on macOS)
+sha256sum -c SHA256SUMS                                  # 58/58 OK (`shasum -a 256 -c` on macOS)
 python tools/build_scitt_vector_package.py --check       # from the repo root
 python tools/build_scitt_vector_package.py --check-drift # committed bytes == what build produces
 ```
@@ -184,7 +184,7 @@ node tools/check_scitt_vectors_node.mjs --self-test
 
 The tree algebra in that file is written again in JavaScript, sharing no code
 with `uibc_core`, the builder or the Python standalone checker. It walks the
-same 55 vectors and must reach `VERDICT: PARITY`.
+same 57 vectors and must reach `VERDICT: PARITY`.
 
 **What this is not.** It is not an independent run. The same author wrote it, so
 the external run ledger does not count it, and neither should a reader: a
@@ -193,7 +193,8 @@ concretely enough to be met twice, not that a stranger can meet them. For that,
 the invitation in `docs/INVITE-ONE-PAGE.md` is the only route.
 
 **What it does add.** `--self-test` feeds both checkers the same seven
-deliberately broken vectors — the empty-tree root replaced by an all-zero
+deliberately broken vectors — the empty-tree constant used as the digest of an
+empty leaf input, the empty-tree root replaced by an all-zero
 digest, a size-0 fold result filled in, a size-0 vector marked `VALID`, a leaf
 digest detached from its leaf input, and three consistency mutations (zeroed
 old root, one proof node too many, the two sizes swapped) — and exits 1 unless
@@ -232,6 +233,32 @@ caught: a sweep that cannot fail its own mutation is a loop, not a check.
 to 128 leaves. It does not prove either reading matches RFC 6962 — for that the
 23 external consistency cases and the 147 external arithmetic cases are the only
 evidence there is, and they are cited as external, not as ours.
+
+## Two "hash of nothing" constants, and why both are in here
+
+The algebra has two values that are easy to conflate because both are *the hash
+of nothing*:
+
+```
+MTH({})         = SHA-256()      = e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+leaf_hash(b"")  = SHA-256(0x00)   = 6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d
+```
+
+A tree of size 1 whose only leaf input is the empty byte string has the **second**
+as its root. A tree of size 0 has the **first**. An implementation that keeps one
+constant for both passes every vector in this corpus whose leaves are non-empty,
+and fails only on these two:
+
+| Vector | What it pins |
+|---|---|
+| `v1/valid-empty-leaf` | size 1, empty leaf input: `root_true` is `SHA-256(0x00)`, not `MTH({})` |
+| `v1/valid-empty-tree2` | size 2, inputs `b""` and `b"\x00"`: the prefix applies to the empty input, and a single zero byte is a different leaf from no bytes at all |
+
+Both checkers' `--self-test` feed exactly this mutation: the empty-tree constant
+substituted for the digest of an empty leaf input. It is caught by the leaf-input
+binding rule, which is the same rule that catches a leaf digest detached from its
+input — but the conflation is a plausible bug rather than a deliberate tamper,
+which is why it is written down separately.
 
 ## Tree construction (write it down, don't import it)
 

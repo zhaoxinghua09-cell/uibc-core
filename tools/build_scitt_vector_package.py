@@ -48,7 +48,23 @@ def _leaf_text(vector_id, i):
     return ("scitt-rfc9162 test vectors v1 :: %s :: leaf %d" % (vector_id, i)).encode()
 
 
+# Vectors whose leaf inputs are not the default ASCII sentence. They exist to pin
+# the one pair of constants in this algebra that are easiest to confuse:
+#   MTH({})            = SHA-256()        = e3b0c442...
+#   leaf_hash(b"")     = SHA-256(0x00)    = 6e340b9c...
+# Both are 32 bytes, both are "the hash of nothing", and a tree of size 1 with an
+# empty leaf input has the second as its root while the empty tree has the first.
+# An implementation that reuses one constant for the other passes every vector
+# with a non-empty leaf and fails here.
+LEAF_OVERRIDES = {
+    "valid-empty-leaf": [b""],
+    "valid-empty-leaf-tree2": [b"", b"\x00"],
+}
+
+
 def _leaves(vector_id, size):
+    if vector_id in LEAF_OVERRIDES:
+        return [merkle.leaf_hash(x) for x in LEAF_OVERRIDES[vector_id]]
     return [merkle.leaf_hash(_leaf_text(vector_id, i)) for i in range(size)]
 
 
@@ -171,6 +187,17 @@ CASES = [
     ("valid-tree65-index64", 65, 64, None, "VALID",
      "tree_size=65 = 64|1: the single tail leaf of a full tree plus one; path length 1 "
      "and the top split is the whole tree."),
+
+    # --- leaf-input edge cases: the two "hash of nothing" constants ---
+    ("valid-empty-leaf", 1, 0, None, "VALID",
+     "One leaf whose input is the empty byte string. root_true is SHA-256(0x00), "
+     "NOT the empty-tree root SHA-256(); a tree of size 1 is not an empty tree. "
+     "An implementation that shares one constant for both passes every non-empty "
+     "vector here and fails this one."),
+    ("valid-empty-leaf-tree2", 2, 1, None, "VALID",
+     "Two leaves, one empty input and one single zero byte. Same edge one level "
+     "up: hashing an empty leaf input must still prepend the 0x00 leaf prefix, "
+     "and a one-byte 0x00 input is not the same leaf as an empty one."),
 
     # --- ambiguous: the root does not authenticate the declared size ---
     ("ambiguous-tree-size", 7, 5, "ambiguous", "VALID_BUT_SIZE_UNAUTHENTICATED",
@@ -367,7 +394,8 @@ def _expected(cid, size, index, tamper, result, desc):
     true_root = merkle.root_hash(leaves)
     proof = list(merkle.audit_path(leaves, index))
     stated_size = size
-    leaf_input = _leaf_text(cid, index)
+    leaf_input = (LEAF_OVERRIDES[cid][index] if cid in LEAF_OVERRIDES
+                  else _leaf_text(cid, index))
     leaf_digest = leaves[index]
     if tamper == "path":
         proof[0] = b"\x00" * 32
@@ -478,6 +506,19 @@ def build(out=OUT):
 
     manifest = {
         "version": "v1",
+        "contract_version": "scitt-vector-package/1",
+        "honest_limits": [
+            "Hash-tree algebra only: no COSE_Sign1 statement bytes, no receipts, no "
+            "signatures, no TSA timestamps. A pass here says nothing about a "
+            "deployment end to end.",
+            "Consistency proofs are scored for 1 <= old_size <= new_size; old_size = 0 "
+            "is unspecified in RFC 6962 Section 2.1.2 and is not carried (see "
+            "underspecified_inputs).",
+            "Sizes are swept exhaustively to 128 leaves in the repository sweep; beyond "
+            "that, only the corpus shapes and whatever an implementer runs are evidence.",
+            "Verdict words are ours. A disagreement on wording with matching roots is "
+            "recorded as wording-only by the harness and is not a conformance failure.",
+        ],
         "stability": "append-only",
         "scope_note": ("Covers the RFC 9162 SHA-256 hash-tree layer: inclusion paths "
                        "(kind=inclusion) and consistency proofs (kind=consistency). No "

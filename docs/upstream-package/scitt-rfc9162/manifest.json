@@ -5,11 +5,18 @@
     "INVALID_LEAF_DIGEST": 1,
     "INVALID_LEAF_INDEX": 2,
     "INVALID_TREE_SIZE": 2,
-    "VALID": 27,
+    "VALID": 29,
     "VALID_BUT_SIZE_UNAUTHENTICATED": 4
   },
   "consistency_note": "The consistency vectors score RFC 6962 Section 2.1.2 SUBPROOF in the order the recursion appends nodes: the recursion's own nodes first, the sibling it appended last. That order is a scored part of the format, not a convenience: reading the same array in reverse scores 18 of the 23 known-good external consistency cases, which is how the order was established here. The verifier used to generate these vectors was itself first written from the recursion text and then validated against those 23 external cases (23/23) before it was allowed to judge anything of ours; its first iterative form scored 20/23 because it seeded both roots from old_root on non-power-of-two old sizes.",
+  "contract_version": "scitt-vector-package/1",
   "coverage_note": "Declaring a tree_size one larger than the path assumes never changes the reconstructed root in this algebra - the fold reads no additional node - so that input is carried as an ambiguous-* vector (the root does not authenticate the size), not as an INVALID_TREE_SIZE vector. INVALID_TREE_SIZE therefore covers 'declared smaller' (path one short) and 'declared zero' (no leaf can sit in an empty tree); the zero case carries MTH({}) = SHA-256(\"\") as its root so the constant itself is scored rather than assumed. This asymmetry was found by running the vectors, not assumed: an earlier draft carried a 'size larger' fail case that our own verifier reported as root-equal.",
+  "honest_limits": [
+    "Hash-tree algebra only: no COSE_Sign1 statement bytes, no receipts, no signatures, no TSA timestamps. A pass here says nothing about a deployment end to end.",
+    "Consistency proofs are scored for 1 <= old_size <= new_size; old_size = 0 is unspecified in RFC 6962 Section 2.1.2 and is not carried (see underspecified_inputs).",
+    "Sizes are swept exhaustively to 128 leaves in the repository sweep; beyond that, only the corpus shapes and whatever an implementer runs are evidence.",
+    "Verdict words are ours. A disagreement on wording with matching roots is recorded as wording-only by the harness and is not a conformance failure."
+  ],
   "leaf_entry_definition": "SHA-256 of the leaf input bytes, hex-encoded. Leaf inputs here are plain ASCII strings rather than COSE_Sign1 digests, so the tree algebra can be checked without a COSE library.",
   "reconstruction_rule": "Fold the path over leaf_index with tree_size using RFC 9162 SHA-256 verification; the result must equal root_true for VALID vectors and must differ for the three fail-* vectors.",
   "retired_underspecified_inputs": [
@@ -930,6 +937,48 @@
       },
       "expected_result": "VALID",
       "id": "valid-tree65-index64"
+    },
+    {
+      "description": "One leaf whose input is the empty byte string. root_true is SHA-256(0x00), NOT the empty-tree root SHA-256(); a tree of size 1 is not an empty tree. An implementation that shares one constant for both passes every non-empty vector here and fails this one.",
+      "dir": "v1/valid-empty-leaf",
+      "expected": {
+        "inclusion_path": [],
+        "leaf_entry": {
+          "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+          "digest_hex": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+          "leaf_input_ascii": "",
+          "leaf_input_hex": ""
+        },
+        "leaf_index": 0,
+        "reconstructed_root": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "result": "VALID",
+        "root_true": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "tree_size": 1
+      },
+      "expected_result": "VALID",
+      "id": "valid-empty-leaf"
+    },
+    {
+      "description": "Two leaves, one empty input and one single zero byte. Same edge one level up: hashing an empty leaf input must still prepend the 0x00 leaf prefix, and a one-byte 0x00 input is not the same leaf as an empty one.",
+      "dir": "v1/valid-empty-leaf-tree2",
+      "expected": {
+        "inclusion_path": [
+          "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+        ],
+        "leaf_entry": {
+          "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+          "digest_hex": "96a296d224f285c67bee93c30f8a309157f0daa35dc5b87e410b78630a09cfc7",
+          "leaf_input_ascii": "\u0000",
+          "leaf_input_hex": "00"
+        },
+        "leaf_index": 1,
+        "reconstructed_root": "fac54203e7cc696cf0dfcb42c92a1d9dbaf70ad9e621f4bd8d98662f00e3c125",
+        "result": "VALID",
+        "root_true": "fac54203e7cc696cf0dfcb42c92a1d9dbaf70ad9e621f4bd8d98662f00e3c125",
+        "tree_size": 2
+      },
+      "expected_result": "VALID",
+      "id": "valid-empty-leaf-tree2"
     },
     {
       "description": "tree_size=7, leaf_index=5: the same inclusion_path folds to the same root at tree_size=8, so the declared size is not authenticated by the root. Independent reproduction of the RFC 9942 Section 5.2.1 observation posted to scitt@ietf.org on 2026-11-15.",

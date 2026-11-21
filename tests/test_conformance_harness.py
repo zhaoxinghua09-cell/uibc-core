@@ -50,7 +50,7 @@ class TestPositiveControl(unittest.TestCase):
         receipt = h.run([sys.executable, os.path.join(REPO, "conformance", "adapters",
                                                       "reference_python.py")])
         self.assertEqual(receipt["kinds"]["consistency"], 13)
-        self.assertEqual(receipt["kinds"]["inclusion"], 42)
+        self.assertEqual(receipt["kinds"]["inclusion"], len(h.load_vectors()) - 13)
         self.assertEqual(receipt["root_agreement"], receipt["answered"])
 
 

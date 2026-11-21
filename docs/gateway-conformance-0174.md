@@ -1,6 +1,6 @@
 # 网关能力自证矩阵 — T/ISC 0174-2026
 
-生成时间：2026-11-20T13:15:41.148994+00:00（脚本：`tools/gateway_conformance.py`，探针 37/37 通过）
+生成时间：2026-11-21T01:05:59.229730+00:00（脚本：`tools/gateway_conformance.py`，探针 37/37 通过）
 标准原文：[T/ISC 0174-2026](https://www.isc.org.cn/profile/2026/10/30/1e2b29f9-8aab-438a-9114-e8eadc5f04cd.pdf)
 
 **判定口径**：PASS = 条款要求的行为存在且有可复跑证据；PARTIAL = 部分存在、缺口已写明；MISSING = 本网关不做这件事。不做四舍五入。
@@ -96,7 +96,7 @@
 | P30_spec_validation | PASS | tool descriptor parsed and rejected when malformed (D4 on non-object schema) |
 | P31_scope_enforced | PASS | caller presenting a scope the record does not grant is refused: HTTP 403, clause 9.2.1 a) |
 | P32_injection_blocked | PASS | override payload refused before verification, no payload text in the refusal (categories=['prompt-override']) |
-| P33_repeat_cache_measured | PASS | identical repeats served from cache: hits=11 misses=2 hit_rate=0.8462; measured first=0.566ms cached_p50=0.472ms (in-process) |
+| P33_repeat_cache_measured | PASS | identical repeats served from cache: hits=11 misses=2 hit_rate=0.8462; measured first=0.761ms cached_p50=0.668ms (in-process) |
 | P34_deploy_hardening_linted | PASS | deploy config carries mTLS + ACL + rate/connection limits: 12/12 directive(s) |
 | P3_forward_verified | PASS | A2A call reached verification and returned PASS |
 | P4_agent_required | PASS | call without registered agent refused (fail closed) |

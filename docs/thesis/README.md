@@ -18,12 +18,15 @@
 | [00-topic-and-abstract.md](00-topic-and-abstract.md) | 题目、中英文摘要、关键词、章节骨架、文献种子 | 已有 |
 | [01-introduction.md](01-introduction.md) | 第 1 章 绪论 | 已有 |
 | [02-standard-basis.md](02-standard-basis.md) | 第 2 章 相关工作与标准依据 | 已有 |
-| — | 第 3 章 证据边界的建模与封装格式 | 待写 |
-| — | 第 4 章 判定器的构造与实现 | 待写 |
+| [03-evidence-boundary.md](03-evidence-boundary.md) | 第 3 章 证据边界的建模与封装格式 | 已有 |
+| [04-verifier.md](04-verifier.md) | 第 4 章 判定器的构造与实现 | 已有 |
 | [../THESIS-CH5-TABLES.md](../THESIS-CH5-TABLES.md) | 第 5 章 表 5-1 至 5-6（脚本生成） | 已有 |
 | [../THESIS-CH5-EXTERNAL-REPRO.md](../THESIS-CH5-EXTERNAL-REPRO.md) | 第 5 章 外部复核补节（表 5-7） | 已有 |
-| — | 第 6 章 结论与局限 | 待写 |
+| [06-conclusion.md](06-conclusion.md) | 第 6 章 结论与局限 | 已有 |
 | — | 封面、原创性声明、摘要页、参考文献表、科研成果、后记 | 待做 |
+
+正文合计约 2.3 万字（含中英文摘要与参考文献表），已过学校 2 万字线；封面、声明页、
+单独参考文献页与后记属排版收尾，尚待补齐。
 
 ## 写作口径（四条规定，写稿时不得违反）
 

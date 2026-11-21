@@ -188,6 +188,174 @@ CASES = [
      "each instance here was found by exhaustive search, not by hand."),
 ]
 
+# id, old_size, new_size, tamper, expected_result, description
+CONSISTENCY_CASES = [
+    # --- valid ---
+    ("cons-1-2", 1, 2, None, "VALID",
+     "Old tree is a single leaf; the new tree's other leaf is the only proof node. The "
+     "smallest consistency proof that is not empty, and the case where a verifier that "
+     "seeds both roots from the first proof node instead of from old_root silently "
+     "accepts the wrong thing."),
+    ("cons-2-5", 2, 5, None, "VALID",
+     "Old tree is the full left child of a 4|1 tree: the recursion never descends, and "
+     "the proof carries only nodes to the right."),
+    ("cons-3-7", 3, 7, None, "VALID",
+     "Old size is not a power of two and the new tree is unbalanced 4|3, so the recursion "
+     "descends on the right and the proof carries a left sibling at two levels. This is "
+     "the shape that broke the first iterative verifier written for this package: it "
+     "scored 20 of 23 known-good external cases until the size relation was fixed."),
+    ("cons-4-8", 4, 8, None, "VALID",
+     "Old tree is exactly half the new tree: every proof node is a full subtree root and "
+     "the fold is a pure right extension."),
+    ("cons-6-9", 6, 9, None, "VALID",
+     "Old size 6 = 4|2 and new size 9 = 8|1: two non-power-of-two sizes, so the proof "
+     "crosses both splits."),
+    ("cons-9-9", 9, 9, None, "VALID",
+     "Equal sizes: the proof must be empty and the two roots must be identical. A "
+     "verifier that reports 'consistent' before looking at the proof cannot be caught "
+     "except by a case like this one."),
+
+    # --- invalid ---
+    ("cons-fail-old-root", 3, 7, "old-root", "INVALID_CONSISTENCY_PROOF",
+     "old_root replaced with one leaf digest. Every proof node is genuine and folds out "
+     "to the genuine new root, so only the final comparison against the old root "
+     "rejects it."),
+    ("cons-fail-new-root", 6, 9, "new-root", "INVALID_CONSISTENCY_PROOF",
+     "new_root replaced with the root of a nearby size. The proof is genuine; only the "
+     "fold to the new root can catch it."),
+    ("cons-fail-proof-last", 4, 8, "proof-last", "INVALID_CONSISTENCY_PROOF",
+     "The highest proof node is replaced with zeros: the old root still folds out, the "
+     "new root does not."),
+    ("cons-fail-proof-short", 3, 7, "proof-short", "INVALID_CONSISTENCY_PROOF",
+     "One proof node dropped. A verifier that folds until the proof runs out and then "
+     "only compares the old root accepts this wrongly; a verifier that requires the "
+     "node counters to reach zero rejects it."),
+    ("cons-fail-proof-long", 2, 5, "proof-long", "INVALID_CONSISTENCY_PROOF",
+     "An extra zero node appended: same bytes as a genuine prefix plus noise. This is "
+     "the case that separates 'roots came out right' from 'the proof was the right "
+     "length'."),
+    ("cons-fail-proof-swap", 3, 7, "proof-swap", "INVALID_CONSISTENCY_PROOF",
+     "Two adjacent proof nodes exchanged: same bytes, same length, wrong order."),
+    ("cons-fail-size-order", 5, 3, "size-order", "INVALID_CONSISTENCY_PROOF",
+     "old_size larger than new_size with both roots genuine: no proof exists, and a "
+     "verifier must refuse on the size relation alone rather than folding something "
+     "that cannot be folded."),
+]
+
+
+def _split(n):
+    """Largest power of two strictly below n (the RFC 9162 split point)."""
+    k = 1
+    while k * 2 < n:
+        k *= 2
+    return k
+
+
+def _subproof(m, leaves, b):
+    """RFC 6962 Section 2.1.2 SUBPROOF, appended in recursion order.
+
+    The order matters and is part of what the vectors score: a reader who reverses the
+    array gets the same nodes and, on five of the thirteen consistency cases here, the
+    wrong verdict. That was measured, not assumed.
+    """
+    n = len(leaves)
+    if m == n:
+        return [] if b else [merkle.root_hash(leaves)]
+    k = _split(n)
+    if m <= k:
+        return _subproof(m, leaves[:k], b) + [merkle.root_hash(leaves[k:])]
+    return _subproof(m - k, leaves[k:], False) + [merkle.root_hash(leaves[:k])]
+
+
+def _consistency_proof(leaves, m):
+    return _subproof(m, list(leaves), True)
+
+
+def reconstruct_consistency(m, n, old_root, proof):
+    """Rebuild both roots from old_root and the proof, or None if the proof cannot.
+
+    Written from the SUBPROOF recursion rather than from a loop: the recursive form
+    says exactly how many nodes the proof must contain, so a short proof and a long
+    proof are both structural failures instead of arithmetic coincidences.
+    """
+    if m < 1 or n < m:
+        return None
+    if m == n:
+        return (old_root, old_root) if not proof else None
+    p = list(proof)
+
+    def walk(a, b, pos, seeded, known_old):
+        if a == b:
+            if seeded:
+                return known_old, known_old, pos
+            if pos >= len(p):
+                return None
+            return p[pos], p[pos], pos + 1
+        k = _split(b)
+        if a <= k:
+            res = walk(a, k, pos, seeded, known_old)
+            if res is None:
+                return None
+            ro, rn, pos = res
+            if pos >= len(p):
+                return None
+            return ro, merkle.node_hash(rn, p[pos]), pos + 1
+        res = walk(a - k, b - k, pos, False, known_old)
+        if res is None:
+            return None
+        ro, rn, pos = res
+        if pos >= len(p):
+            return None
+        return merkle.node_hash(p[pos], ro), merkle.node_hash(p[pos], rn), pos + 1
+
+    res = walk(m, n, 0, True, old_root)
+    if res is None or res[2] != len(p):
+        return None
+    return res[0], res[1]
+
+
+def consistency_holds(m, n, old_root, new_root, proof):
+    res = reconstruct_consistency(m, n, old_root, proof)
+    return res is not None and res[0] == old_root and res[1] == new_root
+
+
+def _expected_consistency(cid, m, n, tamper, result, desc):
+    size = max(m, n)
+    leaves = _leaves(cid, size)
+    old_root = merkle.root_hash(leaves[:m])
+    new_root = merkle.root_hash(leaves[:n])
+    proof = [] if m >= n else _consistency_proof(leaves[:n], m)
+    if tamper == "old-root":
+        old_root = leaves[0]
+    elif tamper == "new-root":
+        new_root = merkle.root_hash(leaves[:n - 1])
+    elif tamper == "proof-last":
+        proof = list(proof)
+        proof[-1] = b"\x00" * 32
+    elif tamper == "proof-short":
+        proof = list(proof)[:-1]
+    elif tamper == "proof-long":
+        proof = list(proof) + [b"\x00" * 32]
+    elif tamper == "proof-swap":
+        proof = list(proof)
+        proof[0], proof[1] = proof[1], proof[0]
+    elif tamper == "size-order":
+        proof = []
+    rec = reconstruct_consistency(m, n, old_root, proof)
+    return {
+        "kind": "consistency",
+        "description": desc,
+        "old_size": m,
+        "new_size": n,
+        "old_root": old_root.hex(),
+        "new_root": new_root.hex(),
+        "consistency_path": [h.hex() for h in proof],
+        "reconstructed_old_root": rec[0].hex() if rec else "",
+        "reconstructed_new_root": rec[1].hex() if rec else "",
+        "result": result,
+    }
+
+
 # The ambiguous case carries four extra fields. They are listed here rather than
 # inlined so the shape stays visible next to the case table above.
 AMBIGUOUS_NOTE = ("the size-8 fold consumes the same three siblings; no additional "
@@ -288,6 +456,22 @@ def build(out=OUT):
             "expected": {k: v for k, v in exp.items() if k != "description"},
         })
 
+    for cid, m, n, tamper, result, desc in CONSISTENCY_CASES:
+        exp = _expected_consistency(cid, m, n, tamper, result, desc)
+        d = os.path.join(out, "v1", cid)
+        os.makedirs(d, exist_ok=True)
+        p = os.path.join(d, "expected.json")
+        with open(p, "w", encoding="utf-8", newline="\n") as fh:
+            json.dump(exp, fh, indent=2, sort_keys=True)
+            fh.write("\n")
+        written.append(p)
+        vectors.append({
+            "id": cid, "dir": "v1/%s" % cid, "kind": "consistency",
+            "description": desc, "expected_result": result,
+            "expected": {k: v for k, v in exp.items()
+                         if k not in ("description", "kind")},
+        })
+
     classes = {}
     for v in vectors:
         classes[v["expected_result"]] = classes.get(v["expected_result"], 0) + 1
@@ -295,9 +479,34 @@ def build(out=OUT):
     manifest = {
         "version": "v1",
         "stability": "append-only",
-        "scope_note": ("Covers the RFC 9162 SHA-256 hash-tree and inclusion-path layer "
-                       "only. No COSE_Sign1 statement or receipt bytes are included; "
-                       "see README 'What this set does not cover'."),
+        "scope_note": ("Covers the RFC 9162 SHA-256 hash-tree layer: inclusion paths "
+                       "(kind=inclusion) and consistency proofs (kind=consistency). No "
+                       "COSE_Sign1 statement or receipt bytes are included; see README "
+                       "'What this set does not cover'."),
+        "consistency_note": (
+            "The consistency vectors score RFC 6962 Section 2.1.2 SUBPROOF in the order the "
+            "recursion appends nodes: the recursion's own nodes first, the sibling it "
+            "appended last. That order is a scored part of the format, not a convenience: "
+            "reading the same array in reverse scores 18 of the 23 known-good external "
+            "consistency cases, which is how the order was established here. The verifier "
+            "used to generate these vectors was itself first written from the recursion "
+            "text and then validated against those 23 external cases (23/23) before it "
+            "was allowed to judge anything of ours; its first iterative form scored 20/23 "
+            "because it seeded both roots from old_root on non-power-of-two old sizes."
+        ),
+        "underspecified_inputs": [
+            {
+                "input": "consistency proof with old_size = 0",
+                "why_not_scored": (
+                    "this one is genuinely underspecified, unlike the empty tree. RFC 6962 "
+                    "Section 2.1.2 defines SUBPROOF for an old tree of size m with 1 <= m "
+                    "<= n; it says nothing about m = 0, and conforming implementations "
+                    "differ (the Go CT libraries accept it as trivially true with an empty "
+                    "proof, this package would refuse it). No vector is carried, because "
+                    "either verdict would be a reading the text does not fix."
+                ),
+            }
+        ],
         "coverage_note": (
             "Declaring a tree_size one larger than the path assumes never changes the "
             "reconstructed root in this algebra - the fold reads no additional node - so "
@@ -371,6 +580,26 @@ def verify(out=OUT):
     for v in manifest["vectors"]:
         with open(os.path.join(out, v["dir"], "expected.json"), encoding="utf-8") as fh:
             exp = json.load(fh)
+        if exp.get("kind") == "consistency":
+            m, n = exp["old_size"], exp["new_size"]
+            old_root = bytes.fromhex(exp["old_root"])
+            new_root = bytes.fromhex(exp["new_root"])
+            proof = [bytes.fromhex(h) for h in exp["consistency_path"]]
+            rec = reconstruct_consistency(m, n, old_root, proof)
+            ro_hex = rec[0].hex() if rec else ""
+            rn_hex = rec[1].hex() if rec else ""
+            if (ro_hex != exp["reconstructed_old_root"]
+                    or rn_hex != exp["reconstructed_new_root"]):
+                ok = False
+                msgs.append("%s: recorded consistency reconstruction is not reproducible"
+                            % v["id"])
+            same = ro_hex == exp["old_root"] and rn_hex == exp["new_root"]
+            is_valid = exp["result"].startswith("VALID")
+            if is_valid != same:
+                ok = False
+                msgs.append("%s: result %s but the consistency fold says %s"
+                            % (v["id"], exp["result"], "equal" if same else "differ"))
+            continue
         leaf = merkle.leaf_hash(bytes.fromhex(exp["leaf_entry"]["leaf_input_hex"]))
         if leaf.hex() != exp["leaf_entry"]["digest_hex"]:
             ok = False

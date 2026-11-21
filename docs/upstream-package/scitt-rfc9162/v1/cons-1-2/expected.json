@@ -1,0 +1,14 @@
+{
+  "consistency_path": [
+    "72c05ad4253efa8c51aa29cb71f110d6a8e7f48b248643ac89af2ac505314334"
+  ],
+  "description": "Old tree is a single leaf; the new tree's other leaf is the only proof node. The smallest consistency proof that is not empty, and the case where a verifier that seeds both roots from the first proof node instead of from old_root silently accepts the wrong thing.",
+  "kind": "consistency",
+  "new_root": "73547dde5866b14112c8ca05c366422db76f36e13eb5595ae362033a8c67020e",
+  "new_size": 2,
+  "old_root": "6a3108a942cecf460aeaa5f3e19e1a94ee51378dba5689c5ce1ede472acf83b6",
+  "old_size": 1,
+  "reconstructed_new_root": "73547dde5866b14112c8ca05c366422db76f36e13eb5595ae362033a8c67020e",
+  "reconstructed_old_root": "6a3108a942cecf460aeaa5f3e19e1a94ee51378dba5689c5ce1ede472acf83b6",
+  "result": "VALID"
+}

@@ -1,0 +1,14 @@
+{
+  "consistency_path": [
+    "66ae5a215d1c32b70e06f2dac071fd751be30415a69a42f094a762d82f3ac96a"
+  ],
+  "description": "Old tree is exactly half the new tree: every proof node is a full subtree root and the fold is a pure right extension.",
+  "kind": "consistency",
+  "new_root": "6e8e27d264f4b88f98434cdca1e1f6df70f6f5163e27e9feec4ae15c46300eb2",
+  "new_size": 8,
+  "old_root": "4850edd8697a9d5413d09ca5bd6f8756ca6a40958874f7b2469a1a3f8295f365",
+  "old_size": 4,
+  "reconstructed_new_root": "6e8e27d264f4b88f98434cdca1e1f6df70f6f5163e27e9feec4ae15c46300eb2",
+  "reconstructed_old_root": "4850edd8697a9d5413d09ca5bd6f8756ca6a40958874f7b2469a1a3f8295f365",
+  "result": "VALID"
+}

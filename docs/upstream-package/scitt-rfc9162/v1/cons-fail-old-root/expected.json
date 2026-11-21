@@ -1,0 +1,17 @@
+{
+  "consistency_path": [
+    "0323d4f71cfd752a792e9d51b03f81d8848d3acc8f5864f97b77cccb7285a0a9",
+    "9058709dbb93020afe1e694d261230d4174ca0de871054908b7bd9c0ca5b331a",
+    "c581dbfd69849f6943806b5ce697eb2bee1dcc9d721e61d57c93929a5590637c",
+    "61294f285b54784f996fbbcfcac5591c304e30817932143b97493c812ef681ec"
+  ],
+  "description": "old_root replaced with one leaf digest. Every proof node is genuine and folds out to the genuine new root, so only the final comparison against the old root rejects it.",
+  "kind": "consistency",
+  "new_root": "b27362342fe67702f7701bf28761e2984f5a35840ae33e2d5d64139fe33624b9",
+  "new_size": 7,
+  "old_root": "1e01eda9a6a5cd9a20302750c77d88ad08982a1a24cf9b9ee23314140a67b644",
+  "old_size": 3,
+  "reconstructed_new_root": "b27362342fe67702f7701bf28761e2984f5a35840ae33e2d5d64139fe33624b9",
+  "reconstructed_old_root": "85e369162a96703a700e6a4bff34858831751c4552587d816b2d99f7de5fd093",
+  "result": "INVALID_CONSISTENCY_PROOF"
+}

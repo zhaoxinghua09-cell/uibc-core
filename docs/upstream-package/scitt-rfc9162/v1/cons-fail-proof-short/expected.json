@@ -1,0 +1,16 @@
+{
+  "consistency_path": [
+    "8f56f6485f498fbee009041ace623eda30ea35b7cbefd8c87e5c00e178140d1c",
+    "81a856132df74118027a2d0c5e9ecc5e290db8c25c3603c5b09c3584304692a7",
+    "1b779eb8acb0b1323f55be865fc724daf9810b344740fd07f56cad96d65906f0"
+  ],
+  "description": "One proof node dropped. A verifier that folds until the proof runs out and then only compares the old root accepts this wrongly; a verifier that requires the node counters to reach zero rejects it.",
+  "kind": "consistency",
+  "new_root": "91535072c6c8c7a67308f16b403cc69887287d2ff2b323b53f0962041457547c",
+  "new_size": 7,
+  "old_root": "adf188f72ad7ab6b88fbe1f4ad542d93bba3bb5efe1d524e91e78d0c165d5196",
+  "old_size": 3,
+  "reconstructed_new_root": "",
+  "reconstructed_old_root": "",
+  "result": "INVALID_CONSISTENCY_PROOF"
+}

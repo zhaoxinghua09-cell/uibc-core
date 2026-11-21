@@ -1,0 +1,15 @@
+{
+  "consistency_path": [
+    "381f5c68a4da787c60d9f7c4fb82513f49db866d02d2e97095f92853a67ccf44",
+    "eca3996ebe86a2946d9b267dc3ad6dd6263307ba44ac27a3aa878c0dfee84fd4"
+  ],
+  "description": "Old tree is the full left child of a 4|1 tree: the recursion never descends, and the proof carries only nodes to the right.",
+  "kind": "consistency",
+  "new_root": "f4e7ddbed26bb7d1a09fce8a24bb25b7fccf5c673fc3e17c057aa8e16dbbe9bd",
+  "new_size": 5,
+  "old_root": "93a22b30dc0756337a29688ab2dd8e8dab0393bf68c47ce474aadf94c726f42c",
+  "old_size": 2,
+  "reconstructed_new_root": "f4e7ddbed26bb7d1a09fce8a24bb25b7fccf5c673fc3e17c057aa8e16dbbe9bd",
+  "reconstructed_old_root": "93a22b30dc0756337a29688ab2dd8e8dab0393bf68c47ce474aadf94c726f42c",
+  "result": "VALID"
+}

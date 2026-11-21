@@ -69,9 +69,65 @@ function fold(leaf, index, size, path) {
   return r;
 }
 
+// RFC 6962 Section 2.1.2 SUBPROOF, walked backwards: rebuild both roots from
+// old_root and the proof. null when the proof cannot be the proof it claims to
+// be — too short, too long, or for the wrong size relation.
+function split(n) {
+  let k = 1;
+  while (k * 2 < n) k *= 2;
+  return k;
+}
+
+function reconstructConsistency(m, n, oldRoot, proof) {
+  if (m < 1 || n < m) return null;
+  if (m === n) return proof.length === 0 ? [oldRoot, oldRoot] : null;
+  const p = proof;
+
+  const walk = (a, b, pos, seeded) => {
+    if (a === b) {
+      if (seeded) return [oldRoot, oldRoot, pos];
+      if (pos >= p.length) return null;
+      return [p[pos], p[pos], pos + 1];
+    }
+    const k = split(b);
+    if (a <= k) {
+      const res = walk(a, k, pos, seeded);
+      if (res === null || res[2] >= p.length) return null;
+      return [res[0], NODE(res[1], p[res[2]]), res[2] + 1];
+    }
+    const res = walk(a - k, b - k, pos, false);
+    if (res === null || res[2] >= p.length) return null;
+    return [NODE(p[res[2]], res[0]), NODE(p[res[2]], res[1]), res[2] + 1];
+  };
+
+  const res = walk(m, n, 0, true);
+  if (res === null || res[2] !== p.length) return null;
+  return [res[0], res[1]];
+}
+
 // Returns 'valid' | 'invalid' for the vector's declared class, pushing a
 // message through fail() for every disagreement.
 function checkOne(id, exp, fail) {
+  if (exp.kind === 'consistency') {
+    // RFC 6962 Section 2.1.2 covers 1 <= m <= n only; old_size = 0 is genuinely
+    // unspecified (see manifest underspecified_inputs) and is not scored here.
+    const rec = reconstructConsistency(
+      exp.old_size, exp.new_size,
+      Buffer.from(exp.old_root, 'hex'),
+      exp.consistency_path.map((h) => Buffer.from(h, 'hex')));
+    const ro = rec ? hex(rec[0]) : '';
+    const rn = rec ? hex(rec[1]) : '';
+    if (ro !== exp.reconstructed_old_root.toLowerCase()
+        || rn !== exp.reconstructed_new_root.toLowerCase()) {
+      fail(`${id}: consistency reconstruction is not reproducible`);
+    }
+    const isValidClass = exp.result.startsWith('VALID');
+    if (isValidClass !== (ro === exp.old_root.toLowerCase() && rn === exp.new_root.toLowerCase())) {
+      fail(`${id}: result ${exp.result} contradicts the consistency fold`);
+    }
+    return isValidClass ? 'valid' : 'invalid';
+  }
+
   const leafInput = Buffer.from(exp.leaf_entry.leaf_input_hex, 'hex');
   const leaf = LEAF(leafInput);
 
@@ -160,6 +216,32 @@ function main() {
        { ...validBase, leaf_entry: { ...validBase.leaf_entry, digest_hex: '00'.repeat(32) } }],
     ];
     for (const [label, tampered] of probes) {
+      const caught = [];
+      checkOne('self-test', tampered, (m) => caught.push(m));
+      if (caught.length === 0) {
+        ok = false;
+        messages.push(`self-test FAILED to catch: ${label}`);
+      } else {
+        messages.push(`self-test caught: ${label} — ${caught[0]}`);
+      }
+    }
+
+    // And the consistency half: three mutations of a genuine vector, each of
+    // which a checker that only compares two root values would wave through.
+    const consVector = manifest.vectors.find(
+      (v) => v.kind === 'consistency'
+        && v.expected_result.startsWith('VALID')
+        && v.expected.consistency_path.length >= 2);
+    const consBase = JSON.parse(
+      readFileSync(join(PKG, consVector.dir, 'expected.json'), 'utf8'));
+    const consProbes = [
+      ['consistency old_root replaced by zeros', { ...consBase, old_root: '00'.repeat(32) }],
+      ['consistency proof one node too long',
+       { ...consBase, consistency_path: [...consBase.consistency_path, '00'.repeat(32)] }],
+      ['consistency sizes put in the wrong order',
+       { ...consBase, old_size: consBase.new_size, new_size: consBase.old_size }],
+    ];
+    for (const [label, tampered] of consProbes) {
       const caught = [];
       checkOne('self-test', tampered, (m) => caught.push(m));
       if (caught.length === 0) {

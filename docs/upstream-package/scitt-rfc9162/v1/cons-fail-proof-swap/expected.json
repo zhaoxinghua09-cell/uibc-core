@@ -1,0 +1,17 @@
+{
+  "consistency_path": [
+    "4247d4beb89bec36289a3d9f6a04ec02ac93e16a274b7d42b67ac525f95f5e67",
+    "2f49211ae544438de339ac0cb77732c066b08427ed94dbb1ec1031429580b67e",
+    "4efd0b5ceed9d7f214f6c3c18c833252ce890b8da809cf7840dc96fb97f358e0",
+    "53011e328c3a8f56018f99675c6d14aff230af9b5e7a745c891318c5c19e3736"
+  ],
+  "description": "Two adjacent proof nodes exchanged: same bytes, same length, wrong order.",
+  "kind": "consistency",
+  "new_root": "5da5359e8eb1086abedb0cc1e68b3c8a348a5725c940b1b04b421982252a64c1",
+  "new_size": 7,
+  "old_root": "7fc97bedb6a81c63c151031e108d27c7d87a35739991df972a5dba08272fd1f0",
+  "old_size": 3,
+  "reconstructed_new_root": "d941dfeaa382c59d33617bfd28a43e6ae2f026c1daa884ff2f87108d2b6b3b6c",
+  "reconstructed_old_root": "99fbe91abcc1b5f48712205d9a3fe78ea88261a8bad8d2390d7ffe8d80b0b42c",
+  "result": "INVALID_CONSISTENCY_PROOF"
+}

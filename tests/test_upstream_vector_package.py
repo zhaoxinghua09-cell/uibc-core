@@ -34,13 +34,13 @@ class TestPackageShape(unittest.TestCase):
         # 6 while the builder knew 5, so a plain `build` run would have dropped a
         # vector from the manifest and left its directory orphaned.
         sys.path.insert(0, REPO)
-        from tools.build_scitt_vector_package import CASES
-        self.assertEqual(len(manifest["vectors"]), len(CASES))
-        self.assertGreaterEqual(len(CASES), 25, "the corpus shrank without anyone saying so")
+        from tools.build_scitt_vector_package import CASES, CONSISTENCY_CASES
+        known = [c[0] for c in CASES] + [c[0] for c in CONSISTENCY_CASES]
+        self.assertEqual(len(manifest["vectors"]), len(known))
+        self.assertGreaterEqual(len(known), 25, "the corpus shrank without anyone saying so")
         for v in manifest["vectors"]:
             self.assertTrue(os.path.isfile(os.path.join(PKG, v["dir"], "expected.json")))
-        self.assertEqual(sorted(v["id"] for v in manifest["vectors"]),
-                         sorted(c[0] for c in CASES))
+        self.assertEqual(sorted(v["id"] for v in manifest["vectors"]), sorted(known))
 
     def test_package_bytes_are_line_ending_independent(self):
         # Build wrote its files through text mode without newline="\n" until
@@ -88,7 +88,11 @@ class TestPackageSelfChecks(unittest.TestCase):
         manifest = json.loads(_read("manifest.json"))
         for v in manifest["vectors"]:
             e = v["expected"]
-            same = e["reconstructed_root"] == e["root_true"]
+            if v.get("kind") == "consistency":
+                same = (e["reconstructed_old_root"] == e["old_root"]
+                        and e["reconstructed_new_root"] == e["new_root"])
+            else:
+                same = e["reconstructed_root"] == e["root_true"]
             ok = e["result"] == "VALID" or e["result"].endswith("_UNAUTHENTICATED")
             self.assertEqual(ok, same, v["id"])
 

@@ -1,17 +1,23 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 # scitt-rfc9162 test vectors (v1)
 
-A self-contained, append-only set of **RFC 9162 SHA-256 hash-tree and
-inclusion-path** vectors: **42 vectors in six classes** — 21 `VALID`, 12
-`INVALID_INCLUSION_PATH`, 2 `INVALID_LEAF_INDEX`, 1 `INVALID_LEAF_DIGEST`, 2
+A self-contained, append-only set of **RFC 9162 SHA-256 hash-tree** vectors:
+**inclusion paths and consistency proofs**, **55 vectors in seven classes** — 27
+`VALID` (21 inclusion, 6 consistency), 12 `INVALID_INCLUSION_PATH`, 7
+`INVALID_CONSISTENCY_PROOF`, 2 `INVALID_LEAF_INDEX`, 1 `INVALID_LEAF_DIGEST`, 2
 `INVALID_TREE_SIZE`, and 4 `VALID_BUT_SIZE_UNAUTHENTICATED` (the ambiguity
 class, described below). Class counts are computed from the vectors themselves
 (`manifest.json` → `class_counts`), not typed in by hand.
 
+Each vector declares `kind` (`inclusion` or `consistency`) in its
+`expected.json`; a reader who only implements inclusion can skip the
+consistency half and still score 42 of the 55.
+
 Tree shapes covered: 1, 2, 3, 4, 5, 6, 7, 8, 9, 15, 16, 17, 31, 32, 33, 63, 64,
 65 leaves; indices include left edge, right edge, interior, and the single tail
 leaf of a `2^n | 1` split. Every shape was chosen to exercise a different fold
-branch, not to reach a round number.
+branch, not to reach a round number. Consistency sizes covered: 1→2, 2→5, 3→7,
+4→8, 6→9, 9→9, plus six tampered proofs and one impossible size relation.
 
 The seven path-structure vectors (`fail-path-short*`, `fail-path-swap*`) isolate
 two properties that a verifier can check separately and get wrong separately:
@@ -57,6 +63,46 @@ The two roots are the whole test: **for `VALID*` vectors they must be equal;
 for the `fail-*` vectors they must differ.** For the negative vectors
 `reconstructed_root` is computed from the tampered material, not asserted
 by hand.
+
+A consistency vector (`kind: consistency`) replaces those fields with:
+
+| Field | Meaning |
+|---|---|
+| `old_size`, `new_size` | the two tree sizes, as a verifier would receive them |
+| `old_root`, `new_root` | the roots of the honest prefix tree and the honest larger tree |
+| `consistency_path` | the RFC 6962 §2.1.2 proof, hex, **in the order the recursion appends nodes** |
+| `reconstructed_old_root`, `reconstructed_new_root` | the two roots rebuilt from `old_root` + path |
+| `result` | `VALID`, or `INVALID_CONSISTENCY_PROOF` |
+
+### Consistency proofs: the array order is scored, not decorative
+
+The proof array is in **recursion order**: nodes produced by the descent first,
+the sibling the same level appended last. That is not a convention this package
+invented for convenience — it is the order the text's `SUBPROOF` produces, and
+it is measurable. Reading the same array **in reverse** scores 18 of the 23
+known-good external consistency cases used to calibrate this checker; the
+forward order scores 23 of 23. A reader who reverses the array will therefore
+get five wrong verdicts on this set too, which is exactly the kind of
+disagreement these vectors are meant to surface.
+
+The verifier behind this half was itself written from the recursion text and
+**calibrated against those 23 external cases before it judged anything of
+ours**. Its first form was an iterative loop that seeded both roots from
+`old_root` even when `old_size` is not a power of two: 20 of 23. The two
+iterative variants tried afterwards scored 20 of 23 as well. Only the recursive
+form scored 23 of 23. That record is here rather than in a commit message
+because a corpus author who cannot show their checker was wrong at some point
+has not shown their checker can be wrong.
+
+One input is **genuinely** not scored: a consistency proof with `old_size = 0`.
+RFC 6962 §2.1.2 defines `SUBPROOF` for `1 <= m <= n`, says nothing about
+`m = 0`, and conforming implementations differ (the Go CT libraries accept it
+as trivially true; this package would refuse it). It is listed in
+`manifest.json` → `underspecified_inputs` with that reason. This is the opposite
+case from `tree_size = 0` above: there the text *did* decide and an earlier
+draft wrongly called it unspecified. The distinction is the point — "the text
+does not say" is a claim that has to be checked against the text, both when it
+is used to score and when it is used to excuse.
 
 ### What this set used to refuse to score, and now does
 
@@ -116,7 +162,7 @@ tree head, or an anchor whose signed payload carries both root and size).
 
 ```bash
 cd docs/upstream-package/scitt-rfc9162
-sha256sum -c SHA256SUMS                                  # 43/43 OK (`shasum -a 256 -c` on macOS)
+sha256sum -c SHA256SUMS                                  # 56/56 OK (`shasum -a 256 -c` on macOS)
 python tools/build_scitt_vector_package.py --check       # from the repo root
 python tools/build_scitt_vector_package.py --check-drift # committed bytes == what build produces
 ```
@@ -138,7 +184,7 @@ node tools/check_scitt_vectors_node.mjs --self-test
 
 The tree algebra in that file is written again in JavaScript, sharing no code
 with `uibc_core`, the builder or the Python standalone checker. It walks the
-same 42 vectors and must reach `VERDICT: PARITY`.
+same 55 vectors and must reach `VERDICT: PARITY`.
 
 **What this is not.** It is not an independent run. The same author wrote it, so
 the external run ledger does not count it, and neither should a reader: a
@@ -146,12 +192,14 @@ second implementation by the same hand proves the *vectors* are written down
 concretely enough to be met twice, not that a stranger can meet them. For that,
 the invitation in `docs/INVITE-ONE-PAGE.md` is the only route.
 
-**What it does add.** `--self-test` feeds both checkers the same four
+**What it does add.** `--self-test` feeds both checkers the same seven
 deliberately broken vectors — the empty-tree root replaced by an all-zero
-digest, a size-0 fold result filled in, a size-0 vector marked `VALID`, and a
-leaf digest detached from its leaf input — and exits 1 unless every one is
-caught. A checker that cannot fail its own mutations is decoration, and this
-is the cheapest way to show the empty-tree rule is enforced rather than
+digest, a size-0 fold result filled in, a size-0 vector marked `VALID`, a leaf
+digest detached from its leaf input, and three consistency mutations (zeroed
+old root, one proof node too many, the two sizes swapped) — and exits 1 unless
+every one is caught. A checker that cannot fail its own mutations is
+decoration, and this is the cheapest way to show the empty-tree rule, the
+leaf-input binding and the consistency length rule are enforced rather than
 described.
 
 ## Tree construction (write it down, don't import it)
@@ -175,6 +223,9 @@ Stated plainly, because it is the first thing a reviewer will ask:
   library installed and will not ship signed bytes it cannot verify itself.
   The v1 set here therefore stops at the hash-tree algebra.
 - **No transparency-log receipts, no witness cosignatures, no TSA timestamps.**
+  The consistency half stops at the algebra for the same reason: a consistency
+  proof is checked here, a *signed* tree head that says which sizes to check is
+  not shipped.
 - **No negative vectors for signature failure** — there are no signatures to
   fail here. The IETF SCITT `examples` set `scitt-cose` already covers that
   layer with signed material; anyone needing it should use that set.

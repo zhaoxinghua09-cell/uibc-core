@@ -17,12 +17,17 @@ Checks, for every vector in manifest.json:
   * VALID* vectors: root_true == reconstructed_root
   * fail-* vectors: root_true != reconstructed_root
   * the ambiguity vector additionally folds to the same root at alt_tree_size
+  * consistency vectors (kind=consistency): rebuilding both roots from old_root
+    and the recorded consistency_path reproduces reconstructed_old_root /
+    reconstructed_new_root, and VALID matches that rebuild
   * SHA256SUMS matches every listed file byte-for-byte
 
---self-test additionally proves these checks are not vacuous: four deliberately
+--self-test additionally proves these checks are not vacuous: seven deliberately
 broken vectors (all-zero empty root, a filled-in size-0 fold result, a size-0
-vector marked VALID, a leaf digest detached from its input) are fed through the
-same code and must each be caught. Exit 1 if any probe slips through.
+vector marked VALID, a leaf digest detached from its input, a consistency vector
+with a zeroed old root, one with a proof node too many, and one with the two
+sizes in the wrong order) are fed through the same code and must each be
+caught. Exit 1 if any probe slips through.
 Exit code 1 on any disagreement.
 """
 import hashlib
@@ -55,8 +60,66 @@ def fold(leaf, index, size, path):
     return r
 
 
+def _split(n):
+    k = 1
+    while k * 2 < n:
+        k *= 2
+    return k
+
+
+def reconstruct_consistency(m, n, old_root, proof):
+    """Rebuild (old_root, new_root) from the proof, or None.
+
+    Written from the RFC 6962 Section 2.1.2 recursion, in the order the recursion
+    appends nodes. A short proof, a long proof and a proof for the wrong size
+    relation all fall out structurally instead of arithmetically.
+    """
+    if m < 1 or n < m:
+        return None
+    if m == n:
+        return (old_root, old_root) if not proof else None
+    p = list(proof)
+
+    def walk(a, b, pos, seeded):
+        if a == b:
+            if seeded:
+                return old_root, old_root, pos
+            if pos >= len(p):
+                return None
+            return p[pos], p[pos], pos + 1
+        k = _split(b)
+        if a <= k:
+            res = walk(a, k, pos, seeded)
+            if res is None or res[2] >= len(p):
+                return None
+            return res[0], NODE(res[1], p[res[2]]), res[2] + 1
+        res = walk(a - k, b - k, pos, False)
+        if res is None or res[2] >= len(p):
+            return None
+        return NODE(p[res[2]], res[0]), NODE(p[res[2]], res[1]), res[2] + 1
+
+    res = walk(m, n, 0, True)
+    if res is None or res[2] != len(p):
+        return None
+    return res[0], res[1]
+
+
 def check_one(cid, exp, fail):
     """Every rule this checker enforces, for one vector. Shared with --self-test."""
+    if exp.get("kind") == "consistency":
+        # RFC 6962 Section 2.1.2 defines SUBPROOF for 1 <= m <= n; the m = 0 case is
+        # genuinely unspecified and is not carried as a vector (see manifest
+        # underspecified_inputs), so this checker refuses it rather than guessing.
+        rec = reconstruct_consistency(exp["old_size"], exp["new_size"],
+                                      bytes.fromhex(exp["old_root"]),
+                                      [bytes.fromhex(h) for h in exp["consistency_path"]])
+        ro = rec[0].hex() if rec else ""
+        rn = rec[1].hex() if rec else ""
+        if (ro != exp["reconstructed_old_root"]) or (rn != exp["reconstructed_new_root"]):
+            fail("%s: consistency reconstruction is not reproducible" % cid)
+        if exp["result"].startswith("VALID") != (ro == exp["old_root"] and rn == exp["new_root"]):
+            fail("%s: result %s contradicts the consistency fold" % (cid, exp["result"]))
+        return
     leaf = LEAF(bytes.fromhex(exp["leaf_entry"]["leaf_input_hex"]))
     if leaf.hex() != exp["leaf_entry"]["digest_hex"]:
         fail("%s: leaf digest != SHA-256(leaf input)" % cid)
@@ -124,6 +187,31 @@ def main():
             ("leaf digest no longer matches its leaf input", valid_tampered),
         ]
         for label, tampered in probes:
+            caught = []
+            check_one("self-test", tampered, caught.append)
+            if caught:
+                msgs.append("self-test caught: %s — %s" % (label, caught[0]))
+            else:
+                ok = False
+                msgs.append("self-test FAILED to catch: %s" % label)
+
+        # The same discipline for the consistency half: three mutations on a
+        # genuine vector, each of which a root-comparing-only checker would miss.
+        cons_id = next(v for v in manifest["vectors"]
+                       if v.get("kind") == "consistency"
+                       and v["expected_result"] == "VALID"
+                       and len(v["expected"]["consistency_path"]) >= 2)
+        with open(os.path.join(PKG, cons_id["dir"], "expected.json"), encoding="utf-8") as fh:
+            cons_base = json.load(fh)
+        cons_probes = [
+            ("consistency old_root replaced by zeros",
+             dict(cons_base, old_root="00" * 32)),
+            ("consistency proof one node too long",
+             dict(cons_base, consistency_path=list(cons_base["consistency_path"]) + ["00" * 32])),
+            ("consistency sizes put in the wrong order",
+             dict(cons_base, old_size=cons_base["new_size"], new_size=cons_base["old_size"])),
+        ]
+        for label, tampered in cons_probes:
             caught = []
             check_one("self-test", tampered, caught.append)
             if caught:

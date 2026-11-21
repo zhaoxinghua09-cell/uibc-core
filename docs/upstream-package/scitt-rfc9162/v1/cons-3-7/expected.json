@@ -1,0 +1,17 @@
+{
+  "consistency_path": [
+    "ad5136029dad34537a6cc2671f1d9b997afdefffb41a3838cde63e85c334082b",
+    "60185194473fada8b19a483f685266f3c32d2821c22ecbbdd320dc313c318ebb",
+    "10d6ef64262bea6f460da1977f8bc5f17072d90640db4c572f4028dbb89a354c",
+    "1d4bbc23e7cd05f78ce6f068c148841e0bf9e911c7272ced5c915cc0faafe7e7"
+  ],
+  "description": "Old size is not a power of two and the new tree is unbalanced 4|3, so the recursion descends on the right and the proof carries a left sibling at two levels. This is the shape that broke the first iterative verifier written for this package: it scored 20 of 23 known-good external cases until the size relation was fixed.",
+  "kind": "consistency",
+  "new_root": "8374254daf8c89b408d3063c2089abe4838019438036256d07ad33e4df2c855f",
+  "new_size": 7,
+  "old_root": "3498db6ac34c7e055a415dd2bcdd8a859142e74b56a572067c81dfe69732b826",
+  "old_size": 3,
+  "reconstructed_new_root": "8374254daf8c89b408d3063c2089abe4838019438036256d07ad33e4df2c855f",
+  "reconstructed_old_root": "3498db6ac34c7e055a415dd2bcdd8a859142e74b56a572067c81dfe69732b826",
+  "result": "VALID"
+}

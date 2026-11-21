@@ -1,0 +1,17 @@
+{
+  "consistency_path": [
+    "cb75f828f347c9b55a7dadad2d97ef40b9520f595ca4deab2d91f7c7af28fa4f",
+    "0b4b52637e00ebb96beddfb5b59eda28ebd674b57242aa65382139b0e22cce46",
+    "75410bb9cbce6b981996f5eccc27ba87fa23ae202661ca3745bc22b3500d507e",
+    "90b2e1541107f76804195398f05d064dc896c3c692ec43629638cde79abb19ca"
+  ],
+  "description": "new_root replaced with the root of a nearby size. The proof is genuine; only the fold to the new root can catch it.",
+  "kind": "consistency",
+  "new_root": "30ce5c5368b1b7bddbf8361472fb3d541d779a0f974706787a92932f52bfd3d9",
+  "new_size": 9,
+  "old_root": "4a6d954f29d79f9b02b50e11851b028f5bd3f6cb7587b03c4f662c09baad77ed",
+  "old_size": 6,
+  "reconstructed_new_root": "e51147a4063d67660a3b6cf8b43c11f26db771e374b6e97dc8abe71c3c99835d",
+  "reconstructed_old_root": "4a6d954f29d79f9b02b50e11851b028f5bd3f6cb7587b03c4f662c09baad77ed",
+  "result": "INVALID_CONSISTENCY_PROOF"
+}

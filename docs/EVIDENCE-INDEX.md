@@ -11,12 +11,12 @@
 | S1 | package structure | 是 | 15 | 1 | 36 |
 | S2 | identity consistency | 是 | 9 | 1 | 22 |
 | S3 | lifecycle state machine + semantics | 是 | 10 | 1 | 21 |
-| S4 | evidence integrity | 是 | 23 | 3 | 44 |
+| S4 | evidence integrity | 是 | 23 | 3 | 45 |
 | S5 | evidence root | 是 | 13 | 3 | 35 |
 | S6 | seal signature | 是 | 25 | 1 | 39 |
 | S7 | evidence index metadata | 否 | 6 | 1 | 19 |
-| S8 | package checkpoint head | 否 | 8 | 2 | 27 |
-| S9 | head pinned out-of-band | 否 | 9 | 1 | 32 |
+| S8 | package checkpoint head | 否 | 8 | 2 | 28 |
+| S9 | head pinned out-of-band | 否 | 9 | 1 | 33 |
 | S10 | attestation closure declared | 否 | 6 | 2 | 10 |
 | S11 | strict serialization | 是 | 7 | 1 | 20 |
 | S12 | timestamp and identifier strictness | 是 | 12 | 2 | 22 |

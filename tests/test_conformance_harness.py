@@ -42,6 +42,17 @@ class TestPositiveControl(unittest.TestCase):
         self.assertGreater(total, 0, out.stdout)
         self.assertEqual(agree, total, out.stdout)
 
+    def test_consistency_vectors_are_judged_not_skipped(self):
+        # The harness crashed on the consistency half when it was added: it read
+        # leaf_entry unconditionally. A corpus that the invite points outsiders at
+        # has to run end to end, both halves, or "run our vectors" is a request that
+        # fails halfway through.
+        receipt = h.run([sys.executable, os.path.join(REPO, "conformance", "adapters",
+                                                      "reference_python.py")])
+        self.assertEqual(receipt["kinds"]["consistency"], 13)
+        self.assertEqual(receipt["kinds"]["inclusion"], 42)
+        self.assertEqual(receipt["root_agreement"], receipt["answered"])
+
 
 class TestNegativeControl(unittest.TestCase):
     def test_accept_all_adapter_is_caught(self):

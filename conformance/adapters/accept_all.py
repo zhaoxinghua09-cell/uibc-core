@@ -22,6 +22,15 @@ def main():
         print(json.dumps({"error": "no input"}))
         return 1
     req = json.loads(line)
+    if req.get("kind") == "consistency":
+        # Cheats the same way: repeats the vector's own roots as its "reconstruction".
+        print(json.dumps({
+            "reconstructed_old_root": req.get("old_root", ""),
+            "reconstructed_new_root": req.get("new_root", ""),
+            "result": "VALID",
+            "note": "accept-all control adapter; computes nothing on purpose",
+        }))
+        return 0
     print(json.dumps({
         "reconstructed_root": req.get("root_true", ""),
         "result": "VALID",

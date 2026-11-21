@@ -10,9 +10,9 @@ turn `expected.json` into calls into their verifier, then eyeball thirty verdict
 
 This harness removes that labour. An implementation supplies **one executable**
 speaking a two-line JSON protocol (see `conformance/ADAPTER-PROTOCOL.md`), and the
-harness does the rest: it feeds every vector, compares what came back, and writes
-a receipt that names the adapter, the environment and the command. The receipt is
-what gets filed, not the adapter author's prose.
+harness does the rest: it feeds every vector — inclusion and consistency — compares
+what came back, and writes a receipt that names the adapter, the environment and
+the command. The receipt is what gets filed, not the adapter author's prose.
 
 The one design decision worth arguing about
 -------------------------------------------
@@ -62,7 +62,28 @@ def load_vectors(pkg=PKG):
     for v in manifest["vectors"]:
         with open(os.path.join(pkg, v["dir"], "expected.json"), encoding="utf-8") as fh:
             exp = json.load(fh)
+        if exp.get("kind") == "consistency":
+            out.append({
+                "id": v["id"],
+                "kind": "consistency",
+                "request": {
+                    "kind": "consistency",
+                    "old_size": exp["old_size"],
+                    "new_size": exp["new_size"],
+                    "old_root": exp["old_root"],
+                    "new_root": exp["new_root"],
+                    "consistency_path": exp["consistency_path"],
+                },
+                "expected_result": exp["result"],
+                "expected_reconstructed": {
+                    "old": exp["reconstructed_old_root"],
+                    "new": exp["reconstructed_new_root"],
+                },
+                "expected_root_true": {"old": exp["old_root"], "new": exp["new_root"]},
+            })
+            continue
         out.append({
+            "kind": "inclusion",
             "id": v["id"],
             "request": {
                 "leaf_input_hex": exp["leaf_entry"]["leaf_input_hex"],
@@ -123,12 +144,33 @@ def run(cmd, vectors=None):
         except Exception as exc:  # noqa: BLE001 - the report must survive any adapter
             rows.append({"id": v["id"], "status": "adapter-error", "detail": str(exc)})
             continue
-        got_root = answer.get("reconstructed_root")
         got_verdict = answer.get("result")
+        if v.get("kind") == "consistency":
+            got_old = answer.get("reconstructed_old_root")
+            got_new = answer.get("reconstructed_new_root")
+            root_ok = (got_old == v["expected_reconstructed"]["old"]
+                       and got_new == v["expected_reconstructed"]["new"])
+            verdict_ok = (got_verdict == v["expected_result"])
+            rows.append({
+                "id": v["id"],
+                "kind": "consistency",
+                "status": "answered",
+                "their_reconstructed_old_root": got_old,
+                "their_reconstructed_new_root": got_new,
+                "their_verdict": got_verdict,
+                "root_agreement": root_ok,
+                "verdict_agreement": verdict_ok,
+                "their_extra": {k: val for k, val in answer.items()
+                                if k not in ("reconstructed_old_root",
+                                             "reconstructed_new_root", "result")},
+            })
+            continue
+        got_root = answer.get("reconstructed_root")
         root_ok = (got_root == v["expected_reconstructed"])
         verdict_ok = (got_verdict == v["expected_result"])
         rows.append({
             "id": v["id"],
+            "kind": "inclusion",
             "status": "answered",
             "their_reconstructed_root": got_root,
             "their_verdict": got_verdict,
@@ -149,6 +191,8 @@ def run(cmd, vectors=None):
             "utc_time": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         },
         "vectors": len(rows),
+        "kinds": {k: sum(1 for r in rows if r.get("kind") == k)
+                      for k in ("inclusion", "consistency")},
         "answered": len(answered),
         "adapter_errors": len(errored),
         "root_agreement": sum(1 for r in answered if r["root_agreement"]),
@@ -206,8 +250,9 @@ def main(argv=None):
     print("=" * 78)
     print("conformance receipt")
     print("adapter : %s" % receipt["adapter_command"])
-    print("vectors : %d   answered: %d   adapter errors: %d"
-          % (receipt["vectors"], receipt["answered"], receipt["adapter_errors"]))
+    print("vectors : %d (inclusion %d / consistency %d)   answered: %d   adapter errors: %d"
+          % (receipt["vectors"], receipt["kinds"]["inclusion"], receipt["kinds"]["consistency"],
+             receipt["answered"], receipt["adapter_errors"]))
     print("root agreement    : %d/%d" % (receipt["root_agreement"], receipt["answered"]))
     print("verdict agreement : %d/%d" % (receipt["verdict_agreement"], receipt["answered"]))
     if receipt["root_mismatches"]:

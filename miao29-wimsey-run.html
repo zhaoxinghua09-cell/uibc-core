@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Miao S2S Test Vectors × wimsey 0.9.0 — Independent Run Record</title>
+<style>
+:root{--navy:#0b1f3a;--gold:#d4af37;--ink:#1c2733;--mut:#5a6a7a;--line:#d9e0e8;--bg:#f6f8fa;--red:#b3261e;--amber:#8a6d00;}
+*{box-sizing:border-box} body{margin:0;font-family:-apple-system,"Segoe UI",Roboto,"Noto Sans CJK SC","PingFang SC","Microsoft YaHei",sans-serif;color:var(--ink);background:#fff;line-height:1.55}
+header{background:var(--navy);color:#fff;padding:34px 20px 26px} header .in{max-width:1020px;margin:0 auto}
+.kick{color:var(--gold);letter-spacing:.14em;font-size:12px;text-transform:uppercase}
+h1{margin:8px 0 6px;font-size:27px;line-height:1.25} header p{margin:0;color:#c9d4e2;max-width:760px}
+main{max-width:1020px;margin:0 auto;padding:24px 20px 40px}
+.facts{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0 4px}
+.fact{background:#10294d;border:1px solid #24466e;border-radius:8px;padding:8px 12px;font-size:12.5px;color:#c9d4e2}
+.fact b{color:#fff;display:block;font-size:13px}
+h2{font-size:19px;margin:30px 0 10px;color:var(--navy);border-bottom:2px solid var(--gold);padding-bottom:5px}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap;margin:14px 0}
+.node{flex:1 1 150px;border:1.5px solid var(--navy);border-radius:10px;padding:12px;text-align:center;background:#fff}
+.node .t{font-weight:700;color:var(--navy)} .node .s{font-size:12.5px;color:var(--mut)}
+.node.gate{border-color:var(--red);background:#fdf1f0} .node.gate .t{color:var(--red)}
+.node.dead{border-style:dashed;color:var(--mut);background:var(--bg)} .node.dead .t{color:var(--mut)}
+.arrow{align-self:center;padding:0 7px;color:var(--gold);font-weight:700;font-size:18px}
+.bar{display:flex;height:34px;border-radius:7px;overflow:hidden;margin:10px 0 6px;font-size:12.5px;color:#fff}
+.bar div{display:flex;align-items:center;justify-content:center;padding:0 6px;text-align:center}
+.b1{background:var(--red);width:17.2%} .b2{background:#c77d0a;width:44.8%} .b3{background:#7d8ea0;width:38%}
+.legend{font-size:13px;color:var(--mut)}
+.tiles{display:flex;gap:12px;flex-wrap:wrap;margin:12px 0}
+.tile{flex:1 1 140px;border:1px solid var(--line);border-radius:10px;padding:12px;text-align:center}
+.tile .n{font-size:26px;font-weight:700;color:var(--navy)} .tile .l{font-size:12.5px;color:var(--mut)}
+.split{display:flex;gap:14px;flex-wrap:wrap}
+.card{flex:1 1 300px;border:1px solid var(--line);border-radius:10px;padding:14px 16px;background:#fff}
+.card h3{margin:0 0 6px;font-size:15px;color:var(--navy)}
+code,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px}
+.err{background:#fdf1f0;border:1px solid #eec5c2;border-radius:8px;padding:10px 14px;color:var(--red);font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;word-break:break-all}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px}
+th{background:var(--navy);color:#fff;text-align:left;padding:8px} td{border-bottom:1px solid var(--line);padding:7px 8px;vertical-align:top}
+td.id{font-weight:700;white-space:nowrap;color:var(--navy)}
+.chip{border-radius:20px;padding:1px 9px;font-size:12px;font-weight:600;white-space:nowrap}
+.chip.mis{background:#fbe9e7;color:var(--red)} .chip.can{background:#eef1f4;color:#54687c} .chip.mat{background:#e5f3e5;color:#1e6b1e}
+.hash{word-break:break-all;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 14px}
+footer{border-top:1px solid var(--line);margin-top:34px;padding-top:14px;font-size:12.5px;color:var(--mut)}
+.big{font-size:15.5px}
+</style></head><body>
+<header><div class="in">
+<div class="kick">Independent verification run · 2026-11-21</div>
+<h1>Miao's 29 WIMSE S2S test vectors, run against wimsey 0.9.0</h1>
+<p>One independent implementation, the real corpus, no token altered. The run found a divergence before it could find anything else — and that divergence is the result.</p>
+<div class="facts">
+<div class="fact"><b>Corpus</b>Zenodo DOI 10.5281/zenodo.24203971 · v4</div>
+<div class="fact"><b>Implementation</b>kanywst/wimsey v0.9.0 (Rust)</div>
+<div class="fact"><b>Vectors</b>29 (6 positive, 23 negative) + 3 observation items</div>
+<div class="fact"><b>Label</b>from-the-draft · NOT an official WG reference</div>
+</div></div></header>
+<main>
+
+<h2>What happened, in one picture</h2>
+<div class="flow">
+<div class="node"><div class="t">Corpus v4</div><div class="s">29 vectors, keys &amp; WITs published in §2</div></div>
+<div class="arrow">→</div>
+<div class="node"><div class="t">WIT verification</div><div class="s">wimsey's first stage: verify the WIT, then the signature</div></div>
+<div class="arrow">→</div>
+<div class="node gate"><div class="t">✕ Alg gate</div><div class="s">corpus says <code>"Ed25519"</code> · wimsey accepts only <code>"EdDSA"</code></div></div>
+<div class="arrow">→</div>
+<div class="node dead"><div class="t">Signature layer</div><div class="s">never reached — no signature base was evaluated</div></div>
+</div>
+<p class="big">Every runnable vector stopped at the same gate. The corpus spells the Ed25519 JOSE algorithm <code>"Ed25519"</code> — in the issuer JWK, in all three WIT headers, and in the confirmation keys. Wimsey 0.9.0 accepts only the older name <code>"EdDSA"</code> and fails closed:</p>
+<div class="err">unsupported algorithm 'Ed25519', expected 'EdDSA'</div>
+
+<h2>The count</h2>
+<div class="bar"><div class="b1">5 positives rejected at the gate</div><div class="b2">13 negatives rejected — right outcome, wrong stage</div><div class="b3">11 outside the CLI's expression</div></div>
+<div class="legend">A negative counts as a match only when both the outcome <i>and</i> the corpus's expected first-fail stage agree. On that rule: <b>0 match · 18 mismatch · 11 cannot</b>. Outcome-only, all 18 runnable vectors were rejected — but 13 of them at the WIT stage instead of their named stage, and the 5 positives should have been accepted.</div>
+<div class="tiles">
+<div class="tile"><div class="n">0</div><div class="l">match (outcome + stage)</div></div>
+<div class="tile"><div class="n">18</div><div class="l">mismatch</div></div>
+<div class="tile"><div class="n">11</div><div class="l">cannot (see table)</div></div>
+<div class="tile"><div class="n">0</div><div class="l">signature bases evaluated</div></div>
+</div>
+
+<h2>Whose spelling is right?</h2>
+<div class="split">
+<div class="card"><h3>The corpus follows the draft</h3><p><code>draft-ietf-wimse-http-signature-08</code>'s own examples print <code>"alg": "Ed25519"</code> in the JWKs, and its algorithm note cites <b>RFC 9864</b>, which registers the fully-specified name <code>Ed25519</code>.</p></div>
+<div class="card"><h3>The implementation is one name behind</h3><p>Wimsey v0.9.0 is pinned to draft-08, but its JWK and WIT parsers accept only <code>EdDSA</code> (RFC 8037) and <code>ES256</code>. It is self-consistent — its own tooling emits <code>EdDSA</code> — and it fails closed. The two sides disagree on a string, and the string is a gate.</p></div>
+</div>
+
+<h2>Per-vector record</h2>
+<table><tr><th>Vector</th><th>Expected (corpus anchor)</th><th>Observed (wimsey)</th><th>Verdict</th></tr>
+<tr><td class="id">P-01</td><td>ACCEPT (first-fail: all-pass)</td><td>REJECT (exit 1) - error: unsupported algorithm `Ed25519`, expected `EdDSA` (stage: WIT)</td><td><span class="chip mis">mismatch</span></td></tr>
+<tr><td class="id">P-02</td><td>ACCEPT (first-fail: all-pass)</td><td>CANNOT - signed RESPONSE; `wimsey httpsig verify` verifies signed requests only (subcommands are sign/verify for requests; no response-verification…</td><td><span class="chip can">cannot</span></td></tr>
+<tr><td class="id">P-03</td><td>ACCEPT (first-fail: all-pass)</td><td>REJECT (exit 1) - error: unsupported algorithm `Ed25519`, expected `EdDSA` (stage: WIT)</td><td><span class="chip mis">mismatch</span></td></tr>
+<tr><td class="id">P-04</td><td>ACCEPT (first-fail: all-pass (CONNECT coverage set))</td><td>REJECT (exit 1) - error: unsupported algorithm `Ed25519`, expected `EdDSA` (stage: WIT)</td><td><span class="chip mis">mismatch</span></td></tr>
+<tr><td class="id">P-05</td><td>ACCEPT (first-fail: all-pass)</td><td>REJECT (exit 1) - error: unsupported algorithm `Ed25519`, expected `EdDSA` (stage: WIT)</td><td><span class="chip mis">mismatch</span></td></tr>
+<tr><td class="id">P-06</td><td>ACCEPT (first-fail: all-pass (SELECT by tag -&gt; sig2))</td><td>REJECT (exit 1) - error: unsupported algorithm `Ed25519`, expected `EdDSA` (stage: WIT)</td><td><span class="chip mis">mismatch</span></td></tr>
+<tr><td class="id">N-01</td><td>REJECT (first-fail: COVERAGE)</td><td>REJECT (exit 1) - error: unsupported algorithm `Ed25519`, expected `EdDSA` (stage: WIT)</td><td><span class="chip mis">mismatch</span></td></tr>
+<tr><td class="id">N-03</td><td>REJECT (first-fail: COVERAGE)</td><td>REJECT (exit 1) - error: unsupported algorithm `Ed25519`, expected `EdDSA` (stage: WIT)</td><td><span class="chip mis">mismatch</span></td></tr>
+<tr><td class="id">N-04</td><td>REJECT (first-fail: DIGEST)</td><td>REJECT (exit 1) - error: unsupported algorithm `Ed25519`, expected `EdDSA` (stage: WIT)</td><td><span class="chip mis">mismatch</span></td></tr>
+<tr><td class="id">N-05</td><td>REJECT (first-fail: PARAMS)</td><td>REJECT (exit 1) - error: unsupported algorithm `Ed25519`, expected `EdDSA` (stage: WIT)</td><td><span class="chip mis">mismatch</span></td></tr>
+<tr><td class="id">N-09</td><td>REJECT (first-fail: WINDOW)</td><td>REJECT (exit 1) - error: unsupported algorithm `Ed25519`, expected `EdDSA` (stage: WIT)</td><td><span class="chip mis">mismatch</span></td></tr>
+<tr><td class="id">N-09b@T0+300</td><td>ACCEPT (first-fail: all-pass)</td><td>REJECT (exit 1) - error: unsupported algorithm `Ed25519`, expected `EdDSA` (stage: WIT)</td><td><span class="chip mis">mismatch</span></td></tr>
+<tr><td class="id">N-09b@T0+301</td><td>REJECT (first-fail: WINDOW)</td><td>REJECT (exit 1) - error: unsupported algorithm `Ed25519`, expected `EdDSA` (stage: WIT)</td><td><span class="chip mis">mismatch</span></td></tr>
+<tr><td class="id">N-15</td><td>REJECT (first-fail: CRYPTO)</td><td>REJECT (exit 1) - error: unsupported algorithm `Ed25519`, expected `EdDSA` (stage: WIT)</td><td><span class="chip mis">mismatch</span></td></tr>
+<tr><td class="id">N-02</td><td>REJECT (first-fail: COVERAGE)</td><td>REJECT (exit 1) - error: unsupported algorithm `Ed25519`, expected `EdDSA` (stage: WIT)</td><td><span class="chip mis">mismatch</span></td></tr>
+<tr><td class="id">N-06</td><td>REJECT (first-fail: PARAMS)</td><td>REJECT (exit 1) - error: unsupported algorithm `Ed25519`, expected `EdDSA` (stage: WIT)</td><td><span class="chip mis">mismatch</span></td></tr>
+<tr><td class="id">N-07</td><td>REJECT (first-fail: PARAMS)</td><td>REJECT (exit 1) - error: unsupported algorithm `Ed25519`, expected `EdDSA` (stage: WIT)</td><td><span class="chip mis">mismatch</span></td></tr>
+<tr><td class="id">N-08</td><td>REJECT (first-fail: SELECT)</td><td>REJECT (exit 1) - error: unsupported algorithm `Ed25519`, expected `EdDSA` (stage: WIT)</td><td><span class="chip mis">mismatch</span></td></tr>
+<tr><td class="id">N-10</td><td>REJECT (first-fail: AUD)</td><td>REJECT (exit 1) - error: unsupported algorithm `Ed25519`, expected `EdDSA` (stage: WIT)</td><td><span class="chip mis">mismatch</span></td></tr>
+<tr><td class="id">N-11</td><td>REJECT (first-fail: PARAMS)</td><td>REJECT (exit 1) - error: unsupported algorithm `Ed25519`, expected `EdDSA` (stage: WIT)</td><td><span class="chip mis">mismatch</span></td></tr>
+<tr><td class="id">N-12</td><td>CLIENT_REJECT (first-fail: PARAMS)</td><td>CANNOT - signed-response vector (base P-02); CLI verifies requests only, no response-verification command (stage: -)</td><td><span class="chip can">cannot</span></td></tr>
+<tr><td class="id">N-13</td><td>CLIENT_REJECT (first-fail: BINDING)</td><td>CANNOT - signed-response vector (base P-02); CLI verifies requests only, no response-verification command (stage: -)</td><td><span class="chip can">cannot</span></td></tr>
+<tr><td class="id">N-14</td><td>CLIENT_REJECT (first-fail: BINDING)</td><td>CANNOT - unsigned-response acceptance decision; there is no signed message for a request verifier to check, and the CLI has no client/response mode…</td><td><span class="chip can">cannot</span></td></tr>
+<tr><td class="id">N-21</td><td>CLIENT_REJECT (first-fail: COVERAGE)</td><td>CANNOT - signed-response vector on a CONNECT exchange (base P-02 form); CLI verifies requests only (stage: -)</td><td><span class="chip can">cannot</span></td></tr>
+<tr><td class="id">N-16</td><td>NONCONFORMANT (sender) (first-fail: E_ENTROPY probe)</td><td>CANNOT - sender-behaviour probe: requires sampling many nonces from a sender implementation; a single-message verify CLI cannot express it (stage: -)</td><td><span class="chip can">cannot</span></td></tr>
+<tr><td class="id">N-17</td><td>NONCONFORMANT (server) (first-fail: E_ERROR_SURFACE probe)</td><td>CANNOT - server-behaviour probe: requires an HTTP server&#x27;s error responses to two failure classes; wimsey is a library-style verify CLI, not a serv…</td><td><span class="chip can">cannot</span></td></tr>
+<tr><td class="id">N-18</td><td>NONCONFORMANT (server) (first-fail: E_UNSIGNED_SUCCESS probe)</td><td>CANNOT - server-behaviour probe: requires observing a server&#x27;s response to a sign-response request; no server mode in the CLI (stage: -)</td><td><span class="chip can">cannot</span></td></tr>
+<tr><td class="id">N-19</td><td>NONCONFORMANT (sender) (first-fail: E_ACCEPT_SIG_WEAK probe)</td><td>CANNOT - sender/server probe around Accept-Signature negotiation; the verify CLI has no Accept-Signature input or server to negotiate with (stage: -)</td><td><span class="chip can">cannot</span></td></tr>
+<tr><td class="id">N-20</td><td>NONCONFORMANT (verifier) (first-fail: E_PROCESS_ORDER probe)</td><td>CANNOT - verifier processing-order probe: the corpus itself assigns this to implementation review/instrumentation evidence; a black-box single-mess…</td><td><span class="chip can">cannot</span></td></tr>
+<tr><td class="id">N-22</td><td>NONCONFORMANT (verifier) (first-fail: E_SELECTION_BY_LABEL probe)</td><td>CANNOT - verifier-behaviour probe (selection method is not a CLI input); its message content is P-06, which was run as P-06 - but in this run verif…</td><td><span class="chip can">cannot</span></td></tr>
+</table>
+<p class="legend">Cannot, stated plainly: P-02, N-12, N-13, N-21 are signed <i>responses</i> and the verify CLI is request-only; N-14 is an unsigned-response acceptance decision; N-16–N-20 and N-22 are behaviour or processing probes, not single-message checks. Regenerated negatives (N-02, N-06, N-07, N-08, N-10, N-11) were re-signed from the corpus §2 keys under its rule A-04; a pre-run self-check reproduced P-01's literal signature byte-for-byte, so the inputs were sound — the gate was not in the signatures.</p>
+
+<h2>The other tier, kept separate</h2>
+<div class="card"><h3>Operator's own verifier (local run, 2026-11-21)</h3>
+<p>23 of the 29 vectors are single-message decidable; <b>all 23 matched</b> the corpus anchors, with two independent local implementations (Python, Node) returning identical verdicts and an anti-circularity injection check on the expected values. The 6 behaviour probes discriminated 6/6 against fixtures. This tier and the wimsey tier are different kinds of evidence and are not merged: the corpus matches its operator's verifier on every decidable vector, and it has <b>not</b> yet had a clean independent-implementation pass, because the only independent implementation available is stopped by the alg string.</p></div>
+
+<h2>Reproduce it</h2>
+<div class="hash">
+<p style="margin:4px 0"><b>Corpus</b> — Zenodo record 24203971, file <span class="mono">s01-vector-set-v4-publication-2026-11-13.md</span><br>sha256 <span class="mono">1744a7aca33d2a5006617e5e590ed37cae21f9db6578ce3cdcd08572c62354b3</span></p>
+<p style="margin:4px 0"><b>Wimsey</b> — release v0.9.0, <span class="mono">wimsey-v0.9.0-x86_64-unknown-linux-gnu.tar.gz</span><br>tarball sha256 <span class="mono">3f4b811b6f13187bd4af9490125b4eb3292c1b32b48108746dcad52da6a64d10</span> (matches the release SHA256SUMS) · binary sha256 <span class="mono">3e33f344883a27622e1b6f1f95a0fdfccd036ea429293462b2135c058b643f21</span></p>
+<p style="margin:4px 0">Each vector was invoked as <span class="mono">wimsey httpsig verify</span> with the corpus's WIT, request fields and signature values, evaluation time pinned with <span class="mono">--now</span>. Full per-vector commands and raw logs are held with the run record and available on request.</p>
+</div>
+
+<footer>
+Run and page: Steven Zhao (individual contributor), 2026-11-21. Wimsey is a vendor-neutral implementation by kanywst — from-the-draft, <b>not</b> an official WG reference implementation; none exists at the time of this run. The corpus is Jiahui Miao's, CC-BY-4.0 (Zenodo DOI above). Nothing on this page claims a pass that did not happen.
+</footer>
+</main></body></html>

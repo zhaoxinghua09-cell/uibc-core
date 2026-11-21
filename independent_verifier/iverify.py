@@ -23,6 +23,8 @@ import hmac
 import json
 import math
 import os
+import re
+import sys
 
 REQUIRED = ["manifest.json", "identity.json", "lifecycle.json", "evidence/index.json"]
 KNOWN_EVENTS = {"REGISTER", "ACTIVATE", "UPDATE", "TRANSFER", "DELEGATE",
@@ -135,6 +137,47 @@ def sha256_file(path) -> str:
 
 def root_from_hashes(content_hashes) -> str:
     return hashlib.sha256(canon_bytes(sorted(content_hashes))).hexdigest()
+
+
+_TS_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$")
+_UUID_RE = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
+
+
+def _rfc3339_zoned(value) -> bool:
+    """RFC 3339 timestamp with an explicit zone, and a date that actually exists.
+
+    V10 exists because V1-V9 are structural: a string of the right shape passes
+    even when the value is wrong. Measured 2026-11-20: three value-level mutations
+    (timestamp without zone, 1900-02-29, uppercase UUID) were accepted by this
+    implementation while the reference rejected them. A verifier that accepts them
+    cannot be cited as agreeing with the reference on negative cases.
+    """
+    if not isinstance(value, str) or not _TS_RE.match(value):
+        return False
+    year, month, day = int(value[0:4]), int(value[5:7]), int(value[8:10])
+    try:
+        import datetime as _dt
+        _dt.date(year, month, day)
+    except ValueError:
+        return False
+    return True
+
+
+def _canonical_lower_uuid(value) -> bool:
+    return isinstance(value, str) and bool(_UUID_RE.match(value))
+
+
+def value_level_violations(manifest, events) -> list:
+    """V10: values that are structurally fine and factually wrong."""
+    problems = []
+    if not _rfc3339_zoned(manifest.get("created_at")):
+        problems.append("V10:manifest.created_at")
+    for pos, ev in enumerate(events):
+        if not _rfc3339_zoned(ev.get("timestamp")):
+            problems.append("V10:timestamp@%d" % pos)
+        if not _canonical_lower_uuid(ev.get("event_id")):
+            problems.append("V10:event_id@%d" % pos)
+    return problems
 
 
 def lifecycle_violations(events) -> list:
@@ -416,6 +459,7 @@ def independent_verify(package_dir: str, key: bytes = None,
                                 and manifest.get("agent_id") == identity.get("agent_id")) else "FAIL"
 
     outcomes["V3"] = "PASS" if not lifecycle_violations(events) else "FAIL"
+    outcomes["V10"] = "PASS" if not value_level_violations(manifest, events) else "FAIL"
 
     hashes, bad = [], False
     for e in index:
@@ -522,8 +566,9 @@ def independent_verify(package_dir: str, key: bytes = None,
             # never set out to check at all - two different reasons, kept in one list on
             # purpose, since a consumer only needs to know it was not checked.
             "scope": ("Structure, identity consistency, lifecycle state machine, evidence "
-                      "content hashes, evidence index metadata and the seal signature, "
-                      "using rules V1-V9 only."),
+                      "content hashes, evidence index metadata, value-level validity of "
+                      "timestamps and event identifiers, and the seal signature, "
+                      "using rules V1-V10 only."),
             "limitations": [
                 "Rules V1-V9 cover nine of the checks the reference implements; the rest "
                 "are declared not checked rather than assumed clean.",
@@ -539,3 +584,4 @@ def independent_verify(package_dir: str, key: bytes = None,
             "not_checked": _not_checked(unjudged),
             "statement": NOT_DETECTED,
             "strict": key is not None}
+

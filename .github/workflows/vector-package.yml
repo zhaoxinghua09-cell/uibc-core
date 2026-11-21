@@ -62,10 +62,17 @@ jobs:
         # corpus cannot: does every (size, index) and every (m, n) up to a bound
         # work? Generation comes from uibc_core, verification from the standalone
         # checker (which imports nothing from it), so a disagreement is real.
+        # Each run also writes a receipt binding its counts to a digest of the instance
+        # file, and the receipt is checked against that file in the same job: a count
+        # printed in a log is not something a stranger can recompute, a digest is.
         run: |
           python tools/verify_tree_algebra_exhaustive.py --max-size 128 \
-            --dump "${{ runner.temp }}/sweep.json" --self-test
+            --dump "${{ runner.temp }}/sweep.json" \
+            --receipt "${{ runner.temp }}/sweep-receipt.json" --self-test
           node tools/verify_tree_algebra_exhaustive.mjs "${{ runner.temp }}/sweep.json"
+          python tools/check_sweep_receipt.py "${{ runner.temp }}/sweep-receipt.json" \
+            --dump "${{ runner.temp }}/sweep.json"
+          python tools/check_sweep_receipt.py --self-test
 
       - name: A receipt must agree with the package that judged it
         # The invite ends with "send the receipt back". This is the step that turns

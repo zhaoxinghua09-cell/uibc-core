@@ -24,6 +24,7 @@ Exit 1 on any disagreement; the counts are printed either way.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import sys
@@ -44,6 +45,8 @@ def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--max-size", type=int, default=64)
     ap.add_argument("--dump", default=None, help="write instances for the node sweep")
+    ap.add_argument("--receipt", default=None,
+                    help="write a small receipt binding the instance counts to a digest of the dump")
     ap.add_argument("--self-test", action="store_true",
                     help="mutate one instance and require the sweep to catch it")
     a = ap.parse_args(argv)
@@ -92,6 +95,31 @@ def main(argv=None):
         with open(a.dump, "w", encoding="utf-8", newline="\n") as fh:
             json.dump(instances, fh)
         print("instances written    : %s" % a.dump)
+
+    if a.receipt:
+        # The sweep prints numbers; a number in a log is not evidence a stranger can
+        # recompute. This binds the counts to the bytes that produced them: anyone can
+        # re-run the sweep, dump, and compare, and nobody has to trust the log line.
+        # The digest cannot be verified without the dump, and that is stated, because
+        # a receipt that verifies itself proves nothing.
+        digest = hashlib.sha256(open(a.dump, "rb").read()).hexdigest() if a.dump else None
+        receipt = {
+            "contract_version": "uibc-sweep-receipt/1",
+            "max_size": a.max_size,
+            "inclusion_instances": inc_count,
+            "consistency_instances": cons_count,
+            "disagreements": len(bad),
+            "dump_bytes": os.path.getsize(a.dump) if a.dump else None,
+            "dump_sha256": digest,
+            "checked_by": "tools/check_sweep_receipt.py, which needs the dump to check anything",
+            "note": "counts are this run's; the digest names the instance file they were counted "
+                    "in. Re-running the sweep regenerates both, so a receipt is evidence that a "
+                    "run happened and what shape it had, never that it was the only run.",
+        }
+        with open(a.receipt, "w", encoding="utf-8", newline="\n") as fh:
+            json.dump(receipt, fh, indent=2)
+            fh.write("\n")
+        print("receipt written      : %s" % a.receipt)
 
     if a.self_test:
         # A sweep that cannot fail its own mutation is a loop, not a check. Two

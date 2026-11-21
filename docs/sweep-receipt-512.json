@@ -1,0 +1,11 @@
+{
+  "contract_version": "uibc-sweep-receipt/1",
+  "max_size": 512,
+  "inclusion_instances": 131328,
+  "consistency_instances": 131328,
+  "disagreements": 0,
+  "dump_bytes": 208431698,
+  "dump_sha256": "0f5baaa4888e0fedf0286ace8a53426d7c995da2bc0156634c3fca9431b24460",
+  "checked_by": "tools/check_sweep_receipt.py, which needs the dump to check anything",
+  "note": "counts are this run's; the digest names the instance file they were counted in. Re-running the sweep regenerates both, so a receipt is evidence that a run happened and what shape it had, never that it was the only run."
+}

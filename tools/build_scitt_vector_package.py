@@ -550,8 +550,9 @@ def build(out=OUT):
             "is unspecified in RFC 6962 Section 2.1.2 and is not carried (see "
             "underspecified_inputs).",
             "Sizes are swept exhaustively to 128 leaves in CI; 512 leaves was swept once locally on "
-            "2026-11-22 (262,656 instances, 0 disagreements, Python and JavaScript). Beyond "
-            "that, only the corpus shapes and whatever an implementer runs are evidence.",
+            "2026-11-22 (262,656 instances, 0 disagreements, Python and JavaScript) and left "
+            "docs/sweep-receipt-512.json, which binds the counts to a digest of the dump. "
+            "Beyond that, only the corpus shapes and whatever an implementer runs are evidence.",
             "Verdict words are ours. A disagreement on wording with matching roots is "
             "recorded as wording-only by the harness and is not a conformance failure.",
         ],

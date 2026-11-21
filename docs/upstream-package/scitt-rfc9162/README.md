@@ -219,7 +219,7 @@ node tools/verify_tree_algebra_exhaustive.mjs /tmp/inst.json
 |---|---|---|---|
 | 128 (CI, every run) | 8,256 (sizes 1..128, every index) | 8,256 (every 1 ≤ m ≤ n ≤ 128) | **0** |
 | 256 (local, 2026-11-22) | 32,896 | 32,896 | **0** |
-| 512 (local, 2026-11-22) | 131,328 | 131,328 | **0** |
+| 512 (local, 2026-11-22, `docs/sweep-receipt-512.json`) | 131,328 | 131,328 | **0** |
 
 Two readings are compared: generation from `uibc_core`, verification from
 `tools/check_scitt_vectors_standalone.py`, which imports nothing from it. The
@@ -234,6 +234,21 @@ caught: a sweep that cannot fail its own mutation is a loop, not a check.
 to 128 leaves. It does not prove either reading matches RFC 6962 — for that the
 23 external consistency cases and the 147 external arithmetic cases are the only
 evidence there is, and they are cited as external, not as ours.
+
+## A sweep leaves a receipt, because a number in a log is not evidence
+
+`--receipt` writes a small file next to the dump: counts, dump size, dump digest,
+and a note saying that re-running regenerates both. `tools/check_sweep_receipt.py`
+refuses a receipt whose counts cannot fit its own `max_size`, whose digest is not a
+digest, whose counts disagree with the dump it names, or whose `dump_bytes` is
+absent. `--self-test` feeds it nine mutated receipts, and CI checks the receipt of
+the 128-leaf sweep against the dump from the same job.
+
+The 512-leaf receipt is committed (`docs/sweep-receipt-512.json`); the 199 MB dump
+is not, and the receipt says what the dump was. So the claim "131,328 + 131,328,
+zero disagreements" is re-derivable — in about eight minutes — instead of
+quotable. It still cannot prove the sweep was run once, and the receipt says that
+too.
 
 ## The refusal vocabulary is closed, and every word has an instance
 

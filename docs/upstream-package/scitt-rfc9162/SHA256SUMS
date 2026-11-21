@@ -18,6 +18,7 @@
 44edcade0970c9dc0d72c71ee2c64a6728935a8ed9a6e061e7c1780d48b0c0d8  v1/valid-tree2-index0/expected.json
 4a31b603b3a8c8aaaa233134751655990c18a28f94856e900fac938745abe57f  v1/ambiguous-tree-size-4/expected.json
 4c09ca83f54012ced6a8fa191cc2493d29ae38e75fc81847a3279354168e3130  v1/fail-tampered-leaf/expected.json
+4c95df8d741fbcfd2d284c364bd45f614e4800e2e71abc4f4f3476fb1c9f9d5d  manifest.json
 52bb2d59f54ffa5f3c8351b19c87c2541dcebde7e7f943d97f1b219c36e0fca0  v1/valid-tree7-index6/expected.json
 5434b5bdefb9d0833854e921c0e51a921db0db1f9e2bc984502b70e6d1b981d6  v1/valid-tree64-index63/expected.json
 55653735d5ccbb4343d8acf3f8163eae4afd871cd53e9e7429ee5bef43481688  v1/fail-tampered-path-last/expected.json
@@ -57,7 +58,6 @@ c9a78ea744bf6519dee5e9aa4df604b69d83fa6a6043fb7e183f74c5ffb6199c  v1/valid-tree6
 d889a9d4a82504c50e0cc9540e01ffa8b9aa67ee2a78fa141e573ae24746164c  v1/fail-path-short-tampered/expected.json
 da57679bb9ce75ad144eeb72322c769a23b24971448599caf5edb5e4691c7dd7  v1/cons-9-9/expected.json
 df1b516317f620e63aca7475759453fef207b93404f4a0cdad8dda7b1bf8cc5a  v1/fail-path-short-tree3/expected.json
-df9dc7ec15a1fd04ecd055d974b56c772b7cf8b802f706d48c36cf742ad5cb6b  manifest.json
 e8a2e0cb06e61a82edbc71f699ef4f054fd2246da5ddb874196d3c0f4e72e530  v1/valid-tree8-index2/expected.json
 ec4e908bbbf686f1c4c68dda809cb0ce79b2233daee16c5669a118450b28f2dd  v1/fail-wrong-leaf-index/expected.json
 f0ea79d75f1d3efb3572507c5d97219f526758ca871d06850e6fed075cd1b62d  v1/fail-path-too-long/expected.json

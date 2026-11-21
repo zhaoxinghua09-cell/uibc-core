@@ -198,5 +198,46 @@ class GateTests(unittest.TestCase):
         self.assertEqual(r["exit_code"], mapping[r["decision"]])
 
 
+    # 11. no overlay, default -> ALLOW (the absence is what it always was)
+    def test_11_absent_overlay_allows_by_default(self):
+        pkg, _ = _make_pkg(self.tmp, sign_ed=True)
+        r = gate(pkg)
+        self.assertEqual(r["decision"], "ALLOW")
+        self.assertEqual(r["exit_code"], 0)
+        self.assertEqual(r["revocation"]["status"], "NONE")
+
+    # 12. no overlay + coverage demanded -> HOLD, never ALLOW
+    def test_12_absent_overlay_holds_when_coverage_required(self):
+        pkg, _ = _make_pkg(self.tmp, sign_ed=True)
+        r = gate(pkg, require_revocation_coverage=True)
+        self.assertEqual(r["decision"], "HOLD")
+        self.assertEqual(r["exit_code"], 3)
+        self.assertIn("coverage absent", r["reason"])
+        self.assertEqual(r["revocation"]["status"], "NONE")
+
+    # 13. coverage demanded AND a valid revocation supplied -> DENY still wins
+    def test_13_revocation_still_denies_under_coverage_requirement(self):
+        import base64
+        import hashlib
+        import hmac
+        key = generate_key()
+        pkg, _ = _make_pkg(self.tmp, sign_key=key)
+        root = _read_manifest_root(pkg)
+        body = {
+            "revocation_id": "r-test-4", "target_root": root,
+            "reason_code": "OWNER_REQUEST", "key_id": key_id(key),
+            "algorithm": "HMAC-SHA256",
+            "revoked_at": "2026-09-18T00:00:00Z",
+        }
+        sig = base64.b64encode(
+            hmac.new(key, _canonical_sig_payload(body), hashlib.sha256).digest()
+        ).decode("ascii")
+        rp = _write_json(os.path.join(self.tmp, "rev.json"), dict(body, signature=sig))
+        r = gate(pkg, key=key, revocation_path=rp, require_revocation_coverage=True)
+        self.assertEqual(r["decision"], "DENY")
+        self.assertEqual(r["exit_code"], 2)
+        self.assertEqual(r["revocation"]["status"], "REVOKED")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

@@ -12,6 +12,7 @@
 | 4 | **最强锚定只到 `anchored`，未达 `witnessed`** | 我们只有 FreeTSA 摘要时间戳 + Bitcoin 区块锚，没有第二个独立见证方为同一摘要联署 | 见 `docs/SPEC-PROPOSAL-v0.1.md` §5；与 EP-AEC-02 的链式见证要求明确标为差距，不声称等价 |
 | 5 | **Windows 下两例测试复现不出** | `test_quick_run_matches_the_receipt`（子进程启动方式）、`test_outside_a_rebase_it_touches_nothing`（路径/重基语义）与平台绑定 | Linux CI 1031 例全过；Windows 干净克隆 1 失败 / 1 错误，失败名写在这里，不写"全平台全过" |
 | 6 | **外部评审方收到的证据包可能落后于当前套件** | 事实包从仓库内已提交的结果 JSON 读取；若 JSON 未随套件刷新，评审方看到的是旧快照 | `tools/muse_review.py` 现在会打印所用快照的文件名与 git blob，数字按快照现算，不再写死条数 |
+| 7 | **撤销只有屏障，没有分发**：覆盖层缺失时默认 `ALLOW`；也没有新鲜度上界 | 判定器只看得见递给它的文件，包内无法自证"没有人撤销过它"，而这正是分发层的活 | 加 `--require-revocation-coverage` 可把"缺失"变成 `HOLD(3)`，但**仍不证明**"确实没有撤销"；带时间窗的"已查无撤销"签名声明（CRL 形态）未实现，新鲜度上界也未实现。2026-11-21 实测八情形 8/8 见 `tools/demo_revocation.py` |
 
 ## 怎么核对这一页
 

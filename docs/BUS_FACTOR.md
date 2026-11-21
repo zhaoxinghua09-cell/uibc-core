@@ -33,7 +33,10 @@
 ```powershell
 # 1) 拉起环境
 git clone https://github.com/zhaoxinghua09-cell/uibc-core && cd uibc-core
-python -m pip install -e ".[verify]"
+python -m pip install -e ".[verify]" pytest
+# pytest 必须单独装：13 个测试模块在 import 时就 import pytest，
+# 只装 .[verify] 会看到 "ImportError: No module named 'pytest'"（13 errors + 2 failures），
+# 那是环境没装全，不是代码坏了。
 # 2) 跑测试（Windows 需先把 mingit 的 cmd 目录放进 PATH，否则 subprocess 调 git 会失败）
 $env:PATH = "C:\Users\<user>\.local\mingit-2.56.0.4\cmd;$env:PATH"
 python -m pytest tests -q

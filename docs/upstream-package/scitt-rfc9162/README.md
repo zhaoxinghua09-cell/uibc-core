@@ -233,6 +233,20 @@ to 128 leaves. It does not prove either reading matches RFC 6962 — for that th
 23 external consistency cases and the 147 external arithmetic cases are the only
 evidence there is, and they are cited as external, not as ours.
 
+## The refusal vocabulary is closed, and every word has an instance
+
+Seven results, no more: `VALID`, `VALID_BUT_SIZE_UNAUTHENTICATED`,
+`INVALID_INCLUSION_PATH`, `INVALID_LEAF_DIGEST`, `INVALID_LEAF_INDEX`,
+`INVALID_TREE_SIZE`, `INVALID_CONSISTENCY_PROOF`. `--check` rejects a vector that
+says anything else, and rejects a vocabulary word that no vector ever claims — a
+word with no instance behind it is a claim, not a check. Both directions are
+tested (`test_an_unknown_result_word_is_a_finding`,
+`test_a_refusal_word_no_vector_claims_is_a_finding`).
+
+Why this is a rule and not tidiness: an implementer reading the package must be
+able to enumerate what it can be asked to say. A package that invents a word per
+case is a package whose refusals cannot be compared.
+
 ## Every negative has a positive twin at the same shape
 
 An audit on 2026-11-22 found eight `fail-*` vectors whose shape had no passing

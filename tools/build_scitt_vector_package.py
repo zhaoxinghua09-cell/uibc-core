@@ -486,6 +486,21 @@ def _write_gitattributes(out):
         fh.write("v1/** -text\nmanifest.json -text\nREADME.md -text\nSHA256SUMS -text\n")
 
 
+# The refusal vocabulary is closed on purpose. A vector package that invents a new
+# word per case tells an implementer nothing about what it is expected to say, and a
+# word no vector ever uses is a claim with no instance behind it. `--check` holds both
+# ends of that: nothing outside this set, nothing inside it left unused.
+RESULT_VOCAB = (
+    "VALID",
+    "VALID_BUT_SIZE_UNAUTHENTICATED",
+    "INVALID_INCLUSION_PATH",
+    "INVALID_LEAF_DIGEST",
+    "INVALID_LEAF_INDEX",
+    "INVALID_TREE_SIZE",
+    "INVALID_CONSISTENCY_PROOF",
+)
+
+
 def build(out=OUT):
     os.makedirs(out, exist_ok=True)
     written, vectors = [], []
@@ -667,9 +682,16 @@ def verify(out=OUT):
         ok = False
         msgs.append("negatives with no positive twin at the same shape: " + ", ".join(unpaired))
 
+    seen_results = {}
     for v in manifest["vectors"]:
         with open(os.path.join(out, v["dir"], "expected.json"), encoding="utf-8") as fh:
             exp = json.load(fh)
+        result = exp.get("result")
+        seen_results.setdefault(result, []).append(v["id"])
+        if result not in RESULT_VOCAB:
+            ok = False
+            msgs.append("%s: result %r is outside the package's refusal vocabulary"
+                        % (v["id"], result))
         if exp.get("kind") == "consistency":
             m, n = exp["old_size"], exp["new_size"]
             old_root = bytes.fromhex(exp["old_root"])
@@ -729,6 +751,14 @@ def verify(out=OUT):
                     ok = False
                     msgs.append("checksum mismatch: %s" % rel)
     msgs.append("vectors: %d" % len(manifest["vectors"]))
+    unused = [w for w in RESULT_VOCAB if w not in seen_results and w != "VALID"]
+    if unused:
+        ok = False
+        msgs.append("vocabulary words no vector ever claims: " + ", ".join(unused))
+    if "VALID" not in seen_results:
+        ok = False
+        msgs.append("no vector expects VALID: the package would be all refusals")
+
     return ok, msgs
 
 

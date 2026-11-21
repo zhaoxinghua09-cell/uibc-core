@@ -103,6 +103,38 @@ class TestPackageSelfChecks(unittest.TestCase):
         self.assertFalse(ok, msgs)
         self.assertTrue(any("no positive twin" in m for m in msgs), msgs)
 
+    def test_an_unknown_result_word_is_a_finding(self):
+        import tools.build_scitt_vector_package as b
+        tmp = tempfile.mkdtemp(prefix="scitt-vocab-")
+        try:
+            b.build(tmp)
+            path = os.path.join(tmp, "v1", "fail-path-swap", "expected.json")
+            with open(path, encoding="utf-8") as fh:
+                doc = json.load(fh)
+            doc["result"] = "INVALID_SOMETHING_WE_JUST_MADE_UP"
+            with open(path, "w", encoding="utf-8") as fh:
+                json.dump(doc, fh)
+            ok, msgs = b.verify(tmp)
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+        self.assertFalse(ok, msgs)
+        self.assertTrue(any("outside the package's refusal vocabulary" in m for m in msgs), msgs)
+
+    def test_a_refusal_word_no_vector_claims_is_a_finding(self):
+        # A word in the vocabulary with no instance behind it is a claim, not a check.
+        import tools.build_scitt_vector_package as b
+        tmp = tempfile.mkdtemp(prefix="scitt-vocab2-")
+        orig = b.RESULT_VOCAB
+        try:
+            b.RESULT_VOCAB = orig + ("INVALID_FRESHNESS",)
+            b.build(tmp)
+            ok, msgs = b.verify(tmp)
+        finally:
+            b.RESULT_VOCAB = orig
+            shutil.rmtree(tmp, ignore_errors=True)
+        self.assertFalse(ok, msgs)
+        self.assertTrue(any("no vector ever claims" in m for m in msgs), msgs)
+
     def test_the_algebra_agrees_on_every_shape_up_to_a_bound(self):
         # The 55 vectors are chosen shapes; this sweeps all of them up to 16 with
         # a self-test that must catch two mutations, so the sweep is alive in CI

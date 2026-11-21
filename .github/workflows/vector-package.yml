@@ -57,8 +57,8 @@ jobs:
         # and an unpinned third-party action would be the one loose end.
         run: node tools/check_scitt_vectors_node.mjs --self-test
 
-      - name: Sweep every tree shape up to 64, both primitives
-        # The corpus is 55 chosen shapes. This step answers the question the
+      - name: Sweep every tree shape up to 128, both primitives
+        # The corpus is 63 chosen shapes. This step answers the question the
         # corpus cannot: does every (size, index) and every (m, n) up to a bound
         # work? Generation comes from uibc_core, verification from the standalone
         # checker (which imports nothing from it), so a disagreement is real.
@@ -73,6 +73,21 @@ jobs:
         # every row must name a real vector, and the harness's own receipt must pass
         # while four mutated ones must not.
         run: python tools/check_conformance_receipt.py --self-test
+
+      - name: The harness really answers, and a cheat is caught
+        # Until 2026-11-22 the documented one-command path (`--adapter foo.py`) died
+        # with [WinError 193] on Windows and every vector became "no answer" -- while
+        # the negative control still reported CONTROL-OK, because "no answers" counted
+        # as a disagreement. So this step demands answers, then demands that the
+        # accept-everything adapter is caught on computation rather than on silence.
+        run: |
+          python tools/conformance_harness.py \
+            --adapter conformance/adapters/reference_python.py \
+            --out "${{ runner.temp }}/receipt.json"
+          python tools/check_conformance_receipt.py "${{ runner.temp }}/receipt.json"
+          python tools/conformance_harness.py \
+            --adapter conformance/adapters/accept_all.py \
+            --expect-disagreement --out "${{ runner.temp }}/cheat.json"
 
       - name: The package tests
         run: python -m pip install --upgrade pip && pip install pytest && python -m pytest tests/test_upstream_vector_package.py -q

@@ -116,7 +116,7 @@ tree head, or an anchor whose signed payload carries both root and size).
 
 ```bash
 cd docs/upstream-package/scitt-rfc9162
-sha256sum -c SHA256SUMS                                  # 31/31 OK (`shasum -a 256 -c` on macOS)
+sha256sum -c SHA256SUMS                                  # 43/43 OK (`shasum -a 256 -c` on macOS)
 python tools/build_scitt_vector_package.py --check       # from the repo root
 python tools/build_scitt_vector_package.py --check-drift # committed bytes == what build produces
 ```
@@ -129,6 +129,29 @@ byte-identity with what is committed, in both directions. It exists because
 and the committed package have drifted apart — on 2026-11-20 that had already
 happened (the builder knew 5 vectors, the manifest listed 6), and a plain
 `build` run would have silently dropped one from the manifest.
+
+## Second implementation, same author
+
+```bash
+node tools/check_scitt_vectors_node.mjs --self-test
+```
+
+The tree algebra in that file is written again in JavaScript, sharing no code
+with `uibc_core`, the builder or the Python standalone checker. It walks the
+same 42 vectors and must reach `VERDICT: PARITY`.
+
+**What this is not.** It is not an independent run. The same author wrote it, so
+the external run ledger does not count it, and neither should a reader: a
+second implementation by the same hand proves the *vectors* are written down
+concretely enough to be met twice, not that a stranger can meet them. For that,
+the invitation in `docs/INVITE-ONE-PAGE.md` is the only route.
+
+**What it does add.** `--self-test` feeds the checker three deliberately broken
+vectors — the empty-tree root replaced by an all-zero digest, a size-0 fold
+result filled in, a size-0 vector marked `VALID` — and exits 1 unless every one
+is caught. A checker that cannot fail its own mutations is decoration, and this
+is the cheapest way to show the empty-tree rule is enforced rather than
+described.
 
 ## Tree construction (write it down, don't import it)
 

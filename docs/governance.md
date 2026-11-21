@@ -60,10 +60,12 @@ LGD 三原则：**有籍（Registry）·有证（Evidence）·有门禁（Gates�
 {
   "revocation_id": "r-<uuid>",
   "target_root": "<被撤销包的 evidence_root>",
-  "reason_code": "KEY_COMPROMISED | EVIDENCE_INVALID | OWNER_REQUEST",
+  "reason_code": "KEY_COMPROMISED | EVIDENCE_INVALID | OWNER_REQUEST | SUPERSEDED",
   "key_id": "<owner key_id>",
   "signature": "<HMAC(key, canonical(revocation body))>",
-  "revoked_at": "<ISO8601>"
+  "revoked_at": "<ISO8601>",
+  "superseded_by": "<后继包的 evidence_root，仅 SUPERSEDED 必填>",
+  "compromised_at": "<ISO8601，KEY_COMPROMISED 可选但强烈建议>"
 }
 ```
 
@@ -71,6 +73,9 @@ LGD 三原则：**有籍（Registry）·有证（Evidence）·有门禁（Gates�
 - R1 撤销必须可验签（用 key_id 对应的 owner key；无 key 则撤销本身 INCONCLUSIVE）
 - R2 撤销是**终态**：被撤销包 verify 附加 `revoked: true`，且门禁（GATE）必须 DENY
 - R3 撤销不可被"未撤销"覆盖（v0.1 无撤销的撤销；需纠错时走 CORRECTION 链留痕）
+- R4 替承（SUPERSEDED）必须指名后继：缺 `superseded_by` 视为格式错误（MALFORMED → HOLD），且后继不得是自身 `target_root`。替承**不新增门禁处置**——被替承的包依然是 DENY，`superseded_by` 只是把"去哪儿"告诉调用方
+- R5 密钥失陷（KEY_COMPROMISED）若带 `compromised_at`，必须是**带时区**的 ISO-8601（无时区的时间无法与另一份撤销的时间比较，判为格式错误）；未带时，只作废本包，不声称作废该密钥更早签过的东西，报告须显式声明这条限制
+- R6 `reason_code` 是闭集：不在闭集内的取值判为 MALFORMED（HOLD），不得被当作"未知但可忽略"的注释
 
 **Dispute vs Revocation 的边界**：Dispute=第三方说"我有异议"（标记不阻断）；
 Revocation=持有者说"这个作废"（验签后阻断门禁）。

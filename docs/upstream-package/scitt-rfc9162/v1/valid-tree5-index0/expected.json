@@ -1,0 +1,19 @@
+{
+  "description": "Pairs with fail-path-swap-tree5: the smallest tree with two siblings in one path.",
+  "inclusion_path": [
+    "e3bf33a7623eacbc97f5e9fc6fc665087e83be930a11350dee4c51b97f58e48a",
+    "0b3234528006a5141e3307f3e00cb629808eb6c86aeb8d825c32a31819522342",
+    "67f5f6691349d477c27d8d779d99583ef96b485f3b716145bf14fc5e86fd613c"
+  ],
+  "leaf_entry": {
+    "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+    "digest_hex": "e89e4066f60a213f988881f37deff5ce18652514b48c671587f8cbfd4d25e648",
+    "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: valid-tree5-index0 :: leaf 0",
+    "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a2076616c69642d74726565352d696e64657830203a3a206c6561662030"
+  },
+  "leaf_index": 0,
+  "reconstructed_root": "28402f12154e2fe3b3c0f84d0f70adf42013fc561207bee9d00422b6af49467d",
+  "result": "VALID",
+  "root_true": "28402f12154e2fe3b3c0f84d0f70adf42013fc561207bee9d00422b6af49467d",
+  "tree_size": 5
+}

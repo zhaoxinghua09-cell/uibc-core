@@ -9,6 +9,8 @@ loses its declared gap, or starts claiming to cover the COSE layer.
 import hashlib
 import json
 import os
+import shutil
+import tempfile
 import subprocess
 import sys
 import unittest
@@ -83,6 +85,23 @@ class TestPackageSelfChecks(unittest.TestCase):
             capture_output=True, text=True, cwd=REPO, timeout=120)
         self.assertEqual(out.returncode, 0, out.stdout + out.stderr)
         self.assertIn("CONSISTENT", out.stdout)
+
+    def test_a_negative_without_a_positive_twin_is_a_finding(self):
+        # Drop the positive at 5,0 at runtime: fail-path-swap-tree5 is then the only
+        # vector at that shape, and an implementation that refuses everything there
+        # would pass it. The builder's invariant must say so rather than stay green.
+        import tools.build_scitt_vector_package as b
+        orig = b.CASES
+        tmp = tempfile.mkdtemp(prefix="scitt-pair-")
+        try:
+            b.CASES = [c for c in orig if c[0] != "valid-tree5-index0"]
+            b.build(tmp)
+            ok, msgs = b.verify(tmp)
+        finally:
+            b.CASES = orig
+            shutil.rmtree(tmp, ignore_errors=True)
+        self.assertFalse(ok, msgs)
+        self.assertTrue(any("no positive twin" in m for m in msgs), msgs)
 
     def test_the_algebra_agrees_on_every_shape_up_to_a_bound(self):
         # The 55 vectors are chosen shapes; this sweeps all of them up to 16 with

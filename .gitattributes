@@ -29,3 +29,23 @@ tests/fixtures/anchor/*.pem -text
 # RFC 3161 token was taken over, so its bytes are fixed by the token, not by us.
 conformance/oracle/**/*.json text eol=lf
 conformance/oracle/cases/oracle-s16-token-byte/timestamps/anchored_head.json -text
+
+# Vendored specification sources are hashed in `docs/spec-sources/MANIFEST.json` and
+# `tests/test_sources.py` compares those digests with the bytes on disk. Same failure
+# mode as #177, different directory: on a default Windows checkout (`core.autocrlf=true`)
+# every one of these files gains CRLF and the recorded digest stops matching. Measured
+# 2026-11-22 on a plain Windows checkout: 1,294 of 1,710 tracked files were CRLF in the
+# worktree while their blobs were LF, and 31 test ids failed for that reason alone -- none
+# of them arithmetic. Pinning the text ones to LF on store and checkout removes the class.
+docs/spec-sources/** text eol=lf
+tests/fixtures/** text eol=lf
+
+# Re-assert the byte-fixed exceptions after the wildcard above: these files are the
+# preimages of real RFC 3161 tokens, so their bytes are fixed by someone else.
+tests/fixtures/anchor/anchored_head.json -text
+tests/fixtures/anchor/*.tsr -text
+tests/fixtures/anchor/*.ots -text
+
+# Final override: with 	ext unset git ignores ol, but the wildcard above still
+# assigns eol=lf to these. Unset both so nothing normalises the token preimages.
+tests/fixtures/anchor/** -text -eol

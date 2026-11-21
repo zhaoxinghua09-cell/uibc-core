@@ -1,0 +1,19 @@
+{
+  "description": "Pairs with fail-path-swap: honest path at the interior access.",
+  "inclusion_path": [
+    "30d04dbab261e90f53b5fddc09c13bd5f4aa30ee8b1d40c7c3aba591231e682e",
+    "09788fe08cf3cd38519d2ea723dabae884ea1fb382e74da9142fffc1c1191cee",
+    "71e5be272108f2f5a4e4b5aaf68b23218de8d714a66474ab36f3b3a1975aabe5"
+  ],
+  "leaf_entry": {
+    "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+    "digest_hex": "1647a92df44a9e5254f3b6ade9d932db4e222c321be48ac3d5b17687942be489",
+    "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: valid-tree8-index5 :: leaf 5",
+    "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a2076616c69642d74726565382d696e64657835203a3a206c6561662035"
+  },
+  "leaf_index": 5,
+  "reconstructed_root": "50be6884c8f32bba3c301a5f38cf09b7f06a45a76be1a1d524f524a2ffe93d6f",
+  "result": "VALID",
+  "root_true": "50be6884c8f32bba3c301a5f38cf09b7f06a45a76be1a1d524f524a2ffe93d6f",
+  "tree_size": 8
+}

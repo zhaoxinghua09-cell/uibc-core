@@ -188,6 +188,26 @@ CASES = [
      "tree_size=65 = 64|1: the single tail leaf of a full tree plus one; path length 1 "
      "and the top split is the whole tree."),
 
+    # --- positives that pair with existing negatives at the same shape ---
+    # A fail-* vector says "at this shape, this mutilation must be refused". If the
+    # honest form at that shape is never handed over, an implementation that
+    # refuses everything there passes the negative and nobody notices. These six
+    # exist because an audit found eight negatives without a positive twin; two
+    # shapes already had one, six did not.
+    ("valid-tree3-index1", 3, 1, None, "VALID",
+     "Pairs with fail-path-short-tree3: same 3-leaf tree, honest path."),
+    ("valid-tree4-index1", 4, 1, None, "VALID",
+     "Pairs with fail-tampered-path-small-tree and fail-tampered-leaf: honest 4-leaf path."),
+    ("valid-tree5-index0", 5, 0, None, "VALID",
+     "Pairs with fail-path-swap-tree5: the smallest tree with two siblings in one path."),
+    ("valid-tree7-index6", 7, 6, None, "VALID",
+     "Pairs with fail-path-short-tampered: honest path at the shape where a size-7 path "
+     "and an unbalanced split meet."),
+    ("valid-tree8-index5", 8, 5, None, "VALID",
+     "Pairs with fail-path-swap: honest path at the interior access."),
+    ("valid-tree16-index9", 16, 9, None, "VALID",
+     "Pairs with fail-tampered-path-last and fail-path-swap-tree16: honest 16-leaf path."),
+
     # --- leaf-input edge cases: the two "hash of nothing" constants ---
     ("valid-empty-leaf", 1, 0, None, "VALID",
      "One leaf whose input is the empty byte string. root_true is SHA-256(0x00), "
@@ -514,8 +534,9 @@ def build(out=OUT):
             "Consistency proofs are scored for 1 <= old_size <= new_size; old_size = 0 "
             "is unspecified in RFC 6962 Section 2.1.2 and is not carried (see "
             "underspecified_inputs).",
-            "Sizes are swept exhaustively to 128 leaves in the repository sweep; beyond "
-            "that, only the corpus shapes and whatever an implementer runs are evidence.",
+            "Sizes are swept exhaustively to 128 leaves by tools/verify_tree_algebra_exhaustive.py "
+            "(the same bound CI runs); beyond that, only the corpus shapes and whatever an "
+            "implementer runs are evidence.",
             "Verdict words are ours. A disagreement on wording with matching roots is "
             "recorded as wording-only by the harness and is not a conformance failure.",
         ],
@@ -618,6 +639,34 @@ def verify(out=OUT):
     ok, msgs = True, []
     with open(os.path.join(out, "manifest.json"), encoding="utf-8") as fh:
         manifest = json.load(fh)
+    # --- corpus invariant: every negative has a positive twin at the same shape ---
+    # Keyed on the *honest* shape from the case table, not on the declared one: a
+    # size-tamper vector's declared tree_size is the lie, and the honest tree it
+    # was built from is the shape that needs a passing twin.
+    pos_inc = {(c[1], c[2]) for c in CASES if c[3] in (None, "ambiguous")}
+    pos_cons = {(c[1], c[2]) for c in CONSISTENCY_CASES if c[3] is None}
+    unpaired = []
+    for cid, size, index, tamper, result, desc in CASES:
+        if tamper in (None, "ambiguous"):
+            continue
+        # A size-0 vector is a lie about a tree with no leaves at that size, so there
+        # is no honest twin to hand over by construction.
+        if tamper == "size-zero":
+            continue
+        if (size, index) not in pos_inc:
+            unpaired.append("%s (inclusion %d,%d)" % (cid, size, index))
+    for cid, m, n, tamper, result, desc in CONSISTENCY_CASES:
+        if tamper is None:
+            continue
+        # There is no tree of size 3 that extends a tree of size 5.
+        if tamper == "size-order":
+            continue
+        if (m, n) not in pos_cons:
+            unpaired.append("%s (consistency %d,%d)" % (cid, m, n))
+    if unpaired:
+        ok = False
+        msgs.append("negatives with no positive twin at the same shape: " + ", ".join(unpaired))
+
     for v in manifest["vectors"]:
         with open(os.path.join(out, v["dir"], "expected.json"), encoding="utf-8") as fh:
             exp = json.load(fh)

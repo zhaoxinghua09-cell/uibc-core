@@ -1,0 +1,18 @@
+{
+  "description": "Pairs with fail-tampered-path-small-tree and fail-tampered-leaf: honest 4-leaf path.",
+  "inclusion_path": [
+    "9690d496da7a6f90e4f0b1ed75613350a634c7da70d63cf12437b2bdc9b6db2b",
+    "609ae8eaad41ab5e47bad7f332a4467033234d7d98860e4879fddb5b96a7414c"
+  ],
+  "leaf_entry": {
+    "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+    "digest_hex": "9706f70832f1235c69ca3b084fb2441cbbc7df51ef5aa0ab98c1372401e813fc",
+    "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: valid-tree4-index1 :: leaf 1",
+    "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a2076616c69642d74726565342d696e64657831203a3a206c6561662031"
+  },
+  "leaf_index": 1,
+  "reconstructed_root": "51236481eccf9b29a5407592121dfbc155fd6177a3d47bc8dceea74d932dea9c",
+  "result": "VALID",
+  "root_true": "51236481eccf9b29a5407592121dfbc155fd6177a3d47bc8dceea74d932dea9c",
+  "tree_size": 4
+}

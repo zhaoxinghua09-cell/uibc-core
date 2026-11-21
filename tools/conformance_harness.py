@@ -110,6 +110,12 @@ def parse_adapter(spec):
     separate `--expect-disagreement` contract below that demands *answers* too.
     """
     if os.path.isfile(spec):
+        # Launching a .py directly depends on a file association, which Windows does
+        # not guarantee: on 2026-11-22 that produced `[WinError 193] %1 is not a valid
+        # Win32 application` for every vector, i.e. the documented one-command path
+        # failed on the platform this package is mostly developed on.
+        if spec.lower().endswith(".py"):
+            return [sys.executable, spec]
         return [spec]
     if os.name == "nt":
         # posix=False keeps backslashes; it may leave quotes on the tokens.

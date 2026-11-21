@@ -46,7 +46,7 @@ and the path, plus your verdict word. Empty strings when your verifier refuses t
 rebuild at all. If you only implement inclusion, answer those rows with
 `{"reconstructed_old_root": "", "reconstructed_new_root": "",
 "result": "UNSUPPORTED"}` — the receipt will record them as root disagreements,
-which is honest and costs you nothing on the inclusion half. The 44 inclusion
+which is honest and costs you nothing on the inclusion half. The 50 inclusion
 vectors and the 13 consistency vectors are counted separately in the receipt
 (`kinds`), so a reader can see which half you support.
 
@@ -64,7 +64,7 @@ It compares two things **separately**:
    If your root matches and your word differs, the receipt records it as
    *wording only* and does **not** count it as a conformance failure.
 
-That split is the point: a report that says "6 of 57 failed" because you call it
+That split is the point: a report that says "6 of 63 failed" because you call it
 `E_PROOF_MISMATCH` and we call it `INVALID_INCLUSION_PATH` teaches nobody anything.
 
 ## Two examples in this repository

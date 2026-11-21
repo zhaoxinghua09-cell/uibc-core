@@ -1,0 +1,18 @@
+{
+  "description": "Pairs with fail-path-short-tampered: honest path at the shape where a size-7 path and an unbalanced split meet.",
+  "inclusion_path": [
+    "2fa25e3063282c1154dc2bd7056ec575f3b177703a84639fd70a043c109a34d2",
+    "0bdd797500d185a00233c2df51beb681642f2132d54f37bfe924ef179a072598"
+  ],
+  "leaf_entry": {
+    "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+    "digest_hex": "803fff2793f22f3fc8c8e90953d7d266a629d0b29ec53e767ffb92d888122f27",
+    "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: valid-tree7-index6 :: leaf 6",
+    "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a2076616c69642d74726565372d696e64657836203a3a206c6561662036"
+  },
+  "leaf_index": 6,
+  "reconstructed_root": "623845278b0fc0065362c22cee72bf3edb4981d7bde9545b986f4fa4fdee160d",
+  "result": "VALID",
+  "root_true": "623845278b0fc0065362c22cee72bf3edb4981d7bde9545b986f4fa4fdee160d",
+  "tree_size": 7
+}

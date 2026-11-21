@@ -63,7 +63,7 @@ jobs:
         # work? Generation comes from uibc_core, verification from the standalone
         # checker (which imports nothing from it), so a disagreement is real.
         run: |
-          python tools/verify_tree_algebra_exhaustive.py --max-size 64 \
+          python tools/verify_tree_algebra_exhaustive.py --max-size 128 \
             --dump "${{ runner.temp }}/sweep.json" --self-test
           node tools/verify_tree_algebra_exhaustive.mjs "${{ runner.temp }}/sweep.json"
 

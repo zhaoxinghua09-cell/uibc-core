@@ -2,8 +2,8 @@
 # scitt-rfc9162 test vectors (v1)
 
 A self-contained, append-only set of **RFC 9162 SHA-256 hash-tree** vectors:
-**inclusion paths and consistency proofs**, **57 vectors in seven classes** — 29
-`VALID` (23 inclusion, 6 consistency), 12 `INVALID_INCLUSION_PATH`, 7
+**inclusion paths and consistency proofs**, **63 vectors in seven classes** — 35
+`VALID` (29 inclusion, 6 consistency), 12 `INVALID_INCLUSION_PATH`, 7
 `INVALID_CONSISTENCY_PROOF`, 2 `INVALID_LEAF_INDEX`, 1 `INVALID_LEAF_DIGEST`, 2
 `INVALID_TREE_SIZE`, and 4 `VALID_BUT_SIZE_UNAUTHENTICATED` (the ambiguity
 class, described below). Class counts are computed from the vectors themselves
@@ -11,7 +11,7 @@ class, described below). Class counts are computed from the vectors themselves
 
 Each vector declares `kind` (`inclusion` or `consistency`) in its
 `expected.json`; a reader who only implements inclusion can skip the
-consistency half and still score 44 of the 57.
+consistency half and still score 50 of the 63.
 
 Tree shapes covered: 1, 2, 3, 4, 5, 6, 7, 8, 9, 15, 16, 17, 31, 32, 33, 63, 64,
 65 leaves; indices include left edge, right edge, interior, and the single tail
@@ -162,7 +162,7 @@ tree head, or an anchor whose signed payload carries both root and size).
 
 ```bash
 cd docs/upstream-package/scitt-rfc9162
-sha256sum -c SHA256SUMS                                  # 58/58 OK (`shasum -a 256 -c` on macOS)
+sha256sum -c SHA256SUMS                                  # 64/64 OK (`shasum -a 256 -c` on macOS)
 python tools/build_scitt_vector_package.py --check       # from the repo root
 python tools/build_scitt_vector_package.py --check-drift # committed bytes == what build produces
 ```
@@ -184,7 +184,7 @@ node tools/check_scitt_vectors_node.mjs --self-test
 
 The tree algebra in that file is written again in JavaScript, sharing no code
 with `uibc_core`, the builder or the Python standalone checker. It walks the
-same 57 vectors and must reach `VERDICT: PARITY`.
+same 63 vectors and must reach `VERDICT: PARITY`.
 
 **What this is not.** It is not an independent run. The same author wrote it, so
 the external run ledger does not count it, and neither should a reader: a
@@ -217,8 +217,7 @@ node tools/verify_tree_algebra_exhaustive.mjs /tmp/inst.json
 
 | Bound | inclusion instances | consistency instances | disagreements |
 |---|---|---|---|
-| 64 (CI) | 2,080 (sizes 1..64, every index) | 2,080 (every 1 ≤ m ≤ n ≤ 64) | **0** |
-| 128 (run locally) | 8,256 | 8,256 | **0** |
+| 128 (CI and locally) | 8,256 (sizes 1..128, every index) | 8,256 (every 1 ≤ m ≤ n ≤ 128) | **0** |
 
 Two readings are compared: generation from `uibc_core`, verification from
 `tools/check_scitt_vectors_standalone.py`, which imports nothing from it. The
@@ -233,6 +232,26 @@ caught: a sweep that cannot fail its own mutation is a loop, not a check.
 to 128 leaves. It does not prove either reading matches RFC 6962 — for that the
 23 external consistency cases and the 147 external arithmetic cases are the only
 evidence there is, and they are cited as external, not as ours.
+
+## Every negative has a positive twin at the same shape
+
+An audit on 2026-11-22 found eight `fail-*` vectors whose shape had no passing
+vector: `16,9`, `4,1`, `3,1`, `8,5`, `5,0`, `7,6` (with two shapes shared). That
+matters because a verifier that refuses *everything* at a given shape passes
+those negatives and fails nothing — the corpus would be silent about the case it
+was built to test.
+
+Six positives were added, and the builder now enforces the rule as an invariant
+in `--check`: every negative whose shape admits an honest tree must have a
+positive at that shape. Two exemptions, both written down:
+
+* a `size-zero` vector is a lie about a tree with no leaves, so no honest twin
+  exists;
+* a consistency vector with `old_size > new_size` has no extending tree at all.
+
+The invariant is itself tested by dropping one positive at runtime and requiring
+`--check` to fail (`test_a_negative_without_a_positive_twin_is_a_finding`). A rule
+that cannot fail its own violation is a sentence, not a rule.
 
 ## Two "hash of nothing" constants, and why both are in here
 

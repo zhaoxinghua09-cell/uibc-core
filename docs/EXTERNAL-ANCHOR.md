@@ -171,17 +171,20 @@ therefore stays **blocked**, and no claim of it appears anywhere in the release.
 
 The ASQAV compliance profile wants "RFC 3161, OpenTimestamps, or both". We
 submitted a head digest to a public OTS calendar. Read back on 2026-11-21, that
-digest is **not** the one the TSA token covers, so the two anchors do not cover
-one digest and this paragraph said they did until it was corrected:
+digest is **not** the one the TSA token covers, so the two anchors did not cover
+one digest, and this paragraph said they did until it was corrected. On the same
+day a second proof was taken on the TSA head itself, which is what makes the
+claim true:
 
 | item | value |
 |---|---|
-| RFC 3161 head | `tools/out/release_status.json` at commit time, digest `4ad23d9153c3…7fd6e98` |
+| RFC 3161 head | `tests/fixtures/anchor/anchored_head.json` (the released status bytes), digest `4ad23d9153c3…7fd6e98` |
 | RFC 3161 | Free TSA token, `genTime=2026-11-17T08:11:35Z`, signature verified offline |
-| OpenTimestamps | `alice.btc.calendar.opentimestamps.org`, proof `tests/fixtures/anchor/ots_head.ots` (207 bytes) |
-| what the OTS proof anchors | its own first message, `f0087497…b808f120` — **not** `4ad23d91…6fd6e98`, and not the hash of any committed `tools/out/release_status.json` |
-| container | a bare serialized tree with no standard header, so the official `ots` client refuses it ("is not a timestamp file") |
-| what the OTS proof says today | **one pending calendar attestation, zero Bitcoin block attestations** |
+| OTS 2026-11-17 | `alice.btc.calendar.opentimestamps.org`, proof `tests/fixtures/anchor/ots_head.ots` (207 bytes) |
+| what that proof anchors | its own first message, `f0087497…b808f120` — **not** `4ad23d91…6fd6e98`, and not the hash of any committed `tools/out/release_status.json` |
+| its container | a bare serialized tree with no standard header, so the official `ots` client refuses it ("is not a timestamp file") |
+| OTS 2026-11-21 (re-stamp) | `tests/fixtures/anchor/anchored_head.json.ots` (237 bytes): taken on the TSA head digest itself, in the standard container, so it binds and the official client can read it |
+| what either proof says today | **pending calendar attestation(s), zero Bitcoin block attestations** |
 
 That is the honest status: a calendar attestation says the calendar had this
 digest at submission time, which is weaker than a block attestation. The
@@ -192,20 +195,16 @@ block attestation, so the claim cannot drift into "Bitcoin-anchored" by
 accident. The test is skipped when the `opentimestamps` library is absent: the
 verifier stays dependency-free.
 
-Two more assertions were added on 2026-11-21 so the mislabel cannot come back
-silently: the fixture is checked to be a bare tree, and its first message is
-checked to differ from the TSA head, with `ots_container.binds` confirming the
-proof answers for no digest at all. `tools/anchor_ots.py --verify FILE --proof P`
-already refuses such a proof instead of walking it (`the proof answers for
-another digest, not for FILE`), because the proof's own first bytes are no
-longer passed in as the initial message.
+The 2026-11-21 assertions make the difference mechanical: the older bare proof
+is checked to carry `f0087497…`, to differ from the TSA head, and to bind to
+nothing; the re-stamp is checked to be a standard container that binds to the
+TSA head; and both are checked to carry no block attestation.
+`tools/anchor_ots.py --verify FILE --proof P` refuses a proof that does not
+answer for `FILE` (`the proof answers for another digest, not for FILE`).
 
-What a correct second anchor would take: re-`--stamp` a *committed*
-`tools/out/release_status.json`, wrap the result into the standard container so
-the official client can read it, then `--upgrade` toward a block. That needs a
-calendar submission and a file that is actually in the tree, so it is a
-deliberate step, not something a monitor should do while the working copy is
-dirty.
+What would upgrade either proof: `--upgrade` until a Bitcoin block attestation
+arrives, which needs hours to days, and then a block-header cross-check against
+a chain source - neither of which this repository can honestly claim today.
 
 ### Checkpoint key: what was tried (2026-11-17, all negative)
 

@@ -1,0 +1,148 @@
+{
+  "schema": "test-ledger/1",
+  "generated_at": "2026-11-19T01:49:47.543360+00:00",
+  "finished_at": "2026-11-19T01:51:31.628746+00:00",
+  "duration_seconds": 104.1,
+  "scope": "(whole repo)",
+  "command": "C:\\Users\\Administrator\\AppData\\Local\\Doubao\\User Data\\sandbox_runtime\\bases\\fa694f517e5995233c80a9a8db5212c2\\python\\python.exe -m pytest -q --tb=no -p no:cacheprovider --junit-xml=…",
+  "git": {
+    "commit": "2eb97631c1202d892721faaf595f486adc3c9beb",
+    "branch": "main",
+    "dirty": true,
+    "git_exe": "C:\\Users\\Administrator\\.local\\bin\\git.CMD"
+  },
+  "env": {
+    "python": "3.13.18",
+    "pytest": "9.2.0",
+    "platform": "Windows-11-10.0.22631-SP0",
+    "machine": "AMD64"
+  },
+  "deps": [
+    "cryptography==50.0.2",
+    "fastmcp==4.2.0",
+    "fastmcp-slim==4.2.0",
+    "jsonschema==4.26.0",
+    "jsonschema-path==0.5.0",
+    "jsonschema-specifications==2025.9.1",
+    "mcp==2.3.0",
+    "mcp-types==2.3.0",
+    "pydantic==2.14.3",
+    "pydantic-settings==2.16.3",
+    "pydantic_core==2.50.4",
+    "pytest==9.2.0"
+  ],
+  "exit_code": 1,
+  "totals": {
+    "collected": 642,
+    "passed": 617,
+    "failed": 1,
+    "errors": 0,
+    "skipped": 24,
+    "duration_seconds": 103
+  },
+  "skipped_detail": [
+    {
+      "test": "tests.test_aac_emit.EmitAACCapsuleTests::test_their_verifier_accepts_our_capsule",
+      "reason": "pip install agent-action-capsule"
+    },
+    {
+      "test": "tests.test_aac_emit.EmitAACCapsuleTests::test_their_verifier_rejects_a_field_we_changed",
+      "reason": "pip install agent-action-capsule"
+    },
+    {
+      "test": "tests.test_aee_rail.TestAeeRailCorpus::test_accept_vectors_verify_valid_with_expected_result",
+      "reason": "agent_evidence_vectors corpus not installed"
+    },
+    {
+      "test": "tests.test_aee_rail.TestAeeRailCorpus::test_indeterminate_family_answers_within_declared_readings",
+      "reason": "agent_evidence_vectors corpus not installed"
+    },
+    {
+      "test": "tests.test_aee_rail.TestAeeRailCorpus::test_module_entrypoint_contract",
+      "reason": "agent_evidence_vectors corpus not installed"
+    },
+    {
+      "test": "tests.test_aee_rail.TestAeeRailCorpus::test_reject_vectors_verify_invalid_with_matching_code",
+      "reason": "agent_evidence_vectors corpus not installed"
+    },
+    {
+      "test": "tests.test_aee_rail.TestAeeRailCorpus::test_tiers_follow_the_pinned_key_policy",
+      "reason": "agent_evidence_vectors corpus not installed"
+    },
+    {
+      "test": "tests.test_dashboard.TestDashboard::test_reason_counts_are_not_zero_by_accident",
+      "reason": "competitor package not installed here"
+    },
+    {
+      "test": "tests.test_diagnostics_compare.TestDiagnosticsCompare::test_their_side_is_either_named_or_absent",
+      "reason": "competitor package not installed: agent-action-capsule not importable (ModuleNotFoundError)"
+    },
+    {
+      "test": "tests.test_langchain_live.TestRealLangChainStack::test_a_raising_tool_is_recorded_as_error_not_as_absence",
+      "reason": "langchain-core not installed"
+    },
+    {
+      "test": "tests.test_langchain_live.TestRealLangChainStack::test_a_real_tool_call_lands_in_the_package",
+      "reason": "langchain-core not installed"
+    },
+    {
+      "test": "tests.test_langchain_live.TestRealLangChainStack::test_forgetting_to_seal_is_caught_by_S5",
+      "reason": "langchain-core not installed"
+    },
+    {
+      "test": "tests.test_langchain_live.TestRealLangChainStack::test_handler_without_langchain_fails_loudly",
+      "reason": "langchain-core not installed"
+    },
+    {
+      "test": "tests.test_langchain_live.TestRealLangChainStack::test_recorder_stays_verifiable_after_framework_traffic",
+      "reason": "langchain-core not installed"
+    },
+    {
+      "test": "tests.test_langchain_live.TestRealLangChainStack::test_two_calls_two_entries_and_hashes_differ",
+      "reason": "langchain-core not installed"
+    },
+    {
+      "test": "tests.test_nostr_anchor.Bip340Vectors::test_cross_check_against_libsecp256k1",
+      "reason": "coincurve not installed"
+    },
+    {
+      "test": "tests.test_nostr_anchor.Events::test_cross_check_against_pynostr",
+      "reason": "pynostr not installed"
+    },
+    {
+      "test": "tests.test_quickstart.TestQuickstart::test_corpus_builder_is_self_seeding",
+      "reason": "corpus already present; self-seeding path not exercised"
+    },
+    {
+      "test": "tests.test_v14_ots_anchor.OpenTimestampsTests::test_head_digest_is_the_documented_one",
+      "reason": "opentimestamps not installed; the verifier itself stays dependency-free, so this proof check is skipped, not failed"
+    },
+    {
+      "test": "tests.test_v14_ots_anchor.OpenTimestampsTests::test_proof_carries_a_pending_calendar_attestation",
+      "reason": "opentimestamps not installed; the verifier itself stays dependency-free, so this proof check is skipped, not failed"
+    },
+    {
+      "test": "tests.test_v14_ots_anchor.OpenTimestampsTests::test_proof_does_not_claim_a_bitcoin_block",
+      "reason": "opentimestamps not installed; the verifier itself stays dependency-free, so this proof check is skipped, not failed"
+    },
+    {
+      "test": "tests.test_v14_ots_anchor.OpenTimestampsTests::test_proof_fixture_exists",
+      "reason": "opentimestamps not installed; the verifier itself stays dependency-free, so this proof check is skipped, not failed"
+    },
+    {
+      "test": "tests.test_v14_ots_anchor.OpenTimestampsTests::test_truncated_proof_does_not_yield_an_attestation",
+      "reason": "opentimestamps not installed; the verifier itself stays dependency-free, so this proof check is skipped, not failed"
+    },
+    {
+      "test": "tests.test_v15_symlink_containment.SymlinkContainmentTests::test_evidence_symlink_outside_the_package_fails_s4",
+      "reason": "this platform does not allow creating symlinks"
+    }
+  ],
+  "failed_detail": [
+    {
+      "test": "tests.test_robustness.TestHostileInput::test_every_hostile_input_is_answered_and_refused",
+      "message": "AssertionError: 1 != 0 : redteam_robustness reported problems: {\n  \"cases\": [\n    {\n      \"case\": \"not-json\",\n      \"js\": \"FAIL S11\",\n      \"py\": \"FAIL S11\",\n      \"ok\": true,\n      \"why\": \"bytes that"
+    }
+  ],
+  "ledger_digest": "05606ed98f3c881cc8feabf5e07f5e28af77f611bc22ec4e81df4a90e8bbbc31"
+}

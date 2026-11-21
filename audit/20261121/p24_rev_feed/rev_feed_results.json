@@ -1,0 +1,111 @@
+{
+  "total": 15,
+  "pass": 15,
+  "results": [
+    {
+      "id": "T01",
+      "desc": "新鲜 feed，签名与链一致 → 接受",
+      "got": "ACCEPT",
+      "want": "ACCEPT",
+      "pass": true
+    },
+    {
+      "id": "T02",
+      "desc": "被撤销实体 → DENY",
+      "got": "DENY:revoked",
+      "want": "DENY:revoked",
+      "pass": true
+    },
+    {
+      "id": "T03",
+      "desc": "序号回滚（serial 1 < 2）→ 拒绝",
+      "got": "REJECT:serial_rollback",
+      "want": "REJECT:serial_rollback",
+      "pass": true
+    },
+    {
+      "id": "T04",
+      "desc": "同序号不同内容（equivocation）→ 拒绝",
+      "got": "REJECT:equivocation",
+      "want": "REJECT:equivocation",
+      "pass": true
+    },
+    {
+      "id": "T05",
+      "desc": "截断历史（删除首条）→ 拒绝",
+      "got": "REJECT:append_only(truncated)",
+      "want": "REJECT:append_only*",
+      "pass": true
+    },
+    {
+      "id": "T06",
+      "desc": "重写历史条目 → 拒绝",
+      "got": "REJECT:append_only(rewritten)",
+      "want": "REJECT:append_only*",
+      "pass": true
+    },
+    {
+      "id": "T07",
+      "desc": "超过 next_expected_by → STALE",
+      "got": "STALE",
+      "want": "STALE",
+      "pass": true
+    },
+    {
+      "id": "T08",
+      "desc": "签发时间未来 20 分钟（超容差）→ 拒绝",
+      "got": "REJECT:future_dated",
+      "want": "REJECT:future_dated",
+      "pass": true
+    },
+    {
+      "id": "T09",
+      "desc": "签发时间未来 3 分钟（在容差内）→ 接受",
+      "got": "ACCEPT",
+      "want": "ACCEPT",
+      "pass": true
+    },
+    {
+      "id": "T10",
+      "desc": "改内容不重签 → 拒绝",
+      "got": "REJECT:bad_signature",
+      "want": "REJECT:bad_signature",
+      "pass": true
+    },
+    {
+      "id": "T11",
+      "desc": "未钉扎的签发方 → 拒绝",
+      "got": "REJECT:unknown_issuer",
+      "want": "REJECT:unknown_issuer",
+      "pass": true
+    },
+    {
+      "id": "T12",
+      "desc": "A 撤销、B 未撤销 → DENY（并集）",
+      "got": "DENY:revoked",
+      "want": "DENY:revoked",
+      "pass": true
+    },
+    {
+      "id": "T13",
+      "desc": "两源都未撤销该实体 → ALLOW",
+      "got": "ALLOW",
+      "want": "ALLOW",
+      "pass": true
+    },
+    {
+      "id": "T14",
+      "desc": "其中一个源 STALE → 整体不能放行",
+      "got": "DENY:stale_source",
+      "want": "DENY:stale_source",
+      "pass": true
+    },
+    {
+      "id": "T15",
+      "desc": "合法追加（count 1→2）→ 接受",
+      "got": "ACCEPT",
+      "want": "ACCEPT",
+      "pass": true
+    }
+  ]
+}

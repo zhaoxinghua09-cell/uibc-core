@@ -1,0 +1,197 @@
+{
+  "kit_version": "xlgd-trust-repro/1",
+  "reproducer": "unknown",
+  "affiliation": "unknown",
+  "conflict_declared": "unknown",
+  "environment": {
+    "os": "Windows-11-10.0.22631-SP0",
+    "python": "3.13.18",
+    "machine": "AMD64"
+  },
+  "started_at": "2026-11-19T01:18:07.499029+00:00",
+  "vectors_total": 30,
+  "matched": 30,
+  "mismatches": [],
+  "results": [
+    {
+      "id": "V-01",
+      "expected": "ALLOW",
+      "actual": "ALLOW",
+      "match": true
+    },
+    {
+      "id": "V-02",
+      "expected": "REJECT",
+      "actual": "REJECT",
+      "match": true
+    },
+    {
+      "id": "V-03",
+      "expected": "REJECT",
+      "actual": "REJECT",
+      "match": true
+    },
+    {
+      "id": "V-04",
+      "expected": "REJECT",
+      "actual": "REJECT",
+      "match": true
+    },
+    {
+      "id": "V-05",
+      "expected": "ALLOW",
+      "actual": "ALLOW",
+      "match": true
+    },
+    {
+      "id": "V-06",
+      "expected": "REJECT",
+      "actual": "REJECT",
+      "match": true
+    },
+    {
+      "id": "V-07",
+      "expected": "REJECT",
+      "actual": "REJECT",
+      "match": true
+    },
+    {
+      "id": "V-08",
+      "expected": "REJECT",
+      "actual": "REJECT",
+      "match": true
+    },
+    {
+      "id": "V-09",
+      "expected": "ALLOW",
+      "actual": "ALLOW",
+      "match": true
+    },
+    {
+      "id": "V-10",
+      "expected": "ALLOW",
+      "actual": "ALLOW",
+      "match": true
+    },
+    {
+      "id": "V-11",
+      "expected": "REJECT",
+      "actual": "REJECT",
+      "match": true
+    },
+    {
+      "id": "V-12",
+      "expected": "REJECT",
+      "actual": "REJECT",
+      "match": true
+    },
+    {
+      "id": "V-13",
+      "expected": "REJECT",
+      "actual": "REJECT",
+      "match": true
+    },
+    {
+      "id": "V-14",
+      "expected": "ALLOW",
+      "actual": "ALLOW",
+      "match": true
+    },
+    {
+      "id": "V-15",
+      "expected": "ALLOW",
+      "actual": "ALLOW",
+      "match": true
+    },
+    {
+      "id": "V-16",
+      "expected": "REJECT",
+      "actual": "REJECT",
+      "match": true
+    },
+    {
+      "id": "V-17",
+      "expected": "REJECT",
+      "actual": "REJECT",
+      "match": true
+    },
+    {
+      "id": "V-18",
+      "expected": "REJECT",
+      "actual": "REJECT",
+      "match": true
+    },
+    {
+      "id": "V-19",
+      "expected": "ALLOW",
+      "actual": "ALLOW",
+      "match": true
+    },
+    {
+      "id": "V-20",
+      "expected": "REJECT",
+      "actual": "REJECT",
+      "match": true
+    },
+    {
+      "id": "V-21",
+      "expected": "REJECT",
+      "actual": "REJECT",
+      "match": true
+    },
+    {
+      "id": "V-22",
+      "expected": "ALLOW",
+      "actual": "ALLOW",
+      "match": true
+    },
+    {
+      "id": "V-23",
+      "expected": "REJECT",
+      "actual": "REJECT",
+      "match": true
+    },
+    {
+      "id": "V-24",
+      "expected": "REJECT",
+      "actual": "REJECT",
+      "match": true
+    },
+    {
+      "id": "V-25",
+      "expected": "REJECT",
+      "actual": "REJECT",
+      "match": true
+    },
+    {
+      "id": "V-26",
+      "expected": "REJECT",
+      "actual": "REJECT",
+      "match": true
+    },
+    {
+      "id": "V-27",
+      "expected": "REJECT",
+      "actual": "REJECT",
+      "match": true
+    },
+    {
+      "id": "V-28",
+      "expected": "ALLOW",
+      "actual": "ALLOW",
+      "match": true
+    },
+    {
+      "id": "V-29",
+      "expected": "REJECT",
+      "actual": "REJECT",
+      "match": true
+    },
+    {
+      "id": "V-30",
+      "expected": "ALLOW",
+      "actual": "ALLOW",
+      "match": true
+    }
+  ]
+}

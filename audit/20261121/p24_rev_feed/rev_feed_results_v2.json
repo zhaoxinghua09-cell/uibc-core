@@ -1,0 +1,146 @@
+{
+  "total": 20,
+  "pass": 20,
+  "results": [
+    {
+      "id": "T01",
+      "desc": "Ed25519 签名有效，链一致 → 接受",
+      "got": "ACCEPT",
+      "want": "ACCEPT",
+      "pass": true
+    },
+    {
+      "id": "T02",
+      "desc": "被撤销实体 → DENY",
+      "got": "DENY:revoked",
+      "want": "DENY:revoked",
+      "pass": true
+    },
+    {
+      "id": "T03",
+      "desc": "序号回滚 → 拒绝",
+      "got": "REJECT:serial_rollback",
+      "want": "REJECT:serial_rollback",
+      "pass": true
+    },
+    {
+      "id": "T04",
+      "desc": "同序号不同内容（分叉）→ 拒绝",
+      "got": "REJECT:equivocation",
+      "want": "REJECT:equivocation",
+      "pass": true
+    },
+    {
+      "id": "T05",
+      "desc": "截断历史 → 拒绝",
+      "got": "REJECT:append_only(truncated)",
+      "want": "REJECT:append_only*",
+      "pass": true
+    },
+    {
+      "id": "T06",
+      "desc": "重写历史 → 拒绝",
+      "got": "REJECT:append_only(rewritten)",
+      "want": "REJECT:append_only*",
+      "pass": true
+    },
+    {
+      "id": "T07",
+      "desc": "超 next_expected_by → STALE",
+      "got": "STALE",
+      "want": "STALE",
+      "pass": true
+    },
+    {
+      "id": "T08",
+      "desc": "签发时间未来 20 分钟 → 拒绝",
+      "got": "REJECT:future_dated",
+      "want": "REJECT:future_dated",
+      "pass": true
+    },
+    {
+      "id": "T09",
+      "desc": "未来 3 分钟（容差内）→ 接受",
+      "got": "ACCEPT",
+      "want": "ACCEPT",
+      "pass": true
+    },
+    {
+      "id": "T10",
+      "desc": "改内容不重签 → bad_signature",
+      "got": "REJECT:bad_signature",
+      "want": "REJECT:bad_signature",
+      "pass": true
+    },
+    {
+      "id": "T11",
+      "desc": "未钉扎的密钥冒名签发 → signer_not_pinned",
+      "got": "REJECT:signer_not_pinned",
+      "want": "REJECT:signer_not_pinned",
+      "pass": true
+    },
+    {
+      "id": "T12",
+      "desc": "A 撤销、B 未撤销 → DENY（并集）",
+      "got": "DENY:revoked",
+      "want": "DENY:revoked",
+      "pass": true
+    },
+    {
+      "id": "T13",
+      "desc": "两源都未撤销 → ALLOW",
+      "got": "ALLOW",
+      "want": "ALLOW",
+      "pass": true
+    },
+    {
+      "id": "T14",
+      "desc": "一源 STALE → 整体不放行",
+      "got": "DENY:stale_source",
+      "want": "DENY:stale_source",
+      "pass": true
+    },
+    {
+      "id": "T15",
+      "desc": "合法追加（1→2）→ 接受",
+      "got": "ACCEPT",
+      "want": "ACCEPT",
+      "pass": true
+    },
+    {
+      "id": "T16",
+      "desc": "旧钥签名的轮换声明 → 接受",
+      "got": "ACCEPT",
+      "want": "ACCEPT",
+      "pass": true
+    },
+    {
+      "id": "T17",
+      "desc": "轮换已落实（含动作记录）",
+      "got": "ROTATE:6b8f24a20698073176b0f7cf7cf22205->c20735bf0e17358579f636ca54c5b65a",
+      "want": "ROTATE:6b8f24a20698073176b0f7cf7cf22205->c20735bf0e17358579f636ca54c5b65a",
+      "pass": true
+    },
+    {
+      "id": "T18",
+      "desc": "新钥用其私钥签名的 feed 需要重新钉扎公钥后才接受",
+      "got": "REJECT:signer_not_pinned",
+      "want": "REJECT:signer_not_pinned",
+      "pass": true
+    },
+    {
+      "id": "T19",
+      "desc": "重新钉扎新公钥后 → 接受",
+      "got": "ACCEPT",
+      "want": "ACCEPT",
+      "pass": true
+    },
+    {
+      "id": "T20",
+      "desc": "签名密钥被撤销后 → 拒绝",
+      "got": "REJECT:key_revoked",
+      "want": "REJECT:key_revoked",
+      "pass": true
+    }
+  ]
+}

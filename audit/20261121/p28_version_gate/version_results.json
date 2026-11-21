@@ -1,0 +1,97 @@
+{
+  "total": 13,
+  "pass": 13,
+  "results": [
+    {
+      "id": "V01",
+      "desc": "五处全一致 → PASS",
+      "got": "(True, [])",
+      "want": "(True, [])",
+      "pass": true
+    },
+    {
+      "id": "V02",
+      "desc": "pyproject=0.4.1 / __version__=0.4.0 → FAIL",
+      "got": "['package_version_mismatch']",
+      "want": "['package_version_mismatch']",
+      "pass": true
+    },
+    {
+      "id": "V03",
+      "desc": "SPEC_VERSION 0.3.3 落后 0.4.0 → FAIL（核心回归）",
+      "got": "['spec_version_lags_package']",
+      "want": "['spec_version_lags_package']",
+      "pass": true
+    },
+    {
+      "id": "V04",
+      "desc": "SPEC_VERSION 0.5.0 超前 → FAIL",
+      "got": "['spec_version_lags_package']",
+      "want": "['spec_version_lags_package']",
+      "pass": true
+    },
+    {
+      "id": "V05",
+      "desc": "SPEC_VERSION 无版本段 → FAIL",
+      "got": "['spec_version_unparseable']",
+      "want": "['spec_version_unparseable']",
+      "pass": true
+    },
+    {
+      "id": "V06",
+      "desc": "缺 SPEC_VERSION → FAIL",
+      "got": "['spec_version_missing']",
+      "want": "['spec_version_missing']",
+      "pass": true
+    },
+    {
+      "id": "V07",
+      "desc": "缺 __version__ → FAIL",
+      "got": "['dunder_version_missing']",
+      "want": "['dunder_version_missing']",
+      "pass": true
+    },
+    {
+      "id": "V08",
+      "desc": "缺 pyproject → FAIL",
+      "got": "['pyproject_version_missing']",
+      "want": "['pyproject_version_missing']",
+      "pass": true
+    },
+    {
+      "id": "V09",
+      "desc": "tag=v0.3.3 / __version__=0.4.0 → FAIL",
+      "got": "['git_tag_mismatch']",
+      "want": "['git_tag_mismatch']",
+      "pass": true
+    },
+    {
+      "id": "V10",
+      "desc": "PyPI=0.3.3 / __version__=0.4.0 → FAIL",
+      "got": "['pypi_version_mismatch']",
+      "want": "['pypi_version_mismatch']",
+      "pass": true
+    },
+    {
+      "id": "V11",
+      "desc": "PyPI 不可达 → 不算不一致，但记录 code",
+      "got": "(True, ['pypi_unreachable'])",
+      "want": "(True, ['pypi_unreachable'])",
+      "pass": true
+    },
+    {
+      "id": "V12",
+      "desc": "四处同时错 → 一次列全",
+      "got": "['git_tag_mismatch', 'package_version_mismatch', 'pypi_version_mismatch', 'spec_version_lags_package']",
+      "want": "['git_tag_mismatch', 'package_version_mismatch', 'pypi_version_mismatch', 'spec_version_lags_package']",
+      "pass": true
+    },
+    {
+      "id": "V13",
+      "desc": "SPEC_VERSION 带 -proposal 后缀 → 仍算一致",
+      "got": "True",
+      "want": "True",
+      "pass": true
+    }
+  ]
+}

@@ -578,7 +578,9 @@ def cmd_gate(args):
             sys.exit("error: --did and --pubkey both pin a key; pass one of them")
         pubkey = _pubkey_from_did(args.did)
     report = gate(pkg, key=key, pubkey=pubkey,
-                  revocation_path=args.revocation, dispute_path=args.dispute)
+                  revocation_path=args.revocation, dispute_path=args.dispute,
+                  require_revocation_coverage=getattr(
+                      args, "require_revocation_coverage", False))
     print(json.dumps(report, ensure_ascii=False, indent=2))
     sys.exit(report["exit_code"])
 
@@ -799,6 +801,9 @@ def main():
                    help="revocation.json overlay (governance.md section 3)")
     p.add_argument("--dispute", default=None, metavar="FILE",
                    help="dispute.json overlay (governance.md section 1)")
+    p.add_argument("--require-revocation-coverage", action="store_true",
+                   help="fail-closed: with no --revocation overlay return HOLD(3) "
+                        "instead of ALLOW(0) - absence is not a clean state")
     p.set_defaults(func=cmd_gate)
 
     p = sub.add_parser("revoke", help="issue a revocation.json for a package (governance 3)")

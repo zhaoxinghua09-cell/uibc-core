@@ -75,6 +75,15 @@ LGD 三原则：**有籍（Registry）·有证（Evidence）·有门禁（Gates�
 **Dispute vs Revocation 的边界**：Dispute=第三方说"我有异议"（标记不阻断）；
 Revocation=持有者说"这个作废"（验签后阻断门禁）。
 
+**R4 覆盖缺失不是干净状态（`--require-revocation-coverage`）**：判定器只看得见"递给它的覆盖层"。
+默认不给覆盖层时门禁返回 `ALLOW`，因为从没见过撤销文件——这是**描述**，不是**担保**。
+要求高保证的调用方加 `--require-revocation-coverage` 后，未给覆盖层即 `HOLD`（exit 3），
+理由写明 `revocation coverage absent`，绝不会被读成"没有东西被撤销"。
+
+这条只堵住"缺失被静默当成干净"，**不**证明"确实没有撤销"：要证后者需要签发方给出
+带时间窗的"已查、无撤销"签名声明（CRL 形态），本仓库尚未实现，见 `KNOWN-LIMITS.md`。
+也**不**提供新鲜度上界：覆盖层多旧都算数，陈旧的分发仍是待做项。
+
 ## 4. Accountability（责任）——"谁授权"
 
 **对象**：已存在于 identity.json 的 `owner` 字段 + lifecycle 的 `actor` 字段。

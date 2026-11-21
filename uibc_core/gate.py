@@ -127,13 +127,20 @@ def _check_dispute(disp: dict, manifest: dict) -> tuple:
 
 def gate(package_dir: str, key: bytes = None,
          revocation_path: str = None, dispute_path: str = None,
-         pubkey: bytes = None) -> dict:
+         pubkey: bytes = None, require_revocation_coverage: bool = False) -> dict:
     """Run verify, then apply governance overlays. Returns a gate report.
 
     Exit-code contract (CLI layer):
         ALLOW           -> 0
         DENY            -> 2   (blocking: mirrors poka-yoke hook semantics)
         HOLD            -> 3   (INCONCLUSIVE: human decision required)
+
+    ``require_revocation_coverage`` is the fail-closed form of "I have no
+    revocation overlay": without it, a caller with no overlay gets ALLOW,
+    because the gate cannot see a revocation it was never given. With it, an
+    absent overlay is HOLD (exit 3) instead of ALLOW - absence is never read as
+    "nothing was revoked". It does not make the absence *verified*; it only
+    stops the absence from being silently treated as a clean state.
     """
     report = verify(package_dir, key=key, pubkey=pubkey)
     manifest = _load_json(os.path.join(package_dir, "manifest.json")) \
@@ -164,6 +171,11 @@ def gate(package_dir: str, key: bytes = None,
             "; ".join(c["id"] for c in report["checks"] if c["result"] == "FAIL")
     elif revocation["status"] in ("MALFORMED", "MISMATCH", "UNVERIFIABLE"):
         decision, reason = "HOLD", f"revocation {revocation['status']}: {revocation['detail']}"
+    elif revocation["status"] == "NONE" and require_revocation_coverage:
+        decision = "HOLD"
+        reason = ("revocation coverage absent: caller demanded coverage and no "
+                  "revocation overlay was supplied (HOLD, never read as "
+                  "'nothing was revoked')")
     elif dispute["status"] in ("MALFORMED", "MISMATCH"):
         decision, reason = "HOLD", f"dispute {dispute['status']}: {dispute['detail']}"
     elif report["result"] == "INCONCLUSIVE" or \

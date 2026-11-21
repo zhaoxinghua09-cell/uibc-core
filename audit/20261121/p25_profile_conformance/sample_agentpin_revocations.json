@@ -1,0 +1,14 @@
+{
+  "agentpin_version": "0.1",
+  "entity": "example.com",
+  "updated_at": "2026-11-19T01:33:08.980146+00:00",
+  "revoked_credentials": [],
+  "revoked_agents": [
+    {
+      "agent_id": "agent-X",
+      "revoked_at": "2026-11-19T01:33:08.980144+00:00",
+      "reason": "key_compromise"
+    }
+  ],
+  "revoked_keys": []
+}

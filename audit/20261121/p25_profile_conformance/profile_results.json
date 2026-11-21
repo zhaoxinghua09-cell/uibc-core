@@ -1,0 +1,158 @@
+{
+  "total": 14,
+  "pass": 14,
+  "results": [
+    {
+      "id": "P01",
+      "desc": "AIP CRL 新鲜 + 实体被撤销 → DENY",
+      "got": "DENY",
+      "want": "DENY",
+      "pass": true
+    },
+    {
+      "id": "P02",
+      "desc": "AIP CRL 新鲜 + 实体未涉及 → ALLOW（宽松模式）",
+      "got": "ALLOW",
+      "want": "ALLOW",
+      "pass": true
+    },
+    {
+      "id": "P03",
+      "desc": "AIP CRL 在 strict 模式 → 缺历史证明，拒绝",
+      "got": [
+        "DENY",
+        "no_history_proof"
+      ],
+      "want": [
+        "DENY",
+        "no_history_proof"
+      ],
+      "pass": true
+    },
+    {
+      "id": "P04",
+      "desc": "AIP scope_revoke 只封 payments：请求 payments → DENY",
+      "got": "DENY",
+      "want": "DENY",
+      "pass": true
+    },
+    {
+      "id": "P05",
+      "desc": "AIP scope_revoke 同一条：请求 read → ALLOW",
+      "got": "ALLOW",
+      "want": "ALLOW",
+      "pass": true
+    },
+    {
+      "id": "P06",
+      "desc": "AIP CRL 超 max_age（40 分钟 > 15）→ DENY",
+      "got": [
+        "DENY",
+        "stale(fail_closed)"
+      ],
+      "want": [
+        "DENY",
+        "stale(fail_closed)"
+      ],
+      "pass": true
+    },
+    {
+      "id": "P07",
+      "desc": "AgIS status=revoked → DENY",
+      "got": [
+        "DENY",
+        "status:revoked"
+      ],
+      "want": [
+        "DENY",
+        "status:revoked"
+      ],
+      "pass": true
+    },
+    {
+      "id": "P08",
+      "desc": "AgIS status=unknown → DENY（不交本地策略）",
+      "got": [
+        "DENY",
+        "status:unknown(fail_closed)"
+      ],
+      "want": [
+        "DENY",
+        "status:unknown(fail_closed)"
+      ],
+      "pass": true
+    },
+    {
+      "id": "P09",
+      "desc": "AgIS status=active 但 cache ttl 已过（5 分钟前更新）→ DENY",
+      "got": [
+        "DENY",
+        "expired"
+      ],
+      "want": [
+        "DENY",
+        "expired"
+      ],
+      "pass": true
+    },
+    {
+      "id": "P10",
+      "desc": "AgIS status=compromised → DENY",
+      "got": [
+        "DENY",
+        "status:compromised"
+      ],
+      "want": [
+        "DENY",
+        "status:compromised"
+      ],
+      "pass": true
+    },
+    {
+      "id": "P11",
+      "desc": "Clawdentity CRL 签名有效 + 实体被撤销 → DENY",
+      "got": "DENY",
+      "want": "DENY",
+      "pass": true
+    },
+    {
+      "id": "P12",
+      "desc": "Clawdentity CRL 超出其 max age（20 分钟 > 15）→ DENY（覆盖 fail-open）",
+      "got": [
+        "DENY",
+        "stale(fail_closed)"
+      ],
+      "want": [
+        "DENY",
+        "stale(fail_closed)"
+      ],
+      "pass": true
+    },
+    {
+      "id": "P13",
+      "desc": "旧 CRL 重放（iat 回退）→ DENY",
+      "got": [
+        "DENY",
+        "replay(older_iat)"
+      ],
+      "want": [
+        "DENY",
+        "replay(older_iat)"
+      ],
+      "pass": true
+    },
+    {
+      "id": "P14",
+      "desc": "Clawdentity CRL 签名伪造 → DENY",
+      "got": [
+        "DENY",
+        "bad_signature"
+      ],
+      "want": [
+        "DENY",
+        "bad_signature"
+      ],
+      "pass": true
+    }
+  ]
+}

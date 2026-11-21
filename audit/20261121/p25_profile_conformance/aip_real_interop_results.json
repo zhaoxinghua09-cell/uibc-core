@@ -1,0 +1,61 @@
+{
+  "total": 7,
+  "pass": 7,
+  "results": [
+    {
+      "id": "P15",
+      "desc": "第三方永久撤销 → 本 profile DENY",
+      "got": "DENY",
+      "want": "DENY",
+      "pass": true
+    },
+    {
+      "id": "P16",
+      "desc": "第三方暂停中 → 本 profile DENY（不看它是否会自行恢复）",
+      "got": "DENY",
+      "want": "DENY",
+      "pass": true
+    },
+    {
+      "id": "P17",
+      "desc": "第三方暂停已过期：它自己 is_revoked=False（fail-open）",
+      "got": false,
+      "want": false,
+      "pass": true
+    },
+    {
+      "id": "P18",
+      "desc": "同一状态喂给本 profile：仍未拿到可信状态 → DENY:not_revoked 不成立，按无历史证明处理后 ALLOW（暴露缺口）",
+      "got": "DENY",
+      "want": "DENY",
+      "pass": true
+    },
+    {
+      "id": "P19",
+      "desc": "第三方 reinstate 会删除记录（历史被抹掉）",
+      "got": 0,
+      "want": 0,
+      "pass": true
+    },
+    {
+      "id": "P20",
+      "desc": "本 profile 在 strict 模式：无历史证明 → 一律 DENY",
+      "got": [
+        "DENY",
+        "no_history_proof"
+      ],
+      "want": [
+        "DENY",
+        "no_history_proof"
+      ],
+      "pass": true
+    },
+    {
+      "id": "P21",
+      "desc": "第三方 store 无单调序号字段（无法检测旧快照重放）",
+      "got": false,
+      "want": false,
+      "pass": true
+    }
+  ]
+}

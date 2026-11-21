@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "XLGD Trust Lifecycle - External Node Result",
+  "type": "object",
+  "required": ["kit_version", "reproducer", "affiliation", "conflict_declared",
+               "environment", "started_at", "vectors_total", "matched", "mismatches", "results"],
+  "properties": {
+    "kit_version": {"const": "xlgd-trust-repro/1"},
+    "reproducer": {"type": "string", "minLength": 2,
+      "description": "Name or handle of the person/organization that ran the kit"},
+    "affiliation": {"type": "string",
+      "description": "Institution or 'independent'. Must not be the maintainer"},
+    "conflict_declared": {"enum": ["true", "false"],
+      "description": "true if any funding/employment/contractual relation with XLGD/SynomosAI"},
+    "environment": {
+      "type": "object",
+      "required": ["os", "python"],
+      "properties": {"os": {"type": "string"}, "python": {"type": "string"},
+                     "machine": {"type": "string"}}
+    },
+    "started_at": {"type": "string", "format": "date-time"},
+    "vectors_total": {"type": "integer", "minimum": 1},
+    "matched": {"type": "integer", "minimum": 0},
+    "mismatches": {
+      "type": "array",
+      "items": {"type": "object", "required": ["id", "expected", "actual"],
+                "properties": {"id": {"type": "string"},
+                               "expected": {"enum": ["ALLOW", "REJECT"]},
+                               "actual": {"enum": ["ALLOW", "REJECT"]}}}
+    },
+    "results": {
+      "type": "array",
+      "items": {"type": "object", "required": ["id", "expected", "actual", "match"],
+                "properties": {"id": {"type": "string"},
+                               "expected": {"enum": ["ALLOW", "REJECT"]},
+                               "actual": {"enum": ["ALLOW", "REJECT"]},
+                               "match": {"type": "boolean"}}}
+    }
+  }
+}

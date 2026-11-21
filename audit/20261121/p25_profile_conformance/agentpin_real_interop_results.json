@@ -1,0 +1,69 @@
+{
+  "total": 9,
+  "pass": 9,
+  "results": [
+    {
+      "id": "P22",
+      "desc": "第三方文档撤销了 agent-X → 本 profile DENY",
+      "got": "DENY",
+      "want": "DENY",
+      "pass": true
+    },
+    {
+      "id": "P23",
+      "desc": "第三方文档未涉及 agent-Y → ALLOW（宽松）",
+      "got": "ALLOW",
+      "want": "ALLOW",
+      "pass": true
+    },
+    {
+      "id": "P24",
+      "desc": "strict 模式：该文档无历史证明 → DENY",
+      "got": "('DENY', 'no_history_proof')",
+      "want": "('DENY', 'no_history_proof')",
+      "pass": true
+    },
+    {
+      "id": "P25",
+      "desc": "该文档的键里没有 sig / serial / chain 字段（可被整体替换或回放而不被察觉）",
+      "got": "[]",
+      "want": "[]",
+      "pass": true
+    },
+    {
+      "id": "P26",
+      "desc": "文档超 15 分钟未更新 → DENY:stale",
+      "got": "('DENY', 'stale(fail_closed)')",
+      "want": "('DENY', 'stale(fail_closed)')",
+      "pass": true
+    },
+    {
+      "id": "P27",
+      "desc": "首次见到 → 钉扎（first_use）",
+      "got": "first_use",
+      "want": "first_use",
+      "pass": true
+    },
+    {
+      "id": "P28",
+      "desc": "同钥再见 → MATCHED",
+      "got": "matched",
+      "want": "matched",
+      "pass": true
+    },
+    {
+      "id": "P29",
+      "desc": "同 kid 换钥 → CHANGED（它硬失败，这点优于它的撤销侧）",
+      "got": "changed",
+      "want": "changed",
+      "pass": true
+    },
+    {
+      "id": "P30",
+      "desc": "Ed25519(OKP) 的 JWK 在其 thumbprint 实现上直接抛错",
+      "got": "KeyError:'y'",
+      "want": "KeyError:'y'",
+      "pass": true
+    }
+  ]
+}

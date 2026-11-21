@@ -1,0 +1,59 @@
+name: Vector package
+
+# The RFC 9162 vector set had no CI job at all until 2026-11-21: every check
+# that guards it (builder --check, --check-drift, the standalone recompute, the
+# Node second implementation) was a command someone had to remember to run.
+# A package whose integrity is verified by memory is a package that drifts.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  vectors:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: "3.12"
+
+      - name: Pin the checksum list
+        # Byte-exact: the package pins its own files as -text in .gitattributes,
+        # so a CRLF checkout on any platform must not change these.
+        working-directory: docs/upstream-package/scitt-rfc9162
+        run: sha256sum -c SHA256SUMS
+
+      - name: Recompute every vector from its declared inputs
+        run: python tools/build_scitt_vector_package.py --check
+
+      - name: Committed bytes are what the builder produces
+        # The stronger check: rebuild into a temp dir and demand byte identity
+        # in both directions, so a builder change cannot silently drop a vector.
+        run: python tools/build_scitt_vector_package.py --check-drift
+
+      - name: Independent recompute, written from the text
+        # Imports nothing from this project; disagreement means one of the two
+        # readings of RFC 9162 is wrong.
+        run: python tools/check_scitt_vectors_standalone.py
+
+      - name: Second implementation (JavaScript) reaches parity
+        # Same author, so this is a differential test and not an independent
+        # run — the external run ledger does not count it. It still proves the
+        # vectors are written down concretely enough to be met twice, and
+        # --self-test proves the checker catches its own mutations (all-zero
+        # empty root, a filled-in size-0 fold result, a size-0 vector marked
+        # VALID) instead of passing everything.
+        # node is preinstalled on ubuntu-latest; no setup-node action is pinned
+        # here on purpose, because this repository pins actions by commit SHA
+        # and an unpinned third-party action would be the one loose end.
+        run: node tools/check_scitt_vectors_node.mjs --self-test
+
+      - name: The package tests
+        run: python -m pip install --upgrade pip && pip install pytest && python -m pytest tests/test_upstream_vector_package.py -q

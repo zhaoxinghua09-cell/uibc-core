@@ -17,9 +17,9 @@
       "detail": "RESULT_JSON=release/anchor_freetsa.json"
     },
     "ots": {
-      "state": "pending_calendar",
-      "detail": "calendar attestation from alice.btc.calendar.opentimestamps.org, not a Bitcoin block"
+      "state": "anchored",
+      "detail": "Bitcoin block 976735 (2026-11-20T14:17:33Z); the page keeps its 272-byte calendar proof because it is frozen, and the upgraded proof is in this directory (BITCOIN-ATTESTATION.json)"
     }
   },
-  "limits": "A signature says which key signed these bytes, not who controls that key outside this repository. The OpenTimestamps file is a calendar attestation here, not a Bitcoin block."
+  "limits": "A signature says which key signed these bytes, not who controls that key outside this repository. The Bitcoin block proves the digest existed by 2026-11-20 14:17:33Z; it does not prove who published it, and it does not prove the workflow behaved."
 }

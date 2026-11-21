@@ -30,6 +30,55 @@ from .canonical import hash_file  # noqa: F401  (re-exported for tools)
 from .signing import (ALGORITHM, ALGORITHM_ED25519, ed_key_id, key_id)  # noqa: F401
 from .verify import verify
 
+# Reason codes a revocation may carry (governance section 3). A closed set:
+# a new reason has to enter the spec before a file can claim it, otherwise
+# "reason_code" becomes free text that nobody can act on.
+#
+# SUPERSEDED and KEY_COMPROMISED are the two that were missing. Neither adds a
+# gate disposition: a superseded package is void (DENY) and the successor is
+# named so a caller can follow it; a compromised key voids what it signed.
+REVOCATION_REASONS = ("OWNER_REQUEST", "EVIDENCE_INVALID",
+                      "KEY_COMPROMISED", "SUPERSEDED")
+
+
+def _timestamp_ok(value) -> bool:
+    """ISO-8601 with a timezone. Naive timestamps are rejected: a revocation
+    time without an offset cannot be compared with another revocation time."""
+    if not isinstance(value, str) or not value:
+        return False
+    try:
+        from datetime import datetime
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return False
+    return parsed.tzinfo is not None
+
+
+def _check_revocation_reason(rev: dict):
+    """Validate the reason vocabulary. Returns (status, detail) or None.
+
+    Why this is a separate step with its own return: a reason code is what a
+    human acts on after the gate says DENY. A file that says SUPERSEDED
+    without naming the successor is a revocation that tells the caller to stop
+    using this package and then leaves them with nowhere to go.
+    """
+    rc = rev.get("reason_code")
+    if rc is None:
+        return None  # legacy revocations predate the vocabulary; not an error
+    if not isinstance(rc, str) or rc not in REVOCATION_REASONS:
+        return "MALFORMED", (
+            "unknown reason_code %r; known: %s" % (rc, ", ".join(REVOCATION_REASONS)))
+    if rc == "SUPERSEDED":
+        successor = rev.get("superseded_by")
+        if not successor:
+            return "MALFORMED", "reason_code SUPERSEDED requires superseded_by"
+        if successor == rev.get("target_root"):
+            return "MALFORMED", "a package cannot supersede itself"
+    if "compromised_at" in rev and not _timestamp_ok(rev.get("compromised_at")):
+        return "MALFORMED", "compromised_at is not ISO-8601 with a timezone"
+    return None
+
+
 
 def _load_json(path):
     with open(path, "r", encoding="utf-8") as f:
@@ -72,6 +121,10 @@ def _check_revocation(rev: dict, manifest: dict, key, pubkey=None) -> tuple:
     for field in ("revocation_id", "target_root", "signature", "revoked_at"):
         if not rev.get(field):
             return "MALFORMED", f"revocation missing field {field!r}"
+    bad_reason = _check_revocation_reason(rev)
+    if bad_reason:
+        return bad_reason
+    reason = rev.get("reason_code") or "UNSPECIFIED"
     if rev.get("target_root") != manifest.get("evidence_root"):
         return "MISMATCH", ("revocation targets a different evidence_root: "
                             f"{rev.get('target_root')!r} != {manifest.get('evidence_root')!r}")
@@ -82,7 +135,8 @@ def _check_revocation(rev: dict, manifest: dict, key, pubkey=None) -> tuple:
                                     "cannot verify (HOLD, never silently trusted)")
         if not _verify_body(key, rev):
             return "UNVERIFIABLE", "revocation signature invalid for supplied key"
-        return "REVOKED", f"valid revocation by key_id {rev.get('key_id', '?')}"
+        return "REVOKED", (f"valid revocation by key_id {rev.get('key_id', '?')} "
+                           f"(reason_code {reason})")
     if algorithm == ALGORITHM_ED25519:
         if pubkey is None:
             return "UNVERIFIABLE", ("Ed25519-signed revocation present but no --pubkey "
@@ -97,7 +151,7 @@ def _check_revocation(rev: dict, manifest: dict, key, pubkey=None) -> tuple:
         if not _ed.verify(pubkey, _canonical_sig_payload(rev), sig):
             return "UNVERIFIABLE", "revocation signature invalid for the pinned public key"
         return "REVOKED", ("valid Ed25519 revocation by key_id "
-                           f"{rev.get('key_id', ed_key_id(pubkey))}")
+                           f"{rev.get('key_id', ed_key_id(pubkey))} (reason_code {reason})")
     return "UNVERIFIABLE", f"unknown revocation algorithm {algorithm!r}"
 
 
@@ -142,9 +196,12 @@ def gate(package_dir: str, key: bytes = None,
     revocation = {"status": "NONE", "detail": "no revocation supplied"}
     if revocation_path:
         try:
-            revocation = dict(zip(("status", "detail"),
-                                  _check_revocation(_load_json(revocation_path), manifest,
-                                                    key, pubkey)))
+            rev = _load_json(revocation_path)
+            status, detail = _check_revocation(rev, manifest, key, pubkey)
+            revocation = {"status": status, "detail": detail}
+            for field in ("reason_code", "superseded_by", "compromised_at"):
+                if rev.get(field) not in (None, ""):
+                    revocation[field] = rev[field]
         except (OSError, ValueError):
             revocation = {"status": "MALFORMED", "detail": "revocation file unreadable/invalid JSON"}
 
@@ -159,6 +216,10 @@ def gate(package_dir: str, key: bytes = None,
     # decision cascade - order is normative (governance section 7)
     if revocation["status"] == "REVOKED":
         decision, reason = "DENY", "package is revoked by valid owner revocation"
+        if revocation.get("reason_code"):
+            reason += " (reason_code %s)" % revocation["reason_code"]
+        if revocation.get("superseded_by"):
+            reason += ", successor %s" % revocation["superseded_by"]
     elif report["result"] == "FAIL":
         decision, reason = "DENY", "verifier FAIL: " + \
             "; ".join(c["id"] for c in report["checks"] if c["result"] == "FAIL")
@@ -192,5 +253,11 @@ def gate(package_dir: str, key: bytes = None,
         "limitations": report["limitations"] + [
             "gate() is a decision layer, not an enforcement layer: it returns "
             "exit codes, it cannot stop a determined caller from ignoring them.",
-        ],
+            # A key-compromise revocation without a time bound still denies the
+            # package, but it says nothing about what the key signed before -
+            # so it cannot be used to bound the damage, only to stop this one.
+        ] + ([] if revocation.get("reason_code") != "KEY_COMPROMISED"
+              or revocation.get("compromised_at") else [
+            "key compromise is declared without compromised_at: the time bound "
+            "is unstated, so only this package is void, not what the key signed earlier."]),
     }

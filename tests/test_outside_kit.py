@@ -83,6 +83,47 @@ class OutsideKitTests(unittest.TestCase):
         self.assertIn("digest differs", proc.stdout)
         self.assertIn("verify.py", proc.stdout)
 
+    def _extracted_root(self):
+        work = tempfile.mkdtemp(dir=self.tmp)
+        with zipfile.ZipFile(self.zip) as zf:
+            zf.extractall(work)
+        return os.path.join(work, "uibc-audit-kit")
+
+    def test_the_kit_carries_the_declaration_tool(self):
+        """An outsider who cannot declare capability cannot be compared with."""
+        self.assertIn("tools/capabilities_check.py", self._names())
+
+    def _names(self):
+        with zipfile.ZipFile(self.zip) as zf:
+            return [n.split("/", 1)[1] for n in zf.namelist()]
+
+    def test_the_declaration_works_from_inside_the_kit(self):
+        root = self._extracted_root()
+        proc = subprocess.run([sys.executable, "tools/capabilities_check.py", "emit"],
+                              cwd=root, capture_output=True, text=True, timeout=120)
+        self.assertEqual(proc.returncode, 0, proc.stderr[-2000:])
+        decl = json.loads(proc.stdout)
+        self.assertEqual(len(decl["checks"]), 20)
+        with open(os.path.join(root, "uibc_core", "gate.py"), encoding="utf-8") as f:
+            self.assertIn("REVOCATION_REASONS", f.read())
+
+    def test_two_runs_of_the_audit_are_byte_identical(self):
+        """One kit, one report: a second run may not say something different."""
+        root = self._extracted_root()
+        first = subprocess.run([sys.executable, "tools/outsider_audit.py"],
+                               cwd=root, capture_output=True, text=True, timeout=180)
+        second = subprocess.run([sys.executable, "tools/outsider_audit.py"],
+                                cwd=root, capture_output=True, text=True, timeout=180)
+        self.assertEqual(first.stdout, second.stdout)
+
+    def test_the_report_names_no_path_on_this_machine(self):
+        root = self._extracted_root()
+        proc = subprocess.run([sys.executable, "tools/outsider_audit.py"],
+                              cwd=root, capture_output=True, text=True, timeout=180)
+        self.assertNotIn(":\\", proc.stdout)
+        self.assertNotIn(REPO, proc.stdout)
+        self.assertNotIn(self.tmp, proc.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()

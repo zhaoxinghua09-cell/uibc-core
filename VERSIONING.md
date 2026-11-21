@@ -74,6 +74,24 @@ Three version identities coexist and do not agree:
 
 This is a defect, not a state to be explained. Until the archival record matches the released code, the phrase "current version" refers to the repository and must say so.
 
+### 7.1 Re-measured 2026-11-21
+
+The table above is the 2026-11-19 snapshot and stays as a record. What is true
+today, with how each number was obtained:
+
+| Where | Version | How it was measured |
+|---|---|---|
+| Repository (`pyproject.toml`, `server.json`, tag `v0.5.0`) | 0.5.0 | read from this tree |
+| Package index | 0.5.0 | `https://pypi.org/pypi/uibc-core/json` -> `info.version`; published releases 0.3.0 … 0.5.0 |
+| Archival DOI record | not measured this round (**[NV]**) | last recorded as 0.3.0; must be re-read at the DOI itself before anyone quotes it |
+
+The repository-vs-index half of the disagreement has since closed: both say
+0.5.0. The remaining question is the archival record, and it is unmeasured here
+rather than assumed unchanged. The rule above holds unchanged: "current
+version" means the repository, and any statement about the archival record has
+to name the day it was read.
+
+
 ## 8. Version floor (added 2026-11-19, after M2 was actually run)
 
 **A PASS from an older verifier is not a safety signal.** That is not a slogan here; it is a measured result.

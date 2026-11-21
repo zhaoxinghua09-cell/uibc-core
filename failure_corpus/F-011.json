@@ -1,0 +1,11 @@
+{
+  "id": "F-011",
+  "date": "2026-11-21",
+  "category": "code",
+  "summary": "the reproduce command embedded the absolute package path, so two runs over the same package produced different report bytes",
+  "root_cause": "The field was written to be copy-pasteable, and the shortest way to make a command runnable is to put the real path in it. Determinism was treated as a property of the verdict rather than of the whole report.",
+  "detection": "tests/test_compare_sut_results compares two runs over one corpus and reported all seven cases diverging, even though both sides were the same implementation.",
+  "fix": "reproduce carries the placeholder <package>: copy-pasteable and constant. The rule now stated in uibc_core/explain.py: the report must be byte-identical across runs of the same package.",
+  "lesson": "Determinism is a property of the document, not of the verdict. Any field derived from the caller's environment - absolute paths, hostnames, timestamps, locales - makes two honest runs incomparable, and the comparison suite will report it as a disagreement between implementations.",
+  "fixture_ref": "tests/test_compare_sut_results.py; tools/compare_sut_results.py"
+}

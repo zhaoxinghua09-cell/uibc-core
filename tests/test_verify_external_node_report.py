@@ -11,6 +11,7 @@ figures only; the full run is exercised when the tool is called without it.
 
 import os
 import re
+import shutil
 import subprocess
 import sys
 import unittest
@@ -43,15 +44,39 @@ class TestTheReceiptIsPinned(unittest.TestCase):
         self.assertEqual((int(m.group(1)), int(m.group(2))), (70, 2))
 
 
+def _git_prefix():
+    """Windows installs git as a `.cmd` shim, and CreateProcess cannot execute a
+    `.cmd` without a shell - so a bare ["git", ...] raises WinError 2 on a
+    machine that does have git (measured 2026-11-21 on this checkout). Resolve
+    the real executable instead of assuming the name is runnable, and return
+    None when nothing usable is found: an unusable tool is a skip, not a fail.
+    """
+    exe = shutil.which("git")
+    if not exe:
+        return None
+    if exe.lower().endswith((".cmd", ".bat")):
+        return ["cmd", "/c", exe]
+    return [exe]
+
+
+_GIT = _git_prefix()
+
+
 def _has_ref(ref):
-    r = subprocess.run(["git", "cat-file", "-e", ref + "^{commit}"], cwd=REPO,
+    if _GIT is None:
+        return None
+    r = subprocess.run(_GIT + ["cat-file", "-e", ref + "^{commit}"], cwd=REPO,
                        capture_output=True, text=True)
     return r.returncode == 0
 
 
 class TestItRecomputes(unittest.TestCase):
     def test_quick_run_matches_the_receipt(self):
-        if not _has_ref(v.RECEIPT_REF):
+        has_ref = _has_ref(v.RECEIPT_REF)
+        if has_ref is None:
+            self.skipTest("git is not executable from Python on this platform "
+                          "(a .cmd shim cannot be spawned without a shell)")
+        if not has_ref:
             # A shallow clone cannot name the commit the receipt refers to. That is
             # a missing input, not a passing test: say so and let CI report it as
             # skipped, with the reason carrying the fix (`fetch-depth: 0`).

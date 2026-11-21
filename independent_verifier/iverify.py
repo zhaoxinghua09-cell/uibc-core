@@ -271,11 +271,13 @@ def _ed25519_verify(pub: bytes, msg: bytes, sig: bytes) -> bool:
         return False
 
 
-def check_seal(key: bytes, package_dir: str) -> str:
+def check_seal(key: bytes, package_dir: str, pubkey: bytes = None) -> str:
     """S6 equivalent: PASS / FAIL / INCONCLUSIVE (seal v0.3 semantics).
 
     - Ed25519 seal: verified publicly with the recorded public key, in
-      every mode; key_id must equal SHA-256 of that public key.
+      every mode; key_id must equal SHA-256 of that public key. When
+      ``pubkey`` is pinned (owner key obtained out of band), the recorded
+      public key must match it, else a key-substituted re-seal fails S6.
     - HMAC seal: checked only when the owner key is provided; without it
       INCONCLUSIVE (symmetric seals cannot be checked publicly).
     - No seal: FAIL when a key is demanded, otherwise INCONCLUSIVE
@@ -314,6 +316,8 @@ def check_seal(key: bytes, package_dir: str) -> str:
             return "FAIL"
         if len(pub) != 32 or seal.get("key_id") != hashlib.sha256(pub).hexdigest():
             return "FAIL"
+        if pubkey is not None and pubkey != pub:
+            return "FAIL"  # pinned key mismatch: the seal was re-signed by another key
         payload = _payload()
         return "PASS" if _ed25519_verify(pub, payload, sig) else "FAIL"
     if key is None:
@@ -409,7 +413,8 @@ def _has_duplicate_members(package_dir):
     return False
 
 
-def independent_verify(package_dir: str, key: bytes = None) -> dict:
+def independent_verify(package_dir: str, key: bytes = None,
+                       pubkey: bytes = None) -> dict:
     """Return {'result': PASS/FAIL/INCONCLUSIVE, 'checks': {V1..V9: result}}."""
     outcomes = {}
 
@@ -473,7 +478,7 @@ def independent_verify(package_dir: str, key: bytes = None) -> dict:
     else:
         outcomes["V5"] = "INCONCLUSIVE"
 
-    outcomes["V6"] = check_seal(key, package_dir)
+    outcomes["V6"] = check_seal(key, package_dir, pubkey)
 
     # v1.1 parity: three checks the corpus (benchmark/adapter.py) showed this
     # implementation was missing while the reference already had them.

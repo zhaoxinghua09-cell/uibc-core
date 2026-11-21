@@ -143,6 +143,12 @@ function main() {
   if (SELF_TEST) {
     const base = JSON.parse(
       readFileSync(join(PKG, 'v1', 'fail-empty-tree', 'expected.json'), 'utf8'));
+    // A valid vector, to prove the leaf-digest binding is checked at all: the
+    // other three probes are about size 0, and a checker could pass them while
+    // never recomputing the leaf from its input.
+    const manifestVector = manifest.vectors.find((v) => v.expected_result.startsWith('VALID'));
+    const validBase = JSON.parse(
+      readFileSync(join(PKG, manifestVector.dir, 'expected.json'), 'utf8'));
     const probes = [
       ['empty root replaced by an all-zero digest',
        { ...base, root_true: '00'.repeat(32) }],
@@ -150,6 +156,8 @@ function main() {
        { ...base, reconstructed_root: base.leaf_entry.digest_hex }],
       ['size-0 vector marked VALID',
        { ...base, result: 'VALID' }],
+      ['leaf digest no longer matches its leaf input',
+       { ...validBase, leaf_entry: { ...validBase.leaf_entry, digest_hex: '00'.repeat(32) } }],
     ];
     for (const [label, tampered] of probes) {
       const caught = [];

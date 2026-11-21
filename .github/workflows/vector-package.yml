@@ -40,8 +40,10 @@ jobs:
 
       - name: Independent recompute, written from the text
         # Imports nothing from this project; disagreement means one of the two
-        # readings of RFC 9162 is wrong.
-        run: python tools/check_scitt_vectors_standalone.py
+        # readings of RFC 9162 is wrong. --self-test additionally feeds four
+        # broken vectors through the same code, so a checker that passes
+        # everything cannot pass this step.
+        run: python tools/check_scitt_vectors_standalone.py --self-test
 
       - name: Second implementation (JavaScript) reaches parity
         # Same author, so this is a differential test and not an independent

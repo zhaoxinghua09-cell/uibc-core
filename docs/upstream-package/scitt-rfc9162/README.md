@@ -146,10 +146,11 @@ second implementation by the same hand proves the *vectors* are written down
 concretely enough to be met twice, not that a stranger can meet them. For that,
 the invitation in `docs/INVITE-ONE-PAGE.md` is the only route.
 
-**What it does add.** `--self-test` feeds the checker three deliberately broken
-vectors — the empty-tree root replaced by an all-zero digest, a size-0 fold
-result filled in, a size-0 vector marked `VALID` — and exits 1 unless every one
-is caught. A checker that cannot fail its own mutations is decoration, and this
+**What it does add.** `--self-test` feeds both checkers the same four
+deliberately broken vectors — the empty-tree root replaced by an all-zero
+digest, a size-0 fold result filled in, a size-0 vector marked `VALID`, and a
+leaf digest detached from its leaf input — and exits 1 unless every one is
+caught. A checker that cannot fail its own mutations is decoration, and this
 is the cheapest way to show the empty-tree rule is enforced rather than
 described.
 

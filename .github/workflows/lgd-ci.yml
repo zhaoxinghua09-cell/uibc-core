@@ -1,0 +1,18 @@
+name: LGD CI
+
+# 共享守门：布局 + JSON 卫生。业务测试保留在仓内自有 CI。
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    uses: LGD-AI/lgd-ci/.github/workflows/lgd-reusable-ci.yml@9a12df6b2ee664db1aa915a178e1d8f46754771b
+    with:
+      python-version: "3.11"
+      run-tests: false
+      require-skill-md: false

@@ -3,24 +3,24 @@
     "INVALID_INCLUSION_PATH": 12,
     "INVALID_LEAF_DIGEST": 1,
     "INVALID_LEAF_INDEX": 2,
-    "INVALID_TREE_SIZE": 1,
+    "INVALID_TREE_SIZE": 2,
     "VALID": 21,
     "VALID_BUT_SIZE_UNAUTHENTICATED": 4
   },
-  "coverage_note": "Declaring a tree_size one larger than the path assumes never changes the reconstructed root in this algebra - the fold reads no additional node - so that input is carried as an ambiguous-* vector (the root does not authenticate the size), not as an INVALID_TREE_SIZE vector. INVALID_TREE_SIZE therefore covers 'declared smaller' (path one short) and 'declared zero' (no fold defined) only. This asymmetry was found by running the vectors, not assumed: an earlier draft carried a 'size larger' fail case that our own verifier reported as root-equal.",
+  "coverage_note": "Declaring a tree_size one larger than the path assumes never changes the reconstructed root in this algebra - the fold reads no additional node - so that input is carried as an ambiguous-* vector (the root does not authenticate the size), not as an INVALID_TREE_SIZE vector. INVALID_TREE_SIZE therefore covers 'declared smaller' (path one short) and 'declared zero' (no leaf can sit in an empty tree); the zero case carries MTH({}) = SHA-256(\"\") as its root so the constant itself is scored rather than assumed. This asymmetry was found by running the vectors, not assumed: an earlier draft carried a 'size larger' fail case that our own verifier reported as root-equal.",
   "leaf_entry_definition": "SHA-256 of the leaf input bytes, hex-encoded. Leaf inputs here are plain ASCII strings rather than COSE_Sign1 digests, so the tree algebra can be checked without a COSE library.",
   "reconstruction_rule": "Fold the path over leaf_index with tree_size using RFC 9162 SHA-256 verification; the result must equal root_true for VALID vectors and must differ for the three fail-* vectors.",
+  "retired_underspecified_inputs": [
+    {
+      "former_status": "declared here as underspecified and deliberately not scored, on the reading that 'two conforming readings disagree' about whether a fold is defined",
+      "input": "tree_size=0 with a leaf_index asserted",
+      "retired_on": "2026-11-21",
+      "why_now_scored": "the reading was wrong. RFC 6962 Section 2.1 states MTH({}) = SHA-256(), so the empty-tree root is fixed by the text rather than borrowed; Section 2.1.1 defines PATH(m, D[n]) only for 0 <= m < n, so no conforming reading admits a leaf in a tree of size 0. The case is now v1/fail-empty-tree, expecting INVALID_TREE_SIZE with root_true = MTH({}). The earlier draft named it fail-tree-size-zero."
+    }
+  ],
   "scope_note": "Covers the RFC 9162 SHA-256 hash-tree and inclusion-path layer only. No COSE_Sign1 statement or receipt bytes are included; see README 'What this set does not cover'.",
   "stability": "append-only",
   "tree_construction": "leaves[i] = SHA-256(leaf_input_i); node_hash = SHA-256(left||right); split = largest power of two below the subtree size (RFC 9162); leaf_input_i = 'scitt-rfc9162 test vectors v1 :: <vector-id> :: leaf <i>'",
-  "underspecified_inputs": [
-    {
-      "independent_behaviour": "a literal RFC 9162 fold keeps folding and returns a root, because nothing in the text forbids size 0",
-      "input": "tree_size=0 with a leaf_index asserted",
-      "our_behaviour": "refused: no fold is defined, reconstructed_root left empty",
-      "why_not_a_vector": "a vector has to be reproducible by an independent reading of the text. This input is not: two conforming readings disagree, so it is declared here instead of being scored. It was found on 2026-11-20 when the standalone checker disagreed with the builder; the earlier draft carried it as fail-tree-size-zero."
-    }
-  ],
   "vectors": [
     {
       "description": "Smallest tree: tree_size=1, empty inclusion path, root == leaf digest.",
@@ -560,6 +560,26 @@
       },
       "expected_result": "INVALID_TREE_SIZE",
       "id": "fail-wrong-tree-size"
+    },
+    {
+      "description": "tree_size=0 with an RFC 6962 empty-tree root: MTH({}) = SHA-256(). No leaf can sit in a tree of size 0, so the only correct verdict is a refusal. This vector exists because a corpus that leaves the empty-tree constant undefined - or that puts another tree's root in its place - cannot be met by a second implementation.",
+      "dir": "v1/fail-empty-tree",
+      "expected": {
+        "inclusion_path": [],
+        "leaf_entry": {
+          "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+          "digest_hex": "2d21e11303b44608cb53ab38158a2965c1bce75edcc2a5af991056fe424ace1d",
+          "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: fail-empty-tree :: leaf 0",
+          "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a206661696c2d656d7074792d74726565203a3a206c6561662030"
+        },
+        "leaf_index": 0,
+        "reconstructed_root": "",
+        "result": "INVALID_TREE_SIZE",
+        "root_true": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "tree_size": 0
+      },
+      "expected_result": "INVALID_TREE_SIZE",
+      "id": "fail-empty-tree"
     },
     {
       "description": "tree_size=9, leaf_index=0: the left subtree is full (8) and the tail is 1.",

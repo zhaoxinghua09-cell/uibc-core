@@ -56,6 +56,17 @@ def main():
         if leaf.hex() != exp["leaf_entry"]["digest_hex"]:
             ok = False; msgs.append("%s: leaf digest != SHA-256(leaf input)" % v["id"])
         path = [bytes.fromhex(h) for h in exp["inclusion_path"]]
+        if exp["tree_size"] == 0:
+            # RFC 9162 Section 2.1: MTH({}) = SHA-256(). Section 2.1.1 defines PATH
+            # only for 0 <= m < n, so no leaf can sit in an empty tree: the root is
+            # the empty-tree constant and the only correct verdict is a refusal.
+            if exp["root_true"] != H(b"").hex():
+                ok = False; msgs.append("%s: size 0 but root_true is not MTH({})" % v["id"])
+            if exp["reconstructed_root"] != "":
+                ok = False; msgs.append("%s: size 0 but a fold result is recorded" % v["id"])
+            if exp["result"].startswith("VALID"):
+                ok = False; msgs.append("%s: size 0 accepted a leaf" % v["id"])
+            continue
         rec = fold(leaf, exp["leaf_index"], exp["tree_size"], path)
         if rec.hex() != exp["reconstructed_root"]:
             ok = False; msgs.append("%s: fold does not reproduce reconstructed_root" % v["id"])

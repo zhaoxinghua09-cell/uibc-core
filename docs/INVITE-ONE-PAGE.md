@@ -78,8 +78,13 @@ The receipt file the harness wrote, plus three lines we cannot derive from it:
 
 If a vector is wrong, say so and say which field is wrong. We will fix the package
 and credit you by name in the changelog. If your verifier refuses an input we score,
-that is the most interesting outcome on the table: it may mean the input belongs in
-`manifest.underspecified_inputs` instead of being scored, and we will move it there.
+that is the most interesting outcome on the table — with one condition: quote the
+RFC sentence. A refusal is either a gap in our vector or a bug in your fold, and
+`MTH({}) = SHA-256()` and the domain of `PATH` are both written down, so the text
+decides it. If it really is a gap, it moves to `manifest.underspecified_inputs`
+instead of being scored; if the text does decide it, the vector stays and the
+disagreement is recorded against the sentence. We have already retracted one false
+gap this way (`manifest.retired_underspecified_inputs`, retired 2026-11-21).
 
 ## How the result will be recorded
 

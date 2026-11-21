@@ -125,6 +125,11 @@ CASES = [
      "Leaf input altered before hashing: digest and reconstructed root both differ."),
     ("fail-wrong-tree-size", 8, 2, "size", "INVALID_TREE_SIZE",
      "tree_size declared one smaller than the path assumes; proof length is one short."),
+    ("fail-empty-tree", 1, 0, "size-zero", "INVALID_TREE_SIZE",
+     "tree_size=0 with an RFC 6962 empty-tree root: MTH({}) = SHA-256(). No leaf can sit "
+     "in a tree of size 0, so the only correct verdict is a refusal. This vector exists "
+     "because a corpus that leaves the empty-tree constant undefined - or that puts "
+     "another tree's root in its place - cannot be met by a second implementation."),
     ("valid-tree9-index0", 9, 0, None, "VALID",
      "tree_size=9, leaf_index=0: the left subtree is full (8) and the tail is 1."),
     ("fail-wrong-leaf-index", 8, 2, "index", "INVALID_LEAF_INDEX",
@@ -221,7 +226,14 @@ def _expected(cid, size, index, tamper, result, desc):
         stated_size = size - 1
         proof = proof[:-1]
     elif tamper == "size-zero":
+        # Declared size 0 while a leaf is asserted. RFC 6962 Section 2.1 fixes the
+        # empty-tree root as SHA-256(), and Section 2.1.1 only defines PATH for
+        # 0 <= index < tree_size, so there is exactly one conforming reading: refuse.
+        # The root carried here is therefore MTH({}), not the root of the one-leaf
+        # tree this case was generated from.
         stated_size = 0
+        proof = []
+        true_root = hashlib.sha256(b"").digest()
     elif tamper == "index":
         proof = list(merkle.audit_path(leaves, (index + 1) % size))
     reconstructed = root_from_path(leaf_digest, index, stated_size, proof)
@@ -291,24 +303,28 @@ def build(out=OUT):
             "reconstructed root in this algebra - the fold reads no additional node - so "
             "that input is carried as an ambiguous-* vector (the root does not authenticate "
             "the size), not as an INVALID_TREE_SIZE vector. INVALID_TREE_SIZE therefore "
-            "covers 'declared smaller' (path one short) and 'declared zero' (no fold "
-            "defined) only. This asymmetry was found by running the vectors, not assumed: "
-            "an earlier draft carried a 'size larger' fail case that our own verifier "
-            "reported as root-equal."
+            "covers 'declared smaller' (path one short) and 'declared zero' (no leaf can "
+            "sit in an empty tree); the zero case carries MTH({}) = SHA-256(\"\") as its "
+            "root so the constant itself is scored rather than assumed. This asymmetry was "
+            "found by running the vectors, not assumed: an earlier draft carried a "
+            "'size larger' fail case that our own verifier reported as root-equal."
         ),
         "class_counts": classes,
-        "underspecified_inputs": [
+        "retired_underspecified_inputs": [
             {
                 "input": "tree_size=0 with a leaf_index asserted",
-                "our_behaviour": "refused: no fold is defined, reconstructed_root left empty",
-                "independent_behaviour": ("a literal RFC 9162 fold keeps folding and returns a "
-                                          "root, because nothing in the text forbids size 0"),
-                "why_not_a_vector": ("a vector has to be reproducible by an independent "
-                                     "reading of the text. This input is not: two conforming "
-                                     "readings disagree, so it is declared here instead of "
-                                     "being scored. It was found on 2026-11-20 when the "
-                                     "standalone checker disagreed with the builder; the "
-                                     "earlier draft carried it as fail-tree-size-zero."),
+                "former_status": ("declared here as underspecified and deliberately not "
+                                 "scored, on the reading that 'two conforming readings "
+                                 "disagree' about whether a fold is defined"),
+                "retired_on": "2026-11-21",
+                "why_now_scored": (
+                    "the reading was wrong. RFC 6962 Section 2.1 states MTH({}) = SHA-256(), "
+                    "so the empty-tree root is fixed by the text rather than borrowed; "
+                    "Section 2.1.1 defines PATH(m, D[n]) only for 0 <= m < n, so no "
+                    "conforming reading admits a leaf in a tree of size 0. The case is now "
+                    "v1/fail-empty-tree, expecting INVALID_TREE_SIZE with root_true = "
+                    "MTH({}). The earlier draft named it fail-tree-size-zero."
+                ),
             }
         ],
         "leaf_entry_definition": ("SHA-256 of the leaf input bytes, hex-encoded. Leaf "

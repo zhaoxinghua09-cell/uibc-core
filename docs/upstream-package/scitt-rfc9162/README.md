@@ -2,8 +2,8 @@
 # scitt-rfc9162 test vectors (v1)
 
 A self-contained, append-only set of **RFC 9162 SHA-256 hash-tree and
-inclusion-path** vectors: **41 vectors in six classes** — 21 `VALID`, 12
-`INVALID_INCLUSION_PATH`, 2 `INVALID_LEAF_INDEX`, 1 `INVALID_LEAF_DIGEST`, 1
+inclusion-path** vectors: **42 vectors in six classes** — 21 `VALID`, 12
+`INVALID_INCLUSION_PATH`, 2 `INVALID_LEAF_INDEX`, 1 `INVALID_LEAF_DIGEST`, 2
 `INVALID_TREE_SIZE`, and 4 `VALID_BUT_SIZE_UNAUTHENTICATED` (the ambiguity
 class, described below). Class counts are computed from the vectors themselves
 (`manifest.json` → `class_counts`), not typed in by hand.
@@ -58,21 +58,31 @@ for the `fail-*` vectors they must differ.** For the negative vectors
 `reconstructed_root` is computed from the tampered material, not asserted
 by hand.
 
-### What this set refuses to score, and says so
+### What this set used to refuse to score, and now does
 
-`manifest.json` carries an `underspecified_inputs` list. It exists because a
-vector is only worth carrying if **an independent reading of the text
-reproduces it**. One input failed that test on 2026-11-20:
+`manifest.json` carries a `retired_underspecified_inputs` list: inputs that
+were once declared unscoreable here, with the reason they were retired.
 
-| Input | Our behaviour | Independent reading | Where it is now |
+**The one entry was wrong, and 2026-11-21 corrected it.**
+
+| Input | Former handling | What the text actually says | Where it is now |
 |---|---|---|---|
-| `tree_size=0` with a `leaf_index` asserted | refused: no fold is defined, `reconstructed_root` left empty | keeps folding, because nothing in RFC 9162 forbids size 0, and returns some root | **declared, not scored** (`underspecified_inputs`) |
+| `tree_size=0` with a `leaf_index` asserted | declared `underspecified`, deliberately not scored, on the reading that "two conforming readings disagree" about whether a fold is defined | **one reading exists.** RFC 9162 §2.1 fixes `MTH({})` = `SHA-256()` (`e3b0c442…`), and §2.1.1 defines `PATH(m, D[n])` only for `0 <= m < n`, so no leaf can sit in a tree of size 0 and the only correct verdict is a refusal | **scored**: `v1/fail-empty-tree`, `result = INVALID_TREE_SIZE`, `root_true = MTH({})` |
 
-An earlier draft carried that input as `fail-tree-size-zero`. Our own
-standalone checker disagreed with the builder on it, which is exactly the
-signal that it is not a vector but a gap in the text. Deleting it and
-declaring it is the honest handling; scoring it against our own reading would
-have forced every other implementer to fail a case the RFC does not decide.
+An earlier draft had carried that input as `fail-tree-size-zero`; it was
+deleted on 2026-11-20 when the standalone checker disagreed with the builder.
+The disagreement was real, but the conclusion drawn from it was not: a checker
+that treats `size = 0` as an ordinary fold and a builder that refuses it are
+not "two conforming readings", because the text fixes the constant and fixes
+the domain of `PATH`. Deleting the vector left the empty-tree root unscored —
+the one constant a corpus must pin if a second implementation is ever to agree
+with it. It is now pinned by a vector.
+
+The lesson is written down rather than hidden: **"the text does not decide
+this" is a claim about the text, and it has to be read in the text before it
+is used to delete a test.** A corpus that leaves a constant undefined cannot
+be met by an independent implementer, and that is the failure this vector
+exists to prevent.
 
 ### Why the size asymmetry is written down
 

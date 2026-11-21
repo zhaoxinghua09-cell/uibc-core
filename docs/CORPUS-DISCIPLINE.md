@@ -98,6 +98,23 @@ Declaring it is strictly better than deleting it silently. A deleted gap teaches
 nobody; a declared gap tells the working group what to fix in the text — which is
 the actual contribution.
 
+**But read the text before you declare.** This rule has a failure mode, and we
+hit it. A disagreement between two verifiers is only a gap if the text really
+leaves the question open. On 2026-11-20 we declared `tree_size = 0` with a
+`leaf_index` asserted to be such a gap, because our standalone checker folded it
+and our builder refused it. The text is not open: RFC 9162 §2.1 fixes
+`MTH({}) = SHA-256()`, and §2.1.1 defines `PATH(m, D[n])` only for `0 <= m < n`,
+so a leaf cannot sit in an empty tree and a refusal is the only conforming
+verdict. One of the two verifiers was simply wrong. That input is now a scored
+vector (`v1/fail-empty-tree`) and the false gap is recorded in
+`manifest.retired_underspecified_inputs` with the reason it was retired.
+
+So the checklist is: disagreement → **open RFC 9162 and find the sentence** →
+gap only if no sentence decides it. Declaring a gap that the text does not
+support is worse than deleting the test, because it makes a corpus look
+rigorous while leaving a constant unscored — every second implementation then
+fails a case it could have passed.
+
 ---
 
 ## Rule 4 — Counts must be computed, not typed

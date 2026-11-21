@@ -82,6 +82,12 @@ def _collect():
             files.append(("uibc_core/" + name, os.path.join(core, name)))
     files.append(("tools/outsider_audit.py",
                   os.path.join(_REPO, "tools", "outsider_audit.py")))
+    # The outsider needs to be able to say what it can do, not only to run our
+    # audit. Without this the kit ships the verdict but not the vocabulary the
+    # verdict is expressed in, and a second implementation cannot be compared
+    # with it from inside the kit.
+    files.append(("tools/capabilities_check.py",
+                  os.path.join(_REPO, "tools", "capabilities_check.py")))
     for rel_root in (os.path.join("fixtures", "clean.uibc"),
                      os.path.join("tests", "fixtures", "anchor")):
         base = os.path.join(_REPO, rel_root)

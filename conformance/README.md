@@ -138,8 +138,47 @@ pins it so the next edit cannot quietly reintroduce it.
 
 **Two negative controls, measured** (see `tests/test_decision_vectors.py`): a gate that
 answers `ALLOW` to everything scores **1/7**; a gate that answers `DENY` to everything
-scores **3/7** — and it is wrong on both `HOLD` cases, because *"cannot verify"* is not
+scores **3/7** — and it is wrong on the one `ALLOW` case and on the **three** `HOLD` cases
+(03 no anchor, 04 another key, 05 somebody else's package), because *"cannot verify"* is not
 *"not revoked"*. A suite that a permissive stub can pass would be decoration.
+
+### A result file, so a second project can compare without reading this page
+
+```bash
+python3 tools/run_decision_vectors.py \
+    --gate "python3 my_gate.py {pkg} --revocation {overlay} --pubkey {anchor}" \
+    --sut-label "my_gate 1.4" --sut-result sut-result.json
+```
+
+The file carries the four things a comparison needs and nothing that has to be trusted:
+
+```json
+{"implementation": "my_gate 1.4",
+ "corpus": {"suite": "conformance/decisions", "digest": "f59e9f83…", "cases": 7},
+ "summary": {"matched": 7, "total": 7},
+ "cases": [{"id": "01", "what": "…",
+            "expected": {"decision": "ALLOW", "exit": 0},
+            "observed": {"decision": "ALLOW", "exit": 0},
+            "verdict": "MATCH"}]}
+```
+
+Three properties are measured, not asserted:
+
+* **the digest is over the suite bytes, in a fixed order** — not a commit id, because a
+  stranger may hold a tarball or a mirror with no history. Measured: a working-tree checkout
+  and a `git archive` of the same commit produce the same digest; appending one byte to one
+  file inside the suite changes it (`test_one_byte_of_a_case_moves_the_digest`). Line
+  endings count as bytes here: the suite is checked out of git as stored (`core.autocrlf=false`,
+  no `eol` rewrite inside `conformance/decisions/`), so a checkout that rewrites text files
+  will produce a different digest — visibly different, which is the next-best outcome to
+  agreement, and the reason the digest is published rather than kept private.
+* **disagreement is recorded per case**, never summarised into a score — the file names which
+  cases diverged and what each side actually answered.
+* **the scope line travels with the data**: agreement on these seven decisions, nothing more;
+  a `MISMATCH` is a difference to look at, not a defect in either side; one run is not an audit.
+
+A digest that depended on checkout order, hash seed or line endings would be a number two
+people cannot compare, which is worse than no number.
 
 The seeds are not shipped: rebuilding the suite produces the same cases in shape with
 different keys, so it is reproducible as a *test*, not as *bytes*.

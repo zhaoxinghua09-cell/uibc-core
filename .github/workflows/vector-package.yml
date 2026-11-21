@@ -89,5 +89,10 @@ jobs:
             --adapter conformance/adapters/accept_all.py \
             --expect-disagreement --out "${{ runner.temp }}/cheat.json"
 
+      - name: The external-run table refuses what prose only asked for
+        run: |
+          python tools/check_external_runs.py
+          python tools/check_external_runs.py --self-test
+
       - name: The package tests
         run: python -m pip install --upgrade pip && pip install pytest && python -m pytest tests/test_upstream_vector_package.py -q

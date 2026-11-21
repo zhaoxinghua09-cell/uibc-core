@@ -217,7 +217,9 @@ node tools/verify_tree_algebra_exhaustive.mjs /tmp/inst.json
 
 | Bound | inclusion instances | consistency instances | disagreements |
 |---|---|---|---|
-| 128 (CI and locally) | 8,256 (sizes 1..128, every index) | 8,256 (every 1 ≤ m ≤ n ≤ 128) | **0** |
+| 128 (CI, every run) | 8,256 (sizes 1..128, every index) | 8,256 (every 1 ≤ m ≤ n ≤ 128) | **0** |
+| 256 (local, 2026-11-22) | 32,896 | 32,896 | **0** |
+| 512 (local, 2026-11-22) | 131,328 | 131,328 | **0** |
 
 Two readings are compared: generation from `uibc_core`, verification from
 `tools/check_scitt_vectors_standalone.py`, which imports nothing from it. The

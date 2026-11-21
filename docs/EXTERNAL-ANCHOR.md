@@ -170,14 +170,17 @@ therefore stays **blocked**, and no claim of it appears anywhere in the release.
 ### OpenTimestamps: the second anchor type (2026-11-17)
 
 The ASQAV compliance profile wants "RFC 3161, OpenTimestamps, or both". We
-submitted the same head digest to a public OTS calendar, so the two anchors
-cover one digest rather than two unrelated claims:
+submitted a head digest to a public OTS calendar. Read back on 2026-11-21, that
+digest is **not** the one the TSA token covers, so the two anchors do not cover
+one digest and this paragraph said they did until it was corrected:
 
 | item | value |
 |---|---|
-| file | `tools/out/release_status.json`, digest `4ad23d9153c3…7fd6e98` |
+| RFC 3161 head | `tools/out/release_status.json` at commit time, digest `4ad23d9153c3…7fd6e98` |
 | RFC 3161 | Free TSA token, `genTime=2026-11-17T08:11:35Z`, signature verified offline |
 | OpenTimestamps | `alice.btc.calendar.opentimestamps.org`, proof `tests/fixtures/anchor/ots_head.ots` (207 bytes) |
+| what the OTS proof anchors | its own first message, `f0087497…b808f120` — **not** `4ad23d91…6fd6e98`, and not the hash of any committed `tools/out/release_status.json` |
+| container | a bare serialized tree with no standard header, so the official `ots` client refuses it ("is not a timestamp file") |
 | what the OTS proof says today | **one pending calendar attestation, zero Bitcoin block attestations** |
 
 That is the honest status: a calendar attestation says the calendar had this
@@ -188,6 +191,22 @@ source. `tests/test_v14_ots_anchor.py` asserts the proof contains **no**
 block attestation, so the claim cannot drift into "Bitcoin-anchored" by
 accident. The test is skipped when the `opentimestamps` library is absent: the
 verifier stays dependency-free.
+
+Two more assertions were added on 2026-11-21 so the mislabel cannot come back
+silently: the fixture is checked to be a bare tree, and its first message is
+checked to differ from the TSA head, with `ots_container.binds` confirming the
+proof answers for no digest at all. `tools/anchor_ots.py --verify FILE --proof P`
+already refuses such a proof instead of walking it (`the proof answers for
+another digest, not for FILE`), because the proof's own first bytes are no
+longer passed in as the initial message.
+
+What a correct second anchor would take: re-`--stamp` a *committed*
+`tools/out/release_status.json`, wrap the result into the standard container so
+the official client can read it, then `--upgrade` toward a block. That needs a
+calendar submission and a file that is actually in the tree, so it is a
+deliberate step, not something a monitor should do while the working copy is
+dirty.
+
 ### Checkpoint key: what was tried (2026-11-17, all negative)
 
 | attempt | result |

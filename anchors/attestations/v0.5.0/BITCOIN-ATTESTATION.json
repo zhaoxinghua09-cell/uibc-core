@@ -1,0 +1,30 @@
+{
+  "attests": {
+    "bytes": 287,
+    "file": "CORPUS-DIGESTS.txt",
+    "sha256": "9a3ffbbcd1c516e005dcb1bb95f413fd166066df20ab88b4c0e9fe4ab395d86c"
+  },
+  "bitcoin": {
+    "block_hash": "000000000000000000014a49db93fe28707b2d0333a7151d6a10a66131e596a8",
+    "block_height": 976735,
+    "block_time_utc": "2026-11-20T14:17:33Z",
+    "merkle_root": "2fe8d00096f65b0a98749981e02f98fdb5ae4e7ad9e227f919d850d102af25a2"
+  },
+  "kind": "uibc-bitcoin-attestation-v0",
+  "limits": "a Bitcoin block proves existence at a time, not authorship, and not that the corpus was run.",
+  "proof": {
+    "bytes": 1308,
+    "container": "DetachedTimestampFile (standard)",
+    "file": "CORPUS-DIGESTS.txt.ots",
+    "sha256": "f8e216935dcd1baa5f8e647fd53aa2a3b70f1250e8dc8a48187f0e861357e3d6"
+  },
+  "tag": "v0.5.0",
+  "verified_against": {
+    "checked_at": "2026-11-21T01:15Z",
+    "result": "the attestation's merkle root equals the block's merkle root, and the block's height and hash agree",
+    "source": "blockstream.info: /api/block-height/976735 then /api/block/<hash>"
+  },
+  "what_it_does_not": "the block header is not walked here: the merkle root is compared with a public explorer and the comparison is recorded, not re-performed by this repository.",
+  "what_it_establishes": "the digest the page serves existed before block 976735's time (2026-11-20 14:17:33 UTC). It does not say who published it, and it does not say the workflow behaved.",
+  "why_not_on_the_page": "the page's own CORPUS-DIGESTS.txt.ots (272 bytes, frozen 2026-11-20 10:41Z) carries a calendar attestation only. It was upgraded here on 2026-11-21 01:14Z, after the block was mined, and the standard container with the block attestation lives in this repository: changing the page would change published bytes. The calendar proof is inside the upgraded file -- the upgrade adds the path to the block, it does not discard the earlier witness."
+}

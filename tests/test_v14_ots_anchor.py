@@ -1,26 +1,29 @@
 """OpenTimestamps anchor: real submission, honest status.
 
-What the fixture actually is, checked 2026-11-21 and corrected here: the `.ots`
-is a real proof returned by `alice.btc.calendar.opentimestamps.org` on
-2026-11-17, but its own first 32 bytes - the message the calendar timestamped -
-are `f0087497…f120`, which is **not** the `4ad23d91…6e98` head that the RFC 3161
-path timestamped and which `anchored_head.json` holds. So the two anchors do
-**not** cover one digest, and until 2026-11-21 this file's docstring said they
-did. The proof also has no standard container header, so the official `ots`
-client refuses it ("is not a timestamp file").
+Two proofs live here, and the difference between them is the whole point:
 
-The assertions are about what the proof actually says, not what we wish it said:
+  * `ots_head.ots` (2026-11-17) is the proof that was claimed to be "for the
+    digest `4ad23d91…` - the same head that Free TSA timestamped. Two anchors,
+    one digest". Read out of the proof itself on 2026-11-21, its first 32 bytes
+    are `f0087497…f120`, which is **not** that head and is not the hash of any
+    committed `tools/out/release_status.json`. It is also a bare tree with no
+    standard header, so the official `ots` client refuses it ("is not a
+    timestamp file").
+  * `anchored_head.json.ots` (2026-11-21) is a re-stamp taken on the exact
+    bytes the TSA token covers, written in the standard container. It binds,
+    the official client can read it, and it still carries only a pending
+    calendar attestation.
 
-  * it contains a pending calendar attestation and zero Bitcoin block
-    attestations, so the honest status is "pending", never "verified";
-  * the head the TSA token covers and the message the OTS proof carries are two
-    different digests, and `ots_container.binds` accepts no digest for the
-    proof at all - the claim lives in assertions now, not in prose;
-  * `--verify` refuses a proof that does not answer for the file it was handed,
-    rather than walking it and printing the proof's own attestations;
+The assertions are about what the proofs actually say, not what we wish they said:
+
+  * the 2026-11-17 proof carries a pending calendar attestation and zero
+    Bitcoin block attestations, and it is refused when handed a file it does
+    not answer for;
+  * the 2026-11-21 proof binds to the TSA head, so "one digest, two anchors" is
+    earned rather than assumed - and it too carries no block attestation;
   * a truncated proof yields no attestation rather than a claim.
 
-The extra assertions went into two existing tests on purpose: a new test method
+The extra assertions went into existing test methods on purpose: a new method
 changes the suite count, and `docs/EVIDENCE-INDEX.md` embeds that count as a
 measured fact.
 """
@@ -42,20 +45,29 @@ except ImportError:  # the verifier stays dependency-free; this test does not
 
 FIX = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures", "anchor")
 PROOF = os.path.join(FIX, "ots_head.ots")
+RESTAMPED = os.path.join(FIX, "anchored_head.json.ots")
 HEAD = os.path.join(FIX, "anchored_head.json")
 # The head the Free TSA token and anchored_head.json speak about.
 EXPECTED = "4ad23d9153c33c77253b23e1f5938249cb6877de93eb7593dea26fa5f7fd6e98"
-# The message the OTS proof really carries, read out of the proof itself.
+# The message the 2026-11-17 proof really carries, read out of the proof itself.
 OTS_ANCHORED = "f0087497e71943f5c1f308f010d39040ccaffbd6144475c1f9be6f88b808f120"
 
 
 def _inspect(proof_path):
+    """Walk a proof. A bare tree needs its message supplied; a standard container
+    carries its own header, and passing blob[:32] to it parses the magic as a
+    message - which reads as UnknownAttestation and hides what is really there."""
     from opentimestamps.core.serialize import BytesDeserializationContext
-    from opentimestamps.core.timestamp import Timestamp
+    from opentimestamps.core.timestamp import DetachedTimestampFile, Timestamp
+    from ots_container import is_standard
 
     with open(proof_path, "rb") as f:
         blob = f.read()
-    ts = Timestamp.deserialize(BytesDeserializationContext(blob), blob[:32])
+    ctx = BytesDeserializationContext(blob)
+    if is_standard(blob):
+        ts = DetachedTimestampFile.deserialize(ctx).timestamp
+    else:
+        ts = Timestamp.deserialize(ctx, blob[:32])
     out = []
 
     def walk(t, depth=0):
@@ -87,22 +99,36 @@ class OpenTimestampsTests(unittest.TestCase):
         self.assertEqual(blob[:32].hex(), OTS_ANCHORED,
                          "the OTS proof anchors a different message than it used to")
         self.assertNotEqual(blob[:32], head_digest,
-                            "the OTS proof and the TSA token cover different bytes; no "
-                            "document may say they cover one digest")
+                            "the 2026-11-17 proof and the TSA token cover different bytes; "
+                            "no document may say they cover one digest")
         self.assertFalse(is_standard(blob),
-                         "the published proof has no standard header, which is why the "
+                         "the 2026-11-17 proof has no standard header, which is why the "
                          "official client refuses it")
         self.assertFalse(binds(blob, head_digest),
                          "a bare tree binds to no digest, so it cannot be tied to the head")
 
+        with open(RESTAMPED, "rb") as f:
+            fresh = f.read()
+        self.assertTrue(is_standard(fresh),
+                        "the re-stamped proof must be readable by the official client, so "
+                        "it needs the header")
+        self.assertTrue(binds(fresh, head_digest),
+                        "the re-stamped proof must answer for the TSA head; that is the "
+                        "only way 'one digest, two anchors' is true")
+
     def test_proof_carries_a_pending_calendar_attestation(self):
-        """And it is refused when handed a file it does not answer for."""
+        """Both proofs are pending, and the older one is refused for another file."""
         import anchor_ots
 
         kinds = _inspect(PROOF)
         self.assertIn("PendingAttestation", kinds)
         with self.assertRaises(RuntimeError):
             anchor_ots.inspect(PROOF, HEAD)
+
+        fresh_kinds = _inspect(RESTAMPED)
+        self.assertIn("PendingAttestation", fresh_kinds)
+        self.assertNotIn("BitcoinBlockHeaderAttestation", fresh_kinds)
+        anchor_ots.inspect(RESTAMPED, HEAD)  # must not raise: this one does bind
 
     def test_proof_does_not_claim_a_bitcoin_block(self):
         kinds = _inspect(PROOF)

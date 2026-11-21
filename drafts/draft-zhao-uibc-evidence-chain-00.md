@@ -23,7 +23,7 @@ Reference impl: https://github.com/zhaoxinghua09-cell/uibc-core
 An autonomous agent leaves a trail of actions, but that trail is normally
 produced, stored and verified by the same party it is supposed to convince.
 This document specifies a portable package that binds an agent's identity,
-lifecycle, and action evidence into one hash-committed structure, gives an
+lifecycle, and action evidence into one hash-committed structure, gives a
 nineteen-check verification procedure with three-valued outcomes, and
 specifies how to commit the resulting root to backends the operator cannot
 rewrite. The specification is deliberately narrow: it defines what can be

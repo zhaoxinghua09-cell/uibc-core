@@ -30,6 +30,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tarfile
 import tempfile
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -44,15 +45,35 @@ MISMATCH_RE = re.compile(r"checks compared: (\d+), mismatches: (\d+)")
 
 
 def export(ref, dest):
-    """A read-only copy of one commit, without touching the working tree."""
-    tar = subprocess.Popen(["git", "archive", ref], cwd=REPO,
-                           stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    untar = subprocess.run(["tar", "-x", "-C", dest], stdin=tar.stdout,
-                           capture_output=True, text=True)
-    tar.stdout.close()
-    err = tar.stderr.read().decode("utf-8", "replace")
-    tar.wait()
-    return tar.returncode, untar.returncode, err + untar.stderr
+    """A read-only copy of one commit, without touching the working tree.
+
+    The archive is written to a file and unpacked with the standard library
+    rather than piped into the system `tar`. The pipe version worked on the
+    host this was written on (Debian) and failed on Windows:
+
+        tar: Error opening archive: Failed to open '\\.\tape0'
+
+    bsdtar there reads stdin only when told to (`-f -`), and without a stream
+    name it falls back to a tape device. A check that fails on one OS and
+    passes on another is not portable - it is a check that teaches the wrong
+    lesson about a repository whose whole claim is "recompute it yourself",
+    wherever you are.
+    """
+    with tempfile.TemporaryDirectory() as td:
+        arc = os.path.join(td, "snapshot.tar")
+        r = subprocess.run(["git", "archive", "--format=tar", "-o", arc, ref],
+                           cwd=REPO, capture_output=True, text=True)
+        if r.returncode != 0:
+            return r.returncode, 1, r.stderr or r.stdout
+        try:
+            with tarfile.open(arc) as tf:
+                try:
+                    tf.extractall(dest, filter="data")
+                except TypeError:  # python < 3.12 has no extraction filter
+                    tf.extractall(dest)
+        except Exception as exc:  # noqa: BLE001 - surfaced as the export error
+            return 0, 1, str(exc)
+    return 0, 0, ""
 
 
 def run_tests(root):

@@ -1,0 +1,41 @@
+{
+  "schema": "uibc.external-node-result/1",
+  "when_utc": "2026-11-20T05:13:32Z",
+  "platform": "macOS-27.2.1-arm64-arm-64bit",
+  "python": "3.12.14",
+  "package": "benchmark/corpus/base",
+  "independent_verifier": {
+    "exit_code": 0,
+    "ms": 37,
+    "interpretation": "0 means PASS"
+  },
+  "reference_verifier": {
+    "result": "PASS",
+    "ms": 12
+  },
+  "probes": [
+    {
+      "probe": "value:timestamp-without-zone",
+      "result": "FAIL",
+      "ms": 11,
+      "expected": "FAIL",
+      "ok": true
+    },
+    {
+      "probe": "value:feb29-1900",
+      "result": "FAIL",
+      "ms": 11,
+      "expected": "FAIL",
+      "ok": true
+    },
+    {
+      "probe": "value:uppercase-uuid",
+      "result": "FAIL",
+      "ms": 10,
+      "expected": "FAIL",
+      "ok": true
+    }
+  ],
+  "verdict": "CONSISTENT",
+  "note": "A CONSISTENT result means: the two implementations agree, and three packages that must be rejected were rejected. It does NOT mean the evidence is true or complete."
+}

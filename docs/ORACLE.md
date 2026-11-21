@@ -175,7 +175,7 @@ measured: V9 fires alone -> reference FAIL S8;     independent FAIL V9
 ```
 
 V7 ↔ S1, V8 ↔ S7 (S8 also fires), V9 ↔ S8, each measured on a package whose seal is valid.
-Stronger than the wording it replaces, and repeatable by anyone.
+A narrower claim than the wording it replaces — three measured pairs, repeatable by anyone.
 
 ## The finding a coverage percentage cannot express
 

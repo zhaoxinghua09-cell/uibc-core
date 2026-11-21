@@ -112,7 +112,37 @@ def judge(case, got):
     return {"id": case["id"], "what": case["what"], "ok": ok,
             "want": "%s/%s" % (want_d, want_x),
             "got": "%s/%s" % (got_d, got_x),
-            "note": got.get("error", "")}
+            "note": got.get("error", ""),
+            # Raw halves as well: a stranger re-running this needs to compare
+            # values, not parse a "X/Y" string back into two fields.
+            "want_decision": want_d, "want_exit": want_x,
+            "got_decision": got_d, "got_exit": got_x}
+
+
+def corpus_digest(suite):
+    """sha256 over every byte of the suite, in a fixed order.
+
+    Why a digest and not a commit id: the person who runs this may be on a
+    different branch, a mirror, or a tarball with no history. A digest of the
+    bytes is the only thing that lets two runs be compared without either side
+    trusting the other's provenance. It covers the package trees as well as the
+    manifest, so a rebuilt case with the same *shape* (different keys, same
+    semantics) deliberately changes the digest - the vectors are not secret, so
+    there is nothing to hide, only something to agree on.
+    """
+    import hashlib
+    h = hashlib.sha256()
+    for root, dirs, files in os.walk(suite):
+        dirs.sort()
+        for name in sorted(files):
+            path = os.path.join(root, name)
+            rel = os.path.relpath(path, suite).replace(os.sep, "/")
+            h.update(rel.encode("utf-8") + b"\0")
+            with open(path, "rb") as f:
+                for chunk in iter(lambda: f.read(65536), b""):
+                    h.update(chunk)
+            h.update(b"\0")
+    return h.hexdigest()
 
 
 def main(argv=None):
@@ -124,6 +154,13 @@ def main(argv=None):
                     help="the same command for cases with no overlay and no anchor, "
                          "e.g. \"python3 my_gate.py {pkg}\".")
     ap.add_argument("--json", action="store_true")
+    ap.add_argument("--sut-result", default=None, metavar="PATH",
+                    help="write a machine-readable result file - the shape another "
+                         "project's comparison script can consume without reading "
+                         "our prose: {implementation, corpus digest, per-case verdict}")
+    ap.add_argument("--sut-label", default=None,
+                    help="how the implementation under test should be named in "
+                         "--sut-result (default: the gate command, or 'ours')")
     a = ap.parse_args(argv)
 
     if not os.path.isdir(SUITE):
@@ -140,6 +177,33 @@ def main(argv=None):
         rows.append(judge(case, runner(pkg, overlay, anchor)))
 
     passed = sum(1 for r in rows if r["ok"])
+    if a.sut_result:
+        # A verdict file, not a scoreboard: it says what each case was, what was
+        # expected, what was observed, and what the corpus bytes were. The
+        # `scope` string travels with the data on purpose - a clean sheet that
+        # nobody re-reads becomes an endorsement by accident.
+        payload = {
+            "implementation": a.sut_label or a.gate or "ours (in-process gate)",
+            "corpus": {"suite": "conformance/decisions", "digest": corpus_digest(SUITE),
+                       "cases": len(rows)},
+            "summary": {"matched": passed, "total": len(rows)},
+            "cases": [{"id": r["id"], "what": r["what"],
+                       "expected": {"decision": r["want_decision"], "exit": r["want_exit"]},
+                       "observed": {"decision": r["got_decision"], "exit": r["got_exit"]},
+                       "verdict": "MATCH" if r["ok"] else "MISMATCH",
+                       "error": r["note"]} for r in rows],
+            "scope": ("Agreement on these %d decisions, nothing more. A MISMATCH is a "
+                      "difference to be looked at, not a defect in either side; "
+                      "one run is not an audit and this file vouches for nobody."
+                      % len(rows)),
+        }
+        d = os.path.dirname(os.path.abspath(a.sut_result))
+        if not os.path.isdir(d):
+            print("SUT result path has no directory: %s" % d, file=sys.stderr)
+            return 2
+        with open(a.sut_result, "w", encoding="utf-8", newline="\n") as f:
+            json.dump(payload, f, indent=2, ensure_ascii=False)
+            f.write("\n")
     if a.json:
         print(json.dumps({"passed": passed, "total": len(rows), "rows": rows},
                          indent=2, ensure_ascii=False))

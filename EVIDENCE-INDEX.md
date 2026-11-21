@@ -25,7 +25,7 @@
 | V5 | L3.5 | 语言中立一致性语料 | 七步、29 个向量（规范化字节、Ed25519 有效／无效等），固定摘要 | `tools/conformance_vectors.py`；不用本项目实现的反向校验见 `tools/conformance_check.py` |
 | V6 | L2 | 红队与假接受率 | 外部攻击者视角，不按自家基准出题 | `tools/redteam_suite.py`、`tools/mutation_benchmark.py` |
 | V7 | L2 | 四镜评审与终审 | 结构化评审记录 | `tools/lens_review.py`、`tools/muse_review.py` |
-| V8 | L4 | 外部验证节点 | **1**（Correctover，2026-11-20T01:44:01Z，Linux / Python 3.12.14）+ **待补第二个** | 干净克隆、stdlib only：`tools/external_node_check.py` → CONSISTENT、负向探针 3/3 被拒；`independent_verifier/cross_check.py` → 70 项 / 0 不一致；回执在桥仓 `ai-seats-bridge`。**该节点同时指出 M17 双验不一致、M20 两边 PASS、`malicious` / `malicious-keyswap` 两边 INCONCLUSIVE**——三条已登记为待办，不是已解决 |
+| V8 | L4 | 外部验证节点 | **2**：① Correctover（2026-11-20T01:44:01Z，Linux / Python 3.12.14，commit `8a95747`）；② EMILIA Protocol（2026-11-20T05:13:32Z，macOS arm64 / Python 3.12.14，commit `8160ac6`，回传文件 sha256 `24e59eac…9b85f3`） | 干净克隆、stdlib only：`tools/external_node_check.py` → 两次均 CONSISTENT、负向探针 3/3 被拒；②于同一 commit 我方 Windows 复跑同为 CONSISTENT（`e0c9c3cb…453f0`），两回执并列在 `docs/external-review/`；①另有 `independent_verifier/cross_check.py` → 70 项 / 0 不一致，回执在桥仓 `ai-seats-bridge`。**①同时指出 M17 双验不一致、M20 两边 PASS、`malicious` / `malicious-keyswap` 两边 INCONCLUSIVE**——三条已登记为待办，不是已解决 |
 | V9 | — | 外部锚（时间） | OpenTimestamps／Rekor／RFC 3161 三条路径 | `tools/anchor_ots.py`、`anchor_rekor.py`、`anchor_tsa.py` |
 
 ## 三、这张表怎么用

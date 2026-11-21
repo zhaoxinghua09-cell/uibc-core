@@ -22,7 +22,12 @@ sys.path.insert(0, REPO)
 
 from independent_verifier.iverify import independent_verify  # noqa: E402
 
-BASE = os.path.join(REPO, "benchmark", "corpus", "base")
+# A package that is in the repository, not one built on a developer's machine:
+# `benchmark/corpus/base` is generated and not tracked, so a clone (and CI)
+# has no copy of it. `anchors/001/package` is tracked, has the same three
+# fields these checks touch (manifest.created_at, lifecycle events[0]
+# .timestamp and .event_id), and is the same example the outsider run uses.
+BASE = os.path.join(REPO, "anchors", "001", "package")
 
 
 def _copy_base():

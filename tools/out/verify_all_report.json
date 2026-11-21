@@ -1,0 +1,70 @@
+{
+  "when": "2026-11-21 17:06:39",
+  "python": "3.13.14",
+  "checks": 4,
+  "pass": 4,
+  "skip": 0,
+  "fail": 0,
+  "all_runnable_pass": true,
+  "results": [
+    {
+      "check": "corpus-generator-stable",
+      "tag": "29-vectors",
+      "what": "published vectors match a fresh build",
+      "cmd": "C:\\Users\\SZYL\\.workbuddy\\binaries\\python\\envs\\default\\Scripts\\python.exe tools/conformance_vectors.py --check",
+      "status": "PASS",
+      "rc": 0,
+      "secs": 0.4,
+      "tail": [
+        "MATCH: 29 vectors reproduce exactly"
+      ]
+    },
+    {
+      "check": "corpus-foreign-checker",
+      "tag": "29-vectors",
+      "what": "a checker importing nothing from uibc_core reproduces every vector",
+      "cmd": "C:\\Users\\SZYL\\.workbuddy\\binaries\\python\\envs\\default\\Scripts\\python.exe tools/conformance_check.py",
+      "status": "PASS",
+      "rc": 0,
+      "secs": 0.8,
+      "tail": [
+        "PASS  l03-inclusion-index-2      recomputed included",
+        "PASS  l04-inclusion-tampered-leaf recomputed not_included",
+        "PASS  l05-inclusion-wrong-index  recomputed not_included",
+        "PASS  p01-policy-artefact-digest artefact digest reproduced",
+        "",
+        "29/29 vectors reproduced by a non-uibc implementation"
+      ]
+    },
+    {
+      "check": "two-implementation-agreement",
+      "tag": "determinism",
+      "what": "independent verifier agrees with main verifier",
+      "cmd": "C:\\Users\\SZYL\\.workbuddy\\binaries\\python\\envs\\default\\Scripts\\python.exe independent_verifier/cross_check.py",
+      "status": "PASS",
+      "rc": 0,
+      "secs": 0.7,
+      "tail": [
+        "fixture:malicious-keyswap   ALL  ALL  INCONCLUSIVEINCONCLUSIVEOK",
+        "xcheck-clean-strict         ALL  ALL  PASS        PASS        OK",
+        "xcheck-tampered-strict      ALL  ALL  FAIL        FAIL        OK",
+        "",
+        "checks compared: 70, mismatches: 0",
+        "AGREEMENT: PASS - spec determinism holds"
+      ]
+    },
+    {
+      "check": "fixture-expectations",
+      "tag": "verdicts",
+      "what": "verdict matrix gate logic is sound (read-only)",
+      "cmd": "C:\\Users\\SZYL\\.workbuddy\\binaries\\python\\envs\\default\\Scripts\\python.exe -m pytest tests/test_fixture_expectations.py -q",
+      "status": "PASS",
+      "rc": 0,
+      "secs": 2.7,
+      "tail": [
+        "................                                                         [100%]",
+        "16 passed in 0.25s"
+      ]
+    }
+  ]
+}

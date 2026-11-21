@@ -17,7 +17,8 @@ are specified in [verdict-and-seal-semantics.md](verdict-and-seal-semantics.md).
 | Verdict fixture matrix (`fixtures/`, 8 packages × S1–S6 checks) | Three-valued verdicts: tampered / deleted / duplicated / reordered / migrated packages FAIL; unresolved cases stay INCONCLUSIVE, never PASS | 24 / 24 cells match `fixtures/EXPECTED.md` | `python fixtures/generate_fixtures.py` |
 | Independent-verifier corpus | The bundled independent verifier (a second implementation path) agrees with the main verifier | 70 checks, 0 mismatches | `python independent_verifier/cross_check.py` |
 | Memory-migration matrix (UIBC-MEM) | Migration preservation checks M0–M5 over faithful and attacked memory packages | 22 / 22 cells match `fixtures/MEMORY_EXPECTED.md` | `python fixtures/generate_memory_fixtures.py` |
-| Unit + stress suite | Package behaviour incl. negative controls (bad inputs must fail) | **305 tests OK (skipped=1)**; three anchor modules skip instead of fail when `cryptography`/`asn1crypto` are absent — `pip install -e .[verify]` runs them | `python -m unittest discover -s tests -p "test_*.py"` |
+| Unit + stress suite | Package behaviour incl. negative controls (bad inputs must fail) | **339 passed, 12 skipped, 16 subtests passed** under pytest with `.[verify]` deps installed (measured 2026-11-21); anchor modules skip rather than fail when `cryptography`/`asn1crypto` are absent | `python -m pytest -q` (or `python -m unittest discover -s tests -p "test_*.py"` without extra deps) |
+| One-command reproduce-all | All published claims in a single structured run | 4/4 checks PASS (corpus build, foreign checker, two-implementation agreement, read-only verdict-matrix gate) | `python tools/verify_all.py --json` |
 | Seal vectors | Ed25519 seal is plain RFC 8032; the published test vector is locked in the suite | Vector 1 passes; a substituted signer key FAILS S6 when the expected key is pinned (`--pubkey`) | unit suite, S6 cases |
 
 A zero-install path exists for single packages: the browser verifier at
@@ -58,9 +59,12 @@ corpus only passed under our own verifier it would prove nothing.
 
 What it does **not** cover, and the difference matters:
 
-* **No second implementation.** We ship the object a second implementation can be measured
-  against; we do not ship that implementation. Tracekit and agent-receipts publish both.
-  "We match Tracekit here" would be a false claim.
+* **No second implementation written by a third party.** We ship two implementations of our
+  own (`uibc_core.verify` and `independent_verifier/iverify.py`, cross-checked 70/0) plus a
+  language-neutral corpus that imports neither. That is not the same as an outsider writing
+  a verifier from our spec — nobody outside our project has done that. Tracekit ships two
+  verifier *languages* (both by the same authors); agent-receipts publishes a reference
+  implementation. "A third party independently re-ran us" would be a false claim.
 * **No end-to-end receipt schema validation.** A receipt is a composite: the seven steps here
   are published, the assembly rules are not. `docs/INTEROP-MATRIX.md` labels the untested cells
   as untested.

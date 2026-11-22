@@ -33,6 +33,9 @@ verify = ["cryptography>=41", "asn1crypto>=1.5"]
 # dependency: CI installs this extra to run the corpus harness against the
 # uibc_core.aee rail; the rail itself is stdlib-only.
 conformance = ["agent-evidence-vectors==0.36.3"]
+# Test runner only. Thirteen test modules import pytest at module level, so the
+# README's unittest entry cannot even collect them unless pytest is importable.
+test = ["pytest>=8"]
 # Measured 2026-11-19: 15 of the 16 tests that CI was skipping were skipping only
 # because this extra was not installed. Installing it turns "527 OK (skipped=16)" into
 # "527 OK (skipped=2)", and the two that remain are deliberate (a self-seeding path that

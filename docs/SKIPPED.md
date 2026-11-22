@@ -126,3 +126,19 @@ $ python tools/redteam_robustness.py     # 9 of 9 ... 1 case skipped, problems: 
 $ python -m unittest discover tests      # Ran 561 tests, OK (skipped=24)
 ```
 
+## 2026-11-22 · outside re-run on HEAD `7ee526d2` (shallow clone, Linux / Python 3.12)
+
+The "2 skipped" line above was measured before the `conformance` extra existed and
+before several tests were added. Re-measured on a clean anonymous clone:
+
+| # | where | why it skipped | category |
+|---|---|---|---|
+| 1 | `tests/test_lab_bundle.py:147` | needs `UIBC_SLOW=1` for the full release script | manual opt-in |
+| 2 | `tests/test_langchain_live.py:151` | `langchain-core` is present, so the bare-env control is not taken | deliberate |
+| 3 | `tests/test_quickstart.py:22` | corpus already present, self-seeding path not exercised | deliberate |
+| 4 | `tests/test_verify_external_node_report.py:53` | shallow clone does not contain commit `8a95747`; `ci.yml` uses `fetch-depth: 0` | clone-depth artifact |
+
+A full clone gives 3 skips. With all extras:
+`python -m pytest tests -q -rs` → `1323 passed, 4 skipped, 100 subtests in 115.9s`;
+`python -m unittest discover -s tests -p "test_*.py"` → `Ran 1065 tests ... OK (skipped=4)`.
+1065 matches the count pinned in `docs/EVIDENCE-INDEX.md`.

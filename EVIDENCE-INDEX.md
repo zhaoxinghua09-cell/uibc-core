@@ -18,7 +18,7 @@
 
 | # | 级别 | 事项 | 结论 | 证据与复跑方式 |
 |---|---|---|---|---|
-| V1 | L1 | 主测试套件 | **328 项通过** | `python -m unittest discover tests`；`tools/release_status.py` |
+| V1 | L1 | 主测试套件 | **1086 例 / `OK (skipped=7)`**（2026-11-22，Windows 11 / Python 3.13.12，`main=130bf9d`，344.2 s） | `python -m unittest discover -s tests -t tests`（必须 `-t tests`；PATH 里要有可执行 `git.exe`）；Linux 四解释器矩阵由 CI `test` 作业覆盖 |
 | V2 | L1 | 压力与规模 | 7 项场景，含内存峰值与倍率 | `python -m unittest tests.stress_test` |
 | V3 | L3 | 第二实现交叉校验 | 与主实现逐项对齐，零不一致 | `independent_verifier/cross_check.py`；`tools/lgd_eval.py` |
 | V4 | L3.5 | 外部语料合规 | `probityai/agent-evidence-vectors` 0.37.0（suiteRevision 32，digest `bf3e5bef…46e11c1`）：**288 向量，288 通过，0 失败，0 拒绝，0 理由不一致** | `uv tool run "agent-evidence-vectors==0.37.0" --verifier "python -m uibc_core.aee"` |

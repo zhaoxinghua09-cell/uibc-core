@@ -106,7 +106,7 @@ evidence_root = SHA-256( RFC8785-JCS( sorted( [content_hash_1...content_hash_n] 
 - 差距：我们**没有**第二方为同一摘要联署，也没有透明日志的包含证明。因此：
   - 可写：`anchored`（时间存在、区块在链上、任何人可复核）；
   - 不可写：`witnessed`、`independent attestation`、与 SCITT receipt 等价。
-- 组合验算：`tools/epaec_gate.py` 的组链适配结果只说明"我们的包能被 EP-AEC 的判定器接收并给出
+- 组合验算：`tools/uibc_to_epaec.py` 的组链适配结果只说明"我们的包能被 EP-AEC 的判定器接收并给出
   预期裁决"，不说明我们满足任何见证要求。
 - 若要把 `anchored` 升级为 `witnessed`，需要的是**外部动作**（第二个机构对同一摘要签名或写入
   透明日志），不是代码改动；在此之前，本规范不声称达到该强度。

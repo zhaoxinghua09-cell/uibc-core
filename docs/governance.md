@@ -75,6 +75,27 @@ LGD 三原则：**有籍（Registry）·有证（Evidence）·有门禁（Gates�
 **Dispute vs Revocation 的边界**：Dispute=第三方说"我有异议"（标记不阻断）；
 Revocation=持有者说"这个作废"（验签后阻断门禁）。
 
+**R4 覆盖缺失不是干净状态（`--require-revocation-coverage`）**：判定器只看得见"递给它的覆盖层"。
+默认不给覆盖层时门禁返回 `ALLOW`，因为从没见过撤销文件——这是**描述**，不是**担保**。
+要求高保证的调用方加 `--require-revocation-coverage` 后，未给覆盖层即 `HOLD`（exit 3），
+理由写明 `revocation coverage absent`，绝不会被读成"没有东西被撤销"。
+
+这条只堵住"缺失被静默当成干净"，**不**证明"确实没有撤销"：要证后者需要签发方给出
+带时间窗的"已查、无撤销"签名声明（CRL 形态）。
+
+**R5 覆盖声明（`revocation-coverage.json`）**：持有者签发"{coverage_id, target_root,
+issued_at, sequence, no_revocation:true, key_id, algorithm, signature}"，语义是
+"截至 issued_at、序号 sequence，我没有对这个包签发过撤销"。判定：
+
+- 先验签，再判新鲜度。签名无效/缺钥 → `HOLD`，绝不读成"没撤销"。
+- `--coverage-max-age` 之外 → `HOLD`（`STALE`）。
+- `--coverage-state` 记已接受的最大 `sequence`，低序号重放 → `HOLD`（`ROLLBACK`）。
+- 有有效撤销时**撤销优先**，覆盖声明不能翻案（`DENY`）。
+
+这条仍是**自证**：同一个持有者既签撤销也签"没撤销"，第三方无法独立确认；也没有
+分发通道与传播延迟观测。对外口径只能是"撤销可被可靠阻断、覆盖新鲜度可被检查、
+撤销传播未实现"。2026-11-22 四步实测见 `发布前审查证据` 同名记录。
+
 ## 4. Accountability（责任）——"谁授权"
 
 **对象**：已存在于 identity.json 的 `owner` 字段 + lifecycle 的 `actor` 字段。

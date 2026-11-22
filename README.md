@@ -12,6 +12,7 @@ and it is unrelated to the UIBCDF computational-biology organisation.
 >
 > **想知道现在到底到哪一步？看 [STATUS.md](STATUS.md)** — 一页纸，每个数字都由 `python tools/status_page.py` 从仓库里算出来，
 > 它和仓库对不上时 `--check` 会红；六个维度的"我们缺什么"逐条列出，不留形容词。
+> **中文导读（五分钟）** → **[docs/zh-guide.md](docs/zh-guide.md)** — 三律在代码里落在哪、`PASS` 的确切含义、21 类篡改逐类结果、两台机器上的复核延迟，以及本仓现在还差什么（含红队的灰区）。每一句能对外说的话，钉到一条你能跑的命令上：**[docs/claims-register.md](docs/claims-register.md)**。
 
 ## Verify it yourself — one command, no install, no account
 

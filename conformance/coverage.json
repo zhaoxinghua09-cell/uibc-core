@@ -1,0 +1,183 @@
+{
+ "format": "uibc-core/conformance-coverage/1",
+ "generated_by": "tools/conformance_coverage.py",
+ "source": {
+  "manifest": "conformance/manifest.json",
+  "checks": "docs/EVIDENCE-INDEX.md"
+ },
+ "totals": {
+  "cases": 36,
+  "checks": 19,
+  "covered": 16,
+  "uncovered": 3
+ },
+ "checks": [
+  {
+   "id": "S1",
+   "title": "package structure",
+   "cases": [
+    "11"
+   ]
+  },
+  {
+   "id": "S2",
+   "title": "identity consistency",
+   "cases": [
+    "14"
+   ]
+  },
+  {
+   "id": "S3",
+   "title": "lifecycle state machine + semantics",
+   "cases": [
+    "13"
+   ]
+  },
+  {
+   "id": "S4",
+   "title": "evidence integrity",
+   "cases": [
+    "07",
+    "08",
+    "09"
+   ]
+  },
+  {
+   "id": "S5",
+   "title": "evidence root",
+   "cases": [
+    "10",
+    "15",
+    "16"
+   ]
+  },
+  {
+   "id": "S6",
+   "title": "seal signature",
+   "cases": [
+    "17",
+    "36"
+   ]
+  },
+  {
+   "id": "S7",
+   "title": "evidence index metadata",
+   "cases": [
+    "32"
+   ]
+  },
+  {
+   "id": "S8",
+   "title": "package checkpoint head",
+   "cases": [
+    "32",
+    "34"
+   ]
+  },
+  {
+   "id": "S9",
+   "title": "head pinned out-of-band",
+   "cases": []
+  },
+  {
+   "id": "S10",
+   "title": "attestation closure declared",
+   "cases": [
+    "33",
+    "35"
+   ]
+  },
+  {
+   "id": "S11",
+   "title": "strict serialization",
+   "cases": [
+    "12"
+   ]
+  },
+  {
+   "id": "S12",
+   "title": "timestamp and identifier strictness",
+   "cases": [
+    "13",
+    "16"
+   ]
+  },
+  {
+   "id": "S13",
+   "title": "merkle inclusion proofs",
+   "cases": [
+    "18",
+    "19",
+    "20",
+    "21"
+   ]
+  },
+  {
+   "id": "S14",
+   "title": "strict base64",
+   "cases": [
+    "24",
+    "25"
+   ]
+  },
+  {
+   "id": "S15",
+   "title": "anchor event resolution",
+   "cases": [
+    "26",
+    "27",
+    "28",
+    "29"
+   ]
+  },
+  {
+   "id": "S16",
+   "title": "external timestamp (RFC 3161)",
+   "cases": []
+  },
+  {
+   "id": "S17",
+   "title": "linear receipt chain",
+   "cases": [
+    "22",
+    "23"
+   ]
+  },
+  {
+   "id": "S18",
+   "title": "policy artefact resolution",
+   "cases": [
+    "30",
+    "31"
+   ]
+  },
+  {
+   "id": "S19",
+   "title": "freshness state",
+   "cases": []
+  }
+ ],
+ "excluded": [
+  {
+   "id": "S0",
+   "reason": "不是检查项：验证器自身抛异常时的兜底条目，无可构造攻击（见 docs/EVIDENCE-INDEX.md 脚注）"
+  }
+ ],
+ "uncovered": [
+  {
+   "id": "S9",
+   "title": "head pinned out-of-band",
+   "reason": "需要带外参数（钉住的链头），不在包内，无法由包本身判定；由 head-pinned 模式的篡改基准 M20 与延迟/复跑脚本覆盖"
+  },
+  {
+   "id": "S16",
+   "title": "external timestamp (RFC 3161)",
+   "reason": "需要外部 RFC 3161 时间戳 token，不在包内；由 `tools/anchor_tsa.py --verify`（仓内已附 token 与 CA）覆盖"
+  },
+  {
+   "id": "S19",
+   "title": "freshness state",
+   "reason": "需要跨包的新鲜度状态（重放/旧序号），单包无法自证；由红队 RT16 与 head-pinned 模式覆盖"
+  }
+ ]
+}

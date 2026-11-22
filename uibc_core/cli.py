@@ -580,7 +580,10 @@ def cmd_gate(args):
     report = gate(pkg, key=key, pubkey=pubkey,
                   revocation_path=args.revocation, dispute_path=args.dispute,
                   require_revocation_coverage=getattr(
-                      args, "require_revocation_coverage", False))
+                      args, "require_revocation_coverage", False),
+                  coverage_path=getattr(args, "coverage", None),
+                  coverage_max_age_s=getattr(args, "coverage_max_age", None),
+                  coverage_state_path=getattr(args, "coverage_state", None))
     print(json.dumps(report, ensure_ascii=False, indent=2))
     sys.exit(report["exit_code"])
 
@@ -804,6 +807,14 @@ def main():
     p.add_argument("--require-revocation-coverage", action="store_true",
                    help="fail-closed: with no --revocation overlay return HOLD(3) "
                         "instead of ALLOW(0) - absence is not a clean state")
+    p.add_argument("--coverage", default=None, metavar="FILE",
+                   help="signed revocation-coverage.json ('as of issued_at, no "
+                        "revocation for this evidence_root')")
+    p.add_argument("--coverage-max-age", default=None, type=float, metavar="SECONDS",
+                   help="refuse a coverage statement older than this (HOLD, exit 3)")
+    p.add_argument("--coverage-state", default=None, metavar="FILE",
+                   help="remember the last accepted coverage sequence; a lower "
+                        "sequence is refused as a rollback (HOLD, exit 3)")
     p.set_defaults(func=cmd_gate)
 
     p = sub.add_parser("revoke", help="issue a revocation.json for a package (governance 3)")

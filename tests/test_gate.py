@@ -27,6 +27,11 @@ def _canonical_sig_payload(body: dict) -> bytes:
                       ensure_ascii=False).encode("utf-8")
 
 
+def _seed_from_keyfile(path):
+    with open(path, "r", encoding="ascii") as f:
+        return bytes.fromhex(f.read().strip().split(":", 1)[1])
+
+
 def _make_pkg(tmp, name="g.uibc", sign_key=None, n_evidence=2, sign_ed=False):
     pkg = os.path.join(tmp, name)
     ucli.cmd_init(type("A", (), {"path": pkg})())
@@ -237,6 +242,88 @@ class GateTests(unittest.TestCase):
         self.assertEqual(r["decision"], "DENY")
         self.assertEqual(r["exit_code"], 2)
         self.assertEqual(r["revocation"]["status"], "REVOKED")
+
+
+    # 14-18. signed coverage statement ("as of issued_at, no revocation")
+    def _coverage(self, pkg, seed, seq=1, issued="2026-11-21T00:00:00Z", name="cov.json"):
+        import base64
+        from uibc_core import ed25519 as _ed
+        from uibc_core.signing import ed_public_key, ed_key_id
+        pub = ed_public_key(seed)
+        body = {
+            "coverage_id": "c-" + str(seq), "target_root": _read_manifest_root(pkg),
+            "issued_at": issued, "sequence": seq, "no_revocation": True,
+            "key_id": ed_key_id(pub), "algorithm": "Ed25519",
+        }
+        sig = base64.b64encode(_ed.sign(seed, _canonical_sig_payload(body))).decode("ascii")
+        return _write_json(os.path.join(self.tmp, name), dict(body, signature=sig)), pub
+
+    def test_14_valid_coverage_allows_and_records(self):
+        import time as _t
+        pkg, kf = _make_pkg(self.tmp, sign_ed=True)
+        seed = _seed_from_keyfile(kf)
+        cp, pub = self._coverage(pkg, seed, issued="2026-11-21T00:00:00Z")
+        state = os.path.join(self.tmp, "state.json")
+        r = gate(pkg, pubkey=pub, coverage_path=cp, coverage_max_age_s=None,
+                 coverage_state_path=state, now=_t.time())
+        self.assertEqual(r["decision"], "ALLOW")
+        self.assertEqual(r["coverage"]["status"], "VERIFIED")
+
+    def test_15_stale_coverage_holds(self):
+        pkg, kf = _make_pkg(self.tmp, sign_ed=True)
+        seed = _seed_from_keyfile(kf)
+        cp, pub = self._coverage(pkg, seed, issued="2026-09-01T00:00:00Z")
+        from datetime import datetime, timezone
+        later = datetime(2026, 11, 21, tzinfo=timezone.utc).timestamp()
+        r = gate(pkg, pubkey=pub, coverage_path=cp, coverage_max_age_s=3600,
+                 now=later)
+        self.assertEqual(r["decision"], "HOLD")
+        self.assertEqual(r["coverage"]["status"], "STALE")
+
+    def test_16_coverage_sequence_rollback_holds(self):
+        pkg, kf = _make_pkg(self.tmp, sign_ed=True)
+        seed = _seed_from_keyfile(kf)
+        cp, pub = self._coverage(pkg, seed, seq=5)
+        state = os.path.join(self.tmp, "state.json")
+        _write_json(state, {"schema": "uibc-coverage-state/1",
+                            "targets": {_read_manifest_root(pkg): {"sequence": 7,
+                                                                   "issued_at": "x"}}})
+        r = gate(pkg, pubkey=pub, coverage_path=cp, coverage_state_path=state)
+        self.assertEqual(r["decision"], "HOLD")
+        self.assertEqual(r["coverage"]["status"], "ROLLBACK")
+
+    def test_17_forged_coverage_signature_holds(self):
+        from uibc_core.signing import ed_generate_seed
+        from uibc_core.signing import ed_generate_seed
+        other = ed_generate_seed()
+        pkg, kf = _make_pkg(self.tmp, sign_ed=True)
+        seed = _seed_from_keyfile(kf)
+        _, pub = self._coverage(pkg, seed, name="covref.json")   # pub = package key
+        cp, _ = self._coverage(pkg, other, name="cov.json")      # signed elsewhere
+        r = gate(pkg, pubkey=pub, coverage_path=cp)
+        self.assertEqual(r["decision"], "HOLD")
+        self.assertEqual(r["coverage"]["status"], "UNVERIFIABLE")
+
+    def test_18_revocation_beats_coverage(self):
+        import base64
+        import hashlib
+        import hmac
+        key = generate_key()
+        pkg, _ = _make_pkg(self.tmp, sign_key=key)
+        rp = _write_json(os.path.join(self.tmp, "rev.json"), {
+            "revocation_id": "r-18", "target_root": _read_manifest_root(pkg),
+            "reason_code": "OWNER_REQUEST", "key_id": key_id(key),
+            "algorithm": "HMAC-SHA256", "revoked_at": "2026-09-18T00:00:00Z",
+            "signature": base64.b64encode(hmac.new(
+                key, _canonical_sig_payload({
+                    "revocation_id": "r-18", "target_root": _read_manifest_root(pkg),
+                    "reason_code": "OWNER_REQUEST", "key_id": key_id(key),
+                    "algorithm": "HMAC-SHA256",
+                    "revoked_at": "2026-09-18T00:00:00Z"}),
+                hashlib.sha256).digest()).decode("ascii")})
+        r = gate(pkg, key=key, revocation_path=rp)
+        self.assertEqual(r["decision"], "DENY")
+        self.assertEqual(r["coverage"]["status"], "ABSENT")
 
 
 if __name__ == "__main__":

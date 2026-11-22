@@ -17,7 +17,7 @@ A conformance corpus and verifier for a per-action evidence format, published wi
 | cases inside the archive | 36 | counted from the zip |
 | archive carries its own verifier | yes | zip listing |
 | oracle cases | 30 | `conformance/oracle/cases` |
-| third-party validations | 0 | `docs/EVIDENCE-INDEX.md` (generated) |
+| third-party validations | 2 | `docs/EVIDENCE-INDEX.md` (generated) |
 | adoption verdict (latest snapshot) | zero (exit 0) | `docs/adoption/2026-11-20-authenticated.json` |
 | package downloads, last month | 598 | same snapshot, **context only — not adoption** |
 

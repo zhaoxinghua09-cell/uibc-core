@@ -1,0 +1,14 @@
+{
+  "schema": "uibc-coverage-latency/1",
+  "scope": "local loopback, poll-side detection only",
+  "trials_requested": 24,
+  "trials_measured": 24,
+  "misses": 0,
+  "poll_interval_s": 0.2,
+  "latency_ms": {
+    "median": 136.07,
+    "p95": 198.15,
+    "max": 201.28
+  },
+  "bound": "detection latency is bounded by the poll interval plus one GET; it is not a delivery guarantee and not a third-party attestation"
+}

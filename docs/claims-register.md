@@ -16,18 +16,18 @@
 | # | 对外断言 | 复跑命令 | 期望输出 | 不符意味着什么 |
 |---|---|---|---|---|
 | A1 | 全套件在本机跑绿的前提是装 extras；具体测试数随平台与 extras 变化，本文不钉固定数字 | `python -m unittest discover -s tests -p "test_*.py"` | 末尾一行 `Ran N tests … OK`（带 `.[verify,interop]`）；裸解释器（缺 `cryptography`）会失败；仓内钉定的规范计数在 `STATUS.md` / `EVIDENCE-INDEX.md` | 数字与仓内规范页不符，说明测试被删/改，或规范页过期——两者都要修，不能只改一个 |
-| A2 | 21 类篡改、三种模式接受率 9.5% / 4.8% / 0% | `python tools/mutation_benchmark.py` | 三行接受率 + `unexplained_accept = 0` | 基准被放宽，或某类拦截失效 |
+| A2 | 本仓构造的 21 类单点篡改、三种模式接受率 9.5% / 4.8% / 0%（该集合不代表全部已知篡改类型） | `python tools/mutation_benchmark.py` | 三行接受率 + `unexplained_accept = 0` | 基准被放宽，或某类拦截失效 |
 | A3 | 基准全程不联网 | **断网后**重跑 A2 | 与联网时逐位一致 | 存在隐藏的网络依赖 |
 | A4 | **校验核心**零第三方依赖（Ed25519 在仓内实现）；**全量套件**需 `.[verify,interop]` | 新建空 venv、不装任何包，分别跑 `python -m uibc_core.cli demo` 与 A1 | 空 venv：`demo` 通过；A1 成片失败（缺 `cryptography`） | 若空 venv 全套件也绿，说明依赖声明写错；若 `demo` 也失败，说明核心被外部包污染 |
 | A5 | `PASS` 的确切含义 | `grep -r "no violation was detected" .` | 命中唯一原句（中英各一处） | 话术漂移，或出现"通过=安全"类改写 |
 | A6 | M17 换钥重签属定义域边界 | 对比 open 与 pinned 两种模式结果 | open 放过、pinned 拦住 | 该结论错，须重写 |
 | A7 | M20 整包回滚只有 head-pinned 能拦 | 对比三模式结果表 | 仅 head-pinned 拒绝 | 同上 |
 | A8 | 文本许可为 CC BY 4.0 | 读 `LICENSE` 与 README 许可节 | 两处一致，无"保留所有权利"残留 | 许可声明冲突，引用者会踩坑 |
-| A9 | 三仓首屏互链（定义→执行→技能） | 分别 grep 三仓 README | 每仓各含另外两仓的 `zh-guide` 链接 | 互链断了，"枢纽"不成立 |
-| A10 | 技能库规模 | 按仓内清单计数 | 与对外所称数字一致 | 数字注水 |
-| A11 | 整包复核延迟（median / p95 / max，**机器相关量**） | `python tools/latency_probe.py` | Windows/Py3.13：median **19.74** / p95 **26.64** / max **38.75**；Linux/Py3.12：median **7.67** / p95 **7.85** / max **8.44**（2026-11-20）；同日复跑 **7.78** / **8.69** / **10.02**（2026-11-21，各 n=50）；同时打印 m_M12 `FAIL` 行 | 两机数量级不同属正常（机器相关）；若 m_M12 未被拒，比延迟不符更严重 |
+| A9 | 三仓首屏互链（定义→执行→技能） | 三仓各跑一次：`for r in uibc-core lgd-theory agent-skills; do curl -sf https://github.com/zhaoxinghua09-cell/$r/raw/main/README.md \| grep -c "zh-guide"; done`（离线则 `git clone --depth 1` 后 `grep -c "zh-guide" README.md`） | 每仓各含另外两仓的 `zh-guide` 链接（计数 ≥2） | 互链断了，"枢纽"不成立 |
+| A10 | 技能库规模（119 个技能目录） | 在 `agent-skills` 仓根目录：`ls -d skills/*/ \| wc -l` | `119` | 数字注水，或目录被删 |
+| A11 | 整包复核延迟（median / p95 / max，**机器相关量**） | `python tools/latency_probe.py` | Windows/Py3.13：median **19.74** / p95 **26.64** / max **38.75**；Linux/Py3.12：median **7.67** / p95 **7.85** / max **8.44**（2026-11-20）、**7.78** / **8.69** / **10.02**（11-21）、**7.39** / **7.55** / **8.38**（11-22，各 n=50）；同时打印 m_M12 `FAIL` 行 | 两机数量级不同属正常（机器相关）；若 m_M12 未被拒，比延迟不符更严重 |
 | A12 | 外部引用可达性 | `python tools/check_citations.py` | 逐条打印 HTTP 状态码（可达 200；403/反爬与超时分别标注） | 某条标"可达"实际不可达，等于引用造假 |
-| A13 | 红队 16 例：13 拒 / 1 灰区 / 2 定义域放行 | `python tools/redteam_suite.py` | RT05 `INCONCLUSIVE`；RT08、RT10 `PASS`；其余 `FAIL` | 出现新的 `PASS` 或新的 `INCONCLUSIVE` 说明拦截面变了，缺口节须重写 |
+| A13 | 红队 16 例：13 拒 / 1 灰区 / 2 定义域放行 | `python tools/redteam_suite.py` | RT05 `INCONCLUSIVE`；RT08、RT10 `PASS`；其余 `FAIL`。RT05 的判定逻辑见脚本内 RT05 分支：删 `seal.json` 后既非完整包亦无篡改证据，故记"无法判定"而不敢判拦 | 出现新的 `PASS` 或新的 `INCONCLUSIVE` 说明拦截面变了，缺口节须重写 |
 | A14 | README 里的克隆命令照抄可跑通 | 原样执行 README 的 `git clone --depth 1 --branch main …`，再跑 `python tools/external_node_check.py` | 打印 `CONSISTENT` | 命令失败＝引用正确但操作错误，比 404 更隐蔽（2026-11-20 发现旧版写 `release/v1.1-precheck`，该分支不存在） |
 
 ## 二、未建（**这些句子现在不许对外说**）

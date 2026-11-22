@@ -2,7 +2,7 @@
 
 每条检查对应到：验证器里的定义、覆盖它的测试、指向它的红队攻击、以及提到它的文档。**重新生成即可复核**，不会随记忆漂移。
 
-**测试套件：1069 个用例**（本页由生成器现数，别处只引用本页，不再抄写这个数字）。
+**测试套件：1073 个用例**（本页由生成器现数，别处只引用本页，不再抄写这个数字）。
 
 
 | 检查 | 名称 | 出厂包是否走到 | 测试 | 红队 | 文档 |
@@ -16,17 +16,17 @@
 | S6 | seal signature | 是 | 25 | 1 | 39 |
 | S7 | evidence index metadata | 否 | 6 | 1 | 19 |
 | S8 | package checkpoint head | 否 | 8 | 2 | 28 |
-| S9 | head pinned out-of-band | 否 | 9 | 1 | 35 |
+| S9 | head pinned out-of-band | 否 | 9 | 1 | 33 |
 | S10 | attestation closure declared | 否 | 6 | 2 | 10 |
 | S11 | strict serialization | 是 | 7 | 1 | 20 |
 | S12 | timestamp and identifier strictness | 是 | 12 | 2 | 22 |
 | S13 | merkle inclusion proofs | 否 | 9 | 4 | 14 |
 | S14 | strict base64 | 否 | 5 | 2 | 9 |
 | S15 | anchor event resolution | 否 | 7 | 4 | 14 |
-| S16 | external timestamp (RFC 3161) | 否 | 9 | 4 | 24 |
+| S16 | external timestamp (RFC 3161) | 否 | 9 | 4 | 22 |
 | S17 | linear receipt chain | 否 | 7 | 2 | 19 |
 | S18 | policy artefact resolution | 否 | 9 | 2 | 18 |
-| S19 | freshness state | 否 | 4 | 1 | 16 |
+| S19 | freshness state | 否 | 4 | 1 | 14 |
 
 出厂包判定：`INCONCLUSIVE`，走到 8/20 项（未签名的包停在 S6，后面不越过去）。
 
@@ -39,4 +39,4 @@
 
 - 提到 ≠ 覆盖：一个测试文件里出现 `S4` 不代表它真的构造了越界符号链接。
 - 「出厂包是否走到」只反映未签名包的路径；后面的检查由红队阶段的合成包覆盖，不在这里。
-- **外部第三方验证：2 次执行（不是利益独立）** —— 以 `docs/EXTERNAL-NODES.md` 为唯一真源；本索引其余各行都由我们自己产出。
+- **外部第三方验证：0。** 本索引里的每一行都是我们自己产出的。

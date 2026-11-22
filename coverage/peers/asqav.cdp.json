@@ -1,0 +1,72 @@
+{
+  "schema": "cdp-1",
+  "subject": {
+    "name": "ASQAV compliance receipts",
+    "version": "draft-marques-asqav-compliance-receipts-09",
+    "commit": null,
+    "measured_at": "2026-11-19T06:45:00+08:00"
+  },
+  "entries": [
+    {
+      "id": "ASQ1", "kind": "REQUIREMENT",
+      "statement": "Receipt fields are bound to EU AI Act Article 12, 26 and 50 and DORA Article 17.",
+      "statement_sha256": null, "status": "EXERCISED",
+      "tests": ["profile section 6 mapping table"],
+      "evidence": ["https://www.ietf.org/archive/id/draft-marques-asqav-compliance-receipts-09.html"],
+      "owner": null, "review_by": null, "reason": null
+    },
+    {
+      "id": "ASQ2", "kind": "REQUIREMENT",
+      "statement": "Receipt fields are bound to six US obligations (NIST RMF, Colorado, Texas, NYDFS, HIPAA, SEC 17a-4) and CIRCIA provisionally.",
+      "statement_sha256": null, "status": "EXERCISED",
+      "tests": ["profile section 7 mapping table"],
+      "evidence": ["https://www.ietf.org/archive/id/draft-marques-asqav-compliance-receipts-09.html"],
+      "owner": null, "review_by": null, "reason": null
+    },
+    {
+      "id": "ASQ3", "kind": "REQUIREMENT",
+      "statement": "An attestation envelope (DSSE + in-toto) carries two tiers: voluntary observation and authoritative attestation.",
+      "statement_sha256": null, "status": "EXERCISED",
+      "tests": ["revision -08/-09 attestation statement envelope section"],
+      "evidence": ["https://www.ietf.org/archive/id/draft-marques-asqav-compliance-receipts-09.html"],
+      "owner": null, "review_by": null, "reason": null
+    },
+    {
+      "id": "ASQ4", "kind": "REQUIREMENT",
+      "statement": "For code, the authoritative tier re-derives the subject digest from the source host rather than trusting the caller.",
+      "statement_sha256": null, "status": "EXERCISED",
+      "tests": ["profile: SHA-256 of raw unified diff re-fetched from source host"],
+      "evidence": ["https://www.ietf.org/archive/id/draft-marques-asqav-compliance-receipts-08.html"],
+      "owner": null, "review_by": null, "reason": null
+    },
+    {
+      "id": "ASQ5", "kind": "REQUIREMENT",
+      "statement": "An independent implementation by a different party verifies the profile.",
+      "statement_sha256": null, "status": "NOT_PUBLIC",
+      "tests": [], "evidence": ["no implementation section located"],
+      "owner": null, "review_by": null,
+      "reason": "no independent verifier record was found as of the measurement date"
+    },
+    {
+      "id": "ASQ6", "kind": "REQUIREMENT",
+      "statement": "A false-accept rate under mutation is published.",
+      "statement_sha256": null, "status": "NOT_PUBLIC",
+      "tests": [], "evidence": ["no mutation benchmark located"],
+      "owner": null, "review_by": null,
+      "reason": "regulatory mapping is not a robustness measurement; no false-accept number was found"
+    },
+    {
+      "id": "ASQ7", "kind": "REQUIREMENT",
+      "statement": "The profile enumerates which of its mandatory checks are unexercised.",
+      "statement_sha256": null, "status": "NOT_PUBLIC",
+      "tests": [], "evidence": ["profile describes core and limitations in prose"],
+      "owner": null, "review_by": null,
+      "reason": "limitations are stated in the body as prose; no machine-readable per-requirement ledger exists, so the gap set cannot be recomputed"
+    }
+  ],
+  "summary": {
+    "total": 7, "exercised": 4, "untested": 0, "exempt": 0, "not_public": 3,
+    "disclosure_completeness": 0.5714, "named_gap_ratio": 1.0
+  },
+  "signature": null
+}

@@ -28,6 +28,8 @@ import time
 
 from . import ed25519 as _ed
 from .canonical import hash_file  # noqa: F401  (re-exported for tools)
+from .coverage_feed import fetch as _fetch_coverage, ChannelError as _CoverageChannelError, \
+    DEFAULT_TIMEOUT_S as _CHANNEL_TIMEOUT_S
 from .signing import (ALGORITHM, ALGORITHM_ED25519, ed_key_id, key_id)  # noqa: F401
 from .verify import verify
 
@@ -250,7 +252,8 @@ def gate(package_dir: str, key: bytes = None,
          revocation_path: str = None, dispute_path: str = None,
          pubkey: bytes = None, require_revocation_coverage: bool = False,
          coverage_path: str = None, coverage_max_age_s: float = None,
-         coverage_state_path: str = None, now: float = None) -> dict:
+         coverage_state_path: str = None, now: float = None,
+         coverage_url: str = None, coverage_channel_timeout_s: float = None) -> dict:
     """Run verify, then apply governance overlays. Returns a gate report.
 
     Exit-code contract (CLI layer):
@@ -287,23 +290,34 @@ def gate(package_dir: str, key: bytes = None,
             dispute = {"status": "MALFORMED", "detail": "dispute file unreadable/invalid JSON"}
 
     coverage = {"status": "ABSENT", "detail": "no coverage statement supplied"}
+    cov = None
     if coverage_path:
         try:
             cov = _load_json(coverage_path)
-            remembered = None
-            if coverage_state_path:
-                remembered = _coverage_state_get(coverage_state_path,
-                                                 cov.get("target_root"))
-            coverage = dict(zip(("status", "detail"),
-                                _check_coverage(cov, manifest, key=key, pubkey=pubkey,
-                                                now=now, max_age_s=coverage_max_age_s,
-                                                remembered_seq=remembered)))
-            if coverage["status"] == "VERIFIED" and coverage_state_path:
-                _coverage_state_put(coverage_state_path, cov.get("target_root"),
-                                    cov.get("sequence"), cov.get("issued_at"))
         except (OSError, ValueError):
             coverage = {"status": "MALFORMED",
                         "detail": "coverage file unreadable/invalid JSON"}
+    elif coverage_url:
+        try:
+            cov = _fetch_coverage(
+                coverage_url,
+                timeout=(coverage_channel_timeout_s
+                         if coverage_channel_timeout_s is not None else _CHANNEL_TIMEOUT_S))
+        except _CoverageChannelError as exc:
+            # an unreachable feed is conspicuous, not clean: HOLD, never ALLOW
+            coverage = {"status": "UNREACHABLE", "detail": str(exc)}
+    if cov is not None:
+        remembered = None
+        if coverage_state_path:
+            remembered = _coverage_state_get(coverage_state_path,
+                                             cov.get("target_root"))
+        coverage = dict(zip(("status", "detail"),
+                            _check_coverage(cov, manifest, key=key, pubkey=pubkey,
+                                            now=now, max_age_s=coverage_max_age_s,
+                                            remembered_seq=remembered)))
+        if coverage["status"] == "VERIFIED" and coverage_state_path:
+            _coverage_state_put(coverage_state_path, cov.get("target_root"),
+                                cov.get("sequence"), cov.get("issued_at"))
 
     # decision cascade - order is normative (governance section 7)
     if revocation["status"] == "REVOKED":
@@ -313,7 +327,8 @@ def gate(package_dir: str, key: bytes = None,
             "; ".join(c["id"] for c in report["checks"] if c["result"] == "FAIL")
     elif revocation["status"] in ("MALFORMED", "MISMATCH", "UNVERIFIABLE"):
         decision, reason = "HOLD", f"revocation {revocation['status']}: {revocation['detail']}"
-    elif coverage["status"] in ("MALFORMED", "MISMATCH", "UNVERIFIABLE", "STALE", "ROLLBACK"):
+    elif coverage["status"] in ("MALFORMED", "MISMATCH", "UNVERIFIABLE", "STALE",
+                                "ROLLBACK", "UNREACHABLE"):
         decision, reason = "HOLD", f"coverage {coverage['status']}: {coverage['detail']}"
     elif revocation["status"] == "NONE" and coverage["status"] == "ABSENT" \
             and require_revocation_coverage:

@@ -583,7 +583,10 @@ def cmd_gate(args):
                       args, "require_revocation_coverage", False),
                   coverage_path=getattr(args, "coverage", None),
                   coverage_max_age_s=getattr(args, "coverage_max_age", None),
-                  coverage_state_path=getattr(args, "coverage_state", None))
+                  coverage_state_path=getattr(args, "coverage_state", None),
+                  coverage_url=getattr(args, "coverage_url", None),
+                  coverage_channel_timeout_s=getattr(
+                      args, "coverage_channel_timeout", None))
     print(json.dumps(report, ensure_ascii=False, indent=2))
     sys.exit(report["exit_code"])
 
@@ -815,6 +818,11 @@ def main():
     p.add_argument("--coverage-state", default=None, metavar="FILE",
                    help="remember the last accepted coverage sequence; a lower "
                         "sequence is refused as a rollback (HOLD, exit 3)")
+    p.add_argument("--coverage-url", default=None, metavar="URL",
+                   help="pull the coverage statement over HTTP instead of reading "
+                        "a file; an unreachable feed is HOLD(3), never ALLOW(0)")
+    p.add_argument("--coverage-channel-timeout", default=None, type=float,
+                   metavar="SECONDS", help="per-GET timeout for --coverage-url")
     p.set_defaults(func=cmd_gate)
 
     p = sub.add_parser("revoke", help="issue a revocation.json for a package (governance 3)")

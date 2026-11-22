@@ -12,7 +12,8 @@
 | 4 | **最强锚定只到 `anchored`，未达 `witnessed`** | 我们只有 FreeTSA 摘要时间戳 + Bitcoin 区块锚，没有第二个独立见证方为同一摘要联署 | 见 `docs/SPEC-PROPOSAL-v0.1.md` §5；与 EP-AEC-02 的链式见证要求明确标为差距，不声称等价 |
 | 5 | **Windows 下两例测试复现不出** | `test_quick_run_matches_the_receipt`（子进程启动方式）、`test_outside_a_rebase_it_touches_nothing`（路径/重基语义）与平台绑定 | Linux CI 1031 例全过；Windows 干净克隆 1 失败 / 1 错误，失败名写在这里，不写"全平台全过" |
 | 6 | **外部评审方收到的证据包可能落后于当前套件** | 事实包从仓库内已提交的结果 JSON 读取；若 JSON 未随套件刷新，评审方看到的是旧快照 | `tools/muse_review.py` 现在会打印所用快照的文件名与 git blob，数字按快照现算，不再写死条数 |
-| 7 | **撤销只有屏障，没有分发**：覆盖层缺失时默认 `ALLOW` | 判定器只看得见递给它的文件，包内无法自证"没有人撤销过它"，而这正是分发层的活 | `--require-revocation-coverage` 把"缺失"变成 `HOLD(3)`；`revocation-coverage.json` + `--coverage-max-age` + `--coverage-state` 可以要求新鲜度并拒绝序号回退（2026-11-22 四步实测：ALLOW→ROLLBACK→STALE→DENY）。仍是**自证**：同一持有者签"没撤销"，第三方无法独立确认，也没有分发通道与延迟数字 |
+| 7 | **撤销只有屏障，没有分发**：覆盖层缺失时默认 `ALLOW` | 判定器只看得见递给它的文件，包内无法自证"没有人撤销过它"，而这正是分发层的活 | `--require-revocation-coverage` 把"缺失"变成 `HOLD(3)`；`revocation-coverage.json` + `--coverage-max-age` + `--coverage-state` 可以要求新鲜度并拒绝序号回退（2026-11-22 四步实测：ALLOW→ROLLBACK→STALE→DENY）。仍是**自证**：同一持有者签"没撤销"，第三方无法独立确认 |
+| 8 | **分发通道是"拉"，有盲窗**：`--coverage-url` 拉不到即 `HOLD`，检测延迟以轮询间隔为上界 | 没有推送通知，也没有第三方证明发布方把撤销都发出来了；轮询式验证方在两次 GET 之间是看不见新声明的 | 端点不可达一律 `HOLD(3)`（`coverage UNREACHABLE`），不回落 `ALLOW`；盲窗可测：本地回环、间隔 0.2 s、24 次随机相位发布 → 两次实测 median 69.3 / 136.1 ms、p95 195.0 / 198.2 ms、max 198.3 / 201.3 ms（`tools/coverage_latency.py`，中位数随发布相位浮动，理论上界仍是"间隔 + 一次 GET"）。对外只能说"上界已实测"，不能说"实时到达" |
 
 ## 怎么核对这一页
 

@@ -96,6 +96,21 @@ issued_at, sequence, no_revocation:true, key_id, algorithm, signature}"，语义
 分发通道与传播延迟观测。对外口径只能是"撤销可被可靠阻断、覆盖新鲜度可被检查、
 撤销传播未实现"。2026-11-22 四步实测见 `发布前审查证据` 同名记录。
 
+**R6 分发通道（`--coverage-url`）**：覆盖声明可以由持有者发布到 HTTP 端点，判定器
+按 URL 拉取（`--coverage-channel-timeout` 控制单次 GET 超时）。判据：
+
+- **拉不到 = `HOLD`**（`coverage UNREACHABLE`，exit 3）。端点不可达是"显眼"，不是
+  "干净"，绝不回落成 `ALLOW`。
+- 拉到的声明仍走 R5 的全部判据（先验签、再判 `max-age`、再判序号回退）。
+- 检测延迟有可测上界：**轮询间隔 + 一次 GET**。本地回环实测（间隔 0.2 s，24 次随机
+  相位发布，两次独立运行）：median 69.3 / 136.1 ms、p95 195.0 / 198.2 ms、
+  max 198.3 / 201.3 ms；`tools/coverage_latency.py` 可复跑，输出
+  `tools/out/coverage_latency.json`。中位数随发布相位浮动，理论量是间隔本身。
+
+这条**只**给出"轮询侧盲窗"的实测上界，不给交付保证：没有推送通知、没有第三方
+证明发布方把撤销都发出来了、也没有跨公网的传播数字。要写进对外材料，只能说
+"检测延迟以轮询间隔为上界并已实测"，不能说"撤销可实时到达"。
+
 ## 4. Accountability（责任）——"谁授权"
 
 **对象**：已存在于 identity.json 的 `owner` 字段 + lifecycle 的 `actor` 字段。

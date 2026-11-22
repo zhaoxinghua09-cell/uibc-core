@@ -41,9 +41,26 @@ class Result:
     reason: str
 
 
+def _comparable(dt) -> bool:
+    """A datetime is usable only if it is aware: naive values cannot be ordered
+    against the others without assuming a zone, and that assumption would be
+    a silent policy choice."""
+    return isinstance(dt, datetime) and dt.tzinfo is not None and dt.utcoffset() is not None
+
+
 def classify(feed: Optional[Feed], subject: str, t: datetime, max_age: timedelta) -> Result:
+    # Every input that cannot be classified falls to undetermined; a crash would
+    # not be fail-closed, so the type checks are part of the contract.
+    if not _comparable(t):
+        return Result("undetermined", "evaluation instant is naive or not a datetime")
     if feed is None:
         return Result("undetermined", "no feed")
+    if not _comparable(feed.issued_at):
+        return Result("undetermined", "feed issued_at is naive or not a datetime")
+    if not isinstance(feed.entries, dict):
+        return Result("undetermined", "feed entries are not a mapping")
+    if not isinstance(max_age, timedelta) or max_age < timedelta(0):
+        return Result("undetermined", "max_age is not a non-negative timedelta")
     if not feed.signature_ok:
         return Result("undetermined", "feed signature invalid")
     # 时钟偏移：评估时刻早于 feed 签发时刻，快照不可能覆盖 t
@@ -54,6 +71,8 @@ def classify(feed: Optional[Feed], subject: str, t: datetime, max_age: timedelta
     rev = feed.entries.get(subject)
     if rev is None:
         return Result("not_revoked_at_t", "fresh signed feed, no entry for subject")
+    if not _comparable(rev):
+        return Result("undetermined", "revocation timestamp is naive or not a datetime")
     if rev <= t:
         return Result("revoked_at_t", f"revoked at {rev.isoformat()}")
     return Result("undetermined", "revocation date is after t")

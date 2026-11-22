@@ -29,6 +29,8 @@
 | A12 | 外部引用可达性 | `python tools/check_citations.py` | 逐条打印 HTTP 状态码（可达 200；403/反爬与超时分别标注） | 某条标"可达"实际不可达，等于引用造假 |
 | A13 | 红队 16 例：13 拒 / 1 灰区 / 2 定义域放行 | `python tools/redteam_suite.py` | RT05 `INCONCLUSIVE`；RT08、RT10 `PASS`；其余 `FAIL`。RT05 的判定逻辑见脚本内 RT05 分支：删 `seal.json` 后既非完整包亦无篡改证据，故记"无法判定"而不敢判拦 | 出现新的 `PASS` 或新的 `INCONCLUSIVE` 说明拦截面变了，缺口节须重写 |
 | A14 | README 里的克隆命令照抄可跑通 | 原样执行 README 的 `git clone --depth 1 --branch main …`，再跑 `python tools/external_node_check.py` | 打印 `CONSISTENT` | 命令失败＝引用正确但操作错误，比 404 更隐蔽（2026-11-20 发现旧版写 `release/v1.1-precheck`，该分支不存在） |
+| A15 | 公开合规包"下载即可自证"：字节、pin、用例三者对得上，且 36 例全过 | `python tools/check_vector_package.py` | 四行 ok（MANIFEST / archive pin / coverage / suite 36/36）；另 `sha256sum -c conformance/MANIFEST.sha256` 独立复算 | 任一行为 FAIL，说明发布物与清单脱节——此时所有"可复跑"的说法都不成立 |
+| A16 | 覆盖矩阵公开且含空白单元：19 项检查中 16 项有用例，S9/S16/S19 无用例并逐条给出替代覆盖路径 | `python tools/conformance_coverage.py --print` | 打印 `16/19 covered`，并列出 `S9, S16, S19`；`conformance/coverage.json` 的 `reason` 字段写替代路径 | 若某空白项没有 reason，说明是用例缺口而非结构限制——必须补用例，不能补说明 |
 
 ## 二、未建（**这些句子现在不许对外说**）
 

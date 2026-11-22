@@ -27,10 +27,13 @@ def run(cmd, cwd, timeout=300):
         out = (p.stdout or "") + (p.stderr or "")
         return {"cmd": " ".join(cmd), "rc": p.returncode,
                 "tail": out.strip().splitlines()[-3:],
-                "secs": round(time.perf_counter() - t0, 1)}
+                "secs": round(time.perf_counter() - t0, 1),
+                "timeout_s": timeout, "truncated_by_tool": False}
     except Exception as e:
+        # rc=-1 means the tool gave up, not that the code failed. Say which.
         return {"cmd": " ".join(cmd), "rc": -1, "tail": [f"{type(e).__name__}: {e}"],
-                "secs": round(time.perf_counter() - t0, 1)}
+                "secs": round(time.perf_counter() - t0, 1),
+                "timeout_s": timeout, "truncated_by_tool": True}
 
 
 def main():
@@ -39,6 +42,11 @@ def main():
     ap.add_argument("--label", required=True)
     ap.add_argument("--make-venv", action="store_true",
                     help="create a fresh venv outside the repo first")
+    ap.add_argument("--timeout", type=int, default=900,
+                    help="per-step wall-clock limit in seconds (default 900). "
+                         "The full suite takes ~300-350 s on a warm machine; the old "
+                         "300 s default silently truncated it and recorded rc=-1, "
+                         "which reads like a failure but is not one")
     a = ap.parse_args()
     repo = os.path.abspath(a.repo)
     venv_py = sys.executable
@@ -53,12 +61,14 @@ def main():
 
     results = {"label": a.label, "repo": repo,
                "generated_at_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-               "interpreter": venv_py, "steps": steps, "runs": []}
+               "interpreter": venv_py, "steps": steps, "runs": [],
+               "step_timeout_s": a.timeout}
 
     # 1) 测试（README 声称的那句"一致性测试"）
     results["runs"].append(dict(name="unittest",
                                 **run([venv_py, "-m", "unittest", "discover",
-                                       "-s", "tests", "-p", "test_*.py"], repo)))
+                                       "-s", "tests", "-p", "test_*.py"], repo,
+                                      timeout=a.timeout)))
     # 2) 版本与规范号
     results["runs"].append(dict(name="version", **run(
         [venv_py, "-c", "import uibc_core as u; print(u.SPEC_VERSION)"], repo)))

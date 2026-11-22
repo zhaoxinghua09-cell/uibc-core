@@ -1,6 +1,6 @@
 # Tri-state revocation — local prototype
 
-状态：**proposal / draft PR，未接入任何生产路径**。用途：把三态撤销（revoked_at_t / not_revoked_at_t / undetermined）做成语义清晰、可复跑的最小实现，供评审；合入与否由维护者决定。
+状态：**本地原型，未并入任何公开仓**。用途：把此前被检索推翻的“三态撤销”主张，先做成语义清晰、可复跑的最小实现，等评审后再考虑合入。
 
 ## 为什么需要第三态
 
@@ -21,13 +21,17 @@
 
 ```bash
 cd proposals/tri_state_revocation
-python -m unittest -v test_tri_state     # 7/7 OK
+python -m unittest -v test_tri_state     # 15/15 OK
 python tri_state.py                      # 4 个演示用例 ALL PASS
 ```
+
+红队用例（14 个对抗输入：naive 时间、非 datetime 条目、`entries=None`、负 `max_age`、边界等值）
+在 PR 描述中逐条列出；修复前其中 5 个抛 `TypeError/AttributeError`，修复后 14/14 全部落 `undetermined`，不抛异常。
 
 ## 边界（必须写进任何引用处）
 
 - 这是**分类器原型**，不处理签名验证本身（`signature_ok` 由调用方给出）。
 - 没有接入任何真实撤销源；没有并发、持久化、时钟同步处理。
-- 只有 7 个单元用例与 4 个演示用例，**不构成产品实现，也不构成外部验证**。
+- 输入类型不合法（naive 时间、非 datetime、非映射、负 `max_age`）一律判 `undetermined`，不抛异常——这是 fail-closed 的一部分，但**时钟真伪仍需调用方保证**。
+- 只有 15 个单元用例、14 个红队用例与 4 个演示用例，**不构成产品实现，也不构成外部验证**。
 - 合入公开仓前需：命名对齐现有 API、增加反例向量、补 README 首屏窄声明、过 CI。

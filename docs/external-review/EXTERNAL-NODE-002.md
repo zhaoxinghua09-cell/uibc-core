@@ -1,5 +1,15 @@
 # External node 002 — Iman Schrock, on a Mac we do not control
 
+**Annotation, 2026-11-22, at the operator's request.** The run recorded below did not exercise
+our independent verifier. At the time of the run, `independent_verifier/iverify.py` had no
+command-line entry point; a caller that shelled out to it read exit code 0 unconditionally,
+so `independent=PASS` was recorded without a verification having run. The `independent=PASS`
+in this record therefore does not evidence an independent evaluation; the `reference=PASS`
+part stands. The defect was fixed in PR #356 (merged 2026-11-21T00:50:18Z, head `2196f9d3`,
+with an entry point and value-level rules V1-V10). Cite the corrected run after PR #356 for
+both verifiers. The returned artefact and the numbers below are kept unchanged so the
+history stays readable.
+
 Received 2026-11-20 13:29 +0800 by email (`team@emiliaprotocol.ai`), as an attachment, not as
 prose. The first answer to the same letter was a decline; the run below came two hours later,
 unprompted, so the record keeps both.

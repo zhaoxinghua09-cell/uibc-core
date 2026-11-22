@@ -29,6 +29,8 @@
 
 - **001**：他是本项目同一 W3C 工作组的通信方，**是第三方执行，不是第三方利益**——不是无利害审计者；而且是我们请来的，主动到访的节点比被邀请的更强。详见 [`external-review/EXTERNAL-NODE-001.md`](external-review/EXTERNAL-NODE-001.md)。
 - **002**：他是相关规范（EMILIA Protocol）的维护者，运行由我们冷启动邀请；同一天他曾先回过一封拒绝，两小时后自行改口并跑完回传（两封都留在收件箱）。`independent` 只指"两套验证器按规范独立实现"，两套都在本仓、都由本仓写，因此这次**仍是第三方执行，不是第三方作者**；不是安全审计。详见 [`external-review/EXTERNAL-NODE-002.md`](external-review/EXTERNAL-NODE-002.md)。
+- **002 加注（2026-11-22，应 Iman Schrock 本人要求）**：上文那一行记录的 run **没有真正调用独立验证器**——当时 `independent_verifier/iverify.py` 没有命令行入口，任何从外部 shell 调用的脚本都会读到退出码 0 并记下 `independent=PASS`，而验证实际未执行。因此该行的 `independent=PASS` **不构成独立评估的证据**，`reference=PASS` 部分成立。已修复于 PR #356（合并 2026-11-21T00:50:18Z，head `2196f9d3`，带 V10 值级规则与入口点）；**引用该 run 时应改为引用 PR #356 之后的修正 run**。原文与回传件保留不动，仅在此加注，以便回溯。
+
 
 一个节点是一个节点，两个也不是一个样本。
 

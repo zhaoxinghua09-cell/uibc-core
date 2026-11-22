@@ -201,6 +201,28 @@ def _offset_ok(off):
     return hh <= 14 and mm < 60 and not (hh == 14 and mm)
 
 
+def _rfc3339_ok(value):
+    """True iff ``value`` is a real RFC 3339 timestamp.
+
+    The recursive walker in S12 judges a timestamp only when it is present, so a
+    *missing* time is a problem it structurally cannot raise. The required-field
+    path needs the same judgement on a value it fetched itself: a real calendar
+    date, no leap second, an in-range offset. One rule, used in both places.
+    """
+    if not isinstance(value, str):
+        return False
+    m = RFC3339.match(value)
+    if not m:
+        return False
+    if not _calendar_ok(int(m.group(1)), int(m.group(2)), int(m.group(3))):
+        return False
+    if int(m.group(6)) > 59:
+        return False
+    if not _offset_ok(m.group(8)):
+        return False
+    return True
+
+
 def _now_utc():
     """Verifier clock, isolated so tests and callers can reason about it."""
     return datetime.now(timezone.utc)
@@ -675,6 +697,15 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
                           ("evidence/index.json", index)):
         for problem in _semantic_problems(doc, now=_now_utc()):
             s12_problems.append("%s: %s" % (doc_name, problem))
+
+    # `created_at` is a required field, and the walker above only judges a
+    # timestamp that is present. A manifest without a real one therefore used
+    # to pass S12 by omission: the field is required, so its absence -- and a
+    # value that is present but not a real time -- belong to the same check
+    # that owns "is this value a legal time", not to S1, which owns structure.
+    if not missing and not _rfc3339_ok(manifest.get("created_at")):
+        s12_problems.append(
+            "manifest.json: created_at is not a real RFC 3339 timestamp")
 
     # A declared count that disagrees with the index is a contradiction inside
     # the package: `evidence_count` is the number of entries a reader will

@@ -259,11 +259,11 @@ python tools/corpus_selfcheck.py --receipt my-receipt.md
 | uibc 用词 | 上游用词（出处） | 关系 |
 |---|---|---|
 | 证据包 / package + manifest + 离线验证 | Package Digest（`draft-raskar-scitt-agent-provenance-00`）；AIVS bundle（`draft-stone-aivs-01`） | **同形态**。我们不加新格式，只在包上给出一个裁决 |
-| 三值裁决 PASS / FAIL / INCONCLUSIVE | EP-AEC-02 五档 `admissible / missing_evidence / stale / conflicted / unverifiable` | **粗化投影**：我们的 INCONCLUSIVE 覆盖后四档中的"判不了"，不细分 |
+| 三值裁决 PASS / FAIL / INCONCLUSIVE | EP-AEC 现行 `-08`（2026-10-04）的 `SATISFIED / UNSATISFIED`（早前 `-02` 的五档 `admissible / missing_evidence / stale / conflicted / unverifiable` 在该文中已消失，`-08` 中出现 0 次） | **不是粗化投影**：`-08` 把"验证"与"接受"分开，并用 bounded reason codes 区分失败原因，与我方三值不再一一对应。旧适配器 `tools/uibc_to_epaec.py` 仍按 `-02` 词汇输出，仅作历史对照，不得据此声称"对齐" |
 | （不做）决策结果 | GAR-08 `governance_decision` = ALLOW / DENY / ESCALATE / SUSPEND | **正交两维**：GAR 给"放不放行"，我们给"验不验得清"。我们不输出决策 |
 | `trust_level` = anchored / unanchored / unattested | 1F916 `witnessed`（独立见证人联署） | **子集**：`witnessed ⊃ anchored ⊃ unanchored`。我们没有见证人，故**永远不声称** witnessed |
 | `checkpoint_head`（S8 / S9） | RFC 6962 STH；1F916 5 分钟 checkpoint | **同类不同强度**：我们是"生命周期 head + 证据根 + 索引元数据 + 条数"的单哈希，无 Merkle 树、无一致性证明 |
-| 生命周期状态机（5 态） | 无直接对应 | 设备/agent 的生命周期状态；与 EP-AEC 的**证据分级**不是同一对象 |
+| 生命周期状态机（5 态） | 无直接对应 | 设备/agent 的生命周期状态；与 EP-AEC 的**证据组合判定**不是同一对象 |
 | `principal_type`、`sequence_number`、`policy_hash` | noa-01 逐字枚举；GAR-08 `cap_profile_hash` | **逐字复用**，一字段同时满足两家 |
 | 门禁 ALLOW / HOLD / DENY | APort(OAP) 的 pre-action authorization；COGITATOR 的 phantom entry | 同目的（执行前拦），我们的判据是"PASS + anchored 才放行" |
 

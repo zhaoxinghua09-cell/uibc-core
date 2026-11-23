@@ -502,6 +502,16 @@
   ],
   "cases_compared": 49,
   "cases_total": 50,
+  "consistency": {
+    "cases": 13,
+    "mismatches": [],
+    "ok": true,
+    "root_agreements": 24,
+    "tampered_root_cases": [
+      "cons-fail-new-root",
+      "cons-fail-old-root"
+    ]
+  },
   "contract_version": "uibc-scitt-crosscheck/1",
   "empty_tree_undefined_by_library": [
     "fail-empty-tree"

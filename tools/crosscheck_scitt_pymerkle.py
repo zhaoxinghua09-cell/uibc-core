@@ -151,8 +151,56 @@ def run(flip=None):
                        "no receipt, no deployment claim"),
         "cases": rows,
     }
-    ok = compared > 0 and agrees_true == compared and verdict_agrees == compared
+    cons = run_consistency(InmemoryTree, flip=flip)
+    report["consistency"] = cons
+    ok = (compared > 0 and agrees_true == compared and verdict_agrees == compared
+          and cons["ok"])
     return ok, report
+
+
+# Two consistency cases declare a root that is deliberately wrong; the library
+# building the canonical tree is *expected* to disagree there, and that is the
+# only place a disagreement is allowed.
+CONSISTENCY_TAMPERED_ROOTS = {"cons-fail-new-root", "cons-fail-old-root"}
+
+
+def run_consistency(InmemoryTree, flip=None):
+    """Both endpoints' roots for the consistency cases. Proof arrays are not read."""
+    rows, agreements, mismatches = [], 0, []
+    for name in sorted(os.listdir(CASE_DIR)):
+        path = os.path.join(CASE_DIR, name, "expected.json")
+        if not os.path.isfile(path):
+            continue
+        case = _read_json(path)
+        if "consistency_path" not in case:
+            continue
+        tpl = "scitt-rfc9162 test vectors v1 :: %s :: leaf %%d" % name
+        row = {"case": name, "result": case.get("result"), "ends": {}}
+        for label, size_key, root_key in (("old", "old_size", "old_root"),
+                                          ("new", "new_size", "new_root")):
+            size = case[size_key]
+            if size == 0:
+                row["ends"][label] = {"size": 0, "library_root": None,
+                                      "declared_root": case[root_key],
+                                      "note": "third party leaves MTH({}) undefined"}
+                continue
+            tree = InmemoryTree(algorithm="sha256", mode="rfc6962")
+            for i in range(size):
+                leaf = (tpl % i).encode()
+                tree.append_entry(leaf + b"mutation" if (flip is not None and i == 0) else leaf)
+            got = _root_hex(tree)
+            agree = got == case[root_key]
+            if agree:
+                agreements += 1
+            elif name not in CONSISTENCY_TAMPERED_ROOTS or flip is not None:
+                mismatches.append("%s/%s" % (name, label))
+            row["ends"][label] = {"size": size, "library_root": got,
+                                  "declared_root": case[root_key], "agrees": agree}
+        rows.append(row)
+    return {"cases": len(rows), "root_agreements": agreements,
+            "mismatches": mismatches,
+            "tampered_root_cases": sorted(CONSISTENCY_TAMPERED_ROOTS),
+            "ok": not mismatches}
 
 
 def main():
@@ -172,6 +220,9 @@ def main():
         bad = [r["case"] for r in report["cases"]
                if r.get("agrees_on_true_root") is False or r.get("agrees_on_verdict") is False]
         print("  disagreements:", ", ".join(bad) or "(none listed)")
+    cons = report["consistency"]
+    print("  consistency endpoints: %d cases, %d root agreements, mismatches %s"
+          % (cons["cases"], cons["root_agreements"], cons["mismatches"] or "none"))
 
     if args.out:
         os.makedirs(os.path.dirname(os.path.abspath(args.out)), exist_ok=True)
@@ -202,6 +253,12 @@ def main():
         if caught != probed:
             print("  SELF-TEST FAILED")
             return 1
+        mutated = run_consistency(InmemoryTree, flip=0)
+        if not mutated["mismatches"]:
+            print("  SELF-TEST FAILED: consistency endpoints survived a leaf mutation")
+            return 1
+        print("  self-test: consistency endpoints detect a mutated leaf (%d mismatches)"
+              % len(mutated["mismatches"]))
     return 0 if ok else 1
 
 

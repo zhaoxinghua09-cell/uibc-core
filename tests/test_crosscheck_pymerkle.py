@@ -48,6 +48,15 @@ class ThirdPartyCrossCheck(unittest.TestCase):
         # reported as undefined rather than folded into the agreement count.
         self.assertEqual(report["empty_tree_undefined_by_library"], ["fail-empty-tree"])
 
+        # Consistency cases: both endpoints' roots only. The two cases that declare
+        # a deliberately wrong root must be the only places the library disagrees.
+        cons = report["consistency"]
+        self.assertEqual(cons["cases"], 13)
+        self.assertEqual(cons["root_agreements"], 24)
+        self.assertEqual(cons["mismatches"], [])
+        self.assertEqual(cons["tampered_root_cases"],
+                         ["cons-fail-new-root", "cons-fail-old-root"])
+
     def test_the_check_can_fail(self):
         # If mutating a leaf still "agrees everywhere", the comparison is vacuous.
         mod = _load_tool()

@@ -21,6 +21,11 @@ Every number in `docs/upstream-package/scitt-rfc9162/` was produced by this repo
 | library root == `reconstructed_root` exactly when VALID, differs when INVALID | 49 / 49 |
 | mutated-leaf self-test (one flipped leaf per case, must be detected) | 49 / 49 |
 | cases the library cannot read | 1 (`fail-empty-tree`) |
+| consistency cases (both endpoints' roots) | 13 |
+| endpoint roots the library builds | 26 |
+| endpoint roots equal to the declared root | 24 |
+| endpoint roots differing by design (declared root is the tampered one) | 2 (`cons-fail-new-root`, `cons-fail-old-root`) |
+| mutated-leaf self-test on consistency endpoints | detected (26 mismatches) |
 
 The one unreadable case is `tree_size=0`. pymerkle defines no root for an empty tree at all, so `MTH({}) = SHA-256("") = e3b0c442…` is **not corroborated by this library**. The constant is still scored in the package and still checked by the standalone and Node checks; it is recorded here as uncorroborated by a third party rather than counted as agreement.
 
@@ -28,7 +33,7 @@ The one unreadable case is `tree_size=0`. pymerkle defines no root for an empty 
 
 - **Not an independent external run.** `docs/EXTERNAL-RUNS.json` stays unchanged; a library is not a person, and this row does not appear in it.
 - **No proof paths.** pymerkle is handed leaf text and asked for roots. The package's proof-path folding, and the INVALID_INCLUSION_PATH verdicts specifically, are not re-derived by the library.
-- **Consistency proofs not covered.** The 23 consistency-side checks in this package are scored by our verifier only; pymerkle's consistency API needs a tree it built itself, and a structural comparison of proof shapes was out of scope here.
+- **Consistency proofs not covered as proofs.** For the 13 consistency cases the library is asked only to build both endpoints' roots from their leaf texts: 24 of 26 endpoint roots agree, and the two that differ are the cases whose declared root is deliberately wrong. The consistency *paths* themselves — the SUBPROOF order this package scores — are not read by the library, so they remain corroborated by our verifier and the standalone checker only.
 - **Nothing about deployment.** No COSE_Sign1 statement, no receipt, no signature, no TSA timestamp. A pass above says the hash-tree arithmetic is met by a second implementation; it says nothing about a deployment end to end.
 
 ## How to reproduce

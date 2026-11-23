@@ -1,8 +1,8 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
-# Five rules a test-vector set has to meet before anyone should trust it
+# Six rules a test-vector set has to meet before anyone should trust it
 
-This page exists because our own vector set failed three of these five rules on
-2026-11-20, and none of the failures were visible from the outside. If you are
+This page exists because our own vector set failed four of these six rules on
+2026-11-20 and 2026-11-21, and none of the failures were visible from the outside. If you are
 building a conformance corpus — RFC 9162, SCITT, JOSE, anything — you can adopt
 these rules directly, and you can mark us against them with the commands named
 under each one.
@@ -98,6 +98,23 @@ Declaring it is strictly better than deleting it silently. A deleted gap teaches
 nobody; a declared gap tells the working group what to fix in the text — which is
 the actual contribution.
 
+**But read the text before you declare.** This rule has a failure mode, and we
+hit it. A disagreement between two verifiers is only a gap if the text really
+leaves the question open. On 2026-11-20 we declared `tree_size = 0` with a
+`leaf_index` asserted to be such a gap, because our standalone checker folded it
+and our builder refused it. The text is not open: RFC 9162 §2.1 fixes
+`MTH({}) = SHA-256()`, and §2.1.1 defines `PATH(m, D[n])` only for `0 <= m < n`,
+so a leaf cannot sit in an empty tree and a refusal is the only conforming
+verdict. One of the two verifiers was simply wrong. That input is now a scored
+vector (`v1/fail-empty-tree`) and the false gap is recorded in
+`manifest.retired_underspecified_inputs` with the reason it was retired.
+
+So the checklist is: disagreement → **open RFC 9162 and find the sentence** →
+gap only if no sentence decides it. Declaring a gap that the text does not
+support is worse than deleting the test, because it makes a corpus look
+rigorous while leaving a constant unscored — every second implementation then
+fails a case it could have passed.
+
 ---
 
 ## Rule 4 — Counts must be computed, not typed
@@ -133,6 +150,43 @@ search over sizes 1..19 and every index. **Three of the four candidates a human
 would guess first do not exhibit the property.** Guessing cost us three rewrites;
 searching cost one pass.
 
+## Rule 6 — Calibrate the checker before you score anything with it
+
+**What it means.** A corpus is only as good as the verifier that decides which
+vectors pass. That verifier has to be shown wrong before it is trusted to say
+what is right — otherwise "our vectors are consistent" means "our code agrees
+with our code".
+
+**What we violated.** When the consistency half was added on 2026-11-21, the
+first verifier written from the text was an iterative loop that seeded both
+roots from `old_root`. On non-power-of-two old sizes that is wrong, and the
+checker scored **20 of 23** known-good consistency cases borrowed from another
+project's corpus. A second iterative variant scored 20 of 23 as well. Only the
+recursive form written from `SUBPROOF` scored **23 of 23**. Had those 23 cases
+not existed, the broken verifier would have generated a corpus that looked
+perfectly consistent and failed every honest implementer on `3→7`, `6→9` and
+`7→8`.
+
+**How to test a set for it.** Before scoring, run the checker against cases
+somebody else produced and whose answers are already known, and write down the
+score honestly:
+
+```
+# known-good external cases first, our own vectors second
+python judge_our_consistency_vectors.py     # 13/13, by two unrelated checkers
+python tools/check_scitt_vectors_standalone.py --self-test   # 7 mutations caught
+```
+
+Two things must hold: the checker must reach the published verdicts on foreign
+data, and its own `--self-test` must catch every mutation. A checker that has
+only ever been run on the corpus it generated has no evidence at all.
+
+**What we got from it.** The array order of consistency proofs turned out to be
+a scored property rather than a convention: reading the same nodes in reverse
+scores 18 of the 23 external cases. That is now stated in the package README,
+because an implementer who reverses the array will disagree with us on real
+data, and it is better to say so than to find out in review.
+
 ---
 
 ## What adopting these gets you
@@ -141,7 +195,7 @@ Not a bigger corpus — a corpus whose size you can *state* without caveats, bec
 every number in it is derived and every claim in it is reproducible by someone who
 does not trust you. That is the only kind of "bigger" that survives review.
 
-If you want to mark us against these five rules, run:
+If you want to mark us against these six rules, run:
 
 ```
 python tools/build_scitt_vector_package.py --check-drift

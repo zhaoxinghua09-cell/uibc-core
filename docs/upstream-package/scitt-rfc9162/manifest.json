@@ -1,24 +1,39 @@
 {
   "class_counts": {
+    "INVALID_CONSISTENCY_PROOF": 7,
     "INVALID_INCLUSION_PATH": 12,
     "INVALID_LEAF_DIGEST": 1,
     "INVALID_LEAF_INDEX": 2,
-    "INVALID_TREE_SIZE": 1,
-    "VALID": 21,
+    "INVALID_TREE_SIZE": 2,
+    "VALID": 35,
     "VALID_BUT_SIZE_UNAUTHENTICATED": 4
   },
-  "coverage_note": "Declaring a tree_size one larger than the path assumes never changes the reconstructed root in this algebra - the fold reads no additional node - so that input is carried as an ambiguous-* vector (the root does not authenticate the size), not as an INVALID_TREE_SIZE vector. INVALID_TREE_SIZE therefore covers 'declared smaller' (path one short) and 'declared zero' (no fold defined) only. This asymmetry was found by running the vectors, not assumed: an earlier draft carried a 'size larger' fail case that our own verifier reported as root-equal.",
+  "consistency_note": "The consistency vectors score RFC 6962 Section 2.1.2 SUBPROOF in the order the recursion appends nodes: the recursion's own nodes first, the sibling it appended last. That order is a scored part of the format, not a convenience: reading the same array in reverse scores 18 of the 23 known-good external consistency cases, which is how the order was established here. The verifier used to generate these vectors was itself first written from the recursion text and then validated against those 23 external cases (23/23) before it was allowed to judge anything of ours; its first iterative form scored 20/23 because it seeded both roots from old_root on non-power-of-two old sizes.",
+  "contract_version": "scitt-vector-package/1",
+  "coverage_note": "Declaring a tree_size one larger than the path assumes never changes the reconstructed root in this algebra - the fold reads no additional node - so that input is carried as an ambiguous-* vector (the root does not authenticate the size), not as an INVALID_TREE_SIZE vector. INVALID_TREE_SIZE therefore covers 'declared smaller' (path one short) and 'declared zero' (no leaf can sit in an empty tree); the zero case carries MTH({}) = SHA-256(\"\") as its root so the constant itself is scored rather than assumed. This asymmetry was found by running the vectors, not assumed: an earlier draft carried a 'size larger' fail case that our own verifier reported as root-equal.",
+  "honest_limits": [
+    "Hash-tree algebra only: no COSE_Sign1 statement bytes, no receipts, no signatures, no TSA timestamps. A pass here says nothing about a deployment end to end.",
+    "Consistency proofs are scored for 1 <= old_size <= new_size; old_size = 0 is unspecified in RFC 6962 Section 2.1.2 and is not carried (see underspecified_inputs).",
+    "Sizes are swept exhaustively to 128 leaves in CI; 512 leaves was swept once locally on 2026-11-22 (262,656 instances, 0 disagreements, Python and JavaScript) and left docs/sweep-receipt-512.json, which binds the counts to a digest of the dump. Beyond that, only the corpus shapes and whatever an implementer runs are evidence.",
+    "Verdict words are ours. A disagreement on wording with matching roots is recorded as wording-only by the harness and is not a conformance failure."
+  ],
   "leaf_entry_definition": "SHA-256 of the leaf input bytes, hex-encoded. Leaf inputs here are plain ASCII strings rather than COSE_Sign1 digests, so the tree algebra can be checked without a COSE library.",
   "reconstruction_rule": "Fold the path over leaf_index with tree_size using RFC 9162 SHA-256 verification; the result must equal root_true for VALID vectors and must differ for the three fail-* vectors.",
-  "scope_note": "Covers the RFC 9162 SHA-256 hash-tree and inclusion-path layer only. No COSE_Sign1 statement or receipt bytes are included; see README 'What this set does not cover'.",
+  "retired_underspecified_inputs": [
+    {
+      "former_status": "declared here as underspecified and deliberately not scored, on the reading that 'two conforming readings disagree' about whether a fold is defined",
+      "input": "tree_size=0 with a leaf_index asserted",
+      "retired_on": "2026-11-21",
+      "why_now_scored": "the reading was wrong. RFC 6962 Section 2.1 states MTH({}) = SHA-256(), so the empty-tree root is fixed by the text rather than borrowed; Section 2.1.1 defines PATH(m, D[n]) only for 0 <= m < n, so no conforming reading admits a leaf in a tree of size 0. The case is now v1/fail-empty-tree, expecting INVALID_TREE_SIZE with root_true = MTH({}). The earlier draft named it fail-tree-size-zero."
+    }
+  ],
+  "scope_note": "Covers the RFC 9162 SHA-256 hash-tree layer: inclusion paths (kind=inclusion) and consistency proofs (kind=consistency). No COSE_Sign1 statement or receipt bytes are included; see README 'What this set does not cover'.",
   "stability": "append-only",
   "tree_construction": "leaves[i] = SHA-256(leaf_input_i); node_hash = SHA-256(left||right); split = largest power of two below the subtree size (RFC 9162); leaf_input_i = 'scitt-rfc9162 test vectors v1 :: <vector-id> :: leaf <i>'",
   "underspecified_inputs": [
     {
-      "independent_behaviour": "a literal RFC 9162 fold keeps folding and returns a root, because nothing in the text forbids size 0",
-      "input": "tree_size=0 with a leaf_index asserted",
-      "our_behaviour": "refused: no fold is defined, reconstructed_root left empty",
-      "why_not_a_vector": "a vector has to be reproducible by an independent reading of the text. This input is not: two conforming readings disagree, so it is declared here instead of being scored. It was found on 2026-11-20 when the standalone checker disagreed with the builder; the earlier draft carried it as fail-tree-size-zero."
+      "input": "consistency proof with old_size = 0",
+      "why_not_scored": "this one is genuinely underspecified, unlike the empty tree. RFC 6962 Section 2.1.2 defines SUBPROOF for an old tree of size m with 1 <= m <= n; it says nothing about m = 0, and conforming implementations differ (the Go CT libraries accept it as trivially true with an empty proof, this package would refuse it). No vector is carried, because either verdict would be a reading the text does not fix."
     }
   ],
   "vectors": [
@@ -562,6 +577,26 @@
       "id": "fail-wrong-tree-size"
     },
     {
+      "description": "tree_size=0 with an RFC 6962 empty-tree root: MTH({}) = SHA-256(). No leaf can sit in a tree of size 0, so the only correct verdict is a refusal. This vector exists because a corpus that leaves the empty-tree constant undefined - or that puts another tree's root in its place - cannot be met by a second implementation.",
+      "dir": "v1/fail-empty-tree",
+      "expected": {
+        "inclusion_path": [],
+        "leaf_entry": {
+          "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+          "digest_hex": "2d21e11303b44608cb53ab38158a2965c1bce75edcc2a5af991056fe424ace1d",
+          "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: fail-empty-tree :: leaf 0",
+          "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a206661696c2d656d7074792d74726565203a3a206c6561662030"
+        },
+        "leaf_index": 0,
+        "reconstructed_root": "",
+        "result": "INVALID_TREE_SIZE",
+        "root_true": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "tree_size": 0
+      },
+      "expected_result": "INVALID_TREE_SIZE",
+      "id": "fail-empty-tree"
+    },
+    {
       "description": "tree_size=9, leaf_index=0: the left subtree is full (8) and the tail is 1.",
       "dir": "v1/valid-tree9-index0",
       "expected": {
@@ -904,6 +939,190 @@
       "id": "valid-tree65-index64"
     },
     {
+      "description": "Pairs with fail-path-short-tree3: same 3-leaf tree, honest path.",
+      "dir": "v1/valid-tree3-index1",
+      "expected": {
+        "inclusion_path": [
+          "6e10a0e804d7ce411bd9e3c386ec3a7616fd0e44964741cc9dcab1a5805c1260",
+          "c432b63079a230785b9a49bd2adbffbf9e35df8d016677a39c772509fd50f2c0"
+        ],
+        "leaf_entry": {
+          "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+          "digest_hex": "08153d0225cb9e448924818d0efe66724e998e1a643017eaa4468ee151a5e27f",
+          "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: valid-tree3-index1 :: leaf 1",
+          "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a2076616c69642d74726565332d696e64657831203a3a206c6561662031"
+        },
+        "leaf_index": 1,
+        "reconstructed_root": "9aa31a6f3f610b8c5983cac468562f1570c4c5b60a6ff8fae04c255706aa49fe",
+        "result": "VALID",
+        "root_true": "9aa31a6f3f610b8c5983cac468562f1570c4c5b60a6ff8fae04c255706aa49fe",
+        "tree_size": 3
+      },
+      "expected_result": "VALID",
+      "id": "valid-tree3-index1"
+    },
+    {
+      "description": "Pairs with fail-tampered-path-small-tree and fail-tampered-leaf: honest 4-leaf path.",
+      "dir": "v1/valid-tree4-index1",
+      "expected": {
+        "inclusion_path": [
+          "9690d496da7a6f90e4f0b1ed75613350a634c7da70d63cf12437b2bdc9b6db2b",
+          "609ae8eaad41ab5e47bad7f332a4467033234d7d98860e4879fddb5b96a7414c"
+        ],
+        "leaf_entry": {
+          "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+          "digest_hex": "9706f70832f1235c69ca3b084fb2441cbbc7df51ef5aa0ab98c1372401e813fc",
+          "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: valid-tree4-index1 :: leaf 1",
+          "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a2076616c69642d74726565342d696e64657831203a3a206c6561662031"
+        },
+        "leaf_index": 1,
+        "reconstructed_root": "51236481eccf9b29a5407592121dfbc155fd6177a3d47bc8dceea74d932dea9c",
+        "result": "VALID",
+        "root_true": "51236481eccf9b29a5407592121dfbc155fd6177a3d47bc8dceea74d932dea9c",
+        "tree_size": 4
+      },
+      "expected_result": "VALID",
+      "id": "valid-tree4-index1"
+    },
+    {
+      "description": "Pairs with fail-path-swap-tree5: the smallest tree with two siblings in one path.",
+      "dir": "v1/valid-tree5-index0",
+      "expected": {
+        "inclusion_path": [
+          "e3bf33a7623eacbc97f5e9fc6fc665087e83be930a11350dee4c51b97f58e48a",
+          "0b3234528006a5141e3307f3e00cb629808eb6c86aeb8d825c32a31819522342",
+          "67f5f6691349d477c27d8d779d99583ef96b485f3b716145bf14fc5e86fd613c"
+        ],
+        "leaf_entry": {
+          "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+          "digest_hex": "e89e4066f60a213f988881f37deff5ce18652514b48c671587f8cbfd4d25e648",
+          "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: valid-tree5-index0 :: leaf 0",
+          "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a2076616c69642d74726565352d696e64657830203a3a206c6561662030"
+        },
+        "leaf_index": 0,
+        "reconstructed_root": "28402f12154e2fe3b3c0f84d0f70adf42013fc561207bee9d00422b6af49467d",
+        "result": "VALID",
+        "root_true": "28402f12154e2fe3b3c0f84d0f70adf42013fc561207bee9d00422b6af49467d",
+        "tree_size": 5
+      },
+      "expected_result": "VALID",
+      "id": "valid-tree5-index0"
+    },
+    {
+      "description": "Pairs with fail-path-short-tampered: honest path at the shape where a size-7 path and an unbalanced split meet.",
+      "dir": "v1/valid-tree7-index6",
+      "expected": {
+        "inclusion_path": [
+          "2fa25e3063282c1154dc2bd7056ec575f3b177703a84639fd70a043c109a34d2",
+          "0bdd797500d185a00233c2df51beb681642f2132d54f37bfe924ef179a072598"
+        ],
+        "leaf_entry": {
+          "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+          "digest_hex": "803fff2793f22f3fc8c8e90953d7d266a629d0b29ec53e767ffb92d888122f27",
+          "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: valid-tree7-index6 :: leaf 6",
+          "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a2076616c69642d74726565372d696e64657836203a3a206c6561662036"
+        },
+        "leaf_index": 6,
+        "reconstructed_root": "623845278b0fc0065362c22cee72bf3edb4981d7bde9545b986f4fa4fdee160d",
+        "result": "VALID",
+        "root_true": "623845278b0fc0065362c22cee72bf3edb4981d7bde9545b986f4fa4fdee160d",
+        "tree_size": 7
+      },
+      "expected_result": "VALID",
+      "id": "valid-tree7-index6"
+    },
+    {
+      "description": "Pairs with fail-path-swap: honest path at the interior access.",
+      "dir": "v1/valid-tree8-index5",
+      "expected": {
+        "inclusion_path": [
+          "30d04dbab261e90f53b5fddc09c13bd5f4aa30ee8b1d40c7c3aba591231e682e",
+          "09788fe08cf3cd38519d2ea723dabae884ea1fb382e74da9142fffc1c1191cee",
+          "71e5be272108f2f5a4e4b5aaf68b23218de8d714a66474ab36f3b3a1975aabe5"
+        ],
+        "leaf_entry": {
+          "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+          "digest_hex": "1647a92df44a9e5254f3b6ade9d932db4e222c321be48ac3d5b17687942be489",
+          "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: valid-tree8-index5 :: leaf 5",
+          "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a2076616c69642d74726565382d696e64657835203a3a206c6561662035"
+        },
+        "leaf_index": 5,
+        "reconstructed_root": "50be6884c8f32bba3c301a5f38cf09b7f06a45a76be1a1d524f524a2ffe93d6f",
+        "result": "VALID",
+        "root_true": "50be6884c8f32bba3c301a5f38cf09b7f06a45a76be1a1d524f524a2ffe93d6f",
+        "tree_size": 8
+      },
+      "expected_result": "VALID",
+      "id": "valid-tree8-index5"
+    },
+    {
+      "description": "Pairs with fail-tampered-path-last and fail-path-swap-tree16: honest 16-leaf path.",
+      "dir": "v1/valid-tree16-index9",
+      "expected": {
+        "inclusion_path": [
+          "70337e6e810d5f3e8c907a48f535689aee08a79c8b29e5f089fbf4f5f26b0c43",
+          "b1836073f73a4bbcea143f9f4d06051ac5b04a3c818fbdcc9f3aa5b3dae65b0a",
+          "0a858e5a154908031a6d5a334aa71e811f1388650bdfe4f4bd96cae3768c37c3",
+          "b0cdb40b5f8b7ce40f0d0b6f817e4c4db985e246811c75ad47486a25b37cb270"
+        ],
+        "leaf_entry": {
+          "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+          "digest_hex": "1b855e5561c9e936975b877e8e944f3dfb62e004132b4890e4841c03efe2724d",
+          "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: valid-tree16-index9 :: leaf 9",
+          "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a2076616c69642d7472656531362d696e64657839203a3a206c6561662039"
+        },
+        "leaf_index": 9,
+        "reconstructed_root": "e3cabd0fbd9f93abc9bcaa48628893da6e1a7ef73700b490d5f4f962fe6bc623",
+        "result": "VALID",
+        "root_true": "e3cabd0fbd9f93abc9bcaa48628893da6e1a7ef73700b490d5f4f962fe6bc623",
+        "tree_size": 16
+      },
+      "expected_result": "VALID",
+      "id": "valid-tree16-index9"
+    },
+    {
+      "description": "One leaf whose input is the empty byte string. root_true is SHA-256(0x00), NOT the empty-tree root SHA-256(); a tree of size 1 is not an empty tree. An implementation that shares one constant for both passes every non-empty vector here and fails this one.",
+      "dir": "v1/valid-empty-leaf",
+      "expected": {
+        "inclusion_path": [],
+        "leaf_entry": {
+          "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+          "digest_hex": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+          "leaf_input_ascii": "",
+          "leaf_input_hex": ""
+        },
+        "leaf_index": 0,
+        "reconstructed_root": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "result": "VALID",
+        "root_true": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "tree_size": 1
+      },
+      "expected_result": "VALID",
+      "id": "valid-empty-leaf"
+    },
+    {
+      "description": "Two leaves, one empty input and one single zero byte. Same edge one level up: hashing an empty leaf input must still prepend the 0x00 leaf prefix, and a one-byte 0x00 input is not the same leaf as an empty one.",
+      "dir": "v1/valid-empty-leaf-tree2",
+      "expected": {
+        "inclusion_path": [
+          "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+        ],
+        "leaf_entry": {
+          "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+          "digest_hex": "96a296d224f285c67bee93c30f8a309157f0daa35dc5b87e410b78630a09cfc7",
+          "leaf_input_ascii": "\u0000",
+          "leaf_input_hex": "00"
+        },
+        "leaf_index": 1,
+        "reconstructed_root": "fac54203e7cc696cf0dfcb42c92a1d9dbaf70ad9e621f4bd8d98662f00e3c125",
+        "result": "VALID",
+        "root_true": "fac54203e7cc696cf0dfcb42c92a1d9dbaf70ad9e621f4bd8d98662f00e3c125",
+        "tree_size": 2
+      },
+      "expected_result": "VALID",
+      "id": "valid-empty-leaf-tree2"
+    },
+    {
       "description": "tree_size=7, leaf_index=5: the same inclusion_path folds to the same root at tree_size=8, so the declared size is not authenticated by the root. Independent reproduction of the RFC 9942 Section 5.2.1 observation posted to scitt@ietf.org on 2026-11-15.",
       "dir": "v1/ambiguous-tree-size",
       "expected": {
@@ -1007,6 +1226,269 @@
       },
       "expected_result": "VALID_BUT_SIZE_UNAUTHENTICATED",
       "id": "ambiguous-tree-size-8"
+    },
+    {
+      "description": "Old tree is a single leaf; the new tree's other leaf is the only proof node. The smallest consistency proof that is not empty, and the case where a verifier that seeds both roots from the first proof node instead of from old_root silently accepts the wrong thing.",
+      "dir": "v1/cons-1-2",
+      "expected": {
+        "consistency_path": [
+          "72c05ad4253efa8c51aa29cb71f110d6a8e7f48b248643ac89af2ac505314334"
+        ],
+        "new_root": "73547dde5866b14112c8ca05c366422db76f36e13eb5595ae362033a8c67020e",
+        "new_size": 2,
+        "old_root": "6a3108a942cecf460aeaa5f3e19e1a94ee51378dba5689c5ce1ede472acf83b6",
+        "old_size": 1,
+        "reconstructed_new_root": "73547dde5866b14112c8ca05c366422db76f36e13eb5595ae362033a8c67020e",
+        "reconstructed_old_root": "6a3108a942cecf460aeaa5f3e19e1a94ee51378dba5689c5ce1ede472acf83b6",
+        "result": "VALID"
+      },
+      "expected_result": "VALID",
+      "id": "cons-1-2",
+      "kind": "consistency"
+    },
+    {
+      "description": "Old tree is the full left child of a 4|1 tree: the recursion never descends, and the proof carries only nodes to the right.",
+      "dir": "v1/cons-2-5",
+      "expected": {
+        "consistency_path": [
+          "381f5c68a4da787c60d9f7c4fb82513f49db866d02d2e97095f92853a67ccf44",
+          "eca3996ebe86a2946d9b267dc3ad6dd6263307ba44ac27a3aa878c0dfee84fd4"
+        ],
+        "new_root": "f4e7ddbed26bb7d1a09fce8a24bb25b7fccf5c673fc3e17c057aa8e16dbbe9bd",
+        "new_size": 5,
+        "old_root": "93a22b30dc0756337a29688ab2dd8e8dab0393bf68c47ce474aadf94c726f42c",
+        "old_size": 2,
+        "reconstructed_new_root": "f4e7ddbed26bb7d1a09fce8a24bb25b7fccf5c673fc3e17c057aa8e16dbbe9bd",
+        "reconstructed_old_root": "93a22b30dc0756337a29688ab2dd8e8dab0393bf68c47ce474aadf94c726f42c",
+        "result": "VALID"
+      },
+      "expected_result": "VALID",
+      "id": "cons-2-5",
+      "kind": "consistency"
+    },
+    {
+      "description": "Old size is not a power of two and the new tree is unbalanced 4|3, so the recursion descends on the right and the proof carries a left sibling at two levels. This is the shape that broke the first iterative verifier written for this package: it scored 20 of 23 known-good external cases until the size relation was fixed.",
+      "dir": "v1/cons-3-7",
+      "expected": {
+        "consistency_path": [
+          "ad5136029dad34537a6cc2671f1d9b997afdefffb41a3838cde63e85c334082b",
+          "60185194473fada8b19a483f685266f3c32d2821c22ecbbdd320dc313c318ebb",
+          "10d6ef64262bea6f460da1977f8bc5f17072d90640db4c572f4028dbb89a354c",
+          "1d4bbc23e7cd05f78ce6f068c148841e0bf9e911c7272ced5c915cc0faafe7e7"
+        ],
+        "new_root": "8374254daf8c89b408d3063c2089abe4838019438036256d07ad33e4df2c855f",
+        "new_size": 7,
+        "old_root": "3498db6ac34c7e055a415dd2bcdd8a859142e74b56a572067c81dfe69732b826",
+        "old_size": 3,
+        "reconstructed_new_root": "8374254daf8c89b408d3063c2089abe4838019438036256d07ad33e4df2c855f",
+        "reconstructed_old_root": "3498db6ac34c7e055a415dd2bcdd8a859142e74b56a572067c81dfe69732b826",
+        "result": "VALID"
+      },
+      "expected_result": "VALID",
+      "id": "cons-3-7",
+      "kind": "consistency"
+    },
+    {
+      "description": "Old tree is exactly half the new tree: every proof node is a full subtree root and the fold is a pure right extension.",
+      "dir": "v1/cons-4-8",
+      "expected": {
+        "consistency_path": [
+          "66ae5a215d1c32b70e06f2dac071fd751be30415a69a42f094a762d82f3ac96a"
+        ],
+        "new_root": "6e8e27d264f4b88f98434cdca1e1f6df70f6f5163e27e9feec4ae15c46300eb2",
+        "new_size": 8,
+        "old_root": "4850edd8697a9d5413d09ca5bd6f8756ca6a40958874f7b2469a1a3f8295f365",
+        "old_size": 4,
+        "reconstructed_new_root": "6e8e27d264f4b88f98434cdca1e1f6df70f6f5163e27e9feec4ae15c46300eb2",
+        "reconstructed_old_root": "4850edd8697a9d5413d09ca5bd6f8756ca6a40958874f7b2469a1a3f8295f365",
+        "result": "VALID"
+      },
+      "expected_result": "VALID",
+      "id": "cons-4-8",
+      "kind": "consistency"
+    },
+    {
+      "description": "Old size 6 = 4|2 and new size 9 = 8|1: two non-power-of-two sizes, so the proof crosses both splits.",
+      "dir": "v1/cons-6-9",
+      "expected": {
+        "consistency_path": [
+          "0b43e7891f8067b625e8d5e3f8aac0871f3f3124df8d3585c913803dac747741",
+          "63fc4743c3e264c8304c392b68d889b3c14b2ad0bc2bee48fdb7cc0e449f3f46",
+          "73725c1cb0273cce10307378a46efd583816f3361619f939fca07b89261792a9",
+          "9b3caabf2f7301707a97ade9cfccb23d56427d41732d80f389bb5cbaeed7ea97"
+        ],
+        "new_root": "2df2a47b612cde4e568459cd1b47ab81905aee560daf661d1989a9d981a7d898",
+        "new_size": 9,
+        "old_root": "891a4d375b04a02299a82488af2d62100e95acabca3c6445d0834b741aecece1",
+        "old_size": 6,
+        "reconstructed_new_root": "2df2a47b612cde4e568459cd1b47ab81905aee560daf661d1989a9d981a7d898",
+        "reconstructed_old_root": "891a4d375b04a02299a82488af2d62100e95acabca3c6445d0834b741aecece1",
+        "result": "VALID"
+      },
+      "expected_result": "VALID",
+      "id": "cons-6-9",
+      "kind": "consistency"
+    },
+    {
+      "description": "Equal sizes: the proof must be empty and the two roots must be identical. A verifier that reports 'consistent' before looking at the proof cannot be caught except by a case like this one.",
+      "dir": "v1/cons-9-9",
+      "expected": {
+        "consistency_path": [],
+        "new_root": "65f795be5713a6e11a0b9b488e4f9ba4fffe5e75797f532b6cc6e2a1b4708a7d",
+        "new_size": 9,
+        "old_root": "65f795be5713a6e11a0b9b488e4f9ba4fffe5e75797f532b6cc6e2a1b4708a7d",
+        "old_size": 9,
+        "reconstructed_new_root": "65f795be5713a6e11a0b9b488e4f9ba4fffe5e75797f532b6cc6e2a1b4708a7d",
+        "reconstructed_old_root": "65f795be5713a6e11a0b9b488e4f9ba4fffe5e75797f532b6cc6e2a1b4708a7d",
+        "result": "VALID"
+      },
+      "expected_result": "VALID",
+      "id": "cons-9-9",
+      "kind": "consistency"
+    },
+    {
+      "description": "old_root replaced with one leaf digest. Every proof node is genuine and folds out to the genuine new root, so only the final comparison against the old root rejects it.",
+      "dir": "v1/cons-fail-old-root",
+      "expected": {
+        "consistency_path": [
+          "0323d4f71cfd752a792e9d51b03f81d8848d3acc8f5864f97b77cccb7285a0a9",
+          "9058709dbb93020afe1e694d261230d4174ca0de871054908b7bd9c0ca5b331a",
+          "c581dbfd69849f6943806b5ce697eb2bee1dcc9d721e61d57c93929a5590637c",
+          "61294f285b54784f996fbbcfcac5591c304e30817932143b97493c812ef681ec"
+        ],
+        "new_root": "b27362342fe67702f7701bf28761e2984f5a35840ae33e2d5d64139fe33624b9",
+        "new_size": 7,
+        "old_root": "1e01eda9a6a5cd9a20302750c77d88ad08982a1a24cf9b9ee23314140a67b644",
+        "old_size": 3,
+        "reconstructed_new_root": "b27362342fe67702f7701bf28761e2984f5a35840ae33e2d5d64139fe33624b9",
+        "reconstructed_old_root": "85e369162a96703a700e6a4bff34858831751c4552587d816b2d99f7de5fd093",
+        "result": "INVALID_CONSISTENCY_PROOF"
+      },
+      "expected_result": "INVALID_CONSISTENCY_PROOF",
+      "id": "cons-fail-old-root",
+      "kind": "consistency"
+    },
+    {
+      "description": "new_root replaced with the root of a nearby size. The proof is genuine; only the fold to the new root can catch it.",
+      "dir": "v1/cons-fail-new-root",
+      "expected": {
+        "consistency_path": [
+          "cb75f828f347c9b55a7dadad2d97ef40b9520f595ca4deab2d91f7c7af28fa4f",
+          "0b4b52637e00ebb96beddfb5b59eda28ebd674b57242aa65382139b0e22cce46",
+          "75410bb9cbce6b981996f5eccc27ba87fa23ae202661ca3745bc22b3500d507e",
+          "90b2e1541107f76804195398f05d064dc896c3c692ec43629638cde79abb19ca"
+        ],
+        "new_root": "30ce5c5368b1b7bddbf8361472fb3d541d779a0f974706787a92932f52bfd3d9",
+        "new_size": 9,
+        "old_root": "4a6d954f29d79f9b02b50e11851b028f5bd3f6cb7587b03c4f662c09baad77ed",
+        "old_size": 6,
+        "reconstructed_new_root": "e51147a4063d67660a3b6cf8b43c11f26db771e374b6e97dc8abe71c3c99835d",
+        "reconstructed_old_root": "4a6d954f29d79f9b02b50e11851b028f5bd3f6cb7587b03c4f662c09baad77ed",
+        "result": "INVALID_CONSISTENCY_PROOF"
+      },
+      "expected_result": "INVALID_CONSISTENCY_PROOF",
+      "id": "cons-fail-new-root",
+      "kind": "consistency"
+    },
+    {
+      "description": "The highest proof node is replaced with zeros: the old root still folds out, the new root does not.",
+      "dir": "v1/cons-fail-proof-last",
+      "expected": {
+        "consistency_path": [
+          "0000000000000000000000000000000000000000000000000000000000000000"
+        ],
+        "new_root": "6a36bbc63da813990d6813157a86ad0681985b833af0416ef3c3a31af88c0191",
+        "new_size": 8,
+        "old_root": "33254a08a9ac359cdb5da9cd8150561cb53aa57235ea2a0ed3a8d60d77b358e1",
+        "old_size": 4,
+        "reconstructed_new_root": "adf2cf293929536aec5cca8b8ade0eac31f73eb2988a6aca465635a6915bb417",
+        "reconstructed_old_root": "33254a08a9ac359cdb5da9cd8150561cb53aa57235ea2a0ed3a8d60d77b358e1",
+        "result": "INVALID_CONSISTENCY_PROOF"
+      },
+      "expected_result": "INVALID_CONSISTENCY_PROOF",
+      "id": "cons-fail-proof-last",
+      "kind": "consistency"
+    },
+    {
+      "description": "One proof node dropped. A verifier that folds until the proof runs out and then only compares the old root accepts this wrongly; a verifier that requires the node counters to reach zero rejects it.",
+      "dir": "v1/cons-fail-proof-short",
+      "expected": {
+        "consistency_path": [
+          "8f56f6485f498fbee009041ace623eda30ea35b7cbefd8c87e5c00e178140d1c",
+          "81a856132df74118027a2d0c5e9ecc5e290db8c25c3603c5b09c3584304692a7",
+          "1b779eb8acb0b1323f55be865fc724daf9810b344740fd07f56cad96d65906f0"
+        ],
+        "new_root": "91535072c6c8c7a67308f16b403cc69887287d2ff2b323b53f0962041457547c",
+        "new_size": 7,
+        "old_root": "adf188f72ad7ab6b88fbe1f4ad542d93bba3bb5efe1d524e91e78d0c165d5196",
+        "old_size": 3,
+        "reconstructed_new_root": "",
+        "reconstructed_old_root": "",
+        "result": "INVALID_CONSISTENCY_PROOF"
+      },
+      "expected_result": "INVALID_CONSISTENCY_PROOF",
+      "id": "cons-fail-proof-short",
+      "kind": "consistency"
+    },
+    {
+      "description": "An extra zero node appended: same bytes as a genuine prefix plus noise. This is the case that separates 'roots came out right' from 'the proof was the right length'.",
+      "dir": "v1/cons-fail-proof-long",
+      "expected": {
+        "consistency_path": [
+          "1c88abcfbf33d8f5161ebbdabf6a51564c98956cbd9131f4570e869a5bee2872",
+          "085f770f92c3dea46be3cadec059cfc45fdb1c34c4dce43d4a111686de37a88d",
+          "0000000000000000000000000000000000000000000000000000000000000000"
+        ],
+        "new_root": "2904578e5622c100ac884cdc7eebb7ae2aa23654f95dea9042a434457c603fca",
+        "new_size": 5,
+        "old_root": "93f0f3d80a45ec0fb81a78224e46f505854d6d1f4802a5114be168d025daf518",
+        "old_size": 2,
+        "reconstructed_new_root": "",
+        "reconstructed_old_root": "",
+        "result": "INVALID_CONSISTENCY_PROOF"
+      },
+      "expected_result": "INVALID_CONSISTENCY_PROOF",
+      "id": "cons-fail-proof-long",
+      "kind": "consistency"
+    },
+    {
+      "description": "Two adjacent proof nodes exchanged: same bytes, same length, wrong order.",
+      "dir": "v1/cons-fail-proof-swap",
+      "expected": {
+        "consistency_path": [
+          "4247d4beb89bec36289a3d9f6a04ec02ac93e16a274b7d42b67ac525f95f5e67",
+          "2f49211ae544438de339ac0cb77732c066b08427ed94dbb1ec1031429580b67e",
+          "4efd0b5ceed9d7f214f6c3c18c833252ce890b8da809cf7840dc96fb97f358e0",
+          "53011e328c3a8f56018f99675c6d14aff230af9b5e7a745c891318c5c19e3736"
+        ],
+        "new_root": "5da5359e8eb1086abedb0cc1e68b3c8a348a5725c940b1b04b421982252a64c1",
+        "new_size": 7,
+        "old_root": "7fc97bedb6a81c63c151031e108d27c7d87a35739991df972a5dba08272fd1f0",
+        "old_size": 3,
+        "reconstructed_new_root": "d941dfeaa382c59d33617bfd28a43e6ae2f026c1daa884ff2f87108d2b6b3b6c",
+        "reconstructed_old_root": "99fbe91abcc1b5f48712205d9a3fe78ea88261a8bad8d2390d7ffe8d80b0b42c",
+        "result": "INVALID_CONSISTENCY_PROOF"
+      },
+      "expected_result": "INVALID_CONSISTENCY_PROOF",
+      "id": "cons-fail-proof-swap",
+      "kind": "consistency"
+    },
+    {
+      "description": "old_size larger than new_size with both roots genuine: no proof exists, and a verifier must refuse on the size relation alone rather than folding something that cannot be folded.",
+      "dir": "v1/cons-fail-size-order",
+      "expected": {
+        "consistency_path": [],
+        "new_root": "71ef43086cf051fcde8603246f473874db9cd0b0f7b4018b98d0be8eab989b68",
+        "new_size": 3,
+        "old_root": "df13391fb8bc644f4adff46a49c7e98d9073e7c0fe54b7c61308049b71b1da2f",
+        "old_size": 5,
+        "reconstructed_new_root": "",
+        "reconstructed_old_root": "",
+        "result": "INVALID_CONSISTENCY_PROOF"
+      },
+      "expected_result": "INVALID_CONSISTENCY_PROOF",
+      "id": "cons-fail-size-order",
+      "kind": "consistency"
     }
   ],
   "version": "v1"

@@ -10,6 +10,8 @@ and it is unrelated to the UIBCDF computational-biology organisation.
 >
 > **不知道从哪进？先看 [STRUCTURE.md](STRUCTURE.md)** — 五层地图（规范／实现／工具／验证／存证）与三条阅读路线。
 >
+> **RFC 9162 哈希树语料（63 条）** → **[docs/upstream-package/scitt-rfc9162/](docs/upstream-package/scitt-rfc9162/README.md)** — 每条负向量都有同形状正孪生、拒绝词表闭合、穷举到 512 叶且带收据；第三方库（pymerkle 6.0.0，RFC 6962 模式）独立重建真树根 49/49 一致，边界与不覆盖项写在 [docs/THIRD-PARTY-CROSSCHECK.md](docs/THIRD-PARTY-CROSSCHECK.md)。
+>
 > **想知道现在到底到哪一步？看 [STATUS.md](STATUS.md)** — 一页纸，每个数字都由 `python tools/status_page.py` 从仓库里算出来，
 > 它和仓库对不上时 `--check` 会红；六个维度的"我们缺什么"逐条列出，不留形容词。
 > **中文导读（五分钟）** → **[docs/zh-guide.md](docs/zh-guide.md)** — 三律在代码里落在哪、`PASS` 的确切含义、21 类篡改逐类结果、两台机器上的复核延迟，以及本仓现在还差什么（含红队的灰区）。每一句能对外说的话，钉到一条你能跑的命令上：**[docs/claims-register.md](docs/claims-register.md)**。

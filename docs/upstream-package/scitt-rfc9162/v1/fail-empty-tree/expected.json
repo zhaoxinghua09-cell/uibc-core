@@ -1,0 +1,15 @@
+{
+  "description": "tree_size=0 with an RFC 6962 empty-tree root: MTH({}) = SHA-256(). No leaf can sit in a tree of size 0, so the only correct verdict is a refusal. This vector exists because a corpus that leaves the empty-tree constant undefined - or that puts another tree's root in its place - cannot be met by a second implementation.",
+  "inclusion_path": [],
+  "leaf_entry": {
+    "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+    "digest_hex": "2d21e11303b44608cb53ab38158a2965c1bce75edcc2a5af991056fe424ace1d",
+    "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: fail-empty-tree :: leaf 0",
+    "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a206661696c2d656d7074792d74726565203a3a206c6561662030"
+  },
+  "leaf_index": 0,
+  "reconstructed_root": "",
+  "result": "INVALID_TREE_SIZE",
+  "root_true": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "tree_size": 0
+}

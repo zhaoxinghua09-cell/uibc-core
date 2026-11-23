@@ -13,6 +13,8 @@ Two constructions are available, selected by name:
     RFC 6962, the Certificate Transparency tree:
         leaf hash  = SHA-256(0x00 || leaf_bytes)
         node hash  = SHA-256(0x01 || left || right)
+        empty tree = SHA-256 of the empty input (e3b0c442...), per RFC 6962
+                     Section 2.1: MTH({}) = SHA-256()
         an unbalanced tail is promoted, not duplicated - duplicating it would
         make two different trees share a root, which is the classic mistake.
 
@@ -104,15 +106,20 @@ def _root_aer1(leaves):
 def root_hash(leaves, profile: str = DEFAULT_PROFILE) -> bytes:
     """Merkle root over already-hashed leaves.
 
-    rfc6962: empty tree -> all-zero digest (the historical convention here).
-    aer1:    empty tree -> SHA-256 of the empty input, per Section 8.1.
+    Both profiles define the empty tree as SHA-256 of the empty input:
+    RFC 6962 Section 2.1 states MTH({}) = SHA-256(), and draft-zambo-aer1
+    Section 8.1 states the same for AER-1. The all-zero digest this function
+    used to return for an empty rfc6962 tree was a local convention, not the
+    RFC's value, and it was contradicted by this module's own header; it
+    disagreed with any conforming implementation, which is the one thing a
+    Merkle root must never do.
     """
     _check_profile(profile)
     leaves = list(leaves)
     if profile == PROFILE_AER1:
         return _root_aer1(leaves)
     if not leaves:
-        return b"\x00" * 32
+        return hashlib.sha256(b"").digest()
     if len(leaves) == 1:
         return leaves[0]
     k = _largest_pow2_below(len(leaves))

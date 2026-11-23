@@ -1,0 +1,118 @@
+name: Vector package
+
+# The RFC 9162 vector set had no CI job at all until 2026-11-21: every check
+# that guards it (builder --check, --check-drift, the standalone recompute, the
+# Node second implementation) was a command someone had to remember to run.
+# A package whose integrity is verified by memory is a package that drifts.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  vectors:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Set up Python
+        uses: actions/setup-python@v7.1.0
+        with:
+          python-version: "3.12"
+
+      - name: Pin the checksum list
+        # Byte-exact: the package pins its own files as -text in .gitattributes,
+        # so a CRLF checkout on any platform must not change these.
+        working-directory: docs/upstream-package/scitt-rfc9162
+        run: sha256sum -c SHA256SUMS
+
+      - name: Recompute every vector from its declared inputs
+        run: python tools/build_scitt_vector_package.py --check
+
+      - name: Committed bytes are what the builder produces
+        # The stronger check: rebuild into a temp dir and demand byte identity
+        # in both directions, so a builder change cannot silently drop a vector.
+        run: python tools/build_scitt_vector_package.py --check-drift
+
+      - name: Independent recompute, written from the text
+        # Imports nothing from this project; disagreement means one of the two
+        # readings of RFC 9162 is wrong. --self-test additionally feeds four
+        # broken vectors through the same code, so a checker that passes
+        # everything cannot pass this step.
+        run: python tools/check_scitt_vectors_standalone.py --self-test
+
+      - name: Second implementation (JavaScript) reaches parity
+        # Same author, so this is a differential test and not an independent
+        # run — the external run ledger does not count it. It still proves the
+        # vectors are written down concretely enough to be met twice, and
+        # --self-test proves the checker catches its own mutations (all-zero
+        # empty root, a filled-in size-0 fold result, a size-0 vector marked
+        # VALID) instead of passing everything.
+        # node is preinstalled on ubuntu-latest; no setup-node action is pinned
+        # here on purpose, because this repository pins actions by commit SHA
+        # and an unpinned third-party action would be the one loose end.
+        run: node tools/check_scitt_vectors_node.mjs --self-test
+
+      - name: A third party builds the same roots
+        # pymerkle in RFC 6962 mode is a library nobody here wrote. It is handed the
+        # leaf texts of all 49 inclusion cases and asked for tree roots, then asked
+        # whether the case's own reconstructed_root is that root exactly (VALID) or
+        # not (INVALID). No proof path, no signature, no receipt: this is hash-tree
+        # arithmetic only. --self-test mutates a leaf per case and demands detection.
+        # The library leaves MTH({}) undefined, so the empty-tree constant is
+        # reported as uncorroborated rather than counted as agreement.
+        run: |
+          python -m pip install "pymerkle==6.0.0"
+          python tools/crosscheck_scitt_pymerkle.py \
+            --out "${{ runner.temp }}/crosscheck_pymerkle.json" --self-test
+
+      - name: Sweep every tree shape up to 128, both primitives
+        # The corpus is 63 chosen shapes. This step answers the question the
+        # corpus cannot: does every (size, index) and every (m, n) up to a bound
+        # work? Generation comes from uibc_core, verification from the standalone
+        # checker (which imports nothing from it), so a disagreement is real.
+        # Each run also writes a receipt binding its counts to a digest of the instance
+        # file, and the receipt is checked against that file in the same job: a count
+        # printed in a log is not something a stranger can recompute, a digest is.
+        run: |
+          python tools/verify_tree_algebra_exhaustive.py --max-size 128 \
+            --dump "${{ runner.temp }}/sweep.json" \
+            --receipt "${{ runner.temp }}/sweep-receipt.json" --self-test
+          node tools/verify_tree_algebra_exhaustive.mjs "${{ runner.temp }}/sweep.json"
+          python tools/check_sweep_receipt.py "${{ runner.temp }}/sweep-receipt.json" \
+            --dump "${{ runner.temp }}/sweep.json"
+          python tools/check_sweep_receipt.py --self-test
+
+      - name: A receipt must agree with the package that judged it
+        # The invite ends with "send the receipt back". This is the step that turns
+        # the receipt from a statement into evidence: counts must equal row tallies,
+        # every row must name a real vector, and the harness's own receipt must pass
+        # while four mutated ones must not.
+        run: python tools/check_conformance_receipt.py --self-test
+
+      - name: The harness really answers, and a cheat is caught
+        # Until 2026-11-22 the documented one-command path (`--adapter foo.py`) died
+        # with [WinError 193] on Windows and every vector became "no answer" -- while
+        # the negative control still reported CONTROL-OK, because "no answers" counted
+        # as a disagreement. So this step demands answers, then demands that the
+        # accept-everything adapter is caught on computation rather than on silence.
+        run: |
+          python tools/conformance_harness.py \
+            --adapter conformance/adapters/reference_python.py \
+            --out "${{ runner.temp }}/receipt.json"
+          python tools/check_conformance_receipt.py "${{ runner.temp }}/receipt.json"
+          python tools/conformance_harness.py \
+            --adapter conformance/adapters/accept_all.py \
+            --expect-disagreement --out "${{ runner.temp }}/cheat.json"
+
+      - name: The external-run table refuses what prose only asked for
+        run: |
+          python tools/check_external_runs.py
+          python tools/check_external_runs.py --self-test
+
+      - name: The package tests
+        run: python -m pip install --upgrade pip && pip install pytest && python -m pytest tests/test_upstream_vector_package.py -q

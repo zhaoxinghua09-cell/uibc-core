@@ -105,14 +105,51 @@ def package_lock(package, timeout=30.0):
         os.close(fd)
 
 
+def replace_with_retry(tmp, path, attempts=40, first_delay=0.005):
+    """os.replace, with a bounded retry for the Windows sharing window.
+
+    On Windows, replacing a file that another *process* holds open for a few
+    milliseconds — a reader, an indexer, an antivirus scanner — fails with
+    PermissionError (WinError 5, "access denied"), not with a lock timeout. The
+    rename is otherwise atomic, so the correct response is to wait and try again,
+    not to fall back to copy-then-delete (which is not atomic and can leave a
+    truncated index).
+
+    Observed on 2026-11-21 in tests/test_concurrency_and_build.py: 200 concurrent
+    writers, one of them lost the rename race and raised. The package still
+    verified, but a library that throws under ordinary concurrency is a library
+    that makes its callers write retry loops.
+
+    Backoff is additive (5 ms, 10 ms, ... capped at 50 ms), bounded to ~1.5 s
+    total; on POSIX this succeeds on the first attempt and costs nothing.
+    """
+    delay = first_delay
+    for attempt in range(attempts):
+        try:
+            os.replace(tmp, path)
+            return
+        except PermissionError:
+            if attempt == attempts - 1:
+                raise
+            time.sleep(delay)
+            delay = min(delay + first_delay, 0.05)
+
+
 def atomic_write_json(path, obj, indent=2):
-    """Write JSON via a sibling temp file and os.replace.
+    """Write JSON via a sibling temp file and an atomic replace.
 
     A reader either sees the old file or the new one, never a partial write.
     """
     import json
     tmp = "%s.tmp-%d-%d" % (path, os.getpid(), id(obj))
-    with open(tmp, "w", encoding="utf-8", newline="\n") as f:
-        json.dump(obj, f, ensure_ascii=False, indent=indent, sort_keys=False)
-        f.write("\n")
-    os.replace(tmp, path)
+    try:
+        with open(tmp, "w", encoding="utf-8", newline="\n") as f:
+            json.dump(obj, f, ensure_ascii=False, indent=indent, sort_keys=False)
+            f.write("\n")
+        replace_with_retry(tmp, path)
+    except BaseException:
+        # A failed replace must not leave the sibling temp file behind: the
+        # concurrency test counts stray files, and so does a real package.
+        with contextlib.suppress(OSError):
+            os.unlink(tmp)
+        raise

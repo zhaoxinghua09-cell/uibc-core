@@ -1,0 +1,14 @@
+{
+  "consistency_path": [
+    "0000000000000000000000000000000000000000000000000000000000000000"
+  ],
+  "description": "The highest proof node is replaced with zeros: the old root still folds out, the new root does not.",
+  "kind": "consistency",
+  "new_root": "6a36bbc63da813990d6813157a86ad0681985b833af0416ef3c3a31af88c0191",
+  "new_size": 8,
+  "old_root": "33254a08a9ac359cdb5da9cd8150561cb53aa57235ea2a0ed3a8d60d77b358e1",
+  "old_size": 4,
+  "reconstructed_new_root": "adf2cf293929536aec5cca8b8ade0eac31f73eb2988a6aca465635a6915bb417",
+  "reconstructed_old_root": "33254a08a9ac359cdb5da9cd8150561cb53aa57235ea2a0ed3a8d60d77b358e1",
+  "result": "INVALID_CONSISTENCY_PROOF"
+}

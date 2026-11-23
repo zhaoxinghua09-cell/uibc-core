@@ -38,6 +38,24 @@ with the disagreement in the row, not flattened into a fraction.
 Empty. Not "no failures" — no entries. Every row above the line would need a link
 that resolves, and there is none yet.
 
+The table is also a file, and the file has a checker: `docs/EXTERNAL-RUNS.json`
+holds the same rows as data, and `tools/check_external_runs.py` refuses what the
+prose above only asks for. It refuses a row whose `evidence` says "independent"
+instead of `blind` or `directed` (a row saying independent is not stating a kind,
+it is stating a conclusion), refuses a blind claim that also records
+`read_our_vectors`, refuses a `figure` that is a percentage or a fraction of some
+other corpus, and refuses a tally that does not equal the rows above it. `--self-test`
+proves it by feeding it eight mutated tables; the test
+`tests/test_external_runs.py` asserts the committed file and the four mutations.
+
+Why that became a file and not a paragraph: on 2026-11-22 a survey of a
+neighbouring project's ledger found eight rows all labelled `independent`, of
+which that project's own `evidence` field marked two as blind and six as
+directed — all posted by one implementer. Every row was individually honest; the
+file was still misleading, because nothing in it could fail. This is the same
+failure as a negative vector with no positive twin: a claim with no instance
+behind it, or an instance that cannot contradict the claim.
+
 | date | runner | where posted | archive sha256 | blind/directed | code author | figure as posted | note |
 |---|---|---|---|---|---|---|---|
 | — | — | — | — | — | — | — | no external run recorded as of 2026-11-20 |

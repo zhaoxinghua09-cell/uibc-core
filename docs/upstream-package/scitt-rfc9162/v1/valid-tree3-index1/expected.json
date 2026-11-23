@@ -1,0 +1,18 @@
+{
+  "description": "Pairs with fail-path-short-tree3: same 3-leaf tree, honest path.",
+  "inclusion_path": [
+    "6e10a0e804d7ce411bd9e3c386ec3a7616fd0e44964741cc9dcab1a5805c1260",
+    "c432b63079a230785b9a49bd2adbffbf9e35df8d016677a39c772509fd50f2c0"
+  ],
+  "leaf_entry": {
+    "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+    "digest_hex": "08153d0225cb9e448924818d0efe66724e998e1a643017eaa4468ee151a5e27f",
+    "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: valid-tree3-index1 :: leaf 1",
+    "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a2076616c69642d74726565332d696e64657831203a3a206c6561662031"
+  },
+  "leaf_index": 1,
+  "reconstructed_root": "9aa31a6f3f610b8c5983cac468562f1570c4c5b60a6ff8fae04c255706aa49fe",
+  "result": "VALID",
+  "root_true": "9aa31a6f3f610b8c5983cac468562f1570c4c5b60a6ff8fae04c255706aa49fe",
+  "tree_size": 3
+}

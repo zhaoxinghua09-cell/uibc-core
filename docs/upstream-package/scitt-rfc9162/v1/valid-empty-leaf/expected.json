@@ -1,0 +1,15 @@
+{
+  "description": "One leaf whose input is the empty byte string. root_true is SHA-256(0x00), NOT the empty-tree root SHA-256(); a tree of size 1 is not an empty tree. An implementation that shares one constant for both passes every non-empty vector here and fails this one.",
+  "inclusion_path": [],
+  "leaf_entry": {
+    "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+    "digest_hex": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+    "leaf_input_ascii": "",
+    "leaf_input_hex": ""
+  },
+  "leaf_index": 0,
+  "reconstructed_root": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+  "result": "VALID",
+  "root_true": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+  "tree_size": 1
+}

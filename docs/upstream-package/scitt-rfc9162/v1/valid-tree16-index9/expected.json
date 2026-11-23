@@ -1,0 +1,20 @@
+{
+  "description": "Pairs with fail-tampered-path-last and fail-path-swap-tree16: honest 16-leaf path.",
+  "inclusion_path": [
+    "70337e6e810d5f3e8c907a48f535689aee08a79c8b29e5f089fbf4f5f26b0c43",
+    "b1836073f73a4bbcea143f9f4d06051ac5b04a3c818fbdcc9f3aa5b3dae65b0a",
+    "0a858e5a154908031a6d5a334aa71e811f1388650bdfe4f4bd96cae3768c37c3",
+    "b0cdb40b5f8b7ce40f0d0b6f817e4c4db985e246811c75ad47486a25b37cb270"
+  ],
+  "leaf_entry": {
+    "definition": "SHA-256 of the leaf input bytes, hex-encoded",
+    "digest_hex": "1b855e5561c9e936975b877e8e944f3dfb62e004132b4890e4841c03efe2724d",
+    "leaf_input_ascii": "scitt-rfc9162 test vectors v1 :: valid-tree16-index9 :: leaf 9",
+    "leaf_input_hex": "73636974742d72666339313632207465737420766563746f7273207631203a3a2076616c69642d7472656531362d696e64657839203a3a206c6561662039"
+  },
+  "leaf_index": 9,
+  "reconstructed_root": "e3cabd0fbd9f93abc9bcaa48628893da6e1a7ef73700b490d5f4f962fe6bc623",
+  "result": "VALID",
+  "root_true": "e3cabd0fbd9f93abc9bcaa48628893da6e1a7ef73700b490d5f4f962fe6bc623",
+  "tree_size": 16
+}

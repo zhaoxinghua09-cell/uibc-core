@@ -1,0 +1,17 @@
+{
+  "consistency_path": [
+    "0b43e7891f8067b625e8d5e3f8aac0871f3f3124df8d3585c913803dac747741",
+    "63fc4743c3e264c8304c392b68d889b3c14b2ad0bc2bee48fdb7cc0e449f3f46",
+    "73725c1cb0273cce10307378a46efd583816f3361619f939fca07b89261792a9",
+    "9b3caabf2f7301707a97ade9cfccb23d56427d41732d80f389bb5cbaeed7ea97"
+  ],
+  "description": "Old size 6 = 4|2 and new size 9 = 8|1: two non-power-of-two sizes, so the proof crosses both splits.",
+  "kind": "consistency",
+  "new_root": "2df2a47b612cde4e568459cd1b47ab81905aee560daf661d1989a9d981a7d898",
+  "new_size": 9,
+  "old_root": "891a4d375b04a02299a82488af2d62100e95acabca3c6445d0834b741aecece1",
+  "old_size": 6,
+  "reconstructed_new_root": "2df2a47b612cde4e568459cd1b47ab81905aee560daf661d1989a9d981a7d898",
+  "reconstructed_old_root": "891a4d375b04a02299a82488af2d62100e95acabca3c6445d0834b741aecece1",
+  "result": "VALID"
+}

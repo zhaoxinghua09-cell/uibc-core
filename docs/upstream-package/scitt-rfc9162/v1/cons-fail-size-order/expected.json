@@ -1,0 +1,12 @@
+{
+  "consistency_path": [],
+  "description": "old_size larger than new_size with both roots genuine: no proof exists, and a verifier must refuse on the size relation alone rather than folding something that cannot be folded.",
+  "kind": "consistency",
+  "new_root": "71ef43086cf051fcde8603246f473874db9cd0b0f7b4018b98d0be8eab989b68",
+  "new_size": 3,
+  "old_root": "df13391fb8bc644f4adff46a49c7e98d9073e7c0fe54b7c61308049b71b1da2f",
+  "old_size": 5,
+  "reconstructed_new_root": "",
+  "reconstructed_old_root": "",
+  "result": "INVALID_CONSISTENCY_PROOF"
+}

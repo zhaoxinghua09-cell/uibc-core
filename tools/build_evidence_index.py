@@ -12,6 +12,12 @@ a scan of `tests/`, the red-team mentions come off `tools/outsider_audit.py`.
 
     python3 tools/build_evidence_index.py            # human table
     python3 tools/build_evidence_index.py --json     # machine-readable
+    python3 tools/build_evidence_index.py --write     # update docs/EVIDENCE-INDEX.md
+
+`--write` exists because the page was maintained by redirecting stdout, so adding a
+single test left the committed count one behind and two tests failed on every round
+that touched the suite (twice by 2026-11-22). The page is prose that no builder
+regenerates, so it needs a writer that is a command, not a shell habit.
 
 The last section is the honest one: what has NO evidence, and why.
 """
@@ -202,7 +208,16 @@ def main():
     if "--json" in sys.argv:
         print(json.dumps(index, indent=2, ensure_ascii=False))
         return 0
-    print(render(index), end="")
+    page = render(index)
+    if "--write" in sys.argv:
+        # LF on purpose: the page is one line of diff when a number changes, and a
+        # CRLF blob turned that one line into forty-two on 2026-11-21.
+        path = os.path.join(_REPO, "docs", "EVIDENCE-INDEX.md")
+        with open(path, "w", encoding="utf-8", newline="\n") as fh:
+            fh.write(page)
+        print("written: %s (%d bytes)" % (path, len(page.encode("utf-8"))))
+        return 0
+    print(page, end="")
     return 0
 
 

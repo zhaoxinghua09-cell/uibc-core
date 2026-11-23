@@ -1,0 +1,16 @@
+{
+  "consistency_path": [
+    "1c88abcfbf33d8f5161ebbdabf6a51564c98956cbd9131f4570e869a5bee2872",
+    "085f770f92c3dea46be3cadec059cfc45fdb1c34c4dce43d4a111686de37a88d",
+    "0000000000000000000000000000000000000000000000000000000000000000"
+  ],
+  "description": "An extra zero node appended: same bytes as a genuine prefix plus noise. This is the case that separates 'roots came out right' from 'the proof was the right length'.",
+  "kind": "consistency",
+  "new_root": "2904578e5622c100ac884cdc7eebb7ae2aa23654f95dea9042a434457c603fca",
+  "new_size": 5,
+  "old_root": "93f0f3d80a45ec0fb81a78224e46f505854d6d1f4802a5114be168d025daf518",
+  "old_size": 2,
+  "reconstructed_new_root": "",
+  "reconstructed_old_root": "",
+  "result": "INVALID_CONSISTENCY_PROOF"
+}

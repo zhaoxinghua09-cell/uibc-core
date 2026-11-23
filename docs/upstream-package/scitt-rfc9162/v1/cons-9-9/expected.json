@@ -1,0 +1,12 @@
+{
+  "consistency_path": [],
+  "description": "Equal sizes: the proof must be empty and the two roots must be identical. A verifier that reports 'consistent' before looking at the proof cannot be caught except by a case like this one.",
+  "kind": "consistency",
+  "new_root": "65f795be5713a6e11a0b9b488e4f9ba4fffe5e75797f532b6cc6e2a1b4708a7d",
+  "new_size": 9,
+  "old_root": "65f795be5713a6e11a0b9b488e4f9ba4fffe5e75797f532b6cc6e2a1b4708a7d",
+  "old_size": 9,
+  "reconstructed_new_root": "65f795be5713a6e11a0b9b488e4f9ba4fffe5e75797f532b6cc6e2a1b4708a7d",
+  "reconstructed_old_root": "65f795be5713a6e11a0b9b488e4f9ba4fffe5e75797f532b6cc6e2a1b4708a7d",
+  "result": "VALID"
+}

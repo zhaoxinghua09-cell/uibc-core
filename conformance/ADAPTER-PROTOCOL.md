@@ -5,9 +5,17 @@ You do not need to read our code, install our package, or agree with our verdict
 names to run this corpus. You need an executable that does this:
 
 ```
+# inclusion (no `kind` field, or kind = "inclusion")
 stdin  : {"leaf_input_hex": "...", "leaf_index": 3, "tree_size": 8,
           "inclusion_path": ["...", "...", "..."], "root_true": "..."}
 stdout : {"reconstructed_root": "...", "result": "YOUR OWN VERDICT WORD"}
+
+# consistency (kind = "consistency")
+stdin  : {"kind": "consistency", "old_size": 3, "new_size": 7,
+          "old_root": "...", "new_root": "...",
+          "consistency_path": ["...", "...", "..."]}
+stdout : {"reconstructed_old_root": "...", "reconstructed_new_root": "...",
+          "result": "YOUR OWN VERDICT WORD"}
 ```
 
 One process per vector, one line each way, exit code 0. The harness
@@ -32,6 +40,16 @@ One process per vector, one line each way, exit code 0. The harness
 | `reconstructed_root` | yes | the root *you computed* by folding. Hex. Empty string if your verifier refuses to fold at all |
 | `result` | yes | your own verdict word. Any string. You are not being graded on our vocabulary |
 
+**Consistency requests** carry `kind: "consistency"` and the two sizes, the two
+roots and the proof; return the two roots your verifier rebuilt from `old_root`
+and the path, plus your verdict word. Empty strings when your verifier refuses to
+rebuild at all. If you only implement inclusion, answer those rows with
+`{"reconstructed_old_root": "", "reconstructed_new_root": "",
+"result": "UNSUPPORTED"}` — the receipt will record them as root disagreements,
+which is honest and costs you nothing on the inclusion half. The 50 inclusion
+vectors and the 13 consistency vectors are counted separately in the receipt
+(`kinds`), so a reader can see which half you support.
+
 Anything else you return is kept verbatim in the receipt under `their_extra`, so if
 your verifier produces a structured reason code, return it and it will be preserved.
 
@@ -46,7 +64,7 @@ It compares two things **separately**:
    If your root matches and your word differs, the receipt records it as
    *wording only* and does **not** count it as a conformance failure.
 
-That split is the point: a report that says "6 of 41 failed" because you call it
+That split is the point: a report that says "6 of 63 failed" because you call it
 `E_PROOF_MISMATCH` and we call it `INVALID_INCLUSION_PATH` teaches nobody anything.
 
 ## Two examples in this repository
@@ -87,6 +105,27 @@ the portal repository with `run_label` = `independent` **only if you wrote the
 implementation**, and `evidence` = `blind` **only if you had not seen our expected
 results beforehand**. Both are recorded as you state them, and the published count
 is derived from the ledger, not typed into prose.
+
+## What happens to the receipt here
+
+A receipt is checked before it is filed, by `tools/check_conformance_receipt.py`:
+
+```bash
+python tools/check_conformance_receipt.py receipt.json
+```
+
+It re-derives every number in the receipt from its own rows and from the packaged
+vectors, and refuses a receipt that contradicts itself: a summary count that disagrees
+with the rows, a row naming a vector that does not exist here, a row whose
+`root_agreement` flag disagrees with the answer it records, or a partial run that does
+not say which vectors it skipped. Its own `--self-test` mutates a good receipt four
+ways and requires each to be caught.
+
+**What this can and cannot do.** It cannot verify what your program computed — that
+happened on your machine. It verifies that what you sent is internally consistent and
+that it describes this package's vectors rather than a stale copy. That is the
+difference between a receipt and a claim: a filer who is careless (or worse) now
+produces something that fails to check, instead of something that reads well.
 
 If you would rather not have your name filed, say so and the row will carry
 `who: "independent implementer (anonymous, at their request)"` with your receipt

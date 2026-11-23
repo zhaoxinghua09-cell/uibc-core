@@ -9,7 +9,7 @@ the vectors pass unchanged and both constructions can sit side by side in one
 implementation.
 
 The vectors file is the corpus fixture, byte-identical to kit 1.5.7
-(sha256 8c76473616ba909fab61cdb96d3e432f3e91b322833716d494e7afc92ad13a25) and is
+(sha256 8c76473616ba909fab61cdb96d3e432f3e91b322833716d494e7afc92ad13a25, LF) and is
 not edited here: if it were edited to fit our code, the test would prove nothing.
 
 The default construction must be untouched: the last check in this file asserts
@@ -31,8 +31,14 @@ FIXTURE_SHA256 = "8c76473616ba909fab61cdb96d3e432f3e91b322833716d494e7afc92ad13a
 def _load():
     with open(FIXTURE, "rb") as fh:
         raw = fh.read()
-    assert hashlib.sha256(raw).hexdigest() == FIXTURE_SHA256, "fixture drifted from kit 1.5.7"
-    return json.loads(raw.decode("utf-8"))
+    # The pin is on content, not on line endings. A checkout with
+    # `core.autocrlf=true` (the Windows default) rewrites CRLF into this JSON
+    # fixture, and a byte-exact pin then fails on nine tests for a reason that has
+    # nothing to do with the vectors. Found 2026-11-22 by running the suite on a
+    # plain Windows checkout for the first time.
+    canonical = raw.replace(b"\r\n", b"\n")
+    assert hashlib.sha256(canonical).hexdigest() == FIXTURE_SHA256, "fixture drifted from kit 1.5.7"
+    return json.loads(canonical.decode("utf-8"))
 
 
 def _leaves_for(vector):

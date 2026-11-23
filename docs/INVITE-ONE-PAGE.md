@@ -78,8 +78,13 @@ The receipt file the harness wrote, plus three lines we cannot derive from it:
 
 If a vector is wrong, say so and say which field is wrong. We will fix the package
 and credit you by name in the changelog. If your verifier refuses an input we score,
-that is the most interesting outcome on the table: it may mean the input belongs in
-`manifest.underspecified_inputs` instead of being scored, and we will move it there.
+that is the most interesting outcome on the table — with one condition: quote the
+RFC sentence. A refusal is either a gap in our vector or a bug in your fold, and
+`MTH({}) = SHA-256()` and the domain of `PATH` are both written down, so the text
+decides it. If it really is a gap, it moves to `manifest.underspecified_inputs`
+instead of being scored; if the text does decide it, the vector stays and the
+disagreement is recorded against the sentence. We have already retracted one false
+gap this way (`manifest.retired_underspecified_inputs`, retired 2026-11-21).
 
 ## How the result will be recorded
 
@@ -102,6 +107,12 @@ node. The axis we cannot close from the inside is exactly the one this page is
 asking you to close.
 
 ---
+
+**What happens to your answer.** It is checked before anything else happens to it:
+`tools/check_conformance_receipt.py` re-derives every number in your receipt from
+its own rows and from the packaged vectors, and refuses a receipt that contradicts
+itself. If yours fails that check you get the specific contradiction back —
+"summary says 55/55, rows say 42/55" — rather than silence or a vague reply.
 
 *Prepared 2026-11-20. Not yet sent to anyone at the time of writing; sending is a
 separate, deliberate act.*

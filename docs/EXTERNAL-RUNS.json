@@ -1,0 +1,16 @@
+{
+  "contract_version": "uibc-external-runs/1",
+  "note": "The machine-checked half of docs/RUNS.md. Empty on purpose: no run of this corpus by anyone else has been posted with a link that resolves, so there is nothing to transcribe. An empty table is a statement about us, not about the corpus. tools/check_external_runs.py refuses a row that calls itself 'independent' instead of blind or directed, refuses a blind claim that also records reading our vectors, refuses a figure that has been normalised into a percentage or into a fraction of a different corpus, and refuses tallies that do not equal the rows above them.",
+  "headline": 0,
+  "runs": [],
+  "attempts": [],
+  "counts": {
+    "rows": 0,
+    "independent": 0,
+    "same_code": 0,
+    "author": 0,
+    "blind": 0,
+    "directed": 0,
+    "blind_independent": 0
+  }
+}

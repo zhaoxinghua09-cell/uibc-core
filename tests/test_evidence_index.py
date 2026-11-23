@@ -59,6 +59,20 @@ class TestEvidenceIndex(unittest.TestCase):
         self.assertEqual(stored, bei.render(self.index),
                          "docs/EVIDENCE-INDEX.md is stale; rerun the tool")
 
+    def test_check_says_what_it_means(self):
+        # Measured 2026-11-24: `--check` was not an option at all, so it fell through
+        # to "print the page, exit 0" -- a check that passed on a stale file, which
+        # is how the 1105-vs-1107 mismatch reached CI. Both directions pinned here.
+        import subprocess
+        tool = os.path.join(_REPO, "tools", "build_evidence_index.py")
+        ok = subprocess.run([sys.executable, tool, "--check"], capture_output=True,
+                            text=True)
+        self.assertEqual(ok.returncode, 0, ok.stderr)
+        bad = subprocess.run([sys.executable, tool, "--no-such-flag"],
+                             capture_output=True, text=True)
+        self.assertEqual(bad.returncode, 2, bad.stdout + bad.stderr)
+        self.assertIn("unknown argument", bad.stderr)
+
 
 if __name__ == "__main__":
     unittest.main()

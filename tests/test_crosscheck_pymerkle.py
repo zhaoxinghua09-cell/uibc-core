@@ -32,7 +32,7 @@ def _load_tool():
     return mod
 
 
-@unittest.skipUnless(HAVE_PYMERKLE, "pymerkle not installed: third-party cross-check not run")
+@unittest.skipUnless(HAVE_PYMERKLE, "third-party cross-check unavailable: pymerkle absent from this interpreter")
 class ThirdPartyCrossCheck(unittest.TestCase):
     def test_the_library_agrees_on_every_case_it_can_read(self):
         mod = _load_tool()

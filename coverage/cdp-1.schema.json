@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/zhaoxinghua09-cell/uibc-core/coverage/cdp-1.schema.json",
+  "title": "CDP-1 Coverage Disclosure Ledger",
+  "description": "A signed, machine-readable statement of what a verifier claims to check, which test exercises each claim, and which claims are not exercised. A ledger that omits a gap is invalid: silence is not a pass.",
+  "type": "object",
+  "required": ["schema", "subject", "entries", "summary"],
+  "additionalProperties": false,
+  "properties": {
+    "schema": {"const": "cdp-1"},
+    "subject": {
+      "type": "object",
+      "required": ["name", "measured_at"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "version": {"type": ["string", "null"]},
+        "commit": {"type": ["string", "null"]},
+        "measured_at": {"type": "string", "format": "date-time"}
+      }
+    },
+    "entries": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "kind", "statement", "status"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {"type": "string", "pattern": "^[A-Z]+[0-9]+$"},
+          "kind": {"enum": ["CHECK", "REQUIREMENT", "VECTOR", "SUITE"]},
+          "statement": {"type": "string", "minLength": 8},
+          "statement_sha256": {"type": ["string", "null"]},
+          "status": {"enum": ["EXERCISED", "UNTESTED", "EXEMPT", "NOT_PUBLIC"]},
+          "tests": {"type": "array", "items": {"type": "string"}},
+          "evidence": {"type": "array", "items": {"type": "string"}},
+          "owner": {"type": ["string", "null"]},
+          "review_by": {"type": ["string", "null"], "format": "date"},
+          "reason": {"type": ["string", "null"]}
+        },
+        "allOf": [
+          {
+            "if": {"properties": {"status": {"const": "EXERCISED"}}},
+            "then": {"properties": {"tests": {"minItems": 1}}}
+          },
+          {
+            "if": {"properties": {"status": {"enum": ["UNTESTED", "EXEMPT"]}}},
+            "then": {
+              "required": ["reason", "owner", "review_by"],
+              "properties": {"reason": {"type": "string", "minLength": 12}}
+            }
+          },
+          {
+            "if": {"properties": {"status": {"const": "NOT_PUBLIC"}}},
+            "then": {
+              "required": ["reason"],
+              "properties": {"reason": {"type": "string", "minLength": 12}}
+            }
+          }
+        ]
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": ["total", "exercised", "untested", "exempt", "disclosure_completeness", "named_gap_ratio"],
+      "properties": {
+        "total": {"type": "integer", "minimum": 1},
+        "exercised": {"type": "integer", "minimum": 0},
+        "untested": {"type": "integer", "minimum": 0},
+        "exempt": {"type": "integer", "minimum": 0},
+        "disclosure_completeness": {"type": "number", "minimum": 0, "maximum": 1},
+        "named_gap_ratio": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
+    "signature": {"type": ["object", "null"]}
+  }
+}

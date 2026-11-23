@@ -1,0 +1,886 @@
+{
+  "schema": "coverage-ledger/1",
+  "generated_at": "2026-11-22T19:07:46+00:00",
+  "subject": {
+    "name": "uibc-core",
+    "version": "0.4.0",
+    "commit": null,
+    "measured_at": "2026-11-19T06:52:32+08:00"
+  },
+  "provenance": {
+    "checks": "coverage/ledger.uibc-core.json",
+    "field_coverage": "docs/FIELD-COVERAGE.md",
+    "known_limits": "docs/KNOWN-LIMITS.md",
+    "peers": [
+      "coverage/peers/aac.cdp.json",
+      "coverage/peers/eqr.cdp.json",
+      "coverage/peers/asqav.cdp.json"
+    ]
+  },
+  "checks": [
+    {
+      "id": "S1",
+      "kind": "CHECK",
+      "statement": "S1: the verifier must detect the class of tampering reached by 1 recorded attack(s).",
+      "statement_sha256": "0e7a63a19c770f34675cfbe271a07906f05ffba73e05049fce00d5c3d2f6526f",
+      "status": "EXERCISED",
+      "tests": [
+        "tools/check_matrix.py::S1"
+      ],
+      "evidence": [
+        "docs/CHECK-MATRIX.md",
+        "tools/outsider_audit.py"
+      ],
+      "owner": null,
+      "review_by": null,
+      "reason": null
+    },
+    {
+      "id": "S2",
+      "kind": "CHECK",
+      "statement": "S2: the verifier must detect the class of tampering reached by 1 recorded attack(s).",
+      "statement_sha256": "9290d897060da1c80cf3e7373e8aebbbc04273500e595a795dbbcd6045cea26d",
+      "status": "EXERCISED",
+      "tests": [
+        "tools/check_matrix.py::S2"
+      ],
+      "evidence": [
+        "docs/CHECK-MATRIX.md",
+        "tools/outsider_audit.py"
+      ],
+      "owner": null,
+      "review_by": null,
+      "reason": null
+    },
+    {
+      "id": "S3",
+      "kind": "CHECK",
+      "statement": "S3: the verifier must detect the class of tampering reached by 1 recorded attack(s).",
+      "statement_sha256": "e96ea88444bed74896fc99164c5f92656ab793f09642c508180d7d8e47715b25",
+      "status": "EXERCISED",
+      "tests": [
+        "tools/check_matrix.py::S3"
+      ],
+      "evidence": [
+        "docs/CHECK-MATRIX.md",
+        "tools/outsider_audit.py"
+      ],
+      "owner": null,
+      "review_by": null,
+      "reason": null
+    },
+    {
+      "id": "S4",
+      "kind": "CHECK",
+      "statement": "S4: the verifier must detect the class of tampering reached by 3 recorded attack(s).",
+      "statement_sha256": "3b3152fddb5e51dc6eefb175f7cff9b14c40fabf4f71843536d33fd9eb5006db",
+      "status": "EXERCISED",
+      "tests": [
+        "tools/check_matrix.py::S4"
+      ],
+      "evidence": [
+        "docs/CHECK-MATRIX.md",
+        "tools/outsider_audit.py"
+      ],
+      "owner": null,
+      "review_by": null,
+      "reason": null
+    },
+    {
+      "id": "S5",
+      "kind": "CHECK",
+      "statement": "S5: the verifier must detect the class of tampering reached by 3 recorded attack(s).",
+      "statement_sha256": "0f49115282401add779138b0b61bc1ebf5b7f7194d1de8aee6b0d5bde4fe8a11",
+      "status": "EXERCISED",
+      "tests": [
+        "tools/check_matrix.py::S5"
+      ],
+      "evidence": [
+        "docs/CHECK-MATRIX.md",
+        "tools/outsider_audit.py"
+      ],
+      "owner": null,
+      "review_by": null,
+      "reason": null
+    },
+    {
+      "id": "S6",
+      "kind": "CHECK",
+      "statement": "S6: the verifier must detect the class of tampering reached by 1 recorded attack(s).",
+      "statement_sha256": "b3481213d0ff2989acb2df33101a761343ba62b37fbafc5f92594fb8d31a531a",
+      "status": "EXERCISED",
+      "tests": [
+        "tools/check_matrix.py::S6"
+      ],
+      "evidence": [
+        "docs/CHECK-MATRIX.md",
+        "tools/outsider_audit.py"
+      ],
+      "owner": null,
+      "review_by": null,
+      "reason": null
+    },
+    {
+      "id": "S7",
+      "kind": "CHECK",
+      "statement": "S7: the verifier must detect the class of tampering reached by 1 recorded attack(s).",
+      "statement_sha256": "56f298bafeed27a80a462e824d2424ca20030fc3ed18dbca257818a2be975a94",
+      "status": "EXERCISED",
+      "tests": [
+        "tools/check_matrix.py::S7"
+      ],
+      "evidence": [
+        "docs/CHECK-MATRIX.md",
+        "tools/outsider_audit.py"
+      ],
+      "owner": null,
+      "review_by": null,
+      "reason": null
+    },
+    {
+      "id": "S8",
+      "kind": "CHECK",
+      "statement": "S8: the verifier must detect the class of tampering reached by 2 recorded attack(s).",
+      "statement_sha256": "365c621fb4506e81af532ce55a2196cdc9a8dca0c305f7d04a2cd824e210e40d",
+      "status": "EXERCISED",
+      "tests": [
+        "tools/check_matrix.py::S8"
+      ],
+      "evidence": [
+        "docs/CHECK-MATRIX.md",
+        "tools/outsider_audit.py"
+      ],
+      "owner": null,
+      "review_by": null,
+      "reason": null
+    },
+    {
+      "id": "S9",
+      "kind": "CHECK",
+      "statement": "S9: the verifier must detect the class of tampering reached by 1 recorded attack(s).",
+      "statement_sha256": "614fac96938da2e55536912d6b458470957981ce1f195e946ca3ceb0186cbb4b",
+      "status": "EXERCISED",
+      "tests": [
+        "tools/check_matrix.py::S9"
+      ],
+      "evidence": [
+        "docs/CHECK-MATRIX.md",
+        "tools/outsider_audit.py"
+      ],
+      "owner": null,
+      "review_by": null,
+      "reason": null
+    },
+    {
+      "id": "S10",
+      "kind": "CHECK",
+      "statement": "S10: the verifier must detect the class of tampering reached by 2 recorded attack(s).",
+      "statement_sha256": "7e868b21063171b2df57634c04c45f91fd86fb3570b11c87bc236372e1084ef1",
+      "status": "EXERCISED",
+      "tests": [
+        "tools/check_matrix.py::S10"
+      ],
+      "evidence": [
+        "docs/CHECK-MATRIX.md",
+        "tools/outsider_audit.py"
+      ],
+      "owner": null,
+      "review_by": null,
+      "reason": null
+    },
+    {
+      "id": "S11",
+      "kind": "CHECK",
+      "statement": "S11: the verifier must detect the class of tampering reached by 1 recorded attack(s).",
+      "statement_sha256": "11c0c9187fcfd40841f67c744a4c93d204260b4ea2931617cba46944cafe605e",
+      "status": "EXERCISED",
+      "tests": [
+        "tools/check_matrix.py::S11"
+      ],
+      "evidence": [
+        "docs/CHECK-MATRIX.md",
+        "tools/outsider_audit.py"
+      ],
+      "owner": null,
+      "review_by": null,
+      "reason": null
+    },
+    {
+      "id": "S12",
+      "kind": "CHECK",
+      "statement": "S12: the verifier must detect the class of tampering reached by 1 recorded attack(s).",
+      "statement_sha256": "94637615bb1cb5469b5e20b2b5bd98fef3a838b0bf482e2d27781c4fd6427ef3",
+      "status": "EXERCISED",
+      "tests": [
+        "tools/check_matrix.py::S12"
+      ],
+      "evidence": [
+        "docs/CHECK-MATRIX.md",
+        "tools/outsider_audit.py"
+      ],
+      "owner": null,
+      "review_by": null,
+      "reason": null
+    },
+    {
+      "id": "S13",
+      "kind": "CHECK",
+      "statement": "S13: the verifier must detect the class of tampering reached by 4 recorded attack(s).",
+      "statement_sha256": "871e1cfd40daa3617a207f30087895a0bc67e375720026b5a5801fb0c431fb76",
+      "status": "EXERCISED",
+      "tests": [
+        "tools/check_matrix.py::S13"
+      ],
+      "evidence": [
+        "docs/CHECK-MATRIX.md",
+        "tools/outsider_audit.py"
+      ],
+      "owner": null,
+      "review_by": null,
+      "reason": null
+    },
+    {
+      "id": "S14",
+      "kind": "CHECK",
+      "statement": "S14: the verifier must detect the class of tampering reached by 2 recorded attack(s).",
+      "statement_sha256": "4b11fa6df5d280e4ac5105b3d7035ecc9b82267d33e7af568de923a3ef534af7",
+      "status": "EXERCISED",
+      "tests": [
+        "tools/check_matrix.py::S14"
+      ],
+      "evidence": [
+        "docs/CHECK-MATRIX.md",
+        "tools/outsider_audit.py"
+      ],
+      "owner": null,
+      "review_by": null,
+      "reason": null
+    },
+    {
+      "id": "S15",
+      "kind": "CHECK",
+      "statement": "S15: the verifier must detect the class of tampering reached by 4 recorded attack(s).",
+      "statement_sha256": "86fa0781d499b7e379147da8025e85585e6834912f4b1734237bc94ab589f0d7",
+      "status": "EXERCISED",
+      "tests": [
+        "tools/check_matrix.py::S15"
+      ],
+      "evidence": [
+        "docs/CHECK-MATRIX.md",
+        "tools/outsider_audit.py"
+      ],
+      "owner": null,
+      "review_by": null,
+      "reason": null
+    },
+    {
+      "id": "S16",
+      "kind": "CHECK",
+      "statement": "S16: the verifier must detect the class of tampering reached by 4 recorded attack(s).",
+      "statement_sha256": "40d7656498d22130cc5d914056a184f14430edeb0896a06f1a2138b044850107",
+      "status": "EXERCISED",
+      "tests": [
+        "tools/check_matrix.py::S16"
+      ],
+      "evidence": [
+        "docs/CHECK-MATRIX.md",
+        "tools/outsider_audit.py"
+      ],
+      "owner": null,
+      "review_by": null,
+      "reason": null
+    },
+    {
+      "id": "S17",
+      "kind": "CHECK",
+      "statement": "S17: the verifier must detect the class of tampering reached by 2 recorded attack(s).",
+      "statement_sha256": "1714b36f73d56d6e948393b4fdfcf62c0b0851b8292ad3d5cff37a81dce8ddac",
+      "status": "EXERCISED",
+      "tests": [
+        "tools/check_matrix.py::S17"
+      ],
+      "evidence": [
+        "docs/CHECK-MATRIX.md",
+        "tools/outsider_audit.py"
+      ],
+      "owner": null,
+      "review_by": null,
+      "reason": null
+    },
+    {
+      "id": "S18",
+      "kind": "CHECK",
+      "statement": "S18: the verifier must detect the class of tampering reached by 2 recorded attack(s).",
+      "statement_sha256": "db9fb506f11a7e65a79a4c35fc5ab84d50b76bfc76e31c034f3a11a61b9e2dd8",
+      "status": "EXERCISED",
+      "tests": [
+        "tools/check_matrix.py::S18"
+      ],
+      "evidence": [
+        "docs/CHECK-MATRIX.md",
+        "tools/outsider_audit.py"
+      ],
+      "owner": null,
+      "review_by": null,
+      "reason": null
+    },
+    {
+      "id": "C1",
+      "kind": "VECTOR",
+      "statement": "C1: the 29 language-neutral conformance vectors must reproduce without importing this project.",
+      "statement_sha256": "1a02008533a522ceff3483aa90ca3175c06fece64a8edd42be0bf6d0cc116320",
+      "status": "EXERCISED",
+      "tests": [
+        "tools/conformance_check.py"
+      ],
+      "evidence": [
+        "docs/conformance/vectors.json",
+        "docs/CONFORMANCE.md"
+      ],
+      "owner": null,
+      "review_by": null,
+      "reason": null
+    },
+    {
+      "id": "R1",
+      "kind": "REQUIREMENT",
+      "statement": "Every normative MUST in the specification is enumerated as its own ledger entry with a test mapping.",
+      "statement_sha256": "9ceec13202afbf12ee3abb994c669c711749c18e194326734db6123e94947e04",
+      "status": "UNTESTED",
+      "tests": [],
+      "evidence": [
+        "drafts/draft-zhao-uibc-evidence-chain-00.md"
+      ],
+      "owner": "maintainer",
+      "review_by": "2026-12-31",
+      "reason": "requirement-level enumeration is the next step; the gap is disclosed here instead of being left implicit"
+    }
+  ],
+  "field_probes": {
+    "probed": 59,
+    "moved": 36,
+    "silent": 23,
+    "source": "docs/FIELD-COVERAGE.md"
+  },
+  "known_limits": [
+    {
+      "id": "KL-1",
+      "limitation": "只改行尾（CRLF/LF）会被判 FAIL**（S4/S8）",
+      "why": "证据按字节哈希，任何字节变化都必须被看见；这是\"哈希敏感\"的硬化代价，对\"无害重排版\"是误报",
+      "disposition": "不改判据。列为已知限制；需要跨平台阅读时请用 `<path>.uibc` 原样字节，不要过编辑器",
+      "source": "docs/KNOWN-LIMITS.md"
+    },
+    {
+      "id": "KL-2",
+      "limitation": "符号链接逃逸在 Windows 上未测**（红队 RT03）",
+      "why": "Windows 默认不授予创建符号链接的权限，测试只能 SKIP",
+      "disposition": "记为\"未测\"，不得记为\"通过\"；Linux 上 RT03 正常执行并按期望 FAIL",
+      "source": "docs/KNOWN-LIMITS.md"
+    },
+    {
+      "id": "KL-3",
+      "limitation": "整包回滚只能带外核对**（S9）",
+      "why": "回滚要比较包外 head；包内自证会把\"谁说了算\"重新交给包本身",
+      "disposition": "如实写在验证报告里；不做包内自证",
+      "source": "docs/KNOWN-LIMITS.md"
+    },
+    {
+      "id": "KL-4",
+      "limitation": "最强锚定只到 `anchored`，未达 `witnessed`",
+      "why": "我们只有 FreeTSA 摘要时间戳 + Bitcoin 区块锚，没有第二个独立见证方为同一摘要联署",
+      "disposition": "见 `docs/SPEC-PROPOSAL-v0.1.md` §5；`witnessed` 与链式见证的要求来自 **SCITT receipts/独立 witness 与 1F916-01**，不是 EP-AEC（EP-AEC `-08` 全文 `witness` 出现 0 次），明确标为差距，不声称等价",
+      "source": "docs/KNOWN-LIMITS.md"
+    },
+    {
+      "id": "KL-5",
+      "limitation": "Windows 下两例测试依赖 PATH 里有可执行的 `git`",
+      "why": "`test_quick_run_matches_the_receipt` 与 `test_outside_a_rebase_it_touches_nothing` 都以子进程调 `git`；PATH 里只有 `.cmd` 包装时会 `FileNotFoundError`（`CreateProcess` 不解析 `.cmd`）",
+      "disposition": "Linux CI 全过；Windows 干净克隆：PATH 无 `git.exe` 时 1 失败 / 1 错误，把真实 `git.exe` 所在目录放进 PATH 后 **1082 例 OK（skipped=5，324.5 s）**。仍不写\"全平台全过\"",
+      "source": "docs/KNOWN-LIMITS.md"
+    },
+    {
+      "id": "KL-6",
+      "limitation": "外部评审方收到的证据包可能落后于当前套件",
+      "why": "事实包从仓库内已提交的结果 JSON 读取；若 JSON 未随套件刷新，评审方看到的是旧快照",
+      "disposition": "`tools/muse_review.py` 现在会打印所用快照的文件名与 git blob，数字按快照现算，不再写死条数",
+      "source": "docs/KNOWN-LIMITS.md"
+    },
+    {
+      "id": "KL-7",
+      "limitation": "撤销只有屏障，没有分发**：覆盖层缺失时默认 `ALLOW`",
+      "why": "判定器只看得见递给它的文件，包内无法自证\"没有人撤销过它\"，而这正是分发层的活",
+      "disposition": "`--require-revocation-coverage` 把\"缺失\"变成 `HOLD(3)`；`revocation-coverage.json` + `--coverage-max-age` + `--coverage-state` 可以要求新鲜度并拒绝序号回退（2026-11-22 四步实测：ALLOW→ROLLBACK→STALE→DENY）。仍是**自证**：同一持有者签\"没撤销\"，第三方无法独立确认",
+      "source": "docs/KNOWN-LIMITS.md"
+    },
+    {
+      "id": "KL-8",
+      "limitation": "分发通道是\"拉\"，有盲窗**：`--coverage-url` 拉不到即 `HOLD`，检测延迟以轮询间隔为上界",
+      "why": "没有推送通知，也没有第三方证明发布方把撤销都发出来了；轮询式验证方在两次 GET 之间是看不见新声明的",
+      "disposition": "端点不可达一律 `HOLD(3)`（`coverage UNREACHABLE`），不回落 `ALLOW`；盲窗可测：本地回环、间隔 0.2 s、24 次随机相位发布 → 两次实测 median 69.3 / 136.1 ms、p95 195.0 / 198.2 ms、max 198.3 / 201.3 ms（`tools/coverage_latency.py`，中位数随发布相位浮动，理论上界仍是\"间隔 + 一次 GET\"）。对外只能说\"上界已实测\"，不能说\"实时到达\"",
+      "source": "docs/KNOWN-LIMITS.md"
+    }
+  ],
+  "peers": [
+    {
+      "name": "aac",
+      "subject": {
+        "name": "agent-action-capsule (AAC)",
+        "version": "0.17.0",
+        "commit": null,
+        "measured_at": "2026-11-19T06:45:00+08:00"
+      },
+      "entries": [
+        {
+          "id": "AAC1",
+          "kind": "REQUIREMENT",
+          "statement": "A reference verifier exists as an installable Python package.",
+          "statement_sha256": null,
+          "status": "EXERCISED",
+          "tests": [
+            "pip install agent-action-capsule==0.17.0"
+          ],
+          "evidence": [
+            "https://pypi.org/pypi/agent-action-capsule/json"
+          ],
+          "owner": null,
+          "review_by": null,
+          "reason": null
+        },
+        {
+          "id": "AAC2",
+          "kind": "REQUIREMENT",
+          "statement": "A second implementation exists in a different language (Rust).",
+          "statement_sha256": null,
+          "status": "EXERCISED",
+          "tests": [
+            "capsule-emit 0.0.13 published 2026-11-17"
+          ],
+          "evidence": [
+            "https://api.github.com/repos/action-state-group/capsule-emit"
+          ],
+          "owner": null,
+          "review_by": null,
+          "reason": null
+        },
+        {
+          "id": "AAC3",
+          "kind": "REQUIREMENT",
+          "statement": "The second implementation is maintained by a separate entity, not the specification author.",
+          "statement_sha256": null,
+          "status": "NOT_PUBLIC",
+          "tests": [],
+          "evidence": [
+            "same GitHub org: action-state-group"
+          ],
+          "owner": null,
+          "review_by": null,
+          "reason": "both implementations sit under one organisation; independence is asserted by neither, and is not publicly documented"
+        },
+        {
+          "id": "AAC4",
+          "kind": "REQUIREMENT",
+          "statement": "Malformed input is refused with a message that names the limit, not a stack trace.",
+          "statement_sha256": null,
+          "status": "EXERCISED",
+          "tests": [
+            "four hostile inputs measured 2026-11-18: notjson/nan/deep/badutf"
+          ],
+          "evidence": [
+            "docs/COMPETITORS.md (our measurement record)"
+          ],
+          "owner": null,
+          "review_by": null,
+          "reason": null
+        },
+        {
+          "id": "AAC5",
+          "kind": "REQUIREMENT",
+          "statement": "A false-accept rate under mutation is published and reproducible.",
+          "statement_sha256": null,
+          "status": "NOT_PUBLIC",
+          "tests": [],
+          "evidence": [
+            "no mutation benchmark found in repo or PyPI metadata"
+          ],
+          "owner": null,
+          "review_by": null,
+          "reason": "no published mutation corpus or false-accept number was found as of the measurement date; absence of a publication is recorded as such"
+        },
+        {
+          "id": "AAC6",
+          "kind": "REQUIREMENT",
+          "statement": "The project publishes a coverage ledger naming requirements it has not tested.",
+          "statement_sha256": null,
+          "status": "NOT_PUBLIC",
+          "tests": [],
+          "evidence": [
+            "no cdp-1 ledger in repository or release artefacts"
+          ],
+          "owner": null,
+          "review_by": null,
+          "reason": "no machine-readable statement of untested requirements exists; this is the axis this ledger is meant to measure"
+        },
+        {
+          "id": "AAC7",
+          "kind": "REQUIREMENT",
+          "statement": "The format has a registered Internet-Draft.",
+          "statement_sha256": null,
+          "status": "EXERCISED",
+          "tests": [
+            "datatracker API rev=05"
+          ],
+          "evidence": [
+            "https://datatracker.ietf.org/api/v1/doc/document/?name=draft-mih-scitt-agent-action-capsule"
+          ],
+          "owner": null,
+          "review_by": null,
+          "reason": null
+        },
+        {
+          "id": "AAC8",
+          "kind": "REQUIREMENT",
+          "statement": "Third parties have run the verifier and left public records.",
+          "statement_sha256": null,
+          "status": "EXERCISED",
+          "tests": [
+            "13 listed, 10 marked ran and verified with links"
+          ],
+          "evidence": [
+            "agent-action-capsule/INTEROP.md",
+            "docs/COMPETITIVE-STATE.md (our measurement record)"
+          ],
+          "owner": null,
+          "review_by": null,
+          "reason": null
+        },
+        {
+          "id": "AAC9",
+          "kind": "REQUIREMENT",
+          "statement": "An append-only transparency log with checkpoints is public.",
+          "statement_sha256": null,
+          "status": "EXERCISED",
+          "tests": [
+            "anchor.agentactioncapsule.org: 15,134 entries, checkpoint 2026-10-31"
+          ],
+          "evidence": [
+            "https://anchor.agentactioncapsule.org"
+          ],
+          "owner": null,
+          "review_by": null,
+          "reason": null
+        }
+      ],
+      "summary": {
+        "total": 9,
+        "exercised": 6,
+        "untested": 0,
+        "exempt": 0,
+        "not_public": 3,
+        "disclosure_completeness": 0.6667,
+        "named_gap_ratio": 1.0
+      }
+    },
+    {
+      "name": "eqr",
+      "subject": {
+        "name": "EQR conformance profile (eqr-core-1)",
+        "version": "draft-watts-eqr-conformance-00",
+        "commit": null,
+        "measured_at": "2026-11-19T06:45:00+08:00"
+      },
+      "entries": [
+        {
+          "id": "EQR1",
+          "kind": "REQUIREMENT",
+          "statement": "Receipt conformance is decided by a fully specified finite rule set.",
+          "statement_sha256": null,
+          "status": "EXERCISED",
+          "tests": [
+            "profile text: strict JSON, SHA-256 encoding, UTC, reference integrity, requirement-stated derivation"
+          ],
+          "evidence": [
+            "https://www.ietf.org/archive/id/draft-watts-eqr-conformance-00.txt"
+          ],
+          "owner": null,
+          "review_by": null,
+          "reason": null
+        },
+        {
+          "id": "EQR2",
+          "kind": "REQUIREMENT",
+          "statement": "A published vector corpus covers valid, invalid and indeterminate cases.",
+          "statement_sha256": null,
+          "status": "EXERCISED",
+          "tests": [
+            "21 vectors: valid PASS, FAIL, INDETERMINATE, malformed"
+          ],
+          "evidence": [
+            "https://www.ietf.org/archive/id/draft-watts-eqr-conformance-00.txt"
+          ],
+          "owner": null,
+          "review_by": null,
+          "reason": null
+        },
+        {
+          "id": "EQR3",
+          "kind": "REQUIREMENT",
+          "statement": "Conformance and derived status are two logically separate outputs.",
+          "statement_sha256": null,
+          "status": "EXERCISED",
+          "tests": [
+            "profile section: conformant boolean plus derived_status pass/fail/indeterminate"
+          ],
+          "evidence": [
+            "https://www.ietf.org/archive/id/draft-watts-eqr-conformance-00.txt"
+          ],
+          "owner": null,
+          "review_by": null,
+          "reason": null
+        },
+        {
+          "id": "EQR4",
+          "kind": "REQUIREMENT",
+          "statement": "Non-conformance must never be reported as PASS, FAIL or INDETERMINATE.",
+          "statement_sha256": null,
+          "status": "EXERCISED",
+          "tests": [
+            "normative statement present and testable in profile text"
+          ],
+          "evidence": [
+            "https://www.ietf.org/archive/id/draft-watts-eqr-conformance-00.txt"
+          ],
+          "owner": null,
+          "review_by": null,
+          "reason": null
+        },
+        {
+          "id": "EQR5",
+          "kind": "REQUIREMENT",
+          "statement": "A second implementation by a different party reproduces the vector corpus.",
+          "statement_sha256": null,
+          "status": "NOT_PUBLIC",
+          "tests": [],
+          "evidence": [
+            "no implementation status section located"
+          ],
+          "owner": null,
+          "review_by": null,
+          "reason": "the draft states the conformance bar but no independent implementation record was found as of the measurement date"
+        },
+        {
+          "id": "EQR6",
+          "kind": "REQUIREMENT",
+          "statement": "A false-accept rate under mutation is published.",
+          "statement_sha256": null,
+          "status": "NOT_PUBLIC",
+          "tests": [],
+          "evidence": [
+            "no mutation benchmark located"
+          ],
+          "owner": null,
+          "review_by": null,
+          "reason": "conformance vectors are not mutation scores; no false-accept number was found"
+        },
+        {
+          "id": "EQR7",
+          "kind": "REQUIREMENT",
+          "statement": "The profile states which requirements are not covered by its 21 vectors.",
+          "statement_sha256": null,
+          "status": "NOT_PUBLIC",
+          "tests": [],
+          "evidence": [
+            "profile describes intended narrowness in prose"
+          ],
+          "owner": null,
+          "review_by": null,
+          "reason": "narrowness is described in prose; no per-requirement ledger was found, so the untested set cannot be enumerated by a machine"
+        }
+      ],
+      "summary": {
+        "total": 7,
+        "exercised": 4,
+        "untested": 0,
+        "exempt": 0,
+        "not_public": 3,
+        "disclosure_completeness": 0.5714,
+        "named_gap_ratio": 1.0
+      }
+    },
+    {
+      "name": "asqav",
+      "subject": {
+        "name": "ASQAV compliance receipts",
+        "version": "draft-marques-asqav-compliance-receipts-09",
+        "commit": null,
+        "measured_at": "2026-11-19T06:45:00+08:00"
+      },
+      "entries": [
+        {
+          "id": "ASQ1",
+          "kind": "REQUIREMENT",
+          "statement": "Receipt fields are bound to EU AI Act Article 12, 26 and 50 and DORA Article 17.",
+          "statement_sha256": null,
+          "status": "EXERCISED",
+          "tests": [
+            "profile section 6 mapping table"
+          ],
+          "evidence": [
+            "https://www.ietf.org/archive/id/draft-marques-asqav-compliance-receipts-09.html"
+          ],
+          "owner": null,
+          "review_by": null,
+          "reason": null
+        },
+        {
+          "id": "ASQ2",
+          "kind": "REQUIREMENT",
+          "statement": "Receipt fields are bound to six US obligations (NIST RMF, Colorado, Texas, NYDFS, HIPAA, SEC 17a-4) and CIRCIA provisionally.",
+          "statement_sha256": null,
+          "status": "EXERCISED",
+          "tests": [
+            "profile section 7 mapping table"
+          ],
+          "evidence": [
+            "https://www.ietf.org/archive/id/draft-marques-asqav-compliance-receipts-09.html"
+          ],
+          "owner": null,
+          "review_by": null,
+          "reason": null
+        },
+        {
+          "id": "ASQ3",
+          "kind": "REQUIREMENT",
+          "statement": "An attestation envelope (DSSE + in-toto) carries two tiers: voluntary observation and authoritative attestation.",
+          "statement_sha256": null,
+          "status": "EXERCISED",
+          "tests": [
+            "revision -08/-09 attestation statement envelope section"
+          ],
+          "evidence": [
+            "https://www.ietf.org/archive/id/draft-marques-asqav-compliance-receipts-09.html"
+          ],
+          "owner": null,
+          "review_by": null,
+          "reason": null
+        },
+        {
+          "id": "ASQ4",
+          "kind": "REQUIREMENT",
+          "statement": "For code, the authoritative tier re-derives the subject digest from the source host rather than trusting the caller.",
+          "statement_sha256": null,
+          "status": "EXERCISED",
+          "tests": [
+            "profile: SHA-256 of raw unified diff re-fetched from source host"
+          ],
+          "evidence": [
+            "https://www.ietf.org/archive/id/draft-marques-asqav-compliance-receipts-08.html"
+          ],
+          "owner": null,
+          "review_by": null,
+          "reason": null
+        },
+        {
+          "id": "ASQ5",
+          "kind": "REQUIREMENT",
+          "statement": "An independent implementation by a different party verifies the profile.",
+          "statement_sha256": null,
+          "status": "NOT_PUBLIC",
+          "tests": [],
+          "evidence": [
+            "no implementation section located"
+          ],
+          "owner": null,
+          "review_by": null,
+          "reason": "no independent verifier record was found as of the measurement date"
+        },
+        {
+          "id": "ASQ6",
+          "kind": "REQUIREMENT",
+          "statement": "A false-accept rate under mutation is published.",
+          "statement_sha256": null,
+          "status": "NOT_PUBLIC",
+          "tests": [],
+          "evidence": [
+            "no mutation benchmark located"
+          ],
+          "owner": null,
+          "review_by": null,
+          "reason": "regulatory mapping is not a robustness measurement; no false-accept number was found"
+        },
+        {
+          "id": "ASQ7",
+          "kind": "REQUIREMENT",
+          "statement": "The profile enumerates which of its mandatory checks are unexercised.",
+          "statement_sha256": null,
+          "status": "NOT_PUBLIC",
+          "tests": [],
+          "evidence": [
+            "profile describes core and limitations in prose"
+          ],
+          "owner": null,
+          "review_by": null,
+          "reason": "limitations are stated in the body as prose; no machine-readable per-requirement ledger exists, so the gap set cannot be recomputed"
+        }
+      ],
+      "summary": {
+        "total": 7,
+        "exercised": 4,
+        "untested": 0,
+        "exempt": 0,
+        "not_public": 3,
+        "disclosure_completeness": 0.5714,
+        "named_gap_ratio": 1.0
+      }
+    }
+  ],
+  "summary": {
+    "checks_total": 20,
+    "checks_by_status": {
+      "UNTESTED": 1,
+      "EXERCISED": 19,
+      "EXEMPT": 0,
+      "NOT_PUBLIC": 0
+    },
+    "disclosure_ratio": 0.95,
+    "distinct_statuses_present": 2,
+    "field_probes": {
+      "probed": 59,
+      "moved": 36,
+      "silent": 23,
+      "source": "docs/FIELD-COVERAGE.md"
+    },
+    "known_limits": 8,
+    "peers": [
+      {
+        "name": "aac",
+        "total": 9,
+        "by_status": {
+          "EXERCISED": 6,
+          "NOT_PUBLIC": 3
+        }
+      },
+      {
+        "name": "eqr",
+        "total": 7,
+        "by_status": {
+          "EXERCISED": 4,
+          "NOT_PUBLIC": 3
+        }
+      },
+      {
+        "name": "asqav",
+        "total": 7,
+        "by_status": {
+          "EXERCISED": 4,
+          "NOT_PUBLIC": 3
+        }
+      }
+    ],
+    "peer_disclosure": {
+      "self": 0.95,
+      "aac": 0.6667,
+      "eqr": 0.5714,
+      "asqav": 0.5714
+    }
+  }
+}

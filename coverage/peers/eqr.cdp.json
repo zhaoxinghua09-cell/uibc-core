@@ -1,0 +1,72 @@
+{
+  "schema": "cdp-1",
+  "subject": {
+    "name": "EQR conformance profile (eqr-core-1)",
+    "version": "draft-watts-eqr-conformance-00",
+    "commit": null,
+    "measured_at": "2026-11-19T06:45:00+08:00"
+  },
+  "entries": [
+    {
+      "id": "EQR1", "kind": "REQUIREMENT",
+      "statement": "Receipt conformance is decided by a fully specified finite rule set.",
+      "statement_sha256": null, "status": "EXERCISED",
+      "tests": ["profile text: strict JSON, SHA-256 encoding, UTC, reference integrity, requirement-stated derivation"],
+      "evidence": ["https://www.ietf.org/archive/id/draft-watts-eqr-conformance-00.txt"],
+      "owner": null, "review_by": null, "reason": null
+    },
+    {
+      "id": "EQR2", "kind": "REQUIREMENT",
+      "statement": "A published vector corpus covers valid, invalid and indeterminate cases.",
+      "statement_sha256": null, "status": "EXERCISED",
+      "tests": ["21 vectors: valid PASS, FAIL, INDETERMINATE, malformed"],
+      "evidence": ["https://www.ietf.org/archive/id/draft-watts-eqr-conformance-00.txt"],
+      "owner": null, "review_by": null, "reason": null
+    },
+    {
+      "id": "EQR3", "kind": "REQUIREMENT",
+      "statement": "Conformance and derived status are two logically separate outputs.",
+      "statement_sha256": null, "status": "EXERCISED",
+      "tests": ["profile section: conformant boolean plus derived_status pass/fail/indeterminate"],
+      "evidence": ["https://www.ietf.org/archive/id/draft-watts-eqr-conformance-00.txt"],
+      "owner": null, "review_by": null, "reason": null
+    },
+    {
+      "id": "EQR4", "kind": "REQUIREMENT",
+      "statement": "Non-conformance must never be reported as PASS, FAIL or INDETERMINATE.",
+      "statement_sha256": null, "status": "EXERCISED",
+      "tests": ["normative statement present and testable in profile text"],
+      "evidence": ["https://www.ietf.org/archive/id/draft-watts-eqr-conformance-00.txt"],
+      "owner": null, "review_by": null, "reason": null
+    },
+    {
+      "id": "EQR5", "kind": "REQUIREMENT",
+      "statement": "A second implementation by a different party reproduces the vector corpus.",
+      "statement_sha256": null, "status": "NOT_PUBLIC",
+      "tests": [], "evidence": ["no implementation status section located"],
+      "owner": null, "review_by": null,
+      "reason": "the draft states the conformance bar but no independent implementation record was found as of the measurement date"
+    },
+    {
+      "id": "EQR6", "kind": "REQUIREMENT",
+      "statement": "A false-accept rate under mutation is published.",
+      "statement_sha256": null, "status": "NOT_PUBLIC",
+      "tests": [], "evidence": ["no mutation benchmark located"],
+      "owner": null, "review_by": null,
+      "reason": "conformance vectors are not mutation scores; no false-accept number was found"
+    },
+    {
+      "id": "EQR7", "kind": "REQUIREMENT",
+      "statement": "The profile states which requirements are not covered by its 21 vectors.",
+      "statement_sha256": null, "status": "NOT_PUBLIC",
+      "tests": [], "evidence": ["profile describes intended narrowness in prose"],
+      "owner": null, "review_by": null,
+      "reason": "narrowness is described in prose; no per-requirement ledger was found, so the untested set cannot be enumerated by a machine"
+    }
+  ],
+  "summary": {
+    "total": 7, "exercised": 4, "untested": 0, "exempt": 0, "not_public": 3,
+    "disclosure_completeness": 0.5714, "named_gap_ratio": 1.0
+  },
+  "signature": null
+}

@@ -57,6 +57,19 @@ jobs:
         # and an unpinned third-party action would be the one loose end.
         run: node tools/check_scitt_vectors_node.mjs --self-test
 
+      - name: A third party builds the same roots
+        # pymerkle in RFC 6962 mode is a library nobody here wrote. It is handed the
+        # leaf texts of all 49 inclusion cases and asked for tree roots, then asked
+        # whether the case's own reconstructed_root is that root exactly (VALID) or
+        # not (INVALID). No proof path, no signature, no receipt: this is hash-tree
+        # arithmetic only. --self-test mutates a leaf per case and demands detection.
+        # The library leaves MTH({}) undefined, so the empty-tree constant is
+        # reported as uncorroborated rather than counted as agreement.
+        run: |
+          python -m pip install "pymerkle==6.0.0"
+          python tools/crosscheck_scitt_pymerkle.py \
+            --out "${{ runner.temp }}/crosscheck_pymerkle.json" --self-test
+
       - name: Sweep every tree shape up to 128, both primitives
         # The corpus is 63 chosen shapes. This step answers the question the
         # corpus cannot: does every (size, index) and every (m, n) up to a bound

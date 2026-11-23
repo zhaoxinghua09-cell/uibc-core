@@ -15,7 +15,7 @@
 | 5 | 计算闭包（权重/分词器/模板/引擎/解码/数值环境） | **AAT-03 的 Attestation Closure** | **今日新增 S10**：声明六项即 PASS，缺项即 FAIL；**不声称验证内容** | **声明层对齐，证明层不做** | `tests/test_v11_closure.py` |
 | 6 | 被拒调用留痕 | COGITATOR phantom entry | 有（`uibc_core/phantom.py`，改/删/缺口全能抓） | **对齐** | 6 条单测 + 门禁 5 条 |
 | 7 | 策略摘要绑定 | COGITATOR policy digest、GAR `cap_profile_hash` | 有（`policy_hash`，逐字复用 noa/GAR 字段） | **对齐** | S2 校验 |
-| 8 | 多档证据分级 | EP-AEC-02 五档 | 三值 + 映射工具（6/6 期望达成） | **对齐（粗化）** | `tools/uibc_to_epaec.py` |
+| 8 | 多档证据分级 | EP-AEC 现行 `-08` 已改为 `SATISFIED / UNSATISFIED` + "验证/接受"分离（`-02` 的五档词汇在 `-08` 中 0 次出现） | 三值；`tools/uibc_to_epaec.py` 仍按 `-02` 词汇输出（历史对照） | **不对齐（对标对象已换算法）** | 需按 `-08` 重做适配器后才可再谈对齐 |
 | 9 | 执行前拦截 | APort/OAP、CCS、MCP 网关群 | 有 PoC（ALLOW/HOLD/DENY，判据 `PASS+anchored`） | **功能对齐** | 5/5 |
 | 10 | 结果词表（八值 disposition） | capsule / bilateral-attestation | 未定义，但决定**直接复用** | 对齐（定义层） | `docs/TERMINOLOGY.md` |
 | 11 | 性能 | CCS 亚毫秒/次调用 | **两个口径都测**：**1.22 ms/次调用**（median，300 次，含索引重写与写盘；p95 1.93 ms）＋ 23 ms/包（median，50 次） | **同量级（1 ms vs 亚毫秒），不宣称领先** | `tools/latency_per_call.py`、`tools/out/latency.json` |

@@ -1,0 +1,347 @@
+diff --git a/.github/workflows/test-ledger.yml b/.github/workflows/test-ledger.yml
+new file mode 100644
+index 0000000..f2d6314
+--- /dev/null
++++ b/.github/workflows/test-ledger.yml
+@@ -0,0 +1,52 @@
++name: Test ledger
++
++# 每次 push 生成一份机器可核对的测试台账，并检查文档里的测试数字有没有漂移。
++# 目的：EVIDENCE-INDEX / README 不再手工维护测试数量（任务书 P1-1）。
++
++on:
++  push:
++    branches: [main]
++  pull_request:
++  workflow_dispatch:
++
++permissions:
++  contents: read
++
++jobs:
++  ledger:
++    runs-on: ubuntu-latest
++    steps:
++      - name: Checkout
++        # TODO(合并前): 固定到 commit SHA
++        uses: actions/checkout@v4
++        with:
++          fetch-depth: 0
++
++      - name: Set up Python
++        uses: actions/setup-python@v5
++        with:
++          python-version: '3.12'
++
++      - name: Install
++        run: |
++          python -m pip install --upgrade pip
++          pip install -e . || pip install -e ".[dev]" || true
++          pip install pytest
++
++      - name: Generate test ledger
++        run: python tools/gen_test_ledger.py --repo . --out evidence/test-ledger.json
++
++      - name: Scan doc claims for drift
++        # 漂移只告警、不失败：文档修正需要人工判断，不能自动改
++        continue-on-error: true
++        run: python tools/scan_claims.py --repo . --ledger evidence/test-ledger.json --out evidence/claims.json
++
++      - name: Upload ledger
++        uses: actions/upload-artifact@v4
++        with:
++          name: test-ledger
++          path: |
++            evidence/test-ledger.json
++            evidence/claims.json
++            evidence/test-ledger.junit.xml
++          if-no-files-found: warn
+diff --git a/tools/gen_test_ledger.py b/tools/gen_test_ledger.py
+new file mode 100644
+index 0000000..3f357e3
+--- /dev/null
++++ b/tools/gen_test_ledger.py
+@@ -0,0 +1,190 @@
++# -*- coding: utf-8 -*-
++"""测试台账生成器：把"测试数字"从文档里搬进机器可核对的 JSON。
++
++解决的问题（任务书 P1-1）：
++  - EVIDENCE-INDEX 手工维护测试数量 → 必然漂移
++  - 543 / 527 / 328 等历史数字找不到对应命令
++  - skip 数量从不展开，只报一个总数
++
++产出：一条可复算的记录
++  {commit, branch, dirty, python, pytest, platform, deps, command,
++   collected, passed, failed, errors, skipped, skipped_detail, duration}
++
++用法：
++  python tools/gen_test_ledger.py --repo . --out evidence/test-ledger.json
++  python tools/gen_test_ledger.py --repo . --out ... --scope tests      # 只跑 tests/
++  python tools/gen_test_ledger.py --repo . --out ... --unittest         # 另附 unittest 口径
++"""
++import argparse
++import datetime
++import hashlib
++import json
++import platform
++import subprocess
++import sys
++import xml.etree.ElementTree as ET
++from pathlib import Path
++
++
++def sh(cmd, cwd=None, timeout=600):
++    try:
++        r = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True,
++                           timeout=timeout, shell=False)
++        return r.returncode, r.stdout, r.stderr
++    except FileNotFoundError:
++        return 127, "", "command not found"
++    except subprocess.TimeoutExpired:
++        return 124, "", "timeout"
++
++
++def _git_exe():
++    """Windows 上 git 常是 git.CMD（批处理），subprocess 直调会 FileNotFoundError。"""
++    import shutil
++    for cand in ("git.exe", "git"):
++        p = shutil.which(cand)
++        if p:
++            return p, False
++    p = shutil.which("git")          # 可能是 .CMD / .BAT
++    if p:
++        return p, True
++    return None, False
++
++
++def git_meta(repo):
++    git, needs_shell = _git_exe()
++    if not git:
++        return {"commit": None, "branch": None, "dirty": None, "git_exe": None}
++
++    def run(args):
++        try:
++            r = subprocess.run([git] + args, capture_output=True, text=True,
++                               timeout=30, shell=needs_shell)
++            return r.returncode, r.stdout
++        except Exception:
++            return 1, ""
++
++    rc, out = run(["-C", str(repo), "rev-parse", "HEAD"])
++    head = out.strip() if rc == 0 else None
++    rc2, out2 = run(["-C", str(repo), "rev-parse", "--abbrev-ref", "HEAD"])
++    branch = out2.strip() if rc2 == 0 else None
++    rc3, out3 = run(["-C", str(repo), "status", "--porcelain"])
++    dirty = bool(out3.strip()) if rc3 == 0 else None
++    return {"commit": head, "branch": branch, "dirty": dirty, "git_exe": git}
++
++
++def deps_snapshot():
++    rc, out, _ = sh([sys.executable, "-m", "pip", "freeze"])
++    if rc != 0:
++        return []
++    keys = ("pytest", "cryptography", "jsonschema", "pydantic", "mcp", "fastmcp")
++    return [ln for ln in out.splitlines()
++            if any(ln.lower().startswith(k) for k in keys)]
++
++
++def parse_junit(path):
++    tree = ET.parse(path)
++    suite = tree.getroot().find("testsuite") or tree.getroot()
++    totals = {k: int(float(suite.get(k, 0))) for k in
++              ("tests", "failures", "errors", "skipped", "time")}
++    skipped, failed = [], []
++    for tc in suite.iter("testcase"):
++        for sk in tc.findall("skipped"):
++            skipped.append({"test": f"{tc.get('classname')}::{tc.get('name')}",
++                            "reason": (sk.get("message") or "").strip()[:200]})
++        for f in list(tc.findall("failure")) + list(tc.findall("error")):
++            failed.append({"test": f"{tc.get('classname')}::{tc.get('name')}",
++                           "message": (f.get("message") or "").strip()[:200]})
++    return totals, skipped, failed
++
++
++def main():
++    ap = argparse.ArgumentParser()
++    ap.add_argument("--repo", default=".")
++    ap.add_argument("--out", default="test-ledger.json")
++    ap.add_argument("--scope", default="", help="限定的测试路径，如 tests")
++    ap.add_argument("--unittest", action="store_true", help="额外跑 unittest 口径")
++    a = ap.parse_args()
++    repo = Path(a.repo).resolve()
++    xml = Path(a.out).with_suffix(".junit.xml")
++    xml.parent.mkdir(parents=True, exist_ok=True)
++
++    cmd = [sys.executable, "-m", "pytest", "-q", "--tb=no", "-p", "no:cacheprovider",
++           f"--junit-xml={xml}"]
++    if a.scope:
++        cmd.append(a.scope)
++    started = datetime.datetime.now(datetime.timezone.utc)
++    rc, out, err = sh(cmd, cwd=repo, timeout=1800)
++    ended = datetime.datetime.now(datetime.timezone.utc)
++
++    ledger = {
++        "schema": "test-ledger/1",
++        "generated_at": started.isoformat(),
++        "finished_at": ended.isoformat(),
++        "duration_seconds": round((ended - started).total_seconds(), 1),
++        "scope": a.scope or "(whole repo)",
++        "command": " ".join(cmd).replace(str(repo), ".").replace(str(xml), "…"),
++        "git": git_meta(repo),
++        "env": {
++            "python": sys.version.split()[0],
++            "pytest": _pytest_version(),
++            "platform": platform.platform(),
++            "machine": platform.machine(),
++        },
++        "deps": deps_snapshot(),
++        "exit_code": rc,
++    }
++
++    if xml.exists():
++        totals, skipped, failed = parse_junit(xml)
++        collected = totals["tests"]
++        ledger["totals"] = {
++            "collected": collected,
++            "passed": collected - totals["failures"] - totals["errors"] - totals["skipped"],
++            "failed": totals["failures"],
++            "errors": totals["errors"],
++            "skipped": totals["skipped"],
++            "duration_seconds": totals["time"],
++        }
++        ledger["skipped_detail"] = skipped
++        ledger["failed_detail"] = failed
++    else:
++        ledger["totals"] = None
++        ledger["stderr_tail"] = err.strip().splitlines()[-5:]
++
++    if a.unittest:
++        rc_u, out_u, err_u = sh([sys.executable, "-m", "unittest", "discover",
++                                 "-s", "tests", "-t", "."], cwd=repo, timeout=1800)
++        tail = [ln.strip() for ln in (err_u or out_u).splitlines() if ln.strip()]
++        ledger["unittest"] = {"exit_code": rc_u, "summary_tail": tail[-3:]}
++
++    if ledger.get("totals"):
++        # 台账自身摘要，用于比对是否被改过
++        body = json.dumps({k: ledger[k] for k in ("totals", "git", "scope")},
++                          sort_keys=True, ensure_ascii=False)
++        ledger["ledger_digest"] = hashlib.sha256(body.encode()).hexdigest()
++
++    Path(a.out).write_text(json.dumps(ledger, ensure_ascii=False, indent=2), encoding="utf-8")
++
++    t = ledger.get("totals") or {}
++    print(f"scope={ledger['scope']}  commit={(ledger['git']['commit'] or '?')[:10]}"
++          f"  dirty={ledger['git']['dirty']}")
++    print(f"collected={t.get('collected')}  passed={t.get('passed')}  failed={t.get('failed')}"
++          f"  errors={t.get('errors')}  skipped={t.get('skipped')}  ({ledger['duration_seconds']}s)")
++    if ledger.get("skipped_detail"):
++        print(f"skipped（{len(ledger['skipped_detail'])} 条）：")
++        for s in ledger["skipped_detail"][:5]:
++            print(f"  - {s['test']}  |  {s['reason'][:80]}")
++    print(f"→ {a.out}")
++    return 0
++
++
++def _pytest_version():
++    try:
++        import pytest
++        return pytest.__version__
++    except Exception:
++        return "unknown"
++
++
++if __name__ == "__main__":
++    sys.exit(main())
+diff --git a/tools/scan_claims.py b/tools/scan_claims.py
+new file mode 100644
+index 0000000..baa7366
+--- /dev/null
++++ b/tools/scan_claims.py
+@@ -0,0 +1,87 @@
++# -*- coding: utf-8 -*-
++"""文档声称数 vs 实测台账 —— 漂移扫描器。
++
++用途：把 README / EVIDENCE-INDEX / CHANGELOG 等文档里"多少项通过"的数字抽出来，
++与 gen_test_ledger.py 产出的真实台账对齐，输出漂移清单。
++
++不做的事：不改文档。只报告。
++"""
++import argparse
++import json
++import re
++from pathlib import Path
++
++PATTERNS = [
++    (r"(\d{2,4})\s*项通过", "项通过"),
++    (r"(\d{2,4})\s*(?:tests?\s*)?(?:pass|passed)", "tests passed"),
++    (r"(\d{2,4})\s*OK\b", "N OK"),
++    (r"(\d{2,4})\s*个?\s*(?:test|测试)", "N tests"),
++    (r"(\d{2,4})\s*/\s*(\d{2,4})", "N/M"),
++]
++
++
++def scan(root: Path, glob="*.md"):
++    rows = []
++    for path in sorted(root.glob(glob)):
++        if path.name.startswith("_"):
++            continue
++        for lineno, line in enumerate(path.read_text(encoding="utf-8", errors="ignore").splitlines(), 1):
++            for pat, label in PATTERNS:
++                for m in re.finditer(pat, line, re.I):
++                    rows.append({
++                        "file": path.name,
++                        "line": lineno,
++                        "kind": label,
++                        "numbers": list(m.groups()),
++                        "text": line.strip()[:160],
++                    })
++    return rows
++
++
++def main():
++    ap = argparse.ArgumentParser()
++    ap.add_argument("--repo", default=".")
++    ap.add_argument("--ledger", default="")
++    ap.add_argument("--out", default="claims.json")
++    a = ap.parse_args()
++
++    root = Path(a.repo).resolve()
++    claims = scan(root)
++
++    actual = None
++    if a.ledger and Path(a.ledger).exists():
++        ledger = json.loads(Path(a.ledger).read_text(encoding="utf-8"))
++        actual = {"collected": ledger["totals"]["collected"],
++                  "passed": ledger["totals"]["passed"],
++                  "skipped": ledger["totals"]["skipped"],
++                  "commit": ledger["git"]["commit"]}
++
++    drift = []
++    if actual:
++        for c in claims:
++            for n in c["numbers"]:
++                if not n.isdigit():
++                    continue
++                v = int(n)
++                if v in (actual["collected"], actual["passed"], actual["passed"] - actual["skipped"]):
++                    continue
++                if v < 100:      # 小的 N/M 之类不参与漂移判定
++                    continue
++                drift.append({**c, "claimed": v})
++
++    payload = {"repo": str(root), "claim_count": len(claims),
++               "actual": actual, "drift": drift, "claims": claims}
++    Path(a.out).write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
++
++    print(f"claims={len(claims)}  actual={actual}")
++    if drift:
++        print(f"\n漂移（{len(drift)} 条）:")
++        for d in drift:
++            print(f"  {d['file']}:{d['line']}  声称 {d['claimed']}  |  {d['text'][:90]}")
++    else:
++        print("无漂移")
++    print(f"→ {a.out}")
++
++
++if __name__ == "__main__":
++    main()

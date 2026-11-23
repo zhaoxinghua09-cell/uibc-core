@@ -67,7 +67,7 @@ URLS = [
     ("CoA 论文（Certificate of Action）", "https://kenpriore.ai/papers/certificate-of-action.pdf"),
     ("sahu 行动收据 -00", "https://www.ietf.org/archive/id/draft-sahu-agent-action-receipts-00.html"),
     ("ISO/IEC 24970 标准页", "https://www.iso.org/standard/88723.html"),
-    ("IMDRF PCCP N90", "https://www.imdrf.org/sites/default/files/2026-08/IMDRF%20SaMD%20WG%20N90%20FINAL%20Essential%20Principles%20and%20Content%20PCCPs%20(1).pdf"),
+    ("IMDRF PCCP N90", "https://www.imdrf.org/sites/default/files/2026-08/IMDRF%20SaMD%20WG%20N90%20FINAL%20Essential%20Principles%20and%20Content%20PCCPs.pdf"),
     ("AER-1 公开语料", "https://zambo.dev/aer1/corpus.json"),
 ]
 
@@ -89,7 +89,7 @@ ALTERNATES = {
 NOTES = {
     "https://www.iso.org/standard/88723.html":
         "付费标准（ISO/IEC 24970）：站点对脚本一律 403。材料里只写标准号+名称，不挂链接，或标“需浏览器访问”。",
-    "https://www.imdrf.org/sites/default/files/2026-08/IMDRF%20SaMD%20WG%20N90%20FINAL%20Essential%20Principles%20and%20Content%20PCCPs%20(1).pdf":
+    "https://www.imdrf.org/sites/default/files/2026-08/IMDRF%20SaMD%20WG%20N90%20FINAL%20Essential%20Principles%20and%20Content%20PCCPs.pdf":
         "imdrf.org 整站在本网络无响应（首页也超时）。材料引用必须随附 PDF 文件，不让读者依赖该站可达性。",
     "https://www.modernrequirements.com/fr-ca/med-tech/":
         "厂商页被 Cloudflare 拦截（无浏览器指纹一律 403）。该类引用只作“存在此能力”的旁证，主张由监管文本支撑。",

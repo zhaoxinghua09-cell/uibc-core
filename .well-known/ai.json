@@ -1,0 +1,12 @@
+{
+  "schema": "ai-manifest/v1",
+  "repository": "zhaoxinghua09-cell/uibc-core",
+  "role": "Specification-plus-reference repo: executable protocol for bounded-lifecycle autonomy, where normative text and a reference implementation ship together.",
+  "what_it_is": "UIBC Core — an executable protocol for bounded-lifecycle autonomy：registry, evidence, gates. Reference implementation + conformance tests. Theory SSOT: zhaoxinghua09-cell/lgd-theory. 代码 Apache-2.0；理论文本保留所有权利。",
+  "what_it_is_not": "Not a running commercial service. Not a third-party certification, compliance finding, or regulatory approval.",
+  "reproduce": "See the README section \"运行测试 / Running the tests\"; commands are verbatim and require no private network.",
+  "contact": "zhaoxinghua09-cell",
+  "evidence_state": "Outsider-view probe recorded 2026-11-22 (anonymous, no token); see this repository README and docs.",
+  "last_verified": "2026-11-22",
+  "claims_policy": "No first-in-class, greenfield, or only-implementation claims. Each comparison states its own boundary."
+}

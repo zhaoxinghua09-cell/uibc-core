@@ -138,6 +138,31 @@ def split_note(checkpoint: str) -> tuple[bytes, list[tuple[str, bytes]]]:
     return body.encode(), sigs
 
 
+def _conclude(proof_ok: bool, sig_state) -> tuple[str, str]:
+    """三值结论：True=已验 / False=已证伪 / None=无法判定（缺依赖或缺公钥）。
+
+    规矩：无法判定不得报成已验。原实现用 `is not False`，等于把"没查"当成"没罪"。
+    """
+    if not proof_ok:
+        return "failed", "inclusion/consistency proof does not hold"
+    if sig_state is True:
+        return "verified", ""
+    if sig_state is False:
+        return "failed", "checkpoint signature is invalid"
+    return "inconclusive", ("checkpoint signature could not be checked "
+                            "(cryptography missing or log key unavailable)")
+
+
+def _exit_for(rec: dict) -> int:
+    """0=verified / 1=failed / 3=inconclusive（与 docs/EXIT-CODES 对齐）"""
+    c = rec.get("conclusion")
+    if c == "verified":
+        return 0
+    if c == "inconclusive":
+        return 3
+    return 1
+
+
 def verify_checkpoint_signature(checkpoint: str, key_pem: bytes) -> dict:
     """Verify the checkpoint's ECDSA signature against the log's public key."""
     try:
@@ -303,9 +328,11 @@ def consistency_check(first_size: int, first_root_hex: str, first_checkpoint: st
     else:
         out["first_checkpoint_signature"] = None
 
-    out["verified"] = bool(out["folded_equals_second_root"]
-                           and sig2.get("verified") is not False
-                           and out["same_origin"] is not False)
+    _proof_ok = bool(out["folded_equals_second_root"]
+                     and out["same_origin"] is not False)
+    out["conclusion"], out["inconclusive_reason"] = _conclude(
+        _proof_ok, sig2.get("verified"))
+    out["verified"] = out["conclusion"] == "verified"
     return out
 
 
@@ -350,7 +377,9 @@ def check_entry(entry: dict, key_pem: bytes | None = None) -> dict:
     folds = out["folds_against"].get("proof_log_index", {}).get("match")
     cp_ok = out["checkpoint"]["root_equals_proof_root"] if out["checkpoint"] else True
     sig_ok = out["checkpoint"]["signature_verified"] if out["checkpoint"] else None
-    out["verified"] = bool(folds and cp_ok and sig_ok is not False)
+    out["conclusion"], out["inconclusive_reason"] = _conclude(
+        bool(folds and cp_ok), sig_ok)
+    out["verified"] = out["conclusion"] == "verified"
     if not folds:
         out["why_not"] = ("the proof does not fold to its own root against its own index; "
                           "if entry_log_index differs, folding against it is never correct")
@@ -401,10 +430,10 @@ def consistency_mode(from_file: str, to_file: str, key_pem: bytes | None) -> int
     receipt = consistency_check(size1, root1, first, second, proof, key_pem)
     print(json.dumps(receipt, indent=2, sort_keys=True))
     print("consistency=%s  %d -> %d  signature=%s  same_origin=%s"
-          % (receipt["verified"], size1, size2,
+          % (receipt.get("conclusion", receipt["verified"]), size1, size2,
              receipt["second_checkpoint_signature"], receipt["same_origin"]),
           file=sys.stderr)
-    return 0 if receipt["verified"] else 1
+    return _exit_for(receipt)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -464,11 +493,11 @@ def main(argv: list[str] | None = None) -> int:
         print("receipt written: %s" % args.out)
     else:
         print(text)
-    print("verified=%s  proof.index=%s  entry.index=%s  checkpoint.signature=%s"
-          % (receipt["verified"], receipt["proof_log_index"], receipt["entry_log_index"],
+    print("conclusion=%s  verified=%s  proof.index=%s  entry.index=%s  checkpoint.signature=%s"
+          % (receipt.get("conclusion"), receipt["verified"], receipt["proof_log_index"], receipt["entry_log_index"],
              receipt["checkpoint"]["signature_verified"] if receipt["checkpoint"] else "no checkpoint"),
           file=sys.stderr)
-    return 0 if receipt["verified"] else 1
+    return _exit_for(receipt)
 
 
 if __name__ == "__main__":

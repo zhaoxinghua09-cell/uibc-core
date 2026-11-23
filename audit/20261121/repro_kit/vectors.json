@@ -1,0 +1,457 @@
+[
+  {
+    "id": "V-01",
+    "check": "binding",
+    "subject": "skill-x",
+    "evidence": {
+      "key_id": "key-A",
+      "mac": "16ba0633e3083659e74d6eb3502fb36157f39591b506598b3234517cdeb620ee",
+      "body": {
+        "subject": "skill-x",
+        "issued_at": "2026-11-19T09:00:00+00:00",
+        "verdict": "clean"
+      }
+    },
+    "registered_digest": "3ddef0455a50d6a236e243b653801846530495cc7695a9698597c9222bb2a56a",
+    "expected": "ALLOW"
+  },
+  {
+    "id": "V-02",
+    "check": "binding",
+    "subject": "skill-x",
+    "evidence": {
+      "key_id": "key-A",
+      "mac": "1408b2f9c24fdd13770c4797bf316d9bd3c8e69aabbeba2a5b095f1e2d014927",
+      "body": {
+        "subject": "skill-x",
+        "issued_at": "2026-11-19T09:00:00+00:00",
+        "verdict": "risky"
+      }
+    },
+    "registered_digest": "3ddef0455a50d6a236e243b653801846530495cc7695a9698597c9222bb2a56a",
+    "expected": "REJECT"
+  },
+  {
+    "id": "V-03",
+    "check": "binding",
+    "subject": "skill-x",
+    "evidence": {
+      "key_id": "key-B",
+      "mac": "1037f3c8a65a9b80db298c496b0850b2e4a0438a842215c3328da598fc4288c4",
+      "body": {
+        "subject": "skill-x",
+        "issued_at": "2026-11-19T09:00:00+00:00",
+        "verdict": "clean"
+      }
+    },
+    "registered_digest": "3ddef0455a50d6a236e243b653801846530495cc7695a9698597c9222bb2a56a",
+    "expected": "REJECT"
+  },
+  {
+    "id": "V-04",
+    "check": "binding",
+    "subject": "skill-x",
+    "evidence": {
+      "key_id": "key-EVIL",
+      "mac": "0000000000000000000000000000000000000000000000000000000000000000",
+      "body": {
+        "subject": "skill-x",
+        "issued_at": "2026-11-19T09:00:00+00:00",
+        "verdict": "clean"
+      }
+    },
+    "registered_digest": "3ddef0455a50d6a236e243b653801846530495cc7695a9698597c9222bb2a56a",
+    "expected": "REJECT"
+  },
+  {
+    "id": "V-05",
+    "check": "usable",
+    "state": "AUTHORIZED",
+    "expires_at": "2026-12-09T09:00:00+00:00",
+    "expected": "ALLOW"
+  },
+  {
+    "id": "V-06",
+    "check": "usable",
+    "state": "AUTHORIZED",
+    "expires_at": "2026-11-18T09:00:00+00:00",
+    "expected": "REJECT"
+  },
+  {
+    "id": "V-07",
+    "check": "usable",
+    "state": "UNKNOWN",
+    "expires_at": "2026-12-09T09:00:00+00:00",
+    "expected": "REJECT"
+  },
+  {
+    "id": "V-08",
+    "check": "transition",
+    "to": "AUTHORIZED",
+    "score_only": true,
+    "expected": "REJECT"
+  },
+  {
+    "id": "V-09",
+    "check": "transition",
+    "to": "AUTHORIZED",
+    "authorization": {
+      "subject": "skill-x",
+      "scope": "runtime",
+      "expires_at": "2026-12-09T09:00:00+00:00"
+    },
+    "expected": "ALLOW"
+  },
+  {
+    "id": "V-10",
+    "check": "compat",
+    "evidence_version": "uibc/0.4.0",
+    "rule_version": "rules/2",
+    "engine": "engine/3",
+    "expected": "ALLOW"
+  },
+  {
+    "id": "V-11",
+    "check": "compat",
+    "evidence_version": "uibc/0.3.x",
+    "rule_version": "rules/2",
+    "engine": "engine/3",
+    "expected": "REJECT"
+  },
+  {
+    "id": "V-12",
+    "check": "compat",
+    "evidence_version": "uibc/0.1.x",
+    "rule_version": "rules/9",
+    "engine": "engine/9",
+    "expected": "REJECT"
+  },
+  {
+    "id": "V-13",
+    "check": "revocation",
+    "object": "auth-x-1",
+    "revocations": [
+      {
+        "target": "skill-x",
+        "kind": "IDENTITY",
+        "propagates_to": [
+          "auth-x-1",
+          "auth-x-2"
+        ]
+      }
+    ],
+    "expected": "REJECT"
+  },
+  {
+    "id": "V-14",
+    "check": "revocation",
+    "object": "auth-y-1",
+    "revocations": [
+      {
+        "target": "skill-x",
+        "kind": "IDENTITY",
+        "propagates_to": [
+          "auth-x-1"
+        ]
+      }
+    ],
+    "expected": "ALLOW"
+  },
+  {
+    "id": "V-15",
+    "check": "exchange",
+    "entity": "agent-A",
+    "pinned_fp": "fp-A",
+    "identity_fp": "fp-A",
+    "rule_version": "rules/2",
+    "engine_version": "engine/3",
+    "compat": [
+      [
+        "rules/2",
+        "engine/3"
+      ],
+      [
+        "rules/2",
+        "engine/2"
+      ]
+    ],
+    "expires_at": "2026-12-09T09:00:00+00:00",
+    "requested_scope": [
+      "read"
+    ],
+    "granted_scope": [
+      "read",
+      "write"
+    ],
+    "snapshot": {
+      "age_hours": 1,
+      "revoked": []
+    },
+    "expected": "ALLOW"
+  },
+  {
+    "id": "V-16",
+    "check": "exchange",
+    "entity": "agent-A",
+    "pinned_fp": "fp-A",
+    "identity_fp": "fp-A",
+    "rule_version": "rules/2",
+    "engine_version": "engine/3",
+    "compat": [
+      [
+        "rules/2",
+        "engine/3"
+      ],
+      [
+        "rules/2",
+        "engine/2"
+      ]
+    ],
+    "expires_at": "2026-12-09T09:00:00+00:00",
+    "requested_scope": [
+      "read"
+    ],
+    "granted_scope": [
+      "read",
+      "write"
+    ],
+    "snapshot": {
+      "age_hours": 1,
+      "revoked": [
+        "agent-A"
+      ]
+    },
+    "expected": "REJECT"
+  },
+  {
+    "id": "V-17",
+    "check": "exchange",
+    "entity": "agent-A",
+    "pinned_fp": "fp-A",
+    "identity_fp": "fp-A",
+    "rule_version": "rules/2",
+    "engine_version": "engine/3",
+    "compat": [
+      [
+        "rules/2",
+        "engine/3"
+      ],
+      [
+        "rules/2",
+        "engine/2"
+      ]
+    ],
+    "expires_at": "2026-12-09T09:00:00+00:00",
+    "requested_scope": [
+      "read"
+    ],
+    "granted_scope": [
+      "read",
+      "write"
+    ],
+    "snapshot": {
+      "age_hours": 30,
+      "revoked": []
+    },
+    "expected": "REJECT"
+  },
+  {
+    "id": "V-18",
+    "check": "exchange",
+    "entity": "agent-A",
+    "pinned_fp": "fp-A",
+    "identity_fp": "fp-A",
+    "rule_version": "rules/2",
+    "engine_version": "engine/3",
+    "compat": [
+      [
+        "rules/2",
+        "engine/3"
+      ],
+      [
+        "rules/2",
+        "engine/2"
+      ]
+    ],
+    "expires_at": "2026-12-09T09:00:00+00:00",
+    "requested_scope": [
+      "read"
+    ],
+    "granted_scope": [
+      "read",
+      "write"
+    ],
+    "expected": "REJECT"
+  },
+  {
+    "id": "V-19",
+    "check": "exchange",
+    "entity": "agent-B",
+    "pinned_fp": "fp-A",
+    "identity_fp": "fp-A",
+    "rule_version": "rules/2",
+    "engine_version": "engine/3",
+    "compat": [
+      [
+        "rules/2",
+        "engine/3"
+      ],
+      [
+        "rules/2",
+        "engine/2"
+      ]
+    ],
+    "expires_at": "2026-12-09T09:00:00+00:00",
+    "requested_scope": [
+      "read"
+    ],
+    "granted_scope": [
+      "read",
+      "write"
+    ],
+    "snapshot": {
+      "age_hours": 1,
+      "revoked": [
+        "agent-A"
+      ]
+    },
+    "expected": "ALLOW"
+  },
+  {
+    "id": "V-20",
+    "check": "exchange",
+    "entity": "agent-A",
+    "pinned_fp": "fp-A",
+    "identity_fp": "fp-A",
+    "rule_version": "rules/1",
+    "engine_version": "engine/1",
+    "compat": [
+      [
+        "rules/2",
+        "engine/3"
+      ],
+      [
+        "rules/2",
+        "engine/2"
+      ]
+    ],
+    "expires_at": "2026-12-09T09:00:00+00:00",
+    "requested_scope": [
+      "read"
+    ],
+    "granted_scope": [
+      "read",
+      "write"
+    ],
+    "snapshot": {
+      "age_hours": 1,
+      "revoked": []
+    },
+    "expected": "REJECT"
+  },
+  {
+    "id": "V-21",
+    "check": "canon",
+    "case": "duplicate_key",
+    "raw": "{\"entity\":\"agent-A\",\"entity\":\"agent-B\"}",
+    "expected": "REJECT"
+  },
+  {
+    "id": "V-22",
+    "check": "canon",
+    "case": "nfc",
+    "registered": "café",
+    "presented": "café",
+    "expected": "ALLOW"
+  },
+  {
+    "id": "V-23",
+    "check": "canon",
+    "case": "nan",
+    "raw": "{\"score\":NaN}",
+    "expected": "REJECT"
+  },
+  {
+    "id": "V-24",
+    "check": "canon",
+    "case": "bigint",
+    "value": "12345678901234567890",
+    "max_safe": "9007199254740991",
+    "expected": "REJECT"
+  },
+  {
+    "id": "V-25",
+    "check": "canon",
+    "case": "float",
+    "presented": "1.0",
+    "canonical": "1",
+    "expected": "REJECT"
+  },
+  {
+    "id": "V-26",
+    "check": "negotiate",
+    "peer": "gtp/2",
+    "supported": [
+      "gtp/1"
+    ],
+    "expected": "REJECT"
+  },
+  {
+    "id": "V-27",
+    "check": "negotiate",
+    "peer": "gtp/0.3",
+    "local": "gtp/1",
+    "supported": [
+      "gtp/1"
+    ],
+    "expected": "REJECT"
+  },
+  {
+    "id": "V-28",
+    "check": "revmerge",
+    "object": "agent-Y",
+    "sources": [
+      {
+        "issuer": "A",
+        "serial": 5,
+        "revoked": [
+          "agent-X"
+        ]
+      },
+      {
+        "issuer": "B",
+        "serial": 9,
+        "revoked": []
+      }
+    ],
+    "expected": "ALLOW"
+  },
+  {
+    "id": "V-29",
+    "check": "revmerge",
+    "object": "agent-X",
+    "sources": [
+      {
+        "issuer": "A",
+        "serial": 5,
+        "revoked": [
+          "agent-X"
+        ]
+      },
+      {
+        "issuer": "B",
+        "serial": 9,
+        "revoked": []
+      }
+    ],
+    "expected": "REJECT"
+  },
+  {
+    "id": "V-30",
+    "check": "skew",
+    "age_minutes": -5,
+    "max_age_minutes": 60,
+    "tolerance_minutes": 10,
+    "expected": "ALLOW"
+  }
+]

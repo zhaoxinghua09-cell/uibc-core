@@ -30,10 +30,14 @@ verifier that refuses malformed input).
 | Stars / forks | 11 / 2 | 2 / 6 |
 | Last push | 2026-11-18T15:11Z | 2026-11-18T14:57Z |
 
+> **Read this table as a dated snapshot, not a live claim.** Every `uibc-core` figure above was measured at `1f7c957` on 2026-11-18. On `main` today the same commands report a larger suite (1086 tests, 30 modules); the numbers here are deliberately frozen so the comparison stays honest about *when* it was true. If you need the current figure, run the command below — it is the authority, not this table.
+
 Re-run the machine-checkable half:
 
 ```
-python3 tools/check_doc_facts.py            # ours: 816 tests, 27 modules, 20 checks
+python3 tools/check_doc_facts.py            # at 1f7c957: 816 tests, 27 modules, 20 checks
+                                            # on main today it prints 1086 tests, 30 modules — the table above is a
+                                            # dated snapshot, not a live claim; the command is the live check
 python3 tools/redteam_robustness.py         # ours: 10 of 10 refused
 python3 tools/cross_impl_check.py --json    # ours: 36 of 36 identical
 ```

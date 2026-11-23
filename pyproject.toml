@@ -33,6 +33,9 @@ verify = ["cryptography>=41", "asn1crypto>=1.5"]
 # dependency: CI installs this extra to run the corpus harness against the
 # uibc_core.aee rail; the rail itself is stdlib-only.
 conformance = ["agent-evidence-vectors==0.36.3"]
+# Test runner only. Thirteen test modules import pytest at module level, so the
+# README's unittest entry cannot even collect them unless pytest is importable.
+test = ["pytest>=8"]
 # Measured 2026-11-19: 15 of the 16 tests that CI was skipping were skipping only
 # because this extra was not installed. Installing it turns "527 OK (skipped=16)" into
 # "527 OK (skipped=2)", and the two that remain are deliberate (a self-seeding path that
@@ -52,3 +55,13 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 include = ["uibc_core*"]
+
+[tool.pytest.ini_options]
+# audit/ holds point-in-time audit materials, not a test suite. In particular
+# audit/20261121/p13_anchor_registry/test_anchor_registry.py runs its self-check
+# at module import time and calls sys.exit(); because the file is named test_*.py
+# pytest imports it during collection and aborts with INTERNALERROR (SystemExit: 0),
+# so a clean clone cannot run `pytest` at all. Excluding audit/ lets a first-time
+# reader run the suite with a bare `pytest`, while the self-check stays runnable
+# directly:  python audit/20261121/p13_anchor_registry/test_anchor_registry.py
+norecursedirs = [".git", ".venv", "venv", "build", "dist", "*.egg", "audit"]

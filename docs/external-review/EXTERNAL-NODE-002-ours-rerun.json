@@ -1,0 +1,41 @@
+{
+  "schema": "uibc.external-node-result/1",
+  "when_utc": "2026-11-21T05:35:45Z",
+  "platform": "Windows-11-10.0.22631-SP0",
+  "python": "3.13.18",
+  "package": "benchmark/corpus/base",
+  "independent_verifier": {
+    "exit_code": 0,
+    "ms": 71,
+    "interpretation": "0 means PASS"
+  },
+  "reference_verifier": {
+    "result": "PASS",
+    "ms": 11
+  },
+  "probes": [
+    {
+      "probe": "value:timestamp-without-zone",
+      "result": "FAIL",
+      "ms": 10,
+      "expected": "FAIL",
+      "ok": true
+    },
+    {
+      "probe": "value:feb29-1900",
+      "result": "FAIL",
+      "ms": 9,
+      "expected": "FAIL",
+      "ok": true
+    },
+    {
+      "probe": "value:uppercase-uuid",
+      "result": "FAIL",
+      "ms": 9,
+      "expected": "FAIL",
+      "ok": true
+    }
+  ],
+  "verdict": "CONSISTENT",
+  "note": "A CONSISTENT result means: the two implementations agree, and three packages that must be rejected were rejected. It does NOT mean the evidence is true or complete."
+}

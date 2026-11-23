@@ -53,12 +53,35 @@ def runtime_version(dist_name: str) -> tuple[str, str]:
     except Exception as e:  # 未安装时降级
         return "", f"unavailable ({type(e).__name__})"
 
-def pin_problems() -> list[str]:
-    """Every `uses:` must be a full 40-character commit SHA.
+def _locked_refs(wf_dir: pathlib.Path) -> set[str]:
+    """Dependencies covered by .github/workflows/actions.lock, as `owner/repo@ref`.
 
-    A floating tag (@v4, release/v1) runs whatever that ref points at today, with this
-    repository's token, and nothing reviews the move. Proven in both directions before
-    shipping: a pinned-only tree passes, one floating line fails with file:line.
+    GitHub Actions workflow lockfiles (GA 2026-10-28) record, for every onboarded
+    workflow, the exact commit each readable ref resolved to, including transitive
+    dependencies. Official guidance: keep readable refs in the workflow and let the
+    lockfile pin the commit — the lockfile supersedes SHA pinning. So a readable
+    ref is acceptable here *only* when the lockfile covers it; an uncovered
+    floating ref is still a hard failure.
+    """
+    lock = wf_dir / "actions.lock"
+    if not lock.exists():
+        return set()
+    out: set[str] = set()
+    for line in lock.read_text(encoding="utf-8").splitlines():
+        m = _re2.match(r"\s{4}'([^']+@[^']+)':", line)
+        if m:
+            out.add(m.group(1))
+    return out
+
+
+def pin_problems() -> list[str]:
+    """Every `uses:` must be pinned — either a full 40-character commit SHA, or a
+    readable ref that `.github/workflows/actions.lock` records a commit for.
+
+    A floating tag (@v4, release/v1) not covered by the lockfile runs whatever that
+    ref points at today, with this repository's token, and nothing reviews the move.
+    Proven in both directions before shipping: a pinned/locked tree passes, one
+    uncovered floating line fails with file:line.
     """
     import re as _re
 
@@ -74,10 +97,12 @@ def pin_problems() -> list[str]:
     if wf_dir is None:
         print("  PIN SKIP: 未找到 .github/workflows（从 ROOT 向上 4 层），钉版规则未生效")
         return bad
+    locked = _locked_refs(wf_dir)
     pat = _re.compile(r"uses:\s*([^\s#]+)")
     sha = _re.compile(r"^[^@]+@[0-9a-f]{40}$")
     wf_files = sorted(wf_dir.glob("*.yml")) + sorted(wf_dir.glob("*.yaml"))
     checked = 0
+    via_lock = 0
     for p in wf_files:
         for lineno, line in enumerate(p.read_text(encoding="utf-8").splitlines(), 1):
             m = pat.search(line)
@@ -87,9 +112,24 @@ def pin_problems() -> list[str]:
             if ref.startswith("./"):
                 continue
             checked += 1
-            if not sha.match(ref):
-                bad.append(f"{p.name}:{lineno}: {ref} is not pinned to a 40-character SHA")
-    print(f"  PIN CHECK: {len(wf_files)} 个 workflow、{checked} 处 uses 已核，浮动 {len(bad)} 处")
+            if sha.match(ref):
+                continue
+            if "@" in ref:
+                action_path, ref_name = ref.rsplit("@", 1)
+                # normalize sub-path actions (owner/repo/sub@ref) to owner/repo@ref
+                parts = action_path.split("/")
+                key = "/".join(parts[:2]) + "@" + ref_name
+                if key in locked:
+                    via_lock += 1
+                    continue
+            bad.append(
+                f"{p.name}:{lineno}: {ref} is neither a 40-character SHA "
+                f"nor covered by .github/workflows/actions.lock"
+            )
+    print(
+        f"  PIN CHECK: {len(wf_files)} 个 workflow、{checked} 处 uses 已核；"
+        f"lockfile 覆盖 {via_lock} 处可读 ref，未钉/未覆盖 {len(bad)} 处"
+    )
     return bad
 
 def main() -> int:

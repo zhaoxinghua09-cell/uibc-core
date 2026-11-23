@@ -1,8 +1,8 @@
 {
-  "when_utc": "2026-11-17T07:26:44Z",
-  "branch": "release/v1.1-precheck",
-  "local_head": "8c39416270351a0bf094a795e8c6db0fa87ac3ef",
-  "public_head": "8c39416270351a0bf094a795e8c6db0fa87ac3ef",
+  "when_utc": "2026-11-21T01:09:12Z",
+  "branch": "main",
+  "local_head": "90d4fa433855a400c69e87590a7823aacf9fef1e",
+  "public_head": "90d4fa433855a400c69e87590a7823aacf9fef1e",
   "reachable": true,
   "in_sync": true,
   "unreachable_reason": null

@@ -7,7 +7,7 @@ body:
       value: |
         **What this form is for.** `tools/external_node_check.py` prints `CONSISTENT` only when a second,
         independently written verifier agrees with the reference one *and* three packages that must be rejected
-        are rejected. Running it and pasting the output here is what turns `external verification nodes: 0` into 1.
+        are rejected. Running it and pasting the output here is what turns `external verification nodes: 2` into 3.
 
         **What it is not.** A PASS does not claim the agent was correct, safe, or wise; that the recorded inputs
         were true or complete; or that any real-world outcome followed. Writing a number here that you did not

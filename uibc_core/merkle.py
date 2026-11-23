@@ -220,3 +220,94 @@ def verify_inclusion(leaf: bytes, index: int, size: int, proof, root: bytes,
 def build_proof(leaves, index: int, profile: str = DEFAULT_PROFILE):
     """Audit path as lowercase hex, for putting in a package."""
     return [h.hex() for h in audit_path(leaves, index, profile)]
+
+
+def _subproof(hashes, lo: int, n: int, m: int, b: bool, profile: str):
+    """RFC 6962 §2.1.2 SUBPROOF(m, D[lo:lo+n], b) over already-hashed leaves."""
+    if m == n:
+        return [] if b else [root_hash(hashes[lo:lo + n], profile)]
+    k = _largest_pow2_below(n)
+    if m <= k:
+        return (_subproof(hashes, lo, k, m, b, profile)
+                + [root_hash(hashes[lo + k:lo + n], profile)])
+    return (_subproof(hashes, lo + k, n - k, m - k, False, profile)
+            + [root_hash(hashes[lo:lo + k], profile)])
+
+
+def build_consistency_proof(leaves, first_size: int, profile: str = DEFAULT_PROFILE):
+    """Consistency proof between the first `first_size` leaves and all of them.
+
+    `leaves` are leaf **hashes** (bytes), the same currency `audit_path` and
+    `root_hash` use. Returns lowercase hex, bottom-up, ready for a package.
+    RFC 6962 §2.1.2: proves the size-`first_size` tree is a prefix of the
+    bigger one.
+    """
+    _check_profile(profile)
+    leaves = list(leaves)
+    n, m = len(leaves), int(first_size)
+    if m <= 0 or m > n:
+        raise ValueError("first_size must be in 1..len(leaves)")
+    if m == n:
+        return []
+    return [h.hex() for h in _subproof(leaves, 0, n, m, True, profile)]
+
+
+def verify_consistency(first_root: bytes, first_size: int, second_root: bytes,
+                       second_size: int, proof, profile: str = DEFAULT_PROFILE) -> bool:
+    """Check a consistency proof without trusting the prover.
+
+    Same discipline as `verify_inclusion`: malformed or hostile input returns
+    False, never raises. Two trees of the same size are consistent iff the
+    roots are equal and the proof is empty.
+    """
+    try:
+        _check_profile(profile)
+        if profile == PROFILE_AER1:
+            return False  # AER-1 has no consistency-proof shape yet; refuse rather than guess
+        if not isinstance(first_size, int) or not isinstance(second_size, int):
+            return False
+        if first_size < 0 or second_size < first_size:
+            return False
+        nodes = []
+        for node in proof:
+            if not isinstance(node, (bytes, bytearray)) or len(node) != 32:
+                return False
+            nodes.append(bytes(node))
+        if first_size == 0:
+            # The empty old tree is a prefix of anything; RFC wants no proof.
+            return not nodes
+        if not isinstance(first_root, (bytes, bytearray)) or len(first_root) != 32:
+            return False
+        if not isinstance(second_root, (bytes, bytearray)) or len(second_root) != 32:
+            return False
+        if first_size == second_size:
+            return not nodes and bytes(first_root) == bytes(second_root)
+        if first_size & (first_size - 1) == 0:
+            # Perfect subtree: its root stands in for the omitted first node.
+            nodes = [bytes(first_root)] + nodes
+        if not nodes:
+            return False
+        fn, sn = first_size - 1, second_size - 1
+        while fn % 2 == 1:      # step past the shared right edge
+            fn //= 2
+            sn //= 2
+        fr = sr = nodes[0]
+        for node in nodes[1:]:
+            if sn == 0:
+                return False
+            if fn % 2 == 1 or fn == sn:
+                # This node sits to the LEFT of both running roots.
+                fr = node_hash(node, fr, profile)
+                sr = node_hash(node, sr, profile)
+                while fn % 2 == 0 and fn != 0:
+                    fn //= 2
+                    sn //= 2
+            else:
+                # To the RIGHT of the newer root only.
+                sr = node_hash(sr, node, profile)
+            fn //= 2
+            sn //= 2
+        return fr == bytes(first_root) and sr == bytes(second_root) and sn == 0
+    except Exception:
+        return False
+

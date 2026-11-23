@@ -1,0 +1,30 @@
+merkle: add RFC 6962 consistency proofs (build + verify)
+
+We could prove inclusion but not that a log *grew* without rewriting
+history: `uibc_core/merkle.py` had leaf_hash / node_hash / root_hash /
+audit_path / verify_inclusion / build_proof and nothing else. A log that
+cannot show consistency across tree sizes cannot be audited after a
+rotation, however good its inclusion proofs are.
+
+This adds build_consistency_proof(leaves, first_size) and
+verify_consistency(first_root, first_size, second_root, second_size, proof),
+both over leaf hashes like the rest of the module, both lowercase-hex at the
+package boundary. AER-1 has no consistency-proof shape defined, so verification
+returns False there rather than guessing.
+
+Verifier discipline is the same as verify_inclusion: hostile input — wrong
+node length, wrong types, first_size > second_size, m > n — returns False and
+never raises. m == 0 follows the RFC convention: consistent, proof must be
+empty.
+
+Nine tests in tests/test_merkle_consistency.py: round trip across
+1/2/3/5/8/9/16/17 and every prefix size, tampered node refused, wrong first
+root refused, wrong size pair refused, dropped node refused, hostile shapes
+return False, AER-1 refuses.
+
+Cross-implementation note (kept out of the tests, measured separately): the
+same nine (m, n) pairs we failed to produce before now build and verify, and
+the proofs are accepted by the PyPI `scitt-cose` verifier and vice versa.
+Today that reference is our only external counterpart, so "consistent with
+it" is not the same as "independently audited" — it is one comparison, not a
+certification.

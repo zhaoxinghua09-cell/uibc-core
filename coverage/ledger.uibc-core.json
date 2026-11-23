@@ -1,0 +1,361 @@
+{
+  "schema": "cdp-1",
+  "subject": {
+    "name": "uibc-core",
+    "version": "0.4.0",
+    "commit": null,
+    "measured_at": "2026-11-19T06:52:32+08:00"
+  },
+  "entries": [
+    {
+      "id": "S1",
+      "kind": "CHECK",
+      "statement": "S1: the verifier must detect the class of tampering reached by 1 recorded attack(s).",
+      "statement_sha256": "0e7a63a19c770f34675cfbe271a07906f05ffba73e05049fce00d5c3d2f6526f",
+      "status": "EXERCISED",
+      "tests": [
+        "tools/check_matrix.py::S1"
+      ],
+      "evidence": [
+        "docs/CHECK-MATRIX.md",
+        "tools/outsider_audit.py"
+      ],
+      "owner": null,
+      "review_by": null,
+      "reason": null
+    },
+    {
+      "id": "S2",
+      "kind": "CHECK",
+      "statement": "S2: the verifier must detect the class of tampering reached by 1 recorded attack(s).",
+      "statement_sha256": "9290d897060da1c80cf3e7373e8aebbbc04273500e595a795dbbcd6045cea26d",
+      "status": "EXERCISED",
+      "tests": [
+        "tools/check_matrix.py::S2"
+      ],
+      "evidence": [
+        "docs/CHECK-MATRIX.md",
+        "tools/outsider_audit.py"
+      ],
+      "owner": null,
+      "review_by": null,
+      "reason": null
+    },
+    {
+      "id": "S3",
+      "kind": "CHECK",
+      "statement": "S3: the verifier must detect the class of tampering reached by 1 recorded attack(s).",
+      "statement_sha256": "e96ea88444bed74896fc99164c5f92656ab793f09642c508180d7d8e47715b25",
+      "status": "EXERCISED",
+      "tests": [
+        "tools/check_matrix.py::S3"
+      ],
+      "evidence": [
+        "docs/CHECK-MATRIX.md",
+        "tools/outsider_audit.py"
+      ],
+      "owner": null,
+      "review_by": null,
+      "reason": null
+    },
+    {
+      "id": "S4",
+      "kind": "CHECK",
+      "statement": "S4: the verifier must detect the class of tampering reached by 3 recorded attack(s).",
+      "statement_sha256": "3b3152fddb5e51dc6eefb175f7cff9b14c40fabf4f71843536d33fd9eb5006db",
+      "status": "EXERCISED",
+      "tests": [
+        "tools/check_matrix.py::S4"
+      ],
+      "evidence": [
+        "docs/CHECK-MATRIX.md",
+        "tools/outsider_audit.py"
+      ],
+      "owner": null,
+      "review_by": null,
+      "reason": null
+    },
+    {
+      "id": "S5",
+      "kind": "CHECK",
+      "statement": "S5: the verifier must detect the class of tampering reached by 3 recorded attack(s).",
+      "statement_sha256": "0f49115282401add779138b0b61bc1ebf5b7f7194d1de8aee6b0d5bde4fe8a11",
+      "status": "EXERCISED",
+      "tests": [
+        "tools/check_matrix.py::S5"
+      ],
+      "evidence": [
+        "docs/CHECK-MATRIX.md",
+        "tools/outsider_audit.py"
+      ],
+      "owner": null,
+      "review_by": null,
+      "reason": null
+    },
+    {
+      "id": "S6",
+      "kind": "CHECK",
+      "statement": "S6: the verifier must detect the class of tampering reached by 1 recorded attack(s).",
+      "statement_sha256": "b3481213d0ff2989acb2df33101a761343ba62b37fbafc5f92594fb8d31a531a",
+      "status": "EXERCISED",
+      "tests": [
+        "tools/check_matrix.py::S6"
+      ],
+      "evidence": [
+        "docs/CHECK-MATRIX.md",
+        "tools/outsider_audit.py"
+      ],
+      "owner": null,
+      "review_by": null,
+      "reason": null
+    },
+    {
+      "id": "S7",
+      "kind": "CHECK",
+      "statement": "S7: the verifier must detect the class of tampering reached by 1 recorded attack(s).",
+      "statement_sha256": "56f298bafeed27a80a462e824d2424ca20030fc3ed18dbca257818a2be975a94",
+      "status": "EXERCISED",
+      "tests": [
+        "tools/check_matrix.py::S7"
+      ],
+      "evidence": [
+        "docs/CHECK-MATRIX.md",
+        "tools/outsider_audit.py"
+      ],
+      "owner": null,
+      "review_by": null,
+      "reason": null
+    },
+    {
+      "id": "S8",
+      "kind": "CHECK",
+      "statement": "S8: the verifier must detect the class of tampering reached by 2 recorded attack(s).",
+      "statement_sha256": "365c621fb4506e81af532ce55a2196cdc9a8dca0c305f7d04a2cd824e210e40d",
+      "status": "EXERCISED",
+      "tests": [
+        "tools/check_matrix.py::S8"
+      ],
+      "evidence": [
+        "docs/CHECK-MATRIX.md",
+        "tools/outsider_audit.py"
+      ],
+      "owner": null,
+      "review_by": null,
+      "reason": null
+    },
+    {
+      "id": "S9",
+      "kind": "CHECK",
+      "statement": "S9: the verifier must detect the class of tampering reached by 1 recorded attack(s).",
+      "statement_sha256": "614fac96938da2e55536912d6b458470957981ce1f195e946ca3ceb0186cbb4b",
+      "status": "EXERCISED",
+      "tests": [
+        "tools/check_matrix.py::S9"
+      ],
+      "evidence": [
+        "docs/CHECK-MATRIX.md",
+        "tools/outsider_audit.py"
+      ],
+      "owner": null,
+      "review_by": null,
+      "reason": null
+    },
+    {
+      "id": "S10",
+      "kind": "CHECK",
+      "statement": "S10: the verifier must detect the class of tampering reached by 2 recorded attack(s).",
+      "statement_sha256": "7e868b21063171b2df57634c04c45f91fd86fb3570b11c87bc236372e1084ef1",
+      "status": "EXERCISED",
+      "tests": [
+        "tools/check_matrix.py::S10"
+      ],
+      "evidence": [
+        "docs/CHECK-MATRIX.md",
+        "tools/outsider_audit.py"
+      ],
+      "owner": null,
+      "review_by": null,
+      "reason": null
+    },
+    {
+      "id": "S11",
+      "kind": "CHECK",
+      "statement": "S11: the verifier must detect the class of tampering reached by 1 recorded attack(s).",
+      "statement_sha256": "11c0c9187fcfd40841f67c744a4c93d204260b4ea2931617cba46944cafe605e",
+      "status": "EXERCISED",
+      "tests": [
+        "tools/check_matrix.py::S11"
+      ],
+      "evidence": [
+        "docs/CHECK-MATRIX.md",
+        "tools/outsider_audit.py"
+      ],
+      "owner": null,
+      "review_by": null,
+      "reason": null
+    },
+    {
+      "id": "S12",
+      "kind": "CHECK",
+      "statement": "S12: the verifier must detect the class of tampering reached by 1 recorded attack(s).",
+      "statement_sha256": "94637615bb1cb5469b5e20b2b5bd98fef3a838b0bf482e2d27781c4fd6427ef3",
+      "status": "EXERCISED",
+      "tests": [
+        "tools/check_matrix.py::S12"
+      ],
+      "evidence": [
+        "docs/CHECK-MATRIX.md",
+        "tools/outsider_audit.py"
+      ],
+      "owner": null,
+      "review_by": null,
+      "reason": null
+    },
+    {
+      "id": "S13",
+      "kind": "CHECK",
+      "statement": "S13: the verifier must detect the class of tampering reached by 4 recorded attack(s).",
+      "statement_sha256": "871e1cfd40daa3617a207f30087895a0bc67e375720026b5a5801fb0c431fb76",
+      "status": "EXERCISED",
+      "tests": [
+        "tools/check_matrix.py::S13"
+      ],
+      "evidence": [
+        "docs/CHECK-MATRIX.md",
+        "tools/outsider_audit.py"
+      ],
+      "owner": null,
+      "review_by": null,
+      "reason": null
+    },
+    {
+      "id": "S14",
+      "kind": "CHECK",
+      "statement": "S14: the verifier must detect the class of tampering reached by 2 recorded attack(s).",
+      "statement_sha256": "4b11fa6df5d280e4ac5105b3d7035ecc9b82267d33e7af568de923a3ef534af7",
+      "status": "EXERCISED",
+      "tests": [
+        "tools/check_matrix.py::S14"
+      ],
+      "evidence": [
+        "docs/CHECK-MATRIX.md",
+        "tools/outsider_audit.py"
+      ],
+      "owner": null,
+      "review_by": null,
+      "reason": null
+    },
+    {
+      "id": "S15",
+      "kind": "CHECK",
+      "statement": "S15: the verifier must detect the class of tampering reached by 4 recorded attack(s).",
+      "statement_sha256": "86fa0781d499b7e379147da8025e85585e6834912f4b1734237bc94ab589f0d7",
+      "status": "EXERCISED",
+      "tests": [
+        "tools/check_matrix.py::S15"
+      ],
+      "evidence": [
+        "docs/CHECK-MATRIX.md",
+        "tools/outsider_audit.py"
+      ],
+      "owner": null,
+      "review_by": null,
+      "reason": null
+    },
+    {
+      "id": "S16",
+      "kind": "CHECK",
+      "statement": "S16: the verifier must detect the class of tampering reached by 4 recorded attack(s).",
+      "statement_sha256": "40d7656498d22130cc5d914056a184f14430edeb0896a06f1a2138b044850107",
+      "status": "EXERCISED",
+      "tests": [
+        "tools/check_matrix.py::S16"
+      ],
+      "evidence": [
+        "docs/CHECK-MATRIX.md",
+        "tools/outsider_audit.py"
+      ],
+      "owner": null,
+      "review_by": null,
+      "reason": null
+    },
+    {
+      "id": "S17",
+      "kind": "CHECK",
+      "statement": "S17: the verifier must detect the class of tampering reached by 2 recorded attack(s).",
+      "statement_sha256": "1714b36f73d56d6e948393b4fdfcf62c0b0851b8292ad3d5cff37a81dce8ddac",
+      "status": "EXERCISED",
+      "tests": [
+        "tools/check_matrix.py::S17"
+      ],
+      "evidence": [
+        "docs/CHECK-MATRIX.md",
+        "tools/outsider_audit.py"
+      ],
+      "owner": null,
+      "review_by": null,
+      "reason": null
+    },
+    {
+      "id": "S18",
+      "kind": "CHECK",
+      "statement": "S18: the verifier must detect the class of tampering reached by 2 recorded attack(s).",
+      "statement_sha256": "db9fb506f11a7e65a79a4c35fc5ab84d50b76bfc76e31c034f3a11a61b9e2dd8",
+      "status": "EXERCISED",
+      "tests": [
+        "tools/check_matrix.py::S18"
+      ],
+      "evidence": [
+        "docs/CHECK-MATRIX.md",
+        "tools/outsider_audit.py"
+      ],
+      "owner": null,
+      "review_by": null,
+      "reason": null
+    },
+    {
+      "id": "C1",
+      "kind": "VECTOR",
+      "statement": "C1: the 29 language-neutral conformance vectors must reproduce without importing this project.",
+      "statement_sha256": "1a02008533a522ceff3483aa90ca3175c06fece64a8edd42be0bf6d0cc116320",
+      "status": "EXERCISED",
+      "tests": [
+        "tools/conformance_check.py"
+      ],
+      "evidence": [
+        "docs/conformance/vectors.json",
+        "docs/CONFORMANCE.md"
+      ],
+      "owner": null,
+      "review_by": null,
+      "reason": null
+    },
+    {
+      "id": "R1",
+      "kind": "REQUIREMENT",
+      "statement": "Every normative MUST in the specification is enumerated as its own ledger entry with a test mapping.",
+      "statement_sha256": "9ceec13202afbf12ee3abb994c669c711749c18e194326734db6123e94947e04",
+      "status": "UNTESTED",
+      "tests": [],
+      "evidence": [
+        "drafts/draft-zhao-uibc-evidence-chain-00.md"
+      ],
+      "owner": "maintainer",
+      "review_by": "2026-12-31",
+      "reason": "requirement-level enumeration is the next step; the gap is disclosed here instead of being left implicit"
+    }
+  ],
+  "summary": {
+    "total": 20,
+    "exercised": 19,
+    "untested": 1,
+    "exempt": 0,
+    "not_public": 0,
+    "disclosure_completeness": 1.0,
+    "named_gap_ratio": 1.0,
+    "attacks_recorded": 36,
+    "vectors": 29,
+    "false_accept_open": null
+  },
+  "signature": null
+}

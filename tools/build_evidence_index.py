@@ -209,14 +209,42 @@ def main():
         print(json.dumps(index, indent=2, ensure_ascii=False))
         return 0
     page = render(index)
+    known = {"--json", "--write", "--check"}
+    unknown = [a for a in sys.argv[1:] if a not in known]
+    if unknown:
+        # Until 2026-11-24 an unknown flag fell through to "print the page" and
+        # exited 0, so `--check` looked like a passing check on a stale file.
+        print("unknown argument(s): %s (known: --json --write --check)"
+              % " ".join(unknown), file=sys.stderr)
+        return 2
+    path = os.path.join(_REPO, "docs", "EVIDENCE-INDEX.md")
     if "--write" in sys.argv:
         # LF on purpose: the page is one line of diff when a number changes, and a
         # CRLF blob turned that one line into forty-two on 2026-11-21.
-        path = os.path.join(_REPO, "docs", "EVIDENCE-INDEX.md")
         with open(path, "w", encoding="utf-8", newline="\n") as fh:
             fh.write(page)
         print("written: %s (%d bytes)" % (path, len(page.encode("utf-8"))))
         return 0
+    if "--check" in sys.argv:
+        try:
+            with open(path, encoding="utf-8") as fh:
+                current = fh.read().replace("\r\n", "\n")
+        except FileNotFoundError:
+            print("missing: %s" % path, file=sys.stderr)
+            return 1
+        if current == page:
+            print("current: %s" % path)
+            return 0
+        a, b = current.splitlines(), page.splitlines()
+        for i, (was, now) in enumerate(zip(a, b), 1):
+            if was != now:
+                print("stale at line %d of %d:\n  in file: %s\n  fresh:   %s"
+                      % (i, len(b), was[:200], now[:200]), file=sys.stderr)
+                break
+        else:
+            print("stale: file has %d lines, a fresh build has %d"
+                  % (len(a), len(b)), file=sys.stderr)
+        return 1
     print(page, end="")
     return 0
 

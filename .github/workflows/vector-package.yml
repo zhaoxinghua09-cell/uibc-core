@@ -83,6 +83,20 @@ jobs:
           python tools/crosscheck_scitt_sigstore.py \
             --out "${{ runner.temp }}/crosscheck_sigstore.json" --self-test
 
+      - name: A third language answers both proof kinds
+        # pymerkle never reads a path; Sigstore's arithmetic has no consistency
+        # checker. This is the only one of the three that verifies a consistency
+        # SUBPROOF, so it is what corroborates the order this package scores.
+        # The module is fetched from a pinned go.mod/go.sum (Google CT lineage,
+        # Apache-2.0) and built with -mod=readonly, so a hash mismatch fails here
+        # rather than being rewritten.
+        run: |
+          cd tools/third_party/go-merklecheck
+          go build -mod=readonly -o "${{ runner.temp }}/merklecheck" .
+          cd -
+          "${{ runner.temp }}/merklecheck" --dir docs/upstream-package/scitt-rfc9162/v1 \
+            --out "${{ runner.temp }}/crosscheck_go.json" --self-test
+
       - name: Sweep every tree shape up to 128, both primitives
         # The corpus is 63 chosen shapes. This step answers the question the
         # corpus cannot: does every (size, index) and every (m, n) up to a bound
@@ -135,4 +149,5 @@ jobs:
         run: |
           python -m pip install --upgrade pip && pip install pytest
           python -m pytest tests/test_upstream_vector_package.py \
-            tests/test_crosscheck_pymerkle.py tests/test_crosscheck_sigstore.py -q
+            tests/test_crosscheck_pymerkle.py tests/test_crosscheck_sigstore.py \
+            tests/test_crosscheck_go.py -q

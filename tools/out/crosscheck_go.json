@@ -1,0 +1,605 @@
+{
+  "contract_version": "uibc-scitt-go-crosscheck/1",
+  "third_party": "github.com/transparency-dev/merkle (Google CT lineage, Apache-2.0)",
+  "module_version": "v0.0.2",
+  "hasher": "rfc6962.DefaultHasher (SHA-256, leaf prefix 0x00, node prefix 0x01)",
+  "case_dir": "docs/upstream-package/scitt-rfc9162/v1",
+  "cases_compared": 63,
+  "agrees_on_verdict": 63,
+  "mutated_paths_detected": 36,
+  "mutated_paths_attempted": 36,
+  "scope_note": "case numbers in, verdict out: no leaf-text hashing, no signature, no receipt, no deployment claim",
+  "cases": [
+    {
+      "case": "ambiguous-tree-size",
+      "kind": "",
+      "result": "VALID_BUT_SIZE_UNAUTHENTICATED",
+      "expect_valid": true,
+      "verified": true,
+      "agrees_on_verdict": true,
+      "path_len": 3
+    },
+    {
+      "case": "ambiguous-tree-size-2",
+      "kind": "",
+      "result": "VALID_BUT_SIZE_UNAUTHENTICATED",
+      "expect_valid": true,
+      "verified": true,
+      "agrees_on_verdict": true,
+      "path_len": 1
+    },
+    {
+      "case": "ambiguous-tree-size-4",
+      "kind": "",
+      "result": "VALID_BUT_SIZE_UNAUTHENTICATED",
+      "expect_valid": true,
+      "verified": true,
+      "agrees_on_verdict": true,
+      "path_len": 2
+    },
+    {
+      "case": "ambiguous-tree-size-8",
+      "kind": "",
+      "result": "VALID_BUT_SIZE_UNAUTHENTICATED",
+      "expect_valid": true,
+      "verified": true,
+      "agrees_on_verdict": true,
+      "path_len": 3
+    },
+    {
+      "case": "cons-1-2",
+      "kind": "consistency",
+      "result": "VALID",
+      "expect_valid": true,
+      "verified": true,
+      "agrees_on_verdict": true,
+      "path_len": 1
+    },
+    {
+      "case": "cons-2-5",
+      "kind": "consistency",
+      "result": "VALID",
+      "expect_valid": true,
+      "verified": true,
+      "agrees_on_verdict": true,
+      "path_len": 2
+    },
+    {
+      "case": "cons-3-7",
+      "kind": "consistency",
+      "result": "VALID",
+      "expect_valid": true,
+      "verified": true,
+      "agrees_on_verdict": true,
+      "path_len": 4
+    },
+    {
+      "case": "cons-4-8",
+      "kind": "consistency",
+      "result": "VALID",
+      "expect_valid": true,
+      "verified": true,
+      "agrees_on_verdict": true,
+      "path_len": 1
+    },
+    {
+      "case": "cons-6-9",
+      "kind": "consistency",
+      "result": "VALID",
+      "expect_valid": true,
+      "verified": true,
+      "agrees_on_verdict": true,
+      "path_len": 4
+    },
+    {
+      "case": "cons-9-9",
+      "kind": "consistency",
+      "result": "VALID",
+      "expect_valid": true,
+      "verified": true,
+      "agrees_on_verdict": true,
+      "path_len": 0
+    },
+    {
+      "case": "cons-fail-new-root",
+      "kind": "consistency",
+      "result": "INVALID_CONSISTENCY_PROOF",
+      "expect_valid": false,
+      "verified": false,
+      "agrees_on_verdict": true,
+      "path_len": 4,
+      "error": "calculated root:\n[229 17 71 164 6 61 103 102 10 59 108 248 180 60 17 242 109 183 113 227 116 182 233 125 200 171 231 28 60 153 131 93]\n does not match expected root:\n[48 206 92 83 104 177 183 189 219 248 54 20 114 251 61 84 29 119 154 15 151 71 6 120 122 146 147 47 82 191 211 217]"
+    },
+    {
+      "case": "cons-fail-old-root",
+      "kind": "consistency",
+      "result": "INVALID_CONSISTENCY_PROOF",
+      "expect_valid": false,
+      "verified": false,
+      "agrees_on_verdict": true,
+      "path_len": 4,
+      "error": "calculated root:\n[133 227 105 22 42 150 112 58 112 14 106 75 255 52 133 136 49 117 28 69 82 88 125 129 107 45 153 247 222 95 208 147]\n does not match expected root:\n[30 1 237 169 166 165 205 154 32 48 39 80 199 125 136 173 8 152 42 26 36 207 155 158 226 51 20 20 10 103 182 68]"
+    },
+    {
+      "case": "cons-fail-proof-last",
+      "kind": "consistency",
+      "result": "INVALID_CONSISTENCY_PROOF",
+      "expect_valid": false,
+      "verified": false,
+      "agrees_on_verdict": true,
+      "path_len": 1,
+      "error": "calculated root:\n[173 242 207 41 57 41 83 106 236 92 202 139 138 222 14 172 49 247 62 178 152 138 106 202 70 86 53 166 145 91 180 23]\n does not match expected root:\n[106 54 187 198 61 168 19 153 13 104 19 21 122 134 173 6 129 152 91 131 58 240 65 110 243 195 163 26 248 140 1 145]"
+    },
+    {
+      "case": "cons-fail-proof-long",
+      "kind": "consistency",
+      "result": "INVALID_CONSISTENCY_PROOF",
+      "expect_valid": false,
+      "verified": false,
+      "agrees_on_verdict": true,
+      "path_len": 3,
+      "error": "wrong proof size 3, want 2"
+    },
+    {
+      "case": "cons-fail-proof-short",
+      "kind": "consistency",
+      "result": "INVALID_CONSISTENCY_PROOF",
+      "expect_valid": false,
+      "verified": false,
+      "agrees_on_verdict": true,
+      "path_len": 3,
+      "error": "wrong proof size 3, want 4"
+    },
+    {
+      "case": "cons-fail-proof-swap",
+      "kind": "consistency",
+      "result": "INVALID_CONSISTENCY_PROOF",
+      "expect_valid": false,
+      "verified": false,
+      "agrees_on_verdict": true,
+      "path_len": 4,
+      "error": "calculated root:\n[153 251 233 26 188 193 181 244 135 18 32 93 154 63 231 142 168 130 97 168 186 216 210 57 13 127 254 141 128 176 180 44]\n does not match expected root:\n[127 201 123 237 182 168 28 99 193 81 3 30 16 141 39 199 216 122 53 115 153 145 223 151 42 93 186 8 39 47 209 240]"
+    },
+    {
+      "case": "cons-fail-size-order",
+      "kind": "consistency",
+      "result": "INVALID_CONSISTENCY_PROOF",
+      "expect_valid": false,
+      "verified": false,
+      "agrees_on_verdict": true,
+      "path_len": 0,
+      "error": "size2 (5) \u003c size1 (3)"
+    },
+    {
+      "case": "fail-empty-path",
+      "kind": "",
+      "result": "INVALID_INCLUSION_PATH",
+      "expect_valid": false,
+      "verified": false,
+      "agrees_on_verdict": true,
+      "path_len": 0,
+      "error": "wrong proof size 0, want 3"
+    },
+    {
+      "case": "fail-empty-tree",
+      "kind": "",
+      "result": "INVALID_TREE_SIZE",
+      "expect_valid": false,
+      "verified": false,
+      "agrees_on_verdict": true,
+      "path_len": 0,
+      "error": "index is beyond size: 0 \u003e= 0"
+    },
+    {
+      "case": "fail-path-short",
+      "kind": "",
+      "result": "INVALID_INCLUSION_PATH",
+      "expect_valid": false,
+      "verified": false,
+      "agrees_on_verdict": true,
+      "path_len": 2,
+      "error": "wrong proof size 2, want 3"
+    },
+    {
+      "case": "fail-path-short-tampered",
+      "kind": "",
+      "result": "INVALID_INCLUSION_PATH",
+      "expect_valid": false,
+      "verified": false,
+      "agrees_on_verdict": true,
+      "path_len": 1,
+      "error": "wrong proof size 1, want 2"
+    },
+    {
+      "case": "fail-path-short-tree3",
+      "kind": "",
+      "result": "INVALID_INCLUSION_PATH",
+      "expect_valid": false,
+      "verified": false,
+      "agrees_on_verdict": true,
+      "path_len": 1,
+      "error": "wrong proof size 1, want 2"
+    },
+    {
+      "case": "fail-path-short-tree32",
+      "kind": "",
+      "result": "INVALID_INCLUSION_PATH",
+      "expect_valid": false,
+      "verified": false,
+      "agrees_on_verdict": true,
+      "path_len": 4,
+      "error": "wrong proof size 4, want 5"
+    },
+    {
+      "case": "fail-path-swap",
+      "kind": "",
+      "result": "INVALID_INCLUSION_PATH",
+      "expect_valid": false,
+      "verified": false,
+      "agrees_on_verdict": true,
+      "path_len": 3,
+      "error": "calculated root:\n[242 4 89 188 96 239 229 7 106 123 93 112 88 147 101 96 74 67 222 3 133 239 163 90 78 37 100 23 82 83 101 162]\n does not match expected root:\n[115 143 243 115 77 4 44 22 149 148 214 190 225 124 192 232 155 154 10 62 197 111 255 46 146 245 224 131 207 24 32 9]"
+    },
+    {
+      "case": "fail-path-swap-tree16",
+      "kind": "",
+      "result": "INVALID_INCLUSION_PATH",
+      "expect_valid": false,
+      "verified": false,
+      "agrees_on_verdict": true,
+      "path_len": 4,
+      "error": "calculated root:\n[106 105 129 252 120 209 250 112 11 128 254 222 145 218 100 2 172 131 114 12 243 121 61 186 150 163 136 156 146 23 192 77]\n does not match expected root:\n[75 76 30 111 127 133 134 99 38 63 93 43 254 190 167 130 27 182 164 181 44 83 176 178 7 124 44 46 72 110 1 40]"
+    },
+    {
+      "case": "fail-path-swap-tree5",
+      "kind": "",
+      "result": "INVALID_INCLUSION_PATH",
+      "expect_valid": false,
+      "verified": false,
+      "agrees_on_verdict": true,
+      "path_len": 3,
+      "error": "calculated root:\n[190 215 32 209 155 254 2 49 146 96 252 253 58 164 109 131 199 213 231 91 9 193 214 100 104 240 117 224 132 66 146 2]\n does not match expected root:\n[1 166 197 255 150 204 56 7 177 163 133 51 205 35 37 69 192 238 145 5 120 150 118 234 114 252 116 120 70 134 27 167]"
+    },
+    {
+      "case": "fail-path-too-long",
+      "kind": "",
+      "result": "INVALID_INCLUSION_PATH",
+      "expect_valid": false,
+      "verified": false,
+      "agrees_on_verdict": true,
+      "path_len": 4,
+      "error": "wrong proof size 4, want 3"
+    },
+    {
+      "case": "fail-tampered-leaf",
+      "kind": "",
+      "result": "INVALID_LEAF_DIGEST",
+      "expect_valid": false,
+      "verified": false,
+      "agrees_on_verdict": true,
+      "path_len": 2,
+      "error": "calculated root:\n[73 218 124 229 163 142 21 125 28 30 15 179 27 222 97 75 23 68 76 211 158 13 87 223 75 204 187 64 239 230 178 77]\n does not match expected root:\n[236 250 242 37 66 229 210 117 37 123 246 66 35 3 180 32 54 194 184 5 89 61 71 206 194 183 221 198 97 218 168 149]"
+    },
+    {
+      "case": "fail-tampered-path",
+      "kind": "",
+      "result": "INVALID_INCLUSION_PATH",
+      "expect_valid": false,
+      "verified": false,
+      "agrees_on_verdict": true,
+      "path_len": 3,
+      "error": "calculated root:\n[153 162 177 150 105 130 243 240 2 44 165 20 137 140 187 6 68 209 135 214 83 22 98 103 187 65 157 208 112 91 18 147]\n does not match expected root:\n[207 219 18 65 198 251 104 39 178 181 228 78 94 239 203 135 72 157 161 74 30 98 86 252 6 169 133 67 69 19 199 86]"
+    },
+    {
+      "case": "fail-tampered-path-last",
+      "kind": "",
+      "result": "INVALID_INCLUSION_PATH",
+      "expect_valid": false,
+      "verified": false,
+      "agrees_on_verdict": true,
+      "path_len": 4,
+      "error": "calculated root:\n[125 108 45 7 41 201 182 219 108 95 227 149 187 152 135 38 205 140 204 98 68 12 202 183 183 92 17 25 116 95 99 120]\n does not match expected root:\n[122 59 165 110 87 236 128 136 59 230 161 55 47 181 251 47 25 5 164 216 205 210 53 89 89 162 138 141 158 81 179 206]"
+    },
+    {
+      "case": "fail-tampered-path-small-tree",
+      "kind": "",
+      "result": "INVALID_INCLUSION_PATH",
+      "expect_valid": false,
+      "verified": false,
+      "agrees_on_verdict": true,
+      "path_len": 2,
+      "error": "calculated root:\n[150 149 148 25 46 73 99 223 121 92 66 255 226 47 241 17 53 253 165 118 217 255 104 71 114 119 34 197 61 118 63 218]\n does not match expected root:\n[97 251 207 117 56 44 213 30 192 64 13 242 2 213 194 69 54 69 194 237 204 191 236 191 145 186 179 5 173 230 202 53]"
+    },
+    {
+      "case": "fail-wrong-leaf-index",
+      "kind": "",
+      "result": "INVALID_LEAF_INDEX",
+      "expect_valid": false,
+      "verified": false,
+      "agrees_on_verdict": true,
+      "path_len": 3,
+      "error": "calculated root:\n[140 50 228 55 119 230 82 170 108 124 215 42 85 93 169 178 2 196 30 217 59 21 251 220 248 170 203 202 118 29 109 140]\n does not match expected root:\n[249 89 62 230 229 252 20 124 224 230 124 192 137 63 69 134 93 115 217 171 159 191 211 251 148 33 82 61 148 64 180 42]"
+    },
+    {
+      "case": "fail-wrong-leaf-index-edge",
+      "kind": "",
+      "result": "INVALID_LEAF_INDEX",
+      "expect_valid": false,
+      "verified": false,
+      "agrees_on_verdict": true,
+      "path_len": 4,
+      "error": "calculated root:\n[237 177 233 113 210 81 10 15 150 124 86 111 7 218 226 200 61 212 227 123 206 255 4 131 249 228 169 115 22 182 136 119]\n does not match expected root:\n[178 215 205 66 164 63 124 247 0 188 122 126 103 121 18 192 73 229 215 175 10 196 115 218 46 56 209 40 225 69 226 217]"
+    },
+    {
+      "case": "fail-wrong-tree-size",
+      "kind": "",
+      "result": "INVALID_TREE_SIZE",
+      "expect_valid": false,
+      "verified": false,
+      "agrees_on_verdict": true,
+      "path_len": 2,
+      "error": "wrong proof size 2, want 3"
+    },
+    {
+      "case": "valid-empty-leaf",
+      "kind": "",
+      "result": "VALID",
+      "expect_valid": true,
+      "verified": true,
+      "agrees_on_verdict": true,
+      "path_len": 0
+    },
+    {
+      "case": "valid-empty-leaf-tree2",
+      "kind": "",
+      "result": "VALID",
+      "expect_valid": true,
+      "verified": true,
+      "agrees_on_verdict": true,
+      "path_len": 1
+    },
+    {
+      "case": "valid-tree1-index0",
+      "kind": "",
+      "result": "VALID",
+      "expect_valid": true,
+      "verified": true,
+      "agrees_on_verdict": true,
+      "path_len": 0
+    },
+    {
+      "case": "valid-tree15-index7",
+      "kind": "",
+      "result": "VALID",
+      "expect_valid": true,
+      "verified": true,
+      "agrees_on_verdict": true,
+      "path_len": 4
+    },
+    {
+      "case": "valid-tree16-index0",
+      "kind": "",
+      "result": "VALID",
+      "expect_valid": true,
+      "verified": true,
+      "agrees_on_verdict": true,
+      "path_len": 4
+    },
+    {
+      "case": "valid-tree16-index9",
+      "kind": "",
+      "result": "VALID",
+      "expect_valid": true,
+      "verified": true,
+      "agrees_on_verdict": true,
+      "path_len": 4
+    },
+    {
+      "case": "valid-tree17-index16",
+      "kind": "",
+      "result": "VALID",
+      "expect_valid": true,
+      "verified": true,
+      "agrees_on_verdict": true,
+      "path_len": 1
+    },
+    {
+      "case": "valid-tree17-index8",
+      "kind": "",
+      "result": "VALID",
+      "expect_valid": true,
+      "verified": true,
+      "agrees_on_verdict": true,
+      "path_len": 5
+    },
+    {
+      "case": "valid-tree2-index0",
+      "kind": "",
+      "result": "VALID",
+      "expect_valid": true,
+      "verified": true,
+      "agrees_on_verdict": true,
+      "path_len": 1
+    },
+    {
+      "case": "valid-tree2-index1",
+      "kind": "",
+      "result": "VALID",
+      "expect_valid": true,
+      "verified": true,
+      "agrees_on_verdict": true,
+      "path_len": 1
+    },
+    {
+      "case": "valid-tree3-index1",
+      "kind": "",
+      "result": "VALID",
+      "expect_valid": true,
+      "verified": true,
+      "agrees_on_verdict": true,
+      "path_len": 2
+    },
+    {
+      "case": "valid-tree3-index2",
+      "kind": "",
+      "result": "VALID",
+      "expect_valid": true,
+      "verified": true,
+      "agrees_on_verdict": true,
+      "path_len": 1
+    },
+    {
+      "case": "valid-tree31-index15",
+      "kind": "",
+      "result": "VALID",
+      "expect_valid": true,
+      "verified": true,
+      "agrees_on_verdict": true,
+      "path_len": 5
+    },
+    {
+      "case": "valid-tree32-index31",
+      "kind": "",
+      "result": "VALID",
+      "expect_valid": true,
+      "verified": true,
+      "agrees_on_verdict": true,
+      "path_len": 5
+    },
+    {
+      "case": "valid-tree33-index0",
+      "kind": "",
+      "result": "VALID",
+      "expect_valid": true,
+      "verified": true,
+      "agrees_on_verdict": true,
+      "path_len": 6
+    },
+    {
+      "case": "valid-tree4-index0",
+      "kind": "",
+      "result": "VALID",
+      "expect_valid": true,
+      "verified": true,
+      "agrees_on_verdict": true,
+      "path_len": 2
+    },
+    {
+      "case": "valid-tree4-index1",
+      "kind": "",
+      "result": "VALID",
+      "expect_valid": true,
+      "verified": true,
+      "agrees_on_verdict": true,
+      "path_len": 2
+    },
+    {
+      "case": "valid-tree5-index0",
+      "kind": "",
+      "result": "VALID",
+      "expect_valid": true,
+      "verified": true,
+      "agrees_on_verdict": true,
+      "path_len": 3
+    },
+    {
+      "case": "valid-tree5-index2",
+      "kind": "",
+      "result": "VALID",
+      "expect_valid": true,
+      "verified": true,
+      "agrees_on_verdict": true,
+      "path_len": 3
+    },
+    {
+      "case": "valid-tree6-index4",
+      "kind": "",
+      "result": "VALID",
+      "expect_valid": true,
+      "verified": true,
+      "agrees_on_verdict": true,
+      "path_len": 2
+    },
+    {
+      "case": "valid-tree63-index31",
+      "kind": "",
+      "result": "VALID",
+      "expect_valid": true,
+      "verified": true,
+      "agrees_on_verdict": true,
+      "path_len": 6
+    },
+    {
+      "case": "valid-tree64-index63",
+      "kind": "",
+      "result": "VALID",
+      "expect_valid": true,
+      "verified": true,
+      "agrees_on_verdict": true,
+      "path_len": 6
+    },
+    {
+      "case": "valid-tree65-index64",
+      "kind": "",
+      "result": "VALID",
+      "expect_valid": true,
+      "verified": true,
+      "agrees_on_verdict": true,
+      "path_len": 1
+    },
+    {
+      "case": "valid-tree7-index3",
+      "kind": "",
+      "result": "VALID",
+      "expect_valid": true,
+      "verified": true,
+      "agrees_on_verdict": true,
+      "path_len": 3
+    },
+    {
+      "case": "valid-tree7-index6",
+      "kind": "",
+      "result": "VALID",
+      "expect_valid": true,
+      "verified": true,
+      "agrees_on_verdict": true,
+      "path_len": 2
+    },
+    {
+      "case": "valid-tree8-index2",
+      "kind": "",
+      "result": "VALID",
+      "expect_valid": true,
+      "verified": true,
+      "agrees_on_verdict": true,
+      "path_len": 3
+    },
+    {
+      "case": "valid-tree8-index5",
+      "kind": "",
+      "result": "VALID",
+      "expect_valid": true,
+      "verified": true,
+      "agrees_on_verdict": true,
+      "path_len": 3
+    },
+    {
+      "case": "valid-tree9-index0",
+      "kind": "",
+      "result": "VALID",
+      "expect_valid": true,
+      "verified": true,
+      "agrees_on_verdict": true,
+      "path_len": 4
+    },
+    {
+      "case": "valid-tree9-index8",
+      "kind": "",
+      "result": "VALID",
+      "expect_valid": true,
+      "verified": true,
+      "agrees_on_verdict": true,
+      "path_len": 1
+    }
+  ]
+}

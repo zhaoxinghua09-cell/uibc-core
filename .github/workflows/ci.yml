@@ -54,6 +54,91 @@ jobs:
   # never run in CI at all. They pass once those packages are present. This job installs
   # them and fails if any skip still says "not installed", so a green matrix can no longer
   # mean "the hard half was skipped".
+  # Measured 2026-11-23: the suite had never run on macOS. Windows-only branches
+  # (`msvcrt` locking) and POSIX-only branches (`fcntl`) are not the same code path,
+  # so a green Ubuntu matrix said nothing about either. This job runs the full
+  # suite on a second POSIX flavour; the lock test is what actually differs.
+  test-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v7.1.0
+        with:
+          python-version: "3.13"
+
+      - name: Install test deps
+        run: python -m pip install --upgrade pip && pip install pytest ".[verify]"
+
+      - name: The platform-dependent branches, named
+        run: python -c "import platform,sys; print(platform.platform(), sys.version)"
+
+      - name: Run the suite
+        run: python -m pytest tests -q
+
+      - name: The lock, on this platform
+        # The only code that differs between Linux and macOS here is the file lock.
+        # A green suite that silently skipped it would not be evidence.
+        run: python -m pytest tests -q -k "lock or concurrent"
+
+  # Measured 2026-11-23: a plain Windows clone with the Git-for-Windows default
+  # `core.autocrlf=true` turned 1,328 tracked files into CRLF and failed 47 tests,
+  # every one of them a byte hash. `.gitattributes` now states the rule for every
+  # path (see the header of that file). This job re-creates the historical
+  # condition and fails if any later edit narrows a rule again - the failure mode
+  # cannot be reproduced on a Linux runner, so it needs its own job.
+  windows-clone-bytes:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v7.1.0
+        with:
+          python-version: "3.13"
+
+      - name: Install test deps
+        shell: bash
+        run: python -m pip install --upgrade pip && pip install pytest ".[verify]"
+
+      - name: Re-checkout the tree the way Git-for-Windows does by default
+        shell: bash
+        run: |
+          git config --global core.autocrlf true
+          git config --global core.eol native
+          git rm --cached -r -q .
+          git reset --hard -q
+          git config core.autocrlf true
+
+      - name: Count what the worktree actually holds
+        shell: bash
+        run: |
+          python - <<'PY'
+          import pathlib
+          crlf = []
+          for p in pathlib.Path('.').rglob('*'):
+              if not p.is_file() or '.git' in p.parts or p.stat().st_size > 2_000_000:
+                  continue
+              try:
+                  b = p.read_bytes()
+              except OSError:
+                  continue
+              if b.count(b'\r\n'):
+                  crlf.append(str(p))
+          print('files with CRLF:', len(crlf))
+          for f in crlf[:20]:
+              print('  ', f)
+          PY
+
+      - name: The byte-hash tests, on this checkout
+        shell: bash
+        run: python -m pytest tests/test_sources.py tests/test_oracle_reproducible.py tests/test_fixture_expectations.py tests/test_outside_kit.py -q
+
   test-with-extras:
     runs-on: ubuntu-latest
     steps:

@@ -1,3 +1,9 @@
+## The third-party implementation, executed in both directions
+
+- `docs/THIRD-PARTY-DIVERGENCE.md`: `aipmc-basic` 0.0.2 fetched from crates.io, built unmodified, and run against our parser — and our parser run against its examples.
+- Result: the two families **reject each other**. Its ten-arc form (declared alignment: `ACPs-spec-AIC-v02.01`) fails our parser with profile `aip-acps`; a GB/Z 185.2-shaped eight-arc code fails its `parse`.
+- Correction to `docs/COMPETITIVE-LANDSCAPE.md`: "deviates from the standard" was the wrong frame. It implements **a different document**, which makes this an interoperability question for the authors of both.
+- Two findings recorded rather than assumed: its `parse` does not verify the checksum (a deliberately wrong CRC still constructs, against its docs' "构造即校验"), and its spec example fails under the published default salt — which is how the private salt becomes visible.
 ## From one public URL to a green suite, on a machine we did not author on
 
 - `docs/REPRODUCTION.md`: public tarball → fresh venv → `check_doc_facts.py` → `pytest` → `probe_reference_repos.py`, with the exact commands and the observed numbers.

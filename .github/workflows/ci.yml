@@ -430,15 +430,23 @@ jobs:
         run: python -m pip install .
 
       - name: Every crosswalk reproduces its committed result
-        # Carry a real probe: `--check` re-runs it, strips the per-run timing, and
-        # compares byte for byte. A failing probe on any non-gap row is OVERCLAIM
-        # (exit 1); a difference from the committed file is drift (exit 3).
+        # Carry a real probe: the run is compared with the committed file byte for
+        # byte. A failing probe on any non-gap row is OVERCLAIM (the tool exits 1);
+        # a difference from the committed file is drift. The diff is printed rather
+        # than only the byte counts, because a drift nobody can read is a drift
+        # nobody can fix - the first run on Linux failed exactly this way and the
+        # counts alone did not say which field moved.
         run: |
           set -eu
           for f in crosswalk/*.json; do
             name=$(basename "$f" .json)
             echo "== $name"
-            python tools/crosswalk_probe.py "$f" --check "tools/out/crosswalk-$name.json" --quiet
+            python tools/crosswalk_probe.py "$f" --json "/tmp/fresh-$name.json" --quiet
+            if ! cmp -s "tools/out/crosswalk-$name.json" "/tmp/fresh-$name.json"; then
+              echo "::error::DRIFT: $name does not reproduce"
+              diff -u "tools/out/crosswalk-$name.json" "/tmp/fresh-$name.json" | head -80 || true
+              exit 3
+            fi
           done
 
       - name: The evidence index matches its sources

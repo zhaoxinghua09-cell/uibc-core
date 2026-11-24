@@ -83,8 +83,14 @@ class ConvertTests(unittest.TestCase):
         self.assertEqual(tf.detect_format({"x": 1}), "json")
         self.assertEqual(tf.detect_format("<root/>"), "xml")
         self.assertEqual(tf.detect_format('{"x":1}'), "json")
+        # A detector is called on bytes the caller did not choose, so "cannot
+        # tell" is an answer here and not an exception. The refusal moved one
+        # level up, to convert(), where something is actually being promised.
+        self.assertIsNone(tf.detect_format("plain text"))
+        self.assertIsNone(tf.detect_format(None))
+        self.assertIsNone(tf.detect_format(""))
         with self.assertRaises(ValueError):
-            tf.detect_format("plain text")
+            tf.convert("plain text", "xml")
 
 
 class HeaderMapTests(unittest.TestCase):

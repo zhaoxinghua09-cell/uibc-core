@@ -1,3 +1,12 @@
+## The AIC text itself, and a checksum we can now decide
+
+- Found the document, not just a crate's copy of it: `ACPs-spec-AIC-v02.02` at `aip-pub/ACPs-community`, path `acps-specs/02-ACPs-spec-AIC/ACPs-spec-AIC.md`. Copy pinned by `sha256:38242a01…23ab` in `docs/ACPS-SPEC-IN-HAND.md`. The earlier "the ACPs repositories are empty" reading came from the `git/tree` endpoint; `contents` returns the tree.
+- `uibc_core/acps_identity_code.py`: spec references corrected v02.01 → v02.02; new `verify_acps_code(code, salt)` recomputes arc 10 (CRC-16/CCITT-FALSE over arcs 1-9 ++ salt, Base36 four chars) and returns `VERIFIED` / `INVALID` / `INCONCLUSIVE`. `VERIFIED` carries an evidence entry whose digest is the sha256 of the exact bytes hashed. Without a salt the answer is still "checksum NOT checked", never a guess.
+- The document's own worked example passes byte for byte: `salt 0x12 0x34` → `crc 0x646C` → arc 10 `0JU4` on `1.2.156.3088.1.1.34C2.478BDF.3GF546`; `0xFFFF → 1EKF` matches the range the text states for arc 10.
+- Third implementation as oracle: `aipub-protocols` 0.0.3 (crates.io, lib `protocols`) compiled unpatched on a Linux VM (cargo 1.100.0, 2026-11-24) and asked for checksums over 16 boundary cases (lowercase, salts 2→16 bytes, both ends of each segment range, ontology form, foreign prefixes). 16/16 agree; the answers are pinned in `tests/test_acps_cross_implementation.py` so they keep agreeing or fail loudly.
+- Tests: `tests/test_acps_spec_conformance.py` (20, built only from the text's example, its stated range and deliberate mutations) + the cross-implementation file (17). Together with the existing reader tests: 52 passed.
+- Version: `pyproject.toml` 0.5.0 → **0.5.1**. `CITATION.cff` is left at 0.4.2 on purpose: it pins the Zenodo archive, not the working tree.
+
 ## Anchor: a frozen root, four calendar receipts, no Bitcoin attestation yet
 
 - `docs/anchors/ROOT-28a23ff.txt` and `.ots`: the claims are frozen against commit `28a23ff` (tree `d4656d1`), `sha256(ROOT) = 20c8d31b07bd…bf72`, submitted 2026-11-24 18:30 +08:00 to four OpenTimestamps calendars.

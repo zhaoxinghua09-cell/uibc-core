@@ -60,7 +60,7 @@ Our parser on the same inputs (`uibc_core/agent_identity_code.py`, same day):
 
 1. **The two families reject each other.** A standard-shaped code fails its parser; a ten-arc code fails ours. "AIC compatible" has to name the document.
 2. **Its `parse` does not check the checksum.** `10seg_bad_crc` constructs successfully with a deliberately wrong CRC; verification is a separate `verify_checksum(salt)` call. Its docs say "构造即校验". A wrong-checksum code being constructible means that phrasing over-claims — recorded here as a documentation discrepancy, not a security defect.
-3. **The salt is private.** Only the default salt is published, so a third party cannot verify checksums on codes issued by another ARSP. Its own spec example failing under the default salt is what makes this visible rather than theoretical.
+3. **The salt is private by design.** The AIC text (`ACPs-spec-AIC-v02.02` §4.1, now in hand — `docs/ACPS-SPEC-IN-HAND.md`) keeps the salt inside each ARSP, at least two bytes, and publishes exactly one worked example (`0x12 0x34`). A third party can therefore verify a code only if that ARSP hands over its salt; our `verify_acps_code(code, salt)` is built for that case rather than pretending the case does not exist.
 4. **The prefix is not fixed in practice.** Default `1.2.156.3088`, spec example `1.2.156.1234`. A reader that pins one prefix cannot read both.
 
 ## What changes on our side

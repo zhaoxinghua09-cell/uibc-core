@@ -2,14 +2,14 @@
 
 There are two published texts that both define "the agent identity code", and they do not describe the same string.
 
-| | GB/Z 185.2-2026 (national guidance) | ACPs-spec-AIC-v02.01 (community specification) |
+| | GB/Z 185.2-2026 (national guidance) | ACPs-spec-AIC-v02.02 (community specification) |
 |---|---|---|
 | Arcs | **8** | **10** |
 | Shape | `1.2.156.3088.版本.服务方.请求方.序列号` | `1.2.156.3088.版本.ARSP.供应商.本体序列号.实例序列号.校验码` |
 | Checksum | none | CRC-16/CCITT-FALSE over arcs 1-9 ++ per-ARSP salt, Base36, 4 chars |
 | Prefix | fixed `1.2.156.3088` | default `1.2.156.3088`, worked example `1.2.156.1234` |
 | Serial | one arc, split only by recommendation | two arcs, ontology and instance |
-| Salt | n/a | per-ARSP, not published |
+| Salt | n/a | per-ARSP, >=2 bytes, not published; the text publishes one worked example (0x1234) |
 
 Measured consequence (`docs/THIRD-PARTY-DIVERGENCE.md`, executed 2026-11-24): the reference implementation of the second document (`aipmc-basic` 0.0.2) **rejects** the first document's shape, and our reader of the first document **rejects** the second's. Neither is defective. They answer different papers.
 
@@ -18,11 +18,11 @@ Measured consequence (`docs/THIRD-PARTY-DIVERGENCE.md`, executed 2026-11-24): th
 Two readers, two labels, no crosswalk:
 
 - `uibc_core/agent_identity_code.py` — eight arcs, GB/Z 185.2 5.1-5.6, checksum absent.
-- `uibc_core/acps_identity_code.py` — ten arcs, ACPs v02.01, checksum present but **never judged** (salt unpublished).
+- `uibc_core/acps_identity_code.py` — ten arcs, ACPs v02.02; checksum **judged only when the caller supplies the salt** (`verify_acps_code(code, salt)`), never guessed.
 
-`detect_profile()` says which reading a string is written in (`gbz185.2` / `aip-acps`). Each reader refuses the other's shape with an explicit reason instead of coercing it. Both top out at `INCONCLUSIVE`: shape is not allocation, and in the ten-arc case the checksum is not verifiable by anyone outside the issuing ARSP.
+`detect_profile()` says which reading a string is written in (`gbz185.2` / `aip-acps`). Each reader refuses the other's shape with an explicit reason instead of coercing it. Shape alone tops out at `INCONCLUSIVE` — shape is not allocation. The ten-arc case goes one step further **when, and only when, the caller holds the ARSP's salt**: `verify_acps_code()` recomputes arc 10 and returns `VERIFIED` or `INVALID`, with `scope` stating that issuance is still a registry question.
 
-A deliberate asymmetry, stated rather than hidden: given a ten-arc code with a wrong checksum, we return `INCONCLUSIVE` — we refuse to guess the salt — while a holder of that ARSP's salt could return a definite failure. Our result is therefore *weaker* than a salt-holder's check, and it is labelled that way in `scope`.
+Where the asymmetry used to sit is now written down as a test rather than a paragraph: without a salt we return `INCONCLUSIVE` and say the checksum was not checked; with a salt we return a definite answer. The text's own worked example (`SALT = 0x1234` → `0x646C` → `0JU4`) is reproduced in `tests/test_acps_spec_conformance.py`, so "we can compute this" is a claim with a run behind it, not a promise.
 
 ## Why this matters beyond our repository
 

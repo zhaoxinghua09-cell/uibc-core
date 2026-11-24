@@ -51,13 +51,13 @@
       "text": "Electronic signatures and handwritten signatures executed to electronic records shall be linked to their respective electronic records to ensure that the signatures cannot be excised, copied, or otherwise transferred to falsify an electronic record by ordinary means.",
       "url": "https://www.ecfr.gov/current/title-21/chapter-I/subchapter-A/part-11",
       "applies": true, "verbatim": true,
-      "strength": "partial",
-      "carrier": ["seal covers evidence_root", "keyswap fixture going INCONCLUSIVE under a pinned key", "tamper detection after sealing"],
+      "strength": "carried",
+      "carrier": ["AEE observationRecords: one DSSE signature per record", "records.record_verified pins the signer key and never trusts the carried keyid", "vendored upstream conformance vector (Apache-2.0, suiteRevision 32)"],
       "probe": {
-        "cmd": "python -m pytest tests/test_iverify_pubkey_pin.py -q",
-        "expect": {"exit": 0}
+        "cmd": "python tools/probe_record_binding.py",
+        "expect": {"exit": 0, "stdout_contains": "bound to their records"}
       },
-      "reason": "A seal over the whole package is not portable: lift it onto different bytes and the root no longer matches, and swap the key and a pinned verifier returns INCONCLUSIVE rather than PASS - the fixture expectations pin exactly that. So 'copied or transferred to falsify' is answered at package granularity. 'Linked to their respective records' is not: there is one seal per package, not one signature per record, and per-record signatures are not implemented."
+      "reason": "Each AEE observation record carries its own DSSE signature over that record's PAE, and records.record_verified checks it against the consumer's pinned key rather than the keyid the record happens to carry. The probe copies record 0's signature list onto record 1 and record 1 stops verifying; delete record 1's signatures and it stops verifying; record 0 is unaffected either way. That is the 'cannot be excised, copied, or otherwise transferred' test, run on a vendored upstream conformance vector instead of on a demo of our own. Not covered: the physical execution of a handwritten signature (pen on paper). Once such a signature has been executed to an electronic record its bytes are record content and inherit the same binding, but the pen-and-paper step is outside any software layer."
     },
     {
       "id": "21 CFR 11.10(k)(2)",

@@ -208,7 +208,16 @@ def test_part_11_clauses_are_verbatim_from_ecfr():
     for c in doc["clauses"]:
         assert c.get("verbatim") is True, c["id"]
         assert "ecfr.gov" in c["url"], c["id"]
-        assert c["strength"] != "carried", "%s: no per-record signature exists yet" % c["id"]
+        if c["strength"] == "carried":
+            # The one carried row must rest on the record-binding probe: a
+            # carried row whose evidence is a demo would defeat the point.
+            assert c["probe"]["cmd"].endswith("probe_record_binding.py"), c["id"]
+
+
+def test_part_11_carries_exactly_the_record_binding_row():
+    doc = json.loads((REPO / "crosswalk" / "21cfr11.json").read_text(encoding="utf-8"))
+    carried = [c["id"] for c in doc["clauses"] if c["strength"] == "carried"]
+    assert carried == ["21 CFR 11.70"], carried
 
 
 # --- the 4(d) probe: identities recompute or they do not ----------------

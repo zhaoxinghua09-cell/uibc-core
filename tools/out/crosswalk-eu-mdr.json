@@ -7,7 +7,7 @@
     "scope_note": "Five clauses only. This is not the GSPR checklist: that has roughly 150-200 rows for a Class IIa/IIb device and is the manufacturer's document, not a library's. Rows were chosen because they are the ones a record layer can plausibly touch at all.",
     "source": "crosswalk/eu-mdr-2017-745.json"
   },
-  "manifest_sha256": "e02a4ade15062e935b1ca667bd913a529b7a5c665afc963cf71f4317da442f24",
+  "manifest_sha256": "71300f801c7295f179b8ad59688816249c0b2ed6e2e378651b0080b38741559e",
   "clause_count": 5,
   "counts": {
     "PARTIAL": 4,
@@ -19,6 +19,7 @@
       "id": "MDR Annex I 17.1",
       "applies": true,
       "strength": "partial",
+      "verbatim": true,
       "state": "PARTIAL",
       "note": "",
       "reason": "The bundled demo builds, seals, verifies, tampers and re-verifies one package end to end, so the same input yields the same verdict and a tampered copy is caught. We do not test device performance, and we do not exercise single-fault behaviour of the device itself.",
@@ -35,12 +36,12 @@
         "expect_exit": 0,
         "stdout_contains": "Try it yourself",
         "ok": true,
-        "duration_s": 0.45,
+        "duration_s": 0.53,
         "tail": [
           "[8/8] verify the same package PINNED to the owner's public key",
           "     -> result: FAIL (expected FAIL: key substitution caught by pinning - publish your .pub where verifiers can pin it)",
-          "Try it yourself: python -m uibc_core.cli verify C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\uibc-demo-vpjesi9m\\demo   (no key needed - the seal is public)",
-          "                 python -m uibc_core.cli verify C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\uibc-demo-vpjesi9m\\forged --pubkey C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\uibc-demo-vpjesi9m\\owner.key.pub"
+          "Try it yourself: python -m uibc_core.cli verify C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\uibc-demo-79ptfc9r\\demo   (no key needed - the seal is public)",
+          "                 python -m uibc_core.cli verify C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\uibc-demo-79ptfc9r\\forged --pubkey C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\uibc-demo-79ptfc9r\\owner.key.pub"
         ]
       }
     },
@@ -48,6 +49,7 @@
       "id": "MDR Annex I 17.2",
       "applies": true,
       "strength": "partial",
+      "verbatim": true,
       "state": "PARTIAL",
       "note": "",
       "reason": "We record that a verification/validation document exists, is bound to the policy in force and has not been altered since sealing. We do not judge whether the plan behind that document is adequate, nor whether the development lifecycle followed it.",
@@ -64,7 +66,7 @@
         "expect_exit": 0,
         "stdout_contains": null,
         "ok": true,
-        "duration_s": 2.69,
+        "duration_s": 2.95,
         "tail": [
           ".........                                                                [100%]",
           "9 passed in 0.92s"
@@ -75,6 +77,7 @@
       "id": "MDR Annex I 17.4",
       "applies": true,
       "strength": "partial",
+      "verbatim": true,
       "state": "PARTIAL",
       "note": "",
       "reason": "The package states its own network and key-resolution requirements and refuses a document that is oversized, loopback/private, or reached through a downgrade. It does not specify hardware, and it does not audit the deployment's actual IT security measures.",
@@ -89,10 +92,10 @@
         "expect_exit": 0,
         "stdout_contains": null,
         "ok": true,
-        "duration_s": 1.96,
+        "duration_s": 2.16,
         "tail": [
           "...............                                               [100%]",
-          "15 passed, 11 subtests passed in 0.13s"
+          "15 passed, 11 subtests passed in 0.23s"
         ]
       }
     },
@@ -100,6 +103,7 @@
       "id": "MDR Annex I 18.8",
       "applies": true,
       "strength": "gap",
+      "verbatim": true,
       "state": "GAP",
       "note": "",
       "reason": "This is device and firmware design: physical access, boot integrity, network exposure of the device itself. A record layer cannot answer it, and claiming otherwise would be the kind of overclaim this file exists to prevent.",
@@ -111,6 +115,7 @@
       "id": "MDR Annex II 4(d)",
       "applies": true,
       "strength": "partial",
+      "verbatim": true,
       "state": "PARTIAL",
       "note": "",
       "reason": "Every evidence entry carries a relative path and a sha256 over its bytes, and a probe recomputes both: 2/2 on the clean fixture, and on the tampered fixture it names the entry whose digest no longer matches. What is still missing is document control - approval, revision history and the controlled-document numbering scheme remain with the manufacturer's QMS (EN ISO 13485 4.2.4).",
@@ -127,7 +132,7 @@
         "expect_exit": 0,
         "stdout_contains": "identities recompute",
         "ok": true,
-        "duration_s": 0.19,
+        "duration_s": 0.2,
         "tail": [
           "OK 2/2 evidence identities recompute"
         ]

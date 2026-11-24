@@ -41,6 +41,17 @@ def test_classify_carried_with_failing_probe_is_overclaim():
     assert state == "OVERCLAIM"
 
 
+def test_classify_carried_requires_a_verbatim_clause():
+    """Reading a summary is not the same as reading the clause."""
+    state, note = cp.classify("carried", "", _probe(True), verbatim=False)
+    assert state == "OVERCLAIM"
+    assert "verbatim" in note
+
+
+def test_classify_partial_is_allowed_without_verbatim():
+    assert cp.classify("partial", "paid standard, titles only", None, verbatim=False)[0] == "PARTIAL"
+
+
 def test_classify_carried_when_not_run_is_unrun():
     state, _ = cp.classify("carried", "", None, ran=False)
     assert state == "UNRUN"
@@ -149,7 +160,7 @@ def test_manifest_digest_is_stable_across_key_order():
 
 # --- the shipped crosswalks --------------------------------------------
 
-@pytest.mark.parametrize("name", ["eu-mdr-2017-745.json", "tool-contract.json"])
+@pytest.mark.parametrize("name", ["eu-mdr-2017-745.json", "tool-contract.json", "iec-62304-2006-a1.json", "iso-14971-2019.json"])
 def test_shipped_crosswalks_evaluate_without_bad_states(name):
     doc = json.loads((REPO / "crosswalk" / name).read_text(encoding="utf-8"))
     assert doc["schema"] == cp.SCHEMA
@@ -169,7 +180,7 @@ def test_mdr_crosswalk_has_no_carried_clause():
 
 
 def test_every_mapped_clause_quotes_a_url():
-    for name in ["eu-mdr-2017-745.json", "tool-contract.json"]:
+    for name in ["eu-mdr-2017-745.json", "tool-contract.json", "iec-62304-2006-a1.json", "iso-14971-2019.json"]:
         doc = json.loads((REPO / "crosswalk" / name).read_text(encoding="utf-8"))
         for c in doc["clauses"]:
             assert c.get("url", "").startswith("https://"), c["id"]

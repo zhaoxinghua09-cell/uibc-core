@@ -11,7 +11,7 @@
       "id": "MDR Annex I 17.1",
       "text": "Devices that incorporate electronic programmable systems, including software, or software that are devices in themselves, shall be designed to ensure repeatability, reliability and performance in line with their intended use. In the event of a single fault condition, appropriate means shall be adopted to eliminate or reduce as far as possible consequent risks or impairment of performance.",
       "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32017R0745",
-      "applies": true,
+      "applies": true,"verbatim": true,
       "strength": "partial",
       "carrier": ["three-valued verdict", "per-check reason code", "checked_at"],
       "probe": {
@@ -24,7 +24,7 @@
       "id": "MDR Annex I 17.2",
       "text": "For devices that incorporate software or for software that are devices in themselves, the software shall be developed and manufactured in accordance with the state of the art taking into account the principles of development life cycle, risk management, including information security, verification and validation.",
       "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32017R0745",
-      "applies": true,
+      "applies": true,"verbatim": true,
       "strength": "partial",
       "carrier": ["evidence entry type=EVAL", "policy_hash", "seal"],
       "probe": {
@@ -37,7 +37,7 @@
       "id": "MDR Annex I 17.4",
       "text": "Manufacturers shall set out minimum requirements concerning hardware, IT networks characteristics and IT security measures, including protection against unauthorised access, necessary to run the software as intended.",
       "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32017R0745",
-      "applies": true,
+      "applies": true,"verbatim": true,
       "strength": "partial",
       "carrier": ["did:web fetch guards: public-host assertion, 2 MB cap, no 3xx downgrade"],
       "probe": {
@@ -50,7 +50,7 @@
       "id": "MDR Annex I 18.8",
       "text": "Devices shall be designed and manufactured in such a way as to protect, as far as possible, against unauthorised access that could hamper the device from functioning as intended.",
       "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32017R0745",
-      "applies": true,
+      "applies": true,"verbatim": true,
       "strength": "gap",
       "carrier": [],
       "probe": null,
@@ -60,7 +60,7 @@
       "id": "MDR Annex II 4(d)",
       "text": "the precise identity of the controlled documents offering evidence of conformity with each harmonised standard, CS or other method applied to demonstrate conformity with the general safety and performance requirements ... shall incorporate a cross-reference to the location of such evidence within the full technical documentation",
       "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32017R0745",
-      "applies": true,
+      "applies": true,"verbatim": true,
       "strength": "partial",
       "carrier": ["evidence/index.json: path + content_hash per document", "evidence_root in manifest", "tools/probe_evidence_identity.py"],
       "probe": {

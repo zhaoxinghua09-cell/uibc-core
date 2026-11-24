@@ -1,0 +1,128 @@
+{
+  "schema": "uibc-crosswalk/1",
+  "standard": {
+    "id": "IEC 62304:2006+AMD1:2015",
+    "title": "IEC 62304 — software life cycle processes, mapped by clause title only",
+    "url": "https://www.iso.org/obp/ui/#iso:std:iec:62304:ed-1:v1:en",
+    "scope_note": "The standard text is paid (CHF 1,150 for the consolidated version). Only the table of contents - clause numbers and titles - is public, and that is all this file quotes. Every row therefore carries verbatim=false and may be PARTIAL or GAP, never carried: a clause whose requirement text nobody on this project has read cannot be claimed as covered. Five clauses, chosen because a record layer might plausibly touch them; the other thirty-five are not listed, which is itself the answer.",
+    "source": "crosswalk/iec-62304-2006-a1.json"
+  },
+  "manifest_sha256": "b5c4b74be4796aee9d284d920cdac226da302104aaed17f647e5edf84d9e10f7",
+  "clause_count": 5,
+  "counts": {
+    "GAP": 2,
+    "PARTIAL": 3
+  },
+  "bad": 0,
+  "rows": [
+    {
+      "id": "IEC 62304 4.3 Software safety classification",
+      "applies": true,
+      "strength": "gap",
+      "verbatim": false,
+      "state": "GAP",
+      "note": "",
+      "reason": "Class A/B/C is assigned from the device risk analysis and drives which tasks are mandatory. This is a decision about the product, made by the manufacturer against ISO 14971; a record layer has nothing to classify and cannot answer it.",
+      "carrier": [],
+      "url": "https://www.iso.org/obp/ui/#iso:std:iec:62304:ed-1:v1:en",
+      "probe": null
+    },
+    {
+      "id": "IEC 62304 5.8 Software release",
+      "applies": true,
+      "strength": "partial",
+      "verbatim": false,
+      "state": "PARTIAL",
+      "note": "",
+      "reason": "A released package names every artefact by digest and seals the set, so the released thing is identifiable and a later edit is detectable. What is missing: the release decision itself - who approved it, against which verification results, and whether every required task for the assigned safety class was actually performed.",
+      "carrier": [
+        "evidence/index.json digests",
+        "manifest evidence_root",
+        "seal"
+      ],
+      "url": "https://www.iso.org/obp/ui/#iso:std:iec:62304:ed-1:v1:en",
+      "probe": {
+        "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" tools/probe_evidence_identity.py fixtures/clean.uibc",
+        "declared": "python tools/probe_evidence_identity.py fixtures/clean.uibc",
+        "exit": 0,
+        "expect_exit": 0,
+        "stdout_contains": "identities recompute",
+        "ok": true,
+        "duration_s": 0.21,
+        "tail": [
+          "OK 2/2 evidence identities recompute"
+        ]
+      }
+    },
+    {
+      "id": "IEC 62304 8.2 Change control",
+      "applies": true,
+      "strength": "partial",
+      "verbatim": false,
+      "state": "PARTIAL",
+      "note": "",
+      "reason": "The seal makes an uncontrolled change visible: alter a byte and verification stops agreeing with the manifest. That is detection, not control - approval of a change, impact analysis and re-baselining stay in the manufacturer's configuration management process.",
+      "carrier": [
+        "seal over manifest",
+        "lifecycle events",
+        "tamper detection"
+      ],
+      "url": "https://www.iso.org/obp/ui/#iso:std:iec:62304:ed-1:v1:en",
+      "probe": {
+        "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" -m pytest tests/test_seal_v03.py -q",
+        "declared": "python -m pytest tests/test_seal_v03.py -q",
+        "exit": 0,
+        "expect_exit": 0,
+        "stdout_contains": null,
+        "ok": true,
+        "duration_s": 2.81,
+        "tail": [
+          ".........                                                                [100%]",
+          "9 passed in 0.91s"
+        ]
+      }
+    },
+    {
+      "id": "IEC 62304 7.1 Analysis of software contributing to hazardous situations",
+      "applies": true,
+      "strength": "gap",
+      "verbatim": false,
+      "state": "GAP",
+      "note": "",
+      "reason": "This is engineering analysis: which software functions can contribute to which hazardous situations. Nothing in a record layer performs it, and a placeholder table of hazards would be worse than an acknowledged gap.",
+      "carrier": [],
+      "url": "https://www.iso.org/obp/ui/#iso:std:iec:62304:ed-1:v1:en",
+      "probe": null
+    },
+    {
+      "id": "IEC 62304 9.5 Maintain records",
+      "applies": true,
+      "strength": "partial",
+      "verbatim": false,
+      "state": "PARTIAL",
+      "note": "",
+      "reason": "Problem and change events are appended with identity and time and can be read back in one command. What is missing: the content requirements of the records (who investigated, what was concluded, which verification closed it) and retention rules.",
+      "carrier": [
+        "lifecycle.json events",
+        "inspect output"
+      ],
+      "url": "https://www.iso.org/obp/ui/#iso:std:iec:62304:ed-1:v1:en",
+      "probe": {
+        "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" -m uibc_core.cli inspect fixtures/clean.uibc",
+        "declared": "python -m uibc_core.cli inspect fixtures/clean.uibc",
+        "exit": 0,
+        "expect_exit": 0,
+        "stdout_contains": "events:",
+        "ok": true,
+        "duration_s": 0.33,
+        "tail": [
+          "status:     REGISTERED / manifest: SUBMITTED",
+          "events:     REGISTER -> ACTIVATE -> UPDATE",
+          "evidence:   2 entries",
+          "root:       a9348d857ee5efb322db8c4e611f59e0a727116745987c5a9613f571f2e9287a"
+        ]
+      }
+    }
+  ],
+  "verdict": "OK"
+}

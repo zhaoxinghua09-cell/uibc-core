@@ -19,6 +19,7 @@
       "id": "TC-1 three-state decision is a pure function",
       "applies": true,
       "strength": "carried",
+      "verbatim": true,
       "state": "COVERED",
       "note": "",
       "reason": "",
@@ -34,10 +35,10 @@
         "expect_exit": 0,
         "stdout_contains": null,
         "ok": true,
-        "duration_s": 1.89,
+        "duration_s": 2.22,
         "tail": [
-          ".........                                                                [100%]",
-          "9 passed, 14 deselected in 0.15s"
+          "...........                                                              [100%]",
+          "11 passed, 16 deselected in 0.15s"
         ]
       }
     },
@@ -45,6 +46,7 @@
       "id": "TC-2 a declared gap stays green and is counted",
       "applies": true,
       "strength": "carried",
+      "verbatim": true,
       "state": "COVERED",
       "note": "",
       "reason": "",
@@ -60,10 +62,10 @@
         "expect_exit": 0,
         "stdout_contains": null,
         "ok": true,
-        "duration_s": 1.89,
+        "duration_s": 4.11,
         "tail": [
           ".                                                                        [100%]",
-          "1 passed, 22 deselected in 0.13s"
+          "1 passed, 26 deselected in 2.02s"
         ]
       }
     },
@@ -71,6 +73,7 @@
       "id": "TC-3 an unproven claim turns the run red",
       "applies": true,
       "strength": "carried",
+      "verbatim": true,
       "state": "COVERED",
       "note": "",
       "reason": "",
@@ -86,10 +89,10 @@
         "expect_exit": 0,
         "stdout_contains": null,
         "ok": true,
-        "duration_s": 2.02,
+        "duration_s": 2.39,
         "tail": [
           "....                                                                     [100%]",
-          "4 passed, 19 deselected in 0.29s"
+          "4 passed, 23 deselected in 0.34s"
         ]
       }
     },
@@ -97,6 +100,7 @@
       "id": "TC-4 shell semantics across platforms",
       "applies": true,
       "strength": "gap",
+      "verbatim": true,
       "state": "GAP",
       "note": "",
       "reason": "Only the Windows path has been exercised here. A probe written for POSIX quoting can pass locally and fail on the other platform; a containerised runner that runs both is not wired up yet.",

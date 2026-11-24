@@ -7,7 +7,7 @@
 - Standard: **Regulation (EU) 2017/745 (MDR)**
 - Source: https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32017R0745
 - Clauses mapped: **5**
-- Manifest digest: `e02a4ade15062e935b1ca667bd913a529b7a5c665afc963cf71f4317da442f24`
+- Manifest digest: `71300f801c7295f179b8ad59688816249c0b2ed6e2e378651b0080b38741559e`
 - Counts: GAP=1, PARTIAL=4
 
 | Clause | Strength | State | Carrier | Probe | What is not covered |

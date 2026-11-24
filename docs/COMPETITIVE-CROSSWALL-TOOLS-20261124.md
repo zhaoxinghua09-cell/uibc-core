@@ -62,20 +62,50 @@ the AER-1 corpus. Its docstring is explicit: "the mapping is authored - the scri
 never guesses". That is the right honesty for a hand mapping, and it also means
 no row can be contradicted by a machine.
 
-## The empty cell, and what fills it
+## Correction, 2026-11-25: the empty cell was not empty
 
-Across all four: structure without execution (OSCAL), execution without a
-partial state (InSpec), execution with human review but no re-runnable verdict
-(vendors), and an authored mapping that nothing runs (our AER-1 file).
+The first version of this note said no tool carried a declared-gap state whose
+verdict came from real tool output. **That was wrong.** A fifth family does:
 
-`tools/crosswalk_probe.py` adds the state that makes honesty mechanical:
+**PayloadGuard Evidence** (`payloadguard-evidence`, GitHub). Its own description:
+each requirement is bound to "a specific run of a specific verification tool,
+with the tool's verbatim output committed alongside the claim"; strength "is
+derived only from what a verification tool actually reported in a real, recorded
+run"; the vocabulary is PROVEN / BOUNDED_CHECKED / TESTED / EXAMPLE_CHECKED /
+DECLARED / GAP; and generation "fails rather than emit a PROVEN label not backed
+by a real, completed proof". It carries an ISO 14971 risk-management plan and
+hazard register per example, and runs the same engine, unmodified, against NHTSA
+FMVSS No. 127 - so it is the cross-domain example as well.
+
+The state is therefore not ours, and saying so is more useful than the earlier
+claim was. What is actually different:
+
+| | PayloadGuard Evidence | this repo |
+|---|---|---|
+| what is mapped | software requirements | regulatory clauses |
+| question answered | is this requirement established, and how strongly | what part of this clause can this package carry at all |
+| source handling | verbatim archive per source; numeric-constant citation gate | a `verbatim` flag per clause: text not read -> never carried |
+| how a domain is added | per-example specs and sources | crosswalk files are data; no engine change |
+| object of the verdict | a proof or test run | a package's identity, seal, state and revocation |
+
+Read plainly: they map evidence to requirements, we map clauses to carrying
+capacity. Neither replaces the other, and "we are ahead" is not available to
+either side. The one rule this repo adds that they do not state is the
+`verbatim` gate below - and that is a narrow rule, not a moat.
+
+Source: https://github.com/PayloadGuard-PLG/payloadguard-evidence
+
+## The states, as this repo runs them
+
+`tools/crosswalk_probe.py` decides a clause from three inputs - what was
+claimed, what the reason says, what the probe did:
 
 | State | Meaning | Effect on exit code |
 |---|---|---|
-| COVERED | strength=carried and the declared probe passed | - |
+| COVERED | strength=carried, clause text quoted verbatim, declared probe passed | - |
 | PARTIAL | strength=partial, reason states what is missing | - |
 | GAP | strength=gap, reason states why this layer cannot carry it | - |
-| OVERCLAIM | strength=carried but no probe, or a probe that failed | 1 |
+| OVERCLAIM | strength=carried but no probe, a failing probe, or no verbatim quote | 1 |
 | UNDECLARED | partial or gap with an empty reason | 1 |
 | UNRUN | `--no-probe`; carried clauses were not executed | - |
 
@@ -85,15 +115,27 @@ outnumber record-layer ones, so a tool that reddens on every gap would be turned
 off within a week. A claim that cannot be demonstrated turns the run red - that is
 the only reason the other two states mean anything.
 
-Two files ship with it:
+The `verbatim` gate is the narrow addition: a row whose clause text was never
+read (a paid standard quoted only by clause title, or a summary quoted instead of
+the standard) may be PARTIAL or GAP, never carried. It is one boolean, not a
+mechanism, and PayloadGuard's per-source verbatim archive is the stronger version
+of the same instinct.
 
-- `crosswalk/eu-mdr-2017-745.json` - five MDR clauses (Annex I 17.1, 17.2, 17.4,
-  18.8 and Annex II 4(d)), four partial and one gap, no carried row. The absence
-  of a carried row is the finding, and a test pins it so a later edit cannot
-  quietly promote a row.
+Four crosswalks ship:
+
+- `crosswalk/eu-mdr-2017-745.json` - Annex I 17.1, 17.2, 17.4, 18.8 and Annex II
+  4(d), text quoted verbatim from EUR-Lex. Four partial, one gap, no carried row.
+- `crosswalk/iec-62304-2006-a1.json` - five clauses, **titles only** (the standard
+  is CHF 1,150 and the full text is not public): three partial, two gaps.
+- `crosswalk/iso-14971-2019.json` - five clauses, **titles only**: two partial,
+  three gaps.
 - `crosswalk/tool-contract.json` - the tool's own contract, three carried rows
-  with real probes and one gap. Kept separate so a regulatory crosswalk is not
+  with real probes plus one gap, kept separate so a regulatory crosswalk is not
   padded with self-tests.
+
+Twelve medical-device clauses mapped, **zero carried**. That is the finding, and
+two tests pin it: promoting a row to carried without a verbatim quote, or without
+a passing probe, turns the run red.
 
 The manifest digest over the clause set is the identity of the mapping: change a
 quoted clause, a strength or a reason and it changes; change only a probe's

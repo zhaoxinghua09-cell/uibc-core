@@ -118,12 +118,20 @@ def run_probe(probe, cwd=REPO, timeout=600):
         }
 
 
-def classify(strength, reason, probe_result, ran=True):
-    """Pure decision function. Kept separate so tests can drive it directly."""
+def classify(strength, reason, probe_result, ran=True, verbatim=True):
+    """Pure decision function. Kept separate so tests can drive it directly.
+
+    verbatim=False means the clause text itself was not quoted from the source
+    (paid standards, or a summary read instead of the standard). A row like that
+    may be PARTIAL or GAP - it may not be carried, because "covered" a clause you
+    never read is the cheapest form of overclaim there is.
+    """
     reason = (reason or "").strip()
     if strength == "carried":
         if not ran:
             return "UNRUN", "no probe executed (--no-probe)"
+        if not verbatim:
+            return "OVERCLAIM", "carried but the clause text was not quoted verbatim - read the source or lower the strength"
         if probe_result is None:
             return "OVERCLAIM", "carried but the clause declares no probe"
         if not probe_result.get("ok"):
@@ -152,11 +160,13 @@ def evaluate(doc, cwd=REPO, run=True):
         probe_result = None
         if run and c.get("probe"):
             probe_result = run_probe(c["probe"], cwd=cwd)
-        state, note = classify(c.get("strength"), c.get("reason"), probe_result, ran=run)
+        state, note = classify(c.get("strength"), c.get("reason"), probe_result,
+                               ran=run, verbatim=c.get("verbatim", True))
         rows.append({
             "id": c.get("id"),
             "applies": c.get("applies", True),
             "strength": c.get("strength"),
+            "verbatim": c.get("verbatim", True),
             "state": state,
             "note": note,
             "reason": (c.get("reason") or "").strip(),
@@ -213,7 +223,9 @@ def render_md(result):
         reason = (r["reason"] or r["note"] or "-").replace("|", "\\|")
         carrier = ", ".join(r["carrier"]) if r["carrier"] else "-"
         lines.append("| %s | %s | **%s** | %s | %s | %s |" % (
-            (r["id"] or "").replace("|", "\\|"), r["strength"], r["state"],
+            (r["id"] or "").replace("|", "\\|"),
+            r["strength"] + ("" if r.get("verbatim", True) else " (titles only)"),
+            r["state"],
             carrier.replace("|", "\\|"), probe, reason))
     lines.append("")
     lines.append("## How to re-run")

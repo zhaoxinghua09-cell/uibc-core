@@ -1,3 +1,9 @@
+## Measured numbers now have to name the commit they came from
+
+- `tests/test_measured_facts_are_pinned.py`: any doc quoting a measured constant (file count, executed test count, tarball size) must also name a commit, or the suite fails.
+- Reason, stated in the test itself: `check_doc_facts.py` can recompute everything derived from the tree, but "1,865 files" and "1471 passed" are properties of one commit on one machine. They go stale when `main` moves, and a stale number with no date is how a document starts lying without anyone editing it.
+- `docs/REPRODUCTION.md` now declares **Commit under test: `8a41372`**; `docs/COMPETITIVE-LANDSCAPE.md` pins its two counts to the same commit.
+- Two new tests; index rebuilt on this branch.
 ## The other document: the ten-arc code, read on its own terms
 
 - `uibc_core/acps_identity_code.py`: a reader for `ACPs-spec-AIC-v02.01` — ten arcs, per-arc Base36 and length rules, prefix noted rather than pinned.

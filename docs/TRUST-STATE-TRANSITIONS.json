@@ -1,0 +1,266 @@
+{
+  "note": "This table constrains emitted sequences, not who is right. Two implementations may disagree about a subject without disagreeing about whether the history was legal.",
+  "rows": [
+    {
+      "new": "VERIFIED",
+      "prior": "VERIFIED",
+      "rule": "no-op"
+    },
+    {
+      "new": "INVALID",
+      "prior": "VERIFIED",
+      "rule": "allowed"
+    },
+    {
+      "new": "REVOKED",
+      "prior": "VERIFIED",
+      "rule": "allowed"
+    },
+    {
+      "new": "EXPIRED",
+      "prior": "VERIFIED",
+      "rule": "allowed"
+    },
+    {
+      "new": "INCONCLUSIVE",
+      "prior": "VERIFIED",
+      "rule": "allowed"
+    },
+    {
+      "new": "UNSUPPORTED",
+      "prior": "VERIFIED",
+      "rule": "forbidden"
+    },
+    {
+      "new": "UNRESOLVED",
+      "prior": "VERIFIED",
+      "rule": "forbidden"
+    },
+    {
+      "new": "VERIFIED",
+      "prior": "INVALID",
+      "rule": "forbidden"
+    },
+    {
+      "new": "INVALID",
+      "prior": "INVALID",
+      "rule": "no-op"
+    },
+    {
+      "new": "REVOKED",
+      "prior": "INVALID",
+      "rule": "forbidden"
+    },
+    {
+      "new": "EXPIRED",
+      "prior": "INVALID",
+      "rule": "forbidden"
+    },
+    {
+      "new": "INCONCLUSIVE",
+      "prior": "INVALID",
+      "rule": "forbidden"
+    },
+    {
+      "new": "UNSUPPORTED",
+      "prior": "INVALID",
+      "rule": "forbidden"
+    },
+    {
+      "new": "UNRESOLVED",
+      "prior": "INVALID",
+      "rule": "forbidden"
+    },
+    {
+      "new": "VERIFIED",
+      "prior": "REVOKED",
+      "rule": "with_evidence_and_reinstatement"
+    },
+    {
+      "new": "INVALID",
+      "prior": "REVOKED",
+      "rule": "allowed"
+    },
+    {
+      "new": "REVOKED",
+      "prior": "REVOKED",
+      "rule": "no-op"
+    },
+    {
+      "new": "EXPIRED",
+      "prior": "REVOKED",
+      "rule": "allowed"
+    },
+    {
+      "new": "INCONCLUSIVE",
+      "prior": "REVOKED",
+      "rule": "forbidden"
+    },
+    {
+      "new": "UNSUPPORTED",
+      "prior": "REVOKED",
+      "rule": "forbidden"
+    },
+    {
+      "new": "UNRESOLVED",
+      "prior": "REVOKED",
+      "rule": "forbidden"
+    },
+    {
+      "new": "VERIFIED",
+      "prior": "EXPIRED",
+      "rule": "with_evidence"
+    },
+    {
+      "new": "INVALID",
+      "prior": "EXPIRED",
+      "rule": "allowed"
+    },
+    {
+      "new": "REVOKED",
+      "prior": "EXPIRED",
+      "rule": "allowed"
+    },
+    {
+      "new": "EXPIRED",
+      "prior": "EXPIRED",
+      "rule": "no-op"
+    },
+    {
+      "new": "INCONCLUSIVE",
+      "prior": "EXPIRED",
+      "rule": "forbidden"
+    },
+    {
+      "new": "UNSUPPORTED",
+      "prior": "EXPIRED",
+      "rule": "forbidden"
+    },
+    {
+      "new": "UNRESOLVED",
+      "prior": "EXPIRED",
+      "rule": "forbidden"
+    },
+    {
+      "new": "VERIFIED",
+      "prior": "INCONCLUSIVE",
+      "rule": "with_evidence"
+    },
+    {
+      "new": "INVALID",
+      "prior": "INCONCLUSIVE",
+      "rule": "allowed"
+    },
+    {
+      "new": "REVOKED",
+      "prior": "INCONCLUSIVE",
+      "rule": "allowed"
+    },
+    {
+      "new": "EXPIRED",
+      "prior": "INCONCLUSIVE",
+      "rule": "allowed"
+    },
+    {
+      "new": "INCONCLUSIVE",
+      "prior": "INCONCLUSIVE",
+      "rule": "no-op"
+    },
+    {
+      "new": "UNSUPPORTED",
+      "prior": "INCONCLUSIVE",
+      "rule": "allowed"
+    },
+    {
+      "new": "UNRESOLVED",
+      "prior": "INCONCLUSIVE",
+      "rule": "allowed"
+    },
+    {
+      "new": "VERIFIED",
+      "prior": "UNSUPPORTED",
+      "rule": "with_evidence"
+    },
+    {
+      "new": "INVALID",
+      "prior": "UNSUPPORTED",
+      "rule": "forbidden"
+    },
+    {
+      "new": "REVOKED",
+      "prior": "UNSUPPORTED",
+      "rule": "forbidden"
+    },
+    {
+      "new": "EXPIRED",
+      "prior": "UNSUPPORTED",
+      "rule": "forbidden"
+    },
+    {
+      "new": "INCONCLUSIVE",
+      "prior": "UNSUPPORTED",
+      "rule": "allowed"
+    },
+    {
+      "new": "UNSUPPORTED",
+      "prior": "UNSUPPORTED",
+      "rule": "no-op"
+    },
+    {
+      "new": "UNRESOLVED",
+      "prior": "UNSUPPORTED",
+      "rule": "allowed"
+    },
+    {
+      "new": "VERIFIED",
+      "prior": "UNRESOLVED",
+      "rule": "with_evidence"
+    },
+    {
+      "new": "INVALID",
+      "prior": "UNRESOLVED",
+      "rule": "allowed"
+    },
+    {
+      "new": "REVOKED",
+      "prior": "UNRESOLVED",
+      "rule": "forbidden"
+    },
+    {
+      "new": "EXPIRED",
+      "prior": "UNRESOLVED",
+      "rule": "forbidden"
+    },
+    {
+      "new": "INCONCLUSIVE",
+      "prior": "UNRESOLVED",
+      "rule": "allowed"
+    },
+    {
+      "new": "UNSUPPORTED",
+      "prior": "UNRESOLVED",
+      "rule": "allowed"
+    },
+    {
+      "new": "UNRESOLVED",
+      "prior": "UNRESOLVED",
+      "rule": "no-op"
+    }
+  ],
+  "rules": {
+    "allowed": "permitted without evidence (bad news travelling, or a lateral move)",
+    "forbidden": "must not be emitted by a conforming implementation",
+    "no-op": "the same state again; no new claim is made",
+    "with_evidence": "requires at least one evidence item",
+    "with_evidence_and_reinstatement": "requires evidence and reinstated=True; lifting a revocation is a policy act"
+  },
+  "states": [
+    "VERIFIED",
+    "INVALID",
+    "REVOKED",
+    "EXPIRED",
+    "INCONCLUSIVE",
+    "UNSUPPORTED",
+    "UNRESOLVED"
+  ]
+}

@@ -31,7 +31,6 @@
       ],
       "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32017R0745",
       "probe": {
-        "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" -m uibc_core.cli demo",
         "declared": "python -m uibc_core.cli demo",
         "exit": 0,
         "ok": true
@@ -52,7 +51,6 @@
       ],
       "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32017R0745",
       "probe": {
-        "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" -m pytest tests/test_seal_v03.py -q",
         "declared": "python -m pytest tests/test_seal_v03.py -q",
         "exit": 0,
         "ok": true
@@ -71,7 +69,6 @@
       ],
       "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32017R0745",
       "probe": {
-        "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" -m pytest tests/test_did_web_hardening.py -q",
         "declared": "python -m pytest tests/test_did_web_hardening.py -q",
         "exit": 0,
         "ok": true
@@ -104,7 +101,6 @@
       ],
       "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32017R0745",
       "probe": {
-        "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" tools/probe_evidence_identity.py fixtures/clean.uibc",
         "declared": "python tools/probe_evidence_identity.py fixtures/clean.uibc",
         "exit": 0,
         "ok": true

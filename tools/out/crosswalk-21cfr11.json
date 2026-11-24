@@ -32,7 +32,6 @@
       ],
       "url": "https://www.ecfr.gov/current/title-21/chapter-I/subchapter-A/part-11",
       "probe": {
-        "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" tools/probe_evidence_identity.py fixtures/tampered.uibc",
         "declared": "python tools/probe_evidence_identity.py fixtures/tampered.uibc",
         "exit": 1,
         "ok": true
@@ -54,7 +53,6 @@
       ],
       "url": "https://www.ecfr.gov/current/title-21/chapter-I/subchapter-A/part-11",
       "probe": {
-        "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" -m pytest tests/test_actor_attribution.py -q",
         "declared": "python -m pytest tests/test_actor_attribution.py -q",
         "exit": 0,
         "ok": true
@@ -75,7 +73,6 @@
       ],
       "url": "https://www.ecfr.gov/current/title-21/chapter-I/subchapter-A/part-11",
       "probe": {
-        "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" -m pytest tests/test_seal_v03.py -q",
         "declared": "python -m pytest tests/test_seal_v03.py -q",
         "exit": 0,
         "ok": true
@@ -96,7 +93,6 @@
       ],
       "url": "https://www.ecfr.gov/current/title-21/chapter-I/subchapter-A/part-11",
       "probe": {
-        "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" tools/probe_record_binding.py",
         "declared": "python tools/probe_record_binding.py",
         "exit": 0,
         "ok": true

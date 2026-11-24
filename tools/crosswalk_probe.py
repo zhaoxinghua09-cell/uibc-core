@@ -176,7 +176,13 @@ def evaluate(doc, cwd=REPO, run=True):
         # point; SLSA calls the property "reproducible").
         probe_record = None
         if probe_result:
-            probe_record = {k: probe_result.get(k) for k in ("cmd", "declared", "exit", "ok")}
+            # The portable command, never the interpreter that happened to run it:
+            # `cmd` carries an absolute path (`C:\Users\...` here, the toolchain
+            # path on a runner), which makes the result unreproducible across
+            # machines and puts a local directory layout into a repository file.
+            # Measured 2026-11-25: the CI gate failed on exactly this, six files,
+            # 21 occurrences.
+            probe_record = {k: probe_result.get(k) for k in ("declared", "exit", "ok")}
         if probe_result:
             diag.append({"id": c.get("id"), "duration_s": probe_result.get("duration_s"),
                           "tail": probe_result.get("tail")})
@@ -257,7 +263,7 @@ def render_md(result):
     for r in rows:
         probe = "-"
         if r["probe"]:
-            shown = r["probe"].get("declared") or r["probe"]["cmd"]
+            shown = r["probe"].get("declared") or r["probe"].get("cmd") or "-"
             probe = "`%s` → exit %s" % (shown.replace("|", "\\|"), r["probe"]["exit"])
         reason = (r["reason"] or r["note"] or "-").replace("|", "\\|")
         carrier = ", ".join(r["carrier"]) if r["carrier"] else "-"

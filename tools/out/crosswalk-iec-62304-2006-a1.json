@@ -43,7 +43,6 @@
       ],
       "url": "https://www.iso.org/obp/ui/#iso:std:iec:62304:ed-1:v1:en",
       "probe": {
-        "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" tools/probe_evidence_identity.py fixtures/clean.uibc",
         "declared": "python tools/probe_evidence_identity.py fixtures/clean.uibc",
         "exit": 0,
         "ok": true
@@ -64,7 +63,6 @@
       ],
       "url": "https://www.iso.org/obp/ui/#iso:std:iec:62304:ed-1:v1:en",
       "probe": {
-        "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" -m pytest tests/test_seal_v03.py -q",
         "declared": "python -m pytest tests/test_seal_v03.py -q",
         "exit": 0,
         "ok": true
@@ -96,7 +94,6 @@
       ],
       "url": "https://www.iso.org/obp/ui/#iso:std:iec:62304:ed-1:v1:en",
       "probe": {
-        "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" -m uibc_core.cli inspect fixtures/clean.uibc",
         "declared": "python -m uibc_core.cli inspect fixtures/clean.uibc",
         "exit": 0,
         "ok": true

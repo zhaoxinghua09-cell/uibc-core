@@ -30,7 +30,6 @@
       ],
       "url": "https://github.com/zhaoxinghua09-cell/uibc-core/blob/main/tools/crosswalk_probe.py",
       "probe": {
-        "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" -m pytest tests/test_crosswalk_probe.py -q -k classify",
         "declared": "python -m pytest tests/test_crosswalk_probe.py -q -k classify",
         "exit": 0,
         "ok": true
@@ -50,7 +49,6 @@
       ],
       "url": "https://github.com/zhaoxinghua09-cell/uibc-core/blob/main/tools/crosswalk_probe.py",
       "probe": {
-        "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" -m pytest tests/test_crosswalk_probe.py -q -k declared_gap",
         "declared": "python -m pytest tests/test_crosswalk_probe.py -q -k declared_gap",
         "exit": 0,
         "ok": true
@@ -70,7 +68,6 @@
       ],
       "url": "https://github.com/zhaoxinghua09-cell/uibc-core/blob/main/tools/crosswalk_probe.py",
       "probe": {
-        "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" -m pytest tests/test_crosswalk_probe.py -q -k overclaim",
         "declared": "python -m pytest tests/test_crosswalk_probe.py -q -k overclaim",
         "exit": 0,
         "ok": true

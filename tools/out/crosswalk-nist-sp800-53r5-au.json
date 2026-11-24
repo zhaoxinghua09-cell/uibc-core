@@ -30,7 +30,6 @@
       ],
       "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-53r5.pdf",
       "probe": {
-        "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" -m pytest tests/test_fixture_expectations.py -q",
         "declared": "python -m pytest tests/test_fixture_expectations.py -q",
         "exit": 0,
         "ok": true
@@ -51,7 +50,6 @@
       ],
       "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-53r5.pdf",
       "probe": {
-        "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" -m pytest tests/test_iverify_pubkey_pin.py -q",
         "declared": "python -m pytest tests/test_iverify_pubkey_pin.py -q",
         "exit": 0,
         "ok": true
@@ -72,7 +70,6 @@
       ],
       "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-53r5.pdf",
       "probe": {
-        "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" tools/probe_record_binding.py",
         "declared": "python tools/probe_record_binding.py",
         "exit": 0,
         "ok": true
@@ -92,7 +89,6 @@
       ],
       "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-53r5.pdf",
       "probe": {
-        "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" tools/probe_record_binding.py",
         "declared": "python tools/probe_record_binding.py",
         "exit": 0,
         "ok": true
@@ -112,7 +108,6 @@
       ],
       "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-53r5.pdf",
       "probe": {
-        "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" -m uibc_core.cli inspect fixtures/clean.uibc",
         "declared": "python -m uibc_core.cli inspect fixtures/clean.uibc",
         "exit": 0,
         "ok": true

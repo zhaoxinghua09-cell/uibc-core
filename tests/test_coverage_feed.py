@@ -11,6 +11,7 @@ import os
 import sys
 import tempfile
 import threading
+import time
 import unittest
 from datetime import datetime, timezone
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -91,18 +92,31 @@ class FetchTests(unittest.TestCase):
         self.assertEqual(out["cov"], {"sequence": 1})
 
     def test_poll_observes_replacement(self):
+        # 时序脆点（2026-11-24 实测）：原来用 `threading.Timer(0.25, ...)` 定时替换，
+        # 整仓 1,500+ 用例并行跑时这条定时线程可能被饿到 5 秒窗口之外，poll 于是超时——
+        # 单跑必过、全量跑偶发失败（uibc-bench D1 在 Windows 上撞到一次，单条复跑 PASS）。
+        # 改成"轮询真的开始之后才替换"，把"定时"换成"先后关系"，与机器负载无关。
         path = os.path.join(self.tmp, "coverage.json")
+        first_poll = threading.Event()
 
         def replace():
+            first_poll.wait(10.0)          # 等到 poll 至少读过一次，再替换
+            time.sleep(0.05)
             tmp = path + ".tmp"
             with open(tmp, "w", encoding="utf-8") as fh:
                 json.dump({"sequence": 2}, fh)
             os.replace(tmp, path)
 
-        threading.Timer(0.25, replace).start()
-        out = poll(self.base + "/coverage.json", lambda c: c.get("sequence") == 2,
-                   timeout_s=5.0, interval_s=0.1)
-        self.assertTrue(out["ok"])
+        worker = threading.Thread(target=replace, daemon=True)
+        worker.start()
+
+        def is_new(c):
+            first_poll.set()
+            return c.get("sequence") == 2
+
+        out = poll(self.base + "/coverage.json", is_new, timeout_s=10.0, interval_s=0.1)
+        worker.join(5.0)
+        self.assertTrue(out["ok"], "the replacement was never observed: %r" % (out,))
         self.assertGreaterEqual(out["latency_s"], 0.0)
 
     def test_poll_reports_last_error_when_feed_dies(self):

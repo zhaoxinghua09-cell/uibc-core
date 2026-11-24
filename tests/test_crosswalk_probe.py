@@ -220,6 +220,19 @@ def test_part_11_carries_exactly_the_record_binding_row():
     assert carried == ["21 CFR 11.70"], carried
 
 
+def test_part_11_actor_row_points_at_the_attribution_probe():
+    """11.10(e) must rest on the reader-authorisation test, not on inspect.
+
+    inspect only shows that events exist. The clause asks for operator entries,
+    and the attribution test is what shows an actor outside the recorded
+    principals is refused. Swapping it back for inspect would quietly demote
+    the row's evidence while keeping it green.
+    """
+    doc = json.loads((REPO / "crosswalk" / "21cfr11.json").read_text(encoding="utf-8"))
+    row = [c for c in doc["clauses"] if c["id"] == "21 CFR 11.10(e)"][0]
+    assert "test_actor_attribution.py" in row["probe"]["cmd"], row["probe"]["cmd"]
+
+
 # --- the 4(d) probe: identities recompute or they do not ----------------
 
 def _run_probe(pkg):

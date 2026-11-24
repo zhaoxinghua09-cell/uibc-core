@@ -26,12 +26,12 @@
       "url": "https://www.ecfr.gov/current/title-21/chapter-I/subchapter-A/part-11",
       "applies": true, "verbatim": true,
       "strength": "partial",
-      "carrier": ["append-only lifecycle events with checked_at", "per-event actor field checked by the verifier's actor allow-list against recorded principals", "seal over the event set", "inspect printing the event trail"],
+      "carrier": ["append-only lifecycle events with checked_at", "per-event actor, refused by S3/L10 when it is not a recorded principal (owner or agent_id)", "identity that lists principals is inside the seal", "inspect printing the event trail"],
       "probe": {
-        "cmd": "python -m uibc_core.cli inspect fixtures/clean.uibc",
-        "expect": {"exit": 0, "stdout_contains": "events:"}
+        "cmd": "python -m pytest tests/test_actor_attribution.py -q",
+        "expect": {"exit": 0}
       },
-      "reason": "Events are computer-generated, time-stamped, append-only and carry the actor that made them; the verifier checks that actor against the recorded principals (its actor allow-list), and the seal makes a later insertion visible, so a change does not silently obscure what was recorded before. Two limits stay honest: the actor check's own test coverage is thin, so this row's probe demonstrates the time-stamped trail rather than the authorization; and the retention period is a records policy the user sets, which a format can preserve but cannot decide."
+      "reason": "Operator entries are attributed rather than anonymous: each event carries the actor that made it, and the lifecycle check refuses an event whose actor is not one of the principals recorded for the package. The probe builds two packages differing only in that actor - the control one passes S3 with 'actors authorised', the other fails S3 naming the non-principal - and the identity listing those principals is inside the seal, so widening the list means re-sealing. Events are time-stamped and append-only, and the seal makes a later insertion or a rewritten trail visible. One element is not carried: the retention period. 'Retained for a period at least as long as that required' is a records policy the deploying organisation sets; a format can preserve the trail indefinitely, but it cannot decide how long is required."
     },
     {
       "id": "21 CFR 11.50(a)",

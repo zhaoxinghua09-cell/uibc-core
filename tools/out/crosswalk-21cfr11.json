@@ -7,7 +7,7 @@
     "scope_note": "Five clauses of Subpart B/C. This is not a Part 11 compliance checklist: Part 11 binds the person who uses the system to keep records, and the controls it names (validation, access control, training, written policy) live in that person's quality system. Rows were chosen because they name something a record layer can either demonstrate or plainly not.",
     "source": "crosswalk/21cfr11.json"
   },
-  "manifest_sha256": "da947e7d37934776c0822c53a58ea1e1e09677b42b77a89ec3e75bb9587ed9e0",
+  "manifest_sha256": "06eb7e27aa25847e5da0ae3c3baf94cf70abc748beba7aad1b0c326979eef240",
   "verdict_sha256": "9938bb44526573c796aca318952e791ae20663521d070fdd36d1ab3ace9f043f",
   "clause_count": 5,
   "counts": {
@@ -45,17 +45,17 @@
       "verbatim": true,
       "state": "PARTIAL",
       "note": "",
-      "reason": "Events are computer-generated, time-stamped, append-only and carry the actor that made them; the verifier checks that actor against the recorded principals (its actor allow-list), and the seal makes a later insertion visible, so a change does not silently obscure what was recorded before. Two limits stay honest: the actor check's own test coverage is thin, so this row's probe demonstrates the time-stamped trail rather than the authorization; and the retention period is a records policy the user sets, which a format can preserve but cannot decide.",
+      "reason": "Operator entries are attributed rather than anonymous: each event carries the actor that made it, and the lifecycle check refuses an event whose actor is not one of the principals recorded for the package. The probe builds two packages differing only in that actor - the control one passes S3 with 'actors authorised', the other fails S3 naming the non-principal - and the identity listing those principals is inside the seal, so widening the list means re-sealing. Events are time-stamped and append-only, and the seal makes a later insertion or a rewritten trail visible. One element is not carried: the retention period. 'Retained for a period at least as long as that required' is a records policy the deploying organisation sets; a format can preserve the trail indefinitely, but it cannot decide how long is required.",
       "carrier": [
         "append-only lifecycle events with checked_at",
-        "per-event actor field checked by the verifier's actor allow-list against recorded principals",
-        "seal over the event set",
+        "per-event actor, refused by S3/L10 when it is not a recorded principal (owner or agent_id)",
+        "identity that lists principals is inside the seal",
         "inspect printing the event trail"
       ],
       "url": "https://www.ecfr.gov/current/title-21/chapter-I/subchapter-A/part-11",
       "probe": {
-        "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" -m uibc_core.cli inspect fixtures/clean.uibc",
-        "declared": "python -m uibc_core.cli inspect fixtures/clean.uibc",
+        "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" -m pytest tests/test_actor_attribution.py -q",
+        "declared": "python -m pytest tests/test_actor_attribution.py -q",
         "exit": 0,
         "ok": true
       }

@@ -31,17 +31,14 @@ Fetch it anonymously, without cloning (no login, no token — measured 2026-11-2
 
 ```bash
 curl -fL -o corpus.zip \
-  https://github.com/zhaoxinghua09-cell/uibc-core/raw/main/conformance/uibc-conformance-0.5.0.zip
-sha256sum corpus.zip   # ad2b73ccdd8e5606364372350fc35134d8efe897f0382b36dd4ee65af341bfc0, 231,243 bytes
+  https://github.com/zhaoxinghua09-cell/uibc-core/raw/main/conformance/uibc-conformance-0.5.1.zip
+sha256sum corpus.zip   # c87559160cd8e34d9ea86f686ed76afe064f4e9a72359b7cda07b22f6e5d3aba, 312,643 bytes
 unzip -q corpus.zip -d corpus && cd corpus && python run.py
 ```
 
-The release page also carries the same bytes, attached on 2026-11-20 by the release workflow:
-`https://github.com/zhaoxinghua09-cell/uibc-core/releases/download/v0.5.0/uibc-conformance-0.5.0.zip`.
-Either URL serves this hash; the older `v0.4.0` asset is a **different** corpus (30 cases) and not
-this one. The build is deterministic for a given tree, but "rebuilding gives the same bytes" is true only from the tree the archive was built from: `0.4.1` came out of commit `d72c4f9`, and the runner template was fixed for the unstartable-verifier case afterwards, so rebuilding `0.4.1` from today's tree yields a different archive (`083c0dbc…`). The builder now refuses to overwrite a pinned archive and prints both hashes instead (measured 2026-11-20, exit 3).
+The release asset for this archive (`v0.5.1`) is attached by the maintainer as the last step before this tree is merged; until then the raw link above is the only route. The older `v0.5.0` asset is a different corpus (36 cases), the `v0.4.0` one a third (30 cases). Neither is this one. The build is deterministic for a given tree, but "rebuilding gives the same bytes" is true only from the tree the archive was built from: `0.4.1` came out of commit `d72c4f9`, and the runner template was fixed for the unstartable-verifier case afterwards, so rebuilding `0.4.1` from today's tree yields a different archive (`083c0dbc…`). The builder now refuses to overwrite a pinned archive and prints both hashes instead (measured 2026-11-20, exit 3).
 
-No repository, no network, no `pip install`: the archive carries its own verifier as a single file (`uibc_core.pyz`), and `run.py` uses it. Expected tail `strict 36/36` in about six seconds, and a `receipt.json` you can publish. A verifier that answers PASS to everything scores **6/36**, so refusing nothing does not pass.
+No repository, no network, no `pip install`: the archive carries its own verifier as a single file (`uibc_core.pyz`), and `run.py` uses it. Expected tail `strict 58/58` in about six seconds, and a `receipt.json` you can publish. A verifier that answers PASS to everything scores **6/58**, so refusing nothing does not pass.
 
 #### Or the RFC 9162 vector set — 41 vectors, and seven of them isolate path structure
 

@@ -1192,6 +1192,26 @@ function verify(pkg, opts = {}) {
       if (Number.isInteger(manifest.evidence_count) && manifest.evidence_count !== n) {
         problems.push("evidence_count says " + manifest.evidence_count + ", index holds " + n);
       }
+      // One identifier per declaration: two entries sharing an id make the
+      // index a list of claims, not a list of evidence.
+      const seenIds = new Map();
+      for (const entry of (index.entries || [])) {
+        const id = entry && entry.evidence_id;
+        if (id == null) continue;
+        if (seenIds.has(id)) {
+          problems.push("the same evidence_id is declared twice: " + id);
+          break;
+        }
+        seenIds.set(id, true);
+      }
+      // Every declared date, not only the manifest's: 2026-11-31 is the shape
+      // of a date that Date would happily roll forward to December 1.
+      for (const entry of (index.entries || [])) {
+        if (entry && entry.created_at != null && !realDate(entry.created_at)) {
+          problems.push("an evidence entry carries a time that does not exist: " + entry.created_at);
+          break;
+        }
+      }
       const lc = readJson(join(pkg, "lifecycle.json"));
       const events = Array.isArray(lc) ? lc : (lc.events || []);
       let last = null;

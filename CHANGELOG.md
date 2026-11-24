@@ -1,3 +1,9 @@
+## From one public URL to a green suite, on a machine we did not author on
+
+- `docs/REPRODUCTION.md`: public tarball → fresh venv → `check_doc_facts.py` → `pytest` → `probe_reference_repos.py`, with the exact commands and the observed numbers.
+- Observed 2026-11-24 on a Linux host: tarball 200 / 2,568,257 bytes / 1,865 files; `check_doc_facts.py` → 0 mismatch; `pytest` → **1471 passed, 33 skipped, 105 subtests passed** in 426.73 s.
+- Two counts are stated side by side because they differ and both are real: 1,173 test functions in the evidence index, 1,471 executed after parametrisation.
+- Row 6 stays **partial**: this removes "only works on the author's machine", not "the author is judging the author". 33 skips are a skip, not a pass.
 ## What the reference implementation lets an anonymous reader see
 
 - `tools/probe_reference_repos.py`: no account, no token, one API call per repo, prints what each default branch actually contains.

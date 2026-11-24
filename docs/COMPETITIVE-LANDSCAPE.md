@@ -72,7 +72,7 @@ Eight criteria, scored on what is on disk and reachable today:
 | 3 | Every published number regenerated from the tree | **Pass** | `check_doc_facts.py` → 0 mismatch |
 | 4 | Differences documented with basis per row | **Pass** | `docs/TWO-CODES-DIFF.md` |
 | 5 | Tests cover the hostile inputs | **Pass** | 1,156 cases across the suite |
-| 6 | Reproducible by someone who is not us, offline | **Partial** | One-command bundle exists; no outside party has run it |
+| 6 | Reproducible by someone who is not us, offline | **Partial** | Run from the public tarball on a second machine and a different OS, no credentials: 0 mismatch, 1471 passed (`docs/REPRODUCTION.md`). Still no outside party |
 | 7 | Cross-checked against the reference implementation | **Partial** | Its default branches expose **0–1 files anonymously** (`tools/probe_reference_repos.py`), so the comparison is against the published changelog, not the code |
 | 8 | Independently evaluated (separate identity, separate interest) | **0** | No evaluation has been performed |
 

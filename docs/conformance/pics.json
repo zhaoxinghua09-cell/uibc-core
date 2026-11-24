@@ -86,8 +86,8 @@
     }
   },
   "check_id_absent_from_report": {
-    "S9": "not emitted by this ruleset; the report jumps S8 -> S11. A relying party must not read absence as failure, and must not assume S9 exists.",
-    "S10": "same as S9."
+    "S9": "declared in the specification as head pinned out-of-band, listed in docs/EVIDENCE-INDEX.md as not covered (no test constructs it), and never emitted in a verify report: the report jumps S8 -> S11",
+    "S10": "declared in the specification as \u0007ttestation closure declared, listed in docs/EVIDENCE-INDEX.md as not covered, and never emitted in a verify report"
   },
   "transports": {
     "cli": {

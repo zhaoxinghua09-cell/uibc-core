@@ -138,10 +138,13 @@ specification in the abstract.
 ## Declarations, for readers who want the edges rather than the results
 
 - [`docs/conformance/pics.json`](conformance/pics.json) — what this implementation
-  does, which check identifiers it emits, **which it declares absent** (S9 and S10
-  never appear in a report), what it explicitly cannot do, and key counts per
-  transport (CLI 17 / MCP 17 / HTTP 22 keys, the latter containing the other twos'
-  fields).
+  does, which check identifiers it emits, **which it declares absent**, what it
+  explicitly cannot do, and key counts per transport (CLI 17 / MCP 17 / HTTP 22
+  keys, the latter containing the other two's fields). Two identifiers need care:
+  **S9** (`head pinned out-of-band`) and **S10** (`attestation closure declared`)
+  are declared in the specification and listed as *not covered* in
+  `docs/EVIDENCE-INDEX.md`, but a verify report never emits them — the report
+  jumps S8 → S11. Absence there is neither a pass nor a failure.
 - [`docs/conformance/pixit.json`](conformance/pixit.json) — environment, subject
   digest, exact commands, exclusions, and the fact that `as_of` is not a
   supported parameter.

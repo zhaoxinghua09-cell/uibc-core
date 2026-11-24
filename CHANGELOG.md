@@ -1,3 +1,30 @@
+## Agent identity code: we read the shape, and stop there
+
+- `uibc_core/agent_identity_code.py` parses `GB/Z 185.2—2026` identity codes
+  (the national OID scheme, prefix `1.2.156.3088`) strictly by the published
+  clauses: five dot-separated parts over a four-arc prefix, version `1` of a
+  35-value range, provider and requester of 1–6 characters, sequence bounded at
+  19 (9 ontology + 10 instance, **derived and labelled as derived**).
+- **The ceiling is `INCONCLUSIVE`, by construction.** `_verdict()` has one
+  return value and no branch that produces `VERIFIED`: allocation belongs to a
+  registration service provider, and the standard defines no resolution
+  endpoint. A shape check that returned `VERIFIED` would be reporting "this
+  identity is real" on the strength of "this string is shaped correctly".
+- A reserved version is `UNSUPPORTED`, not `INVALID` — first real use of the
+  seven-state vocabulary on a national standard: *not implemented is not wrong*.
+- Found and documented a **third-party reading that adds two levels and a
+  checksum**: `aipmc-basic` (MIT, crates.io) reads ten arcs, separating ontology
+  and instance serials and appending a four-character Base36
+  CRC-16/CCITT-FALSE with a non-public salt. None of that is in the standard as
+  published, and we cannot recompute the checksum, so `detect_profile()` names
+  the profile and `parse_agent_code()` refuses it *with the reason attached*.
+  We do not silently accept a private convention, and we do not pretend to
+  verify it.
+- `duplicates()` exposes management requirement 6(d) (one code, one agent) as a
+  report rather than a decision.
+- 27 new tests; `docs/AGENT-IDENTITY-CODE.md` states the boundaries and the
+  remaining gaps (no issuer, no resolver, AIP reference implementation not yet
+  compared); module count 34 → 35 and the evidence index rebuilt.
 ### Where coverage stops, and why
 
 - `docs/COMPETITIVE-COVERAGE-AAC.md` gains a table of the classes we probed and
@@ -158,45 +185,6 @@ record carries.
   invalidate every package already sealed under it.
 
 ## [Unreleased]
-
-### Hostile input is an answer, and an agent id is an identifier (2026-11-24)
-
-Both changes come from the harness run of 2026-11-24, not from reading the code:
-
-- `adapters.a2a.transform.detect_format()` raised `ValueError` for `None`, `""` and
-  any string that is neither JSON nor XML. A detector is what a gateway calls on
-  bytes it did not choose, so "cannot tell" is now `None` and the refusal moved up
-  to `convert()`, whose error names the formats it accepts. `test_14` changed with
-  it: the assertion that used to expect the exception now checks both layers.
-- `uibc register` accepted the empty string, a C0 control character and a
-  right-to-left override as agent ids, and each of them was then written into
-  `identity.json`, `manifest.json` and the first lifecycle event. `agent_id_error()`
-  refuses empty, over-long (>128), control, bidi-control and space-padded ids before
-  anything is written; nine tests in `tests/test_agent_id_policy.py`, including a
-  subprocess run that shows a refused id leaves the `init` skeleton in place rather
-  than a half-written identity.
-
-### `did:web` now refuses targets that are not public names (2026-11-24)
-
-Three defects were measured on 2026-11-23 and each one let a resolver be aimed
-somewhere other than the DID:
-
-- `did:web:127.0.0.1%3A8443` fetched a document from the verifier's own machine,
-  and `did:web:169.254.169.254` reached a link-local metadata address. `resolve()`
-  checked only that the *first* hop was https. Now `assert_public_host()` refuses
-  IP literals (the method spec forbids them outright), local names, and names that
-  resolve into any non-global range — before the request is made.
-- A 302 to plaintext `http` was followed by `urllib` by default, so the https
-  requirement applied to the first hop only. Redirects now pass through
-  `_NoDowgradeRedirect`, which refuses a scheme change and re-applies the host
-  policy; the final URL is checked once more after the body arrives.
-- A 20 MB document was read in full (70 MB peak) before failing as JSON. Reads are
-  now capped at `DEFAULT_MAX_DOCUMENT_BYTES` (512 KiB) and abandoned unparsed.
-
-Nine tests in `tests/test_did_host_policy.py`, all offline. Known limit recorded
-rather than papered over: DNS rebinding is *narrowed*, not solved — the name is
-resolved for the policy check and again for the connection, and closing that
-window needs a resolver hook, which this module does not have.
 
 ### Six China-registry DID methods, each at the level its own text allows (2026-11-24)
 

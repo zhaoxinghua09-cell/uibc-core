@@ -205,7 +205,7 @@ class TestCliBinding(unittest.TestCase):
         self._cli("init", self.pkg)
         result = self._cli("register", self.pkg, "--agent-id", "a1",
                            "--owner", "tester",
-                           "--did", "did:ioa:agent:abc")
+                           "--did", "did:wba:example.com:agent:abc")
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("no public resolution rule", result.stderr)
 

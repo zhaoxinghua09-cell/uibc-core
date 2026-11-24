@@ -59,6 +59,26 @@ Both published examples confirm it: 30-character bodies decode to about 22 bytes
 size, and returns no offline document for these methods. A resolver that pretended
 otherwise would produce an authoritative-looking, wrong answer.
 
+## How it shows up on the command line
+
+`register` and `verify` (and `gate`) take the six methods but never guess where to
+read them:
+
+```
+uibc register ./pkg --agent-id a1 --owner me \
+    --did did:cn:88.100.1 --did-endpoint https://registry.example
+uibc verify ./pkg --did did:cndid:efnVUgqQFfYeu97ABf6sGm3WFtVXHZB2 \
+    --did-endpoint https://node.example
+```
+
+- `register --did <china method>` also **resolves the identifier once, at write
+  time**. A DID we cannot resolve here would be a claim about control that nobody
+  could check, so the binding is refused instead of written.
+- `did:ctid` / `did:oan` are refused at `register` with the reason, because no
+  resolution channel exists to prove the binding.
+- `--did-endpoint` has no default anywhere: the specifications name registries,
+  not public resolution URLs.
+
 ## Scope note
 
 `did_cn.py` is standard-library only, has no network default, and refuses any method

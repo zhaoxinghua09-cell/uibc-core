@@ -215,3 +215,45 @@ def test_ed25519_suffix_with_full_32_byte_key_is_unreachable_by_the_abnf():
     assert len(body) > 40                      # 43-44 chars for 32 bytes
     with pytest.raises(did_cn.IdentifierError):
         did_cn.validate(value)
+
+
+# --------------------------------------------------------------------------- #
+# CLI: the binding is only written when the DID actually resolves here
+# --------------------------------------------------------------------------- #
+def _cli(tmp_path, *args):
+    import subprocess
+    import sys
+    import os
+    return subprocess.run(
+        [sys.executable, "-m", "uibc_core.cli"] + list(args),
+        cwd=os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        capture_output=True, text=True)
+
+
+def test_register_refuses_identifier_only_binding(tmp_path):
+    pkg = str(tmp_path / "p")
+    assert _cli(tmp_path, "init", pkg).returncode == 0
+    r = _cli(tmp_path, "register", pkg, "--agent-id", "a1", "--owner", "t",
+             "--did", "did:ctid:16D44117484372A2D010BDAA56703E723FB4C5C06CA44105F0C9C5B8020A7073")
+    assert r.returncode != 0
+    assert "publishes no resolution channel" in r.stderr
+
+
+def test_register_requires_endpoint_for_registry_method(tmp_path):
+    pkg = str(tmp_path / "p")
+    assert _cli(tmp_path, "init", pkg).returncode == 0
+    r = _cli(tmp_path, "register", pkg, "--agent-id", "a1", "--owner", "t",
+             "--did", "did:cn:88.100.1")
+    assert r.returncode != 0
+    assert "--did-endpoint" in r.stderr
+
+
+def test_register_proves_resolvability_before_writing(tmp_path):
+    pkg = str(tmp_path / "p")
+    assert _cli(tmp_path, "init", pkg).returncode == 0
+    r = _cli(tmp_path, "register", pkg, "--agent-id", "a1", "--owner", "t",
+             "--did", "did:cn:88.100.1", "--did-endpoint", "http://127.0.0.1:9")
+    # nothing listens on port 9: the binding must not be written anyway
+    assert r.returncode != 0
+    assert "cannot resolve" in r.stderr
+

@@ -259,9 +259,10 @@ def document_ed25519_key(document):
     raise DIDError("no usable Ed25519 verification method in DID document")
 
 
-def resolve_ed25519_key(did, timeout=10, fetcher=None):
+def resolve_ed25519_key(did, timeout=10, fetcher=None, endpoint=None):
     """Resolve a DID and return its Ed25519 key as (public_key, kid)."""
-    return document_ed25519_key(resolve(did, timeout=timeout, fetcher=fetcher))
+    return document_ed25519_key(resolve(did, timeout=timeout, fetcher=fetcher,
+                                        endpoint=endpoint))
 
 
 def verify_seal_with_did(did, identity, manifest, sig_b64, lifecycle=None,

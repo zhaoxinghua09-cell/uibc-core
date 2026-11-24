@@ -104,11 +104,33 @@ def cmd_register(args):
     # write time rather than let a typo become a verification failure later.
     if getattr(args, "did", None):
         method, _ = did_mod.parse(args.did)
-        if method not in did_mod.SUPPORTED_METHODS:
+        from . import did_cn
+        if method not in did_mod.SUPPORTED_METHODS and method not in did_cn.METHODS:
             raise SystemExit(
                 "error: did:%s has no public resolution rule in this build "
                 "(supported: %s)"
-                % (method, ", ".join("did:" + m for m in did_mod.SUPPORTED_METHODS)))
+                % (method, ", ".join(
+                    "did:" + m for m in did_mod.SUPPORTED_METHODS + did_cn.METHODS)))
+        if method in did_cn.METHODS:
+            lvl = did_cn.level(args.did)
+            if lvl != "registry":
+                raise SystemExit(
+                    "error: did:%s is validated but publishes no resolution channel "
+                    "we can re-run (%s), so binding an identity to it would prove "
+                    "nothing a third party can check. Bind did:key / did:web, or one "
+                    "of did:cn / did:ioa / did:cndid / did:cndomain with --did-endpoint"
+                    % (method, did_cn.SPECS[method][1]))
+            if not getattr(args, "did_endpoint", None):
+                raise SystemExit(
+                    "error: did:%s resolves through a registry; pass --did-endpoint "
+                    "<registry base url> (spec: %s)"
+                    % (method, did_cn.SPECS[method][1]))
+            # Write-time proof: a DID we cannot resolve here is a claim, not a
+            # binding. Resolve now, so a typo fails at register, not at verify.
+            try:
+                did_mod.resolve(args.did, endpoint=args.did_endpoint)
+            except (did_mod.DIDError, OSError, ValueError) as exc:
+                raise SystemExit("error: cannot resolve %s: %s" % (args.did, exc))
     ident = {
         "schema": SPEC_VERSION,
         "agent_id": agent_id,
@@ -245,15 +267,16 @@ def _load_seal_key(path):
     return "hmac", _load_key(path)
 
 
-def _pubkey_from_did(value):
+def _pubkey_from_did(value, endpoint=None):
     """Resolve a DID to the Ed25519 key it publishes.
 
     This is the point of binding to a DID: the verifier checks the seal against
     the key the *DID* names, instead of being handed a key out of band and
-    asked to trust whoever handed it over.
+    asked to trust whoever handed it over. `endpoint` is the registry base URL
+    for the China-registry methods; it has no default on purpose.
     """
     try:
-        public_key, _kid = did_mod.resolve_ed25519_key(value)
+        public_key, _kid = did_mod.resolve_ed25519_key(value, endpoint=endpoint)
     except (did_mod.DIDError, OSError, ValueError) as exc:
         sys.exit("error: cannot resolve %s: %s" % (value, exc))
     return public_key
@@ -576,7 +599,7 @@ def cmd_gate(args):
     if getattr(args, "did", None):
         if pubkey is not None:
             sys.exit("error: --did and --pubkey both pin a key; pass one of them")
-        pubkey = _pubkey_from_did(args.did)
+        pubkey = _pubkey_from_did(args.did, getattr(args, "did_endpoint", None))
     report = gate(pkg, key=key, pubkey=pubkey,
                   revocation_path=args.revocation, dispute_path=args.dispute,
                   require_revocation_coverage=getattr(
@@ -622,7 +645,7 @@ def cmd_verify(args):
     if getattr(args, "did", None):
         if pubkey is not None:
             sys.exit("error: --did and --pubkey both pin a key; pass one of them")
-        pubkey = _pubkey_from_did(args.did)
+        pubkey = _pubkey_from_did(args.did, getattr(args, "did_endpoint", None))
     report = verify(pkg, key=key, pubkey=pubkey,
                     expect_head=getattr(args, "expect_head", None),
                     strict=getattr(args, "strict", False),
@@ -711,7 +734,13 @@ def main():
     # (did:key / did:web) are accepted: binding an identity to a DID nobody
     # can independently resolve proves nothing about who controls it.
     p.add_argument("--did", default=None,
-                   help="bind this identity to a DID (did:key or did:web)")
+                   help="bind this identity to a DID (did:key or did:web; the "
+                        "China-registry methods need --did-endpoint and are "
+                        "resolved once, now, before the binding is written)")
+    p.add_argument("--did-endpoint", dest="did_endpoint", default=None, metavar="URL",
+                   help="registry base URL for did:cn / did:ioa / did:cndid / "
+                        "did:cndomain. No default: the specs name registries, not "
+                        "public resolution URLs")
     p.set_defaults(func=cmd_register)
 
     p = sub.add_parser("event", help="append lifecycle event")
@@ -752,7 +781,10 @@ def main():
                         "public key must match it, else S6 FAILS")
     p.add_argument("--did", default=None, metavar="DID",
                    help="pin the key by DID instead of a file (did:key resolves "
-                        "offline; did:web over https)")
+                        "offline; did:web over https; did:cn / did:ioa / did:cndid "
+                        "/ did:cndomain with --did-endpoint)")
+    p.add_argument("--did-endpoint", dest="did_endpoint", default=None, metavar="URL",
+                   help="registry base URL for the China-registry DID methods")
     p.add_argument("--expect-head", dest="expect_head", default=None, metavar="HEAD",
                    help="pin the package checkpoint_head observed elsewhere: a "
                         "mismatch FAILS S9, which is the only way to catch a rollback "
@@ -802,7 +834,10 @@ def main():
     p.add_argument("--pubkey", default=None, metavar="PUBFILE",
                    help="pinned Ed25519 public key (hex file) for the verify step")
     p.add_argument("--did", default=None, metavar="DID",
-                   help="pin the key by DID instead of a file (did:key / did:web)")
+                   help="pin the key by DID instead of a file (did:key / did:web; "
+                        "China-registry methods need --did-endpoint)")
+    p.add_argument("--did-endpoint", dest="did_endpoint", default=None, metavar="URL",
+                   help="registry base URL for the China-registry DID methods")
     p.add_argument("--revocation", default=None, metavar="FILE",
                    help="revocation.json overlay (governance.md section 3)")
     p.add_argument("--dispute", default=None, metavar="FILE",

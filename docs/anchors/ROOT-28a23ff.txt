@@ -1,0 +1,6 @@
+UIBC-CORE POSITIONING ROOT
+generated: 2026-11-24T18:30:33+08:00
+repository: https://github.com/zhaoxinghua09-cell/uibc-core
+commit: 28a23ff08ea02543042a65d3a457f5eeffd2627b
+tree:   d4656d14d8301837ef387ef0e0f3618f60548bd7
+subject: agent identity codes (GB/Z 185.2-2026 eight-arc; ACPs-spec-AIC-v02.01 ten-arc), did:cn live namespace, competitive landscape, reproduction

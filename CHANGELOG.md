@@ -1,3 +1,9 @@
+## Anchor: a frozen root, four calendar receipts, no Bitcoin attestation yet
+
+- `docs/anchors/ROOT-28a23ff.txt` and `.ots`: the claims are frozen against commit `28a23ff` (tree `d4656d1`), `sha256(ROOT) = 20c8d31b07bd…bf72`, submitted 2026-11-24 18:30 +08:00 to four OpenTimestamps calendars.
+- `ots upgrade` answers `Pending confirmation in Bitcoin blockchain` on all four. So the proof establishes "existed no later than submission, witnessed by four calendars", and **not** "attested on Bitcoin".
+- RFC 3161 came back empty: `freetsa.org/tsr` 404, `timestamp.digicert.com` 400 (http) / timeout (https), `timestamp.sectigo.com` 404. The registry keeps `RFC3161 = rejection`; the row is not deleted.
+- `docs/ANCHOR.md` states both, and why the root also lives in the repository (GitHub as a second, weaker witness).
 ## Measured numbers now have to name the commit they came from
 
 - `tests/test_measured_facts_are_pinned.py`: any doc quoting a measured constant (file count, executed test count, tarball size) must also name a commit, or the suite fails.

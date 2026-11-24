@@ -40,6 +40,7 @@ python -c "from uibc_core import identity_adapter as ia; print(ia.check('did:key
 
 ## 边界
 
-- 只做了两种：DID（8 方法）与 X.509 只读。VC、SD-JWT、DNS、企业目录仍是 0 个适配器（见 `docs/IDENTITY-MAPPING.md` 的六个数字）。
+- 只做了两种：DID（11 方法，含离线自描述的 `did:jwk`、`did:peer` 与星火 `did:bid`）与 X.509 只读。VC、SD-JWT、DNS、企业目录仍是 0 个适配器（见 `docs/IDENTITY-MAPPING.md` 的六个数字）。
 - 没有建链、没有撤销获取、没有新鲜度——这三件在验证路径里，不在这一层。
 - 适配器的 `VERIFIED` 只是“身份绑定”层面的，不构成对该主体行为可信的判断。混用会被 `claims-register` 的规矩挡住。
+

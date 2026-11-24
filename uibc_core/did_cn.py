@@ -2,11 +2,13 @@
 
 Six DID methods whose specifications are published by Chinese registry operators
 and which are listed in the W3C DID Extensions registry (`w3c/did-extensions`,
-`methods/<name>.json`; 282 entries on the day this was written):
+`methods/<name>.json`; 282 entries on the day this was written), plus `did:bid`
+(BIF / CAICT), which the same registry also lists:
 
   cn        CAICT / Astron    github.com/caict-4iot-dev/CN-DID-Method-Specification
   ioa       teleinfo CAICT    github.com/ReciterKim/ioa  (doc/en IOA Protocol Specification)
   cndid     teleinfo CAICT    github.com/teleinfo-bif/cndid (doc/en CNDID Protocol Specification)
+  bid       BIF / CAICT       github.com/teleinfo-bif/bid (doc/en BID Protocol Specification)
   ctid      anicert           github.com/617640999/ctid-did-register (anicert-ctid-did-en.md)
   oan       OpenAgenet        github.com/OpenAgenet/oan-public-docs (did-oan-specs/doc)
   cndomain  CNNIC             cndomain-dev.github.io/did-method-cndomain (draft 2026-05-07)
@@ -73,6 +75,9 @@ SPECS = {
     "cndomain": ("CNNIC / did-method-cndomain working draft",
                  "https://cndomain-dev.github.io/did-method-cndomain/did-cndomain-method-specification-draft.html",
                  "registry"),
+    "bid": ("BIF / CAICT (teleinfo)",
+            "https://github.com/teleinfo-bif/bid/blob/master/doc/en/BID%20Protocol%20Specification.md",
+            "registry"),
 }
 
 METHODS = tuple(SPECS)
@@ -95,6 +100,59 @@ _CTID_RE = re.compile(r"^[0-9A-F]{64}$")
 #   acsn = 4(ALPHA / DIGIT) ; suffix = (22,42)(ALPHA / DIGIT)
 _ACSN_RE = re.compile(r"^[A-Za-z0-9]{4}$")
 _SUFFIX_RE = re.compile(r"^[A-Za-z0-9]{22,42}$")
+
+
+def _check_bid(ident):
+    """`did:bid` identity rule, quoted from the BID protocol specification (teleinfo/CAICT).
+
+        bid-specific-identifier = 0*1(acsn ":") suffix / acsn ":" 0*1(suffix)
+        acsn    = 4(ALPHA / DIGIT)
+        suffix  = (22,42)(ALPHA / DIGIT)
+
+    Two shapes are legal, and the second one is why this cannot be a single regex:
+
+    * main chain: `efnVUgqQFfYeu97ABf6sGm3WFtVXHZB2` -- the first character is the
+      encryption method, the second the encoding method (see the spec's two tables),
+      the rest is the encoded key digest;
+    * sub chain:  `XXXX:...` (acsn + suffix), and the specification explicitly allows
+      an *empty* suffix there (`acsn ":" 0*1(suffix)`), which is the `did:bid:byol`
+      side-chain-resolution form.
+
+    We read the two prefix characters into `crypto`/`encoding` when they are known,
+    and *never* claim the suffix decodes to a key: the spec trims trailing bytes, so
+    the identifier does not carry a whole key we could re-derive a document from.
+    """
+    parts = ident.split(":")
+    if ident == "byol":
+        # spec 3.1: `did:bid:byol` is explicitly "a special kind of BID, not
+        # encompassing the postfix". It does not fit the ABNF above (which needs an
+        # acsn followed by ':'), so it gets its own named branch instead of a regex
+        # exception silently swallowing four-character identifiers.
+        return {"shape": "byol", "offline_document": False,
+                "note": "spec 3.1 special side-chain-resolution form, no suffix"}
+    if len(parts) == 1:
+        suffix = parts[0]
+        if not _SUFFIX_RE.match(suffix):
+            raise IdentifierError(
+                "did:bid main-chain identifier expects a (22,42) character suffix, got %r"
+                % (suffix,))
+        crypto = _CRYPTO.get(suffix[0])
+        encoding = _ENCODING.get(suffix[1])
+        return {"shape": "main", "crypto": crypto, "encoding": encoding,
+                "suffix": suffix, "offline_document": False}
+    if len(parts) == 2:
+        acsn, suffix = parts
+        if not _ACSN_RE.match(acsn):
+            raise IdentifierError(
+                "did:bid sub-chain identifier expects a 4-character AC code before ':', got %r"
+                % (acsn,))
+        if suffix and not _SUFFIX_RE.match(suffix):
+            raise IdentifierError(
+                "did:bid sub-chain suffix must be empty or (22,42) characters, got %r"
+                % (suffix,))
+        return {"shape": "sub", "acsn": acsn, "suffix": suffix,
+                "offline_document": False}
+    raise IdentifierError("did:bid has at most one ':' inside its identifier, got %r" % (ident,))
 # oan: did:oan:routing-code ":" suffix-code ; 5 + 32 base58 chars
 _OAN_RE = re.compile("^(?:[%s]{5}):(?:[%s]{32})$" % (_B58, _B58))
 # cndomain: "did:cndomain:" domain [ ":" object-type ":" object-name ] ; domain ends ".cn"
@@ -237,6 +295,8 @@ def validate(did):
                 "did:cndomain expects lowercase <label.>+.cn[:<object-type>:<object-name>], got %r"
                 % (ident,))
         details.update(domain=ident.split(":")[0])
+    elif method == "bid":
+        details.update(_check_bid(ident))
     return method, SPECS[method][2], details
 
 
@@ -370,6 +430,17 @@ def resolve(did, endpoint=None, timeout=10, fetcher=None):
         doc = data.get("didDocument") if isinstance(data, dict) else envelope
     elif method == "cndomain":
         doc = _fetch_json("%s/%s" % (endpoint, did), timeout, fetcher)
+    elif method == "bid":
+        # spec 5.3: "read" is an HTTP GET; the body carries errorCode alongside the
+        # document, and some deployments nest it as data.didDocument. Both shapes
+        # are accepted -- and both still have to answer with the id we asked about,
+        # which the check below enforces.
+        envelope = _fetch_json("%s/%s" % (endpoint, did), timeout, fetcher)
+        if isinstance(envelope, dict) and envelope.get("errorCode") not in (None, 0):
+            raise DIDCNError("%s: registry refused: errorCode=%r message=%r"
+                             % (did, envelope.get("errorCode"), envelope.get("message")))
+        data = envelope.get("data") if isinstance(envelope, dict) else None
+        doc = data.get("didDocument") if isinstance(data, dict) and data.get("didDocument") else envelope
     else:
         raise DIDCNError("%s: no read shape implemented for did:%s" % (did, method))
     if not isinstance(doc, dict):

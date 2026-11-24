@@ -48,7 +48,7 @@ __all__ = [
     "SUPPORTED_METHODS",
 ]
 
-SUPPORTED_METHODS = ("key", "web")
+SUPPORTED_METHODS = ("key", "web", "jwk", "peer")
 
 # did:method:specific-id  (specific-id is intentionally loose: each method has
 # its own grammar and we validate per method below)
@@ -56,6 +56,8 @@ _DID_RE = re.compile(r"^did:([a-z0-9]+):([^:\s]+(?::[^:\s]+)*)$")
 
 # multibase + multicodec prefix for an Ed25519 public key: 0xed 0x01
 _ED25519_MULTICODEC = b"\xed\x01"
+# multicodec prefix for an X25519 public key: 0xec 0x01 (did:peer E elements)
+_X25519_MULTICODEC = b"\xec\x01"
 _B58_ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
 
 
@@ -65,6 +67,15 @@ class DIDError(ValueError):
 
 class UnsupportedMethod(DIDError):
     """Method is well-formed but this module refuses to guess its rule."""
+
+
+class NotSelfResolving(DIDError):
+    """Well-formed, but the document cannot be derived from the identifier alone.
+
+    The distinction is the whole point: a `did:peer:3` is not a malformed DID, it
+    is a DID whose document lives with the counterparty. Reporting it as INVALID
+    would be the third instance of the same collapse this project keeps catching.
+    """
 
 
 # --------------------------------------------------------------------------- #
@@ -78,6 +89,67 @@ def parse(did):
     if not m:
         raise DIDError("not a DID: %r" % (did,))
     return m.group(1), m.group(2)
+
+
+#: JWK members that only exist in a *private* key. A did:jwk that carries any of
+#: them is not a public identifier -- it is a key leak, and refusing it is the
+#: whole point of checking. `k` is listed because symmetric keys have no public
+#: half at all, so nothing in a DID document could be verified with it.
+_JWK_PRIVATE_MEMBERS = ("d", "p", "q", "dp", "dq", "qi", "oth", "k")
+
+#: A did:jwk bigger than this is not a plausible identifier; it is either a
+#: mistake or an attempt to make a resolver do work it did not agree to.
+_MAX_JWK_BYTES = 4096
+
+
+def did_jwk_document(did):
+    """Build the document for `did:jwk` from the identifier alone -- no network.
+
+    `did:jwk:<base64url(JWK)>` puts the key in the identifier, so "resolution" is
+    decoding, not fetching. Two refusals matter:
+
+    1. **Private key material.** Members like `d`/`p`/`q`/`k` never belong in an
+       identifier. If present we refuse instead of silently publishing them in a
+       document -- a resolver is the last place that should launder a key leak.
+    2. **Size.** The JWK is capped so an over-long string cannot turn a local
+       decode into an unbounded workspace.
+
+    Nothing here claims the key is *controlled* by anyone: the document is the
+    identifier, so the binding is arithmetic, not a registry statement. That is
+    why this method can reach VERIFIED while the registry methods cannot.
+    """
+    method, ident = parse(did)
+    if method != "jwk":
+        raise UnsupportedMethod("did_jwk_document() only accepts did:jwk, got did:%s" % method)
+    if not ident:
+        raise DIDError("did:jwk has an empty JWK segment")
+    blob = _b64url_decode(ident)
+    if len(blob) > _MAX_JWK_BYTES:
+        raise DIDError("did:jwk JWK is %d bytes, over the %d-byte cap"
+                       % (len(blob), _MAX_JWK_BYTES))
+    try:
+        jwk = json.loads(blob.decode("utf-8"))
+    except (UnicodeDecodeError, ValueError) as exc:
+        raise DIDError("did:jwk segment is not a UTF-8 JSON object: %s" % (exc,)) from None
+    if not isinstance(jwk, dict):
+        raise DIDError("did:jwk segment must decode to a JSON object")
+    if not isinstance(jwk.get("kty"), str) or not jwk.get("kty"):
+        raise DIDError("did:jwk JWK has no 'kty' member")
+    leaked = sorted(k for k in _JWK_PRIVATE_MEMBERS if k in jwk)
+    if leaked:
+        raise DIDError("did:jwk carries private key members %s; a DID is a public "
+                       "identifier and must never be built from a private key"
+                       % ", ".join(leaked))
+    return {
+        "@context": ["https://www.w3.org/ns/did/v1"],
+        "id": did,
+        "verificationMethod": [{
+            "id": did + "#0",
+            "type": "JsonWebKey2020",
+            "controller": did,
+            "publicKeyJwk": jwk,
+        }],
+    }
 
 
 def did_web_url(did):
@@ -295,13 +367,27 @@ def resolve(did, timeout=10, fetcher=None, endpoint=None):
         if len(raw) != 32:
             raise DIDError("ed25519 did:key must carry 32 bytes, got %d" % len(raw))
         return did_key_document(raw, did)
+    if method == "jwk":
+        return did_jwk_document(did)
+    if method == "peer":
+        from . import did_peer  # local import: did_peer imports this module's helpers
+        return did_peer.resolve(did)
     if method == "web":
         url = did_web_url(did)
         if not url.startswith("https://"):
             raise DIDError("did:web must resolve over https")
+        # The host policy belongs to the resolution contract, not to the transport.
+        # It used to live only inside _fetch_json, so any caller that injected its
+        # own fetcher (tests, the bench's local-server cases, adapters) resolved
+        # did:web:127.0.0.1 happily -- the check applied or not depending on which
+        # code path carried the bytes. Same argument for the size cap below.
+        assert_public_host(url)
         document = (fetcher or _fetch_json)(url, timeout)
         if not isinstance(document, dict):
             raise DIDError("did:web document must be a JSON object")
+        if len(json.dumps(document).encode("utf-8")) > MAX_DOCUMENT_BYTES:
+            raise DIDError("did:web document exceeds the %d-byte cap (measured after transport)"
+                           % MAX_DOCUMENT_BYTES)
         if document.get("id") != did:
             raise DIDError("document id %r does not match %r"
                            % (document.get("id"), did))
@@ -366,3 +452,4 @@ def verify_seal_with_did(did, identity, manifest, sig_b64, lifecycle=None,
     public_key, kid = resolve_ed25519_key(did, timeout=timeout, fetcher=fetcher)
     return signing.ed_seal_verify(public_key, identity, manifest, sig_b64,
                                   lifecycle=lifecycle), kid
+

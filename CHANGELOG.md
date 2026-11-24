@@ -1,3 +1,21 @@
+## 未发布 — 2026-11-25（DID 对接：补 did:peer）
+
+- **`did:peer` numalgo 0/2 支持，全离线**：文档由标识本身推导，不需要端点也不需要注册中心。`0z<multibase ed25519>` 与同键 `did:key` 的文档键材料一致（规范明说二者等价）；`2` 解析 `.A/.E/.V/.I/.D` 键元素与 `.S<base64url>` 服务元素，按规范把 `t/s/r/a`、`dm` 还原成全称。
+- **numalgo 1/3/4 报 `UNRESOLVED` 而不是 `INVALID`**：它们的文档不在标识里（1 是创世文档的哈希、3 是 numalgo-2 DID 的哈希、4 短形态是长形态的哈希），需要对方提供。新增 `NotSelfResolving` 异常，适配器单独接住——这是同一类"错误信息坍缩"的第三例（前两例是 RegistryEndpointRequired 与线上 did:cn 形态）。
+- 明确不声明 `keyAgreement`：从 Ed25519 公钥推 X25519 需要双有理映射，本实现没做，宁可不给也不给一个看起来对的错键。
+- 测试 `tests/test_did_peer.py` 24 条，向量取自 Peer DID 方法规范原文样例。
+
+## 未发布 — 2026-11-24（DID 对接：补 did:jwk / did:bid + 修线上 did:cn 误判）
+
+主题：把"身份无关"从口号变成能点名的清单。两件事，一件加能力，一件修错误结论。
+
+- **新增 `did:jwk`**（`uibc_core/did.py::did_jwk_document`）：离线解析（文档就是标识）。两条硬拒绝：JWK 里出现 `d/p/q/dp/dq/qi/oth/k` 一律拒绝（DID 是公开标识，解析器不该替人搬运私钥）；JWK 超过 4096 字节拒绝（不让一条长字符串把本地解码变成无界工作量）。ed25519 → `VERIFIED`，其它键型 → `INCONCLUSIVE`。测试 `tests/test_did_jwk.py` 15 条
+- **修 `did:cn` 线上形态被误判为 `INVALID`**：信通院线上平台发的 `did:cn:agent:<base58>` 不在已发布 ABNF 内，`validate()` 拒绝是对的，但适配器把这次拒绝说成了"标识写错了"——等于告诉一个分配正确的智能体它的标识非法。现改为 `UNRESOLVED` 并保留标签（形态可识别 ≠ 分配已确认），回归测试钉住。这是本仓第二次"错误信息坍缩"（第一次是 `RegistryEndpointRequired`）
+- **新增 `did:bid`**（`uibc_core/did_cn.py::_check_bid`）：星火·链网 BID，ABNF 两种形状——主链 `ef<base58>`（首字符加密算法、次字符编码算法，按规范两张表读出）与子链 `AC01:<suffix>`；`did:bid:byol` 作为规范明列的例外单独识别，不硬塞进正则。`read` 走 HTTP GET，`errorCode` 非 0 直接抛出，端点必须调用方给（不默认 URL）。测试 `tests/test_did_bid.py` 14 条
+- **记下一处规范间冲突**：BID 的 ABNF 允许 `acsn ":" 0*1(suffix)` 的空后缀形态（如 `did:bid:AC01:`），但 DID Core 的 `method-specific-id` 必须以 idchar 结尾；两者不能同时满足。我们按 DID Core 拒绝，冲突写在测试与 `docs/DID-LANDSCAPE.md` §4，不装作看不见
+- 新增 `docs/DID-LANDSCAPE.md`：DID 对接全景（9 种已接、主流方法矩阵、三档策略、与 Universal Resolver 的差距口径）
+- `docs/EVIDENCE-INDEX.md` 由生成器重算（静态用例数 1557），口径改为"静态计数 ≠ 运行期收集数（参数化会更多、平台跳过会更少）"；`check_doc_facts` 0 mismatch
+- 证据：`tests/test_did_jwk.py`、`tests/test_identity_adapter.py`、`docs/DID-LANDSCAPE.md`
 ## The suite count, counted where it cannot drift
 
 - `docs/EVIDENCE-INDEX.md` carries one published number, and the tool that generates it (`suite_size()` in `tools/build_evidence_index.py`) asked `unittest` discovery how many cases the suite has. That number depends on **where** you run it: the same commit counts **1157 on Linux and 1156 on Windows**, because discovery imports modules and platform-gated imports differ. So the page was guaranteed to be stale on one platform, and `test_the_doc_in_the_repo_matches_a_fresh_build`, `check_says_what_it_means` and `test_index_number_matches_what_is_measured` failed there. This was found the honest way — `uibc-bench` D1 ("outsider runs the whole suite") failed on a clean Linux clone of main.
@@ -1557,3 +1575,16 @@ Initial proposal.
 ### Known issues at this version
 - No signatures ⇒ malicious forgery undetected.
 - No certificate, gate-decision, memory-migration or registry layer.
+
+
+## 未发布 — 2026-11-25（修 did:web 策略随传输路径漂移，s02b 三例根因）
+
+- **发现**：`assert_public_host`、禁降级 302、文档体积上限三处限制原先只写在 `_fetch_json` 里。
+  任何**自带 fetcher** 的调用方（测试替身、bench 的本地服务用例、适配器）从 `resolve()` 进来时，
+  `did:web:127.0.0.1` 会被正常解析——限制"生效与否"取决于哪条代码路径搬字节。这正是 issue #434
+  里三个用例 Linux PASS / Windows FAIL 的根因，不是平台差异。
+- **修法**：把主机策略与体积上限搬进 `resolve()` 的解析契约（loopback/私网/`.local` 一律拒；返回的文档按
+  UTF-8 序列化后超过 2 MiB 一律拒），传输层 `_fetch_json` 保留原检查作为纵深防御。
+- 降级 302 仍只能在传输层拒绝（注入 fetcher 时看不到重定向）；这一点在测试与文档里明说，不假装覆盖。
+- 新增 `tests/test_did_web_policy.py`（6 条）：注入 fetcher 的 loopback / 私网 / localhost 一律拒，
+  公网照常；2.2 MB 文档拒绝、1.5 MB 接受。

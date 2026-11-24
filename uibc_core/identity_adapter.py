@@ -96,6 +96,25 @@ class DIDAdapter(IdentityAdapter):
             # INVALID because it arrived as a DIDError subclass -- the adapter is
             # what caught the collapse, which is the reason the vocabulary exists.
             return IdentityRecord(identifier, self.name, "UNRESOLVED", notes=str(exc))
+        except did_cn.IdentifierError as exc:
+            # Same collapse, second instance (found 2026-11-24): the live platform
+            # hands out `did:cn:agent:<base58>`, which is absent from the published
+            # ABNF, so validate() refuses it and the adapter called it INVALID --
+            # i.e. told a correctly-allocated agent that its identifier was wrong.
+            # Shape is recognisable, allocation is not; so: UNRESOLVED, labelled.
+            try:
+                did_cn.validate_live_agent_id(identifier)
+            except Exception:  # noqa: BLE001 - not the live form either
+                return IdentityRecord(identifier, self.name, "INVALID", notes=str(exc))
+            return IdentityRecord(
+                identifier, self.name, "UNRESOLVED",
+                notes=("live did:cn agent form (not in the published ABNF); "
+                       "resolution needs the registry endpoint; %s" % exc))
+        except did.NotSelfResolving as exc:
+            # Third instance of the same collapse (after RegistryEndpointRequired and
+            # the live did:cn form): well-formed but not derivable from the identifier
+            # alone is not "the identifier is wrong".
+            return IdentityRecord(identifier, self.name, "UNRESOLVED", notes=str(exc))
         except did.DIDError as exc:
             return IdentityRecord(identifier, self.name, "INVALID", notes=str(exc))
         except Exception as exc:  # noqa: BLE001 - network and endpoint problems

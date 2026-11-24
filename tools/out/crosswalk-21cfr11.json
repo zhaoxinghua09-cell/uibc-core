@@ -7,7 +7,7 @@
     "scope_note": "Five clauses of Subpart B/C. This is not a Part 11 compliance checklist: Part 11 binds the person who uses the system to keep records, and the controls it names (validation, access control, training, written policy) live in that person's quality system. Rows were chosen because they name something a record layer can either demonstrate or plainly not.",
     "source": "crosswalk/21cfr11.json"
   },
-  "manifest_sha256": "c3ffc2235d1fdf58292d3924e84e6d465f6b6b4ea8ebd3dbdaa42547eaff1a60",
+  "manifest_sha256": "da947e7d37934776c0822c53a58ea1e1e09677b42b77a89ec3e75bb9587ed9e0",
   "verdict_sha256": "9938bb44526573c796aca318952e791ae20663521d070fdd36d1ab3ace9f043f",
   "clause_count": 5,
   "counts": {
@@ -45,9 +45,10 @@
       "verbatim": true,
       "state": "PARTIAL",
       "note": "",
-      "reason": "Events are computer-generated, time-stamped, and append-only, and the seal makes a later insertion visible, so a change does not silently obscure what was recorded before. What is missing: the operator identity behind an entry (we record the agent and the key, not a named person), and the retention period, which is a records policy the user sets and we only inherit.",
+      "reason": "Events are computer-generated, time-stamped, append-only and carry the actor that made them; the verifier checks that actor against the recorded principals (its actor allow-list), and the seal makes a later insertion visible, so a change does not silently obscure what was recorded before. Two limits stay honest: the actor check's own test coverage is thin, so this row's probe demonstrates the time-stamped trail rather than the authorization; and the retention period is a records policy the user sets, which a format can preserve but cannot decide.",
       "carrier": [
         "append-only lifecycle events with checked_at",
+        "per-event actor field checked by the verifier's actor allow-list against recorded principals",
         "seal over the event set",
         "inspect printing the event trail"
       ],

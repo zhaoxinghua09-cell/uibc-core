@@ -26,12 +26,12 @@
       "url": "https://www.ecfr.gov/current/title-21/chapter-I/subchapter-A/part-11",
       "applies": true, "verbatim": true,
       "strength": "partial",
-      "carrier": ["append-only lifecycle events with checked_at", "seal over the event set", "inspect printing the event trail"],
+      "carrier": ["append-only lifecycle events with checked_at", "per-event actor field checked by the verifier's actor allow-list against recorded principals", "seal over the event set", "inspect printing the event trail"],
       "probe": {
         "cmd": "python -m uibc_core.cli inspect fixtures/clean.uibc",
         "expect": {"exit": 0, "stdout_contains": "events:"}
       },
-      "reason": "Events are computer-generated, time-stamped, and append-only, and the seal makes a later insertion visible, so a change does not silently obscure what was recorded before. What is missing: the operator identity behind an entry (we record the agent and the key, not a named person), and the retention period, which is a records policy the user sets and we only inherit."
+      "reason": "Events are computer-generated, time-stamped, append-only and carry the actor that made them; the verifier checks that actor against the recorded principals (its actor allow-list), and the seal makes a later insertion visible, so a change does not silently obscure what was recorded before. Two limits stay honest: the actor check's own test coverage is thin, so this row's probe demonstrates the time-stamped trail rather than the authorization; and the retention period is a records policy the user sets, which a format can preserve but cannot decide."
     },
     {
       "id": "21 CFR 11.50(a)",

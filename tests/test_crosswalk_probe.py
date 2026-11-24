@@ -172,7 +172,7 @@ def test_manifest_digest_is_stable_across_key_order():
 
 # --- the shipped crosswalks --------------------------------------------
 
-@pytest.mark.parametrize("name", ["eu-mdr-2017-745.json", "tool-contract.json", "iec-62304-2006-a1.json", "iso-14971-2019.json", "21cfr11.json"])
+@pytest.mark.parametrize("name", ["eu-mdr-2017-745.json", "tool-contract.json", "iec-62304-2006-a1.json", "iso-14971-2019.json", "21cfr11.json", "nist-sp800-53r5-au.json"])
 def test_shipped_crosswalks_evaluate_without_bad_states(name):
     doc = json.loads((REPO / "crosswalk" / name).read_text(encoding="utf-8"))
     assert doc["schema"] == cp.SCHEMA
@@ -192,7 +192,7 @@ def test_mdr_crosswalk_has_no_carried_clause():
 
 
 def test_every_mapped_clause_quotes_a_url():
-    for name in ["eu-mdr-2017-745.json", "tool-contract.json", "iec-62304-2006-a1.json", "iso-14971-2019.json", "21cfr11.json"]:
+    for name in ["eu-mdr-2017-745.json", "tool-contract.json", "iec-62304-2006-a1.json", "iso-14971-2019.json", "21cfr11.json", "nist-sp800-53r5-au.json"]:
         doc = json.loads((REPO / "crosswalk" / name).read_text(encoding="utf-8"))
         for c in doc["clauses"]:
             assert c.get("url", "").startswith("https://"), c["id"]

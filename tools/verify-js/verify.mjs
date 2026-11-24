@@ -1204,8 +1204,18 @@ function verify(pkg, opts = {}) {
           break;
         }
       }
-      // Lifecycle ordering, types and timestamps are S3's business; S12 owns the
-      // manifest's, the index's and the identifiers' shape.
+      // A lifecycle time that is present but impossible is S12's; a time that is
+      // missing altogether is S3's (a malformed event, not a bad date).
+      const lc = readJson(join(pkg, "lifecycle.json"));
+      const events = Array.isArray(lc) ? lc : (lc.events || []);
+      for (const ev of events) {
+        const at = ev && (ev.at || ev.created_at || ev.timestamp);
+        if (at != null && !realDate(at)) {
+          problems.push("a lifecycle event carries a time that does not exist: " + at);
+          break;
+        }
+      }
+      // Lifecycle ordering, types and actors are S3's business.
     } catch (err) { problems.push(err.message); }
     note("S12", "timestamp and identifier strictness", problems.length === 0,
          problems.slice(0, 4).join("; ") || "ok");

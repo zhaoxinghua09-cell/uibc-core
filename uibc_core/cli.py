@@ -499,7 +499,8 @@ def cmd_cert_verify(args):
     pkg = os.path.abspath(args.package) if args.package else None
     report = verify_certificate(key, cert, package_dir=pkg)
     print(json.dumps(report, ensure_ascii=False, indent=2))
-    sys.exit(0 if report["result"] == "PASS" else 1)
+    _RC = {"PASS": 0, "FAIL": 1, "INCONCLUSIVE": 2}
+    sys.exit(_RC.get(report.get("result"), 3))
 
 
 def cmd_revoke(args):
@@ -567,6 +568,13 @@ def cmd_revoke(args):
 
 
 def cmd_gate(args):
+    try:
+        json.load(open(os.path.join(os.path.abspath(args.path), "manifest.json"), encoding="utf-8"))
+    except Exception as exc:
+        print(json.dumps({"gate_version": "unreadable-guard", "decision": "HOLD",
+                          "reason": "package unreadable: %s" % exc,
+                          "exit_code": 3}, ensure_ascii=False, indent=1))
+        sys.exit(3)
     from .gate import gate
     pkg = os.path.abspath(args.path)
     if not os.path.isdir(pkg):
@@ -628,7 +636,8 @@ def cmd_verify(args):
                     strict=getattr(args, "strict", False),
                     state_file=getattr(args, "state_file", None))
     print(json.dumps(report, ensure_ascii=False, indent=2))
-    sys.exit(0 if report["result"] == "PASS" else 1)
+    _RC = {"PASS": 0, "FAIL": 1, "INCONCLUSIVE": 2}
+    sys.exit(_RC.get(report.get("result"), 3))
 
 
 def cmd_explain(args):
@@ -665,10 +674,16 @@ def cmd_explain(args):
     out = report.get("statement") or ""
     if out:
         print(out)
-    sys.exit(0 if report["result"] == "PASS" else 1)
+    _RC = {"PASS": 0, "FAIL": 1, "INCONCLUSIVE": 2}
+    sys.exit(_RC.get(report.get("result"), 3))
 
 
 def cmd_inspect(args):
+    try:
+        json.load(open(os.path.join(os.path.abspath(args.path), "manifest.json"), encoding="utf-8"))
+    except Exception as exc:
+        print("result: UNREADABLE   (package cannot be read: %s)" % exc)
+        sys.exit(3)
     pkg = os.path.abspath(args.path)
     manifest = _read(os.path.join(pkg, "manifest.json"))
     identity = _read(os.path.join(pkg, "identity.json"))
@@ -847,7 +862,23 @@ def main():
     p.add_argument("path"); p.set_defaults(func=cmd_inspect)
 
     args = ap.parse_args()
-    args.func(args)
+    try:
+        args.func(args)
+    except SystemExit:
+        raise
+    except Exception as exc:
+        # A package we cannot read is a verdict, not a traceback (docs: hostile input).
+        name = getattr(getattr(args, "func", None), "__name__", "")
+        detail = "%s: %s" % (type(exc).__name__, exc)
+        if name == "cmd_gate":
+            print(json.dumps({"gate_version": "unreadable-guard", "decision": "HOLD",
+                              "reason": "package unreadable: " + detail,
+                              "exit_code": 3}, ensure_ascii=False, indent=1))
+            sys.exit(3)
+        if name == "cmd_inspect":
+            print("result: UNREADABLE   (package cannot be read: %s)" % detail)
+            sys.exit(3)
+        raise
 
 
 if __name__ == "__main__":

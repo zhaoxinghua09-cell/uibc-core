@@ -1,0 +1,26 @@
+{
+  "schema": "uibc-core/ownership/1",
+  "system": "uibc-core",
+  "namespace": "zhaoxinghua09-cell/uibc-core",
+  "claimed_by": {
+    "github_account": "zhaoxinghua09-cell",
+    "role": "repository maintainer and the author of the mapped implementation"
+  },
+  "what_this_file_proves": [
+    "That whoever can commit to this repository also states, in the repository, which namespace the crosswalk is about.",
+    "Nothing else. A reader who needs cryptographic namespace ownership should require one of the proofs listed below; this file alone is a claim inside the namespace it claims."
+  ],
+  "what_this_file_does_not_prove": [
+    "control of a DNS name (no TXT record is published)",
+    "control of an organisational account through OIDC",
+    "that the PyPI project uibc-core is published by the same party without checking the publisher record"
+  ],
+  "stronger_proofs_a_registry_could_require": [
+    "DNS: a TXT or HTTPS .well-known record served from the namespace's own domain",
+    "OIDC: a token issued by the identity provider that owns the namespace, presented at publish time",
+    "Registry-side: an account binding that a registry operator verifies once and records"
+  ],
+  "crosswalk": "https://github.com/NOSAI-Federation/agent-governance-vocabulary/blob/main/crosswalk/uibc.yaml",
+  "as_of": "2026-11-24",
+  "note": "Written because the vocabulary registry, like the MCP registry, treats namespace ownership as the thing a listing must not fake. Until one of the stronger proofs exists, a listing should describe this system as self-declared rather than verified."
+}

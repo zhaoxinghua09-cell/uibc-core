@@ -376,9 +376,18 @@ def resolve(did, timeout=10, fetcher=None, endpoint=None):
         url = did_web_url(did)
         if not url.startswith("https://"):
             raise DIDError("did:web must resolve over https")
+        # The host policy belongs to the resolution contract, not to the transport.
+        # It used to live only inside _fetch_json, so any caller that injected its
+        # own fetcher (tests, the bench's local-server cases, adapters) resolved
+        # did:web:127.0.0.1 happily -- the check applied or not depending on which
+        # code path carried the bytes. Same argument for the size cap below.
+        assert_public_host(url)
         document = (fetcher or _fetch_json)(url, timeout)
         if not isinstance(document, dict):
             raise DIDError("did:web document must be a JSON object")
+        if len(json.dumps(document).encode("utf-8")) > MAX_DOCUMENT_BYTES:
+            raise DIDError("did:web document exceeds the %d-byte cap (measured after transport)"
+                           % MAX_DOCUMENT_BYTES)
         if document.get("id") != did:
             raise DIDError("document id %r does not match %r"
                            % (document.get("id"), did))

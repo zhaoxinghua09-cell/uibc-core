@@ -1576,3 +1576,15 @@ Initial proposal.
 - No signatures ⇒ malicious forgery undetected.
 - No certificate, gate-decision, memory-migration or registry layer.
 
+
+## 未发布 — 2026-11-25（修 did:web 策略随传输路径漂移，s02b 三例根因）
+
+- **发现**：`assert_public_host`、禁降级 302、文档体积上限三处限制原先只写在 `_fetch_json` 里。
+  任何**自带 fetcher** 的调用方（测试替身、bench 的本地服务用例、适配器）从 `resolve()` 进来时，
+  `did:web:127.0.0.1` 会被正常解析——限制"生效与否"取决于哪条代码路径搬字节。这正是 issue #434
+  里三个用例 Linux PASS / Windows FAIL 的根因，不是平台差异。
+- **修法**：把主机策略与体积上限搬进 `resolve()` 的解析契约（loopback/私网/`.local` 一律拒；返回的文档按
+  UTF-8 序列化后超过 2 MiB 一律拒），传输层 `_fetch_json` 保留原检查作为纵深防御。
+- 降级 302 仍只能在传输层拒绝（注入 fetcher 时看不到重定向）；这一点在测试与文档里明说，不假装覆盖。
+- 新增 `tests/test_did_web_policy.py`（6 条）：注入 fetcher 的 loopback / 私网 / localhost 一律拒，
+  公网照常；2.2 MB 文档拒绝、1.5 MB 接受。

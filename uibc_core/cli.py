@@ -83,9 +83,51 @@ def cmd_init(args):
     print(f"next: uibc register {pkg} --agent-id <id> --owner <owner>")
 
 
+MAX_AGENT_ID_LENGTH = 128
+
+# Characters that make two different identifiers look the same, or take an
+# identifier somewhere other than where it is displayed. Measured 2026-11-24
+# (harness s07, G3): `register` accepted the empty string, a control character
+# and a bidi override as agent ids, each of which then became the actor name in
+# a signed lifecycle event.
+_BIDI_CONTROLS = frozenset("\u200e\u200f\u202a\u202b\u202c\u202d\u202e"
+                           "\u2066\u2067\u2068\u2069\ufeff")
+
+
+def agent_id_error(agent_id):
+    """Return a reason the id is unusable, or None.
+
+    An identifier is written into identity.json, manifest.json and the first
+    lifecycle event, and it is what a verifier compares against. A value that is
+    invisible, empty or renders as a different string is not a stricter check
+    that is missing -- it is a different object being named.
+    """
+    if not isinstance(agent_id, str):
+        return "agent id must be a string, got %r" % (type(agent_id).__name__,)
+    if not agent_id:
+        return "agent id must not be empty"
+    if len(agent_id) > MAX_AGENT_ID_LENGTH:
+        return "agent id is %d characters, limit is %d" % (len(agent_id), MAX_AGENT_ID_LENGTH)
+    for ch in agent_id:
+        if ord(ch) < 0x20 or ord(ch) == 0x7f:
+            return "agent id contains a control character U+%04X" % ord(ch)
+        if 0x7f < ord(ch) < 0xa0:
+            return "agent id contains a control character U+%04X" % ord(ch)
+        if ch in _BIDI_CONTROLS:
+            return "agent id contains a bidirection control U+%04X" % ord(ch)
+        if ch.isspace() and ch != " ":
+            return "agent id contains whitespace U+%04X" % ord(ch)
+    if agent_id != agent_id.strip() or "  " in agent_id:
+        return "agent id has leading, trailing or repeated spaces"
+    return None
+
+
 def cmd_register(args):
     pkg = os.path.abspath(args.path)
     agent_id = args.agent_id
+    reason = agent_id_error(agent_id)
+    if reason:
+        raise SystemExit("error: %s" % reason)
     now = _now()
     reg_event = {
         "event_id": _uuid(),

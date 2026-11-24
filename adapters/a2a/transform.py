@@ -132,6 +132,14 @@ def check_roundtrip(payload):
 
 
 def detect_format(payload):
+    """Return "json", "xml", or None when the input cannot be judged.
+
+    Measured 2026-11-24 (harness s03, C2 "A2A 畸形输入"): this raised ValueError
+    for `None`, `""` and other non-messages. A detector is the function a gateway
+    calls on bytes it did not choose, so "cannot tell" has to be an answer and
+    not an exception -- the caller decides whether to refuse. `convert()` still
+    refuses, with a message that names the reason.
+    """
     if isinstance(payload, (dict, list)):
         return "json"
     if isinstance(payload, str):
@@ -140,7 +148,7 @@ def detect_format(payload):
             return "xml"
         if text.startswith("{") or text.startswith("["):
             return "json"
-    raise ValueError("cannot detect message format; supply source_format")
+    return None
 
 
 def convert(payload, target_format, source_format=None):
@@ -155,7 +163,9 @@ def convert(payload, target_format, source_format=None):
                          % (target_format, ", ".join(FORMATS)))
     source = source_format or detect_format(payload)
     if source not in FORMATS:
-        raise ValueError("unsupported source format %r" % (source,))
+        raise ValueError(
+            "cannot detect the message format (%r is not one of %s); "
+            "pass source_format explicitly" % (source, ", ".join(FORMATS)))
 
     if source == target_format:
         parsed = payload

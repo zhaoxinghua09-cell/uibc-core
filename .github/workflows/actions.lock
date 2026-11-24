@@ -49,6 +49,9 @@ workflows:
     '.github/workflows/security-baseline.yml':
         - 'actions/checkout@v7.0.1'
         - 'actions/setup-python@v7.1.0'
+    '.github/workflows/trusted-verify.yml':
+        - 'actions/checkout@v7.0.1'
+        - 'actions/setup-python@v7.1.0'
     '.github/workflows/version-gate.yml':
         - 'actions/checkout@v4.4.0'
         - 'actions/setup-python@v7.1.0'

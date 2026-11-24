@@ -1,0 +1,59 @@
+# C: a base-owned verifier judging the pull request's data. The PR cannot grade itself.
+# The pull request cannot grade itself: the oracle is the base tree.
+name: Trusted verify (base-owned oracle)
+
+on:
+  pull_request:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  trusted-verify:
+    name: trusted-verify
+    runs-on: ubuntu-latest
+    steps:
+      - name: proposed tree
+        uses: actions/checkout@v7.0.1
+        with:
+          path: pr-data
+          persist-credentials: false
+      - name: base tree
+        uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.base.sha || github.event.repository.default_branch }}
+          path: trusted
+          persist-credentials: false
+      - uses: actions/setup-python@v7.1.0
+        with:
+          python-version: "3.12"
+      # The oracle is the BASE code. A pull request that relaxes the verifier it is
+      # graded by changes pr-data, not this environment, so the relaxation cannot
+      # take effect here. Same shape as agent-governance-vocabulary's validate-trusted.
+      - name: install the base verifier
+        run: pip install -e ./trusted
+      - name: run the base verifier over the pull request's cases
+        run: |
+          python - <<'PY'
+          import json, os, sys
+          from uibc_core.verify import verify
+
+          manifest = json.load(open("pr-data/conformance/manifest.json", encoding="utf-8"))
+          cases = manifest["cases"]
+          fails = []
+          for c in cases:
+              pkg = os.path.join("pr-data/conformance", c["path"])
+              rep = verify(pkg)  # lenient mode: the conformance manifest is defined in it (case 05 carries an uncommitted evidence/.lock)
+              want = c.get("expected_result")
+              ok = rep["result"] == want if c.get("expect") == "accept" else (
+                  rep["result"] == "FAIL" and any(
+                      ch["id"] in (c.get("expected_checks") or []) for ch in rep["checks"]))
+              print(f"{c['id']} {rep['result']:12} expected {want:12} {'OK' if ok else 'MISMATCH'}")
+              if not ok:
+                  fails.append(c["id"])
+          print(f"\n{len(cases) - len(fails)}/{len(cases)} cases agree with the base verifier")
+          if fails:
+              print("cases the base verifier does not accept:", fails)
+              sys.exit(1)
+          PY

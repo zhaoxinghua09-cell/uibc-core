@@ -13,7 +13,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from uibc_core.authority_age import commit_recheck, decision_record
+from uibc_core.authority_age import (
+    commit_recheck,
+    commit_recheck_from_history,
+    decision_record,
+)
 
 CASES = Path(__file__).resolve().parent.parent / "vectors" / "authority-age" / "cases.json"
 
@@ -23,8 +27,14 @@ def main() -> int:
     failures = 0
     print("schema: %s   as_of: %s" % (doc["schema"], doc["as_of"]))
     for case in doc["cases"]:
-        if case.get("kind") == "commit":
-            result = commit_recheck(case["answers"], case["commit_at"], case["bounds"])
+        if case.get("kind") in ("commit", "history"):
+            if case.get("kind") == "history":
+                result = commit_recheck_from_history(
+                    case["histories"], case["commit_at"], case["bounds"])
+                rows = result["links"]
+            else:
+                result = commit_recheck(case["answers"], case["commit_at"], case["bounds"])
+                rows = result["answer_checks"]
             got, want = result["state"], case["expect_state"]
             reasons = ",".join(result["reason_codes"]) or "-"
             detail = "outcome=%s/%s reasons=%s" % (result["outcome"], case["expect_outcome"], reasons)
@@ -33,8 +43,8 @@ def main() -> int:
             if case.get("expect_reason") and case["expect_reason"] not in result["reason_codes"]:
                 got = "%s/%s" % (got, "missing-reason")
             ages = ", ".join(
-                "%s=%s" % (row["link"], "n/a" if row["age_seconds"] is None else "%ds" % row["age_seconds"])
-                for row in result["answer_checks"]
+                "%s=%s" % (row["link"], "n/a" if row.get("age_seconds") is None else "%ds" % row["age_seconds"])
+                for row in rows
             )
         else:
             record = decision_record(

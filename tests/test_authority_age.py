@@ -18,8 +18,10 @@ from uibc_core.authority_age import (
     answer_age,
     check_link,
     commit_recheck,
+    commit_recheck_from_history,
     decision_record,
     evaluate_links,
+    status_at,
 )
 
 T = "2026-11-24T09:00:00Z"   # validation instant
@@ -138,6 +140,77 @@ class TestCommitRecheck(unittest.TestCase):
             {"anchor": IAT, "mandate": IAT}, A,
             {"anchor": 7200, "mandate": 86400})
         self.assertEqual(result["outcome"], REFUSED)
+
+
+REVOKED_AT_1030 = [
+    {"at": "2026-11-24T08:00:00Z", "new": "VERIFIED"},
+    {"at": "2026-11-24T10:30:00Z", "new": "REVOKED", "reason": "key compromise"},
+]
+
+
+class TestStatusAt(unittest.TestCase):
+    """Our own revocation history, read at an instant."""
+
+    def test_status_before_revocation_is_verified(self):
+        status = status_at(REVOKED_AT_1030, "2026-11-24T10:00:00Z")
+        self.assertEqual(status["state"], "VERIFIED")
+        self.assertEqual(status["records_used"], 1)
+
+    def test_status_after_revocation_is_revoked(self):
+        status = status_at(REVOKED_AT_1030, "2026-11-24T11:00:00Z")
+        self.assertEqual(status["state"], "REVOKED")
+        self.assertEqual(status["reason"], "key compromise")
+
+    def test_later_records_are_not_read_backwards(self):
+        # A revocation dated after the instant must not describe that instant.
+        status = status_at(REVOKED_AT_1030, "2026-11-24T09:00:00Z")
+        self.assertEqual(status["state"], "VERIFIED")
+
+    def test_no_record_at_all_is_no_state(self):
+        status = status_at([], "2026-11-24T09:00:00Z")
+        self.assertIsNone(status["state"])
+        self.assertIn("not the same as being valid", status["detail"])
+
+
+class TestCommitRecheckFromHistory(unittest.TestCase):
+    """Revocation derived from our record, not from a caller's answer."""
+
+    def test_revoked_before_commit_refuses_even_with_young_answer(self):
+        result = commit_recheck_from_history(
+            {"mandate": REVOKED_AT_1030}, A, {"mandate": 7200})
+        self.assertEqual(result["outcome"], REFUSED)
+        self.assertEqual(result["reason_codes"], ["authority_revoked"])
+
+    def test_still_verified_at_commit_executes(self):
+        result = commit_recheck_from_history(
+            {"mandate": REVOKED_AT_1030}, "2026-11-24T10:00:00Z", {"mandate": 7200})
+        self.assertEqual(result["outcome"], EXECUTED)
+        self.assertEqual(result["reason_codes"], [])
+
+    def test_revocation_after_commit_does_not_affect_this_action(self):
+        result = commit_recheck_from_history(
+            {"mandate": REVOKED_AT_1030}, "2026-11-24T10:00:00Z", {"mandate": 7200})
+        self.assertEqual(result["state"], CURRENT)
+
+    def test_verified_but_over_the_bound_still_refuses(self):
+        fresh_but_old = [{"at": "2026-11-24T08:00:00Z", "new": "VERIFIED"}]
+        result = commit_recheck_from_history({"mandate": fresh_but_old}, A,
+                                             {"mandate": 7200})
+        self.assertEqual(result["outcome"], REFUSED)
+        self.assertEqual(result["reason_codes"], ["authority_expired"])
+
+    def test_no_history_refuses_as_unknown(self):
+        result = commit_recheck_from_history({"mandate": []}, A, {"mandate": 7200})
+        self.assertEqual(result["outcome"], REFUSED)
+        self.assertEqual(result["reason_codes"], ["authority_unknown"])
+
+    def test_one_revoked_link_refuses_the_whole_action(self):
+        result = commit_recheck_from_history(
+            {"anchor": [{"at": "2026-11-24T08:00:00Z", "new": "VERIFIED"}],
+             "mandate": REVOKED_AT_1030},
+            A, {"anchor": 86400, "mandate": 86400})
+        self.assertEqual(result["outcome"], REFUSED)
+        self.assertEqual(result["reason_codes"], ["authority_revoked"])
 
 
 class TestDecisionRecord(unittest.TestCase):

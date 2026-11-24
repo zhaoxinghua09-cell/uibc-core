@@ -60,6 +60,8 @@ __all__ = [
     "check_link",
     "evaluate_links",
     "commit_recheck",
+    "status_at",
+    "commit_recheck_from_history",
     "decision_record",
 ]
 
@@ -196,6 +198,105 @@ def commit_recheck(answers_by_link, commit_at, bounds):
         "answer_checks": evaluation["links"],
         "rule": ("an answer over its bound, absent, or dated after the commit "
                  "refuses the action rather than executing it"),
+    }
+
+
+def status_at(history, at):
+    """What our own record says a link's status was at instant ``at``.
+
+    ``history`` is a list of transition records in ascending time order, each
+    with ``at`` (ISO-8601), ``new`` (one of interop_result.STATES) and optional
+    ``reason``. Records dated after ``at`` are ignored: they had not happened
+    yet, and using them would let a later revocation retroactively describe an
+    earlier moment.
+
+    Why this exists: the SCITT OAR profile asks a relying party to hand it the
+    authority's status. We can do better on the one axis we own -- we derive
+    the status at commit from our own revocation history, so the refusal does
+    not rest on a caller remembering to re-ask. This does not make the answer
+    fresh by itself; it makes the *revocation* self-attested.
+    """
+    if not isinstance(history, (list, tuple)):
+        raise ValueError("history must be a sequence of transition records")
+    at_dt = _instant(at, "at")
+    chosen = None
+    used = 0
+    for record in history:
+        when = _instant(record.get("at"), "history.at")
+        if when > at_dt:
+            break
+        used += 1
+        chosen = record
+    if chosen is None:
+        return {"state": None, "answer_iat": None, "records_used": 0,
+                "detail": "no record at or before this instant; the link had no "
+                          "status then, which is not the same as being valid"}
+    return {
+        "state": chosen.get("new"),
+        "answer_iat": chosen.get("at"),
+        "records_used": used,
+        "reason": chosen.get("reason"),
+    }
+
+
+def commit_recheck_from_history(histories, commit_at, bounds):
+    """Re-check at commit using our own status history instead of an outside answer.
+
+    Each link's status at ``commit_at`` is derived with ``status_at()``; a link
+    whose status is REVOKED, EXPIRED, INVALID or UNRESOLVED refuses the action
+    with ``authority_revoked`` / ``authority_expired`` / ``authority_invalid``,
+    regardless of how young the answer is. A link that is still VERIFIED at
+    commit then goes through the ordinary age bound.
+
+    The distinction that matters: age answers "is it stale", status answers
+    "was it withdrawn". A fresh answer for a revoked authority is still a
+    refusal, and this function cannot return CURRENT for one.
+    """
+    REVOKING = {"REVOKED": "authority_revoked",
+                "EXPIRED": "authority_expired",
+                "INVALID": "authority_invalid",
+                "UNRESOLVED": "authority_unknown"}
+    rows, codes, answers = [], [], {}
+    for link in sorted(histories):
+        status = status_at(histories[link], commit_at)
+        revoked_code = REVOKING.get(status["state"])
+        if revoked_code:
+            rows.append({"link": link, "state": CHANGED, "status": status["state"],
+                         "answer_iat": status["answer_iat"], "age_seconds": None,
+                         "reason_code": revoked_code,
+                         "detail": "status at commit is %s from our own record"
+                                   % status["state"]})
+            codes.append(revoked_code)
+            continue
+        if status["state"] is None:
+            rows.append({"link": link, "state": INCONCLUSIVE, "status": None,
+                         "answer_iat": None, "age_seconds": None,
+                         "reason_code": "authority_unknown",
+                         "detail": status["detail"]})
+            codes.append("authority_unknown")
+            continue
+        answers[link] = status["answer_iat"]
+    if answers:
+        age_eval = evaluate_links(answers, commit_at, bounds)
+        for row in age_eval["links"]:
+            rows.append(row)
+            if row["state"] == FAIL:
+                codes.append("authority_expired")
+            elif row["state"] == INCONCLUSIVE:
+                codes.append("authority_clock_skew")
+    rows.sort(key=lambda r: r["link"])
+    if codes:
+        state, outcome = CHANGED, REFUSED
+    else:
+        state, outcome = CURRENT, EXECUTED
+    return {
+        "state": state,
+        "outcome": outcome,
+        "checked_at": commit_at,
+        "reason_codes": sorted(set(codes)),
+        "links": rows,
+        "rule": ("status at commit comes from our own transition history; a revoked "
+                 "or expired link refuses the action even when its answer is young"),
     }
 
 

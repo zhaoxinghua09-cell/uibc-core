@@ -102,6 +102,37 @@
       "expect_state": "CHANGED",
       "expect_outcome": "refused",
       "expect_reason": "authority_expired"
+    },
+    {
+      "id": "aa-11",
+      "kind": "history",
+      "why": "our own record shows the mandate was revoked before commit, so the action is refused even though the answer is young",
+      "histories": {
+        "mandate": [
+          {"at": "2026-11-24T08:00:00Z", "new": "VERIFIED"},
+          {"at": "2026-11-24T10:30:00Z", "new": "REVOKED", "reason": "key compromise"}
+        ]
+      },
+      "bounds": {"mandate": 7200},
+      "commit_at": "2026-11-24T11:00:00Z",
+      "expect_state": "CHANGED",
+      "expect_outcome": "refused",
+      "expect_reason": "authority_revoked"
+    },
+    {
+      "id": "aa-12",
+      "kind": "history",
+      "why": "the revocation is dated after the commit instant, so it cannot retroactively describe that instant",
+      "histories": {
+        "mandate": [
+          {"at": "2026-11-24T08:00:00Z", "new": "VERIFIED"},
+          {"at": "2026-11-24T10:30:00Z", "new": "REVOKED", "reason": "key compromise"}
+        ]
+      },
+      "bounds": {"mandate": 7200},
+      "commit_at": "2026-11-24T10:00:00Z",
+      "expect_state": "CURRENT",
+      "expect_outcome": "executed"
     }
   ]
 }

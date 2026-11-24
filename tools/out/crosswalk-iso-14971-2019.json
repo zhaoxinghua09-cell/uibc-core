@@ -1,0 +1,113 @@
+{
+  "schema": "uibc-crosswalk/1",
+  "standard": {
+    "id": "ISO 14971:2019",
+    "title": "ISO 14971 — risk management clauses, mapped by clause title only",
+    "url": "https://www.iso.org/obp/ui/#iso:std:iso:14971:en",
+    "scope_note": "The standard text is paid. Only clause numbers and titles are public (ISO OBP table of contents), and that is all this file quotes, so every row is verbatim=false and no row may be carried. Five of the ten clauses are mapped; the rest are not, because a risk-management process is engineering work and listing it as 'partial' would only pad the table.",
+    "source": "crosswalk/iso-14971-2019.json"
+  },
+  "manifest_sha256": "a17c54ff4891560a805f5609defefc3e0ffb405db325bc6544129fc93ca2f93e",
+  "clause_count": 5,
+  "counts": {
+    "PARTIAL": 2,
+    "GAP": 3
+  },
+  "bad": 0,
+  "rows": [
+    {
+      "id": "ISO 14971 4.5 Risk management file",
+      "applies": true,
+      "strength": "partial",
+      "verbatim": false,
+      "state": "PARTIAL",
+      "note": "",
+      "reason": "A package can hold the file's documents, name each by digest, and prove none changed since sealing - which is what makes a file auditable. What is missing: whether the file contains the right records, in the required structure, traceable to hazards.",
+      "carrier": [
+        "evidence container with per-file digests",
+        "evidence_root",
+        "seal"
+      ],
+      "url": "https://www.iso.org/obp/ui/#iso:std:iso:14971:en",
+      "probe": {
+        "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" tools/probe_evidence_identity.py fixtures/clean.uibc",
+        "declared": "python tools/probe_evidence_identity.py fixtures/clean.uibc",
+        "exit": 0,
+        "expect_exit": 0,
+        "stdout_contains": "identities recompute",
+        "ok": true,
+        "duration_s": 0.21,
+        "tail": [
+          "OK 2/2 evidence identities recompute"
+        ]
+      }
+    },
+    {
+      "id": "ISO 14971 4.4 Risk management plan",
+      "applies": true,
+      "strength": "gap",
+      "verbatim": false,
+      "state": "GAP",
+      "note": "",
+      "reason": "Scope, responsibilities, acceptability criteria and the overall-residual-risk method are authored by the manufacturer. A record layer can store the plan as evidence; it cannot write or judge it.",
+      "carrier": [],
+      "url": "https://www.iso.org/obp/ui/#iso:std:iso:14971:en",
+      "probe": null
+    },
+    {
+      "id": "ISO 14971 5.4 Identification of hazards and hazardous situations",
+      "applies": true,
+      "strength": "gap",
+      "verbatim": false,
+      "state": "GAP",
+      "note": "",
+      "reason": "Hazard identification is the analytical core of the standard. No check in this library invents hazards, and pretending to enumerate them from a package would invert the whole point.",
+      "carrier": [],
+      "url": "https://www.iso.org/obp/ui/#iso:std:iso:14971:en",
+      "probe": null
+    },
+    {
+      "id": "ISO 14971 7.2 Implementation of risk control measures",
+      "applies": true,
+      "strength": "gap",
+      "verbatim": false,
+      "state": "GAP",
+      "note": "",
+      "reason": "Implementation happens in the product. What a package can show is that a verification result was recorded against a control - not that the control is in the shipped software, and not that it works.",
+      "carrier": [],
+      "url": "https://www.iso.org/obp/ui/#iso:std:iso:14971:en",
+      "probe": null
+    },
+    {
+      "id": "ISO 14971 10.2 Information collection (production and post-production)",
+      "applies": true,
+      "strength": "partial",
+      "verbatim": false,
+      "state": "PARTIAL",
+      "note": "",
+      "reason": "The demo re-verifies a package after it was sealed and catches a substituted key, which is the shape of a post-production signal. What is missing: a real collection channel - complaints, literature, other devices on the market - and the review that decides whether a signal is safety-relevant.",
+      "carrier": [
+        "checked_at on each verdict",
+        "commit-time recheck",
+        "revocation record"
+      ],
+      "url": "https://www.iso.org/obp/ui/#iso:std:iso:14971:en",
+      "probe": {
+        "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" -m uibc_core.cli demo",
+        "declared": "python -m uibc_core.cli demo",
+        "exit": 0,
+        "expect_exit": 0,
+        "stdout_contains": "Try it yourself",
+        "ok": true,
+        "duration_s": 0.49,
+        "tail": [
+          "[8/8] verify the same package PINNED to the owner's public key",
+          "     -> result: FAIL (expected FAIL: key substitution caught by pinning - publish your .pub where verifiers can pin it)",
+          "Try it yourself: python -m uibc_core.cli verify C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\uibc-demo-ug_4hly3\\demo   (no key needed - the seal is public)",
+          "                 python -m uibc_core.cli verify C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\uibc-demo-ug_4hly3\\forged --pubkey C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\uibc-demo-ug_4hly3\\owner.key.pub"
+        ]
+      }
+    }
+  ],
+  "verdict": "OK"
+}

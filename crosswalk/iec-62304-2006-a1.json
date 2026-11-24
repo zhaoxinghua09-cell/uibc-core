@@ -1,0 +1,75 @@
+{
+  "schema": "uibc-crosswalk/1",
+  "standard": {
+    "id": "IEC 62304:2006+AMD1:2015",
+    "title": "IEC 62304 — software life cycle processes, mapped by clause title only",
+    "url": "https://www.iso.org/obp/ui/#iso:std:iec:62304:ed-1:v1:en",
+    "scope_note": "The standard text is paid (CHF 1,150 for the consolidated version). Only the table of contents - clause numbers and titles - is public, and that is all this file quotes. Every row therefore carries verbatim=false and may be PARTIAL or GAP, never carried: a clause whose requirement text nobody on this project has read cannot be claimed as covered. Five clauses, chosen because a record layer might plausibly touch them; the other thirty-five are not listed, which is itself the answer."
+  },
+  "clauses": [
+    {
+      "id": "IEC 62304 4.3 Software safety classification",
+      "text": "[title only] Software safety classification",
+      "url": "https://www.iso.org/obp/ui/#iso:std:iec:62304:ed-1:v1:en",
+      "applies": true,
+      "verbatim": false,
+      "strength": "gap",
+      "carrier": [],
+      "probe": null,
+      "reason": "Class A/B/C is assigned from the device risk analysis and drives which tasks are mandatory. This is a decision about the product, made by the manufacturer against ISO 14971; a record layer has nothing to classify and cannot answer it."
+    },
+    {
+      "id": "IEC 62304 5.8 Software release",
+      "text": "[title only] Software release",
+      "url": "https://www.iso.org/obp/ui/#iso:std:iec:62304:ed-1:v1:en",
+      "applies": true,
+      "verbatim": false,
+      "strength": "partial",
+      "carrier": ["evidence/index.json digests", "manifest evidence_root", "seal"],
+      "probe": {
+        "cmd": "python tools/probe_evidence_identity.py fixtures/clean.uibc",
+        "expect": {"exit": 0, "stdout_contains": "identities recompute"}
+      },
+      "reason": "A released package names every artefact by digest and seals the set, so the released thing is identifiable and a later edit is detectable. What is missing: the release decision itself - who approved it, against which verification results, and whether every required task for the assigned safety class was actually performed."
+    },
+    {
+      "id": "IEC 62304 8.2 Change control",
+      "text": "[title only] Change control",
+      "url": "https://www.iso.org/obp/ui/#iso:std:iec:62304:ed-1:v1:en",
+      "applies": true,
+      "verbatim": false,
+      "strength": "partial",
+      "carrier": ["seal over manifest", "lifecycle events", "tamper detection"],
+      "probe": {
+        "cmd": "python -m pytest tests/test_seal_v03.py -q",
+        "expect": {"exit": 0}
+      },
+      "reason": "The seal makes an uncontrolled change visible: alter a byte and verification stops agreeing with the manifest. That is detection, not control - approval of a change, impact analysis and re-baselining stay in the manufacturer's configuration management process."
+    },
+    {
+      "id": "IEC 62304 7.1 Analysis of software contributing to hazardous situations",
+      "text": "[title only] Analysis of software contributing to hazardous situations",
+      "url": "https://www.iso.org/obp/ui/#iso:std:iec:62304:ed-1:v1:en",
+      "applies": true,
+      "verbatim": false,
+      "strength": "gap",
+      "carrier": [],
+      "probe": null,
+      "reason": "This is engineering analysis: which software functions can contribute to which hazardous situations. Nothing in a record layer performs it, and a placeholder table of hazards would be worse than an acknowledged gap."
+    },
+    {
+      "id": "IEC 62304 9.5 Maintain records",
+      "text": "[title only] Maintain records",
+      "url": "https://www.iso.org/obp/ui/#iso:std:iec:62304:ed-1:v1:en",
+      "applies": true,
+      "verbatim": false,
+      "strength": "partial",
+      "carrier": ["lifecycle.json events", "inspect output"],
+      "probe": {
+        "cmd": "python -m uibc_core.cli inspect fixtures/clean.uibc",
+        "expect": {"exit": 0, "stdout_contains": "events:"}
+      },
+      "reason": "Problem and change events are appended with identity and time and can be read back in one command. What is missing: the content requirements of the records (who investigated, what was concluded, which verification closed it) and retention rules."
+    }
+  ]
+}

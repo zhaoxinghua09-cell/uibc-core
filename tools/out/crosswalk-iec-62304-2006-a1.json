@@ -8,6 +8,7 @@
     "source": "crosswalk/iec-62304-2006-a1.json"
   },
   "manifest_sha256": "b5c4b74be4796aee9d284d920cdac226da302104aaed17f647e5edf84d9e10f7",
+  "verdict_sha256": "875a509ac1062338d68f0cdf06654a3acb9e6626082a78caf3b3cd8f66bc76e9",
   "clause_count": 5,
   "counts": {
     "GAP": 2,
@@ -45,13 +46,7 @@
         "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" tools/probe_evidence_identity.py fixtures/clean.uibc",
         "declared": "python tools/probe_evidence_identity.py fixtures/clean.uibc",
         "exit": 0,
-        "expect_exit": 0,
-        "stdout_contains": "identities recompute",
-        "ok": true,
-        "duration_s": 0.21,
-        "tail": [
-          "OK 2/2 evidence identities recompute"
-        ]
+        "ok": true
       }
     },
     {
@@ -72,14 +67,7 @@
         "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" -m pytest tests/test_seal_v03.py -q",
         "declared": "python -m pytest tests/test_seal_v03.py -q",
         "exit": 0,
-        "expect_exit": 0,
-        "stdout_contains": null,
-        "ok": true,
-        "duration_s": 2.81,
-        "tail": [
-          ".........                                                                [100%]",
-          "9 passed in 0.91s"
-        ]
+        "ok": true
       }
     },
     {
@@ -111,16 +99,7 @@
         "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" -m uibc_core.cli inspect fixtures/clean.uibc",
         "declared": "python -m uibc_core.cli inspect fixtures/clean.uibc",
         "exit": 0,
-        "expect_exit": 0,
-        "stdout_contains": "events:",
-        "ok": true,
-        "duration_s": 0.33,
-        "tail": [
-          "status:     REGISTERED / manifest: SUBMITTED",
-          "events:     REGISTER -> ACTIVATE -> UPDATE",
-          "evidence:   2 entries",
-          "root:       a9348d857ee5efb322db8c4e611f59e0a727116745987c5a9613f571f2e9287a"
-        ]
+        "ok": true
       }
     }
   ],

@@ -133,7 +133,7 @@ Four crosswalks ship:
   with real probes plus one gap, kept separate so a regulatory crosswalk is not
   padded with self-tests.
 
-Twelve medical-device clauses mapped, **zero carried**. That is the finding, and
+Fifteen medical-device clauses mapped, **zero carried**. That is the finding, and
 two tests pin it: promoting a row to carried without a verbatim quote, or without
 a passing probe, turns the run red.
 
@@ -141,3 +141,59 @@ The manifest digest over the clause set is the identity of the mapping: change a
 quoted clause, a strength or a reason and it changes; change only a probe's
 runtime and it does not. That is the same shape Annex II 4(d) asks for when it
 demands a precise identity for each piece of evidence.
+
+## 5. Determinism: the property everyone states and we did not have
+
+Status date: 2026-11-25. Four more sources were read on one narrow question -
+must the same input produce the same bytes?
+
+**SLSA separates two things.** "Reproducible" means "repeating the build with the
+same inputs results in bit-for-bit identical output"; "verified reproducible"
+means two or more independent build platforms corroborating the same result. The
+spec then says it "does not require verified reproducible builds directly" -
+reproducibility is one implementation option, not a requirement.
+
+Source: https://slsa.dev/spec/v1.1/faq
+
+**Three compliance tools already treat determinism as a design property, not a
+nice-to-have:**
+
+- `0xBahalaNa/oscal-evidence-pipeline` derives every observation, finding and
+  subject UUID from a `uuid5` hash of the object's stable identity, so "only the
+  assessment timestamps ... change between runs. That stability is what makes two
+  SARs from different dates diffable". It pins this with
+  `test_observation_uuids_are_deterministic`.
+- `sw30labs/driftlab` lists "Idempotent by construction. Re-running a cycle on
+  the same inputs yields byte-identical artifacts (content-derived UUIDs /
+  hashing)" among its non-negotiable design principles, and tests it as
+  "byte-identical ledger on re-run".
+- `risk-sentinel/sparc` runs the stronger version in CI: the **regen-diff gate**
+  regenerates every derived document and "fails the merge if the result differs
+  from what is committed", so a hand edit to a generated file is a build break
+  rather than a discrepancy found during assessment.
+
+**What that said about us.** Until this round, `tools/out/crosswalk-*.json`
+carried `duration_s` and a `tail` of probe stdout. Two runs of unchanged input
+produced different bytes, which makes a regen-diff gate useless and makes an
+honest reviewer unable to tell "the mapping changed" from "the machine was
+slower". That is a plain defect, and it was ours, not theirs.
+
+**What was changed.** The result document now carries only fields derived from
+the input: state, note, strength, verbatim, carrier, url, reason, and for a probe
+only `cmd`, `declared`, `exit`, `ok`. Timings and output tails moved to a
+separate `--diag` file that is never committed. A second digest,
+`verdict_sha256`, is taken over `(id, state, strength, verbatim, probe exit)` -
+the identity of the verdict set, kept distinct from `manifest_sha256`, the
+identity of the clause set. `--check COMMITTED_JSON` re-runs and exits 3 on any
+byte difference, which is SPARC's regen-diff gate in one flag. Four tests hold
+it: byte-identical output across two runs, `--check` green on a fresh result,
+`--check` exits 3 when one reason changes, and no `duration_s`/`tail` in the
+result.
+
+**Where this still loses.** Byte-identical output on one host is reproducible,
+not verified-reproducible: a second independent host has not corroborated these
+files, and nothing here would detect a host-specific difference in probe
+behaviour. DriftLab is honest about the same limit. Byte stability also proves
+only that nothing changed - it says nothing about whether the mapping is correct,
+which is why the verdict digest is published separately and the states still
+carry the argument.

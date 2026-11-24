@@ -79,6 +79,18 @@ def test_classify_unknown_strength_is_undeclared():
     assert cp.classify("almost", "x", None)[0] == "UNDECLARED"
 
 
+def test_classify_partial_with_a_failing_probe_is_overclaim():
+    # A partial row may cite a probe for the part it carries. If that probe
+    # stops passing, the row must stop looking carried-and-checked.
+    state, note = cp.classify("partial", "we record the file, not its adequacy", _probe(False))
+    assert state == "OVERCLAIM"
+    assert "did not pass" in note
+
+
+def test_classify_partial_with_a_passing_probe_stays_partial():
+    assert cp.classify("partial", "we record the file, not its adequacy", _probe(True))[0] == "PARTIAL"
+
+
 # --- the run-level rule -------------------------------------------------
 
 def _write(tmp_path, clauses):
@@ -160,7 +172,7 @@ def test_manifest_digest_is_stable_across_key_order():
 
 # --- the shipped crosswalks --------------------------------------------
 
-@pytest.mark.parametrize("name", ["eu-mdr-2017-745.json", "tool-contract.json", "iec-62304-2006-a1.json", "iso-14971-2019.json"])
+@pytest.mark.parametrize("name", ["eu-mdr-2017-745.json", "tool-contract.json", "iec-62304-2006-a1.json", "iso-14971-2019.json", "21cfr11.json"])
 def test_shipped_crosswalks_evaluate_without_bad_states(name):
     doc = json.loads((REPO / "crosswalk" / name).read_text(encoding="utf-8"))
     assert doc["schema"] == cp.SCHEMA
@@ -180,10 +192,23 @@ def test_mdr_crosswalk_has_no_carried_clause():
 
 
 def test_every_mapped_clause_quotes_a_url():
-    for name in ["eu-mdr-2017-745.json", "tool-contract.json", "iec-62304-2006-a1.json", "iso-14971-2019.json"]:
+    for name in ["eu-mdr-2017-745.json", "tool-contract.json", "iec-62304-2006-a1.json", "iso-14971-2019.json", "21cfr11.json"]:
         doc = json.loads((REPO / "crosswalk" / name).read_text(encoding="utf-8"))
         for c in doc["clauses"]:
             assert c.get("url", "").startswith("https://"), c["id"]
+
+
+def test_part_11_clauses_are_verbatim_from_ecfr():
+    """Part 11 is public on eCFR, so there is no excuse for quoting a title.
+
+    If a row drops to verbatim=False, it was probably re-written from memory -
+    which is exactly the case the OVERCLAIM gate exists for.
+    """
+    doc = json.loads((REPO / "crosswalk" / "21cfr11.json").read_text(encoding="utf-8"))
+    for c in doc["clauses"]:
+        assert c.get("verbatim") is True, c["id"]
+        assert "ecfr.gov" in c["url"], c["id"]
+        assert c["strength"] != "carried", "%s: no per-record signature exists yet" % c["id"]
 
 
 # --- the 4(d) probe: identities recompute or they do not ----------------
@@ -206,3 +231,64 @@ def test_evidence_identity_probe_names_the_tampered_entry():
     r = _run_probe("tampered.uibc")
     assert r.returncode == 1
     assert "digest mismatch" in r.stdout
+
+
+# --- determinism: the same input must produce the same bytes ------------
+
+def test_result_is_byte_identical_across_two_runs(tmp_path):
+    """SLSA calls this "reproducible"; DriftLab asserts it; SPARC gates on it.
+
+    Two runs of one crosswalk must produce identical bytes, or a CI drift gate
+    cannot tell a real change from a timing. Diagnostics are excluded on purpose
+    and land in --diag instead.
+    """
+    script = tmp_path / "ok.py"
+    script.write_text("print('fine')\n", encoding="utf-8")
+    path = _write(tmp_path, [{
+        "id": "D-1", "strength": "carried",
+        "probe": {"cmd": '"%s" "%s"' % (sys.executable, script),
+                  "expect": {"exit": 0, "stdout_contains": "fine"}},
+        "reason": ""}])
+    a = tmp_path / "a.json"
+    b = tmp_path / "b.json"
+    assert cp.main([path, "--quiet", "--json", str(a)]) == 0
+    assert cp.main([path, "--quiet", "--json", str(b)]) == 0
+    assert a.read_bytes() == b.read_bytes()
+
+
+def test_check_mode_passes_on_a_fresh_result(tmp_path):
+    path = _write(tmp_path, [{"id": "G-2", "strength": "gap", "probe": None, "reason": "not ours"}])
+    committed = tmp_path / "committed.json"
+    assert cp.main([path, "--quiet", "--json", str(committed)]) == 0
+    assert cp.main([path, "--quiet", "--check", str(committed)]) == 0
+
+
+def test_check_mode_detects_drift_when_a_clause_changes(tmp_path):
+    path = _write(tmp_path, [{"id": "G-3", "strength": "gap", "probe": None, "reason": "first reason"}])
+    committed = tmp_path / "committed.json"
+    assert cp.main([path, "--quiet", "--json", str(committed)]) == 0
+    _write(tmp_path, [{"id": "G-3", "strength": "gap", "probe": None, "reason": "second reason"}])
+    assert cp.main([path, "--quiet", "--check", str(committed)]) == 3
+
+
+def test_check_mode_reports_a_missing_baseline(tmp_path):
+    path = _write(tmp_path, [{"id": "G-4", "strength": "gap", "probe": None, "reason": "r"}])
+    assert cp.main([path, "--quiet", "--check", str(tmp_path / "absent.json")]) == 3
+
+
+def test_verdict_digest_moves_with_state_not_with_timing():
+    clauses = [{"id": "V-1", "strength": "gap", "reason": "r", "text": "t"}]
+    doc = {"schema": cp.SCHEMA, "standard": {}, "clauses": clauses}
+    a = cp.evaluate(doc, run=False)
+    b = cp.evaluate(doc, run=False)
+    assert a["verdict_sha256"] == b["verdict_sha256"]
+    doc2 = {"schema": cp.SCHEMA, "standard": {},
+            "clauses": [{"id": "V-1", "strength": "partial", "reason": "r", "text": "t"}]}
+    assert cp.evaluate(doc2, run=False)["verdict_sha256"] != a["verdict_sha256"]
+
+
+def test_diagnostics_do_not_leak_into_the_result():
+    clauses = [{"id": "V-2", "strength": "gap", "reason": "r"}]
+    res = cp.evaluate({"schema": cp.SCHEMA, "clauses": clauses}, run=False)
+    assert "duration_s" not in cp.dumps_result(res)
+    assert "tail" not in cp.dumps_result(res)

@@ -1,0 +1,73 @@
+{
+  "schema": "uibc-crosswalk/1",
+  "standard": {
+    "id": "21 CFR Part 11",
+    "title": "21 CFR Part 11 — electronic records and electronic signatures, mapped to what the package can carry",
+    "url": "https://www.ecfr.gov/current/title-21/chapter-I/subchapter-A/part-11",
+    "scope_note": "Five clauses of Subpart B/C. This is not a Part 11 compliance checklist: Part 11 binds the person who uses the system to keep records, and the controls it names (validation, access control, training, written policy) live in that person's quality system. Rows were chosen because they name something a record layer can either demonstrate or plainly not."
+  },
+  "clauses": [
+    {
+      "id": "21 CFR 11.10(a)",
+      "text": "Validation of systems to ensure accuracy, reliability, consistent intended performance, and the ability to discern invalid or altered records.",
+      "url": "https://www.ecfr.gov/current/title-21/chapter-I/subchapter-A/part-11",
+      "applies": true, "verbatim": true,
+      "strength": "partial",
+      "carrier": ["per-file sha256 in evidence/index.json", "three-valued verdict", "probe_evidence_identity naming the altered entry"],
+      "probe": {
+        "cmd": "python tools/probe_evidence_identity.py fixtures/tampered.uibc",
+        "expect": {"exit": 1, "stdout_contains": "digest mismatch"}
+      },
+      "reason": "The probe recomputes every evidence digest and names the entry whose bytes changed: 2/2 on the clean package, and on the tampered one it reports the mismatch instead of passing. That is the 'ability to discern invalid or altered records' half, demonstrated rather than asserted. The validation half - IQ/OQ/PQ, a validation plan and report accepted by the user's quality unit - is the user's work, and a library cannot perform it for them."
+    },
+    {
+      "id": "21 CFR 11.10(e)",
+      "text": "Use of secure, computer-generated, time-stamped audit trails to independently record the date and time of operator entries and actions that create, modify, or delete electronic records. Record changes shall not obscure previously recorded information. Such audit trail documentation shall be retained for a period at least as long as that required for the subject electronic records and shall be available for agency review and copying.",
+      "url": "https://www.ecfr.gov/current/title-21/chapter-I/subchapter-A/part-11",
+      "applies": true, "verbatim": true,
+      "strength": "partial",
+      "carrier": ["append-only lifecycle events with checked_at", "seal over the event set", "inspect printing the event trail"],
+      "probe": {
+        "cmd": "python -m uibc_core.cli inspect fixtures/clean.uibc",
+        "expect": {"exit": 0, "stdout_contains": "events:"}
+      },
+      "reason": "Events are computer-generated, time-stamped, and append-only, and the seal makes a later insertion visible, so a change does not silently obscure what was recorded before. What is missing: the operator identity behind an entry (we record the agent and the key, not a named person), and the retention period, which is a records policy the user sets and we only inherit."
+    },
+    {
+      "id": "21 CFR 11.50(a)",
+      "text": "Signed electronic records shall contain information associated with the signing that clearly indicates all of the following: (1) The printed name of the signer; (2) The date and time when the signature was executed; and (3) The meaning (such as review, approval, responsibility, or authorship) associated with the signature.",
+      "url": "https://www.ecfr.gov/current/title-21/chapter-I/subchapter-A/part-11",
+      "applies": true, "verbatim": true,
+      "strength": "partial",
+      "carrier": ["checked_at timestamp", "verdict as the stated meaning", "signer key identity in the manifest"],
+      "probe": {
+        "cmd": "python -m pytest tests/test_seal_v03.py -q",
+        "expect": {"exit": 0}
+      },
+      "reason": "Two of the three elements are present and checkable: when the seal was applied, and what it means (the verdict it asserts). The printed name of the signer is not: the package carries a key identity, not a person's name, and mapping a key to a named individual is the user's identity-proofing step under 11.100(b)."
+    },
+    {
+      "id": "21 CFR 11.70",
+      "text": "Electronic signatures and handwritten signatures executed to electronic records shall be linked to their respective electronic records to ensure that the signatures cannot be excised, copied, or otherwise transferred to falsify an electronic record by ordinary means.",
+      "url": "https://www.ecfr.gov/current/title-21/chapter-I/subchapter-A/part-11",
+      "applies": true, "verbatim": true,
+      "strength": "partial",
+      "carrier": ["seal covers evidence_root", "keyswap fixture going INCONCLUSIVE under a pinned key", "tamper detection after sealing"],
+      "probe": {
+        "cmd": "python -m pytest tests/test_iverify_pubkey_pin.py -q",
+        "expect": {"exit": 0}
+      },
+      "reason": "A seal over the whole package is not portable: lift it onto different bytes and the root no longer matches, and swap the key and a pinned verifier returns INCONCLUSIVE rather than PASS - the fixture expectations pin exactly that. So 'copied or transferred to falsify' is answered at package granularity. 'Linked to their respective records' is not: there is one seal per package, not one signature per record, and per-record signatures are not implemented."
+    },
+    {
+      "id": "21 CFR 11.10(k)(2)",
+      "text": "Revision and change control procedures to maintain an audit trail that documents time-sequenced development and modification of systems documentation.",
+      "url": "https://www.ecfr.gov/current/title-21/chapter-I/subchapter-A/part-11",
+      "applies": true, "verbatim": true,
+      "strength": "gap",
+      "carrier": [],
+      "probe": null,
+      "reason": "This is change control over the system's own documentation - procedures, revision history, approval of revisions. It belongs to the user's quality system, and no record layer can supply the procedure it asks for."
+    }
+  ]
+}

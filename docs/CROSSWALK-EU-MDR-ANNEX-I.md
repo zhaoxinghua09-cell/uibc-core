@@ -8,6 +8,8 @@
 - Source: https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32017R0745
 - Clauses mapped: **5**
 - Manifest digest: `71300f801c7295f179b8ad59688816249c0b2ed6e2e378651b0080b38741559e`
+- Verdict digest: `040c3f976e7d09ae7d3c1c33e737f9da7cb5825547ab43fd10e1095c415c3462` (identity of the verdict set, not of the clause text)
+- Determinism: re-running on the same input yields byte-identical output; `--check` exits 3 on any drift. Reproducible in the SLSA sense - not verified-reproducible, which would need a second independent host.
 - Counts: GAP=1, PARTIAL=4
 
 | Clause | Strength | State | Carrier | Probe | What is not covered |

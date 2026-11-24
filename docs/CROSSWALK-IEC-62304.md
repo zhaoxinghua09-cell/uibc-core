@@ -8,6 +8,8 @@
 - Source: https://www.iso.org/obp/ui/#iso:std:iec:62304:ed-1:v1:en
 - Clauses mapped: **5**
 - Manifest digest: `b5c4b74be4796aee9d284d920cdac226da302104aaed17f647e5edf84d9e10f7`
+- Verdict digest: `875a509ac1062338d68f0cdf06654a3acb9e6626082a78caf3b3cd8f66bc76e9` (identity of the verdict set, not of the clause text)
+- Determinism: re-running on the same input yields byte-identical output; `--check` exits 3 on any drift. Reproducible in the SLSA sense - not verified-reproducible, which would need a second independent host.
 - Counts: GAP=2, PARTIAL=3
 
 | Clause | Strength | State | Carrier | Probe | What is not covered |

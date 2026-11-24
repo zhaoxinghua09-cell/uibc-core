@@ -1,0 +1,117 @@
+{
+  "schema": "uibc-crosswalk/1",
+  "standard": {
+    "id": "21 CFR Part 11",
+    "title": "21 CFR Part 11 — electronic records and electronic signatures, mapped to what the package can carry",
+    "url": "https://www.ecfr.gov/current/title-21/chapter-I/subchapter-A/part-11",
+    "scope_note": "Five clauses of Subpart B/C. This is not a Part 11 compliance checklist: Part 11 binds the person who uses the system to keep records, and the controls it names (validation, access control, training, written policy) live in that person's quality system. Rows were chosen because they name something a record layer can either demonstrate or plainly not.",
+    "source": "crosswalk/21cfr11.json"
+  },
+  "manifest_sha256": "18d122e7df47599647f3ca11fa98304c2557b72e28708fe56aaf53f7778b6f99",
+  "verdict_sha256": "29e75be1ae203eba9a7a2864f9f28a3aa5e4a2b23fa6a03987db675bfbffd566",
+  "clause_count": 5,
+  "counts": {
+    "PARTIAL": 4,
+    "GAP": 1
+  },
+  "bad": 0,
+  "rows": [
+    {
+      "id": "21 CFR 11.10(a)",
+      "applies": true,
+      "strength": "partial",
+      "verbatim": true,
+      "state": "PARTIAL",
+      "note": "",
+      "reason": "The probe recomputes every evidence digest and names the entry whose bytes changed: 2/2 on the clean package, and on the tampered one it reports the mismatch instead of passing. That is the 'ability to discern invalid or altered records' half, demonstrated rather than asserted. The validation half - IQ/OQ/PQ, a validation plan and report accepted by the user's quality unit - is the user's work, and a library cannot perform it for them.",
+      "carrier": [
+        "per-file sha256 in evidence/index.json",
+        "three-valued verdict",
+        "probe_evidence_identity naming the altered entry"
+      ],
+      "url": "https://www.ecfr.gov/current/title-21/chapter-I/subchapter-A/part-11",
+      "probe": {
+        "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" tools/probe_evidence_identity.py fixtures/tampered.uibc",
+        "declared": "python tools/probe_evidence_identity.py fixtures/tampered.uibc",
+        "exit": 1,
+        "ok": true
+      }
+    },
+    {
+      "id": "21 CFR 11.10(e)",
+      "applies": true,
+      "strength": "partial",
+      "verbatim": true,
+      "state": "PARTIAL",
+      "note": "",
+      "reason": "Events are computer-generated, time-stamped, and append-only, and the seal makes a later insertion visible, so a change does not silently obscure what was recorded before. What is missing: the operator identity behind an entry (we record the agent and the key, not a named person), and the retention period, which is a records policy the user sets and we only inherit.",
+      "carrier": [
+        "append-only lifecycle events with checked_at",
+        "seal over the event set",
+        "inspect printing the event trail"
+      ],
+      "url": "https://www.ecfr.gov/current/title-21/chapter-I/subchapter-A/part-11",
+      "probe": {
+        "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" -m uibc_core.cli inspect fixtures/clean.uibc",
+        "declared": "python -m uibc_core.cli inspect fixtures/clean.uibc",
+        "exit": 0,
+        "ok": true
+      }
+    },
+    {
+      "id": "21 CFR 11.50(a)",
+      "applies": true,
+      "strength": "partial",
+      "verbatim": true,
+      "state": "PARTIAL",
+      "note": "",
+      "reason": "Two of the three elements are present and checkable: when the seal was applied, and what it means (the verdict it asserts). The printed name of the signer is not: the package carries a key identity, not a person's name, and mapping a key to a named individual is the user's identity-proofing step under 11.100(b).",
+      "carrier": [
+        "checked_at timestamp",
+        "verdict as the stated meaning",
+        "signer key identity in the manifest"
+      ],
+      "url": "https://www.ecfr.gov/current/title-21/chapter-I/subchapter-A/part-11",
+      "probe": {
+        "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" -m pytest tests/test_seal_v03.py -q",
+        "declared": "python -m pytest tests/test_seal_v03.py -q",
+        "exit": 0,
+        "ok": true
+      }
+    },
+    {
+      "id": "21 CFR 11.70",
+      "applies": true,
+      "strength": "partial",
+      "verbatim": true,
+      "state": "PARTIAL",
+      "note": "",
+      "reason": "A seal over the whole package is not portable: lift it onto different bytes and the root no longer matches, and swap the key and a pinned verifier returns INCONCLUSIVE rather than PASS - the fixture expectations pin exactly that. So 'copied or transferred to falsify' is answered at package granularity. 'Linked to their respective records' is not: there is one seal per package, not one signature per record, and per-record signatures are not implemented.",
+      "carrier": [
+        "seal covers evidence_root",
+        "keyswap fixture going INCONCLUSIVE under a pinned key",
+        "tamper detection after sealing"
+      ],
+      "url": "https://www.ecfr.gov/current/title-21/chapter-I/subchapter-A/part-11",
+      "probe": {
+        "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" -m pytest tests/test_iverify_pubkey_pin.py -q",
+        "declared": "python -m pytest tests/test_iverify_pubkey_pin.py -q",
+        "exit": 0,
+        "ok": true
+      }
+    },
+    {
+      "id": "21 CFR 11.10(k)(2)",
+      "applies": true,
+      "strength": "gap",
+      "verbatim": true,
+      "state": "GAP",
+      "note": "",
+      "reason": "This is change control over the system's own documentation - procedures, revision history, approval of revisions. It belongs to the user's quality system, and no record layer can supply the procedure it asks for.",
+      "carrier": [],
+      "url": "https://www.ecfr.gov/current/title-21/chapter-I/subchapter-A/part-11",
+      "probe": null
+    }
+  ],
+  "verdict": "OK"
+}

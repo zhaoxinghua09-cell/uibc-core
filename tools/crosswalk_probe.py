@@ -137,6 +137,12 @@ def classify(strength, reason, probe_result, ran=True, verbatim=True):
         if not probe_result.get("ok"):
             return "OVERCLAIM", "carried but the probe did not pass"
         return "COVERED", ""
+    if probe_result is not None and not probe_result.get("ok") and strength != "gap":
+        # A partial row may declare a probe for the part it does carry. If that
+        # probe fails, the carried part is no longer shown, and the row would
+        # otherwise stay green on the strength of a probe that does not pass.
+        return "OVERCLAIM", "declares a probe that did not pass (exit=%s) - the carried part is no longer shown" % (
+            probe_result.get("exit"),)
     if strength == "partial":
         if not reason:
             return "UNDECLARED", "partial without a reason - say what is not covered"
@@ -156,12 +162,24 @@ def manifest_digest(clauses):
 def evaluate(doc, cwd=REPO, run=True):
     clauses = doc.get("clauses") or []
     rows = []
+    diag = []
     for c in clauses:
         probe_result = None
         if run and c.get("probe"):
             probe_result = run_probe(c["probe"], cwd=cwd)
         state, note = classify(c.get("strength"), c.get("reason"), probe_result,
                                ran=run, verbatim=c.get("verbatim", True))
+        # Only deterministic fields enter the result. Duration and output tails
+        # are diagnostics: they differ between two runs of the same input, and
+        # an artifact that differs between two runs of the same input cannot be
+        # diffed in CI (oscal-evidence-pipeline, DriftLab and SPARC all make this
+        # point; SLSA calls the property "reproducible").
+        probe_record = None
+        if probe_result:
+            probe_record = {k: probe_result.get(k) for k in ("cmd", "declared", "exit", "ok")}
+        if probe_result:
+            diag.append({"id": c.get("id"), "duration_s": probe_result.get("duration_s"),
+                          "tail": probe_result.get("tail")})
         rows.append({
             "id": c.get("id"),
             "applies": c.get("applies", True),
@@ -172,22 +190,39 @@ def evaluate(doc, cwd=REPO, run=True):
             "reason": (c.get("reason") or "").strip(),
             "carrier": c.get("carrier") or [],
             "url": c.get("url"),
-            "probe": probe_result,
+            "probe": probe_record,
         })
     counts = {}
     for r in rows:
         counts[r["state"]] = counts.get(r["state"], 0) + 1
     bad = sum(counts.get(s, 0) for s in BAD_STATES)
-    return {
+    # Identity of the verdict set, separate from the identity of the clause set:
+    # it changes when a state changes and does not change when a probe runs
+    # slower. This is what a CI drift check compares.
+    verdict_body = [{"id": r["id"], "state": r["state"], "strength": r["strength"],
+                     "verbatim": r["verbatim"],
+                     "probe_exit": (r["probe"] or {}).get("exit")} for r in rows]
+    result = {
         "schema": SCHEMA,
         "standard": doc.get("standard") or {},
         "manifest_sha256": manifest_digest(clauses),
+        "verdict_sha256": hashlib.sha256(json.dumps(
+            verdict_body, ensure_ascii=False, sort_keys=True,
+            separators=(",", ":")).encode("utf-8")).hexdigest(),
         "clause_count": len(rows),
         "counts": counts,
         "bad": bad,
         "rows": rows,
         "verdict": "FAIL" if bad else ("PARTIAL-RUN" if counts.get("UNRUN") else "OK"),
     }
+    result["_diag"] = diag
+    return result
+
+
+def dumps_result(result):
+    """Deterministic serialisation: no dicts, no timings, one fixed format."""
+    body = {k: v for k, v in result.items() if not k.startswith("_")}
+    return json.dumps(body, ensure_ascii=False, indent=2) + "\n"
 
 
 def render_md(result):
@@ -211,6 +246,10 @@ def render_md(result):
         lines.append("- Source: %s" % std["url"])
     lines.append("- Clauses mapped: **%d**" % result["clause_count"])
     lines.append("- Manifest digest: `%s`" % ident)
+    lines.append("- Verdict digest: `%s` (identity of the verdict set, not of the clause text)" % result["verdict_sha256"])
+    lines.append("- Determinism: re-running on the same input yields byte-identical output; "
+                 "`--check` exits 3 on any drift. Reproducible in the SLSA sense - "
+                 "not verified-reproducible, which would need a second independent host.")
     lines.append("- Counts: " + ", ".join("%s=%d" % (k, counts[k]) for k in sorted(counts)))
     lines.append("")
     lines.append("| Clause | Strength | State | Carrier | Probe | What is not covered |")
@@ -245,6 +284,9 @@ def main(argv=None):
     ap.add_argument("crosswalk", help="path to a uibc-crosswalk/1 JSON file")
     ap.add_argument("--json", dest="json_out", help="write the machine result here")
     ap.add_argument("--md", dest="md_out", help="write a generated markdown table here")
+    ap.add_argument("--diag", dest="diag_out", help="write probe timings and output tails here (not deterministic)")
+    ap.add_argument("--check", dest="check_against", metavar="COMMITTED_JSON",
+                    help="compare this run's result to a committed file; exit 3 on any difference")
     ap.add_argument("--no-probe", action="store_true", help="static check only; carried clauses become UNRUN")
     ap.add_argument("--quiet", action="store_true")
     args = ap.parse_args(argv)
@@ -261,21 +303,47 @@ def main(argv=None):
     doc.setdefault("standard", {})["source"] = os.path.relpath(path, REPO).replace("\\", "/")
     result = evaluate(doc, cwd=REPO, run=not args.no_probe)
 
+    if args.check_against:
+        committed_path = args.check_against
+        if not os.path.isabs(committed_path):
+            committed_path = os.path.join(REPO, committed_path)
+        try:
+            with open(committed_path, "r", encoding="utf-8") as f:
+                committed = f.read()
+        except FileNotFoundError:
+            print("DRIFT: no committed result at %s - nothing to compare" % args.check_against)
+            return 3
+        fresh = dumps_result(result)
+        if fresh != committed:
+            print("DRIFT: %s no longer matches a fresh run\n"
+                  "  committed bytes=%d, fresh bytes=%d\n"
+                  "  re-run with --json to regenerate, then review the diff before committing"
+                  % (args.check_against, len(committed), len(fresh)))
+            return 3
+        if not args.quiet:
+            print("STABLE: %s matches a fresh run byte for byte" % args.check_against)
+
     if not args.quiet:
         for r in result["rows"]:
             print("%-13s %-32s %s" % (r["state"], r["id"], r["note"]))
         counts = result["counts"]
-        print("\nclauses=%d  %s  manifest=%s" % (
+        print("\nclauses=%d  %s  manifest=%s  verdict=%s" % (
             result["clause_count"],
             "  ".join("%s=%d" % (k, counts[k]) for k in sorted(counts)),
-            result["manifest_sha256"][:16]))
+            result["manifest_sha256"][:16],
+            result["verdict_sha256"][:16]))
         print("verdict: %s" % result["verdict"])
 
     if args.json_out:
         out = args.json_out if os.path.isabs(args.json_out) else os.path.join(REPO, args.json_out)
         os.makedirs(os.path.dirname(out) or REPO, exist_ok=True)
         with open(out, "w", encoding="utf-8", newline="\n") as f:
-            json.dump(result, f, ensure_ascii=False, indent=2)
+            f.write(dumps_result(result))
+    if args.diag_out:
+        out = args.diag_out if os.path.isabs(args.diag_out) else os.path.join(REPO, args.diag_out)
+        os.makedirs(os.path.dirname(out) or REPO, exist_ok=True)
+        with open(out, "w", encoding="utf-8", newline="\n") as f:
+            json.dump(result.get("_diag") or [], f, ensure_ascii=False, indent=2)
             f.write("\n")
     if args.md_out:
         out = args.md_out if os.path.isabs(args.md_out) else os.path.join(REPO, args.md_out)

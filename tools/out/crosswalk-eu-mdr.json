@@ -8,6 +8,7 @@
     "source": "crosswalk/eu-mdr-2017-745.json"
   },
   "manifest_sha256": "71300f801c7295f179b8ad59688816249c0b2ed6e2e378651b0080b38741559e",
+  "verdict_sha256": "040c3f976e7d09ae7d3c1c33e737f9da7cb5825547ab43fd10e1095c415c3462",
   "clause_count": 5,
   "counts": {
     "PARTIAL": 4,
@@ -33,16 +34,7 @@
         "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" -m uibc_core.cli demo",
         "declared": "python -m uibc_core.cli demo",
         "exit": 0,
-        "expect_exit": 0,
-        "stdout_contains": "Try it yourself",
-        "ok": true,
-        "duration_s": 0.53,
-        "tail": [
-          "[8/8] verify the same package PINNED to the owner's public key",
-          "     -> result: FAIL (expected FAIL: key substitution caught by pinning - publish your .pub where verifiers can pin it)",
-          "Try it yourself: python -m uibc_core.cli verify C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\uibc-demo-79ptfc9r\\demo   (no key needed - the seal is public)",
-          "                 python -m uibc_core.cli verify C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\uibc-demo-79ptfc9r\\forged --pubkey C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\uibc-demo-79ptfc9r\\owner.key.pub"
-        ]
+        "ok": true
       }
     },
     {
@@ -63,14 +55,7 @@
         "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" -m pytest tests/test_seal_v03.py -q",
         "declared": "python -m pytest tests/test_seal_v03.py -q",
         "exit": 0,
-        "expect_exit": 0,
-        "stdout_contains": null,
-        "ok": true,
-        "duration_s": 2.95,
-        "tail": [
-          ".........                                                                [100%]",
-          "9 passed in 0.92s"
-        ]
+        "ok": true
       }
     },
     {
@@ -89,14 +74,7 @@
         "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" -m pytest tests/test_did_web_hardening.py -q",
         "declared": "python -m pytest tests/test_did_web_hardening.py -q",
         "exit": 0,
-        "expect_exit": 0,
-        "stdout_contains": null,
-        "ok": true,
-        "duration_s": 2.16,
-        "tail": [
-          "...............                                               [100%]",
-          "15 passed, 11 subtests passed in 0.23s"
-        ]
+        "ok": true
       }
     },
     {
@@ -129,13 +107,7 @@
         "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" tools/probe_evidence_identity.py fixtures/clean.uibc",
         "declared": "python tools/probe_evidence_identity.py fixtures/clean.uibc",
         "exit": 0,
-        "expect_exit": 0,
-        "stdout_contains": "identities recompute",
-        "ok": true,
-        "duration_s": 0.2,
-        "tail": [
-          "OK 2/2 evidence identities recompute"
-        ]
+        "ok": true
       }
     }
   ],

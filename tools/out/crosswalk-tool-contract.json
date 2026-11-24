@@ -8,6 +8,7 @@
     "source": "crosswalk/tool-contract.json"
   },
   "manifest_sha256": "654d7fc64995d3b0e934c5d5f4d632b78b0b0db86bbb6d9c8d838926a5ee8658",
+  "verdict_sha256": "cf9ae9c5091f67211196e170fa0c209e50fca36cdead5305041c10b219ebd556",
   "clause_count": 4,
   "counts": {
     "COVERED": 3,
@@ -32,14 +33,7 @@
         "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" -m pytest tests/test_crosswalk_probe.py -q -k classify",
         "declared": "python -m pytest tests/test_crosswalk_probe.py -q -k classify",
         "exit": 0,
-        "expect_exit": 0,
-        "stdout_contains": null,
-        "ok": true,
-        "duration_s": 2.22,
-        "tail": [
-          "...........                                                              [100%]",
-          "11 passed, 16 deselected in 0.15s"
-        ]
+        "ok": true
       }
     },
     {
@@ -59,14 +53,7 @@
         "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" -m pytest tests/test_crosswalk_probe.py -q -k declared_gap",
         "declared": "python -m pytest tests/test_crosswalk_probe.py -q -k declared_gap",
         "exit": 0,
-        "expect_exit": 0,
-        "stdout_contains": null,
-        "ok": true,
-        "duration_s": 4.11,
-        "tail": [
-          ".                                                                        [100%]",
-          "1 passed, 26 deselected in 2.02s"
-        ]
+        "ok": true
       }
     },
     {
@@ -86,14 +73,7 @@
         "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" -m pytest tests/test_crosswalk_probe.py -q -k overclaim",
         "declared": "python -m pytest tests/test_crosswalk_probe.py -q -k overclaim",
         "exit": 0,
-        "expect_exit": 0,
-        "stdout_contains": null,
-        "ok": true,
-        "duration_s": 2.39,
-        "tail": [
-          "....                                                                     [100%]",
-          "4 passed, 23 deselected in 0.34s"
-        ]
+        "ok": true
       }
     },
     {

@@ -8,6 +8,7 @@
     "source": "crosswalk/iso-14971-2019.json"
   },
   "manifest_sha256": "a17c54ff4891560a805f5609defefc3e0ffb405db325bc6544129fc93ca2f93e",
+  "verdict_sha256": "66428bdac058480811f022c120af623ce9d400a5b6b76b256d6df80db2ce8137",
   "clause_count": 5,
   "counts": {
     "PARTIAL": 2,
@@ -33,13 +34,7 @@
         "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" tools/probe_evidence_identity.py fixtures/clean.uibc",
         "declared": "python tools/probe_evidence_identity.py fixtures/clean.uibc",
         "exit": 0,
-        "expect_exit": 0,
-        "stdout_contains": "identities recompute",
-        "ok": true,
-        "duration_s": 0.21,
-        "tail": [
-          "OK 2/2 evidence identities recompute"
-        ]
+        "ok": true
       }
     },
     {
@@ -96,16 +91,7 @@
         "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" -m uibc_core.cli demo",
         "declared": "python -m uibc_core.cli demo",
         "exit": 0,
-        "expect_exit": 0,
-        "stdout_contains": "Try it yourself",
-        "ok": true,
-        "duration_s": 0.49,
-        "tail": [
-          "[8/8] verify the same package PINNED to the owner's public key",
-          "     -> result: FAIL (expected FAIL: key substitution caught by pinning - publish your .pub where verifiers can pin it)",
-          "Try it yourself: python -m uibc_core.cli verify C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\uibc-demo-ug_4hly3\\demo   (no key needed - the seal is public)",
-          "                 python -m uibc_core.cli verify C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\uibc-demo-ug_4hly3\\forged --pubkey C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\uibc-demo-ug_4hly3\\owner.key.pub"
-        ]
+        "ok": true
       }
     }
   ],

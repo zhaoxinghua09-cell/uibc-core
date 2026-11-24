@@ -1,0 +1,131 @@
+[
+ {
+  "case": "G0 环境自检",
+  "verdict": "PASS",
+  "note": "python 可用",
+  "extra": {}
+ },
+ {
+  "case": "G1 证据索引路径穿越(../)",
+  "verdict": "PASS",
+  "note": "exit=1 结果=未通过/被拒；包外条目哈希已按真实内容填写，被接受即证明读了包外文件",
+  "extra": {
+   "kind": "路径围栏",
+   "severity": "-"
+  }
+ },
+ {
+  "case": "G2 重复 JSON 成员名",
+  "verdict": "PASS",
+  "note": "exit=1（严格序列化应拒收）",
+  "extra": {
+   "kind": "严格序列化",
+   "severity": "中"
+  }
+ },
+ {
+  "case": "G3 agent_id 超长 10000 字符",
+  "verdict": "PASS",
+  "note": "exit=1 error: agent id is 10000 characters, limit is 128",
+  "extra": {
+   "kind": "标识符校验",
+   "severity": "-"
+  }
+ },
+ {
+  "case": "G3 agent_id 控制字符",
+  "verdict": "PASS",
+  "note": "exit=1 error: agent id contains a control character U+0001",
+  "extra": {
+   "kind": "标识符校验",
+   "severity": "-"
+  }
+ },
+ {
+  "case": "G3 agent_id emoji",
+  "verdict": "INFO",
+  "note": "exit=0 registered agent '智能体🤖-01' (owner: x) at 2026-11-24T11:52:46",
+  "extra": {
+   "kind": "标识符校验",
+   "severity": "-"
+  }
+ },
+ {
+  "case": "G3 agent_id 双向文本",
+  "verdict": "PASS",
+  "note": "exit=1 error: agent id contains a bidirection control U+202E",
+  "extra": {
+   "kind": "标识符校验",
+   "severity": "-"
+  }
+ },
+ {
+  "case": "G3 agent_id 路径样串",
+  "verdict": "INFO",
+  "note": "exit=0 registered agent '../../etc/passwd' (owner: x) at 2026-11-24",
+  "extra": {
+   "kind": "标识符校验",
+   "severity": "-"
+  }
+ },
+ {
+  "case": "G3 agent_id 空串",
+  "verdict": "PASS",
+  "note": "exit=1 error: agent id must not be empty",
+  "extra": {
+   "kind": "标识符校验",
+   "severity": "-"
+  }
+ },
+ {
+  "case": "G3 agent_id 保留设备名",
+  "verdict": "INFO",
+  "note": "exit=0 registered agent 'CON' (owner: x) at 2026-11-24T11:52:47Z",
+  "extra": {
+   "kind": "标识符校验",
+   "severity": "-"
+  }
+ },
+ {
+  "case": "G4 10 并发只读校验",
+  "verdict": "PASS",
+  "note": "ok=10 err=[] 中位=788ms",
+  "extra": {
+   "kind": "并发",
+   "severity": "-"
+  }
+ },
+ {
+  "case": "G4 校验是否写了包目录",
+  "verdict": "PASS",
+  "note": "改动 [] 新增 []（校验应只读；有写入说明副作用）",
+  "extra": {
+   "kind": "只读性",
+   "severity": "-"
+  }
+ },
+ {
+  "case": "G5 三时区判定一致",
+  "verdict": "PASS",
+  "note": "{'UTC': (1, 'PASS'), 'Asia/Shanghai': (1, 'PASS'), 'Pacific/Kiritimati': (1, 'PASS')}",
+  "extra": {
+   "kind": "时区",
+   "severity": "-"
+  }
+ },
+ {
+  "case": "G6 50MB 证据文件入包",
+  "verdict": "PASS",
+  "note": "exit=0 耗时 0.2s（只算哈希，不应整包复制）",
+  "extra": {
+   "kind": "大文件",
+   "severity": "低"
+  }
+ },
+ {
+  "case": "G6 50MB 证据包校验",
+  "verdict": "PASS",
+  "note": "exit=1 耗时 0.2s",
+  "extra": {}
+ }
+]

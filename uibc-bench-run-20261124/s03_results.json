@@ -1,0 +1,202 @@
+[
+ {
+  "case": "C1 MCP 会话(7 请求+2 垃圾行)",
+  "verdict": "PASS",
+  "note": "exit=0 响应行=8 收到 id=[1, 2, 3, 4, 5, 6, 7, 9] stderr=''",
+  "extra": {}
+ },
+ {
+  "case": "C1 MCP 未知方法是否给 JSON-RPC 错误",
+  "verdict": "PASS",
+  "note": "id3 有无响应：True",
+  "extra": {}
+ },
+ {
+  "case": "C1 MCP 畸形行是否中止进程",
+  "verdict": "PASS",
+  "note": "exit=0（进程存活）",
+  "extra": {}
+ },
+ {
+  "case": "C1 MCP 工具清单",
+  "verdict": "INFO",
+  "note": "7 个：['verify_package', 'gate_check', 'inspect_package', 'cert_verify', 'get_identity', 'list_events', 'list_evidence']",
+  "extra": {}
+ },
+ {
+  "case": "C1 MCP 双进程并发",
+  "verdict": "PASS",
+  "note": "两个独立进程均正常退出",
+  "extra": {}
+ },
+ {
+  "case": "C2 A2A 导出函数",
+  "verdict": "INFO",
+  "note": "6 个：['SemanticDrift', 'check_roundtrip', 'convert', 'detect_format', 'json_to_xml', 'xml_to_json']",
+  "extra": {}
+ },
+ {
+  "case": "C2 A2A 畸形输入",
+  "verdict": "PASS",
+  "note": "全部以异常/拒绝收场，无静默错值",
+  "extra": {
+   "fails": []
+  }
+ },
+ {
+  "case": "C3 生成演示包",
+  "verdict": "PASS",
+  "note": "exit=0 0.1s submission sealed: agent=js-parity-01 evidence=1 root=3c1ff0b3d4e0af5970fecea61be6104ad393",
+  "extra": {}
+ },
+ {
+  "case": "C3 Node 校验 Python 生成的包",
+  "verdict": "PASS",
+  "note": "node exit=0 判定=INCONCLUSIVE 失败检查=[]（JS 端只做结构类，签名/时间戳留白）",
+  "extra": {
+   "tail": [
+    "  \"warnings\": [],",
+    "  \"note\": \"structural verifier: signatures, Merkle proofs, external timestamps and the receipt chain are not checked here, so a sound package is INCONCLUSIVE rather than PASS\",",
+    "  \"implementation\": \"verify-js (independent of uibc-core)\"",
+    "}"
+   ]
+  }
+ },
+ {
+  "case": "C3 两语言判定是否一致",
+  "verdict": "PASS",
+  "note": "Python=INCONCLUSIVE Node=INCONCLUSIVE（同一个包）",
+  "extra": {}
+ },
+ {
+  "case": "C4 CLI keygen（中文+空格路径）",
+  "verdict": "PASS",
+  "note": "exit=0 0.1s keep this file secret - anyone holding it can sign packages as you",
+  "extra": {}
+ },
+ {
+  "case": "C4 CLI init（中文+空格路径）",
+  "verdict": "PASS",
+  "note": "exit=0 0.1s next: uibc register /tmp/实测_中国信通院 身份码 场景/包 一/包 --agent-id <id> --owner <owner>",
+  "extra": {}
+ },
+ {
+  "case": "C4 CLI register",
+  "verdict": "PASS",
+  "note": "exit=0 0.1s registered agent 'caict-test-agent-01' (owner: 中国信通院-测试主体) at 2026-11-24T11:52:41Z",
+  "extra": {}
+ },
+ {
+  "case": "C4 CLI event",
+  "verdict": "PASS",
+  "note": "exit=0 0.1s appended event ACTIVATE (3ea24693-a1b5-4823-85e4-91b65d4df856)",
+  "extra": {}
+ },
+ {
+  "case": "C4 CLI evidence",
+  "verdict": "PASS",
+  "note": "exit=0 0.1s evidence added: OUTPUT files/证据_输出.txt (hash recorded)",
+  "extra": {}
+ },
+ {
+  "case": "C4 CLI submit",
+  "verdict": "PASS",
+  "note": "exit=0 0.1s submission sealed: agent=caict-test-agent-01 evidence=1 root=376b68cf0a0770a45568e66751a28b519abf906b44c5ecb6a",
+  "extra": {}
+ },
+ {
+  "case": "C4 CLI verify",
+  "verdict": "PASS",
+  "note": "exit=0 0.1s }",
+  "extra": {}
+ },
+ {
+  "case": "C4 CLI gate",
+  "verdict": "PASS",
+  "note": "exit=3 0.1s }",
+  "extra": {}
+ },
+ {
+  "case": "C4 CLI inspect",
+  "verdict": "PASS",
+  "note": "exit=0 0.1s root:       376b68cf0a0770a45568e66751a28b519abf906b44c5ecb6ac4c3a610f4057e7",
+  "extra": {}
+ },
+ {
+  "case": "C4 空证据包 → INCONCLUSIVE(exit1)",
+  "verdict": "PASS",
+  "note": "result=INCONCLUSIVE exit=1（三值判定语义正确）",
+  "extra": {}
+ },
+ {
+  "case": "C4 篡改包后 verify 必须非 0",
+  "verdict": "PASS",
+  "note": "exit=1 }",
+  "extra": {}
+ },
+ {
+  "case": "C4 截断 manifest 的处理",
+  "verdict": "PASS",
+  "note": "exit=1 }",
+  "extra": {}
+ },
+ {
+  "case": "C4 截断时是否泄漏堆栈",
+  "verdict": "PASS",
+  "note": "stderr 含 Traceback：False",
+  "extra": {}
+ },
+ {
+  "case": "C5 6 进程并发 submit 同一包",
+  "verdict": "PASS",
+  "note": "ok=6 err=[] 总耗时=2.1s（锁在 Windows 上走 msvcrt 分支）",
+  "extra": {}
+ },
+ {
+  "case": "C5 并发后包仍可校验",
+  "verdict": "PASS",
+  "note": "exit=0",
+  "extra": {}
+ },
+ {
+  "case": "C5 包写在没有权限的目录",
+  "verdict": "INFO",
+  "note": "exit=0 next: uibc register /tmp/实测_中国信通院 身份码 场景/并发/只读/p2 --agent-id <id> --owner <owner>",
+  "extra": {}
+ },
+ {
+  "case": "C6 demo 在 TZ=UTC",
+  "verdict": "PASS",
+  "note": "exit=0 0.2s",
+  "extra": {}
+ },
+ {
+  "case": "C6 demo 在 TZ=Asia/Shanghai",
+  "verdict": "PASS",
+  "note": "exit=0 0.2s",
+  "extra": {}
+ },
+ {
+  "case": "C6 控制台 cp936（中文 Windows 默认）",
+  "verdict": "PASS",
+  "note": "exit=0                  python -m uibc_core.cli verify /tmp/uibc-demo-nf2hi0or/forged --pubkey /tmp/uibc-demo-nf2hi0or/owner.ke",
+  "extra": {}
+ },
+ {
+  "case": "C7 输出中是否出现密钥素材",
+  "verdict": "PASS",
+  "note": "扫描目录内无 64 位十六进制密钥/私钥头",
+  "extra": {
+   "hits": []
+  }
+ },
+ {
+  "case": "C7 密钥文件是否明文落盘",
+  "verdict": "INFO",
+  "note": "64 字节，明文 hex；Windows 下无 POSIX 0600 语义，靠 ACL 继承",
+  "extra": {
+   "kind": "密钥保护",
+   "severity": "中"
+  }
+ }
+]

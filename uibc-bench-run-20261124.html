@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UIBC Bench — Independent Run, 2026-11-24</title>
+<style>
+  :root{--navy:#0b1f3a;--navy2:#122c50;--gold:#d4af37;--ink:#eef2f7;--dim:#9db1c7;--bad:#e0654f;--ok:#57b06a;--warn:#d9a441}
+  *{box-sizing:border-box} body{margin:0;background:var(--navy);color:var(--ink);font-family:"Segoe UI",Inter,system-ui,"Noto Sans CJK SC",sans-serif;line-height:1.55}
+  .wrap{max-width:1020px;margin:0 auto;padding:32px 20px 64px}
+  h1{font-size:30px;margin:0 0 4px} h2{font-size:21px;margin:38px 0 12px;color:#fff;border-bottom:2px solid var(--gold);padding-bottom:6px}
+  .sub{color:var(--gold);font-size:17px;margin:0 0 6px}
+  .prov{color:var(--dim);font-size:13.5px;margin:10px 0 0}
+  .prov code{color:var(--ink)}
+  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:22px 0 4px}
+  .tile{background:var(--navy2);border:1px solid #274a75;border-radius:10px;padding:16px 14px;text-align:center}
+  .tile .n{font-size:38px;font-weight:700;line-height:1.05}
+  .tile .l{color:var(--dim);font-size:13px;margin-top:4px}
+  .pass{color:var(--ok)} .fail{color:var(--bad)} .info{color:var(--dim)} .warn{color:var(--warn)}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:14.5px}
+  th,td{border:1px solid #274a75;padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:var(--navy2);color:#fff}
+  td.c,th.c{text-align:center}
+  .bar{display:flex;height:20px;border-radius:5px;overflow:hidden;margin:8px 0 4px;border:1px solid #274a75}
+  .bar div{height:100%}
+  .legend{color:var(--dim);font-size:13px}
+  .pile{background:var(--navy2);border:1px solid #274a75;border-radius:10px;padding:14px 18px;margin:12px 0}
+  .pile h3{margin:2px 0 8px;font-size:16.5px;color:#fff}
+  .pile ul{margin:6px 0 6px 18px;padding:0}
+  .pile li{margin:5px 0}
+  .note{color:var(--dim);font-size:13.5px}
+  a{color:var(--gold)}
+  code{background:#0a1830;border:1px solid #274a75;border-radius:4px;padding:1px 6px;font-size:13.5px}
+  .cmd{background:#0a1830;border:1px solid #274a75;border-radius:8px;padding:12px 16px;font-family:Consolas,monospace;font-size:14px;white-space:pre-wrap}
+  .zh{color:var(--gold)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<p class="sub">UIBC, IN RECEIPTS · DEMO</p>
+<h1>The bench, run by someone else</h1>
+<p class="sub zh">实测台，换一台机器跑</p>
+<p>The UIBC bench (<code>UIBC/uibc-bench</code>) was built by its authors on a Windows machine. On 2026-11-24 it was run end-to-end, unmodified, on a different machine in a different environment — a Linux VM operated by an independent reviewer seat. This page is that run: every count below comes from the run's own output files, linked at the bottom.</p>
+<p class="zh">UIBC 实测台由作者在 Windows 机器上建成。2026 年 11 月 24 日，它被原样搬到另一台机器、另一个环境（独立评审席位的 Linux 虚拟机）上完整跑了一遍。本页就是这一次运行：下面每个数字都来自运行自己的产物文件，页尾有链接。</p>
+<p class="prov">Bench: <code>UIBC/uibc-bench @ 259defb</code> (v0.4.36) · Subject: <code>uibc-core @ 6187e96e</code> · Python 3.12.3 · Linux x86_64 · Command: <code>python first_run.py</code> (fast path, 4 of ~10 groups) · Wall time ≈ 1.6 min · Run id: <code>20261124_195138_first_run_fast</code></p>
+
+<div class="tiles">
+  <div class="tile"><div class="n pass">51</div><div class="l">PASS · 通过</div></div>
+  <div class="tile"><div class="n fail">11</div><div class="l">FAIL · 失败</div></div>
+  <div class="tile"><div class="n info">23</div><div class="l">INFO · 信息</div></div>
+  <div class="tile"><div class="n warn">1</div><div class="l">WARN · 警告</div></div>
+  <div class="tile"><div class="n">86</div><div class="l">Cases · 用例</div></div>
+</div>
+
+<h2>The comparison · 对比</h2>
+<p>The bench ships its authors' baseline in the repo. The independent run was diffed against it, case by case, by the bench's own <code>compare_baseline.py</code>:</p>
+<p class="zh">实测台在仓里带着作者自己的基线。本次独立运行由台子自己的 compare_baseline.py 与基线逐例比对：</p>
+<div class="bar">
+  <div style="width:93%;background:var(--ok)"></div>
+  <div style="width:5.8%;background:var(--gold)"></div>
+  <div style="width:1.2%;background:var(--bad)"></div>
+</div>
+<p class="legend">Of 86 shared cases: <b style="color:var(--ok)">80 identical verdicts (93%)</b> · <b style="color:var(--gold)">5 changed, all toward PASS</b> · <b style="color:var(--bad)">1 regression</b>. 55 further cases of the bench's 141-case full list were not covered by the fast path and are listed as not covered — by the bench itself, not hidden.</p>
+<table>
+  <tr><th>Measure</th><th class="c">Authors' baseline (Windows)</th><th class="c">Independent run (Linux)</th></tr>
+  <tr><td>Verdicts on the 86 shared cases</td><td class="c">as shipped in <code>baseline.json</code></td><td class="c">51 PASS / 11 FAIL / 23 INFO / 1 WARN</td></tr>
+  <tr><td>Agreement</td><td class="c" colspan="2">80 of 86 identical — including 10 of the 11 FAILs, which the authors' own baseline already recorded as FAIL</td></tr>
+  <tr><td>Regression</td><td class="c" colspan="2">1 — A3 TLS baseline probe (PASS → FAIL, an SSL version error against the external endpoint; environment-sensitive, flagged by the diff itself)</td></tr>
+  <tr><td>Changed</td><td class="c" colspan="2">5 — C2 A2A malformed input (WARN → PASS) and four G3 agent-id boundary cases (WARN/INFO → PASS)</td></tr>
+  <tr><td>Not covered</td><td class="c" colspan="2">55 cases: the B (full hostile set), D (full-suite), E (line-ending), F (performance), I (third-party interop) and M (environment matrix) groups need the full run</td></tr>
+</table>
+
+<h2>The 11 failures, in two piles · 11 个失败，分两堆</h2>
+<div class="pile">
+  <h3>Pile one — 8 findings about an external platform's resolver endpoint</h3>
+  <ul>
+    <li>Seven malformed or unresolvable DID inputs (non-DID string, wrong method, numeric type, 4096-char DID, injection characters, path traversal, nonexistent <code>did:cn:agent</code>) each returned <b>HTTP 200 with <code>success=True</code> while the resolution itself FAILED</b>. The truth is only in the <code>resolutionStatus</code> field — a caller that reads the success flag is silently misled. The bench names this pattern in its own notes: a contract trap.</li>
+    <li>One TLS baseline probe failed with an SSL version error (the regression above).</li>
+  </ul>
+  <p class="note">八个发现指向一个外部平台的解析端点：七种畸形或不可解析的 DID 输入，解析明明失败，端点仍回 200 并写 success=True，真话只在 resolutionStatus 字段里。只读 success 标志的调用方会被静默误导，台子在自己的注记里把这叫作契约陷阱。</p>
+</div>
+<div class="pile">
+  <h3>Pile two — 3 findings about the resolver under test</h3>
+  <ul>
+    <li><b>Loopback not restricted:</b> a <code>did:web</code> document pointing at a loopback address resolves successfully.</li>
+    <li><b>Downgrade followed:</b> an HTTPS fetch answered with a 302 redirect to plain HTTP is followed; HTTPS constrains only the first hop.</li>
+    <li><b>No size cap:</b> a 20 MB DID document is accepted and parsed (0.2 s, 65 MB peak memory) with no size limit applied.</li>
+  </ul>
+  <p class="note">三个发现指向被测解析器自身：回环地址未限制；https 被 302 降级到明文 http 时照样跟随；20MB 文档照单全收，没有大小上限。这三项在作者自己的基线里同样记为 FAIL，两个环境判得一致。</p>
+</div>
+
+<h2>By group · 分组结果</h2>
+<table>
+  <tr><th>Group</th><th>What it tests</th><th class="c">Cases</th><th class="c">PASS</th><th class="c">FAIL</th><th class="c">INFO</th><th class="c">WARN</th><th class="c">Time</th></tr>
+  <tr><td>s01</td><td>Platform contract probes (read-only)</td><td class="c">37</td><td class="c">12</td><td class="c">8</td><td class="c">16</td><td class="c">1</td><td class="c">60.2 s</td></tr>
+  <tr><td>s02b</td><td>DID resolution, hostile inputs (clean control)</td><td class="c">3</td><td class="c">0</td><td class="c">3</td><td class="c">0</td><td class="c">0</td><td class="c">1.9 s</td></tr>
+  <tr><td>s03</td><td>Ecosystem: MCP / A2A / CLI / timezones / leakage</td><td class="c">31</td><td class="c">27</td><td class="c">0</td><td class="c">4</td><td class="c">0</td><td class="c">4.5 s</td></tr>
+  <tr><td>s07</td><td>Package &amp; evidence-layer boundaries</td><td class="c">15</td><td class="c">12</td><td class="c">0</td><td class="c">3</td><td class="c">0</td><td class="c">7 s</td></tr>
+</table>
+
+<h2>What this run does not show · 这次没跑到的</h2>
+<p>The fast path is 4 of the bench's ~10 groups. The full run — the 1,086-case unit suite, the third-party interop group (which needs an independent parser installed), the performance thresholds and the 12-condition environment matrix — has not been run in this environment yet. The bench's "three readers, same verdicts" claim rests, so far, on its authors' own runs; this page is the first run by a different operator, and it covers the bench, not yet the three-reader claim.</p>
+<p class="zh">快跑是台子约 10 组里的 4 组。全量跑（1086 例单测、需要第三方解析器的互操作组、性能阈值、12 项环境矩阵）还没在这个环境跑过。台子「三读者同判」的说法目前只有作者自跑记录；本页是第一个异机运行，它覆盖的是台子本身，还没覆盖三读者那条。</p>
+
+<h2>Run it yourself · 自己复跑</h2>
+<div class="cmd">git clone https://github.com/UIBC/uibc-bench
+cd uibc-bench
+python first_run.py</div>
+<p class="note">Raw outputs of this run: <a href="uibc-bench-run-20261124/summary.json">summary.json</a> · <a href="uibc-bench-run-20261124/s01_results.json">s01</a> · <a href="uibc-bench-run-20261124/s02b_results.json">s02b</a> · <a href="uibc-bench-run-20261124/s03_results.json">s03</a> · <a href="uibc-bench-run-20261124/s07_results.json">s07</a> · <a href="uibc-bench-run-20261124/baseline_diff.json">baseline_diff.json</a> · <a href="uibc-bench-run-20261124/dashboard.html">the bench's own dashboard for this run</a></p>
+
+</div>
+</body>
+</html>

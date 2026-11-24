@@ -1,0 +1,29 @@
+[
+ {
+  "case": "B1' 回环目标可解析(id自洽)",
+  "verdict": "FAIL",
+  "note": "解析成功，命中 ['/.well-known/did.json']：did:web 未限制回环地址",
+  "extra": {
+   "kind": "SSRF",
+   "severity": "中高"
+  }
+ },
+ {
+  "case": "B3' 302 降级到 http 是否被跟随",
+  "verdict": "FAIL",
+  "note": "命中序列=['/redir/did.json', 'plain:/plain/did.json']；明文 http 被接受，https 只约束首跳",
+  "extra": {
+   "kind": "传输降级",
+   "severity": "中"
+  }
+ },
+ {
+  "case": "B5' 20MB 文档(id自洽)",
+  "verdict": "FAIL",
+  "note": "接受并解析，耗时 0.2s，峰值内存 65.0MB；无大小上限",
+  "extra": {
+   "kind": "DoS",
+   "severity": "中"
+  }
+ }
+]

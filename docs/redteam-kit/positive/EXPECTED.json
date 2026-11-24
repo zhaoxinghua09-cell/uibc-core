@@ -1,0 +1,8 @@
+{
+ "schema": "uibc-redteam-kit/positive@0.1",
+ "case": "clean",
+ "source": "uibc-core fixtures-v041/clean.uibc (Ed25519, v0.4.1 set)",
+ "pin": "positive/owner.key.pub",
+ "expect": "PASS",
+ "measured": "reference and independent implementation both PASS, 2026-11-24"
+}

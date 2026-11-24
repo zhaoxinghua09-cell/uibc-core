@@ -1,0 +1,40 @@
+{
+ "schema": "uibc-redteam-kit/expected@0.1",
+ "corpus": [
+  "not-json",
+  "manifest-is-array",
+  "duplicate-member",
+  "nan-literal",
+  "deep-nesting",
+  "invalid-utf8",
+  "path-escape",
+  "empty-dir",
+  "huge-manifest"
+ ],
+ "rules": {
+  "must_answer": "a SUT that exits non-zero with empty stdout and a traceback has crashed",
+  "must_refuse": "for every case the verdict must not be PASS",
+  "verdict_vocabulary": [
+   "PASS",
+   "FAIL",
+   "INCONCLUSIVE",
+   "UNREADABLE"
+  ]
+ },
+ "why": {
+  "not-json": "bytes that are not JSON must be refused, not crashed on",
+  "manifest-is-array": "the wrong top-level type is a structural refusal",
+  "duplicate-member": "two readers, two answers - the check exists for this",
+  "nan-literal": "RFC 8259 has no NaN; a permissive parser must still refuse it",
+  "deep-nesting": "a recursive reader dies here; the verifier must not",
+  "invalid-utf8": "the format is UTF-8 or it is nothing",
+  "path-escape": "an evidence path must not resolve outside the package",
+  "empty-dir": "nothing at all is still something to say",
+  "huge-manifest": "a reader must not be defeated by size alone"
+ },
+ "reference_baseline": {
+  "sut": "uibc-core 0.5.0 verify",
+  "verdicts": "FAIL on all 9",
+  "measured": "2026-11-24, see evidence/hostile_matrix.json"
+ }
+}

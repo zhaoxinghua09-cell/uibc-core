@@ -41,14 +41,25 @@ PASS = "PASS"
 FAIL = "FAIL"
 INCONCLUSIVE = "INCONCLUSIVE"
 
+CURRENT = "CURRENT"
+CHANGED = "CHANGED"
+
+EXECUTED = "executed"
+REFUSED = "refused"
+
 __all__ = [
     "SCHEMA",
     "PASS",
     "FAIL",
     "INCONCLUSIVE",
+    "CURRENT",
+    "CHANGED",
+    "EXECUTED",
+    "REFUSED",
     "answer_age",
     "check_link",
     "evaluate_links",
+    "commit_recheck",
     "decision_record",
 ]
 
@@ -141,6 +152,50 @@ def evaluate_links(answers_by_link, decision_at, bounds):
         "decision_at": decision_at,
         "links": rows,
         "rule": "FAIL > INCONCLUSIVE > PASS; an unanswered link cannot contribute a pass",
+    }
+
+
+def commit_recheck(answers_by_link, commit_at, bounds):
+    """Re-check the answers at the instant the action commits.
+
+    Between decision and commit there is a window: a token can be revoked, a
+    mandate can expire, a status answer can go stale. A record showing the
+    answer was fresh at decision time does not show it was still fresh when
+    the action ran -- the point draft-malhotra-scitt-oar-00 Section 4.2 makes
+    with its ``authority_check`` and ``result: current | changed``.
+
+    We return ``state`` (CURRENT or CHANGED) plus the ``outcome`` a caller must
+    record: an action whose answer went stale before commit is ``refused``, not
+    executed, and names why in ``reason_codes``.
+
+    This narrows the window; it cannot close it. The gap between ``commit_at``
+    and the actual commit is the caller's to keep short, and this module does
+    no I/O, so it cannot re-ask anyone -- the caller must supply fresh answers.
+
+    Reason codes: ``authority_expired`` for an answer over its bound,
+    ``authority_unknown`` for a link with no answer, ``authority_clock_skew``
+    for an answer dated after the commit instant.
+    """
+    evaluation = evaluate_links(answers_by_link, commit_at, bounds)
+    codes = []
+    for row in evaluation["links"]:
+        if row["state"] == FAIL:
+            codes.append("authority_expired")
+        elif row["state"] == INCONCLUSIVE:
+            codes.append("authority_clock_skew" if (row["age_seconds"] or 0) < 0
+                         else "authority_unknown")
+    if codes:
+        state, outcome = CHANGED, REFUSED
+    else:
+        state, outcome = CURRENT, EXECUTED
+    return {
+        "state": state,
+        "outcome": outcome,
+        "checked_at": commit_at,
+        "reason_codes": codes,
+        "answer_checks": evaluation["links"],
+        "rule": ("an answer over its bound, absent, or dated after the commit "
+                 "refuses the action rather than executing it"),
     }
 
 

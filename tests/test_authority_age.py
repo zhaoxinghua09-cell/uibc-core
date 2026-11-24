@@ -8,11 +8,16 @@ by the decision instant A, because a person waited between them. That is
 import unittest
 
 from uibc_core.authority_age import (
+    CHANGED,
+    CURRENT,
+    EXECUTED,
     FAIL,
     INCONCLUSIVE,
     PASS,
+    REFUSED,
     answer_age,
     check_link,
+    commit_recheck,
     decision_record,
     evaluate_links,
 )
@@ -101,6 +106,38 @@ class TestFreshAtTOverTheBoundAtA(unittest.TestCase):
         self.assertEqual(at_A["state"], FAIL)
         self.assertEqual(at_A["age_seconds"], 3 * 3600.0)
         self.assertEqual(at_T["age_seconds"], 3600.0)
+
+
+class TestCommitRecheck(unittest.TestCase):
+    """The window between decision and commit (OAR Section 4.2)."""
+
+    def test_still_current_at_commit_executes(self):
+        result = commit_recheck({"mandate": IAT}, T, {"mandate": 7200})
+        self.assertEqual(result["state"], CURRENT)
+        self.assertEqual(result["outcome"], EXECUTED)
+        self.assertEqual(result["reason_codes"], [])
+
+    def test_going_stale_before_commit_refuses(self):
+        result = commit_recheck({"mandate": IAT}, A, {"mandate": 7200})
+        self.assertEqual(result["state"], CHANGED)
+        self.assertEqual(result["outcome"], REFUSED)
+        self.assertEqual(result["reason_codes"], ["authority_expired"])
+
+    def test_no_answer_at_commit_refuses(self):
+        result = commit_recheck({"mandate": None}, T, {"mandate": 7200})
+        self.assertEqual(result["outcome"], REFUSED)
+        self.assertEqual(result["reason_codes"], ["authority_unknown"])
+
+    def test_answer_dated_after_commit_refuses_with_skew(self):
+        result = commit_recheck({"mandate": "2026-11-24T09:30:00Z"}, T, {"mandate": 7200})
+        self.assertEqual(result["outcome"], REFUSED)
+        self.assertEqual(result["reason_codes"], ["authority_clock_skew"])
+
+    def test_one_changed_link_is_enough_to_refuse(self):
+        result = commit_recheck(
+            {"anchor": IAT, "mandate": IAT}, A,
+            {"anchor": 7200, "mandate": 86400})
+        self.assertEqual(result["outcome"], REFUSED)
 
 
 class TestDecisionRecord(unittest.TestCase):

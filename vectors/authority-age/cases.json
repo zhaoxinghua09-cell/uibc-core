@@ -81,6 +81,27 @@
       "conditions_met": ["action is reversible"],
       "recourse_relied_on": ["30-day chargeback"],
       "expect_state": "INCONCLUSIVE"
+    },
+    {
+      "id": "aa-09",
+      "kind": "commit",
+      "why": "re-check at commit: answer still inside the bound, action may run",
+      "answers": {"mandate": "2026-11-24T08:00:00Z"},
+      "bounds": {"mandate": 7200},
+      "commit_at": "2026-11-24T09:00:00Z",
+      "expect_state": "CURRENT",
+      "expect_outcome": "executed"
+    },
+    {
+      "id": "aa-10",
+      "kind": "commit",
+      "why": "re-check at commit: answer went stale between decision and commit, so the action is refused rather than executed (OAR 4.2)",
+      "answers": {"mandate": "2026-11-24T08:00:00Z"},
+      "bounds": {"mandate": 7200},
+      "commit_at": "2026-11-24T11:00:00Z",
+      "expect_state": "CHANGED",
+      "expect_outcome": "refused",
+      "expect_reason": "authority_expired"
     }
   ]
 }

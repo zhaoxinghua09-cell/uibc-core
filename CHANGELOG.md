@@ -159,6 +159,23 @@ record carries.
 
 ## [Unreleased]
 
+### Hostile input is an answer, and an agent id is an identifier (2026-11-24)
+
+Both changes come from the harness run of 2026-11-24, not from reading the code:
+
+- `adapters.a2a.transform.detect_format()` raised `ValueError` for `None`, `""` and
+  any string that is neither JSON nor XML. A detector is what a gateway calls on
+  bytes it did not choose, so "cannot tell" is now `None` and the refusal moved up
+  to `convert()`, whose error names the formats it accepts. `test_14` changed with
+  it: the assertion that used to expect the exception now checks both layers.
+- `uibc register` accepted the empty string, a C0 control character and a
+  right-to-left override as agent ids, and each of them was then written into
+  `identity.json`, `manifest.json` and the first lifecycle event. `agent_id_error()`
+  refuses empty, over-long (>128), control, bidi-control and space-padded ids before
+  anything is written; nine tests in `tests/test_agent_id_policy.py`, including a
+  subprocess run that shows a refused id leaves the `init` skeleton in place rather
+  than a half-written identity.
+
 ### `did:web` now refuses targets that are not public names (2026-11-24)
 
 Three defects were measured on 2026-11-23 and each one let a resolver be aimed

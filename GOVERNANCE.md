@@ -1,91 +1,38 @@
-# GOVERNANCE.md — 生态治理章程
+# GOVERNANCE
 
-Version 1.0 · 2026-11-19 · Owner: Xinghua Zhao (Steven Zhao) · ORCID 0009-0001-0512-1237
+本文件写死三件容易被"解释"掉的事：许可不会悄悄变、改名需要留痕、谁有权改。
 
-## 1. Current governance form
+## §1 许可承诺
 
-This project is **single-maintainer with published rules**. That is the accurate description today and it is what this charter governs.
+本仓库的代码许可是 **Apache-2.0**（见 `LICENSE`），规范文本与方法论文本是 **CC BY 4.0**（见 `LICENSE-TEXT`）。
 
-It is not a foundation, not a consortium, not an independent committee, and not a standards body. Those forms are not established and must not be described as established in any material. <!-- phrase-ok: 政策条款在列举禁令本身 -->
+**对已发布版本不改**：任何已发布版本的许可不变；变更只对**新版本**生效，且必须在 `CHANGELOG.md` 写明"许可变更"与生效版本号。
 
-Development stage: **stage 1** (founder-led, rules published, records transparent). The staged path to other forms is in §7.
+**收紧许可的门槛**（比 Apache-2.0 更严的任何变更）：
 
-## 2. Authority
+1. 提前 **30 天**在仓库开 issue 公示（标签 `license-change`）；
+2. 需要**当版全部贡献者的书面同意**（含历史提交作者，不含仅 typo 修复者）；
+3. 变更必须单独成一个 PR，不与功能改动混在同一提交里。
 
-| Decision | Who decides | Record |
-|---|---|---|
-| Changes to the normative core (as defined in `VERSIONING.md` §1) | Maintainer, after the seven-step procedure in §3 | Decision Record, public |
-| Extension additions | Maintainer | Release record |
-| Merging code contributions | Maintainer | Commit history |
-| Evaluation conclusions | Evaluator of record | Evaluation record with relation class |
-| Authorization to use the system in an organisation | That organisation, not this project | Outside this project's records |
-| Publication of any external submission | The owner, named in person | Submission log |
+做不到这三条，就维持 Apache-2.0。
 
-Three separations are structural and may not be collapsed for convenience:
+## §2 改名
 
-1. **Registration is not assessment.** A record existing in a registry means it was listed, nothing more.
-2. **Assessment is not authorization.** A favourable verdict is a statement about evidence against a standard. It is not permission to operate.
-3. **Authorization is not a safety guarantee.** Permission to run is granted by a party that accepts the risk, not by this project.
+仓库改名、组织迁移、包名变更（PyPI / npm / MCP registry）必须留 **ADR**（`docs/adr/`），写明：动机、旧名→新名映射、旧链接如何处理、旧包是否保留（不得静默删除）。
 
-## 3. Change procedure for the normative core
+## §3 商标与认证
 
-Seven steps, in order. Step 3 must complete before step 4 begins.
+商标不随许可授予（`TRADEMARK.md`）。任何人不得以 "UIBC certified / 官方" 表述推广实现；作者也不得以"通过测试"暗示认证。
 
-| Step | Output | Question it must answer |
-|---|---|---|
-| 1 | Change Proposal | What changes, and why now |
-| 2 | Technical Rationale | What breaks if we do not change it |
-| 3 | Compatibility Analysis | What will an existing verifier do — the full field set from `VERSIONING.md` §3 |
-| 4 | Security Review | Does this introduce a path that returns `PASS` on unknown input |
-| 5 | Public Discussion | Objections received and how each was resolved |
-| 6 | Decision Record | Who decided, on what grounds, with objections retained |
-| 7 | Version Release | Release record with migration steps |
+## §4 规范变更
 
-Skipping step 3 does not accelerate the process; it moves the cost to whoever implements against an unclear specification.
+规范文本的实质性变更（改变判定语义、增加必填字段、收紧 PASS 条件）必须同时提供：
 
-## 4. Contribution and maintainership
+- 一份改前/改后的**语料差异**（`conformance/vectors` 的 diff 或新版本文件）；
+- 一份**受影响的实现清单**（哪些字段、哪些检查会从 PASS 变 NOT_PASS）。
 
-Contributions are accepted under `CONTRIBUTING.md`. A contributor becomes eligible for maintainership when all three hold:
+只改规范、不给语料差异的 PR 不予合并。
 
-- a record of merged contributions;
-- a demonstrated passing run of the conformance corpus;
-- a signed declaration of interests under `COI.md`.
+## §5 数据与隐私
 
-Eligibility is not appointment. Appointment requires a Decision Record naming the maintainer and the scope of their authority.
-
-## 5. External review
-
-External review is invited, not claimed. A review counts as external only when the reviewer's relation class is `S3` or `S4` under `INDEPENDENCE.md`. Reviews are published with the reviewer's name, their relation class, and any objection they raised.
-
-## 6. Disputes and appeals
-
-Any party may dispute an identity record, an evidence record, an evaluation conclusion, or an authorization record.
-
-| Stage | Commitment (internal target, not a published SLA) | Record |
-|---|---|---|
-| Acknowledgement | 3 working days | Case number |
-| Evidence submission | 14 days for the complainant | Submitted package digest |
-| Initial review | 14 days | Reasoning for accepting or rejecting new facts |
-| Review by an uninvolved party (material disputes only) | 30 days | Reviewer identity and relation class |
-| Outcome | One of: upheld / corrected / withdrawn / re-assessed | Published |
-
-Rules that do not bend:
-
-- an unfavourable conclusion may not be deleted without a record; deletion is treated as withdrawal and must be logged;
-- a correction preserves the original conclusion and appends the change with its reason;
-- conclusions are published; third-party personal data may be redacted, the outcome may not.
-
-## 7. Staged path
-
-| Stage | Form | Entry condition (checkable) |
-|---|---|---|
-| 1 | Founder-led, rules published | current |
-| 2 | Multiple maintainers and external technical reviewers | ≥1 external maintainer and ≥1 reviewer at `S3`/`S4` |
-| 3 | Formal independent review mechanism | evaluator and developer are different owners, with an appeal having run end to end |
-| 4 | Foundation or other independent legal form | legal and operational study completed |
-
-No stage may be announced before its entry condition is met. Announcing a stage is a factual claim, and factual claims are governed by the same evidence rules as technical ones.
-
-## 8. Amendment
-
-Amendments to §2 or §3 require the seven-step procedure and a major version of this document.
+仓库不含真实个人数据；所有夹具为合成数据。发现真实数据混入，按安全事件处理（见 `SECURITY.md`）。

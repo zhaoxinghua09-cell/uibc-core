@@ -324,6 +324,8 @@ uibc verify demo.uibc                   # 开放模式：仅完整性检查
 ```bash
 pip install pytest ".[verify,interop,conformance]"   # 首次必须先装：下方命令会 import pytest
 python -m unittest discover -s tests -p "test_*.py"   # 全量套件（2026-11-22 外人复测的结果与确数都钉在 `docs/EVIDENCE-INDEX.md`，README 不抄数字。先 `pip install pytest` 并装齐 `.[verify,interop,conformance]`——13 个测试模块在顶层 import pytest，不装 pytest 会直接报 13 个 ImportError；未装 extras 则不只是多跳过，而是有失败。请用完整克隆，`git clone --depth 1` 会再跳一条，原因见 `docs/SKIPPED.md`；stress 7 场景单跑，见下条）
+> **Windows 平台说明（实测 2026-11-24，Python 3.13.18，HEAD 9dfd714）**：Windows 上全量套件会红 2 条 —— `tests/test_resolve_generated.py::TestItRefusesOutsideARebase::test_outside_a_rebase_it_touches_nothing` 与 `tests/test_verify_external_node_report.py::TestItRecomputes::test_quick_run_matches_the_receipt`，两者均报 `FileNotFoundError [WinError 2]`，原因是这些用例起子进程时依赖 POSIX shell；同轮其余 **1553 passed / 12 skipped / 118 subtests，484 s**。CI 的 Linux 与 macOS 矩阵不受影响。这不是产品缺陷，但 Windows 读者不该在看到红条时以为包坏了。
+
 python -m unittest tests.stress_test        # 压力 7 场景
 python independent_verifier/cross_check.py  # 独立第二实现交叉核验（70 项，0 分歧）
 ```

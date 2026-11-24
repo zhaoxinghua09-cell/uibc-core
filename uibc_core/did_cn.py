@@ -46,6 +46,7 @@ __all__ = [
     "IdentifierError",
     "RegistryEndpointRequired",
     "validate",
+    "validate_live_agent_id",
     "level",
     "derivable_document",
     "resolve",
@@ -81,6 +82,13 @@ _B58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
 # cn: cn-specific-idstring = issuer "." industry "." enterprise
 #     issuer = 2DIGIT ; industry = 3*5DIGIT ; enterprise = 1*128DIGIT
 _CN_RE = re.compile(r"^(\d{2})\.(\d{3,5})\.(\d{1,128})$")
+# The namespace the live platform actually serves. It is **not** in the
+# published ABNF: the platform hands out `did:cn:agent:<base58>`, where the
+# second segment is the literal word "agent" and the tail is base58, while the
+# README fixes `2DIGIT.3*5DIGIT.1*128DIGIT`. Measured 2026-11-24 against
+# agent.idfactory.cn, whose registered agents all read `did:cn:agent:sf...`.
+# Recognised, labelled, and never passed off as the published form.
+_CN_LIVE_AGENT_RE = re.compile(r"^agent:(?P<key>[%s]{22,44})$" % _B58)
 # ctid: method-specific-id = <hexdigit>{64} ; hexdigit = [0-9A-F]
 _CTID_RE = re.compile(r"^[0-9A-F]{64}$")
 # ioa / cndid: 0*1(acsn ":") suffix / acsn ":" 0*1(suffix)
@@ -230,6 +238,44 @@ def validate(did):
                 % (ident,))
         details.update(domain=ident.split(":")[0])
     return method, SPECS[method][2], details
+
+
+def validate_live_agent_id(did):
+    """Recognise the live `did:cn:agent:<base58>` form the platform really serves.
+
+    This form is **not** in the published ABNF (README fixes
+    `2DIGIT.3*5DIGIT.1*128DIGIT`), and `validate()` therefore refuses it — which
+    is correct, because accepting it there would mean the adapter no longer
+    checks the document it claims to check. But refusing it silently leaves
+    every registered agent unresolvable: the platform's own listing is 77 agents
+    and all of them read `did:cn:agent:sf...` (measured 2026-11-24).
+
+    So it gets its own entry point, with its own label. Returns a dict on
+    success and raises `IdentifierError` otherwise. The dict always says
+    `published_abnf: False`, so no caller can accidentally treat this as the
+    documented namespace, and nothing here can reach `VERIFIED`: the segment
+    proves only that the string is shaped like the platform's output.
+    """
+    if not isinstance(did, str):
+        raise IdentifierError("DID must be a string")
+    method, ident = _did.parse(did)
+    if method != "cn":
+        raise IdentifierError("this is the did:cn live form only, got did:%s" % (method,))
+    m = _CN_LIVE_AGENT_RE.match(ident)
+    if not m:
+        raise IdentifierError(
+            "not the live did:cn agent form: expected 'agent:<22-44 base58>', got %r "
+            "(the published ABNF form '2DIGIT.3*5DIGIT.1*128DIGIT' is handled by "
+            "validate(), not here)" % (ident,))
+    return {
+        "method": "cn",
+        "namespace": "agent",
+        "key_encoding": "base58",
+        "key_length": len(m.group("key")),
+        "published_abnf": False,
+        "note": ("undocumented live form: the published ABNF has no 'agent' segment; "
+                 "shape alone proves nothing about allocation"),
+    }
 
 
 def level(did):

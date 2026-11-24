@@ -1,3 +1,21 @@
+## The did:cn namespace the platform serves is not the one the README publishes
+
+- Measured on `agent.idfactory.cn`: every registered agent reads
+  `did:cn:agent:<base58>`, while the CN DID Method Specification fixes
+  `2DIGIT.3*5DIGIT.1*128DIGIT`. Until now our adapter refused **all** of them —
+  correct against the published ABNF, useless against the live namespace.
+- `validate()` is unchanged and still refuses the live form: loosening it would
+  mean the adapter no longer checks the document it claims to check.
+- `validate_live_agent_id()` is new: it recognises `did:cn:agent:<22-44 base58>`,
+  labels itself `published_abnf: False`, and states that shape proves nothing
+  about allocation. Two entry points, two labels, no silent merge.
+- `docs/TWO-CODES-DIFF.md` puts the two codes side by side across ten
+  dimensions, each row citing 标准 / 规范 / 实测. Three divergences are now
+  written down instead of inferred: the live namespace has no published ABNF;
+  `service` lives in the DID Document for `did:cn` but has no document at all
+  for the national code; and **neither track can answer "after revocation, is a
+  previously issued credential still valid"**.
+- 10 new tests.
 ## Agent identity code: we read the shape, and stop there
 
 - `uibc_core/agent_identity_code.py` parses `GB/Z 185.2—2026` identity codes

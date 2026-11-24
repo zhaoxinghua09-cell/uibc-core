@@ -88,3 +88,55 @@
 - ARIA Protocol 信任等级文档（`aria.bar/docs/trust-levels`）
 
 标"未核实"的格子：ARIA 的外部实现数量与治理、bailey-00 的实现情况、信通院的状态码取值——**这些没查到，不等于没有。**
+
+---
+
+## 六、晚补（同日）：commit 复检与撤销自证，以及两个 2026 年最热的授权面玩家
+
+本节在同一天晚些时候补入，因为下面两维是当天才在代码里存在的，此前不可能出现在任何矩阵里。
+
+**新增两维：**
+
+- **D9** 是否在 commit 时刻重判（不是只在决策时判一次）
+- **D10** 撤销状态是否由判定方自证（不是等外部报"它还 valid 吗"）
+
+| 对手 | D9 commit 重判 | D10 撤销自证 |
+|---|---|---|
+| **SCITT OAR**（draft-malhotra-scitt-oar-00） | **有**：`authority_check` 带 `checked_at`/`set_digest`/`result: current\|changed`，changed 即 `refused` 并给 `authority_revoked/expired/invalid` | **无**：§6.5 明文 "This profile defines no key revocation or rotation mechanism"，状态由 relying party 提供 |
+| **WIMSE**（draft-hulea-wimse-agent-mandate-00） | 无：程序上要求 `A >= T` 并把检查结果记在授权决策里，但没有"变旧即拒"的判定 | 无 |
+| **SCITT Permit**（draft-munoz-scitt-permit-profile-01） | 部分：执行前把决策绑定到请求体规范字节；未规定 commit 时复检撤销 | 无 |
+| **SCITT Dual-Receipt**（draft-jones-scitt-dual-receipt-02） | 无：`evaluated_at` 是决策后的**独立评估**，不是 commit 复检 | 明文无（§6.5） |
+| **AP2**（Google，60+ 组织） | 部分：Merchant 校验 Checkout Mandate 与 `checkout_hash`；无"到 commit 再看一遍撤销" | 未规定 |
+| **Okta XAA**（ID-JAG，25+ 集成） | 无：靠短时效 token 与 IdP 策略，属"到期即失效"，不是判定层复检 | 未规定（撤销在 IdP 侧） |
+| **AuthZEN 1.0** | 无：明文不做 freshness/provenance | 无 |
+| **SPIFFE/SPIRE** | 无（身份层）：短时效 SVID + CRL/trust bundle 流式推送 | **部分，但属身份层**：撤销针对凭证，不针对判定记录 |
+| **KYA-OS / ANP / vLEI / 信通院 / ARIA / bailey-00** | 未规定 | 未规定 |
+
+**读法**：D9 上 OAR 与我们并列（它先到，我们照它的名字对齐）；**D10 在判定层只有我们**。这句话必须带限定——只查了这 12 家，没查到不等于没有。
+
+**新增两条可复跑的优势：**
+
+| # | 优势 | 与谁不同 | 复跑 |
+|---|---|---|---|
+| A4 | commit 复检 + 撤销由我方记录自证（`status_at` / `commit_recheck_from_history`） | OAR 有复检但要别人报状态且明文不做撤销；WIMSE 只有 bound；SPIFFE 的 CRL 属身份层 | `python tools/run_authority_age_vectors.py`（12/12） |
+| A5 | 同一答案在两个时刻给两个判定（T 新鲜、A 超龄 → 前者 PASS 后者 refused） | WIMSE 把这一例列为 **planned**；这里做成 shipped（`aa-03` / `aa-10`） | 同上 |
+
+**落后清单要补两行，不能只补优势：**
+
+- **授权书分阶段 + 请求体字节绑定**：AP2（Intent / Cart / Payment 三类 + Receipt + `checkout_hash`，60+ 组织）**领先**。我们的字节绑定仍停在立项规格，未实现。
+- **生态渗透**：`agent-action-capsule` 有 13 个第三方实现、在线验证器、已进 `ietf-wg-scitt/examples`；我们仍是 2 个邀请型外部节点。
+
+**三条外人 30 秒可验的命令（本机实跑输出）：**
+
+```
+python tools/run_authority_age_vectors.py   -> 12 case(s), 0 mismatch(es)   exit 0
+python tools/check_vector_package.py        -> 36/36 strict, refused 30/36
+                                               RESULT: OK - download verified offline,
+                                               archive matches the pin, suite green   exit 0
+python tools/status_page.py --check         -> CURRENT - STATUS.md matches every source it cites
+                                               exit 0
+```
+
+第三条是这套东西与别家最不一样的地方：**STATUS.md 的数字不是手写的，从仓库算出来，对不上就红。**
+
+来源同前：OAR / WIMSE / Permit / Dual-Receipt 的 IETF 原文；AP2 `ap2-protocol.org/index.md` 与 FAQ；Okta XAA `developer.okta.com/docs/concepts/xaa/` 与发布博文；AuthZEN 1.0 final；SPIFFE 概念与 WIT-SVID。

@@ -404,3 +404,43 @@ jobs:
         # refused package it fails for an unrelated reason, or a check the
         # Python side gained that the JavaScript side never carried.
         run: python tools/assert_second_impl.py
+
+  # Measured 2026-11-25: the crosswalk had no gate at all. `crosswalk/*.json` and
+  # `tools/out/crosswalk-*.json` could drift apart, a clause could be demoted from
+  # carried to partial, or a declared probe could start failing, and CI would stay
+  # green - the counts in the documents were reproducible only by whoever ran the
+  # tool by hand. This job re-runs every probe and compares the fresh result with
+  # the committed file byte for byte (exit 3 on any difference), so a reader can
+  # re-run the same thing and get the same numbers, and a demotion cannot be made
+  # quietly. It also re-checks the generated evidence index against its sources.
+  crosswalk-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v7.1.0
+        with:
+          python-version: "3.12"
+
+      - name: Install test deps
+        run: python -m pip install --upgrade pip && pip install pytest ".[verify]"
+
+      - name: Install the package
+        run: python -m pip install .
+
+      - name: Every crosswalk reproduces its committed result
+        # Carry a real probe: `--check` re-runs it, strips the per-run timing, and
+        # compares byte for byte. A failing probe on any non-gap row is OVERCLAIM
+        # (exit 1); a difference from the committed file is drift (exit 3).
+        run: |
+          set -eu
+          for f in crosswalk/*.json; do
+            name=$(basename "$f" .json)
+            echo "== $name"
+            python tools/crosswalk_probe.py "$f" --check "tools/out/crosswalk-$name.json" --quiet
+          done
+
+      - name: The evidence index matches its sources
+        run: python tools/build_evidence_index.py --check
+

@@ -7,10 +7,7 @@
     "A verifier passes a case only if it reports FAIL and names at least one of expected_checks.",
     "Reporting FAIL for a case in this suite is the requirement; the exact reason strings are not testable across implementations.",
     "A case with \"expect\": \"accept\" must not be refused; a verifier that refuses everything fails those.",
-    "Every mutated case started from a correct package and then broke exactly one thing.",
-    "A package may append evidence after sealing, provided every new file is declared in the evidence index: that is growth, not tampering, and must not be refused.",
-    "A package whose anchor points at a root this verifier cannot recompute MUST be refused: 'cannot recompute' is a refusal condition, not an unknown.",
-    "A package sealed with an asymmetric key whose public key ships inside the package (and whose signature verifies against it) must not be refused: 'no key available' applies only when no public key is shipped."
+    "Every mutated case started from a correct package and then broke exactly one thing."
   ],
   "cases": [
     {

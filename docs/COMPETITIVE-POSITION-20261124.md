@@ -140,3 +140,31 @@ python tools/status_page.py --check         -> CURRENT - STATUS.md matches every
 第三条是这套东西与别家最不一样的地方：**STATUS.md 的数字不是手写的，从仓库算出来，对不上就红。**
 
 来源同前：OAR / WIMSE / Permit / Dual-Receipt 的 IETF 原文；AP2 `ap2-protocol.org/index.md` 与 FAQ；Okta XAA `developer.okta.com/docs/concepts/xaa/` 与发布博文；AuthZEN 1.0 final；SPIFFE 概念与 WIT-SVID。
+
+---
+
+## 七、为什么"多态"不是学术洁癖：一个可跑的对照，与两条监管条文
+
+**可跑的对照**：`python tools/demo_boolean_vs_states.py`（3 场景，0 断言失败）。
+
+同一场景：08:00 答案 VERIFIED，09:00 决策，09:30 撤销，提交时刻分三种。一个只知道 allow/deny 的闸门与本文档所描述的实现并排跑：
+
+| # | 布尔闸门 | 决策层 | 提交层 | 结果 | 原因 |
+|---|---|---|---|---|---|
+| A | allow | PASS | CURRENT | executed | — |
+| B | **allow** | PASS | CHANGED | **refused** | `authority_revoked` |
+| C | deny | INCONCLUSIVE | CHANGED | refused | `authority_unknown` |
+
+两句话：
+
+1. **B 上布尔闸门放行、此处拒绝**——状态在决策与提交之间从 verified 变成 revoked，一 bit 的状态装不下这个变化。
+2. **B 与 C 在此处都拒绝，但原因不同**（`authority_revoked` / `authority_unknown`），且 C 的决策层保持 INCONCLUSIVE，后来的读者能分清"被撤回"与"从未查看"。布尔闸门没有第三个值来承载这个区别。
+
+**两条监管条文（EU AI Act）：**
+
+- 第 12 条（记录保存）：高风险系统须能自动记录事件、日志须支撑可追溯性并具备防篡改能力（`ai-act-service-desk.ec.europa.eu/en/ai-act/article-12`）。
+- 第 14 条（人工监督）：须让被指派的自然人能理解系统能力与局限、能监控运行、能干预或中断（`.../article-14`）。
+
+对应关系：Art 12 的"可追溯 + 防篡改"落在判定标签自我复查与带 `checked_at`/reason code 的提交复检；Art 14 的"人可理解"要求监督者能读到"被撤销"与"从未查过"是两件事——七态给得出，一 bit 给不出。
+
+**边界，写在这里而不是脚注里**：这不是合规声明。条文要求系统具备能力，这里给出的是判定记录具备承载该能力的字段；是否满足取决于部署方的日志留存、访问控制与人员安排。把"字段能承载"写成"已合规"是另一种夸大。

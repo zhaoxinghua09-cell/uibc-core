@@ -1,0 +1,298 @@
+[
+ {
+  "case": "A1 agents 读取 #1",
+  "verdict": "PASS",
+  "status": 200,
+  "ms": 1.9,
+  "note": "",
+  "body": null
+ },
+ {
+  "case": "A1 agents 读取 #2",
+  "verdict": "PASS",
+  "status": 200,
+  "ms": 0.9,
+  "note": "",
+  "body": null
+ },
+ {
+  "case": "A1 agents 读取 #3",
+  "verdict": "PASS",
+  "status": 200,
+  "ms": 0.9,
+  "note": "",
+  "body": null
+ },
+ {
+  "case": "A1 agents 读取 #4",
+  "verdict": "PASS",
+  "status": 200,
+  "ms": 1.0,
+  "note": "",
+  "body": null
+ },
+ {
+  "case": "A1 agents 读取 #5",
+  "verdict": "PASS",
+  "status": 200,
+  "ms": 1.0,
+  "note": "",
+  "body": null
+ },
+ {
+  "case": "A1 顶层字段",
+  "verdict": "INFO",
+  "status": 200,
+  "ms": 0.8,
+  "note": "keys=['code', 'data', 'message', 'success']",
+  "body": "{\"code\":0,\"data\":[{\"name\":\"华臣医美顾问\",\"did\":\"did:cn:agent:sf26TaP8ZCDw7jxLitjNGwaoq1qUzqTPX\"},{\"name\":\"军创文化赋能企业管理智能体\",\"did\":\"did:cn:agent:sfKvhQocnYJJME4zGDdRqvWtes21Mi9c\"},{\"name\":\"企业经营决策智能体\",\"did\":\"did:cn:agent:sfQgZ6LLLVXWeRWdVn6KzFPebHQTpN1Q\"},{\"name\":\"复兴堂AI助手\",\"did\":\"did:cn:agent:sfnWsxKxoGJKd3mw2"
+ },
+ {
+  "case": "A1 在册智能体条数",
+  "verdict": "INFO",
+  "status": 200,
+  "ms": 0.8,
+  "note": "n=78",
+  "body": null
+ },
+ {
+  "case": "A1 条目字段集合",
+  "verdict": "INFO",
+  "status": null,
+  "ms": null,
+  "note": "fields=['did', 'name']",
+  "body": null
+ },
+ {
+  "case": "A1 字段缺失/空值",
+  "verdict": "PASS",
+  "status": null,
+  "ms": null,
+  "note": "无缺失",
+  "body": null
+ },
+ {
+  "case": "A1 同字段类型不一致",
+  "verdict": "PASS",
+  "status": null,
+  "ms": null,
+  "note": "一致",
+  "body": null
+ },
+ {
+  "case": "A1 携带 DID 的条目数",
+  "verdict": "INFO",
+  "status": null,
+  "ms": null,
+  "note": "78/78",
+  "body": null
+ },
+ {
+  "case": "A1 DID 方法分布",
+  "verdict": "INFO",
+  "status": null,
+  "ms": null,
+  "note": "{'cn': 78}",
+  "body": null
+ },
+ {
+  "case": "A2 已注册 DID",
+  "verdict": "PASS",
+  "status": 200,
+  "ms": 12.6,
+  "note": "success=True rs=SUCCESS vc=SKIPPED",
+  "body": "{\"code\":0,\"data\":{\"summary\":{\"resolutionStatus\":\"SUCCESS\",\"vcVerificationStatus\":\"SKIPPED\",\"isTrustEstablished\":true,\"summaryNote\":\"DID 解析成功（已验签文档）；未开启 VC 核验\"},\"identity\":{\"id\":\"did:cn:agent:sfZD8WUaMvz7kE2Z797nzDf7oqMmVu3r\",\"controller\":\"did:cn:agent:sfZD8WUaMvz7kE2Z797nzDf7oqMmVu3r\",\"publicKeyType\":\"EcdsaSecp256k1VerificationKey2019\",\"publicKey\":\"02db756f43d895f151739ac543b3bab2c7d416633d400f344146924047e55c4c56\",\"agentStatus\":\"RUNNING\"},\"registration\":{\"companyName\":\"其他智能体客户端\",\"companyDid\":\"did:cn:agent:sfpASHNu85YyFrfMnpGAJ31Vw55iKSpe\",\"registrationNodeName\":\"供需智能体平台生产注册节点\",\"registrationNo"
+ },
+ {
+  "case": "A2 不存在的 did:cn:agent",
+  "verdict": "WARN",
+  "status": 200,
+  "ms": 5.8,
+  "note": "success=True rs=FAILED vc=SKIPPED <陷阱:success真但解析失败> <契约陷阱：只能看 resolutionStatus>",
+  "body": "{\"code\":0,\"data\":{\"summary\":{\"resolutionStatus\":\"FAILED\",\"vcVerificationStatus\":\"SKIPPED\",\"isTrustEstablished\":false,\"summaryNote\":\"未在注册智能体（agent）中命中该 did_identifier，或缺少权威 DID 文档（agent_did_document）JSON。\"}},\"message\":\"操作成功!\",\"success\":true}"
+ },
+ {
+  "case": "A2 空字符串 DID",
+  "verdict": "PASS",
+  "status": 400,
+  "ms": 1.2,
+  "note": "success=False rs=None vc=None",
+  "body": "{\"code\":400,\"message\":\"must not be blank\",\"success\":false}"
+ },
+ {
+  "case": "A2 非 DID 字符串",
+  "verdict": "FAIL",
+  "status": 200,
+  "ms": 1.0,
+  "note": "success=True rs=FAILED vc=SKIPPED <陷阱:success真但解析失败> <应 400 却返回 200>",
+  "body": "{\"code\":0,\"data\":{\"summary\":{\"resolutionStatus\":\"FAILED\",\"vcVerificationStatus\":\"SKIPPED\",\"isTrustEstablished\":false,\"summaryNote\":\"未在注册智能体（agent）中命中该 did_identifier，或缺少权威 DID 文档（agent_did_document）JSON。\"}},\"message\":\"操作成功!\",\"success\":true}"
+ },
+ {
+  "case": "A2 别的方法 did:web",
+  "verdict": "FAIL",
+  "status": 200,
+  "ms": 0.9,
+  "note": "success=True rs=FAILED vc=SKIPPED <陷阱:success真但解析失败> <应 400 却返回 200>",
+  "body": "{\"code\":0,\"data\":{\"summary\":{\"resolutionStatus\":\"FAILED\",\"vcVerificationStatus\":\"SKIPPED\",\"isTrustEstablished\":false,\"summaryNote\":\"未在注册智能体（agent）中命中该 did_identifier，或缺少权威 DID 文档（agent_did_document）JSON。\"}},\"message\":\"操作成功!\",\"success\":true}"
+ },
+ {
+  "case": "A2 别的方法 did:key",
+  "verdict": "FAIL",
+  "status": 200,
+  "ms": 1.1,
+  "note": "success=True rs=FAILED vc=SKIPPED <陷阱:success真但解析失败> <应 400 却返回 200>",
+  "body": "{\"code\":0,\"data\":{\"summary\":{\"resolutionStatus\":\"FAILED\",\"vcVerificationStatus\":\"SKIPPED\",\"isTrustEstablished\":false,\"summaryNote\":\"未在注册智能体（agent）中命中该 did_identifier，或缺少权威 DID 文档（agent_did_document）JSON。\"}},\"message\":\"操作成功!\",\"success\":true}"
+ },
+ {
+  "case": "A2 DID 类型错误(数字)",
+  "verdict": "FAIL",
+  "status": 200,
+  "ms": 1.0,
+  "note": "success=True rs=FAILED vc=SKIPPED <陷阱:success真但解析失败> <应 400 却返回 200>",
+  "body": "{\"code\":0,\"data\":{\"summary\":{\"resolutionStatus\":\"FAILED\",\"vcVerificationStatus\":\"SKIPPED\",\"isTrustEstablished\":false,\"summaryNote\":\"未在注册智能体（agent）中命中该 did_identifier，或缺少权威 DID 文档（agent_did_document）JSON。\"}},\"message\":\"操作成功!\",\"success\":true}"
+ },
+ {
+  "case": "A2 缺 did 字段",
+  "verdict": "PASS",
+  "status": 400,
+  "ms": 1.0,
+  "note": "success=False rs=None vc=None",
+  "body": "{\"code\":400,\"message\":\"must not be blank\",\"success\":false}"
+ },
+ {
+  "case": "A2 超长 DID 4096",
+  "verdict": "FAIL",
+  "status": 200,
+  "ms": 1.5,
+  "note": "success=True rs=FAILED vc=SKIPPED <陷阱:success真但解析失败> <应 400 却返回 200>",
+  "body": "{\"code\":0,\"data\":{\"summary\":{\"resolutionStatus\":\"FAILED\",\"vcVerificationStatus\":\"SKIPPED\",\"isTrustEstablished\":false,\"summaryNote\":\"未在注册智能体（agent）中命中该 did_identifier，或缺少权威 DID 文档（agent_did_document）JSON。\"}},\"message\":\"操作成功!\",\"success\":true}"
+ },
+ {
+  "case": "A2 含注入字符",
+  "verdict": "FAIL",
+  "status": 200,
+  "ms": 1.3,
+  "note": "success=True rs=FAILED vc=SKIPPED <陷阱:success真但解析失败> <应 400 却返回 200>",
+  "body": "{\"code\":0,\"data\":{\"summary\":{\"resolutionStatus\":\"FAILED\",\"vcVerificationStatus\":\"SKIPPED\",\"isTrustEstablished\":false,\"summaryNote\":\"未在注册智能体（agent）中命中该 did_identifier，或缺少权威 DID 文档（agent_did_document）JSON。\"}},\"message\":\"操作成功!\",\"success\":true}"
+ },
+ {
+  "case": "A2 含路径穿越",
+  "verdict": "FAIL",
+  "status": 200,
+  "ms": 1.4,
+  "note": "success=True rs=FAILED vc=SKIPPED <陷阱:success真但解析失败> <应 400 却返回 200>",
+  "body": "{\"code\":0,\"data\":{\"summary\":{\"resolutionStatus\":\"FAILED\",\"vcVerificationStatus\":\"SKIPPED\",\"isTrustEstablished\":false,\"summaryNote\":\"未在注册智能体（agent）中命中该 did_identifier，或缺少权威 DID 文档（agent_did_document）JSON。\"}},\"message\":\"操作成功!\",\"success\":true}"
+ },
+ {
+  "case": "A2 多余字段",
+  "verdict": "PASS",
+  "status": 200,
+  "ms": 1.0,
+  "note": "success=True rs=SUCCESS vc=SKIPPED",
+  "body": "{\"code\":0,\"data\":{\"summary\":{\"resolutionStatus\":\"SUCCESS\",\"vcVerificationStatus\":\"SKIPPED\",\"isTrustEstablished\":true,\"summaryNote\":\"DID 解析成功（已验签文档）；未开启 VC 核验\"},\"identity\":{\"id\":\"did:cn:agent:sfZD8WUaMvz7kE2Z797nzDf7oqMmVu3r\",\"controller\":\"did:cn:agent:sfZD8WUaMvz7kE2Z797nzDf7oqMmVu3r\",\"publicKeyType\":\"EcdsaSecp256k1VerificationKey2019\",\"publicKey\":\"02db756f43d895f151739ac543b3bab2c7d416633d400f344146924047e55c4c56\",\"agentStatus\":\"RUNNING\"},\"registration\":{\"companyName\":\"其他智能体客户端\",\"companyDid\":\"did:cn:agent:sfpASHNu85YyFrfMnpGAJ31Vw55iKSpe\",\"registrationNodeName\":\"供需智能体平台生产注册节点\",\"registrationNo"
+ },
+ {
+  "case": "A3 agents HEAD",
+  "verdict": "INFO",
+  "status": 200,
+  "ms": 1.1,
+  "note": "allow=None",
+  "body": null
+ },
+ {
+  "case": "A3 agents OPTIONS",
+  "verdict": "INFO",
+  "status": 200,
+  "ms": 1.3,
+  "note": "allow=GET,HEAD,OPTIONS",
+  "body": null
+ },
+ {
+  "case": "A3 agents PUT",
+  "verdict": "INFO",
+  "status": 405,
+  "ms": 1.0,
+  "note": "allow=None",
+  "body": null
+ },
+ {
+  "case": "A3 agents DELETE",
+  "verdict": "INFO",
+  "status": 405,
+  "ms": 1.3,
+  "note": "allow=None",
+  "body": null
+ },
+ {
+  "case": "A3 demand-providers 权限",
+  "verdict": "INFO",
+  "status": 200,
+  "ms": 1.2,
+  "note": "{\"code\":0,\"data\":[{\"name\":\"LobsterAI\",\"did\":\"did:cn:agent:sf22GKtH8yG8wXDnXdu7Cgt67d5EQ6Yzb\",\"serviceProviderName\":\"网易北京",
+  "body": null
+ },
+ {
+  "case": "A3 路径变体 /api/public/ioa/agentz",
+  "verdict": "INFO",
+  "status": 404,
+  "ms": 1.0,
+  "note": "{\"code\":404,\"message\":\"资源不存在\",\"success\":false}",
+  "body": null
+ },
+ {
+  "case": "A3 路径变体 /API/PUBLIC/IOA/AGENTS",
+  "verdict": "INFO",
+  "status": 200,
+  "ms": 1.5,
+  "note": "<!DOCTYPE html> <html lang=\"en\">   <head>     <meta charset=\"UTF-8\" />     <link       rel=\"shortcut",
+  "body": null
+ },
+ {
+  "case": "A3 路径变体 /api/public/ioa/agents/",
+  "verdict": "INFO",
+  "status": 404,
+  "ms": 1.2,
+  "note": "{\"code\":404,\"message\":\"资源不存在\",\"success\":false}",
+  "body": null
+ },
+ {
+  "case": "A3 TLS 基线",
+  "verdict": "FAIL",
+  "status": null,
+  "ms": null,
+  "note": "SSLError(1, '[SSL: WRONG_VERSION_NUMBER] wrong version number (_ssl.c:1000)')",
+  "body": null
+ },
+ {
+  "case": "A3 响应头基线",
+  "verdict": "INFO",
+  "status": 200,
+  "ms": 0.9,
+  "note": "{'Server': 'nginx', 'Content-Type': 'application/json', 'Vary': 'Accept-Encoding', 'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate', 'Strict-Transport-Security': 'max-age=15724800; includeSubDomains', 'X-Frame-Options': 'DENY'}",
+  "body": null
+ },
+ {
+  "case": "A4 并发 8 读",
+  "verdict": "PASS",
+  "status": null,
+  "ms": 212.5,
+  "note": "ok=8 err=[] p50=1ms p95=1ms 总耗时=1.7s",
+  "body": null
+ },
+ {
+  "case": "A5 时延基线(境内直连)",
+  "verdict": "INFO",
+  "status": null,
+  "ms": 1.2,
+  "note": "min=1 p50=1 max=1",
+  "body": null
+ },
+ {
+  "case": "A5 DNS 解析",
+  "verdict": "INFO",
+  "status": null,
+  "ms": 0.7,
+  "note": "A=['198.18.152.156']",
+  "body": null
+ }
+]

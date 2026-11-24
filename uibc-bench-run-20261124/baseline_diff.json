@@ -1,0 +1,96 @@
+{
+ "at": "20261124_195138_first_run_fast",
+ "same": 80,
+ "regress": [
+  {
+   "case": "A3 TLS 基线",
+   "was": "PASS",
+   "now": "FAIL"
+  }
+ ],
+ "changed": [
+  {
+   "case": "C2 A2A 畸形输入",
+   "was": "WARN",
+   "now": "PASS"
+  },
+  {
+   "case": "G3 agent_id 超长 10000 字符",
+   "was": "INFO",
+   "now": "PASS"
+  },
+  {
+   "case": "G3 agent_id 控制字符",
+   "was": "WARN",
+   "now": "PASS"
+  },
+  {
+   "case": "G3 agent_id 双向文本",
+   "was": "WARN",
+   "now": "PASS"
+  },
+  {
+   "case": "G3 agent_id 空串",
+   "was": "WARN",
+   "now": "PASS"
+  }
+ ],
+ "added": [],
+ "missing": [
+  "B1 did:web 指向回环 127.0.0.1",
+  "B2 did:web URL 构造边界",
+  "B3 https 被 302 降级到 http",
+  "B4 慢响应超时",
+  "B5 20MB 文档",
+  "B6 返回 HTML 而非 JSON",
+  "B7 非 Ed25519 文档",
+  "B8 畸形 DID ' did:web:a.com'",
+  "B8 畸形 DID 'DID:web:x'",
+  "B8 畸形 DID 'did:'",
+  "B8 畸形 DID 'did:key:'",
+  "B8 畸形 DID 'did:key:z'",
+  "B8 畸形 DID 'did:key:zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz'",
+  "B8 畸形 DID 'did:web:'",
+  "B9 20 线程并发解析",
+  "D0 环境指纹",
+  "D1 外人全量单测",
+  "D1 跳过原因归档",
+  "D2 网关一致性 43 条",
+  "D3 独立交叉核验",
+  "D4 一条命令端到端 demo",
+  "D5 Release 包 run.py",
+  "E1 .gitattributes 是否覆盖 tests/fixtures",
+  "E1 受影响模块在默认克隆下",
+  "E1 字节锚定文件匹配",
+  "E1 实际行尾配置",
+  "E1 行尾改写文件数",
+  "E1 默认配置克隆仓库",
+  "F0 判定器自检（exit≠0 必判 FAIL）",
+  "F0 阈值来源",
+  "F1 冷启动 TLS 握手",
+  "F1 平台 agents 时延 P50/P95",
+  "F1 最慢单次请求",
+  "F2 10 证据包校验",
+  "F2 CLI demo 端到端",
+  "F2 did:key 单次解析",
+  "I0 本地 did:web 宿主",
+  "I1 我方解析 did:web",
+  "I2 我方取公钥",
+  "I3 第三方解析 did:web",
+  "I4 两实现逐字段比对",
+  "I5 坏 DID 两边都拒",
+  "I6 不可达方法两边都拒",
+  "M0 平台与架构",
+  "M1 Python 版本门槛",
+  "M10 磁盘写满",
+  "M11 24 小时长跑",
+  "M2 文件系统大小写敏感",
+  "M3 中文+空格路径端到端",
+  "M4 控制台编码 cp936 下 CLI",
+  "M5 容器化环境",
+  "M6 只读临时目录下运行",
+  "M7 离线/断网环境",
+  "M8 企业代理 MITM",
+  "M9 弱网/高延迟"
+ ]
+}

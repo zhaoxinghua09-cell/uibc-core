@@ -1,0 +1,61 @@
+{
+ "run": "20261124_195138_first_run_fast",
+ "tag": "first_run_fast",
+ "started": "2026-11-24T19:51:38",
+ "python": "/tmp/uibc-org/uibc-bench/.venv/bin/python",
+ "env": {
+  "platform": "linux",
+  "host": ""
+ },
+ "groups": [
+  {
+   "group": "s01",
+   "file": "s01_platform_contract.py",
+   "seconds": 60.2,
+   "ok": true,
+   "counts": {
+    "PASS": 12,
+    "INFO": 16,
+    "WARN": 1,
+    "FAIL": 8
+   }
+  },
+  {
+   "group": "s02b",
+   "file": "s02b_did_hostile_clean.py",
+   "seconds": 1.9,
+   "ok": true,
+   "counts": {
+    "FAIL": 3
+   }
+  },
+  {
+   "group": "s03",
+   "file": "s03_ecosystem.py",
+   "seconds": 4.5,
+   "ok": true,
+   "counts": {
+    "PASS": 27,
+    "INFO": 4
+   }
+  },
+  {
+   "group": "s07",
+   "file": "s07_package_boundaries.py",
+   "seconds": 7.8,
+   "ok": true,
+   "counts": {
+    "PASS": 12,
+    "INFO": 3
+   }
+  }
+ ],
+ "counts": {
+  "PASS": 51,
+  "INFO": 23,
+  "WARN": 1,
+  "FAIL": 11
+ },
+ "schema": "results.schema.json",
+ "finished": "2026-11-24T19:52:52"
+}

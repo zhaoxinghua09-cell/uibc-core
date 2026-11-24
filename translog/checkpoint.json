@@ -1,0 +1,7 @@
+{
+  "format": "uibc-translog-v1",
+  "tree_size": 8,
+  "root": "3d52be24bf5b2dcdd0225cf032556619a67d6a38335529694a149bee4df23586",
+  "created_at": 1795529130,
+  "note": "sample: unsigned on purpose, operator key stays outside the repo"
+}

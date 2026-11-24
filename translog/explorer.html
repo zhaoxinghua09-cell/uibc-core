@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<title>UIBC transparency log</title>
+<style>
+body{margin:0;padding:28px;font:14px/1.7 -apple-system,"Segoe UI","Microsoft YaHei",sans-serif;color:#0f172a;max-width:1000px}
+h1{font-size:20px;margin:0 0 4px} h2{font-size:14px;margin:22px 0 8px;border-bottom:1px solid #e2e8f0;padding-bottom:5px}
+.sub{color:#64748b;font-size:12px} code{font-family:ui-monospace,monospace;font-size:12px}
+</style></head><body>
+<h1>UIBC transparency log</h1>
+<div class="sub">format uibc-translog-v1 ｜ tree_size 8 ｜
+root <code>3d52be24bf5b2dcdd0225cf032556619a67d6a38335529694a149bee4df23586</code> ｜ 本页静态生成，无任何外部引用</div>
+
+<h2>1. 只增不减</h2>
+<svg viewBox="0 0 240 120" width="100%" role="img" aria-label="log growth"><rect x="14" y="16.0" width="22" height="80.0" fill="#1d4ed8" rx="2"/><text x="25" y="110" text-anchor="middle" font-size="9" fill="#475569">8</text></svg>
+
+<h2>2. 叶子</h2>
+<svg viewBox="0 0 720 168" width="100%" role="img" aria-label="leaves"><text x="0" y="18" font-family="ui-monospace,monospace" font-size="10.5" fill="#334155">   0  36a103fe22b6fcbed35a0395c45ac3c8f645d695aa95ed444583208d9ace7251</text><text x="0" y="36" font-family="ui-monospace,monospace" font-size="10.5" fill="#334155">   1  db87bbe151cfbfb2d8bbf147d418035bdfadfed2164b2a6e7970a152bff703ca</text><text x="0" y="54" font-family="ui-monospace,monospace" font-size="10.5" fill="#334155">   2  c3198cda96fa3dcc79c51fe8ac41084a51beceae267e935cd619137539965d52</text><text x="0" y="72" font-family="ui-monospace,monospace" font-size="10.5" fill="#334155">   3  a9d82629e22db084328c2b305a69021a3529afb091d18fcabcc7f3387e2b8d66</text><text x="0" y="90" font-family="ui-monospace,monospace" font-size="10.5" fill="#334155">   4  7f371ec59e7b1903c921aaa0e29247b6a0c8ef1cbbb09248330c13274d894c20</text><text x="0" y="108" font-family="ui-monospace,monospace" font-size="10.5" fill="#334155">   5  fe2e59b9696c4627920cb7ae9f38a99fa43adc4063b841a921269901f5fabd9d</text><text x="0" y="126" font-family="ui-monospace,monospace" font-size="10.5" fill="#334155">   6  d114c302a63a3e1a8f371cbfc521ac35fbbf09e3203b968bc578c7cbea722b13</text><text x="0" y="144" font-family="ui-monospace,monospace" font-size="10.5" fill="#334155">   7  35dc12627af8f4613cd15af0ceccd46603fd112da769756db4f86e823aa96a73</text></svg>
+
+<h2>3. 见证</h2>
+<svg viewBox="0 0 720 90" width="100%" role="img" aria-label="witnesses"><text x="0" y="14" font-size="11.5" fill="#475569">有效见证 0 / 声称 0（绿=验过，红=声称但验不过）</text><rect x="0" y="24" width="0.0" height="26" fill="#166534" rx="3"/><rect x="0.0" y="24" width="0.0" height="26" fill="#991b1b" rx="3"/><text x="0" y="68" font-size="11" fill="#991b1b">还没有外部见证：这个头目前只有本仓库自己的签名</text></svg>
+
+<h2>4. 这个头能被谁复核</h2>
+<div class="sub">任何人拿到 <code>log.json</code> 就能重算 root；拿到 <code>proof.json</code> 就能验一条叶子在里面；
+checkpoint 的签名可以对着仓库里的公钥验。见证数为 0 时，这只证明"本仓库在 T 时刻有过这个头"，
+不证明"外部有人看过"。</div>
+</body></html>

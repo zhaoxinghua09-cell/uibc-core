@@ -33,6 +33,10 @@ jobs:
     environment: pypi
     permissions:
       id-token: write
+      # Required to upload attestations. build-provenance.yml already says so:
+      # "id-token: write alone is NOT enough - attestations: write is the minimum
+      # additional permission". It was noted in the file that does not publish.
+      attestations: write
     env:
       UV_PUBLISH_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
     steps:
@@ -46,6 +50,10 @@ jobs:
         continue-on-error: true
         uses: pypa/gh-action-pypi-publish@v1.14.3 # v1.14.3
       - name: Publish (API token fallback)
+        # Kept for now, but it is why 0.5.0 has no provenance: an upload through a
+        # long-lived token carries no attestation, and this path is silent
+        # (continue-on-error on both steps). Remove the fallback once OIDC is
+        # confirmed stable, then delete the secret.
         if: steps.oidc.outcome == 'failure' && env.UV_PUBLISH_TOKEN != ''
         continue-on-error: true
         run: |
@@ -85,4 +93,43 @@ jobs:
               time.sleep(10)
           print("NOT ON PYPI: %s %s - the publish step reported success but published nothing" % (pkg, want))
           sys.exit(1)
+          PY
+      - name: Verify provenance exists for every uploaded file
+        # The step above proves the version exists; it never proves the security
+        # signal exists. 0.5.0 passed that check while every provenance URL
+        # returned 404. A check that cannot fail on the property you care about is
+        # not a check, so this one asks PyPI for the attestation itself.
+        if: always()
+        env:
+          PKG: uibc-core
+          MANIFEST: pyproject.toml
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          python - <<'PY'
+          import json, os, re, sys, urllib.request
+          pkg = os.environ["PKG"]
+          want = (os.environ.get("TAG") or "").lstrip("v")
+          if not want:
+              txt = open(os.environ["MANIFEST"], encoding="utf-8").read()
+              m = re.search(r'^version\s*=\s*"([^"]+)"', txt, re.M)
+              want = m.group(1) if m else ""
+          if not want:
+              print("cannot determine a version; refusing to claim provenance")
+              sys.exit(1)
+          data = json.load(urllib.request.urlopen("https://pypi.org/pypi/%s/json" % pkg, timeout=20))
+          files = [f["filename"] for f in (data.get("releases") or {}).get(want, [])]
+          if not files:
+              print("no files published for %s %s" % (pkg, want))
+              sys.exit(1)
+          missing = []
+          for fn in files:
+              url = "https://pypi.org/integrity/%s/%s/%s/provenance" % (pkg, want, fn)
+              try:
+                  urllib.request.urlopen(url, timeout=20).read()
+                  print("provenance present: %s" % fn)
+              except Exception as e:
+                  missing.append((fn, str(e)))
+          for fn, e in missing:
+              print("MISSING provenance: %s (%s)" % (fn, e))
+          sys.exit(1 if missing else 0)
           PY

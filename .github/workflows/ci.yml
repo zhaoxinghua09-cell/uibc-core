@@ -111,15 +111,20 @@ jobs:
         run: |
           git config --global core.autocrlf true
           git config --global core.eol native
+          git config --local core.autocrlf true
           git rm --cached -r -q .
           git reset --hard -q
-          git config core.autocrlf true
+          git config --show-origin core.autocrlf || true
 
-      - name: No tracked text file may arrive with CRLF
+      # The measurement and the verdict are split on purpose. Job logs are not
+      # readable through the API for this repository (401/404), so the numbers
+      # this job acts on are also published as an artefact. A check nobody can
+      # read is a check that cannot be argued with.
+      - name: Measure the bytes this checkout produced
         shell: bash
         run: |
           python - <<'PY'
-          import pathlib, sys
+          import hashlib, json, pathlib
           crlf = []
           for p in pathlib.Path('.').rglob('*'):
               if not p.is_file() or '.git' in p.parts or p.stat().st_size > 2_000_000:
@@ -129,22 +134,7 @@ jobs:
               except OSError:
                   continue
               if b.count(b'\r\n'):
-                  crlf.append(str(p))
-          print('files with CRLF:', len(crlf))
-          for f in crlf[:40]:
-              print('  ', f)
-          sys.exit(1 if crlf else 0)
-          PY
-
-      - name: Every vendored source still hashes to its recorded digest
-        # The claim is not "the tests pass on Windows"; it is "the bytes this
-        # checkout produces are the bytes the hashes were recorded over". That is
-        # checkable directly from the manifest, without a test runner and without
-        # anything platform-specific sitting in between.
-        shell: bash
-        run: |
-          python - <<'PY'
-          import hashlib, json, pathlib, sys
+                  crlf.append({'path': str(p), 'crlf': b.count(b'\r\n'), 'bytes': len(b)})
           root = pathlib.Path('docs/spec-sources')
           manifest = json.loads((root / 'MANIFEST.json').read_text(encoding='utf-8'))
           bad = []
@@ -152,14 +142,48 @@ jobs:
               path = root / doc['file']
               got = hashlib.sha256(path.read_bytes()).hexdigest()
               if got != doc['sha256']:
-                  bad.append((doc['file'], doc['sha256'], got))
-          print('documents checked:', len(manifest['documents']), 'mismatched:', len(bad))
-          for name, want, got in bad:
-              print('  ', name, 'want', want[:12], 'got', got[:12])
-          sys.exit(1 if bad else 0)
+                  bad.append({'file': doc['file'], 'want': doc['sha256'], 'got': got})
+          report = {
+              'crlf_count': len(crlf),
+              'crlf_files': crlf[:60],
+              'sources_checked': len(manifest['documents']),
+              'sources_mismatched': bad,
+          }
+          pathlib.Path('windows-bytes.json').write_text(
+              json.dumps(report, indent=2), encoding='utf-8')
+          print(json.dumps({k: (v if k != 'crlf_files' else len(v)) for k, v in report.items()}, indent=2))
+          PY
+
+      - name: Publish the measurement
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-bytes
+          path: windows-bytes.json
+          if-no-files-found: error
+
+      - name: No tracked text file may arrive with CRLF, and every digest must still match
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, pathlib, sys
+          report = json.loads(pathlib.Path('windows-bytes.json').read_text(encoding='utf-8'))
+          ok = True
+          if report['crlf_count']:
+              print('CRLF files:', report['crlf_count'])
+              for entry in report['crlf_files'][:40]:
+                  print('  ', entry['path'], entry['crlf'], 'CRLF of', entry['bytes'], 'bytes')
+              ok = False
+          if report['sources_mismatched']:
+              print('digest mismatches:', len(report['sources_mismatched']))
+              for entry in report['sources_mismatched']:
+                  print('  ', entry['file'], 'want', entry['want'][:12], 'got', entry['got'][:12])
+              ok = False
+          print('sources checked:', report['sources_checked'])
+          sys.exit(0 if ok else 1)
           PY
 
   test-with-extras:
+    runs-on: ubuntu-latest
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1

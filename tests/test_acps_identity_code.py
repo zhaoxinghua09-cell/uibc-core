@@ -17,13 +17,15 @@ GBZ_SHAPE = "1.2.156.3088.1.360.360.000000001"
 def test_crate_example_reads_as_ten_arcs():
     r = read_acps_code(CRATE_EXAMPLE)
     assert r["state"] == "INCONCLUSIVE"
-    assert "ACPs-spec-AIC-v02.01" in r["method"]
+    assert "ACPs-spec-AIC-v02.02" in r["method"]
 
 
-def test_checksum_is_never_judged():
+def test_read_alone_does_not_judge_the_checksum():
+    # The reader decides shape; the checksum needs the ARSP's salt, which
+    # verify_acps_code() takes as an argument (tests/test_acps_spec_conformance.py).
     r = read_acps_code(CRATE_EXAMPLE)
-    assert "checksum: unverified" in r["detail"]
-    assert "unverified (salt not published)" in r["scope"]
+    assert "checksum: not checked here" in r["detail"]
+    assert "checksum not checked (no salt supplied)" in r["scope"]
 
 
 def test_spec_example_uses_its_own_prefix_and_says_so():

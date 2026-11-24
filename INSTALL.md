@@ -73,6 +73,8 @@ Step 7 of `demo` prints PASS with a foreign key | Expected — an unpinned seal 
 Windows 11 + PowerShell 7 | 3.13.12 | **已实测**（demo 与 verify 均跑通） |
 Linux / macOS | ≥ 3.10 | 预期可用，**本次未实测** |
 
+> **Windows 取源码请用 `git clone`，不要用 GitHub 的 "Download ZIP"。** 2026-11-24 实测：zip/tar 解包会把非 ASCII 文件名按 cp437 猜码写坏（`conformance/oracle/cases/accept-unicode-names/` 下 `résumé.md` 变成 `r茅sum茅.md`、`运行日志.txt` 变成乱码名），随后 `pytest tests` 会有 3 项失败（语料重建、MANIFEST 树比对、该 accept 用例被判拒）。同一 commit 用 `git clone` 复跑为 1337 passed / 0 failed；仓库内 `MANIFEST.sha256` 与 `evidence/index.json` 记的都是正确文件名 —— 这是解包器的损失，不是仓库数据的问题。
+
 ## 路径 A — 不安装（首次试用推荐）
 
 ```powershell

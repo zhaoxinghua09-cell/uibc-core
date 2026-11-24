@@ -552,6 +552,6 @@ the corpus or the fixtures have grown and the README claim is stale.
 
 ## Permanent Archive / 永久存档
 
-[![Software Heritage](https://archive.softwareheritage.org/badge/origin/save/https://github.com/zhaoxinghua09-cell/uibc-core/)](https://archive.softwareheritage.org/browse/origin/?origin_url=https%3A%2F%2Fgithub.com%2Fzhaoxinghua09-cell%2Fuibc-core%2F)
+[Software Heritage 永久存档（Visit ID 2559486）](https://archive.softwareheritage.org/browse/origin/?origin_url=https%3A%2F%2Fgithub.com%2Fzhaoxinghua09-cell%2Fuibc-core%2F) — 该 badge 端点在本仓无 origin 快照时返回 404（2026-11-24 实测），故改为直达原型页的文本链接。
 
 - **Software Heritage Visit ID**: `2559486` — 本仓已由 Software Heritage 永久存档（不可篡改证据），为该生态资产的长期可引用性提供基础设施级保证。

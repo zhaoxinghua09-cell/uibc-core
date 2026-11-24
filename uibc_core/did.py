@@ -27,7 +27,9 @@ canonicalisation of arbitrary documents.
 
 import base64
 import json
+import ipaddress
 import re
+import urllib.parse
 import urllib.request
 
 from . import signing
@@ -177,13 +179,101 @@ def did_key_document(public_key, did=None):
     }
 
 
+MAX_DOCUMENT_BYTES = 2 * 1024 * 1024
+"""Cap on a fetched DID document. A DID document is a key and some service
+entries; 2 MiB is generous for that and small enough that a hostile or
+misconfigured host cannot make the resolver hold an arbitrary amount of memory."""
+
+_DENIED_HOSTNAMES = {"localhost", "localhost.localdomain", "ip6-localhost"}
+
+
+def assert_public_host(url):
+    """Refuse a did:web fetch target that is not a public host.
+
+    Three limits, each stated rather than implied:
+
+    * a literal IP that is loopback, private, link-local, multicast, reserved
+      or unspecified is refused -- `did:web:127.0.0.1` must not make the
+      resolver talk to a service on the caller's own machine;
+    * `localhost` and `*.local` names are refused by name, since they resolve
+      to the same place without looking like an address;
+    * domain names are *not* additionally DNS-resolved here. Resolution would
+      add a network round trip and a time-of-check/time-of-use gap that this
+      layer cannot close, so DNS-rebinding is not solved by this function.
+      Saying so is better than a check that reads stronger than it is.
+    """
+    parsed = urllib.parse.urlsplit(url)
+    if parsed.scheme != "https":
+        raise DIDError("did:web must resolve over https, got %r" % (parsed.scheme or ""))
+    host = parsed.hostname
+    if not host:
+        raise DIDError("did:web target has no host: %r" % url)
+    host = host.lower()
+    if host in _DENIED_HOSTNAMES or host.endswith(".local"):
+        raise DIDError("did:web target %r is a local host and is refused" % host)
+    try:
+        ip = ipaddress.ip_address(host)
+    except ValueError:
+        return  # a domain name; see the third limit above
+    if (ip.is_loopback or ip.is_private or ip.is_link_local
+            or ip.is_multicast or ip.is_reserved or ip.is_unspecified):
+        raise DIDError("did:web target %r is not a public address" % host)
+
+
+def enforce_size(content_length, body):
+    """Refuse a DID document above ``MAX_DOCUMENT_BYTES``.
+
+    Both checks are kept: a declared Content-Length is refused before the body
+    is read, and the body is refused after reading one byte past the cap, since
+    a host is free to declare nothing or declare a small number and send more.
+    """
+    if content_length is not None:
+        try:
+            declared = int(content_length)
+        except (TypeError, ValueError):
+            declared = None
+        if declared is not None and declared > MAX_DOCUMENT_BYTES:
+            raise DIDError("did:web document declares %d bytes, over the %d-byte cap"
+                           % (declared, MAX_DOCUMENT_BYTES))
+    if len(body) > MAX_DOCUMENT_BYTES:
+        raise DIDError("did:web document exceeds the %d-byte cap" % MAX_DOCUMENT_BYTES)
+
+
+class _NoDowngradeRedirect(urllib.request.HTTPRedirectHandler):
+    """Follow redirects only when they stay on https and stay public.
+
+    urllib follows redirects by default, including a 302 from https down to
+    plain http. For a resolver that is a silent downgrade of the whole
+    guarantee: the document would arrive unauthenticated on the wire. A
+    downgrade is refused rather than followed, and every hop is re-checked
+    against the same host rule as the first request.
+    """
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        target = (newurl or "").strip()
+        # A Location header may be relative; urllib resolves it against the
+        # request URL after this returns, so resolve it here with the same rule
+        # before judging scheme and host. Judging the raw value would refuse a
+        # legitimate relative hop.
+        if target and not urllib.parse.urlsplit(target).scheme:
+            base = req.get_full_url() if req is not None else ""
+            target = urllib.parse.urljoin(base, target)
+        if not target.lower().startswith("https://"):
+            raise DIDError("did:web redirect to %r refused: not https" % target)
+        assert_public_host(target)
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
 def _fetch_json(url, timeout):
+    assert_public_host(url)
     request = urllib.request.Request(url, headers={
         "Accept": "application/did+ld+json, application/json",
         "User-Agent": "uibc-core-did/0.1",
     })
-    with urllib.request.urlopen(request, timeout=timeout) as response:  # nosec B310 - https only
-        body = response.read()
+    opener = urllib.request.build_opener(_NoDowngradeRedirect())
+    with opener.open(request, timeout=timeout) as response:  # nosec B310 - https enforced above
+        body = response.read(MAX_DOCUMENT_BYTES + 1)
+        enforce_size(response.headers.get("Content-Length"), body)
     try:
         return json.loads(body.decode("utf-8"))
     except (UnicodeDecodeError, json.JSONDecodeError) as exc:

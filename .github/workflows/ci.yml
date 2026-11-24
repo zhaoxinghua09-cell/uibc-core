@@ -184,7 +184,6 @@ jobs:
 
   test-with-extras:
     runs-on: ubuntu-latest
-    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
         with:

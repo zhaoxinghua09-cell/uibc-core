@@ -159,6 +159,28 @@ record carries.
 
 ## [Unreleased]
 
+### `did:web` now refuses targets that are not public names (2026-11-24)
+
+Three defects were measured on 2026-11-23 and each one let a resolver be aimed
+somewhere other than the DID:
+
+- `did:web:127.0.0.1%3A8443` fetched a document from the verifier's own machine,
+  and `did:web:169.254.169.254` reached a link-local metadata address. `resolve()`
+  checked only that the *first* hop was https. Now `assert_public_host()` refuses
+  IP literals (the method spec forbids them outright), local names, and names that
+  resolve into any non-global range — before the request is made.
+- A 302 to plaintext `http` was followed by `urllib` by default, so the https
+  requirement applied to the first hop only. Redirects now pass through
+  `_NoDowgradeRedirect`, which refuses a scheme change and re-applies the host
+  policy; the final URL is checked once more after the body arrives.
+- A 20 MB document was read in full (70 MB peak) before failing as JSON. Reads are
+  now capped at `DEFAULT_MAX_DOCUMENT_BYTES` (512 KiB) and abandoned unparsed.
+
+Nine tests in `tests/test_did_host_policy.py`, all offline. Known limit recorded
+rather than papered over: DNS rebinding is *narrowed*, not solved — the name is
+resolved for the policy check and again for the connection, and closing that
+window needs a resolver hook, which this module does not have.
+
 ### Six China-registry DID methods, each at the level its own text allows (2026-11-24)
 
 - `uibc_core/did_cn.py` (new, standard library only) accepts `did:cn`, `did:ioa`,

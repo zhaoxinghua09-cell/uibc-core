@@ -26,14 +26,19 @@ canonicalisation of arbitrary documents.
 """
 
 import base64
+import ipaddress
 import json
 import re
+import socket
+import urllib.parse
 import urllib.request
 
 from . import signing
 
 __all__ = [
     "DIDError",
+    "HostPolicyError",
+    "DocumentTooLarge",
     "UnsupportedMethod",
     "parse",
     "did_web_url",
@@ -177,13 +182,149 @@ def did_key_document(public_key, did=None):
     }
 
 
-def _fetch_json(url, timeout):
+# --------------------------------------------------------------------------- #
+# Network guards for did:web
+#
+# Three defects were measured on 2026-11-23 and each one is a way to make a
+# verifier do something other than verify:
+#
+#   * `did:web:127.0.0.1%3A8443` fetched a document from the verifier's own
+#     machine; `did:web:169.254.169.254` reaches a cloud metadata service. The
+#     method spec itself forbids an IP address in the method-specific id, and
+#     "must resolve over https" says nothing about *where*.
+#   * A 302 could point at plaintext http, and urllib follows it by default,
+#     so the one https check applied to the first hop only.
+#   * A 20 MB document was read in full (70 MB peak) before being rejected as
+#     JSON -- an unbounded read is a memory exhaustion primitive.
+#
+# The guards sit in `_fetch_json`, which is the path a real resolver takes. A
+# caller that injects `fetcher=` is deliberately outside them: the caller has
+# already chosen the transport, and pretending otherwise would be theatre.
+# --------------------------------------------------------------------------- #
+
+DEFAULT_MAX_DOCUMENT_BYTES = 512 * 1024
+
+_BLOCKED_HOSTS = frozenset({
+    "localhost", "localhost.localdomain", "ip6-localhost", "ip6-loopback",
+    "metadata.google.internal", "instance-data", "metadata",
+})
+_BLOCKED_SUFFIXES = (".localhost", ".local", ".internal", ".localdomain")
+
+
+class HostPolicyError(DIDError):
+    """The target host is not a public, routable name that did:web may use."""
+
+
+class DocumentTooLarge(DIDError):
+    """The response exceeded the read cap; the document was never parsed."""
+
+
+def assert_public_host(host, resolve_dns=True):
+    """Refuse anything that is not a public DNS name.
+
+    Called before the request and again on the final URL, because a redirect is
+    a second chance to break the rule. DNS rebinding is narrowed, not solved:
+    the name is resolved here and the connection resolves it again, and a
+    resolver hook would be needed to close that window. Saying so is cheaper
+    than implying the guard is complete.
+    """
+    if not host:
+        raise HostPolicyError("did:web has an empty host")
+    host = host.strip().rstrip(".")
+    if not host:
+        raise HostPolicyError("did:web has an empty host")
+    if "@" in host or "/" in host or "\\" in host or any(c.isspace() for c in host):
+        raise HostPolicyError("did:web host is not a bare hostname: %r" % host)
+
+    literal = host
+    if literal.startswith("[") and literal.endswith("]"):
+        literal = literal[1:-1]
+    try:
+        address = ipaddress.ip_address(literal)
+    except ValueError:
+        address = None
+    if address is not None:
+        # w3c-ccg did:web: "the method-specific identifier MUST NOT contain an
+        # IP address". No exception for "it looked convenient in a test".
+        raise HostPolicyError("did:web must not address an IP literal: %r" % host)
+
+    lowered = host.lower()
+    if lowered in _BLOCKED_HOSTS or lowered.endswith(_BLOCKED_SUFFIXES):
+        raise HostPolicyError("did:web must not address a local name: %r" % host)
+    if not resolve_dns:
+        return
+
+    try:
+        infos = socket.getaddrinfo(host, None)
+    except socket.gaierror as exc:
+        raise HostPolicyError("did:web host does not resolve: %r (%s)" % (host, exc)) from None
+    if not infos:
+        raise HostPolicyError("did:web host resolves to nothing: %r" % host)
+    for info in infos:
+        sockaddr = info[4]
+        addr_text = sockaddr[0]
+        try:
+            addr = ipaddress.ip_address(addr_text.split("%")[0])
+        except ValueError:
+            raise HostPolicyError("did:web host resolved to %r" % addr_text) from None
+        if (addr.is_private or addr.is_loopback or addr.is_link_local
+                or addr.is_reserved or addr.is_multicast or addr.is_unspecified
+                or not addr.is_global):
+            raise HostPolicyError(
+                "did:web host %r resolves to a non-public address %s" % (host, addr))
+
+
+class _NoDowngradeRedirect(urllib.request.HTTPRedirectHandler):
+    """Follow a redirect only if it stays https and stays on a public host."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        parts = urllib.parse.urlsplit(newurl)
+        if parts.scheme != "https":
+            raise HostPolicyError(
+                "did:web redirect left https: %r -> %r"
+                % (getattr(req, "full_url", "<unknown>"), newurl))
+        assert_public_host(parts.hostname or "")
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
+def _read_capped(response, limit):
+    chunks = []
+    total = 0
+    while True:
+        chunk = response.read(65536)
+        if not chunk:
+            break
+        total += len(chunk)
+        if total > limit:
+            raise DocumentTooLarge(
+                "document exceeded %d bytes and was abandoned unparsed" % limit)
+        chunks.append(chunk)
+    return b"".join(chunks)
+
+
+def _fetch_json(url, timeout, max_bytes=DEFAULT_MAX_DOCUMENT_BYTES):
+    parts = urllib.parse.urlsplit(url)
+    if parts.scheme != "https":
+        raise DIDError("did:web must resolve over https")
+    assert_public_host(parts.hostname or "")
+
     request = urllib.request.Request(url, headers={
         "Accept": "application/did+ld+json, application/json",
         "User-Agent": "uibc-core-did/0.1",
     })
-    with urllib.request.urlopen(request, timeout=timeout) as response:  # nosec B310 - https only
-        body = response.read()
+    opener = urllib.request.build_opener(_NoDowngradeRedirect)
+    try:
+        with opener.open(request, timeout=timeout) as response:  # nosec B310 - guarded above
+            final = urllib.parse.urlsplit(response.geturl())
+            if final.scheme != "https":
+                raise HostPolicyError(
+                    "did:web document arrived over %r after redirects" % final.scheme)
+            assert_public_host(final.hostname or "", resolve_dns=False)
+            body = _read_capped(response, max_bytes)
+    except urllib.error.HTTPError as exc:
+        raise DIDError("document at %s returned HTTP %s" % (url, exc.code)) from None
+    except urllib.error.URLError as exc:
+        raise DIDError("document at %s was unreachable: %s" % (url, exc.reason)) from None
     try:
         return json.loads(body.decode("utf-8"))
     except (UnicodeDecodeError, json.JSONDecodeError) as exc:

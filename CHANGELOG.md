@@ -1,3 +1,10 @@
+## The other document: the ten-arc code, read on its own terms
+
+- `uibc_core/acps_identity_code.py`: a reader for `ACPs-spec-AIC-v02.01` — ten arcs, per-arc Base36 and length rules, prefix noted rather than pinned.
+- **The checksum is never judged.** The salt is per-ARSP and unpublished; a code with a deliberately wrong trailer returns `INCONCLUSIVE`, and `scope` says so. A salt-holder's check would be strictly stronger, and the document says that instead of hiding it.
+- Each reader refuses the other document's shape with an explicit reason instead of coercing it; `detect_profile()` labels which one a string belongs to. There is no crosswalk, because neither text contains one.
+- `docs/TWO-DOCUMENTS-ONE-CODE.md` puts the two texts side by side and states the consequence: "supports the national agent identity code" is ambiguous until the document is named.
+- 18 new tests. EVIDENCE-INDEX rebuilt on this branch; `paper/paper.md` module count updated 35 → 36.
 ## The third-party implementation, executed in both directions
 
 - `docs/THIRD-PARTY-DIVERGENCE.md`: `aipmc-basic` 0.0.2 fetched from crates.io, built unmodified, and run against our parser — and our parser run against its examples.

@@ -5,7 +5,7 @@
 - Consequence, stated rather than papered over: **the checksum is order-agnostic** (it hashes arcs 1-9 as text), so both orderings produce codes that verify. The defect is field naming, and it matters downstream (AAC subjects, ADP chains, ATR certificate matching) even though integrity is unaffected. We follow AIC §3, `scope` says so, and there is no invented crosswalk.
 - Four new tests pin the corpus measurements, including "both orderings verify" and "AIP's two trailers are placeholders". Conformance file: 21; cross-implementation: 17; with the reader tests, 56 passed across the three files.
 - Access recorded: `git clone --depth 1` works (1,937 files); the `contents` API rate-limits (429); `git/tree` returns zero entries. A Windows checkout differs from the API copy by CRLF only (8,149 vs 8,043 bytes, same `sha256:38242a01…23ab` after normalising).
-- Version: 0.5.1 → **0.5.2**.
+- **No version bump.** `pyproject.toml` stays 0.5.0: this repository's release chain is pinned by `anchors/pins/uibc-conformance-0.5.0.sha256`, a hash of a *built* archive, and `STATUS.md` plus the README digest quote that pin. Bumping the number without building and publishing a new archive broke `test_pin_resolvability`, `test_outward_receipt` and `test_status_page` — measured on a clean Linux tarball: 16 failed at 0.5.2, 49 passed at 0.5.0 across the same seven files. Everything here is recorded as unreleased until an archive exists.
 
 ## The AIC text itself, and a checksum we can now decide
 
@@ -14,7 +14,7 @@
 - The document's own worked example passes byte for byte: `salt 0x12 0x34` → `crc 0x646C` → arc 10 `0JU4` on `1.2.156.3088.1.1.34C2.478BDF.3GF546`; `0xFFFF → 1EKF` matches the range the text states for arc 10.
 - Third implementation as oracle: `aipub-protocols` 0.0.3 (crates.io, lib `protocols`) compiled unpatched on a Linux VM (cargo 1.100.0, 2026-11-24) and asked for checksums over 16 boundary cases (lowercase, salts 2→16 bytes, both ends of each segment range, ontology form, foreign prefixes). 16/16 agree; the answers are pinned in `tests/test_acps_cross_implementation.py` so they keep agreeing or fail loudly.
 - Tests: `tests/test_acps_spec_conformance.py` (21, built only from the text's example, its stated range, deliberate mutations and the other documents' samples) + the cross-implementation file (17). Together with the existing reader tests: 56 passed across the three files.
-- Version: `pyproject.toml` 0.5.0 → **0.5.1**. `CITATION.cff` is left at 0.4.2 on purpose: it pins the Zenodo archive, not the working tree.
+- **No version bump**, and `CITATION.cff` stays 0.4.2 on purpose: it pins the Zenodo archive, not the working tree. `pyproject.toml` 0.5.0 → 0.5.1 was tried and reverted for the same reason as above — the number is bound to a built archive, not to a code change.
 
 ## Anchor: a frozen root, four calendar receipts, no Bitcoin attestation yet
 

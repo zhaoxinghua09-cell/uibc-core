@@ -48,12 +48,18 @@ class TestParse(unittest.TestCase):
                 did.parse(bad)
 
     def test_unsupported_methods_are_refused_not_guessed(self):
-        # These three are the methods the CAICT network uses / has announced.
-        # None has a published rule, so resolving them would be invention.
-        for value in ("did:cn:agent:sfKvhQocnYJJME4zGDdRqvWtes21Mi9c",
-                      "did:ioa:agent:abc", "did:wba:example.com:agent:abc",
-                      "did:lgd:abc"):
+        # Since 2026-11-24 the CAICT-family methods have published specifications
+        # and are handled in did_cn.py. What must still be refused is either a
+        # method this build knows nothing about, or an identifier that breaks the
+        # published ABNF. Neither may be answered with a guess.
+        for value in ("did:wba:example.com:agent:abc",   # spec exists, not wired here yet
+                      "did:lgd:abc"):                    # no such method at all
             with self.assertRaises(did.UnsupportedMethod):
+                did.resolve(value)
+        from uibc_core import did_cn
+        for value in ("did:cn:agent:sfKvhQocnYJJME4zGDdRqvWtes21Mi9c",
+                      "did:ioa:agent:abc"):
+            with self.assertRaises(did_cn.IdentifierError):
                 did.resolve(value)
 
 

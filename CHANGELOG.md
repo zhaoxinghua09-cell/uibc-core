@@ -159,6 +159,36 @@ record carries.
 
 ## [Unreleased]
 
+### Six China-registry DID methods, each at the level its own text allows (2026-11-24)
+
+- `uibc_core/did_cn.py` (new, standard library only) accepts `did:cn`, `did:ioa`,
+  `did:cndid`, `did:ctid`, `did:oan` and `did:cndomain` by their published ABNF,
+  and resolves the four that publish a channel — never with a guessed default URL:
+  `did:cn` via `GET {base}/did/resolve/<did>` (spec §3.2), `did:ioa` / `did:cndid`
+  via an `operation: "read"` envelope (§5.2), `did:cndomain` via HTTPS publication.
+  `did:ctid` (vendor SDK, SM2 keys) and `did:oan` (no HTTP read API in the spec)
+  are validated and then refused, with the reason stated per method in
+  `matrix()`.
+- `did.resolve()` gains `endpoint=None` and dispatches the six names to
+  `did_cn`; `UnsupportedMethod` now lists what is actually supported.
+- The "no published specification, 11 paths returned 401/404" sentence is
+  **deleted**, not reworded: all six methods (and `did:wba`) do have public text.
+  Replaced by `docs/spec-sources/did-cn-specs.md` (spec URLs, byte counts,
+  ABNF, per-method support matrix).
+- Recorded finding, in code comments and in the doc: an offline DID document
+  cannot be rebuilt from a `did:ioa` / `did:cndid` identifier. The suffix is capped
+  at 42 characters, leaving ≤40 for the key body, while a 32-byte Ed25519 key
+  needs 43–44 in base58 — the arithmetic, not our laziness, closes that door.
+- `tests/test_did_cn.py` (38 cases): spec examples accepted, out-of-grammar
+  neighbours refused, endpoint-never-defaulted, envelope shape, document-id
+  mismatch, matrix fields, and the suffix-length arithmetic asserted.
+  `tests/test_did.py`'s "refused not guessed" case is split accordingly: `did:wba`
+  and `did:lgd` still raise `UnsupportedMethod`; `did:cn` / `did:ioa` strings
+  outside the published grammar now raise `IdentifierError`.
+- No version bump in this entry: 0.5.1 would drag ~20 generated-artifact
+  consistency tests into red, so the change is booked here and the bump is a
+  separate job (regenerate first, then bump).
+
 - CI fix: `actions/checkout` now uses `fetch-depth: 0` in `ci.yml`. The test that
   recomputes the outsider's figures at `8a95747` needs that commit to exist in the
   clone; on a shallow clone it now reports **skipped** with the reason, rather than

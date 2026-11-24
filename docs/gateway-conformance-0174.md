@@ -27,7 +27,7 @@
 | 6.1.1 c) | 宜 | 支持元数据在线编辑且变更需审核 | [~] PARTIAL | gateway/registry/update：先校验→待审→approve 才落地，全程进 journal | 审核只是单点 approve 布尔确认 + 留痕，没有多人审批流转；变更也未写回注册文件 |
 | 6.1.1 d) | 宜 | 提供面向行业/场景的元数据模板 | [+] PASS | adapters/a2a/templates.py（medical-device / government-service，模板本身过同一校验器） | - |
 | 6.1.2 a) | 宜 | 为每个智能体生成网关内唯一、可跨域解析的标识 | [~] PARTIAL | uibc_core/did.py；our DID: did:web:verify.medxpert.cn | did:web 的 .well-known 尚未在公网发布，跨域解析实测缺一环 |
-| 6.1.2 b) | 宜 | 多种标识生成策略（随机/层级/密码学） | [~] PARTIAL | did.py 支持 did:key（密码学）、did:web（层级域名） | 无随机标识策略；两种方法之外一律拒绝（有意，不猜） |
+| 6.1.2 b) | 宜 | 多种标识生成策略（随机/层级/密码学） | [~] PARTIAL | did.py 支持 did:key（密码学）、did:web（层级域名）；did_cn.py 另接受六种信通院系标识（did:cn / ioa / cndid / ctid / oan / cndomain，见 docs/spec-sources/did-cn-specs.md） | 仍无随机标识策略；无公开规范的方法一律拒绝（有意，不猜） |
 | 6.1.3 a) | 应 | 身份全生命周期闭环（注册/启用/停用/注销） | [+] PASS | adapters/a2a/state.py；tests/test_gateway_lifecycle.py | - |
 | 6.1.3 b) | 应 | 状态变更即时生效：停用即阻断全部通信；恢复需重校验 | [+] PASS | 每请求 require_active + 403；resume 重跑 B1-B7 | - |
 | 6.2.1 a) | 应 | 基于语义查询的标准接口，支持关键词精确/模糊查询 | [~] PARTIAL | server.search_agents（字段加权关键词，含模糊子串） | 是关键词加权，不是语义嵌入检索；称“语义”会过誉 |

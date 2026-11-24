@@ -92,11 +92,15 @@ uibc verify ./pkg --did did:key:z6Mk...          # offline, no network
 uibc verify ./pkg --did did:web:medxpert.cn      # key fetched over https
 ```
 
-Supported: `did:key` (offline) and `did:web` (https). Deliberately **not**
-supported: `did:cn:agent`, `did:ioa`, `did:wba` - no published resolution rule
-exists for them as of 2026-11-20, and inventing one would produce a resolver
-that looks authoritative and is wrong. Binding an identity to a DID nobody
-else can resolve proves nothing about who controls it, so `register --did`
+Resolvable here: `did:key` (offline) and `did:web` (https). Also accepted by
+their published ABNF since 2026-11-24: the six China-registry methods
+(`did:cn`, `did:ioa`, `did:cndid`, `did:ctid`, `did:oan`, `did:cndomain`), of
+which four resolve only when the caller names the registry endpoint and two
+(`did:ctid`, `did:oan`) publish no read channel at all - see
+`docs/spec-sources/did-cn-specs.md`. Still refused: `did:wba` (public spec,
+resolver branch not written yet) and any method with no published rule. Binding
+an identity to a DID nobody else can resolve proves nothing about who controls
+it, so `register --did`
 refuses those methods at write time rather than failing mysteriously later.
 
 ## Trust model (**operator-trusted**, read-only)

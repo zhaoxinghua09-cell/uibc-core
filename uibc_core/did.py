@@ -1,18 +1,21 @@
-"""DID support for uibc-core: `did:key` (offline) and `did:web` (HTTPS).
+"""DID support for uibc-core: `did:key` (offline) and `did:web` (HTTPS), plus
+the six China-registry methods handled in `uibc_core.did_cn`.
 
-Why only these two methods
---------------------------
-They are the two whose resolution rules are public and stable, so a third party
-can check our binding without trusting us: `did:key` needs no network at all,
+Two groups, two rules
+---------------------
+`did:key` and `did:web` are resolved here: `did:key` needs no network at all,
 `did:web` resolves to a document the controller publishes under their own
-domain. Everything else is an adapter, not a resolver.
+domain, so a third party can check our binding without trusting us.
 
-Deliberately out of scope: `did:cn:agent` (the CAICT identity network's own
-method) and its announced aliases `did:ioa` / `did:wba`. As of 2026-11-20 none
-of them has a published specification -- 11 candidate document paths on the
-platform returned 401/404 -- so guessing the rule here would produce a
-resolver that *looks* authoritative and is wrong. When the spec arrives it
-becomes one more `resolve_*` branch, nothing else changes.
+The China-registry methods (`did:cn`, `did:ioa`, `did:cndid`, `did:ctid`,
+`did:oan`, `did:cndomain`) live in `did_cn.py`. Their specifications are public
+(see `docs/spec-sources/did-cn-specs.md` for URLs and byte counts, fetched
+2026-11-24), which is why the earlier "no published specification" note in this
+module is gone rather than softened -- a stale negative is still a false claim.
+Each of them is supported at the level its own text allows: identifier ABNF
+always, registry resolution only when the caller names the endpoint, and no
+guessed default URL anywhere. `did:wba` also has a public specification but is
+not wired here yet, so it still raises UnsupportedMethod.
 
 Scope of this module
 --------------------
@@ -187,8 +190,12 @@ def _fetch_json(url, timeout):
         raise DIDError("document at %s is not JSON: %s" % (url, exc)) from None
 
 
-def resolve(did, timeout=10, fetcher=None):
-    """Resolve a DID to a document. `fetcher(url, timeout)` is injectable for tests."""
+def resolve(did, timeout=10, fetcher=None, endpoint=None):
+    """Resolve a DID to a document.
+
+    `fetcher(url, timeout)` is injectable for tests. `endpoint` is used only by
+    the registry-resolved China methods, and is never defaulted.
+    """
     method, ident = parse(did)
     if method == "key":
         prefix, raw = _multibase_decode(ident)
@@ -209,9 +216,12 @@ def resolve(did, timeout=10, fetcher=None):
             raise DIDError("document id %r does not match %r"
                            % (document.get("id"), did))
         return document
+    from . import did_cn  # local import: did_cn imports this module's helpers
+    if method in did_cn.METHODS:
+        return did_cn.resolve(did, endpoint=endpoint, timeout=timeout, fetcher=fetcher)
     raise UnsupportedMethod(
         "did:%s has no published resolution rule in this build; supported: %s"
-        % (method, ", ".join("did:" + m for m in SUPPORTED_METHODS)))
+        % (method, ", ".join("did:" + m for m in SUPPORTED_METHODS + did_cn.METHODS)))
 
 
 def document_ed25519_key(document):

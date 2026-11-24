@@ -1,3 +1,35 @@
+# Byte determinism, class-level rule.
+#
+# Measured 2026-11-23 on a plain Windows clone (`core.autocrlf=true`): 1,328 tracked
+# files arrived as CRLF and 47 tests failed -- every failure was a byte hash, not
+# arithmetic. The rules further down fixed `fixtures/`, `tests/fixtures/` and
+# `docs/spec-sources/` one directory at a time; the same class kept reappearing in
+# whatever directory nobody had listed yet. So the default is now stated once, for
+# every path, and anything that must keep its literal bytes is re-asserted below.
+#
+# `text=auto` means git decides per file whether it is text at all, so archives and
+# images are left alone even without the explicit list that follows it.
+* text=auto eol=lf
+
+# Artefacts whose bytes belong to a signature, an archive or a raster format.
+# Normalising one of these is silent corruption, not a formatting change.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.zip binary
+*.gz binary
+*.tar binary
+*.whl binary
+*.pdf binary
+*.wav binary
+*.mp3 binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+
 # UIBC golden fixtures: byte-deterministic cross-platform (archive SS32).
 #
 # Root cause of the #177 S4 failure: evidence files were written in Python

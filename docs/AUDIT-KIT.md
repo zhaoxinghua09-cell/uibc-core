@@ -4,7 +4,7 @@ This document exists because "trust us" is not evidence. Everything below runs o
 
 ## Zero: the archive that needs no repository
 
-`conformance/uibc-conformance-0.5.1.zip` — sha256 `c87559160cd8e34d9ea86f686ed76afe064f4e9a72359b7cda07b22f6e5d3aba`, 231,243 bytes. Pin: `anchors/pins/uibc-conformance-0.5.0.sha256`. The build is deterministic for a given tree, and this hash is reproducible only from the tree that produced it: `0.4.1` was built at commit `d72c4f9`, and rebuilding from today's tree gives `083c0dbc…` because the runner template was fixed afterwards. `tools/build_conformance_bundle.py` therefore refuses to overwrite a pinned archive whose bytes would change, and prints both hashes (measured 2026-11-20, exit 3). A version number names one set of bytes; "latest" does not. 
+`conformance/uibc-conformance-0.5.2.zip` — sha256 `917f8732a5a497a5e7085b09d6152a52a341b8935934d9d9b5c087ca5b1d0d2f`, 231,243 bytes. Pin: `anchors/pins/uibc-conformance-0.5.0.sha256`. The build is deterministic for a given tree, and this hash is reproducible only from the tree that produced it: `0.4.1` was built at commit `d72c4f9`, and rebuilding from today's tree gives `083c0dbc…` because the runner template was fixed afterwards. `tools/build_conformance_bundle.py` therefore refuses to overwrite a pinned archive whose bytes would change, and prints both hashes (measured 2026-11-20, exit 3). A version number names one set of bytes; "latest" does not. 
 
 One thing here is weaker than it reads: the archive's runner falls back to a
 `uibc-core` installed in the Python that runs it when the bundled verifier is absent.
@@ -52,8 +52,8 @@ If you have not cloned anything, the corpus is one anonymous download away — n
 
 ```bash
 curl -fL -o corpus.zip \
-  https://github.com/zhaoxinghua09-cell/uibc-core/raw/main/conformance/uibc-conformance-0.5.1.zip
-sha256sum corpus.zip   # c87559160cd8e34d9ea86f686ed76afe064f4e9a72359b7cda07b22f6e5d3aba
+  https://github.com/zhaoxinghua09-cell/uibc-core/raw/main/conformance/uibc-conformance-0.5.2.zip
+sha256sum corpus.zip   # 917f8732a5a497a5e7085b09d6152a52a341b8935934d9d9b5c087ca5b1d0d2f
 unzip -q corpus.zip -d corpus && cd corpus && python run.py
 ```
 
@@ -65,7 +65,7 @@ Note what changed on 2026-11-20: the release page used to carry no archive for t
 the only release asset anywhere was `uibc-conformance-0.4.0.zip`, a 30-case archive under a different
 version. Running the release workflow for the existing `v0.4.1` tag attached
 `uibc-conformance-0.4.1.zip` (228,000 bytes, the pin's hash) to
-The release asset for this archive (0.5.1) is attached by the maintainer before the merge; until then the raw route above is the only one.
+The release carries the same bytes: https://github.com/zhaoxinghua09-cell/uibc-core/releases/download/v0.5.2/uibc-conformance-0.5.2.zip (attached 2026-11-25).
 Both that and the raw URL above serve the same bytes; `tools/check_outsider_entry.py` fails if either
 disappears from the documents, or if a document points at an asset for a different version. The commands below need the
 repository, because they rebuild the suite rather than run it.

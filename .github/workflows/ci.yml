@@ -120,38 +120,52 @@ jobs:
       # readable through the API for this repository (401/404), so the numbers
       # this job acts on are also published as an artefact. A check nobody can
       # read is a check that cannot be argued with.
-      - name: Measure the bytes this checkout produced
+      - name: Measure where this checkout differs from the stored blobs
         shell: bash
         run: |
           python - <<'PY'
-          import hashlib, json, pathlib
-          crlf = []
-          for p in pathlib.Path('.').rglob('*'):
-              if not p.is_file() or '.git' in p.parts or p.stat().st_size > 2_000_000:
+          # The first version of this job asserted "no file may contain CRLF" and
+          # failed at once: 83 files carry CRLF *inside their blobs*, so every
+          # platform receives them and no platform is wrong. The defect that cost
+          # 47 tests is narrower and this is the honest form of it -- the worktree
+          # disagrees with the blob the hash was recorded over. `git ls-files --eol`
+          # states exactly that, per file, and needs no test runner.
+          import hashlib, json, pathlib, subprocess
+
+          raw = subprocess.run(["git", "ls-files", "--eol"], capture_output=True,
+                              text=True, encoding="utf-8", errors="replace")
+          diverged, stored_crlf = [], []
+          for line in raw.stdout.splitlines():
+              if not line.strip():
                   continue
-              try:
-                  b = p.read_bytes()
-              except OSError:
-                  continue
-              if b.count(b'\r\n'):
-                  crlf.append({'path': str(p), 'crlf': b.count(b'\r\n'), 'bytes': len(b)})
-          root = pathlib.Path('docs/spec-sources')
-          manifest = json.loads((root / 'MANIFEST.json').read_text(encoding='utf-8'))
+              meta, _, path = line.partition("\t")
+              parts = meta.split()
+              i_eol = next((p for p in parts if p.startswith("i/")), "")
+              w_eol = next((p for p in parts if p.startswith("w/")), "")
+              if w_eol == "w/crlf" and i_eol == "i/lf":
+                  diverged.append(path)
+              elif i_eol == "i/crlf":
+                  stored_crlf.append(path)
+
+          root = pathlib.Path("docs/spec-sources")
+          manifest = json.loads((root / "MANIFEST.json").read_text(encoding="utf-8"))
           bad = []
-          for doc in manifest['documents']:
-              path = root / doc['file']
-              got = hashlib.sha256(path.read_bytes()).hexdigest()
-              if got != doc['sha256']:
-                  bad.append({'file': doc['file'], 'want': doc['sha256'], 'got': got})
+          for doc in manifest["documents"]:
+              got = hashlib.sha256((root / doc["file"]).read_bytes()).hexdigest()
+              if got != doc["sha256"]:
+                  bad.append({"file": doc["file"], "want": doc["sha256"], "got": got})
+
           report = {
-              'crlf_count': len(crlf),
-              'crlf_files': crlf[:60],
-              'sources_checked': len(manifest['documents']),
-              'sources_mismatched': bad,
+              "files_diverged_from_blob": diverged,
+              "blobs_stored_with_crlf": len(stored_crlf),
+              "sources_checked": len(manifest["documents"]),
+              "sources_mismatched": bad,
+              "git_files_seen": raw.stdout.count("\n"),
           }
-          pathlib.Path('windows-bytes.json').write_text(
-              json.dumps(report, indent=2), encoding='utf-8')
-          print(json.dumps({k: (v if k != 'crlf_files' else len(v)) for k, v in report.items()}, indent=2))
+          pathlib.Path("windows-bytes.json").write_text(
+              json.dumps(report, indent=2), encoding="utf-8")
+          print("diverged:", len(diverged), "stored-CRLF blobs:", len(stored_crlf),
+                "digest mismatches:", len(bad))
           PY
 
       - name: Publish the measurement
@@ -161,24 +175,26 @@ jobs:
           path: windows-bytes.json
           if-no-files-found: error
 
-      - name: No tracked text file may arrive with CRLF, and every digest must still match
+      - name: No file may disagree with the blob its hash was recorded over
         shell: bash
         run: |
           python - <<'PY'
           import json, pathlib, sys
-          report = json.loads(pathlib.Path('windows-bytes.json').read_text(encoding='utf-8'))
+          report = json.loads(pathlib.Path("windows-bytes.json").read_text(encoding="utf-8"))
           ok = True
-          if report['crlf_count']:
-              print('CRLF files:', report['crlf_count'])
-              for entry in report['crlf_files'][:40]:
-                  print('  ', entry['path'], entry['crlf'], 'CRLF of', entry['bytes'], 'bytes')
+          if report["files_diverged_from_blob"]:
+              print("files whose bytes differ from their blob:", len(report["files_diverged_from_blob"]))
+              for p in report["files_diverged_from_blob"][:40]:
+                  print("  ", p)
               ok = False
-          if report['sources_mismatched']:
-              print('digest mismatches:', len(report['sources_mismatched']))
-              for entry in report['sources_mismatched']:
-                  print('  ', entry['file'], 'want', entry['want'][:12], 'got', entry['got'][:12])
+          if report["sources_mismatched"]:
+              print("digest mismatches:", len(report["sources_mismatched"]))
+              for e in report["sources_mismatched"]:
+                  print("  ", e["file"], "want", e["want"][:12], "got", e["got"][:12])
               ok = False
-          print('sources checked:', report['sources_checked'])
+          print("tracked files:", report["git_files_seen"],
+                "blobs that store CRLF:", report["blobs_stored_with_crlf"],
+                "sources checked:", report["sources_checked"])
           sys.exit(0 if ok else 1)
           PY
 

@@ -12,17 +12,17 @@
 
 | 字段 | 现状 |
 |---|---|
-| 标识格式 | 8 种已接受：`did:key`、`did:web`、`did:cn`、`did:ioa`、`did:cndid`、`did:ctid`、`did:oan`、`did:cndomain`。六种中国注册体系的 ABNF 强制校验（`uibc_core/did_cn.py`） |
-| 解析机制 | `did:key` 离线；`did:web` HTTPS；`did:cn` 走 `GET {base}/did/resolve/<did>`；`ioa`/`cndid` 走 `operation:"read"` 信封；`cndomain` 走 HTTPS 发布。**端点必须调用方给，无默认 URL** |
-| 验证要求 | Ed25519 公钥提取（`document_ed25519_key`）；`did:ctid`（SM2/SDK）与 `did:oan`（无 read API）**只校验不解析**，理由写入 `SPECS` |
+| 标识格式 | 11 种已接受：`did:key`、`did:jwk`、`did:peer`、`did:web`、`did:cn`、`did:ioa`、`did:cndid`、`did:bid`、`did:ctid`、`did:oan`、`did:cndomain`。七种中国注册体系（含 `did:bid`）的 ABNF 强制校验（`uibc_core/did_cn.py`） |
+| 解析机制 | `did:key` / `did:jwk` / `did:peer` 离线（文档就是标识，`did:jwk` 那段 base64url 解码即得，上限 4096 字节、私钥成员一律拒绝）；`did:web` HTTPS；`did:cn` 走 `GET {base}/did/resolve/<did>`；`ioa`/`cndid` 走 `operation:"read"` 信封；`cndomain` 走 HTTPS 发布；`bid` 走 BIF `read`（HTTP GET，`errorCode` 非 0 直接抛出）。**端点必须调用方给，无默认 URL** |
+| 验证要求 | Ed25519 公钥提取（`document_ed25519_key`，同时读 `publicKeyMultibase` 与 JWK `OKP/Ed25519`）；`did:ctid`（SM2/SDK）与 `did:oan`（无 read API）**只校验不解析**，理由写入 `SPECS` |
 | 信任依赖 | `did:web` 依赖域名 + TLS；六法依赖各自注册中心；`did:key` 无外部依赖 |
 | 密钥轮换 | 不支持——文档只取当前状态，无历史。属"不做"而非遗漏（见 `PARITY-MATRIX`） |
 | 撤销 | 不做分发；只能靠调用方重新解析后比对 |
 | 过期 | 不适用（DID 本身无有效期）；凭证级过期在 §3 |
-| 不支持的操作 | `did:wba`（有公开规范、resolver 分支未写）；其余 274 种注册方法 |
+| 不支持的操作 | `did:wba`（有公开规范、resolver 分支未写）；其余注册表方法（截至 2026-11 约 270 种；不追全部，见 `docs/DID-LANDSCAPE.md`） |
 | 失败条件 | 语法不符 → `IdentifierError`；无端点 → `RegistryEndpointRequired`；文档 id 不符 → `DIDCNError`；网络失败 → 原样抛出 |
 
-**测试**：`tests/test_did_cn.py` 41 条、`tests/test_did.py` 15 条。
+**测试**：`tests/test_did_cn.py` 41 条、`tests/test_did.py` 15 条、`tests/test_did_jwk.py` 15 条（含 7 种私钥成员的拒绝参数化）、`tests/test_did_bid.py` 14 条（含 ABNF 与 DID Core 的冲突用例）。
 
 ---
 
@@ -118,3 +118,4 @@
 | 撤销处理 | 1（屏障 + 自证覆盖层） | 3（分发、StatusList、第三方确认） |
 
 **这张表的用途不是好看，是给 P1 排序**：五个未实现里，X.509 只读 adapter 与 VC 只读映射的代价最低、对"异质身份"的说服力最高，应当先做。
+

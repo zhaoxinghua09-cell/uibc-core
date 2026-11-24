@@ -231,6 +231,20 @@ def export():
             "that refuses everything fails those.",
             "Every mutated case started from a correct package and then broke "
             "exactly one thing.",
+            # Measured 2026-11-24: an independent reviewer (SiliconFlow, blind, 36/36)
+            # refused case 05, hedged on 29 and then on 06. Each time the suite was at
+            # fault, not the reviewer: the rules did not say that declared growth is
+            # legitimate, that an unrecomputable root is a refusal, or that a shipped
+            # public key makes an asymmetric seal verifiable.
+            "A package may append evidence after sealing, provided every new file is "
+            "declared in the evidence index: that is growth, not tampering, and must "
+            "not be refused.",
+            "A package whose anchor points at a root this verifier cannot recompute "
+            "MUST be refused: 'cannot recompute' is a refusal condition, not an "
+            "unknown.",
+            "A package sealed with an asymmetric key whose public key ships inside the "
+            "package (and whose signature verifies against it) must not be refused: "
+            "'no key available' applies only when no public key is shipped.",
         ],
         "cases": cases,
         "skipped": skipped,

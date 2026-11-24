@@ -149,7 +149,7 @@ first.
 * Tracekit paper: <https://arxiv.org/html/2609.35659>
 * Treeship: <https://www.treeship.dev/>
 * NovaFabric site: <https://novafabric.ai/> ; paper: <https://arxiv.org/html/2609.12594>
-* agent-receipts: <https://www.npmjs.com/package/agent-receipts-cli> ; repo: <https://github.com/agent-viscro/agent-receipts>
+* agent-receipts: npm 包 `agent-receipts-cli`（npmjs 页面对 HEAD 返回 403 反爬，registry 接口可达）；repo `agent-viscro/agent-receipts` 于 2026-11-24 实测 404，已不再给出可点击仓库链接（与 `docs/INTEROP-REQUEST.md` 的测量一致）
 * AIAuditLog: <https://pypi.org/project/aiauditlog/0.1.0a3/>
 * fact0: <https://fact0.io/>
 * Vaara: <https://pypi.org/project/vaara/> (2.17.0 measured; 0.63.0 page is stale)

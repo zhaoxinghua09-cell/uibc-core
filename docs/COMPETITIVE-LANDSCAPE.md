@@ -16,6 +16,30 @@ This document exists because we keep being tempted to say "we are ahead". The ta
 | **agent.idfactory.cn / iaisp.teleinfo.cn** | 200+ nodes, 1,181 identity codes, 13,526 expressions of interest (2026-07-21) | The allocation side. We are a reader of it, not a participant — and the self-service entry is open, which we have not used yet. | 实测 (HTTP 200, 77 agents listed) |
 | Community state | An open discussion asking the community to *design* identity codes for platform users | Allocation guidance is still being asked for in public. Nothing about our verification work fills that gap. | 实测 (discussion list) |
 
+### What a third party can actually read
+
+The reference implementation's landing page reports 16.45 K downloads. Downloads are not inspection: `tools/probe_reference_repos.py` asks the AtomGit API, with no account and no token, what files each repository's default branch contains.
+
+Measured 2026-11-24:
+
+| Repository | Branch | Readable files | Content |
+|---|---|---|---|
+| ACPs-community | main | **0** | no files at all |
+| ACPs-SDK | master | 1 | README.md |
+| ACPs-CA-Server | master | 1 | README.md |
+| ACPs-CA-Client | master | 1 | README.md |
+| ACPs-CA-Challenge | master | 1 | README.md |
+| ACPs-Registry-Server | master | 1 | README.md |
+| ACPs-Discovery-Server | master | 1 | README.md |
+| ACPs-Demo-Project | master | 1 | README.md |
+| Agent-Interconnection-Protocol-Project | master | 1 | README.md |
+
+So the only cross-check available to an anonymous third party is the **changelog**, not the code. Our own claims have to be held to a different standard than theirs, and we can say so without pretending it is a defect in their project: an account wall may be deliberate.
+
+Two consequences we accept:
+
+1. **We cannot claim "cross-checked against the reference implementation."** We can claim "read its published version history and protocol names." Row 7 below stays *partial* for a new reason: the code is not anonymously readable.
+2. **Our own verifiability is measurable, and should be measured.** The same question put to this repository, anonymously, returns **1,865 files** on `main`, and the `codeload` tarball answers **200** with no token. Same date, same network, opposite result. That contrast is a fact we can put in front of anyone, and it is the only place on this track where "ahead" means "inspectable".
 ## 2. DID track (`did:cn`)
 
 | Fact | Standing | Basis |
@@ -49,7 +73,7 @@ Eight criteria, scored on what is on disk and reachable today:
 | 4 | Differences documented with basis per row | **Pass** | `docs/TWO-CODES-DIFF.md` |
 | 5 | Tests cover the hostile inputs | **Pass** | 1,156 cases across the suite |
 | 6 | Reproducible by someone who is not us, offline | **Partial** | One-command bundle exists; no outside party has run it |
-| 7 | Cross-checked against the reference implementation | **Partial** | Read, not run: the reference repo's main branch currently returns empty, so we compare against its published changelog, not its code |
+| 7 | Cross-checked against the reference implementation | **Partial** | Its default branches expose **0–1 files anonymously** (`tools/probe_reference_repos.py`), so the comparison is against the published changelog, not the code |
 | 8 | Independently evaluated (separate identity, separate interest) | **0** | No evaluation has been performed |
 
 Rows 6–8 are the actual gap. They are not closed by writing more code; they are closed by someone else doing the work, and pretending otherwise is exactly the over-claim this repository exists to avoid.

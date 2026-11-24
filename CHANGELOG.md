@@ -1,3 +1,9 @@
+## What the reference implementation lets an anonymous reader see
+
+- `tools/probe_reference_repos.py`: no account, no token, one API call per repo, prints what each default branch actually contains.
+- Result 2026-11-24: `ACPs-community` main → **0 files**; the other eight repositories → **README.md only**. The 16.45 K downloads on the landing page are not inspection.
+- Consequence recorded in `docs/COMPETITIVE-LANDSCAPE.md`: we may say we **read** its version history and protocol names, and we may not say we cross-checked against its code.
+- The same question put to this repository returns **1,865 files** anonymously, tarball 200 without a token. That contrast is the one place on this track where "ahead" means "inspectable", and it is measured rather than asserted.
 ## The competitive table, with the rows we lose
 
 - `docs/COMPETITIVE-LANDSCAPE.md`: three tracks, every row carrying 标准 / 规范 / 实测 / 读码 as its basis.

@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at_utc": "2026-11-19T08:50:55Z",
+    "generated_at_utc": "2026-11-24T02:18:15Z",
     "cases": 500,
     "verifier": "uibc-core verify()",
     "deterministic": true,
@@ -49,7 +49,7 @@
         "S6": 40,
         "S5": 4,
         "S8": 4,
-        "S12": 7,
+        "S12": 8,
         "S7": 4
       }
     },
@@ -167,7 +167,8 @@
       "accepted_pinned": 0,
       "caught_by": {
         "S6": 8,
-        "S5": 1
+        "S5": 1,
+        "S12": 1
       }
     },
     "rollback": {
@@ -4520,6 +4521,7 @@
         "open": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S12",
             "S6"
           ],
           "accepted": false
@@ -4527,6 +4529,7 @@
         "pinned": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S12",
             "S6"
           ],
           "accepted": false
@@ -10116,6 +10119,7 @@
         "open": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S12",
             "S6"
           ],
           "accepted": false
@@ -10123,6 +10127,7 @@
         "pinned": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S12",
             "S6"
           ],
           "accepted": false

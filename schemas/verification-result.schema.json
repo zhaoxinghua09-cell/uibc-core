@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "UIBC interoperability verification result",
+  "description": "One identity / trust decision, in seven states. VERIFIED requires evidence; absence of evidence is INCONCLUSIVE and never a pass.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "state",
+    "subject",
+    "evidence",
+    "detail"
+  ],
+  "properties": {
+    "state": {
+      "enum": [
+        "VERIFIED",
+        "INVALID",
+        "REVOKED",
+        "EXPIRED",
+        "INCONCLUSIVE",
+        "UNSUPPORTED",
+        "UNRESOLVED"
+      ]
+    },
+    "subject": {
+      "type": "string",
+      "minLength": 1
+    },
+    "method": {
+      "type": "string"
+    },
+    "detail": {
+      "type": "string"
+    },
+    "scope": {
+      "type": "string"
+    },
+    "verified_at": {
+      "type": "string"
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "type",
+          "issuer",
+          "digest"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "type": {
+            "type": "string",
+            "minLength": 1
+          },
+          "issuer": {
+            "type": "string",
+            "minLength": 1
+          },
+          "digest": {
+            "type": "string",
+            "pattern": "^(sha256|sha384|sha512):[0-9a-f]{64,128}$"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "issued_at": {
+            "type": "string"
+          },
+          "expires_at": {
+            "type": "string"
+          },
+          "method": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "verification_result": {
+            "type": "string"
+          },
+          "provenance": {
+            "type": "string"
+          },
+          "scope": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "const": "VERIFIED"
+          }
+        },
+        "required": [
+          "state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "evidence": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "enum": [
+              "REVOKED",
+              "EXPIRED"
+            ]
+          }
+        },
+        "required": [
+          "state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "detail": {
+            "minLength": 1
+          }
+        }
+      }
+    }
+  ]
+}

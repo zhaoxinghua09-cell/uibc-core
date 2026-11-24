@@ -1,0 +1,66 @@
+{
+  "schema": "uibc-pixit/1",
+  "title": "Protocol Implementation eXtra Information for Testing",
+  "status": "PROPOSED",
+  "as_of": "2026-11-24T19:40:00+08:00",
+  "test_suite": {
+    "vectors_package": "agent-evidence-vectors==0.36.3",
+    "cases": 36,
+    "expectation_model": "each case declares `expected` (the check ids that must fire) and `refused`"
+  },
+  "environment": {
+    "os": "Windows 10",
+    "python": "3.13.18",
+    "node": "v22.23.2",
+    "git": "2.47.1",
+    "shell": "pwsh 7.6.4",
+    "timezone": "Asia/Shanghai (UTC+8)",
+    "openssl": "absent on this host",
+    "gh_cli": "absent on this host"
+  },
+  "subject_under_test": {
+    "file": "pkg.zip",
+    "sha256": "1fec47df7f7550c7452eb652db908cc7067ba8c1f16d445c10c5981893f29664",
+    "bytes": 2106
+  },
+  "invocations": {
+    "a": "python tools/run_conformance.py --name uibc-core-py --json",
+    "b": "python tools/run_conformance.py --verify \"node tools/verify-js/verify.mjs {pkg}\" --name verify-js --json",
+    "verify_cli": "uibc verify <pkg> --json"
+  },
+  "excluded_from_this_run": [
+    "checks that require the teleinfo production domain (s01/s04/s06 of the bench, not of the verifier)",
+    "network-dependent DID resolution (did:web) - all runs were offline",
+    "registry-backed states (independent / superseded) - the registry holds one entry",
+    "the corpus's W3C report emission/ingestion paths (--emit-w3c-report / --read-w3c-report) were not exercised"
+  ],
+  "clock": {
+    "as_of_parameter_supported": false,
+    "consequence": "two runs cannot be compared across time; a replay comparison must be same-day by construction"
+  },
+  "known_limits": [
+    "Windows filesystem case-insensitivity may mask a duplicate-member attack that POSIX would catch",
+    "the verifier reads the seal key out of the package in open mode, so a PASS proves internal consistency, not external trust"
+  ],
+  "corpora": {
+    "own_corpus": {
+      "file": "conformance/manifest.json",
+      "cases": 36,
+      "checks_tracked": 19,
+      "covered": 16,
+      "uncovered": 3,
+      "note": "home-made; the 36 cases are not the third-party suite"
+    },
+    "third_party_corpus": {
+      "package": "agent-evidence-vectors==0.36.3",
+      "vectors": 288,
+      "breakdown": {
+        "accept": 63,
+        "reject": 223,
+        "indeterminate": 2
+      },
+      "run_command": "python packaging/run_vectors.py --vectors vectors --verifier \"python -m uibc_core.aee\" --report aee-report-uibc.json",
+      "run_at": "2026-11-24T19:55+08:00"
+    }
+  }
+}

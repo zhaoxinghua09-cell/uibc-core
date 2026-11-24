@@ -1,0 +1,170 @@
+{
+  "schema": "uibc-pics/1",
+  "title": "Protocol Implementation Conformance Statement - uibc-core verifier",
+  "status": "PROPOSED",
+  "as_of": "2026-11-24T19:40:00+08:00",
+  "implementation": {
+    "label": "uibc-core",
+    "version": "0.5.0",
+    "verifier_id": "uibc-core-verifier",
+    "ruleset": "uibc-core/0.3.3-proposal",
+    "ruleset_digest": "uibc-core/0.3.3-proposal@1d2ff548e42f",
+    "assurance": "public-key",
+    "root_algorithm": "sha256(canonical-json(sorted(content_hashes))) v0.1-provisional",
+    "key_custody": null
+  },
+  "checks_declared": {
+    "S11": {
+      "name": "strict serialization",
+      "implemented": "full",
+      "observed_result_on_reference_package": "PASS",
+      "evidence_class": "related",
+      "citation": "RFC 8785"
+    },
+    "S1": {
+      "name": "package structure",
+      "implemented": "full",
+      "observed_result_on_reference_package": "PASS",
+      "evidence_class": "none",
+      "citation": ""
+    },
+    "S2": {
+      "name": "identity consistency",
+      "implemented": "full",
+      "observed_result_on_reference_package": "PASS",
+      "evidence_class": "direct",
+      "citation": "draft-noa-scitt-ai-agent-receipt-00"
+    },
+    "S3": {
+      "name": "lifecycle state machine + semantics",
+      "implemented": "full",
+      "observed_result_on_reference_package": "PASS",
+      "evidence_class": "related",
+      "citation": "draft-maintainer-1f916-agent-record-01"
+    },
+    "S4": {
+      "name": "evidence integrity",
+      "implemented": "full",
+      "observed_result_on_reference_package": "PASS",
+      "evidence_class": "none",
+      "citation": ""
+    },
+    "S12": {
+      "name": "timestamp and identifier strictness",
+      "implemented": "full",
+      "observed_result_on_reference_package": "PASS",
+      "evidence_class": "none",
+      "citation": ""
+    },
+    "S7": {
+      "name": "evidence index metadata",
+      "implemented": "full",
+      "observed_result_on_reference_package": "PASS",
+      "evidence_class": "none",
+      "citation": ""
+    },
+    "S8": {
+      "name": "package checkpoint head",
+      "implemented": "full",
+      "observed_result_on_reference_package": "PASS",
+      "evidence_class": "related",
+      "citation": "draft-maintainer-1f916-agent-record-01"
+    },
+    "S5": {
+      "name": "evidence root",
+      "implemented": "full",
+      "observed_result_on_reference_package": "PASS",
+      "evidence_class": "related",
+      "citation": "RFC 6962"
+    },
+    "S6": {
+      "name": "seal signature",
+      "implemented": "full",
+      "observed_result_on_reference_package": "PASS",
+      "evidence_class": "related",
+      "citation": "RFC 8032"
+    }
+  },
+  "check_id_absent_from_report": {
+    "S9": "declared in the specification as head pinned out-of-band, listed in docs/EVIDENCE-INDEX.md as not covered (no test constructs it), and never emitted in a verify report: the report jumps S8 -> S11",
+    "S10": "declared in the specification as \u0007ttestation closure declared, listed in docs/EVIDENCE-INDEX.md as not covered, and never emitted in a verify report"
+  },
+  "transports": {
+    "cli": {
+      "envelope_keys": 17,
+      "fields": "full"
+    },
+    "mcp": {
+      "envelope_keys": 17,
+      "fields": "full",
+      "note": "measured field-by-field equal to CLI"
+    },
+    "http": {
+      "envelope_keys_before_patch": 6,
+      "envelope_keys_after_patch": 19,
+      "fields": "full after patch 0001; before patch: subject/trust_level/spec_version/limitations/not_checked dropped",
+      "anchoring": "unavailable: endpoint accepts no key or DID, so every HTTP verdict is trust_level=unanchored"
+    }
+  },
+  "capabilities_by_key_type": {
+    "ed25519": {
+      "seal_verify": "supported",
+      "third_party_verifiable": true
+    },
+    "hmac_sha256_v02": {
+      "seal_verify": "supported",
+      "third_party_verifiable": false,
+      "reason": "symmetric: verification requires the owner key"
+    }
+  },
+  "explicitly_not_capable": [
+    "returning PASS for a package it cannot evaluate (the JS implementation never returns PASS; this one does)",
+    "anchoring over the HTTP transport (no key/DID parameter)",
+    "attesting key custody (key_custody is null in the observed report)",
+    "external timestamp anchoring (listed in not_checked)",
+    "lifecycle event signature verification (listed in not_checked)",
+    "behavioral evaluation and memory fidelity (listed in not_checked)",
+    "claiming the third-party corpus as our own: the vectors, the manifest and the reference verifier belong to its author"
+  ],
+  "non_claims": [
+    "a PASS is not a statement that the package is valid; it is a statement that no violation was detected within the observed evidence boundary",
+    "the report does not sign anything and does not assert third-party approval",
+    "the presence of 10 checks is not a claim that 10 is the complete set (see check_id_absent_from_report)"
+  ],
+  "third_party_corpus_runs": [
+    {
+      "corpus": "agent-evidence-vectors 0.36.3 (Adversarial Execution Evidence v0.7)",
+      "corpus_owner": "third party, not the operator of this implementation; reference verifier ships with the corpus",
+      "predicate_type": "https://in-toto.io/attestation/adversarial-execution-evidence/v0.7",
+      "suite_revision": 32,
+      "corpus_digest": "bf3e5befd71640757ff1b3f0af63507364b823b5e3f9059678f72f64a46e11c1",
+      "manifest_sha256": "5f828f57e4e6845a48d802ae6c9a32d3365b092aa7d23969a2daa7438ac7f368",
+      "contract": "<cmd> <vector-file>; exit 0 = valid; last stdout line one JSON object {verdict, codes, result, tiers}",
+      "rail": "uibc_core/aee.py (this implementation)",
+      "verifier_command": "python -m uibc_core.aee",
+      "vectors_executed": 288,
+      "totals": {
+        "vectors": 288,
+        "pass": 288,
+        "fail": 0,
+        "conform": 288,
+        "reasonParityMismatch": 0,
+        "suiteRefusals": 0,
+        "notExercised": 0
+      },
+      "comparison_surface": {
+        "normative": [
+          "verdict",
+          "result",
+          "tierWithPinnedKey",
+          "tierWithoutKey"
+        ],
+        "measured": [
+          "codes"
+        ],
+        "note": "A vector's conformance column is its verdict, its result token where the manifest declares one, both tier columns where it declares them, and the behaviour assertions. Its reasonParity column is the code comparison, which vectors/MANIFEST.json calls a datum rather than a failure. The status column still counts both, so the exit code has not moved."
+      },
+      "measured": "verdict and result are normative; failure codes are the corpus's own vocabulary, so a code difference is a reason-parity datum, not a failure"
+    }
+  ]
+}

@@ -22,8 +22,13 @@ a test that is timing-sensitive on one platform is a fact about the test, not ab
 
 ## How to add a row
 
-1. `git clone https://github.com/UIBC/uibc-bench && cd uibc-bench && python gate_all.py --roots .`
-   Record the printed verdict (`GREEN n/n`, hard findings count).
+1. Run this repository's conformance suite against your implementation, not ours:
+   `python tools/run_conformance.py --verify "<your verifier cmd> {pkg}" --name <you> --json`
+   Record every case verdict, not just the totals. If your implementation emits
+   check identifiers, compare them case by case — `conformance/manifest.json`
+   states which checks each case must report.
+   Then run the language-neutral corpus in `docs/conformance/vectors.json` with
+   `python tools/conformance_check.py` and record `n/29`.
 2. `git clone https://github.com/zhaoxinghua09-cell/uibc-core && cd uibc-core && python -m pytest -q`
    Record `passed / skipped / failed`.
 3. Fill the table. In `reviewer independence`, write `independent` only if you

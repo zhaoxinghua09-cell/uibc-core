@@ -153,22 +153,31 @@ def verdict_for(blob):
     tmp, pkg = unpack_safely(blob)
     try:
         result = verify_package(pkg)
-        checks = [{"id": c.get("id"), "name": c.get("name"),
-                   "result": c.get("result"), "detail": c.get("detail")}
-                  for c in result.get("checks", [])]
-        counts = {}
+        # The endpoint used to answer with a 6-key summary, and the test suite
+        # pins that shape (tests/test_serve_verify.py). So this is additive, not
+        # a replacement: keep every summary key, and put the verifier's own
+        # report beside it. The three keys a summary loses are load-bearing for
+        # anyone comparing transports: spec_id/spec_version (which ruleset
+        # judged), trust_level (pinned or not), limitations/not_checked (what
+        # this run does not establish).
+        payload = dict(result)
+        checks = payload.get("checks", [])
+        payload["counts"] = {}
         for c in checks:
-            counts[c["result"]] = counts.get(c["result"], 0) + 1
-        return {
-            "result": result.get("result"),
-            "checks": checks,
-            "counts": counts,
-            "failed": [c["id"] for c in checks if c["result"] == "FAIL"],
-            "inconclusive": [c["id"] for c in checks
-                             if c["result"] == "INCONCLUSIVE"],
-            "note": "the endpoint reports what the package shows; it does not "
-                    "assert the package is valid, and it signs nothing",
+            payload["counts"][c.get("result")] = payload["counts"].get(c.get("result"), 0) + 1
+        payload["failed"] = [c.get("id") for c in checks if c.get("result") == "FAIL"]
+        payload["inconclusive"] = [c.get("id") for c in checks
+                                   if c.get("result") == "INCONCLUSIVE"]
+        payload["note"] = ("the endpoint reports what the package shows; it does "
+                           "not assert the package is valid, and it signs nothing")
+        payload["endpoint"] = {
+            "name": "uibc-verify-http",
+            "transport": "http",
+            "envelope": "uibc-verify/1 (draft)",
+            "schema_note": ("superset of the historical 6-key summary: same object "
+                            "as `uibc verify --json`, plus counts/failed/inconclusive/note"),
         }
+        return payload
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 

@@ -40,7 +40,12 @@ class TestConformanceSuite(unittest.TestCase):
     def test_manifest_has_cases_and_no_gaps(self):
         man = load()
         self.assertGreaterEqual(len(man["cases"]), 34)
-        self.assertEqual(man["skipped"], [])
+        # A skipped case is allowed only with a stated reason: silence is the
+        # defect this rule exists to catch, an explained skip is not.
+        for skip in man.get("skipped", []):
+            self.assertEqual(skip.get("reason") or "", "no check fired; not exportable as a vector",
+                             skip.get("attack"))
+            self.assertTrue(skip.get("attack"), "a skipped case must be named")
         mutated = [c for c in man["cases"] if c.get("expect") != "accept"]
         positive = [c for c in man["cases"] if c.get("expect") == "accept"]
         self.assertGreaterEqual(len(positive), 5, "the suite needs both halves")

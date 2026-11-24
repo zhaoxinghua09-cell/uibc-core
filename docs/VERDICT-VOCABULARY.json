@@ -1,0 +1,160 @@
+{
+  "caveat": "Mappings model the published shapes as read on 2026-11-24 (AuthZEN decision true/false; KYA-OS Core L1-L3 with fail-closed demotion). They are not the systems, and no claim is made that either could not add states.",
+  "critical_pairs": [
+    [
+      "UNSUPPORTED",
+      "REVOKED"
+    ],
+    [
+      "INCONCLUSIVE",
+      "REVOKED"
+    ],
+    [
+      "UNRESOLVED",
+      "UNSUPPORTED"
+    ],
+    [
+      "EXPIRED",
+      "INVALID"
+    ]
+  ],
+  "measured": {
+    "boolean": {
+      "critical_kept": [],
+      "critical_lost": [
+        [
+          "UNSUPPORTED",
+          "REVOKED"
+        ],
+        [
+          "INCONCLUSIVE",
+          "REVOKED"
+        ],
+        [
+          "UNRESOLVED",
+          "UNSUPPORTED"
+        ],
+        [
+          "EXPIRED",
+          "INVALID"
+        ]
+      ],
+      "distinct_outputs": 2,
+      "outputs": {
+        "deny": [
+          "INVALID",
+          "REVOKED",
+          "EXPIRED",
+          "INCONCLUSIVE",
+          "UNSUPPORTED",
+          "UNRESOLVED"
+        ],
+        "permit": [
+          "VERIFIED"
+        ]
+      },
+      "pairs_kept_apart": 6,
+      "pairs_merged": 15,
+      "pairs_total": 21
+    },
+    "ladder": {
+      "critical_kept": [
+        [
+          "INCONCLUSIVE",
+          "REVOKED"
+        ],
+        [
+          "UNRESOLVED",
+          "UNSUPPORTED"
+        ]
+      ],
+      "critical_lost": [
+        [
+          "UNSUPPORTED",
+          "REVOKED"
+        ],
+        [
+          "EXPIRED",
+          "INVALID"
+        ]
+      ],
+      "distinct_outputs": 3,
+      "outputs": {
+        "L1": [
+          "INVALID",
+          "REVOKED",
+          "EXPIRED",
+          "UNSUPPORTED"
+        ],
+        "L2": [
+          "INCONCLUSIVE",
+          "UNRESOLVED"
+        ],
+        "L3": [
+          "VERIFIED"
+        ]
+      },
+      "pairs_kept_apart": 14,
+      "pairs_merged": 7,
+      "pairs_total": 21
+    },
+    "seven": {
+      "critical_kept": [
+        [
+          "UNSUPPORTED",
+          "REVOKED"
+        ],
+        [
+          "INCONCLUSIVE",
+          "REVOKED"
+        ],
+        [
+          "UNRESOLVED",
+          "UNSUPPORTED"
+        ],
+        [
+          "EXPIRED",
+          "INVALID"
+        ]
+      ],
+      "critical_lost": [],
+      "distinct_outputs": 7,
+      "outputs": {
+        "EXPIRED": [
+          "EXPIRED"
+        ],
+        "INCONCLUSIVE": [
+          "INCONCLUSIVE"
+        ],
+        "INVALID": [
+          "INVALID"
+        ],
+        "REVOKED": [
+          "REVOKED"
+        ],
+        "UNRESOLVED": [
+          "UNRESOLVED"
+        ],
+        "UNSUPPORTED": [
+          "UNSUPPORTED"
+        ],
+        "VERIFIED": [
+          "VERIFIED"
+        ]
+      },
+      "pairs_kept_apart": 21,
+      "pairs_merged": 0,
+      "pairs_total": 21
+    }
+  },
+  "receipt_sha256": "9256006ffcc44991e15570e46764163d92894ac3d7c3aceea8d86b215c98b9ef",
+  "states": [
+    "VERIFIED",
+    "INVALID",
+    "REVOKED",
+    "EXPIRED",
+    "INCONCLUSIVE",
+    "UNSUPPORTED",
+    "UNRESOLVED"
+  ]
+}

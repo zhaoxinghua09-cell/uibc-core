@@ -67,6 +67,7 @@ def main(argv=None):
 
         committed = out_dir / ("crosswalk-%s.json" % name)
         drift = "unrun"
+        old = None
         if not args.no_probe:
             fresh = cp.dumps_result(res)
             if not committed.exists():
@@ -80,17 +81,23 @@ def main(argv=None):
                 drift = "same" if old == fresh else "drift"
             if drift != "same":
                 worst = max(worst, 3)
-                # Byte counts alone were not enough last time: the first failing
-                # run on Linux said only "6974 vs 6830", and the field that had
-                # moved was a path. Point at the first differing line.
-                a, b = old.splitlines(), fresh.splitlines()
-                for i, (x, y) in enumerate(zip(a, b)):
-                    if x != y:
-                        print("  first difference in %s at line %d:\n  - %s\n  + %s"
-                              % (name, i + 1, x.strip()[:160], y.strip()[:160]))
-                        break
-                if len(a) != len(b):
-                    print("  line counts differ: committed=%d fresh=%d" % (len(a), len(b)))
+                if old is None:
+                    # A source distribution does not ship tools/out, so this is a
+                    # legitimate state rather than a defect: say so, and keep the
+                    # exit code (nothing was compared, so nothing is proven).
+                    print("  no committed result at %s - nothing to compare" % committed)
+                else:
+                    # Byte counts alone were not enough last time: the first failing
+                    # run on Linux said only "6974 vs 6830", and the field that had
+                    # moved was a path. Point at the first differing line.
+                    a, b = old.splitlines(), fresh.splitlines()
+                    for i, (x, y) in enumerate(zip(a, b)):
+                        if x != y:
+                            print("  first difference in %s at line %d:\n  - %s\n  + %s"
+                                  % (name, i + 1, x.strip()[:160], y.strip()[:160]))
+                            break
+                    if len(a) != len(b):
+                        print("  line counts differ: committed=%d fresh=%d" % (len(a), len(b)))
         if res["bad"]:
             worst = max(worst, 1)
 

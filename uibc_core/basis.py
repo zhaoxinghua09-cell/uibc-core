@@ -55,8 +55,8 @@ BASIS = {
             "note": "时间戳协议本体；「须覆盖本包链头」的判定自定"},
     "S17": {"class": "direct", "citation": "draft-marques-asqav-compliance-receipts-01",
             "note": "收据与摘要"},
-    "S18": {"class": "direct", "citation": "draft-marques-asqav-compliance-receipts-01 §4.2.4",
-            "note": "摘要须可解析"},
+    "S18": {"class": "direct", "citation": "draft-marques-asqav-compliance-receipts-01 §4.2.2",
+            "note": "摘要须可解析（draft-01 没有 §4.2.4；该条为 §4.2.2 policy_digest）"},
     "S19": {"class": "related", "citation": "draft-bailey-scitt-agent-session-receipt",
             "note": "新鲜度只能由外部状态判定，签名不蕴含时间顺序；"
                     "高水位记忆机制为本项目自定。机制并不新："

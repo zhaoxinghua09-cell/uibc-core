@@ -39,7 +39,7 @@ So the only cross-check available to an anonymous third party is the **changelog
 Two consequences we accept:
 
 1. **We cannot claim "cross-checked against the reference implementation."** We can claim "read its published version history and protocol names." Row 7 below stays *partial* for a new reason: the code is not anonymously readable.
-2. **Our own verifiability is measurable, and should be measured.** The same question put to this repository, anonymously, returns **1,865 files** on `main`, and the `codeload` tarball answers **200** with no token. Same date, same network, opposite result. That contrast is a fact we can put in front of anyone, and it is the only place on this track where "ahead" means "inspectable".
+2. **Our own verifiability is measurable, and should be measured.** The same question put to this repository, anonymously, returns **1,865 files** on `main` at commit `8a41372`, and the `codeload` tarball answers **200** with no token. These two counts are a property of that commit, not of the repository in general. Same date, same network, opposite result. That contrast is a fact we can put in front of anyone, and it is the only place on this track where "ahead" means "inspectable".
 ## 2. DID track (`did:cn`)
 
 | Fact | Standing | Basis |
@@ -72,7 +72,7 @@ Eight criteria, scored on what is on disk and reachable today:
 | 3 | Every published number regenerated from the tree | **Pass** | `check_doc_facts.py` → 0 mismatch |
 | 4 | Differences documented with basis per row | **Pass** | `docs/TWO-CODES-DIFF.md` |
 | 5 | Tests cover the hostile inputs | **Pass** | 1,156 cases across the suite |
-| 6 | Reproducible by someone who is not us, offline | **Partial** | Run from the public tarball on a second machine and a different OS, no credentials: 0 mismatch, 1471 passed (`docs/REPRODUCTION.md`). Still no outside party |
+| 6 | Reproducible by someone who is not us, offline | **Partial** | Run from the public tarball on a second machine and a different OS, no credentials: 0 mismatch, 1471 passed at `8a41372` (`docs/REPRODUCTION.md`). Still no outside party |
 | 7 | Cross-checked against the reference implementation | **Partial** | Its default branches expose **0–1 files anonymously** (`tools/probe_reference_repos.py`), so the comparison is against the published changelog, not the code |
 | 8 | Independently evaluated (separate identity, separate interest) | **0** | No evaluation has been performed |
 

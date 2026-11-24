@@ -155,7 +155,7 @@ jobs:
           PY
 
       - name: Publish the measurement
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4.4.0
         with:
           name: windows-bytes
           path: windows-bytes.json

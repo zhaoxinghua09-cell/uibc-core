@@ -76,6 +76,9 @@ MANIFEST_FIELDS = ["agent_id", "agent_version", "status", "evidence_root",
                    "evidence_index_digest", "min_verifier_version", "created_at",
                    "schema", "agent_id"]  # 最后一个重复出现，索引仍然唯一
 MANIFEST_VALUES = ["evil", 999999, "0" * 64, "PASSED", "", None]
+# Fields the v1.1 narrow index digest never covered (conformance vector D-002).
+# F18 mutates them; before S20 existed every one of these passed the suite.
+FULL_META_FIELDS = ["evidence_id", "media_type", "created_at"]
 
 
 def mut_manifest_scalar(field, value):
@@ -197,6 +200,23 @@ def mut_index_meta(etype, note):
         for e in o.get("entries", []):
             e["type"] = etype
             e["note"] = note
+        _w(p, o)
+    return f
+
+
+def mut_index_full_meta(field, value):
+    """D-002 closed: rewrite a metadata field that the NARROW digest never covered.
+
+    Before 0.6.0 none of evidence_id / media_type / created_at was inside any
+    sealed commitment, so these mutations passed the whole suite. The attack is
+    kept as its own family because a fix that is not attacked is a fix nobody
+    has tested.
+    """
+    def f(d):
+        p = os.path.join(d, "evidence", "index.json")
+        o = _j(p)
+        for e in o.get("entries", []):
+            e[field] = value
         _w(p, o)
     return f
 
@@ -332,6 +352,13 @@ def build_cases():
         cases.append(("F12-%02d" % i, "keyswap",
                       "攻击者第 %d 号密钥重签" % i,
                       mut_keyswap(1 + i), None))
+
+    for i in range(24):
+        cases.append(("F18-%02d" % i, "index-full-metadata",
+                      "索引 %s←backdated-%d（窄摘要看不见的字段）"
+                      % (FULL_META_FIELDS[i % 3], i),
+                      mut_index_full_meta(FULL_META_FIELDS[i % 3],
+                                          "backdated-%d" % i), None))
 
     for i in range(24):
         cases.append(("F13-%02d" % i, "root-extra", "根目录加 notes-%d.md" % i,
@@ -523,3 +550,4 @@ def main(argv=None):
 
 if __name__ == "__main__":
     sys.exit(main())
+

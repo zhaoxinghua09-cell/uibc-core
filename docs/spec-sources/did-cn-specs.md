@@ -97,3 +97,17 @@ That was true of the platform paths we had tried and false as a statement about
 specifications: all six methods above have public text, and so does `did:wba`. The
 sentence is removed rather than softened, because a stale negative is still a false
 claim.
+
+
+## Post-publication change: did:ctid's platform is retired
+
+On 2026-05-23 Zhongdun Anxin (anicert, the registry entry's operator) published a
+statement that the CTID platform would complete its mission and go fully offline
+on 2026-06-30, ending identity-authentication service
+(https://www.anicert.cn/news/info/381.html).
+
+So did:ctid is not "a method whose read channel we have not wired yet" -- the
+platform behind it has stopped serving. We keep the ABNF enforced (identifiers
+that appear in old evidence must still be judged), and we still refuse to write
+one, because there is no channel left to prove control. This is an inference
+from the operator's own statement, not a normative claim about the method.

@@ -1,0 +1,109 @@
+{
+  "schema": "uibc-crosswalk/1",
+  "standard": {
+    "id": "uibc-crosswalk/1 (tool contract)",
+    "title": "The crosswalk tool's own contract, mapped to the tests that hold it",
+    "url": "https://github.com/zhaoxinghua09-cell/uibc-core/blob/main/tools/crosswalk_probe.py",
+    "scope_note": "Not a regulation. This file exists so the COVERED path has at least one real customer: a clause whose probe genuinely runs and passes. Keeping it separate from the MDR file avoids inflating a regulatory crosswalk with self-tests.",
+    "source": "crosswalk/tool-contract.json"
+  },
+  "manifest_sha256": "654d7fc64995d3b0e934c5d5f4d632b78b0b0db86bbb6d9c8d838926a5ee8658",
+  "clause_count": 4,
+  "counts": {
+    "COVERED": 3,
+    "GAP": 1
+  },
+  "bad": 0,
+  "rows": [
+    {
+      "id": "TC-1 three-state decision is a pure function",
+      "applies": true,
+      "strength": "carried",
+      "state": "COVERED",
+      "note": "",
+      "reason": "",
+      "carrier": [
+        "classify()",
+        "unit tests drive it directly"
+      ],
+      "url": "https://github.com/zhaoxinghua09-cell/uibc-core/blob/main/tools/crosswalk_probe.py",
+      "probe": {
+        "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" -m pytest tests/test_crosswalk_probe.py -q -k classify",
+        "declared": "python -m pytest tests/test_crosswalk_probe.py -q -k classify",
+        "exit": 0,
+        "expect_exit": 0,
+        "stdout_contains": null,
+        "ok": true,
+        "duration_s": 1.89,
+        "tail": [
+          ".........                                                                [100%]",
+          "9 passed, 14 deselected in 0.15s"
+        ]
+      }
+    },
+    {
+      "id": "TC-2 a declared gap stays green and is counted",
+      "applies": true,
+      "strength": "carried",
+      "state": "COVERED",
+      "note": "",
+      "reason": "",
+      "carrier": [
+        "classify()",
+        "exit code rule"
+      ],
+      "url": "https://github.com/zhaoxinghua09-cell/uibc-core/blob/main/tools/crosswalk_probe.py",
+      "probe": {
+        "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" -m pytest tests/test_crosswalk_probe.py -q -k declared_gap",
+        "declared": "python -m pytest tests/test_crosswalk_probe.py -q -k declared_gap",
+        "exit": 0,
+        "expect_exit": 0,
+        "stdout_contains": null,
+        "ok": true,
+        "duration_s": 1.89,
+        "tail": [
+          ".                                                                        [100%]",
+          "1 passed, 22 deselected in 0.13s"
+        ]
+      }
+    },
+    {
+      "id": "TC-3 an unproven claim turns the run red",
+      "applies": true,
+      "strength": "carried",
+      "state": "COVERED",
+      "note": "",
+      "reason": "",
+      "carrier": [
+        "classify()",
+        "main() exit code"
+      ],
+      "url": "https://github.com/zhaoxinghua09-cell/uibc-core/blob/main/tools/crosswalk_probe.py",
+      "probe": {
+        "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" -m pytest tests/test_crosswalk_probe.py -q -k overclaim",
+        "declared": "python -m pytest tests/test_crosswalk_probe.py -q -k overclaim",
+        "exit": 0,
+        "expect_exit": 0,
+        "stdout_contains": null,
+        "ok": true,
+        "duration_s": 2.02,
+        "tail": [
+          "....                                                                     [100%]",
+          "4 passed, 19 deselected in 0.29s"
+        ]
+      }
+    },
+    {
+      "id": "TC-4 shell semantics across platforms",
+      "applies": true,
+      "strength": "gap",
+      "state": "GAP",
+      "note": "",
+      "reason": "Only the Windows path has been exercised here. A probe written for POSIX quoting can pass locally and fail on the other platform; a containerised runner that runs both is not wired up yet.",
+      "carrier": [],
+      "url": "https://github.com/zhaoxinghua09-cell/uibc-core/blob/main/tools/crosswalk_probe.py",
+      "probe": null
+    }
+  ],
+  "verdict": "OK"
+}

@@ -1,3 +1,9 @@
+## The competitive table, with the rows we lose
+
+- `docs/COMPETITIVE-LANDSCAPE.md`: three tracks, every row carrying 标准 / 规范 / 实测 / 读码 as its basis.
+- Corrections it forces on us: the reference implementation is at **v2.2.0** (2026-08-31), not the v2.1.0 of the July release; it adopted the OID form in v2.0.0; and **AAC shipped in v2.2.0**, so it is not a concept we can claim to have introduced.
+- It also records that the reference repo's `main` currently returns an empty tree, so our cross-check is against its published changelog rather than its code — a partial, not a pass.
+- Eight "what best means" criteria scored: five pass, two partial, one zero. The zero is independent evaluation by a separate identity, and it stays zero until someone else does it.
 ## The did:cn namespace the platform serves is not the one the README publishes
 
 - Measured on `agent.idfactory.cn`: every registered agent reads

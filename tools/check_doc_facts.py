@@ -56,10 +56,11 @@ CLAIMS = (
 
 
 def measure():
-    loader = unittest.TestLoader()
-    suite = loader.discover(os.path.join(_REPO, "tests"), pattern="test_*.py")
+    # 静态计数，跨平台一致；运行期 discover 在同一提交上 Linux/Windows 会差 1 条，
+    # 那会让"文档里的数字"在另一个平台上必然算错。
+    import suite_count
     from uibc_core.basis import BASIS
-    facts = {"tests": suite.countTestCases(), "checks": len(BASIS),
+    facts = {"tests": suite_count.count_test_functions(_REPO), "checks": len(BASIS),
              "modules": len([f for f in os.listdir(os.path.join(_REPO, "uibc_core"))
                              if f.endswith(".py")])}
     try:

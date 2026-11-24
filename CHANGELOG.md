@@ -1,3 +1,10 @@
+## The suite count, counted where it cannot drift
+
+- `docs/EVIDENCE-INDEX.md` carries one published number, and the tool that generates it (`suite_size()` in `tools/build_evidence_index.py`) asked `unittest` discovery how many cases the suite has. That number depends on **where** you run it: the same commit counts **1157 on Linux and 1156 on Windows**, because discovery imports modules and platform-gated imports differ. So the page was guaranteed to be stale on one platform, and `test_the_doc_in_the_repo_matches_a_fresh_build`, `check_says_what_it_means` and `test_index_number_matches_what_is_measured` failed there. This was found the honest way — `uibc-bench` D1 ("outsider runs the whole suite") failed on a clean Linux clone of main.
+- Fix: `tools/suite_count.py` counts `def test_*` (AST, including async) under `tests/`, importing nothing. `build_evidence_index.suite_size()` and `check_doc_facts.measure()` both call it. Same commit → same number on every platform and in every checkout: **1510** on Linux and on Windows, verified 2026-11-24.
+- The published line now says what it counts: static `def test_*` count, cross-platform, runtime discovery is slightly lower because of platform skips. Anything else still cites the page rather than retyping a number.
+- Note for the record: the previous 1156 had also gone stale against a later commit on its own platform (PR #423 added `tests/test_interop_*`), which is the same defect with a different cause — a single typed digit that nothing re-derives.
+- No version bump, same reason as above: the number is bound to a built archive.
 ## Ten documents, two orderings, measured
 
 - Read all ten ACPs documents (`acps-specs/01`…`10`, each **v02.02**): `docs/ACPS-SPEC-MAP.md` maps what each is, how many times it names AIC, and which ones actually consume the code — ATR (certificate `CN`/`URI:acps://{AIC}`), AIA (mTLS peer check), ADP (`forwardChain`, loop detection), AAC (`agent:{aic}` subject IDs), AMP (logs, `kid` needed because AIC alone cannot pick a key).

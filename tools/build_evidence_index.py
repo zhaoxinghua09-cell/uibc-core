@@ -157,8 +157,8 @@ def render(index):
     lines.append("# 证据索引（由 `tools/build_evidence_index.py` 生成）\n")
     lines.append("每条检查对应到：验证器里的定义、覆盖它的测试、指向它的红队攻击、以及"
                  "提到它的文档。**重新生成即可复核**，不会随记忆漂移。\n")
-    lines.append("**测试套件：%d 个用例**（本页由生成器现数，别处只引用本页，不再抄写这个数字）。"
-                 "\n" % suite_size())
+    lines.append("**测试套件：%d 个用例**（静态计数：`tests/` 下 `def test_*` 的个数，跨平台一致；"
+                 "运行期因平台跳过会略少，别处只引用本页，不再抄写这个数字）。\n" % suite_size())
     lines.append("")
     lines.append("| 检查 | 名称 | 出厂包是否走到 | 测试 | 红队 | 文档 |")
     lines.append("|---|---|---|---|---|---|")
@@ -196,11 +196,15 @@ def render(index):
 
 
 def suite_size():
-    """How many test cases the suite actually contains, counted, not typed."""
-    import unittest
-    loader = unittest.TestLoader()
-    suite = loader.discover(os.path.join(_REPO, "tests"), pattern="test_*.py")
-    return suite.countTestCases()
+    """How many test cases the suite contains — counted statically, not typed.
+
+    Runtime discovery was the wrong instrument: the same commit counts 1157 on
+    Linux and 1156 on Windows, so whatever number the page carried was stale on
+    the other platform and two checks failed there. Static counting (def test_*
+    under tests/) imports nothing and is identical everywhere.
+    """
+    import suite_count
+    return suite_count.count_test_functions(_REPO)
 
 
 def main():

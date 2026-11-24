@@ -115,11 +115,11 @@ jobs:
           git reset --hard -q
           git config core.autocrlf true
 
-      - name: Count what the worktree actually holds
+      - name: No tracked text file may arrive with CRLF
         shell: bash
         run: |
           python - <<'PY'
-          import pathlib
+          import pathlib, sys
           crlf = []
           for p in pathlib.Path('.').rglob('*'):
               if not p.is_file() or '.git' in p.parts or p.stat().st_size > 2_000_000:
@@ -131,13 +131,33 @@ jobs:
               if b.count(b'\r\n'):
                   crlf.append(str(p))
           print('files with CRLF:', len(crlf))
-          for f in crlf[:20]:
+          for f in crlf[:40]:
               print('  ', f)
+          sys.exit(1 if crlf else 0)
           PY
 
-      - name: The byte-hash tests, on this checkout
+      - name: Every vendored source still hashes to its recorded digest
+        # The claim is not "the tests pass on Windows"; it is "the bytes this
+        # checkout produces are the bytes the hashes were recorded over". That is
+        # checkable directly from the manifest, without a test runner and without
+        # anything platform-specific sitting in between.
         shell: bash
-        run: python -m pytest tests/test_sources.py tests/test_oracle_reproducible.py tests/test_fixture_expectations.py tests/test_outside_kit.py -q
+        run: |
+          python - <<'PY'
+          import hashlib, json, pathlib, sys
+          root = pathlib.Path('docs/spec-sources')
+          manifest = json.loads((root / 'MANIFEST.json').read_text(encoding='utf-8'))
+          bad = []
+          for doc in manifest['documents']:
+              path = root / doc['file']
+              got = hashlib.sha256(path.read_bytes()).hexdigest()
+              if got != doc['sha256']:
+                  bad.append((doc['file'], doc['sha256'], got))
+          print('documents checked:', len(manifest['documents']), 'mismatched:', len(bad))
+          for name, want, got in bad:
+              print('  ', name, 'want', want[:12], 'got', got[:12])
+          sys.exit(1 if bad else 0)
+          PY
 
   test-with-extras:
     runs-on: ubuntu-latest

@@ -1,10 +1,19 @@
+## Ten documents, two orderings, measured
+
+- Read all ten ACPs documents (`acps-specs/01`…`10`, each **v02.02**): `docs/ACPS-SPEC-MAP.md` maps what each is, how many times it names AIC, and which ones actually consume the code — ATR (certificate `CN`/`URI:acps://{AIC}`), AIA (mTLS peer check), ADP (`forwardChain`, loop detection), AAC (`agent:{aic}` subject IDs), AMP (logs, `kid` needed because AIC alone cannot pick a key).
+- **Contradiction found and measured**: `ACPs-spec-AIC` §3 puts the version arc at position 5; `ACPs-spec-overview` §5.2 puts it at position 9; `ACPs-spec-ATR` §3.1 follows the overview in words. Nine distinct ten-arc samples exist across the corpus; seven carry a checksum that recomputes under salt `0x1234`, and the two that do not are AIP's `…0JU1` / `…0JU2` — `0JU4` with the last character bumped, i.e. placeholders.
+- Consequence, stated rather than papered over: **the checksum is order-agnostic** (it hashes arcs 1-9 as text), so both orderings produce codes that verify. The defect is field naming, and it matters downstream (AAC subjects, ADP chains, ATR certificate matching) even though integrity is unaffected. We follow AIC §3, `scope` says so, and there is no invented crosswalk.
+- Four new tests pin the corpus measurements, including "both orderings verify" and "AIP's two trailers are placeholders". Conformance file: 21; cross-implementation: 17; with the reader tests, 56 passed across the three files.
+- Access recorded: `git clone --depth 1` works (1,937 files); the `contents` API rate-limits (429); `git/tree` returns zero entries. A Windows checkout differs from the API copy by CRLF only (8,149 vs 8,043 bytes, same `sha256:38242a01…23ab` after normalising).
+- Version: 0.5.1 → **0.5.2**.
+
 ## The AIC text itself, and a checksum we can now decide
 
 - Found the document, not just a crate's copy of it: `ACPs-spec-AIC-v02.02` at `aip-pub/ACPs-community`, path `acps-specs/02-ACPs-spec-AIC/ACPs-spec-AIC.md`. Copy pinned by `sha256:38242a01…23ab` in `docs/ACPS-SPEC-IN-HAND.md`. The earlier "the ACPs repositories are empty" reading came from the `git/tree` endpoint; `contents` returns the tree.
 - `uibc_core/acps_identity_code.py`: spec references corrected v02.01 → v02.02; new `verify_acps_code(code, salt)` recomputes arc 10 (CRC-16/CCITT-FALSE over arcs 1-9 ++ salt, Base36 four chars) and returns `VERIFIED` / `INVALID` / `INCONCLUSIVE`. `VERIFIED` carries an evidence entry whose digest is the sha256 of the exact bytes hashed. Without a salt the answer is still "checksum NOT checked", never a guess.
 - The document's own worked example passes byte for byte: `salt 0x12 0x34` → `crc 0x646C` → arc 10 `0JU4` on `1.2.156.3088.1.1.34C2.478BDF.3GF546`; `0xFFFF → 1EKF` matches the range the text states for arc 10.
 - Third implementation as oracle: `aipub-protocols` 0.0.3 (crates.io, lib `protocols`) compiled unpatched on a Linux VM (cargo 1.100.0, 2026-11-24) and asked for checksums over 16 boundary cases (lowercase, salts 2→16 bytes, both ends of each segment range, ontology form, foreign prefixes). 16/16 agree; the answers are pinned in `tests/test_acps_cross_implementation.py` so they keep agreeing or fail loudly.
-- Tests: `tests/test_acps_spec_conformance.py` (20, built only from the text's example, its stated range and deliberate mutations) + the cross-implementation file (17). Together with the existing reader tests: 52 passed.
+- Tests: `tests/test_acps_spec_conformance.py` (21, built only from the text's example, its stated range, deliberate mutations and the other documents' samples) + the cross-implementation file (17). Together with the existing reader tests: 56 passed across the three files.
 - Version: `pyproject.toml` 0.5.0 → **0.5.1**. `CITATION.cff` is left at 0.4.2 on purpose: it pins the Zenodo archive, not the working tree.
 
 ## Anchor: a frozen root, four calendar receipts, no Bitcoin attestation yet

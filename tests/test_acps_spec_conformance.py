@@ -141,3 +141,40 @@ def test_random_salts_round_trip(seed):
         checksum = acps_checksum(body, salt)
         assert len(checksum) == 4 and all(c in BASE36 for c in checksum)
         assert verify_acps_code(body + "." + checksum, salt)["state"] == "VERIFIED"
+
+# --- the corpus itself: two orderings, one checksum -------------------------
+# Evidence and reasoning live in docs/ACPS-SPEC-MAP.md. These tests pin the measurements
+# so the day someone "fixes" the ordering by silent re-labelling, it fails here first.
+
+OVERVIEW_EXAMPLE = "1.2.156.3088.1.34C2.478BDF.3GF546.1.0SEN"   # overview §5.2 ordering
+AIP_FIRST_AGENT = "1.2.156.3088.1.1.34C2.478BDF.3GF546.0JU1"    # AIP, placeholder trailer
+AIP_SECOND_AGENT = "1.2.156.3088.1.1.34C2.478BDF.3GF546.0JU2"
+
+
+def test_overview_example_carries_its_own_valid_checksum():
+    # The checksum hashes arcs 1-9 as text, so it does not care what the arcs mean.
+    body = OVERVIEW_EXAMPLE.rsplit(".", 1)[0]
+    assert acps_checksum(body, SPEC_SALT) == "0SEN"
+    assert verify_acps_code(OVERVIEW_EXAMPLE, SPEC_SALT)["state"] == "VERIFIED"
+
+
+def test_two_orderings_produce_two_valid_codes():
+    # Both documents' examples verify under their own ordering; neither is "the broken one".
+    assert verify_acps_code(SPEC_CODE, SPEC_SALT)["state"] == "VERIFIED"
+    assert verify_acps_code(OVERVIEW_EXAMPLE, SPEC_SALT)["state"] == "VERIFIED"
+    assert SPEC_CODE.split(".")[4:9] != OVERVIEW_EXAMPLE.split(".")[4:9]
+
+
+def test_aip_placeholder_trailers_are_placeholders_not_a_third_algorithm():
+    for code in (AIP_FIRST_AGENT, AIP_SECOND_AGENT):
+        body = code.rsplit(".", 1)[0]
+        assert acps_checksum(body, SPEC_SALT) == "0JU4"
+        assert verify_acps_code(code, SPEC_SALT)["state"] == "INVALID"
+
+
+def test_reader_labels_follow_the_aic_document_and_says_so():
+    # AIC §3 puts the version at arc 5. The overview puts it at arc 9. We follow AIC,
+    # because that is the document whose §4 defines the checksum we implement.
+    r = read_acps_code(OVERVIEW_EXAMPLE)
+    assert r["state"] == "INCONCLUSIVE"
+    assert "ACPs-spec-AIC-v02.02" in r["method"]

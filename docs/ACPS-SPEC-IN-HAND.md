@@ -54,8 +54,9 @@ code   1.2.156.3088.1.1.34C2.478BDF.3GF546.0JU4
   `VERIFIED` carries a reproducible evidence entry (`sha256` over the exact bytes hashed).
 - `read_acps_code()` is unchanged in spirit: shape only, `INCONCLUSIVE`, and it now points at
   `verify_acps_code()` instead of saying the checksum is unknowable.
-- `tests/test_acps_spec_conformance.py` — 20 tests built only from the document's own
-  example, its stated range, and deliberate mutations of stated rules.
+- `tests/test_acps_spec_conformance.py` — 21 tests built only from the document's own
+  example, its stated range, deliberate mutations of stated rules, and the other
+  documents' samples (`docs/ACPS-SPEC-MAP.md`).
 - `tests/test_acps_cross_implementation.py` — 16 pinned expectations taken from a third
   implementation, so agreement is a test and not a sentence.
 

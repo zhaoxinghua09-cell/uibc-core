@@ -111,6 +111,19 @@ def test_a_step_one_machine_could_not_run_is_a_scope_note_not_a_mismatch():
     assert note and "ledger" in note, note
 
 
+def test_a_receipt_that_skipped_a_step_cannot_still_say_reproduced():
+    """Skipping the ledger does not license "everything matched"."""
+    bare = json.loads(json.dumps(SAMPLE))
+    body = ver.build_receipt(bare)
+    body["verdict"] = "REPRODUCED"
+    body["code"] = 0
+    body.pop("receipt_sha256")
+    import hashlib
+    body["receipt_sha256"] = hashlib.sha256(ver.canonical(body)).hexdigest()
+    diffs, _ = ver.compare(body, dict(SAMPLE))
+    assert any("PARTIAL" in line for line in diffs), diffs
+
+
 def test_the_limitation_is_stated_in_the_output():
     out = subprocess.run([sys.executable, TOOL, "--help"],
                          capture_output=True, text=True)

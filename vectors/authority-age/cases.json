@@ -1,0 +1,138 @@
+{
+  "schema": "uibc-authority-age-vectors/1",
+  "as_of": "2026-11-24",
+  "what_this_is": "Runnable cases for the answer-age check that WG0 #71 Requirement 1 asks for. IETF WIMSE draft-hulea-wimse-agent-mandate-00 lists the case 'Status fresh at T but older than max_status_age at A' as a planned test vector; it is case aa-03 here and it executes.",
+  "instants": {
+    "answer_iat": "2026-11-24T08:00:00Z",
+    "T": "2026-11-24T09:00:00Z",
+    "A_plus_2h": "2026-11-24T11:00:00Z"
+  },
+  "cases": [
+    {
+      "id": "aa-01",
+      "why": "answer is fresh at the moment of decision",
+      "validation_at": "2026-11-24T09:00:00Z",
+      "decision_at": "2026-11-24T09:00:00Z",
+      "answers": {"mandate": "2026-11-24T08:00:00Z"},
+      "bounds": {"mandate": 7200},
+      "expect_state": "PASS"
+    },
+    {
+      "id": "aa-02",
+      "why": "answer was fresh at T but the decision waited; still inside the bound",
+      "validation_at": "2026-11-24T09:00:00Z",
+      "decision_at": "2026-11-24T09:30:00Z",
+      "answers": {"mandate": "2026-11-24T08:00:00Z"},
+      "bounds": {"mandate": 7200},
+      "expect_state": "PASS"
+    },
+    {
+      "id": "aa-03",
+      "why": "WIMSE planned case: status fresh at T, older than max_status_age at A",
+      "validation_at": "2026-11-24T09:00:00Z",
+      "decision_at": "2026-11-24T11:00:00Z",
+      "answers": {"mandate": "2026-11-24T08:00:00Z"},
+      "bounds": {"mandate": 7200},
+      "expect_state": "FAIL"
+    },
+    {
+      "id": "aa-04",
+      "why": "no answer at all: unresolved, and it must not read as a pass",
+      "validation_at": "2026-11-24T09:00:00Z",
+      "decision_at": "2026-11-24T11:00:00Z",
+      "answers": {"mandate": null},
+      "bounds": {"mandate": 7200},
+      "expect_state": "INCONCLUSIVE"
+    },
+    {
+      "id": "aa-05",
+      "why": "one link fresh, one unexamined: the unexamined link cannot contribute a pass",
+      "validation_at": "2026-11-24T09:00:00Z",
+      "decision_at": "2026-11-24T09:00:00Z",
+      "answers": {"anchor": "2026-11-24T08:30:00Z", "mandate": null},
+      "bounds": {"anchor": 7200, "mandate": 7200},
+      "expect_state": "INCONCLUSIVE"
+    },
+    {
+      "id": "aa-06",
+      "why": "one link over the bound beats another link that passes",
+      "validation_at": "2026-11-24T09:00:00Z",
+      "decision_at": "2026-11-24T09:00:00Z",
+      "answers": {"anchor": "2026-11-24T08:30:00Z", "mandate": "2026-11-24T08:00:00Z"},
+      "bounds": {"anchor": 7200, "mandate": 600},
+      "expect_state": "FAIL"
+    },
+    {
+      "id": "aa-07",
+      "why": "answer dated after the decision: clocks disagree, not freshness",
+      "validation_at": "2026-11-24T09:00:00Z",
+      "decision_at": "2026-11-24T09:00:00Z",
+      "answers": {"mandate": "2026-11-24T09:30:00Z"},
+      "bounds": {"mandate": 7200},
+      "expect_state": "INCONCLUSIVE"
+    },
+    {
+      "id": "aa-08",
+      "why": "unresolved with a named recourse stays unresolved on the record",
+      "validation_at": "2026-11-24T09:00:00Z",
+      "decision_at": "2026-11-24T11:00:00Z",
+      "answers": {"mandate": null},
+      "bounds": {"mandate": 7200},
+      "conditions_met": ["action is reversible"],
+      "recourse_relied_on": ["30-day chargeback"],
+      "expect_state": "INCONCLUSIVE"
+    },
+    {
+      "id": "aa-09",
+      "kind": "commit",
+      "why": "re-check at commit: answer still inside the bound, action may run",
+      "answers": {"mandate": "2026-11-24T08:00:00Z"},
+      "bounds": {"mandate": 7200},
+      "commit_at": "2026-11-24T09:00:00Z",
+      "expect_state": "CURRENT",
+      "expect_outcome": "executed"
+    },
+    {
+      "id": "aa-10",
+      "kind": "commit",
+      "why": "re-check at commit: answer went stale between decision and commit, so the action is refused rather than executed (OAR 4.2)",
+      "answers": {"mandate": "2026-11-24T08:00:00Z"},
+      "bounds": {"mandate": 7200},
+      "commit_at": "2026-11-24T11:00:00Z",
+      "expect_state": "CHANGED",
+      "expect_outcome": "refused",
+      "expect_reason": "authority_expired"
+    },
+    {
+      "id": "aa-11",
+      "kind": "history",
+      "why": "our own record shows the mandate was revoked before commit, so the action is refused even though the answer is young",
+      "histories": {
+        "mandate": [
+          {"at": "2026-11-24T08:00:00Z", "new": "VERIFIED"},
+          {"at": "2026-11-24T10:30:00Z", "new": "REVOKED", "reason": "key compromise"}
+        ]
+      },
+      "bounds": {"mandate": 7200},
+      "commit_at": "2026-11-24T11:00:00Z",
+      "expect_state": "CHANGED",
+      "expect_outcome": "refused",
+      "expect_reason": "authority_revoked"
+    },
+    {
+      "id": "aa-12",
+      "kind": "history",
+      "why": "the revocation is dated after the commit instant, so it cannot retroactively describe that instant",
+      "histories": {
+        "mandate": [
+          {"at": "2026-11-24T08:00:00Z", "new": "VERIFIED"},
+          {"at": "2026-11-24T10:30:00Z", "new": "REVOKED", "reason": "key compromise"}
+        ]
+      },
+      "bounds": {"mandate": 7200},
+      "commit_at": "2026-11-24T10:00:00Z",
+      "expect_state": "CURRENT",
+      "expect_outcome": "executed"
+    }
+  ]
+}

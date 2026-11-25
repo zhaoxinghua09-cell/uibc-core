@@ -89,6 +89,11 @@ def _have_crypto():
 TERMS = ("bytes", "sweep", "control", "ledger", "ledger_skipped",
          "sigstore_inclusion", "verdict", "code")
 LEDGER_TERMS = ("ledger", "ledger_skipped")
+# The verdict and the exit code travel with the ledger step: a run that skipped it
+# records PARTIAL / 3, while a run that could evaluate it records REPRODUCED / 0.
+# They are therefore not comparable across that asymmetry either - but the receipt
+# still has to be *internally* consistent, which is checked below.
+VERDICT_TERMS = ("verdict", "code")
 
 
 def compare(receipt, out, tool_path=None):
@@ -120,14 +125,24 @@ def compare(receipt, out, tool_path=None):
     note = None
     skip = set()
     if receipt.get("ledger") is None and fresh["ledger"] is not None:
-        skip = set(LEDGER_TERMS)
+        skip = set(LEDGER_TERMS) | set(VERDICT_TERMS)
         note = ("the receipt's ledger step was not evaluated where it was written "
                 "(no cryptography); this machine has it, so that row cannot be "
                 "compared - the arithmetic can")
     elif receipt.get("ledger") is not None and fresh["ledger"] is None:
-        skip = set(LEDGER_TERMS)
+        skip = set(LEDGER_TERMS) | set(VERDICT_TERMS)
         note = ("this machine has no cryptography, so the receipt's ledger row "
                 "cannot be recomputed here")
+
+    if skip:
+        # Skipping a step does not license any verdict: the receipt must say what
+        # it could and could not check.
+        if receipt.get("ledger") is None:
+            if not str(receipt.get("verdict") or "").startswith("PARTIAL") \
+                    or receipt.get("code") != 3:
+                diffs.append("verdict: a receipt that skipped the ledger step must "
+                             "record PARTIAL and exit 3, not %r / %r"
+                             % (receipt.get("verdict"), receipt.get("code")))
 
     for term in TERMS:
         if term in skip:
@@ -178,7 +193,8 @@ def selftest():
     # A step that exists on one machine and not the other is a scope note, not a
     # disagreement: the arithmetic still has to match exactly.
     out_no_ledger = json.loads(json.dumps(out))
-    out_no_ledger.update({"ledger": None, "ledger_skipped": "no cryptography"})
+    out_no_ledger.update({"ledger": None, "ledger_skipped": "no cryptography",
+                          "verdict": "PARTIAL", "code": 3})
     diffs, note = compare(build_receipt(out_no_ledger), out)
     assert not diffs and note, (diffs, note)
     diffs, note = compare(build_receipt(out), out_no_ledger)
@@ -215,7 +231,7 @@ def main(argv=None):
     if note:
         print("note: %s" % note)
         print("the receipt's %d comparable checks and verdict %r are what this "
-              "machine recomputes" % (len(TERMS) - len(LEDGER_TERMS),
+              "machine recomputes" % (len(TERMS) - len(LEDGER_TERMS) - len(VERDICT_TERMS),
                                       receipt.get("verdict")))
         print("VERDICT: VERIFIED (arithmetic only)")
         return 0

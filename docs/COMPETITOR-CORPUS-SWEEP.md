@@ -294,8 +294,8 @@ ledger 那一栏取决于机器：没有 `cryptography` 的机器写出的 recei
 note: the receipt's ledger step was not evaluated where it was written
       (no cryptography); this machine has it, so that row cannot be
       compared - the arithmetic can
-the receipt's 6 comparable checks and verdict 'PARTIAL' are what this machine recomputes
+the receipt's 4 comparable checks are what this machine recomputes
 VERDICT: VERIFIED (arithmetic only)
 ```
 
-这条规则的理由和上一节一样：**读者少装一个库，不该被记成我们数字不对**；但也不能把"少核了一栏"说成"全核过了"，所以结论后面直接带上 `(arithmetic only)`。
+verdict 与退出码跟着那一栏走：跳过了 ledger 的 receipt 记 `PARTIAL`/3，能算的那台记 `REPRODUCED`/0，所以它们也不跨这一栏比；但 receipt 自身必须自洽——跳过 ledger 却写 `REPRODUCED` 会被直接点名（测试里有这条）。\n\n这条规则的理由和上一节一样：**读者少装一个库，不该被记成我们数字不对**；但也不能把"少核了一栏"说成"全核过了"，所以结论后面直接带上 `(arithmetic only)`。

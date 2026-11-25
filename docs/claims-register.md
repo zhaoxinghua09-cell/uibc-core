@@ -11,6 +11,16 @@
 
 这不是谦虚，是唯一能让"第三方复核"从口号变成动作的办法。
 
+## 数字与收据之间多一道锁
+
+人肉抄数字是这一页唯一的薄弱处：收据被重算一次，句子里的旧数字不会自己变。所以凡挂在收据上的行，行尾带一个机器可读的注解：
+
+```
+<!-- lock: docs/upstream-package/competitor-defects/corpus-ledger-39daf704.json totals.verdict,totals.nothing -->
+```
+
+`python tools/audit_claims_receipts.py` 只做三件机械的事：注解指的收据存在；注解指的字段在收据里是整数；那个整数出现在**该行正文**里（并且该行正文点名收据文件名）。正文改了而收据没动会红，收据动了而正文没改也会红。没有 `lock:` 的行不算错，只计入 `unlocked`——**`unlocked` 的个数就是"还有多少句只靠人"的尺度**，不必假装它是零。
+
 ## 一、可复跑（外人五分钟能自己验）
 
 | # | 对外断言 | 复跑命令 | 期望输出 | 不符意味着什么 |
@@ -32,13 +42,13 @@
 | A15 | 公开合规包**字节自证**（不是结论自证）：下载物、pin、用例三者对得上，且 58 例全过 | `python tools/check_vector_package.py` | 四行 ok（MANIFEST / archive pin / coverage / suite 58/58）；另 `sha256sum -c conformance/MANIFEST.sha256` 独立复算 | 任一行为 FAIL，说明发布物与清单脱节——此时所有"可复跑"的说法都不成立。**边界**：它证明的是"你拿到的字节是我们发布的字节"，不证明用例设计正确，也不证明判定结论必真 |
 | A16 | 覆盖矩阵公开且含空白单元：19 项检查中 16 项有用例，S9/S16/S19 无**直接**用例，逐条给出理由与替代验证路径（替代路径不计为向量覆盖） | `python tools/conformance_coverage.py --print` | 打印 `16/19 covered`，并列出 `S9, S16, S19`；`conformance/coverage.json` 的 `reason` 字段写替代路径 | 若某空白项没有 reason，说明是用例缺口而非结构限制——必须补用例，不能补说明 |
 | A17 | 突变基准报告 α 也报告 β，并给 Wilson 上界；第二套算子族单列 | `python tools/mutation_controls.py` | 保持型 10 例假拒绝 **0/10**（两模式，上界 ≤27.8%）；第二套算子 11 例假接受 **0/11**（三模式，上界 ≤25.9%）；3 个变异在 `ambiguous_excluded` 里写明裁决理由 | 若只报 α 或把 0 写成“0%”，即违反本法：0/10 的上界仍是 27.8%，不能当日结论 |
-| A18 | 竞品 171 条语料里 69 条（40%）能被外人按公开标准复算，69 自洽、0 矛盾、102 不可复算（HEAD `39daf704`） | 抓 `probityai/agent-evidence-vectors` 到 `39daf704`，`python tools/sweep_competitor_corpus.py --dir <…/corpus> --json` | 末行 `TOTAL 171 vectors, replayable without their code 69 (40%), consistent 69, inconsistent 0, not replayable 102`；逐文件 sha256 见收据 `docs/upstream-package/competitor-defects/corpus-sweep-39daf704.json` | 任一数字变动＝语料被改过，或我们的判据被放宽；必须先解释再改文档 |
-| A19 | 那个“0 矛盾”是检测器真的会失手才有的：196 处注入改动，183 处被认出，13 处属尺寸歧义，0 处无法解释 | 同一份语料上 `python tools/sweep_mutation_control.py --dir <…/corpus>` | `TOTAL applied 196, detected 183, ambiguous 13, unexplained 0`；收据 `…/sweep-mutation-control.json` | 若 `unexplained` 出现非零，说明漏检而不只是歧义——“0 矛盾”立刻失去支撑，须撤回该句 |
+| A18 | 竞品 171 条语料里 69 条（40%）能被外人按公开标准复算，69 自洽、0 矛盾、102 不可复算（HEAD `39daf704`） | 抓 `probityai/agent-evidence-vectors` 到 `39daf704`，`python tools/sweep_competitor_corpus.py --dir <…/corpus> --json` | 末行 `TOTAL 171 vectors, replayable without their code 69 (40%), consistent 69, inconsistent 0, not replayable 102`；逐文件 sha256 见收据 `docs/upstream-package/competitor-defects/corpus-sweep-39daf704.json` | 任一数字变动＝语料被改过，或我们的判据被放宽；必须先解释再改文档 <!-- lock: docs/upstream-package/competitor-defects/corpus-sweep-39daf704.json totals.vectors,totals.n_replayable,totals.consistent,totals.inconsistent,totals.none --> |
+| A19 | 那个“0 矛盾”是检测器真的会失手才有的：196 处注入改动，183 处被认出，13 处属尺寸歧义，0 处无法解释 | 同一份语料上 `python tools/sweep_mutation_control.py --dir <…/corpus>` | `TOTAL applied 196, detected 183, ambiguous 13, unexplained 0`；收据 `…/sweep-mutation-control.json` | 若 `unexplained` 出现非零，说明漏检而不只是歧义——“0 矛盾”立刻失去支撑，须撤回该句 <!-- lock: docs/upstream-package/competitor-defects/sweep-mutation-control.json totals.applied,totals.detected,totals.ambiguous,totals.unexplained --> |
 | A20 | 上面 A18、A19 两句，外人**一条命令**就能自己复得，不需要 clone 上游、不需要装任何包 | `python tools/stranger_competitor_check.py`（本机无网则 `--dir <已解包 corpus>`） | `bytes: 171 checked, 171 match` → `sweep: … 69 replayable … 0 inconsistent, 102 not replayable` → `control: 196 applied, 183 detected, 13 ambiguous, 0 unexplained` → `VERDICT: REPRODUCED`；`--json` 输出单个对象 | 任一步 `DIFFERS`／`DIFF`／退出码非 0，说明字节或数字有一处对不上——此时 A18/A19 只能引用“当时那次”的收据，不能对外说“可复得” |
 | A21 | 上述 69/0/102 不是某一天的偶然：上游 `22764551`（v0.38.0）与 `39daf704` 两快照之间，171 个文件**零字节变化**，两次扫描同一组数字 | `python tools/compare_corpus_snapshots.py --a …/corpus-sweep-22764551.json --b …/corpus-sweep-39daf704.json` | `22764551 vs 39daf704: IDENTICAL`；`manifest digest 7169d876… / 7169d876…`；`changed 0`；两条收据 totals 逐字段相等 | 判定变 `DIFFERENT` 或摘要不同，说明上游动过这批字节——那时 A18 必须按新快照重跑，旧数字只能标注为“截至 22764551–39daf704” |
 | A22 | 收据引用的那批字节若被上游改动，**当天可见**，不需要有人想起来重查 | `python tools/watch_upstream_corpus.py`（定时作业 `upstream-corpus-watch.yml` 每天 03:10 UTC 跑同一命令） | `upstream: <head> (171 files, digest 7169d876…)` → `VERDICT: NO DRIFT`，退出 0；有变动则 `DRIFT` + 点名 changed/added/removed 并退出 1 | 若显示 `DRIFT` 而页面仍写 69/171，说明收据已过期，A18/A20 必须立刻按新快照重跑或标注截止日期 |
-| A23 | A18 的 69/171 是**用同一把尺子量出来的**：我们的 63 条 RFC 9162 语料在同一组折叠函数下 **63/63 可复算、63 一致、0 矛盾**，叶摘要 50/50 可重建、自述重构根 57/57 与折叠吻合；另 4 条 `VALID_BUT_SIZE_UNAUTHENTICATED` 单列不计入 VALID | `python tools/measure_own_corpus.py`（`--check` 核对收据，`--selftest` 14 条） | `TOTAL 63 vectors, replayable 63 (100%), consistent 63, inconsistent 0, not replayable 0`；`leaf digests rebuilt 50 of 50 vectors that state one; own reconstructed_root agrees 57 of 57 stated; 4 vectors are VALID_BUT_SIZE_UNAUTHENTICATED`；收据 `docs/upstream-package/measurements/own-corpus-replay.json`（清单摘要 `f9079358…`） | 任一条变为不可复算或矛盾＝我方语料或判据退化，A18 的对照就失去意义；`--check` 报 stale＝向量被改过而收据未更新，文档里的 100% 立刻过期 |
-| A24 | A18 的 102 条“不可复算”不是一句话，而是三层：69 条落 `verdict`（算术直接判）、88 条只落 `signature-only`（签名自洽、判定规则未随文件发布）、14 条连签名也到不了（`nothing`）；后 14 条里没有一条是因为我们没跑 | `python tools/build_upstream_ledger.py --dir <…/corpus>`（`--check` 核对收据；`--selftest` 7 条） | `verdict 69 (40%)` / `signature-only 88 (51%)` / `nothing 14 (8%)`，`signatures that verify: 88`；收据 `docs/upstream-package/competitor-defects/corpus-ledger-39daf704.json`（171 行逐文件，清单摘要 `7169d876…`） | 任一条的可达级别与收据不符＝判据被改，或语料被改；`--check` 报 stale 时，文档里的三行数立刻过期。**边界**：`signature-only` 只说明字节自洽签过名，不说明他们的判定对不对，因此永不与 69 合并计数 |
+| A23 | A18 的 69/171 是**用同一把尺子量出来的**：我们的 63 条 RFC 9162 语料在同一组折叠函数下 **63/63 可复算、63 一致、0 矛盾**，叶摘要 50/50 可重建、自述重构根 57/57 与折叠吻合；另 4 条 `VALID_BUT_SIZE_UNAUTHENTICATED` 单列不计入 VALID | `python tools/measure_own_corpus.py`（`--check` 核对收据，`--selftest` 14 条） | `TOTAL 63 vectors, replayable 63 (100%), consistent 63, inconsistent 0, not replayable 0`；`leaf digests rebuilt 50 of 50 vectors that state one; own reconstructed_root agrees 57 of 57 stated; 4 vectors are VALID_BUT_SIZE_UNAUTHENTICATED`；收据 `docs/upstream-package/measurements/own-corpus-replay.json`（清单摘要 `f9079358…`） | 任一条变为不可复算或矛盾＝我方语料或判据退化，A18 的对照就失去意义；`--check` 报 stale＝向量被改过而收据未更新，文档里的 100% 立刻过期 <!-- lock: docs/upstream-package/measurements/own-corpus-replay.json totals.vectors,totals.n_replayable,totals.leaf_digest_rebuilt,totals.leaf_digest_stated,totals.own_reconstruction_agrees,totals.own_reconstruction_stated,totals.size_unauthenticated --> |
+| A24 | A18 的 102 条“不可复算”不是一句话，而是三层：69 条落 `verdict`（算术直接判）、88 条只落 `signature-only`（签名自洽、判定规则未随文件发布）、14 条连签名也到不了（`nothing`）；后 14 条里没有一条是因为我们没跑 | `python tools/build_upstream_ledger.py --dir <…/corpus>`（`--check` 核对收据；`--selftest` 7 条） | `verdict 69 (40%)` / `signature-only 88 (51%)` / `nothing 14 (8%)`，`signatures that verify: 88`；收据 `docs/upstream-package/competitor-defects/corpus-ledger-39daf704.json`（171 行逐文件，清单摘要 `7169d876…`） | 任一条的可达级别与收据不符＝判据被改，或语料被改；`--check` 报 stale 时，文档里的三行数立刻过期。**边界**：`signature-only` 只说明字节自洽签过名，不说明他们的判定对不对，因此永不与 69 合并计数 <!-- lock: docs/upstream-package/competitor-defects/corpus-ledger-39daf704.json totals.vectors,totals.verdict,totals.signature-only,totals.nothing --> |
 
 ## 二、未建（**这些句子现在不许对外说**）
 
@@ -120,3 +130,4 @@ tools/check_citations.py   → 逐条打印引用 HTTP 状态码
 **复跑口径**：本节对手读数来自 `git ls-tree` 级统计与原文摘句，原件在发布前审查包（`S2_peer_repos_20261124.json`、`S2逐节定位_20261124.md`）。对手仓更新后本表即过期，引用前必须重跑。
 
 *本表随每次对外材料更新。表内每一条都可被任何人执行；执行结果与本表不一致时，以执行结果为准，并请开 issue。*
+| A25 | 对外数字不是抄的：每条挂在收据上的断言都带一个机器可读的 `lock:` 注解，CI 同时核三件事——收据存在、字段是整数、该整数出现在该行正文里；正文改了而收据没动、或收据动了而正文没改，都会红 | `python tools/audit_claims_receipts.py`（`--selftest` 6 条） | `claims: N rows, M locked to a receipt, K unlocked` + 逐行打印每个锁定行的字段与数值 → `VERDICT: NUMBERS AGREE` | 出现 `PROBLEM … does not appear` 说明某一行的数字与收据脱节——此时该行不许对外引用，直到两者对齐。**边界**：只覆盖显式带 `lock:` 的行，未锁的行仍靠人；`unlocked` 数就是这句自述的尺度 |

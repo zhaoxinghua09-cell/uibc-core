@@ -351,6 +351,12 @@ jobs:
           # should not print. The selftest also re-reads the committed receipt and
           # asserts its rows still sum to its own total.
           python tools/build_upstream_ledger.py --selftest
+          # Between a receipt and a sentence sat a person copying a number. Every
+          # claim row that quotes a receipt carries a lock: annotation, and this
+          # fails if the receipt moved without the prose or the prose without the
+          # receipt. Unlocked rows are counted out loud, not silently passed.
+          python tools/audit_claims_receipts.py
+          python tools/audit_claims_receipts.py --selftest
           python tools/check_competitor_vectors.py \
             --dir docs/upstream-package/competitor-defects/v0.38.0 \
             --dir docs/upstream-package/competitor-defects/v0.38.0-counter --json \

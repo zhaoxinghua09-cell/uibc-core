@@ -24,6 +24,12 @@ graft tests
 # vocabulary and not grafted, so the sdist carried the test that reads it and
 # not the file it opens -- exactly the failure class described above. CI job
 # `sdist-self-check` caught it, which is the point of that job.
+# Sixth pass, 2026-11-25. `vectors/` was added for the BID conformance pack and
+# not grafted, so the sdist carried tools/check_bid_vectors.py and the test that
+# runs it, but not the JSON they read. Caught by `sdist-self-check` again -- the
+# same failure class, sixth time. The rule is mechanical: a new top-level
+# directory a test opens must be grafted in the same commit.
+graft vectors
 graft schemas
 graft fixtures
 graft tools

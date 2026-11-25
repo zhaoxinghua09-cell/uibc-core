@@ -174,6 +174,26 @@ def evidence_root(content_hashes: list) -> str:
     return sha256_hex(canonicalize(sorted(content_hashes)))
 
 
+def evidence_root_merkle(content_hashes: list) -> str:
+    """Evidence Root v0.2 (merkle-aer1-v1): Merkle root over content hashes.
+
+    Leaves are ``merkle.leaf_hash(bytes.fromhex(content_hash))`` sorted by
+    content hash, so the root is reproducible from the declared hashes alone
+    and one item can be proven with ``log2(n)`` sibling hashes.
+    """
+    from .merkle import leaf_hash, root_hash
+    leaves = [leaf_hash(bytes.fromhex(h)) for h in sorted(content_hashes)]
+    return root_hash(leaves).hex()
+
+
+def evidence_root_for(content_hashes: list, root_algorithm=None) -> str:
+    """Dispatch on ``manifest["root_algorithm"]``; unknown/absent -> legacy v0.1."""
+    alg = (root_algorithm or "").strip().lower()
+    if alg.startswith("merkle-aer1"):
+        return evidence_root_merkle(content_hashes)
+    return evidence_root(content_hashes)
+
+
 def index_metadata_digest(index: dict) -> str:
     """SHA-256 over the evidence-index METADATA only (v1.1, check S7).
 

@@ -176,11 +176,25 @@ def _verify_aer1(leaf: bytes, index: int, size: int, proof, root: bytes) -> bool
         return False
     r, idx = leaf, index
     for sibling in proof:
-        if not isinstance(sibling, (bytes, bytearray)) or len(sibling) != 32:
+        sb = _as_sibling(sibling)
+        if sb is None or len(sb) != 32:
             return False
+        sibling = sb
         r = node_hash(r, sibling, PROFILE_AER1) if idx % 2 == 0 else node_hash(sibling, r, PROFILE_AER1)
         idx //= 2
     return r == root
+
+
+def _as_sibling(x):
+    """Accept both bytes and lowercase hex - build_proof() emits hex."""
+    if isinstance(x, str):
+        try:
+            return bytes.fromhex(x)
+        except ValueError:
+            return None
+    if isinstance(x, (bytes, bytearray)):
+        return bytes(x)
+    return None
 
 
 def verify_inclusion(leaf: bytes, index: int, size: int, proof, root: bytes,
@@ -201,8 +215,10 @@ def verify_inclusion(leaf: bytes, index: int, size: int, proof, root: bytes,
             return _verify_aer1(leaf, index, size, proof, root)
         fn, sn, r = index, size - 1, leaf
         for sibling in proof:
-            if not isinstance(sibling, (bytes, bytearray)) or len(sibling) != 32:
+            sb = _as_sibling(sibling)
+            if sb is None or len(sb) != 32:
                 return False
+            sibling = sb
             if fn % 2 == 1 or fn == sn:
                 r = node_hash(bytes(sibling), r)
                 while fn % 2 == 0 and fn != 0:

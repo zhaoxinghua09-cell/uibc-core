@@ -1,6 +1,6 @@
 {
  "audited_at": "2026-11-26",
- "checked_at": "2026-11-26T04:04:41",
+ "checked_at": "2026-11-26T07:21:43",
  "entries": [
   {
    "repo": "WeBankBlockchain/WeIdentity",
@@ -8,7 +8,7 @@
    "url": "https://github.com/WeBankBlockchain/WeIdentity/tree/2f8e4b5a7e208790af7e2697b061550c91560e98",
    "status": 200,
    "final_url": "https://github.com/WeBankBlockchain/WeIdentity/tree/2f8e4b5a7e208790af7e2697b061550c91560e98",
-   "elapsed_ms": 913,
+   "elapsed_ms": 1007,
    "error": ""
   },
   {
@@ -17,7 +17,7 @@
    "url": "https://github.com/caict-4iot-dev/uni-registrar-driver-did-bid/tree/68f69ec419c0f23c1a7faf95dd8d73aeb5ff30a4",
    "status": 200,
    "final_url": "https://github.com/caict-4iot-dev/uni-registrar-driver-did-bid/tree/68f69ec419c0f23c1a7faf95dd8d73aeb5ff30a4",
-   "elapsed_ms": 984,
+   "elapsed_ms": 1110,
    "error": ""
   },
   {
@@ -26,7 +26,7 @@
    "url": "https://github.com/caict-4iot-dev/uni-resolver-driver-did-bid/tree/5a933656eb9631bc65ba535f4bb69aa893d79a79",
    "status": 200,
    "final_url": "https://github.com/caict-4iot-dev/uni-resolver-driver-did-bid/tree/5a933656eb9631bc65ba535f4bb69aa893d79a79",
-   "elapsed_ms": 919,
+   "elapsed_ms": 1077,
    "error": ""
   },
   {
@@ -35,7 +35,7 @@
    "url": "https://github.com/ceramicnetwork/js-did/tree/def0a5fed152a42ffeef87bafb4619816f9954f6",
    "status": 200,
    "final_url": "https://github.com/ceramicnetwork/js-did/tree/def0a5fed152a42ffeef87bafb4619816f9954f6",
-   "elapsed_ms": 1008,
+   "elapsed_ms": 1177,
    "error": ""
   },
   {
@@ -44,7 +44,7 @@
    "url": "https://github.com/decentralized-identity/did-jwt/tree/63663c1f40b4d6dd0d510847acfe5ae5ad230fd2",
    "status": 200,
    "final_url": "https://github.com/decentralized-identity/did-jwt/tree/63663c1f40b4d6dd0d510847acfe5ae5ad230fd2",
-   "elapsed_ms": 963,
+   "elapsed_ms": 1140,
    "error": ""
   },
   {
@@ -53,7 +53,7 @@
    "url": "https://github.com/decentralized-identity/did-resolver/tree/005411b26ac3002aa4f501673ee4e2ecc96b2a71",
    "status": 200,
    "final_url": "https://github.com/decentralized-identity/did-resolver/tree/005411b26ac3002aa4f501673ee4e2ecc96b2a71",
-   "elapsed_ms": 877,
+   "elapsed_ms": 1042,
    "error": ""
   },
   {
@@ -62,7 +62,7 @@
    "url": "https://github.com/decentralized-identity/ethr-did-resolver/tree/6e0bd47702495d259674c6a53e8be3037069dcc1",
    "status": 200,
    "final_url": "https://github.com/decentralized-identity/ethr-did-resolver/tree/6e0bd47702495d259674c6a53e8be3037069dcc1",
-   "elapsed_ms": 932,
+   "elapsed_ms": 1479,
    "error": ""
   },
   {
@@ -71,7 +71,7 @@
    "url": "https://github.com/decentralized-identity/ion/tree/424ec87dda60c89c0b3c4e46c274eff3124fe484",
    "status": 200,
    "final_url": "https://github.com/decentralized-identity/ion/tree/424ec87dda60c89c0b3c4e46c274eff3124fe484",
-   "elapsed_ms": 959,
+   "elapsed_ms": 1021,
    "error": ""
   },
   {
@@ -80,8 +80,16 @@
    "url": "https://github.com/decentralized-identity/sidetree-core/tree/bb4bb16d23838cc02bbde0b4ac634e0491ae85fd",
    "status": 301,
    "final_url": "https://github.com/decentralized-identity/sidetree/tree/bb4bb16d23838cc02bbde0b4ac634e0491ae85fd",
-   "elapsed_ms": 553,
-   "error": ""
+   "elapsed_ms": 548,
+   "error": "",
+   "followed": {
+    "repo_now": "decentralized-identity/sidetree",
+    "url": "https://github.com/decentralized-identity/sidetree/tree/bb4bb16d23838cc02bbde0b4ac634e0491ae85fd",
+    "status": 200,
+    "final_url": "https://github.com/decentralized-identity/sidetree/tree/bb4bb16d23838cc02bbde0b4ac634e0491ae85fd",
+    "elapsed_ms": 1052,
+    "error": ""
+   }
   },
   {
    "repo": "decentralized-identity/universal-resolver",
@@ -89,7 +97,7 @@
    "url": "https://github.com/decentralized-identity/universal-resolver/tree/99838d52a7a6c7424bf8c895d03d317dcd8cdb3a",
    "status": 200,
    "final_url": "https://github.com/decentralized-identity/universal-resolver/tree/99838d52a7a6c7424bf8c895d03d317dcd8cdb3a",
-   "elapsed_ms": 986,
+   "elapsed_ms": 939,
    "error": ""
   },
   {
@@ -98,7 +106,7 @@
    "url": "https://github.com/decentralized-identity/veramo/tree/ac953d9a28db1faa57266636de7c4ed891bf1b0b",
    "status": 200,
    "final_url": "https://github.com/decentralized-identity/veramo/tree/ac953d9a28db1faa57266636de7c4ed891bf1b0b",
-   "elapsed_ms": 979,
+   "elapsed_ms": 985,
    "error": ""
   },
   {
@@ -107,7 +115,7 @@
    "url": "https://github.com/digitalbazaar/did-io/tree/940555f002fbf69e081e4db5b44b3cd9e0234404",
    "status": 200,
    "final_url": "https://github.com/digitalbazaar/did-io/tree/940555f002fbf69e081e4db5b44b3cd9e0234404",
-   "elapsed_ms": 1049,
+   "elapsed_ms": 1143,
    "error": ""
   },
   {
@@ -116,7 +124,7 @@
    "url": "https://github.com/docknetwork/sdk/tree/1eadcdc7a9c1dd7a28a2df5ff2b3b969a51427a6",
    "status": 200,
    "final_url": "https://github.com/docknetwork/sdk/tree/1eadcdc7a9c1dd7a28a2df5ff2b3b969a51427a6",
-   "elapsed_ms": 936,
+   "elapsed_ms": 978,
    "error": ""
   },
   {
@@ -125,8 +133,16 @@
    "url": "https://github.com/hyperledger/aries-cloudagent-python/tree/daf7ff8d208a56bbfe5f66d879c638b2d2fb4a77",
    "status": 301,
    "final_url": "https://github.com/openwallet-foundation/acapy/tree/daf7ff8d208a56bbfe5f66d879c638b2d2fb4a77",
-   "elapsed_ms": 518,
-   "error": ""
+   "elapsed_ms": 562,
+   "error": "",
+   "followed": {
+    "repo_now": "openwallet-foundation/acapy",
+    "url": "https://github.com/openwallet-foundation/acapy/tree/daf7ff8d208a56bbfe5f66d879c638b2d2fb4a77",
+    "status": 200,
+    "final_url": "https://github.com/openwallet-foundation/acapy/tree/daf7ff8d208a56bbfe5f66d879c638b2d2fb4a77",
+    "elapsed_ms": 1334,
+    "error": ""
+   }
   },
   {
    "repo": "hyperledger/aries-framework-go",
@@ -134,8 +150,16 @@
    "url": "https://github.com/hyperledger/aries-framework-go/tree/64dd8acc07506884f480719f7d9d960447d9a5ac",
    "status": 301,
    "final_url": "https://github.com/hyperledger-aries/aries-framework-go/tree/64dd8acc07506884f480719f7d9d960447d9a5ac",
-   "elapsed_ms": 559,
-   "error": ""
+   "elapsed_ms": 588,
+   "error": "",
+   "followed": {
+    "repo_now": "hyperledger-aries/aries-framework-go",
+    "url": "https://github.com/hyperledger-aries/aries-framework-go/tree/64dd8acc07506884f480719f7d9d960447d9a5ac",
+    "status": 200,
+    "final_url": "https://github.com/hyperledger-aries/aries-framework-go/tree/64dd8acc07506884f480719f7d9d960447d9a5ac",
+    "elapsed_ms": 1163,
+    "error": ""
+   }
   },
   {
    "repo": "hyperledger/indy-sdk",
@@ -143,8 +167,16 @@
    "url": "https://github.com/hyperledger/indy-sdk/tree/2d47f2ff1ca62563f0f85e52cc9378f133ad8a0d",
    "status": 301,
    "final_url": "https://github.com/hyperledger-indy/indy-sdk/tree/2d47f2ff1ca62563f0f85e52cc9378f133ad8a0d",
-   "elapsed_ms": 549,
-   "error": ""
+   "elapsed_ms": 630,
+   "error": "",
+   "followed": {
+    "repo_now": "hyperledger-indy/indy-sdk",
+    "url": "https://github.com/hyperledger-indy/indy-sdk/tree/2d47f2ff1ca62563f0f85e52cc9378f133ad8a0d",
+    "status": 200,
+    "final_url": "https://github.com/hyperledger-indy/indy-sdk/tree/2d47f2ff1ca62563f0f85e52cc9378f133ad8a0d",
+    "elapsed_ms": 1200,
+    "error": ""
+   }
   },
   {
    "repo": "hyperledger/indy-vdr",
@@ -152,8 +184,16 @@
    "url": "https://github.com/hyperledger/indy-vdr/tree/e4902fcd5638efb0aaded3a854a56e077f8b32f3",
    "status": 301,
    "final_url": "https://github.com/hyperledger-indy/indy-vdr/tree/e4902fcd5638efb0aaded3a854a56e077f8b32f3",
-   "elapsed_ms": 539,
-   "error": ""
+   "elapsed_ms": 587,
+   "error": "",
+   "followed": {
+    "repo_now": "hyperledger-indy/indy-vdr",
+    "url": "https://github.com/hyperledger-indy/indy-vdr/tree/e4902fcd5638efb0aaded3a854a56e077f8b32f3",
+    "status": 200,
+    "final_url": "https://github.com/hyperledger-indy/indy-vdr/tree/e4902fcd5638efb0aaded3a854a56e077f8b32f3",
+    "elapsed_ms": 1096,
+    "error": ""
+   }
   },
   {
    "repo": "ontio/ontology-did",
@@ -161,7 +201,7 @@
    "url": "https://github.com/ontio/ontology-did/tree/9902c8f80f0610080008ddf0eb151dabb6340f2a",
    "status": 200,
    "final_url": "https://github.com/ontio/ontology-did/tree/9902c8f80f0610080008ddf0eb151dabb6340f2a",
-   "elapsed_ms": 948,
+   "elapsed_ms": 1022,
    "error": ""
   },
   {
@@ -170,7 +210,7 @@
    "url": "https://github.com/sphereon-opensource/ssi-sdk/tree/4f8b21c24659259843b4b802e4a68a635989a590",
    "status": 200,
    "final_url": "https://github.com/sphereon-opensource/ssi-sdk/tree/4f8b21c24659259843b4b802e4a68a635989a590",
-   "elapsed_ms": 1002,
+   "elapsed_ms": 1209,
    "error": ""
   },
   {
@@ -179,7 +219,7 @@
    "url": "https://github.com/spruceid/didkit/tree/57a3b45111f8b1003ef1a50cf7cf21c81cd59cb1",
    "status": 200,
    "final_url": "https://github.com/spruceid/didkit/tree/57a3b45111f8b1003ef1a50cf7cf21c81cd59cb1",
-   "elapsed_ms": 1008,
+   "elapsed_ms": 1015,
    "error": ""
   },
   {
@@ -188,7 +228,7 @@
    "url": "https://github.com/spruceid/ssi/tree/726f49e7fefbb726ff41deba331428088bfa782d",
    "status": 200,
    "final_url": "https://github.com/spruceid/ssi/tree/726f49e7fefbb726ff41deba331428088bfa782d",
-   "elapsed_ms": 1225,
+   "elapsed_ms": 1110,
    "error": ""
   },
   {
@@ -197,7 +237,7 @@
    "url": "https://github.com/transmute-industries/sidetree.js/tree/0b17eb9ed7aa787230bfdeaff92cc7eca05d0e7e",
    "status": 200,
    "final_url": "https://github.com/transmute-industries/sidetree.js/tree/0b17eb9ed7aa787230bfdeaff92cc7eca05d0e7e",
-   "elapsed_ms": 1100,
+   "elapsed_ms": 2024,
    "error": ""
   },
   {
@@ -206,7 +246,7 @@
    "url": "https://github.com/uport-project/ethr-did/tree/4bbd2ef539ba532731508198e5828657c169ff66",
    "status": 200,
    "final_url": "https://github.com/uport-project/ethr-did/tree/4bbd2ef539ba532731508198e5828657c169ff66",
-   "elapsed_ms": 1025,
+   "elapsed_ms": 1036,
    "error": ""
   },
   {
@@ -215,8 +255,16 @@
    "url": "https://github.com/w3c-ccg/did-method-key/tree/2cc490c38c5aacf58497a87fc0cf8794668bf716",
    "status": 301,
    "final_url": "https://github.com/w3c-ccg/did-key-spec/tree/2cc490c38c5aacf58497a87fc0cf8794668bf716",
-   "elapsed_ms": 611,
-   "error": ""
+   "elapsed_ms": 752,
+   "error": "",
+   "followed": {
+    "repo_now": "w3c-ccg/did-key-spec",
+    "url": "https://github.com/w3c-ccg/did-key-spec/tree/2cc490c38c5aacf58497a87fc0cf8794668bf716",
+    "status": 200,
+    "final_url": "https://github.com/w3c-ccg/did-key-spec/tree/2cc490c38c5aacf58497a87fc0cf8794668bf716",
+    "elapsed_ms": 1050,
+    "error": ""
+   }
   },
   {
    "repo": "w3c-ccg/did-test-suite",
@@ -224,7 +272,7 @@
    "url": "https://github.com/w3c-ccg/did-test-suite/tree/addafb08c84ef3c4dd4a596ebe71f164daa4ceab",
    "status": 200,
    "final_url": "https://github.com/w3c-ccg/did-test-suite/tree/addafb08c84ef3c4dd4a596ebe71f164daa4ceab",
-   "elapsed_ms": 1046,
+   "elapsed_ms": 1144,
    "error": ""
   }
  ],
@@ -232,6 +280,8 @@
   "citations": 25,
   "alive": 19,
   "moved": 6,
-  "dead": 0
+  "moved_verified": 6,
+  "dead": 0,
+  "dead_after_move": 0
  }
 }

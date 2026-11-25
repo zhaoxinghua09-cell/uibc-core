@@ -1,0 +1,33 @@
+# 真装真跑：两家竞品的测试套件跑出了什么（每次重写本页）
+
+审计日 2026-11-26。主机 Windows 11, node v22.23.2, npm 10.9.8, pnpm 9.15.9。
+
+**这不是加分项，也不是减分项。** 把竞品仓按同一批固定 commit 真装真跑一遍，只记录它们自己的测试套件跑出了什么；不改竞品表任何分数，也不把'它的测试能跑'读成'它更差'。
+
+| 仓库 | 固定 commit | 用例 | 过 | 红 | 跳过 | 耗时 s | 退出码 |
+|---|---|---|---|---|---|---|---|
+| `decentralized-identity/did-jwt` | `63663c1f40b4` | 506 | 506 | 0 | 0 | 4.22 | 0 |
+| `decentralized-identity/ethr-did-resolver` | `6e0bd4770249` | 182 | 178 | 1 | 3 | 19.51 | 1 |
+
+## `decentralized-identity/did-jwt`
+
+- 安装：npm install 失败（npm 读 pnpm workspace 时 `Cannot read properties of null (reading 'edgesOut')`）；改用 `pnpm install --ignore-workspace`，9.8s 完成。仓库自带的 pnpm-workspace.yaml 只有 allowBuilds 键，pnpm 9 要求 `packages` 字段，本地补了 `- .` 才能 `pnpm run`。
+- 套件：`pnpm test → vitest run` → 16 文件 / 506 用例 / 0 红 / 0 跳过 / 4.22 s / exit 0
+- 额外探针：pnpm run canary（他们的 ESM / CJS / tsc --noEmit 三层一次性探测） → exit 1。脚本自身的 Windows 路径缺陷：`canary/unpack.mjs:24` 用 `new URL(import.meta.url).pathname` 取路径，在 Windows 上得到 `/D:/...`，`resolve(HERE, '..')` 变成 `D:\D:\realrun\did-jwt`，在跑任何检查之前就 ENOENT。 读法：这条不代表它那三层一致性不存在，只代表该脚本是 POSIX-only；因此不作为任何关于 D4 能力的证据。
+- 结论：它的测试套件是绿的：506 条全过。但那是 JWT 签名/校验的套件，不是'一条报文的每一位翻一遍'——绿不等于本表的 D2。
+
+## `decentralized-identity/ethr-did-resolver`
+
+- 安装：`pnpm install --no-frozen-lockfile` 24.7s 完成（workspace 里 3 个包）。
+- 套件：`pnpm -r test` → 19 文件 / 182 用例 / 1 红 / 3 跳过 / 19.51 s / exit 1
+- 按原样跑不动的部分：仓库里的 `test` 脚本写成 `HARDHAT_CONFIG=hardhat.config.mts vitest run`（POSIX 环境变量前缀），Windows 直接报 `'HARDHAT_CONFIG' is not recognized`——这是 shell 语法问题，不是测试失败。设 `$env:HARDHAT_CONFIG` 后重跑，才是下面这份结果。
+- 红的那条：`src/__tests__/networks.integration.test.ts > ethrResolver (alt-chains) > eth-networks > resolves on mainnet with versionId` —— AssertionError: 与主网实时链状态深比较不一致 读法：该用例断言的是实时 mainnet 上的解析结果；链上状态随时间变化，所以它现在红。不是代码缺陷，也不是本表任何一维的证据。
+- 结论：182 条里 178 绿、1 红（网络/链状态相关）、3 跳过；exit 1 来自那条实时链断言。
+
+## 为什么这些数字不进表
+
+本表量的是'仓内有没有外人可复算的变异证据'；'它的测试套件能跑' 与这一维无关，所以无论绿红都不许改分。
+
+改分条数：**0**。
+
+复跑：`python tools/parity_realrun.py --check`（离线比对记录与快照）。真跑本身是可复现的人工步骤，命令与踩到的坑都写在记录里，不假装是一条命令能复现的流水线。

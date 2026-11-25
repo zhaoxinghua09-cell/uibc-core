@@ -36,6 +36,7 @@
 | A19 | 那个“0 矛盾”是检测器真的会失手才有的：196 处注入改动，183 处被认出，13 处属尺寸歧义，0 处无法解释 | 同一份语料上 `python tools/sweep_mutation_control.py --dir <…/corpus>` | `TOTAL applied 196, detected 183, ambiguous 13, unexplained 0`；收据 `…/sweep-mutation-control.json` | 若 `unexplained` 出现非零，说明漏检而不只是歧义——“0 矛盾”立刻失去支撑，须撤回该句 |
 | A20 | 上面 A18、A19 两句，外人**一条命令**就能自己复得，不需要 clone 上游、不需要装任何包 | `python tools/stranger_competitor_check.py`（本机无网则 `--dir <已解包 corpus>`） | `bytes: 171 checked, 171 match` → `sweep: … 69 replayable … 0 inconsistent, 102 not replayable` → `control: 196 applied, 183 detected, 13 ambiguous, 0 unexplained` → `VERDICT: REPRODUCED`；`--json` 输出单个对象 | 任一步 `DIFFERS`／`DIFF`／退出码非 0，说明字节或数字有一处对不上——此时 A18/A19 只能引用“当时那次”的收据，不能对外说“可复得” |
 | A21 | 上述 69/0/102 不是某一天的偶然：上游 `22764551`（v0.38.0）与 `39daf704` 两快照之间，171 个文件**零字节变化**，两次扫描同一组数字 | `python tools/compare_corpus_snapshots.py --a …/corpus-sweep-22764551.json --b …/corpus-sweep-39daf704.json` | `22764551 vs 39daf704: IDENTICAL`；`manifest digest 7169d876… / 7169d876…`；`changed 0`；两条收据 totals 逐字段相等 | 判定变 `DIFFERENT` 或摘要不同，说明上游动过这批字节——那时 A18 必须按新快照重跑，旧数字只能标注为“截至 22764551–39daf704” |
+| A22 | 收据引用的那批字节若被上游改动，**当天可见**，不需要有人想起来重查 | `python tools/watch_upstream_corpus.py`（定时作业 `upstream-corpus-watch.yml` 每天 03:10 UTC 跑同一命令） | `upstream: <head> (171 files, digest 7169d876…)` → `VERDICT: NO DRIFT`，退出 0；有变动则 `DRIFT` + 点名 changed/added/removed 并退出 1 | 若显示 `DRIFT` 而页面仍写 69/171，说明收据已过期，A18/A20 必须立刻按新快照重跑或标注截止日期 |
 
 ## 二、未建（**这些句子现在不许对外说**）
 

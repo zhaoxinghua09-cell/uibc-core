@@ -121,8 +121,11 @@ manifest_digest = sha256("path<TAB>sha256<LF" 每行, 按 path 排序)
 
 两个 head 之间 **171 个文件一个字节都没动**，所以 69/0/102 不是某一天的偶然：他们没在这两次之间修过这批语料，我们的数字也不是快照造成的假象。收据 `corpus-snapshots-22764551-39daf704.json`（判定 `IDENTICAL`），旧快照的收据 `corpus-sweep-22764551.json` 只留摘要不重复 74 KB 清单——摘要相等就是同一批字节，`tools/compare_corpus_snapshots.py` 负责讲这句话，并且在那份摘要与 39daf704 的清单不再相符时失败。
 
+有的读者会问得更远：这两个快照之后他们又改了吗？答案不能靠人记得。`tools/watch_upstream_corpus.py` 取上游**当前 head** 的语料、逐个摘要，与我们收据逐文件比对，只输出两种结论：`NO DRIFT`（同一批字节）或 `DRIFT`（点名改了/多了/少了哪些文件，并退出非零）。`.github/workflows/upstream-corpus-watch.yml` 每天 03:10 UTC 跑一次：没有漂移就安静，漂移就变红。它**只比对、不更新**——重扫并改收据是人做的事（数字、文档、图、登记行要一起动），这个作业只保证这件事不会被漏掉。
+
 ## 与我们自己的语料摆在一起
 
 我们 63 条 RFC 9162 语料（inclusion 50 + consistency 13）没有一条要求读者信任我们的代码：每条都带正孪生、拒绝词表，并被 pymerkle、Sigstore `merkle.py`、Go `transparency-dev/merkle` 三份实现各自独立判过（`docs/THIRD-PARTY-CROSSCHECK.md`）。对方 171 条里 69 条能这样被判，102 条不能。
 
 这是本轮唯一可比的"体量"：**可被外人独立复算的向量条数**，不是总条数。总数（3,069 套件条目 vs 63）我们不比，因为追不上也不影响可核验性。
+

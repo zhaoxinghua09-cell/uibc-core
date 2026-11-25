@@ -13,7 +13,9 @@
 - **跨实现核验（这是本轮最该被外人复查的一条）**：签名不是我们自己验自己。`tools/verify-js/bid.mjs` 用**另一套 RFC 8785 实现**（JS 里按 RFC 原文重写，未复用 Python 代码）规范化、用 **node/OpenSSL** 验 Ed25519，对 `fixtures/bid/signed_document.json` 给出 `signature-verified true`，并打印规范化字节的 sha256 与 Python 逐字符比对。两次实现算出同一个 sha256，才叫"第三方能重算"。夹具由 `tools/make_bid_fixture.py` 以固定种子生成（随机种子会让已提交的夹具无法复现，等于把可证伪性换成了一次性快照）。测试 `tests/test_bid_crossjs.py` 4 条：夹具仍能自验、node 能验、两侧 sha256 相同、改一个字段 node 必须拒。
 - **用官方 SDK 反查，抓到一个会让真实文档全部被拒的缺陷**：`bid-sdk-nodejs` 1.0.1（Caict 发布）对固定种子给出的 `encPublicKey` 是 `b0 65 66 || 32 字节`——**35 字节**，而协议 §5.4.1 的样例 `b06566f76733ae…` 正是这个形状。此前我们只认 `b0 || key`（33 字节），于是真实 BID 文档的 `publicKeyHex` 一律被当成 35 字节的非法长度，验签直接失败。现在前缀按 `b06566` → `b0` → 裸键三档剥离（`strip_key_prefix`），边长集合 64/70/66；夹具也改用真实编码，JS 侧同步。
 - **地址规则三方对齐**：`tools/bid_sdk_address.mjs` 调官方 keypair 模块、`fixtures/bid/sdk_address.json` 原样记录输出、`tests/test_bid_address_rule.py` 4 条用协议规则（`base58(sha256(pub)[10:])`）独立复算——三方给出同一个 `did:bid:ef23dCHgV7h6RiXN2QrPcPMXmFgZtSG3d`，且我们的 `_check_bid` 把它判成主链/Ed25519/base58。
-- 证据：`uibc_core/bid_protocol.py`、`tests/test_bid_protocol.py`、`tests/test_bid_crossjs.py`、`tests/test_bid_address_rule.py`、`tools/verify-js/bid.mjs`、`tools/bid_sdk_address.mjs`、`fixtures/bid/`
+- 证据（键编码与 SDK 对齐）：`tests/test_bid_address_rule.py`、`tools/bid_sdk_address.mjs`、`fixtures/bid/sdk_address.json`
+- **§4.2.2 五个字段接口落地**（`resolve_public_keys` / `resolve_attributes` / `resolve_acsns` / `resolve_credentials` / `resolve_service`）：协议给了五个字段端点，其中 `public-keys` 返回数组而 `public-keys/{id}` 返回单个对象——这个**形状不对称是协议自己的**，调用方若假定"永远是列表"就会错。都按 §4.2.5 的码处理（3/7 重试、6 不重试），都校验 `data.id` 必须等于请求的 BID、`data.version` 必须是字符串，单键查询必须真的是一把键、服务查询必须真的问什么答什么。键 id 要百分号编码（`#` → `%23`），服务查询用半角 `?id=`（协议里印的是全角"？"）。测试 `tests/test_bid_fields.py` 15 条。
+- 证据：`uibc_core/bid_protocol.py`、`tests/test_bid_fields.py`
 
 ## 0.5.3 — 2026-11-25（一致性语料 36→58，第二实现对齐）
 

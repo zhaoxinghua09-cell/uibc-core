@@ -191,3 +191,15 @@ def test_a_delivery_difference_is_named_and_not_called_a_blood_edit(tool, tmp_pa
     assert rc == 0, out
     assert "DELIVERY MATCH" in out
     assert receipt["tree_sha256"] != tool.tree_digest(str(copy))[0]
+
+
+def test_without_git_the_commit_view_is_absent(tool, tmp_path):
+    """No `.git`: the tool must say so and fall back, not guess."""
+    t = tmp_path / "t"
+    (t / "a").mkdir(parents=True)
+    (t / "a" / "one.txt").write_text("one\n", encoding="utf-8")
+    assert tool.commit_blobs(str(t)) is None
+    views = tool.all_digests(str(t))
+    assert [v[0] for v in views] == ["disk"]
+    assert views[0][1][3] == 1
+

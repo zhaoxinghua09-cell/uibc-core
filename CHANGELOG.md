@@ -1,10 +1,17 @@
+## 未发布 — 2026-11-26（收据比的是 HEAD，不是工作区）
+
+- **第二次红，原因不同**：加上折行轴后 CI 仍红。在 Linux 干净克隆上重跑十门是 `10 passed`，说明不是提交的问题——是**工作区**。同一条 job 里排在审计之前的步骤会往树里丢文件（重建的页面、临时产物），工作区因此不再是那个提交。拿工作区当基准，就得接受"别人刚跑过的树"与"这个提交"不是一回事。
+- **做法**：`commit_blobs()` 用 `git ls-tree -r` + `git cat-file --batch` 直接读 HEAD 的 blob，`digests_from_blobs()` 在内存里算三根轴；`all_digests()` 同时给两个视图（`commit`、`disk`），`--check` 依次比对，命中哪个就说哪个。`--run` 有 `.git` 时记 `delivery: commit`（与 `git archive` 的字节一致，因此克隆与解包终于对同一个数）。
+- **效果**：审计不再被同一 job 里别人的副作用弄红；同时保留了折行轴，解包的人仍可用 `DELIVERY MATCH` 判读。
+- **代价写清楚**：`commit` 视图要求 `.git` 与能跑通的 `git`；取不到时自动退回 `disk` 视图，收据里 `delivery` 记 `archive`/`worktree`，判定逻辑不变。
+
 ## 未发布 — 2026-11-26（同一个提交、两条通道，两套字节：收据现在说得出来是哪一套）
 
 - **问题**：把 `outsider_rerun.py --check` 收进十门审计后，CI 红了，而红得很委屈——文件集 2437 个两边完全一样，`windows-clone-bytes` 步骤也报 `diverged: 0`。真相是**投递方式**：本仓有 83 个 blob 按 CRLF 存，`.gitattributes` 写的却是 `text=auto eol=lf`；`git archive`（codeload 包）发的是存储的 blob，Linux 检出按属性把行尾折成 LF。所以同一个提交，克隆的人和解包的人手里本来就是两套字节。
 - **做法**：`outsider_rerun.py` 加第三根轴 `content_lf_sha256`（每个文件先 CRLF→LF 再哈希），收据多记 `content_lf_sha256` 与 `delivery`（`worktree` / `archive`）。`--check` 四态：字节全同 → OK；仅名字坏 → `NAMES-ONLY` exit 2；**仅换行差 → `VERDICT: DELIVERY MATCH` exit 0**；真有字节动 → `CONTENT` exit 1。
 - **实测**：本仓 archive 树 `tree 07d6b0c5ca52 / content 94c43f5e3575 / lf f29a…`；把整棵树 98 个文件折成 LF 后 `--check` 打 `DELIVERY MATCH` 而不是红。
 - **不修的代价写清楚**：没有去改那 83 个 blob 的存储形态——那会动全仓摘要、既有快照与随仓语料的哈希；这根轴只负责让收据可判定，不负责抹平通道差异。断言 A32。
-- **测试**：`tests/test_outsider_rerun.py` 12 条（新增：折行只动内容摘要、单文件折行被判 DELIVERY MATCH 且严摘要仍不符）。
+- **测试**：`tests/test_outsider_rerun.py` 11 条（新增：折行只动内容摘要、单文件折行被判 DELIVERY MATCH 且严摘要仍不符）。
 
 ## 未发布 — 2026-11-26（敏感性检验：把 D1 规则放松，"最好 3/10"会不会翻）
 
@@ -191,7 +198,7 @@
 - **地址：先撤回一条被放大成"定律"的巧合，再把它算到底**。上一稿写过"`base58(sha256(pub)[10:])` 能复算出官方 SDK 打的同一个地址"，只在一个样本上成立；拿 50 个固定种子批量复算只有 **7/50** 一致，于是又写成"能校验、不能反推"。两句话错在同一处：**字母表用错了**。官方 SDK 走的是 `brdc-sjcl` 的 Base58，字母表与比特币表**只差 4 处**（位置 10 `b/B`、27 `u/U`、34 `B/b`、52 `U/u`，全是大小写对调）；前 9 位 `1`–`9` 相同，所以 7 个不含这 4 个字母的地址偶然相等。换表后 **50/50** 逐字节复现——地址是完全可推导的。
 - **新模块 `uibc_core/bid_address.py`**：`derive_did` / `address_matches` / `bitcoin_to_bid_suffix`。版本字节（RFC-003 §5.1 第三步 `0x01`）做成显式开关：RFC 的唯一示例用"带版本字节"精确复现出 `38VPR182Y4uTkq32fykXjbKBPdQZutH`，50 条现行地址用"不带"精确复现——标准文本与参考实现在这一步分叉了，不替任何一方选默认。
 - 现在钉住的四条性质（`tests/test_bid_address.py`）：50/50 精确复现；带版本字节时 0/50；用比特币字母表时恰好 7/50；SM2 走 SM3 且落在 ABNF 区间。
-- 证据（地址性质）：`tests/test_bid_address.py`（13 条）、`docs/ADDRESS-DERIVATION.md`、`tests/test_bid_address_rule.py`（55 条）、`tools/bid_sdk_address_batch.mjs`、`fixtures/bid/sdk_address_batch.json`；单样本记录 `fixtures/bid/sdk_address.json` 保留，只作"官方输出原样快照"，不再当作可复算的证据。
+- 证据（地址性质）：`tests/test_bid_address.py`（11 条）、`docs/ADDRESS-DERIVATION.md`、`tests/test_bid_address_rule.py`（55 条）、`tools/bid_sdk_address_batch.mjs`、`fixtures/bid/sdk_address_batch.json`；单样本记录 `fixtures/bid/sdk_address.json` 保留，只作"官方输出原样快照"，不再当作可复算的证据。
 - **§4.2.2 五个字段接口落地**（`resolve_public_keys` / `resolve_attributes` / `resolve_acsns` / `resolve_credentials` / `resolve_service`）：协议给了五个字段端点，其中 `public-keys` 返回数组而 `public-keys/{id}` 返回单个对象——这个**形状不对称是协议自己的**，调用方若假定"永远是列表"就会错。都按 §4.2.5 的码处理（3/7 重试、6 不重试），都校验 `data.id` 必须等于请求的 BID、`data.version` 必须是字符串，单键查询必须真的是一把键、服务查询必须真的问什么答什么。键 id 要百分号编码（`#` → `%23`），服务查询用半角 `?id=`（协议里印的是全角"？"）。测试 `tests/test_bid_fields.py` 15 条。
 - 证据：`uibc_core/bid_protocol.py`、`tests/test_bid_fields.py`
 - **§4.2.4 可信解析（`resolve_bid_trusted`）**：协议说可信解析要"对BID文档的公钥和签名内容进行可信验证"，"确保递归解析过程中每个经过的解析服务都是可信的"。最容易犯的错是把 `data.verify` 当结论——那等于把核查交给了被核查方。所以返回的是一个把三件事分开的对象：`server_verify`（解析服务自述，必须是 Bool 字面 `true`，字符串 `"true"` 直接拒）、`signature_ok`（我们自己按 §5 重验文档签名）、`delegate_state`（`extension.delegateSign` 第三方背书：`absent`/`verified`/`invalid`/`unchecked`）。`trusted` = 服务自述 **且** 我们自己验过；`fully_trusted` 还要求背书被核。**签名者公钥取不到时是 `unchecked` 而不是默认通过**——"没有证据"和"证据成立"必须能被区分。

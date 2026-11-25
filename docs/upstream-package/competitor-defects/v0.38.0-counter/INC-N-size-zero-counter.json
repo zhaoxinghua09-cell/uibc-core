@@ -1,0 +1,21 @@
+{
+  "class": "negative",
+  "expect": {
+    "code": [
+      "not-included"
+    ],
+    "result": "reject"
+  },
+  "id": "INC-N-size-zero-counter",
+  "index": 0,
+  "kind": "inclusion",
+  "note": "same shape as INC-N-size-zero, with the RFC 6962 constant: the reject is now forced by the leaf count (index 0 of 0 leaves), not by a broken root",
+  "proof": [],
+  "record_hex": "",
+  "requirements": [
+    "7.3.4"
+  ],
+  "root": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "tree_size": 0,
+  "source": "uibc-core counter-vector, 2026-11-25"
+}

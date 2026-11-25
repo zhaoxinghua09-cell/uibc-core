@@ -1,0 +1,18 @@
+{
+  "class": "negative",
+  "expect": {
+    "code": [
+      "schema"
+    ],
+    "result": "reject"
+  },
+  "id": "TOK-N-tree-size-zero-counter",
+  "kind": "token",
+  "note": "same shape as TOK-N-tree-size-zero, with the RFC 6962 constant: the reject is forced by the type of tree_size (a string, not an integer), not by a root",
+  "public_key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+  "requirements": [
+    "7.7.1"
+  ],
+  "text": "{\n  \"eat_profile\": \"https://advancedaisociety.org/poc/v0.1\",\n  \"iat\": 1754400000,\n  \"iss\": \"https://verifier.example/poc\",\n  \"nonce\": \"nonce-00000000\",\n  \"poc_claims\": {\n    \"agent_id\": \"did:web:example.org:agents:ref-1\",\n    \"alg\": \"EdDSA\",\n    \"merkle_root\": \"sha-256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\",\n    \"step_index\": 0,\n    \"tree_size\": \"0\",\n    \"verdict\": \"ALLOW\"\n  }\n}",
+  "source": "uibc-core counter-vector, 2026-11-25"
+}

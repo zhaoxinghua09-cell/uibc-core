@@ -51,6 +51,7 @@ HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SNAPSHOT = os.path.join(HERE, "docs", "competitor-parity.json")
 DOC = os.path.join(HERE, "docs", "COMPETITOR-GATE-PARITY.md")
 SVG = os.path.join(HERE, "docs", "COMPETITOR-GATE-PARITY.svg")
+BOARD = os.path.join(HERE, "docs", "parity-board.html")
 GATE = os.path.join(HERE, "tools", "mutation_gate.py")
 OURS = "zhaoxinghua09-cell/uibc-core"
 # The audit may grow; it may not quietly shrink back to the first nine. Anybody
@@ -277,6 +278,7 @@ python tools/competitor_gate_parity.py --json                    # 机读
 
 快照：`docs/competitor-parity.json`（含每个仓库的 sha、tarball sha256、字节数、原始计数）。
 矩阵图：`docs/COMPETITOR-GATE-PARITY.svg`（由快照生成，字节可复现）。
+看板：`docs/parity-board.html`（单文件、零外链，数据内嵌，**打开即自检**；`node tools/board_check.js` 可在无浏览器环境里跑它自己的脚本验收）。
 
 ## 八、引用
 
@@ -328,6 +330,111 @@ def render_svg(snap):
                      f'font-size="11" fill="{colour_name}">{score}/10</text>')
     parts.append("</svg>")
     return "\n".join(parts) + "\n"
+
+
+BOARD_HTML = """<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<title>竞品门禁对照看板（%d 家 + 本仓）</title>
+<style>
+:root{--bg:#101418;--fg:#e8edf2;--dim:#8fa3b5;--line:#26313a;--ok:#3fd48a;--bad:#ff6b6b;--warn:#ffc857}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.6 -apple-system,Segoe UI,Roboto,Helvetica,Arial,"Microsoft YaHei",sans-serif}
+.wrap{max-width:1120px;margin:0 auto;padding:32px 20px 64px}
+h1{font-size:22px;margin:0 0 6px}
+.sub{color:var(--dim);font-size:13px;margin-bottom:20px}
+.chips{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 22px}
+.chip{border:1px solid var(--line);border-radius:8px;padding:10px 14px;min-width:120px}
+.chip b{display:block;font-size:20px;margin-top:2px}
+.chip span{color:var(--dim);font-size:12px}
+table{width:100%%;border-collapse:collapse;font-size:13px}
+th,td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:center}
+th:first-child,td:first-child{text-align:left}
+td.repo{font-family:ui-monospace,Consolas,monospace;font-size:12.5px}
+tr.ours td{background:#16241c}
+td.y{color:var(--ok);font-weight:600}
+td.n{color:#3a4650}
+td.sc b{color:var(--fg)}
+#selfcheck{margin-top:26px;border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+#selfcheck h2{font-size:15px;margin:0 0 8px}
+#sc{font-family:ui-monospace,Consolas,monospace;font-size:12.5px;white-space:pre-wrap;color:var(--dim)}
+.note{color:var(--dim);font-size:12px;margin-top:14px}
+</style></head><body><div class="wrap">
+<h1>竞品门禁对照看板</h1>
+<div class="sub">审计日 <span id="audited"></span> · 数据在本文件内嵌（Archived JSON），<b>零外链</b>，打开即自检</div>
+<div class="chips" id="chips"></div>
+<table><thead><tr><th>仓库</th><th>D1 拒绝断言</th><th>D2 逐位变异</th><th>D3 门自证</th><th>D4 跨层单一退出码</th><th>D5 二进制层</th><th>得分</th></tr></thead>
+<tbody id="rows"></tbody></table>
+<div id="selfcheck"><h2>打开自检（本页 JS 现场重算，不看预生成数字）</h2><div id="sc">running…</div></div>
+<div class="note">D2/D5 的 0 是“源码文本里检索不到”的下界，不是“没有实现”。本仓那一行由 <code>score_ours()</code> 从证据现算，不是手写。</div>
+</div>
+<script id="snap" type="application/json">__SNAP__</script>
+<script>
+const S = JSON.parse(document.getElementById('snap').textContent);
+const DIMS = ['D1','D2','D3','D4','D5'];
+const NAME = {D1:'拒绝断言',D2:'逐位变异',D3:'门自证',D4:'跨层退出码',D5:'二进制层'};
+const score = r => DIMS.reduce((a,d)=>a+((r.dims&&r.dims[d])||0),0);
+function cell(v){ return v ? '<td class="y">2</td>' : '<td class="n">0</td>'; }
+function render(){
+  document.getElementById('audited').textContent = S.audited_at || '';
+  const repos = S.repos.filter(r=>!r.error);
+  const ours = S.ours;
+  const best = Math.max(...repos.map(score));
+  const chips = [
+    ['取样仓库', repos.length, '固定 commit + tarball sha256'],
+    ['最好竞品', best + '/10', '代表取样，非全集'],
+    ['本仓库', score(ours) + '/10', '由证据现算，非手写'],
+    ['谎报上限', S.calibration ? S.calibration.ceiling + '/10' : '?', '注释堆词的合成仓得分'],
+  ];
+  document.getElementById('chips').innerHTML = chips.map(c=>`<div class="chip"><span>${c[0]}</span><b>${c[1]}</b><span>${c[2]}</span></div>`).join('');
+  let rows = repos.slice().sort((a,b)=>score(b)-score(a)).map(r=>
+    `<tr><td class="repo">${r.repo}</td>${DIMS.map(d=>cell((r.dims||{})[d])).join('')}<td class="sc"><b>${score(r)}</b>/10</td></tr>`);
+  rows.push(`<tr class="ours"><td class="repo">${ours.repo} <span style="color:#3fd48a">（本仓）</span></td>${DIMS.map(d=>cell((ours.dims||{})[d])).join('')}<td class="sc"><b>${score(ours)}</b>/10</td></tr>`);
+  document.getElementById('rows').innerHTML = rows.join('');
+  return {repos, best, ours};
+}
+function selfcheck(){
+  const {repos, best, ours} = window.__last;
+  const lines = []; let ok = true;
+  const push = (cond, msg) => { lines.push((cond?'PASS ':'FAIL ')+msg); ok = ok && cond; };
+  const sumDims = r => DIMS.reduce((a,d)=>a+((r.dims&&r.dims[d])||0),0);
+  push(repos.length === S.summary_repos, `表内 ${repos.length} 行 = 快照声明 ${S.summary_repos} 行`);
+  push(repos.length !== 0, '取样非空');
+  push(best === S.summary_best, `最好竞品现算 ${best} = 快照 ${S.summary_best}`);
+  push(sumDims(ours) === S.summary_ours, `本仓现算 ${sumDims(ours)} = 快照 ${S.summary_ours}`);
+  push(DIMS.every(d => (ours.dims||{})[d] === 2), '本仓五维全为 2');
+  if (S.calibration) {
+    push(S.calibration.ceiling < best, `谎报上限 ${S.calibration.ceiling} < 最好竞品 ${best}（否则表无法区分人与堆词）`);
+    push(S.calibration.empty === 0 && S.calibration.stuffed === 0, `空仓 ${S.calibration.empty} / 堆词仓 ${S.calibration.stuffed} 均为 0`);
+  }
+  push(repos.every(r => r.sha && r.sha !== 'unknown'), '每家都有 40 位 commit');
+  const t = document.getElementById('sc');
+  t.textContent = lines.join('\\n') + '\\n\\n' + (ok ? 'SELF-CHECK PASS' : 'SELF-CHECK FAIL — 本页不可信，回仓库重算');
+  t.style.color = ok ? '#8fa3b5' : '#ff6b6b';
+  return ok;
+}
+window.__last = render(); selfcheck();
+</script></body></html>
+"""
+
+
+def render_html(snap, path):
+    """Single file, no external references, numbers recomputed in the browser."""
+    repos = [r for r in snap["repos"] if "error" not in r]
+    best = max(sum(r.get("dims", {}).values()) for r in repos)
+    embedded = {
+        "audited_at": snap.get("audited_at"),
+        "calibration": snap.get("calibration"),
+        "repos": [{"repo": r["repo"], "sha": r["sha"], "dims": r.get("dims", {})} for r in repos],
+        "ours": {"repo": snap["ours"]["repo"], "dims": snap["ours"].get("dims", {})},
+        "summary_repos": len(repos),
+        "summary_best": best,
+        "summary_ours": sum(snap["ours"].get("dims", {}).values()),
+    }
+    blob = json.dumps(embedded, ensure_ascii=False).replace("<", "\\u003c")
+    html_text = BOARD_HTML % len(repos)
+    html_text = html_text.replace("__SNAP__", blob)
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(html_text)
+    return path
 
 
 def render_png(snap, path):
@@ -611,7 +718,8 @@ def save(snap):
     open(SNAPSHOT, "w", encoding="utf-8").write(json.dumps(snap, indent=1, ensure_ascii=False) + "\n")
     open(DOC, "w", encoding="utf-8").write(render_doc(snap))
     open(SVG, "w", encoding="utf-8").write(render_svg(snap))
-    print("written", SNAPSHOT, DOC, SVG)
+    render_html(snap, BOARD)
+    print("written", SNAPSHOT, DOC, SVG, BOARD)
 
 
 def main():

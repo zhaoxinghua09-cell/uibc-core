@@ -45,12 +45,14 @@ def key_id(seed):
     return "sha256:" + hashlib.sha256(ed25519.publickey(seed)).hexdigest()
 
 
-def message(head, role, tree_size):
-    """The signed statement. tree_size is inside it when present, so the size
-    a signer saw cannot be swapped afterwards."""
+def message(head, role, tree_size, vds=None):
+    """The signed statement. tree_size and vds are inside it, so neither the size
+    nor the hash identity a signer saw can be swapped afterwards."""
     body = {"head": head, "role": role}
     if tree_size is not None:
         body["tree_size"] = tree_size
+    if vds is not None:
+        body["vds"] = vds
     return json.dumps(body, sort_keys=True, separators=(",", ":")).encode("utf-8")
 
 
@@ -58,11 +60,12 @@ def cmd_sign(a):
     seed = seed_bytes(a.seed)
     if os.path.exists(a.out):
         body = json.load(open(a.out, encoding="utf-8"))
-        if body.get("head") != a.head or body.get("tree_size") != a.tree_size:
-            print("head or tree_size differs from the file being extended; refusing")
+        if (body.get("head") != a.head or body.get("tree_size") != a.tree_size
+                or body.get("vds") != a.vds):
+            print("head, tree_size or vds differs from the file being extended; refusing")
             return 2
     else:
-        body = {"v": "uibc-head-cosign/2", "head": a.head,
+        body = {"v": "uibc-head-cosign/2", "head": a.head, "vds": a.vds,
                 "tree_size": a.tree_size, "signatures": []}
         if a.tree_size is None:
             del body["tree_size"]
@@ -72,7 +75,7 @@ def cmd_sign(a):
     body["signatures"].append({
         "role": a.role,
         "key_id": key_id(seed),
-        "sig": ed25519.sign(seed, message(a.head, a.role, a.tree_size)).hex(),
+        "sig": ed25519.sign(seed, message(a.head, a.role, a.tree_size, a.vds)).hex(),
     })
     with open(a.out, "w", encoding="utf-8") as f:
         json.dump(body, f, ensure_ascii=False, indent=2)
@@ -90,7 +93,8 @@ def check_signed(body, seeds):
             continue
         try:
             ok = ed25519.verify(ed25519.publickey(seeds[role]),
-                                message(body["head"], role, body.get("tree_size")),
+                                message(body["head"], role, body.get("tree_size"),
+                                        body.get("vds")),
                                 bytes.fromhex(roles[role]["sig"]))
         except Exception:
             ok = False
@@ -106,7 +110,12 @@ def cmd_verify(a):
     body = json.load(open(a.file, encoding="utf-8"))
     seeds = {"owner": seed_bytes(a.owner_seed), "witness": seed_bytes(a.witness_seed)}
     reasons, distinct = check_signed(body, seeds)
+    # vds: the hash identity the reader trusts. A signed vds that differs from it
+    # would let peaks computed under two hash functions look comparable.
+    if body.get("vds") != a.vds:
+        reasons.append(f"vds is {body.get('vds')!r}, reader trusts {a.vds!r}")
     print(json.dumps({"head": body.get("head"), "tree_size": body.get("tree_size"),
+                      "vds": body.get("vds"),
                       "distinct_keys": distinct, "ok": not reasons,
                       "reasons": reasons}, ensure_ascii=False, indent=2))
     return 0 if not reasons else 1
@@ -123,6 +132,9 @@ def cmd_chain(a):
         sig_reasons, _ = check_signed(e, seeds)
         if sig_reasons:
             reasons.append(f"#{i}: " + "; ".join(sig_reasons))
+        if e.get("vds") != a.vds:
+            reasons.append(f"#{i}: vds is {e.get('vds')!r}, reader trusts {a.vds!r}; "
+                           f"accumulators under two hash functions are not comparable")
         size = e.get("tree_size")
         if size is None:
             reasons.append(f"#{i}: no tree_size, so 'only grew' cannot be checked")
@@ -157,9 +169,13 @@ def main():
     s.add_argument("--seed", required=True)
     s.add_argument("--role", required=True, choices=list(ROLES))
     s.add_argument("--out", required=True)
+    s.add_argument("--vds", default="sha256",
+                   help="hash identity signed with the head (default sha256)")
     for name in ("verify", "chain"):
         v = sub.add_parser(name)
         v.add_argument("--file", required=True)
+        v.add_argument("--vds", default="sha256",
+                       help="hash identity this reader trusts (default sha256)")
         v.add_argument("--owner-seed", required=True)
         v.add_argument("--witness-seed", required=True)
     a = ap.parse_args()

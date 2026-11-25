@@ -987,7 +987,50 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
                            "result": "PASS",
                            "detail": "index metadata matches evidence_index_digest"})
 
-    # S10 attestation closure (draft-sharif-agent-audit-trail-03 Section 13.6).    # AAT's point is that any component left outside the attested set is a
+    # S20 full index metadata (0.6.0). S7 above commits path/type/note/
+    # action_digest. It does NOT commit evidence_id, media_type or created_at,
+    # so rewriting any of the three - swapping an identifier, backdating an
+    # artefact - used to leave the verdict at PASS (vector D-002). The wider
+    # commitment ships under a separate manifest field because the narrow one
+    # is already sealed into every package built before 0.6.0; widening it in
+    # place would fail every existing seal.
+    #
+    # Absence is not a failure: a package sealed before 0.6.0 cannot carry it,
+    # and Backward Compatibility (VERSIONING.md section 3) requires this verifier
+    # to still validate those packages. What absence must not do is pass silently
+    # as full coverage, so the check says partial out loud.
+    full_digest_field = manifest.get("evidence_index_full_digest")
+    if full_digest_field:
+        from .canonical import index_full_digest as _ifd
+        actual_full = _ifd(index)
+        if actual_full != full_digest_field:
+            ok = False
+            checks.append({"id": "S20", "name": "full index metadata",
+                           "result": "FAIL",
+                           "detail": "evidence/index.json metadata (including "
+                                     "evidence_id, media_type, created_at) does not "
+                                     "match the sealed evidence_index_full_digest "
+                                     f"(expected {str(full_digest_field)[:20]}..., "
+                                     f"actual {actual_full[:20]}...)"})
+        else:
+            checks.append({"id": "S20", "name": "full index metadata",
+                           "result": "PASS",
+                           "detail": "all index metadata fields, including "
+                                     "evidence_id, media_type and created_at, "
+                                     "match evidence_index_full_digest"})
+    else:
+        checks.append({"id": "S20", "name": "full index metadata",
+                       "result": "PASS",
+                       "detail": "partial coverage: this package was sealed before "
+                                 "evidence_index_full_digest existed, so evidence_id, "
+                                 "media_type and created_at are not covered by any "
+                                 "sealed commitment (vector D-002)"})
+
+
+    # forgery channel: weights, tokenizer, chat template, engine build, decoding
+    # configuration, numeric environment. We can only check that a submitter
+    # S10 attestation closure (draft-sharif-agent-audit-trail-03 Section 13.6).
+    # AAT's point is that any component left outside the attested set is a
     # forgery channel: weights, tokenizer, chat template, engine build, decoding
     # configuration, numeric environment. We can only check that a submitter
     # DECLARED all six and gave each a digest; whether those digests correspond

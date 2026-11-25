@@ -199,6 +199,42 @@ def index_metadata_digest(index: dict) -> str:
     return "sha256:" + sha256_hex(canonicalize(meta))
 
 
+def index_full_digest(index: dict) -> str:
+    """SHA-256 over the WHOLE evidence-index metadata record (v0.6.0, check S20).
+
+    Why this exists next to index_metadata_digest rather than replacing it: that
+    one is SEALED into every package built before 0.6.0. Widening its scope would
+    make every existing seal fail - a compatibility catastrophe dressed as a bug
+    fix. So the wider commitment ships under a second name, and packages sealed
+    before it existed simply do not carry it (S20 then reports partial coverage
+    instead of pretending the gap is closed).
+
+    The gap it closes, measured on 0.5.0 (D-002 in the conformance corpus):
+    `evidence_id`, `media_type` and `created_at` could each be rewritten in
+    evidence/index.json and the package still verified PASS. Backdating an
+    artifact and swapping its identifier were undetectable, which is exactly the
+    class of change an integrity check exists to catch.
+
+    `content_hash` stays excluded for the same reason as in
+    index_metadata_digest: it is already committed twice (per-file in S4, as a
+    set in S5), and including it here would make harmless entry re-ordering
+    look like tampering.
+    """
+    meta = []
+    for e in index.get("entries", []):
+        meta.append({
+            "path": str(e.get("path", "")),
+            "type": e.get("type"),
+            "note": e.get("note"),
+            "action_digest": e.get("action_digest"),
+            "evidence_id": e.get("evidence_id"),
+            "media_type": e.get("media_type"),
+            "created_at": e.get("created_at"),
+        })
+    meta.sort(key=lambda m: m["path"])
+    return "sha256:" + sha256_hex(canonicalize(meta))
+
+
 def lifecycle_head(events: list) -> str:
     """Head commitment over the lifecycle log (v1.1, checks S8/S9).
 

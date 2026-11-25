@@ -395,6 +395,14 @@ def cmd_submit(args):
     # every content hash still matched and every check still passed (the gap
     # this repo's own mutation benchmark missed until M19 was added).
     manifest["evidence_index_digest"] = index_metadata_digest(idx)
+    # 0.6.0: the SAME metadata record under a WIDER scope. evidence_id,
+    # media_type and created_at were outside the sealed digest above, so they
+    # could be rewritten - backdating an artifact, swapping its identifier -
+    # while every check still passed (conformance vector D-002). A second field
+    # rather than a wider first one, because the first one is sealed into every
+    # package built before today.
+    from .canonical import index_full_digest as _ifd
+    manifest["evidence_index_full_digest"] = _ifd(idx)
     # v1.1: head commitment over the lifecycle log, so a silently shortened log
     # is visible even when the package is unsigned, and so a verifier can pin
     # the head out-of-band to catch whole-package rollback (check S9).

@@ -746,7 +746,24 @@ def cmd_inspect(args):
     print(f"root:       {manifest.get('evidence_root')}")
 
 
+def _utf8_stdout():
+    """Every command's output is UTF-8 JSON or UTF-8 text.
+
+    A Windows console defaults to cp1252, and `print(json.dumps(..., ensure_ascii=False))`
+    then raises UnicodeEncodeError on the first non-ASCII detail - so `verify` dies
+    with a traceback on stderr and prints nothing, on a package it could describe.
+    Reconfiguring the stream keeps the bytes the same on every platform; a console
+    that cannot render them shows boxes rather than a crash.
+    """
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8")
+        except (AttributeError, ValueError):
+            pass
+
+
 def main():
+    _utf8_stdout()
     ap = argparse.ArgumentParser(prog="uibc", description="UIBC Core CLI v%s [PROPOSAL]" % __version__)
     # --version exists so a bundled single-file build can state which version it
     # is without importing the package: the conformance runner reads it to label

@@ -332,6 +332,10 @@ jobs:
         # old page. The counter-vectors are the control: they must all agree.
         run: |
           python tools/check_competitor_vectors.py --self-test
+          # Only two of the five categories in the upstream corpus can be replayed
+          # with arithmetic alone; the sweep has to keep saying which it cannot, and
+          # its selftest fails if the classifier starts flattering us.
+          python tools/sweep_competitor_corpus.py --selftest
           python tools/check_competitor_vectors.py \
             --dir docs/upstream-package/competitor-defects/v0.38.0 \
             --dir docs/upstream-package/competitor-defects/v0.38.0-counter --json \

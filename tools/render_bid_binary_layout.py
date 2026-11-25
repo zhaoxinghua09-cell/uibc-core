@@ -27,18 +27,19 @@ OUT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                    "docs", "BID-BINARY-LAYOUT.svg")
 
 CELL = 34          # one bit cell, px
+CELL_BYTE = 96     # one byte cell for the span rows: 34 is too narrow for a label
 PAD = 18
 FONT = "font-family='DejaVu Sans, Segoe UI, sans-serif'"
 
-CANVAS_H = 650
+CANVAS_H = 700
 
 # byte spans after the first four bytes, as RFC-011 §5.1.2.1 names them
 TAIL_SPANS = [
-    ("unUsed", 1, "1 byte, reserved"),
-    ("replyCode", 2, "answer type (§5.1.2.1.2 table)"),
-    ("messageID", 2, "fragment id, first = 1"),
-    ("transactionID", 4, "request/answer correlation"),
-    ("messageLength", 4, "body length incl. signature"),
+    ("unUsed", 1, "reserved"),
+    ("replyCode", 2, "answer type"),
+    ("messageID", 2, "fragment id"),
+    ("transactionID", 4, "correlation id"),
+    ("messageLength", 4, "body length"),
 ]
 
 
@@ -47,7 +48,7 @@ def _esc(text):
             .replace('"', "&quot;"))
 
 
-def _bit_ruler(x0, y0, bits, labels):
+def _bit_ruler(x0, y0, bits, labels, numbers=None):
     """One horizontal row of bit cells, labels = list of (start_bit, nbits, text)."""
     parts = []
     for i in range(bits):
@@ -60,25 +61,30 @@ def _bit_ruler(x0, y0, bits, labels):
                      % (x0 + start * CELL, y0, w, CELL, "#93c5fd"))
         parts.append("<text x='%d' y='%d' %s font-size='%d' fill='#0f172a' text-anchor='middle'>%s</text>"
                      % (x0 + start * CELL + w // 2, y0 + CELL // 2 + 5, FONT, 12, _esc(text)))
-    for i in range(bits):
+    if numbers is None:
+        numbers = list(range(bits))
+    for i, number in enumerate(numbers):
         parts.append("<text x='%d' y='%d' %s font-size='8' fill='#64748b' text-anchor='middle'>%d</text>"
-                     % (x0 + i * CELL + CELL // 2, y0 + CELL + 11, FONT, i))
+                     % (x0 + i * CELL + CELL // 2, y0 + CELL + 11, FONT, number))
     return parts
 
 
-def _span_row(x0, y0, spans, total_bytes):
+SPAN_H = 44
+
+
+def _span_row(x0, y0, spans):
     parts = []
     x = x0
     for name, nbytes, note in spans:
-        w = nbytes * CELL
+        w = nbytes * CELL_BYTE
         parts.append("<rect x='%d' y='%d' width='%d' height='%d' fill='#fde68a' stroke='#92400e'/>"
-                     % (x, y0, w - 2, CELL))
-        parts.append("<text x='%d' y='%d' %s font-size='11' fill='#111827'>%s</text>"
-                     % (x + 6, y0 + 14, FONT, _esc(name)))
+                     % (x, y0, w - 2, SPAN_H))
+        parts.append("<text x='%d' y='%d' %s font-size='12' fill='#111827'>%s</text>"
+                     % (x + 7, y0 + 17, FONT, _esc(name)))
         parts.append("<text x='%d' y='%d' %s font-size='9' fill='#78350f'>%s</text>"
-                     % (x + 6, y0 + 27, FONT, _esc(note)))
-        parts.append("<text x='%d' y='%d' %s font-size='8' fill='#64748b'>%dB</text>"
-                     % (x + w - 10, y0 + CELL - 3, FONT, nbytes))
+                     % (x + 7, y0 + 31, FONT, _esc(note)))
+        parts.append("<text x='%d' y='%d' %s font-size='9' fill='#64748b' text-anchor='end'>%dB</text>"
+                     % (x + w - 8, y0 + SPAN_H - 5, FONT, nbytes))
         x += w
     return parts, x
 
@@ -94,7 +100,7 @@ def render():
     assert (first_bits + flag_bits) // 8 + tail_bytes == BB.HEADER_MIN, \
         "the diagram's spans disagree with HEADER_MIN=%d" % BB.HEADER_MIN
 
-    width = max(16 * CELL + 2 * PAD, 900)
+    width = max(16 * CELL + 2 * PAD, 13 * CELL_BYTE + 2 * PAD, 900)
     parts = ["<?xml version='1.0' encoding='UTF-8'?>",
              "<svg xmlns='http://www.w3.org/2000/svg' width='%d' height='%d' viewBox='0 0 %d %d'>"
              % (width, CANVAS_H, width, CANVAS_H),
@@ -109,13 +115,14 @@ def render():
     y = 84
     parts.append("<text x='%d' y='%d' %s font-size='12' fill='#334155'>byte 0 — version | headerLength</text>"
                  % (PAD, y, FONT))
-    parts += _bit_ruler(PAD, y + 8, 8, [(0, 4, "version"), (4, 4, "hdrLen/4B")])
+    parts += _bit_ruler(PAD, y + 8, 8, [(0, 4, "version"), (4, 4, "hdrLen/4B")],
+                        numbers=list(range(7, -1, -1)))
 
     y += 70
     parts.append("<text x='%d' y='%d' %s font-size='12' fill='#334155'>"
                  "bytes 1–2 — flag: listed order, no bit numbers in the RFC</text>" % (PAD, y, FONT))
     labels = [(15 - bit, 1, name) for name, bit in flags] + [(shifts, 4, "opCode")]
-    parts += _bit_ruler(PAD, y + 8, 16, labels)
+    parts += _bit_ruler(PAD, y + 8, 16, labels, numbers=list(range(15, -1, -1)))
     parts.append("<text x='%d' y='%d' %s font-size='9' fill='#b91c1c'>"
                  "bit numbers shown are the msb-first assumption (flag_bit_order='msb'); 'lsb' flips them"
                  "</text>" % (PAD, y + 62, FONT))
@@ -123,15 +130,15 @@ def render():
     y += 92
     parts.append("<text x='%d' y='%d' %s font-size='12' fill='#334155'>bytes 3–15 — the rest of the header</text>"
                  % (PAD, y, FONT))
-    row, _x = _span_row(PAD, y + 8, TAIL_SPANS, tail_bytes)
+    row, _x = _span_row(PAD, y + 8, TAIL_SPANS)
     parts += row
 
-    y += 78
+    y += 88
     parts.append("<text x='%d' y='%d' %s font-size='12' fill='#334155'>"
                  "body — unit tree (payload may itself be units; that is the whole nesting rule)"
                  "</text>" % (PAD, y, FONT))
     row, _x = _span_row(PAD, y + 8, [("unitID", 2, "field id"), ("length", 2, "payload bytes"),
-                                     ("payload / child units …", 6, "nested = same structure")], 10)
+                                     ("payload / child units", 6, "same structure, nested")])
     parts += row
 
     y += 78

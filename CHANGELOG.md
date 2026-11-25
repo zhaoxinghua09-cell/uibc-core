@@ -1,3 +1,11 @@
+## 未发布 — 2026-11-26（同一个提交、两条通道，两套字节：收据现在说得出来是哪一套）
+
+- **问题**：把 `outsider_rerun.py --check` 收进十门审计后，CI 红了，而红得很委屈——文件集 2437 个两边完全一样，`windows-clone-bytes` 步骤也报 `diverged: 0`。真相是**投递方式**：本仓有 83 个 blob 按 CRLF 存，`.gitattributes` 写的却是 `text=auto eol=lf`；`git archive`（codeload 包）发的是存储的 blob，Linux 检出按属性把行尾折成 LF。所以同一个提交，克隆的人和解包的人手里本来就是两套字节。
+- **做法**：`outsider_rerun.py` 加第三根轴 `content_lf_sha256`（每个文件先 CRLF→LF 再哈希），收据多记 `content_lf_sha256` 与 `delivery`（`worktree` / `archive`）。`--check` 四态：字节全同 → OK；仅名字坏 → `NAMES-ONLY` exit 2；**仅换行差 → `VERDICT: DELIVERY MATCH` exit 0**；真有字节动 → `CONTENT` exit 1。
+- **实测**：本仓 archive 树 `tree 07d6b0c5ca52 / content 94c43f5e3575 / lf f29a…`；把整棵树 98 个文件折成 LF 后 `--check` 打 `DELIVERY MATCH` 而不是红。
+- **不修的代价写清楚**：没有去改那 83 个 blob 的存储形态——那会动全仓摘要、既有快照与随仓语料的哈希；这根轴只负责让收据可判定，不负责抹平通道差异。断言 A32。
+- **测试**：`tests/test_outsider_rerun.py` 12 条（新增：折行只动内容摘要、单文件折行被判 DELIVERY MATCH 且严摘要仍不符）。
+
 ## 未发布 — 2026-11-26（敏感性检验：把 D1 规则放松，"最好 3/10"会不会翻）
 
 - **为什么要做**：D1 的判据是"一行里同时出现断言和拒绝词"。这门规则是我们自己写的，所以"最好竞品只有 3/10"也可能是我们拼写方式的产物——这正是这类对照表最容易自欺的地方。

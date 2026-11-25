@@ -137,6 +137,30 @@ def content_digest(root, files=None):
     return hashlib.sha256("\n".join(sorted(hashes)).encode()).hexdigest(), len(hashes)
 
 
+def content_lf_digest(root, files=None):
+    """The content axis with CRLF folded to LF before hashing.
+
+    Why a third number: `git archive` ships the stored blob, a checkout applies
+    the eol attributes. Measured here: 83 blobs are stored with CRLF while
+    `.gitattributes` says `text=auto eol=lf`, so the same commit hands you
+    different bytes depending on how you got it - clone or codeload tarball. A
+    receipt taken from an archive therefore disagrees with a Linux worktree on
+    those 83 files and on nothing else. This axis is what tells that apart from
+    an actual edit; it is never used as the strict number.
+    """
+    hashes = []
+    for rel in (files if files is not None else tracked_files(root)):
+        if rel in GENERATED:
+            continue
+        p = os.path.join(root, rel.replace("/", os.sep))
+        try:
+            with open(p, "rb") as f:
+                hashes.append(hashlib.sha256(f.read().replace(b"\r\n", b"\n")).hexdigest())
+        except OSError:
+            hashes.append("unreadable")
+    return hashlib.sha256("\n".join(sorted(hashes)).encode()).hexdigest(), len(hashes)
+
+
 def clean_env():
     return {k: os.environ[k] for k in ENV_KEEP if k in os.environ} | {"PYTHONUTF8": "1"}
 
@@ -148,6 +172,7 @@ def copy_tree(dest):
 def run(steps_only=None):
     digest, count = tree_digest(HERE)
     cdigest, ccount = content_digest(HERE)
+    lfdigest, _ = content_lf_digest(HERE)
     tmp = tempfile.mkdtemp(prefix="uibc-outsider-")
     work = os.path.join(tmp, "repo")
     copy_tree(work)
@@ -170,17 +195,22 @@ def run(steps_only=None):
                         "tail": tail or err.strip().splitlines()[-1][:160]})
         print(f"{'PASS' if ok else 'FAIL'} {name:6s} rc={rc} {round(time.time() - t0, 1)}s :: {tail}")
     shutil.rmtree(tmp, ignore_errors=True)
-    return {"digest": digest, "files": count, "content_digest": cdigest, "content_files": ccount,
+    return {"digest": digest, "files": count, "content_digest": cdigest,
+            "content_files": ccount, "content_lf_digest": lfdigest,
+            "delivery": "worktree" if os.path.isdir(os.path.join(HERE, ".git")) else "archive",
             "results": results}
 
 
-def write_receipt(digest, files, results, content=None, content_files=None):
+def write_receipt(digest, files, results, content=None, content_files=None,
+                  content_lf=None, delivery=None):
     receipt = {
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "tree_sha256": digest,
         "files_hashed": files,
         "content_sha256": content,
         "content_files": content_files,
+        "content_lf_sha256": content_lf,
+        "delivery": delivery,
         "digest_excludes": sorted(GENERATED),
         "runner": {"python": platform.python_version(), "machine": platform.machine(),
                    "system": platform.system()},
@@ -208,6 +238,12 @@ def write_receipt(digest, files, results, content=None, content_files=None):
              "`NAMES-ONLY`（字节全同、名字坏了，问题在你的解包器）还是 `CONTENT`（真的有字节动了）。",
              "在 Windows 上解包请用 `python -c \"import tarfile,sys;tarfile.open(sys.argv[1]).extractall(sys.argv[2])\" <包> <目录>`，"
              "或直接在 POSIX 上解包。",
+             "",
+             f"**第三根轴 `{str(receipt.get('content_lf_sha256'))[:16]}…`：内容摘要再折一次换行（CRLF→LF）**，"
+             f"收据记的是 `{receipt.get('delivery')}` 这一路的字节。原因实测：本仓有 83 个文件的 blob 按 CRLF 存，"
+             "而 `.gitattributes` 写的是 `text=auto eol=lf`——`git archive` 给的是存储的字节，检出给的是规整后的字节，"
+             "同一个提交两条通道给两套字节。这一根轴用来把\"换行差异\"与\"有人改了字节\"分开，"
+             "`--check` 因此能报 `VERDICT: DELIVERY MATCH`（同名同内容、只差换行）。",
              "", "复核：`python tools/outsider_rerun.py --check`（重算两根摘要＋逐步判定），或 `--run` 重新跑一遍。"]
     open(PAGE, "w", encoding="utf-8").write("\n".join(page) + "\n")
     print("OUTSIDER OK" if receipt["ok"] else "OUTSIDER FAIL",
@@ -223,14 +259,23 @@ def check():
     fails = []
     digest, count = tree_digest(HERE)
     cdigest, _ = content_digest(HERE)
+    lfdigest, _ = content_lf_digest(HERE)
     receipt_content = receipt.get("content_sha256")
+    receipt_lf = receipt.get("content_lf_sha256")
     names_only = False
+    delivery_only = False
     if receipt.get("tree_sha256") != digest:
         if receipt_content and receipt_content == cdigest:
             names_only = True
             fails.append(
                 "NAMES-ONLY: the paths differ but every byte matches "
                 f"(content_sha256 {cdigest[:12]} agrees, tree_sha256 {digest[:12]} does not)")
+        elif receipt_lf and receipt_lf == lfdigest:
+            delivery_only = True
+            fails.append(
+                "DELIVERY: the bytes differ only in line endings "
+                f"(content_lf_sha256 {lfdigest[:12]} agrees on both sides); the receipt names "
+                f"delivery {receipt.get('delivery')!r}, this tree is the other one")
         else:
             fails.append(f"CONTENT: receipt describes tree {str(receipt.get('tree_sha256'))[:12]} but this tree hashes to {digest[:12]}"
                          f" (content_sha256 {str(receipt_content)[:12]} vs {cdigest[:12]})")
@@ -254,6 +299,15 @@ def check():
         print("or on a POSIX host, then rerun --check; the tree digest will match unchanged.")
         print(f"\nOUTSIDER FAIL ({len(fails)} problem(s), names only - bytes are intact)")
         return 2
+    if delivery_only:
+        print("\nOK BY DELIVERY: this is the same commit seen through the other channel. `git archive`")
+        print("ships the stored blob; a checkout applies `.gitattributes` (text=auto eol=lf), and")
+        print("this repository stores some blobs with CRLF. The strict digest names the channel it")
+        print("was taken from, so a stranger who clones and a stranger who unpacks a tarball each")
+        print("get a number that matches their own bytes. Nothing was edited.")
+        print(f"\nVERDICT: DELIVERY MATCH ({receipt.get('delivery')} receipt, "
+              f"{'worktree' if os.path.isdir(os.path.join(HERE, '.git')) else 'archive'} tree)")
+        return 0
     if fails:
         print(f"\nOUTSIDER FAIL ({len(fails)} problem(s))")
         return 1
@@ -271,7 +325,8 @@ def main():
     if args.run:
         out = run()
         rc = write_receipt(out["digest"], out["files"], out["results"],
-                           content=out["content_digest"], content_files=out["content_files"])
+                           content=out["content_digest"], content_files=out["content_files"],
+                           content_lf=out["content_lf_digest"], delivery=out["delivery"])
     else:
         rc = check()
     if args.json:

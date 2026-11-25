@@ -331,11 +331,14 @@ VERDICT: REPRODUCED
 
 `--selftest` 8 条，其中两条是负对照：翻一位必须被抓到且点名文件；私自塞进一个向量必须判"多出来的"而不是默认采纳。测试 `tests/test_vendored_corpus.py` 6 条，另钉住一条——**不加 `--dir` 时必须跑随仓那份，并且打出 `VERDICT: REPRODUCED`**。
 
+
+**一条补充（本轮实测）**：把 `outsider_rerun.py --check` 收进审计时它红了，原因不是编辑而是**投递**——本仓 83 个 blob 按 CRLF 存、`.gitattributes` 声明 `text=auto eol=lf`，于是 `git archive` 的字节与 Linux 检出的字节不同。收据因此多记一根折行轴（`content_lf_sha256`）与 `delivery`，`--check` 只在纯换行差异时报 `VERDICT: DELIVERY MATCH`（exit 0），真有字节动仍报 `CONTENT`（exit 1）。见 A32。
+
 ## 最后一条：审我们自己，也只要一条命令
 
 上面每条结论都有各自的 `--check`。但它们是**分开**跑的，而且通常是在一个被很多次编辑过的树里跑——那正是陈旧最容易藏身的地方。
 
-`tools/stranger_own_check.py` 把七件事一次跑完，并可以在**一份不是我们生成的副本**上跑：
+`tools/stranger_own_check.py` 把十件事一次跑完，并可以在**一份不是我们生成的副本**上跑：
 
 | 检查 | 对应的 `--check` / 门 |
 |---|---|
@@ -346,6 +349,9 @@ VERDICT: REPRODUCED
 | `ledger-invariants` | 分层账自身不变量成立（`build_upstream_ledger.py --selftest`） |
 | `claims-vs-receipts` | 每个锁定断言仍等于其收据（`audit_claims_receipts.py`） |
 | `evidence-index` | 证据索引是这棵树的扫描（`build_evidence_index.py --check`） |
+| `vendored-corpus` | 随仓的 171 条竞品向量就是扫过的那份字节（`verify_vendored_corpus.py --check`） |
+| `outsider-receipt` | 外人重跑的收据描述的是**这棵树**，而不是某次别处的运行（`outsider_rerun.py --check`） |
+| `tree-digest-second-impl` | 收据里的两个摘要由第二种语言重算后仍相等（`tree_digest_second_impl.py --check`） |
 
 两种跑法：
 
@@ -354,6 +360,6 @@ python tools/stranger_own_check.py            # 当前检出
 python tools/stranger_own_check.py --fresh    # 抓 main tarball，在干净副本上跑
 ```
 
-实跑两种路径都是 `8 passed, 0 failed` → `VERDICT: SELF-CONSISTENT`。`--fresh` 那条尤其值得看：它证明的不是"我的树是干净的"，而是"**别人拿到的那份 main，七道门全过**"。任一检查失败会打一行原因（失败检查的首行输出），所以"不复现"从来不是一句没有下文的话。
+实跑两种路径都是 `10 passed, 0 failed` → `VERDICT: SELF-CONSISTENT`。第十道门是第二语言重算收据里的两个摘要——缺 node 时它显示 `SKIP`，按 skip 计数、不算通过。`--fresh` 那条尤其值得看：它证明的不是"我的树是干净的"，而是"**别人拿到的那份 main，十道门全过**"。任一检查失败会打一行原因（失败检查的首行输出），所以"不复现"从来不是一句没有下文的话。
 
-边界：它审**自洽**，不审**正确**。收据可以是错的，只要七处都与它一致；正确性靠前面的算术、第三方实现、变异控制与外部实跑去证明。这条只保证一件事——**没有任何一页比它引用的收据更新或更旧**。
+边界：它审**自洽**，不审**正确**。收据可以是错的，只要十处都与它一致；同理，`tree-digest-second-impl` 缺 node 时报 `SKIP`（exit 77），skip 计入条数但**不算通过**，也不能掩盖别处的 FAIL——门没被跑过，就不算守住；正确性靠前面的算术、第三方实现、变异控制与外部实跑去证明。这条只保证一件事——**没有任何一页比它引用的收据更新或更旧**。

@@ -40,6 +40,19 @@ It trusts one constant, the one the RFC pins down, and one rule set: `index < tr
 Verdict today: **upstream 0/3 agree** with their own published code; **counter-vectors
 3/3 agree**. `tests/test_competitor_defects.py` pins both numbers, so neither can drift.
 
+## Judged again, and again
+
+`docs/upstream-package/competitor-defects/HISTORY.json` keeps one row per re-judging,
+and CI runs the judge on every pull request, so a row that stops being true turns the
+build red instead of surviving as a stale page.
+
+| upstream | judged | how the bytes were tied to it | published code agreed? |
+|---|---|---|---|
+| release `v0.37.1` | 2026-11-21 | size match only (564 / 735 / 1816 bytes from the 0.1.0 wheel; not re-hashed) | 0 of 3 |
+| commit `22764551` (`v0.38.0`) | 2026-11-25 | vendored bytes, sha256 per file | 0 of 3 |
+
+Check here rather than assuming: `python tools/check_competitor_vectors.py --dir …`.
+
 ## What this does not claim
 
 - Not that their implementation is wrong. Their verifier is not run and not read.

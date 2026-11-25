@@ -99,6 +99,26 @@ def test_it_does_not_pretend_to_know_who_ran_it():
         "a receipt must not carry an identity claim it cannot back")
 
 
+def test_a_step_one_machine_could_not_run_is_a_scope_note_not_a_mismatch():
+    """A receipt from a bare interpreter must still verify its arithmetic here."""
+    with_ledger = json.loads(json.dumps(SAMPLE))
+    with_ledger.update({"ledger": {"verdict": 69, "signature-only": 88,
+                                   "nothing": 14, "signature_verified": 88},
+                        "ledger_skipped": None})
+    body = ver.build_receipt(with_ledger)
+    diffs, note = ver.compare(body, dict(SAMPLE))
+    assert diffs == [], diffs
+    assert note and "ledger" in note, note
+
+
+def test_the_limitation_is_stated_in_the_output():
+    out = subprocess.run([sys.executable, TOOL, "--help"],
+                         capture_output=True, text=True)
+    with open(TOOL, encoding="utf-8") as f:
+        src = f.read()
+    assert "VERIFIED (arithmetic only)" in src
+
+
 def test_the_stranger_tool_offers_the_receipt_flag():
     out = subprocess.run([sys.executable, os.path.join(
         ROOT, "tools", "stranger_competitor_check.py"), "--help"],

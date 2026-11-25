@@ -88,34 +88,59 @@ def _have_crypto():
 
 TERMS = ("bytes", "sweep", "control", "ledger", "ledger_skipped",
          "sigstore_inclusion", "verdict", "code")
+LEDGER_TERMS = ("ledger", "ledger_skipped")
 
 
-def check(receipt, out, tool_path=None):
-    """Every disagreement, named by field. Empty list means verified."""
-    bad = []
+def compare(receipt, out, tool_path=None):
+    """(diffs, scope_note). A note means one step could not be compared here."""
+    diffs = []
     if receipt.get("format") != FORMAT:
-        return ["format: %r is not %s" % (receipt.get("format"), FORMAT)]
+        return ["format: %r is not %s" % (receipt.get("format"), FORMAT)], None
     stated = receipt.get("receipt_sha256")
     if not stated:
-        bad.append("receipt_sha256: absent, so any number could have been edited")
+        diffs.append("receipt_sha256: absent, so any number could have been edited")
     else:
         body = {k: v for k, v in receipt.items() if k != "receipt_sha256"}
         if hashlib.sha256(canonical(body)).hexdigest() != stated:
-            bad.append("receipt_sha256: the receipt's own digest does not cover "
-                       "its contents (edited after it was written)")
+            diffs.append("receipt_sha256: the receipt's own digest does not cover "
+                         "its contents (edited after it was written)")
 
     # The field-by-field comparison runs even when the digest is broken, so a
     # reader learns *which* number moved, not only that something did.
     tool_path = tool_path or os.path.join(HERE, "stranger_competitor_check.py")
     if receipt.get("tool_sha256") != _sha256_file(tool_path):
-        bad.append("tool_sha256: receipt was written by a different copy of the "
-                   "tool than the one being run here")
+        diffs.append("tool_sha256: receipt was written by a different copy of the "
+                     "tool than the one being run here")
     fresh = build_receipt(out, tool_path)
+
+    # The ledger column is environment-specific: a receipt written without
+    # `cryptography` has no ledger row to compare against a machine that has it,
+    # and one that has a ledger row cannot be checked where the library is absent.
+    # Saying "not verified" there would blame the receipt for this machine.
+    note = None
+    skip = set()
+    if receipt.get("ledger") is None and fresh["ledger"] is not None:
+        skip = set(LEDGER_TERMS)
+        note = ("the receipt's ledger step was not evaluated where it was written "
+                "(no cryptography); this machine has it, so that row cannot be "
+                "compared - the arithmetic can")
+    elif receipt.get("ledger") is not None and fresh["ledger"] is None:
+        skip = set(LEDGER_TERMS)
+        note = ("this machine has no cryptography, so the receipt's ledger row "
+                "cannot be recomputed here")
+
     for term in TERMS:
+        if term in skip:
+            continue
         if receipt.get(term) != fresh[term]:
-            bad.append("%s: receipt says %r, this machine recomputes %r"
-                       % (term, receipt.get(term), fresh[term]))
-    return bad
+            diffs.append("%s: receipt says %r, this machine recomputes %r"
+                         % (term, receipt.get(term), fresh[term]))
+    return diffs, note
+
+
+def check(receipt, out, tool_path=None):
+    """Every disagreement, named by field. Empty list means verified."""
+    return compare(receipt, out, tool_path)[0]
 
 
 def selftest():
@@ -150,6 +175,14 @@ def selftest():
     r5["receipt_sha256"] = hashlib.sha256(canonical(
         {k: v for k, v in r5.items() if k != "receipt_sha256"})).hexdigest()
     assert check(r5, out), "a receipt from another tool version passed"
+    # A step that exists on one machine and not the other is a scope note, not a
+    # disagreement: the arithmetic still has to match exactly.
+    out_no_ledger = json.loads(json.dumps(out))
+    out_no_ledger.update({"ledger": None, "ledger_skipped": "no cryptography"})
+    diffs, note = compare(build_receipt(out_no_ledger), out)
+    assert not diffs and note, (diffs, note)
+    diffs, note = compare(build_receipt(out), out_no_ledger)
+    assert not diffs and note, (diffs, note)
     print("selftest: a faithful receipt verifies; edits, a missing digest and "
           "another version do not")
     return 0
@@ -168,15 +201,24 @@ def main(argv=None):
     with open(a.receipt, encoding="utf-8") as f:
         receipt = json.load(f)
     out = stranger.run(a.dir, verbose=False)
-    bad = check(receipt, out)
-    if bad:
-        for line in bad:
+    diffs, note = compare(receipt, out)
+    if diffs:
+        for line in diffs:
             print("DIFF %s" % line)
+        if note:
+            print("note: %s" % note)
         print("VERDICT: NOT VERIFIED")
         return 1
     rt = receipt.get("runtime", {})
     print("runtime: python %s on %s, cryptography %s"
           % (rt.get("python"), rt.get("platform"), rt.get("cryptography")))
+    if note:
+        print("note: %s" % note)
+        print("the receipt's %d comparable checks and verdict %r are what this "
+              "machine recomputes" % (len(TERMS) - len(LEDGER_TERMS),
+                                      receipt.get("verdict")))
+        print("VERDICT: VERIFIED (arithmetic only)")
+        return 0
     print("the receipt's %d checks, verdict %r and code %r are what this machine "
           "recomputes" % (len(TERMS), receipt.get("verdict"), receipt.get("code")))
     print("VERDICT: VERIFIED")

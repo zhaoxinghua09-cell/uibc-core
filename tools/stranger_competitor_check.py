@@ -220,8 +220,9 @@ def run(dir_arg=None, verbose=True):
                   % (c["applied"], c["detected"], c["ambiguous"], c["unexplained"]))
             if g is None:
                 print("ledger: SKIPPED - %s" % ledger_skipped)
-                print("        install it (`pip install cryptography`) and rerun for "
-                      "the complete check")
+                if "install" not in ledger_skipped:
+                    print("        install it (`pip install cryptography`) and rerun "
+                          "for the complete check")
             else:
                 print("ledger: %d verdict, %d signature-only, %d nothing, "
                       "%d signatures verify"

@@ -31,6 +31,10 @@
 - **可运行 demo**（`tools/demo_bid_trusted.py`）：起一个真的 `http.server` 当解析服务，四种答法（诚实 / 说验过但文档被动过 / 说没验过 / 带背书），打印五条裁决。第 2 条是全部意义所在：只读 `data.verify` 的客户端在那里会打印 OK。
 - 测试 `tests/test_bid_trusted.py` 15 条（请求形如 `{url}/{bid}?verify=true`、服务撒谎必被抓、`"true"` 字符串必拒、`verify=false` 是答案不是异常、背书四态各一条）。
 - 证据：`uibc_core/bid_protocol.py::resolve_bid_trusted`、`tests/test_bid_trusted.py`、`tools/demo_bid_trusted.py`
+- **一致性向量集 v1（`vectors/bid-resolution-v1.json`，22 条）+ 外部可跑的核对器（`tools/check_bid_vectors.py`）**：官方没有发布机可验向量，与其等，先把"读条款读出来的判据"写成**数据**而不是埋在测试代码里。每条向量带 `clause`（§4.2.1/§4.2.2/§4.2.4/§4.2.5/§5）和一句 `note` 说明它钉的是什么，期望值写在 JSON 里——外人可以直接改他不认同的那条，然后 `python tools/check_bid_vectors.py --subject <任意 checkout>` 复跑。**文件头写明：自撰，非 Caict 发布，不具权威**；与官方不一致时改这里，不许含糊过去。
+- 首次跑 22 条时抓到 4 处"期望与实现不一致"，逐条定性而不是改测试迁就：3 条是**期望写错了**（错误信封没有 `data`；`proof.creator` 指向不存在的键属结构错，`signatureValue` 非 Base58 也是结构错，都不该期望"返回 False"），已按条款改成"必须抛 `BIDDocumentError`"。这类不一致正是向量集存在的理由：手写期望会错，写错了要能看见。
+- 证据：`vectors/bid-resolution-v1.json`、`tools/check_bid_vectors.py`、`tests/test_bid_vectors.py`（4 条：22/22 全过、provenance 必须自称自撰、每条必须带条款与说明、id 唯一）
+
 
 ## 0.5.3 — 2026-11-25（一致性语料 36→58，第二实现对齐）
 

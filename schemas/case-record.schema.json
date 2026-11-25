@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "uibc-core/conformance/case-record/1",
+  "title": "Conformance case record",
+  "description": "One case in a conformance suite. Required fields are the ones a third party needs to rerun the case and to tell 'decision wrong' from 'evidence absent' from 'could not decide'. `group` names the structural family the case belongs to, not its polarity: a positive case is group=positive, every other group is a mutation that must be caught.",
+  "type": "object",
+  "required": ["id", "group", "attack", "why", "expected_result", "expected_checks", "path", "sha256"],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._-]+$",
+      "description": "Stable name. Renumbering breaks citations, so it must not change after release."
+    },
+    "group": {
+      "enum": ["positive", "core", "extended", "tree-and-chain", "checkpoint", "seal", "scale"],
+      "description": "Structural family. Only 'positive' is a case that must not be refused; all other groups are mutations of a correct package and must be caught."
+    },
+    "attack": {
+      "type": "string",
+      "minLength": 8,
+      "description": "What the case does to the input. A mutation with no stated change is an assertion, not a test."
+    },
+    "why": {
+      "type": "string",
+      "minLength": 12,
+      "description": "Why this outcome is the right one. Without it the expected value is arguable instead of authoritative."
+    },
+    "expect": {
+      "enum": ["accept", "reject"],
+      "description": "Optional for mutations, required for positives: the coarse decision. Kept separate from expected_result because 'accept' and 'PASS' are not the same claim."
+    },
+    "expected_result": {
+      "enum": ["INCONCLUSIVE", "FAIL", "PASS", "HOLD"],
+      "description": "The verdict value the case must produce. This, not 'expect', is what a run is compared against."
+    },
+    "expected_checks": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 2 },
+      "description": "Which sub-checks must fire for a mutation. A reject for the wrong reason still counts as a reject unless this is pinned; positives carry an empty array."
+    },
+    "path": {
+      "type": "string",
+      "minLength": 3,
+      "description": "Input artefacts, as a path inside the suite."
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "Digest binding the input to the case id, so artefacts cannot drift under a fixed id."
+    },
+    "expectation": {
+      "type": "string",
+      "description": "Optional human-readable restatement of expected_result."
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "group": { "const": "positive" } }, "required": ["group"] },
+      "then": {
+        "required": ["expect"],
+        "properties": { "expect": { "const": "accept" } }
+      }
+    },
+    {
+      "if": {
+        "properties": { "group": { "const": "positive" } },
+        "required": ["group"]
+      },
+      "else": {
+        "required": ["expected_checks"],
+        "properties": {
+          "expected_result": { "const": "FAIL" },
+          "expected_checks": { "minItems": 1 }
+        }
+      }
+    }
+  ]
+}

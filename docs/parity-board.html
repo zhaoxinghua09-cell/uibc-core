@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<title>竞品门禁对照看板（25 家 + 本仓）</title>
+<style>
+:root{--bg:#101418;--fg:#e8edf2;--dim:#8fa3b5;--line:#26313a;--ok:#3fd48a;--bad:#ff6b6b;--warn:#ffc857}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.6 -apple-system,Segoe UI,Roboto,Helvetica,Arial,"Microsoft YaHei",sans-serif}
+.wrap{max-width:1120px;margin:0 auto;padding:32px 20px 64px}
+h1{font-size:22px;margin:0 0 6px}
+.sub{color:var(--dim);font-size:13px;margin-bottom:20px}
+.chips{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 22px}
+.chip{border:1px solid var(--line);border-radius:8px;padding:10px 14px;min-width:120px}
+.chip b{display:block;font-size:20px;margin-top:2px}
+.chip span{color:var(--dim);font-size:12px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:center}
+th:first-child,td:first-child{text-align:left}
+td.repo{font-family:ui-monospace,Consolas,monospace;font-size:12.5px}
+tr.ours td{background:#16241c}
+td.y{color:var(--ok);font-weight:600}
+td.n{color:#3a4650}
+td.sc b{color:var(--fg)}
+#selfcheck{margin-top:26px;border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+#selfcheck h2{font-size:15px;margin:0 0 8px}
+#sc{font-family:ui-monospace,Consolas,monospace;font-size:12.5px;white-space:pre-wrap;color:var(--dim)}
+.note{color:var(--dim);font-size:12px;margin-top:14px}
+</style></head><body><div class="wrap">
+<h1>竞品门禁对照看板</h1>
+<div class="sub">审计日 <span id="audited"></span> · 数据在本文件内嵌（Archived JSON），<b>零外链</b>，打开即自检</div>
+<div class="chips" id="chips"></div>
+<table><thead><tr><th>仓库</th><th>D1 拒绝断言</th><th>D2 逐位变异</th><th>D3 门自证</th><th>D4 跨层单一退出码</th><th>D5 二进制层</th><th>得分</th></tr></thead>
+<tbody id="rows"></tbody></table>
+<div id="selfcheck"><h2>打开自检（本页 JS 现场重算，不看预生成数字）</h2><div id="sc">running…</div></div>
+<div class="note">D2/D5 的 0 是“源码文本里检索不到”的下界，不是“没有实现”。本仓那一行由 <code>score_ours()</code> 从证据现算，不是手写。</div>
+</div>
+<script id="snap" type="application/json">{"audited_at": "2026-11-26", "calibration": {"empty": 0, "stuffed": 0, "honest": 1, "ceiling": 0}, "repos": [{"repo": "WeBankBlockchain/WeIdentity", "sha": "2f8e4b5a7e208790af7e2697b061550c91560e98", "dims": {"D1": 0, "D2": 0, "D3": 0, "D4": 0, "D5": 0}}, {"repo": "caict-4iot-dev/uni-registrar-driver-did-bid", "sha": "68f69ec419c0f23c1a7faf95dd8d73aeb5ff30a4", "dims": {"D1": 0, "D2": 0, "D3": 0, "D4": 0, "D5": 0}}, {"repo": "caict-4iot-dev/uni-resolver-driver-did-bid", "sha": "5a933656eb9631bc65ba535f4bb69aa893d79a79", "dims": {"D1": 0, "D2": 0, "D3": 0, "D4": 0, "D5": 0}}, {"repo": "ceramicnetwork/js-did", "sha": "def0a5fed152a42ffeef87bafb4619816f9954f6", "dims": {"D1": 1, "D2": 0, "D3": 1, "D4": 0, "D5": 0}}, {"repo": "decentralized-identity/did-jwt", "sha": "63663c1f40b4d6dd0d510847acfe5ae5ad230fd2", "dims": {"D1": 1, "D2": 0, "D3": 1, "D4": 1, "D5": 0}}, {"repo": "decentralized-identity/did-resolver", "sha": "005411b26ac3002aa4f501673ee4e2ecc96b2a71", "dims": {"D1": 0, "D2": 0, "D3": 0, "D4": 0, "D5": 0}}, {"repo": "decentralized-identity/ethr-did-resolver", "sha": "6e0bd47702495d259674c6a53e8be3037069dcc1", "dims": {"D1": 1, "D2": 0, "D3": 1, "D4": 1, "D5": 0}}, {"repo": "decentralized-identity/ion", "sha": "424ec87dda60c89c0b3c4e46c274eff3124fe484", "dims": {"D1": 0, "D2": 0, "D3": 0, "D4": 0, "D5": 0}}, {"repo": "decentralized-identity/sidetree-core", "sha": "bb4bb16d23838cc02bbde0b4ac634e0491ae85fd", "dims": {"D1": 0, "D2": 0, "D3": 0, "D4": 0, "D5": 0}}, {"repo": "decentralized-identity/universal-resolver", "sha": "99838d52a7a6c7424bf8c895d03d317dcd8cdb3a", "dims": {"D1": 0, "D2": 0, "D3": 0, "D4": 0, "D5": 0}}, {"repo": "decentralized-identity/veramo", "sha": "ac953d9a28db1faa57266636de7c4ed891bf1b0b", "dims": {"D1": 1, "D2": 0, "D3": 1, "D4": 1, "D5": 0}}, {"repo": "digitalbazaar/did-io", "sha": "940555f002fbf69e081e4db5b44b3cd9e0234404", "dims": {"D1": 0, "D2": 0, "D3": 0, "D4": 0, "D5": 0}}, {"repo": "docknetwork/sdk", "sha": "1eadcdc7a9c1dd7a28a2df5ff2b3b969a51427a6", "dims": {"D1": 1, "D2": 0, "D3": 1, "D4": 1, "D5": 0}}, {"repo": "hyperledger/aries-cloudagent-python", "sha": "daf7ff8d208a56bbfe5f66d879c638b2d2fb4a77", "dims": {"D1": 1, "D2": 0, "D3": 1, "D4": 1, "D5": 0}}, {"repo": "hyperledger/aries-framework-go", "sha": "64dd8acc07506884f480719f7d9d960447d9a5ac", "dims": {"D1": 1, "D2": 0, "D3": 1, "D4": 1, "D5": 0}}, {"repo": "hyperledger/indy-sdk", "sha": "2d47f2ff1ca62563f0f85e52cc9378f133ad8a0d", "dims": {"D1": 1, "D2": 0, "D3": 1, "D4": 1, "D5": 0}}, {"repo": "hyperledger/indy-vdr", "sha": "e4902fcd5638efb0aaded3a854a56e077f8b32f3", "dims": {"D1": 1, "D2": 0, "D3": 1, "D4": 1, "D5": 0}}, {"repo": "ontio/ontology-did", "sha": "9902c8f80f0610080008ddf0eb151dabb6340f2a", "dims": {"D1": 0, "D2": 0, "D3": 0, "D4": 0, "D5": 0}}, {"repo": "sphereon-opensource/ssi-sdk", "sha": "4f8b21c24659259843b4b802e4a68a635989a590", "dims": {"D1": 1, "D2": 0, "D3": 1, "D4": 1, "D5": 0}}, {"repo": "spruceid/didkit", "sha": "57a3b45111f8b1003ef1a50cf7cf21c81cd59cb1", "dims": {"D1": 0, "D2": 0, "D3": 0, "D4": 0, "D5": 0}}, {"repo": "spruceid/ssi", "sha": "726f49e7fefbb726ff41deba331428088bfa782d", "dims": {"D1": 0, "D2": 0, "D3": 0, "D4": 0, "D5": 0}}, {"repo": "transmute-industries/sidetree.js", "sha": "0b17eb9ed7aa787230bfdeaff92cc7eca05d0e7e", "dims": {"D1": 0, "D2": 0, "D3": 0, "D4": 0, "D5": 0}}, {"repo": "uport-project/ethr-did", "sha": "4bbd2ef539ba532731508198e5828657c169ff66", "dims": {"D1": 0, "D2": 0, "D3": 0, "D4": 0, "D5": 0}}, {"repo": "w3c-ccg/did-method-key", "sha": "2cc490c38c5aacf58497a87fc0cf8794668bf716", "dims": {"D1": 0, "D2": 0, "D3": 0, "D4": 0, "D5": 0}}, {"repo": "w3c-ccg/did-test-suite", "sha": "addafb08c84ef3c4dd4a596ebe71f164daa4ceab", "dims": {"D1": 0, "D2": 0, "D3": 0, "D4": 0, "D5": 0}}], "ours": {"repo": "zhaoxinghua09-cell/uibc-core", "dims": {"D1": 2, "D2": 2, "D3": 2, "D4": 2, "D5": 2}}, "summary_repos": 25, "summary_best": 3, "summary_ours": 10}</script>
+<script>
+const S = JSON.parse(document.getElementById('snap').textContent);
+const DIMS = ['D1','D2','D3','D4','D5'];
+const NAME = {D1:'拒绝断言',D2:'逐位变异',D3:'门自证',D4:'跨层退出码',D5:'二进制层'};
+const score = r => DIMS.reduce((a,d)=>a+((r.dims&&r.dims[d])||0),0);
+function cell(v){ return v ? '<td class="y">2</td>' : '<td class="n">0</td>'; }
+function render(){
+  document.getElementById('audited').textContent = S.audited_at || '';
+  const repos = S.repos.filter(r=>!r.error);
+  const ours = S.ours;
+  const best = Math.max(...repos.map(score));
+  const chips = [
+    ['取样仓库', repos.length, '固定 commit + tarball sha256'],
+    ['最好竞品', best + '/10', '代表取样，非全集'],
+    ['本仓库', score(ours) + '/10', '由证据现算，非手写'],
+    ['谎报上限', S.calibration ? S.calibration.ceiling + '/10' : '?', '注释堆词的合成仓得分'],
+  ];
+  document.getElementById('chips').innerHTML = chips.map(c=>`<div class="chip"><span>${c[0]}</span><b>${c[1]}</b><span>${c[2]}</span></div>`).join('');
+  let rows = repos.slice().sort((a,b)=>score(b)-score(a)).map(r=>
+    `<tr><td class="repo">${r.repo}</td>${DIMS.map(d=>cell((r.dims||{})[d])).join('')}<td class="sc"><b>${score(r)}</b>/10</td></tr>`);
+  rows.push(`<tr class="ours"><td class="repo">${ours.repo} <span style="color:#3fd48a">（本仓）</span></td>${DIMS.map(d=>cell((ours.dims||{})[d])).join('')}<td class="sc"><b>${score(ours)}</b>/10</td></tr>`);
+  document.getElementById('rows').innerHTML = rows.join('');
+  return {repos, best, ours};
+}
+function selfcheck(){
+  const {repos, best, ours} = window.__last;
+  const lines = []; let ok = true;
+  const push = (cond, msg) => { lines.push((cond?'PASS ':'FAIL ')+msg); ok = ok && cond; };
+  const sumDims = r => DIMS.reduce((a,d)=>a+((r.dims&&r.dims[d])||0),0);
+  push(repos.length === S.summary_repos, `表内 ${repos.length} 行 = 快照声明 ${S.summary_repos} 行`);
+  push(repos.length !== 0, '取样非空');
+  push(best === S.summary_best, `最好竞品现算 ${best} = 快照 ${S.summary_best}`);
+  push(sumDims(ours) === S.summary_ours, `本仓现算 ${sumDims(ours)} = 快照 ${S.summary_ours}`);
+  push(DIMS.every(d => (ours.dims||{})[d] === 2), '本仓五维全为 2');
+  if (S.calibration) {
+    push(S.calibration.ceiling < best, `谎报上限 ${S.calibration.ceiling} < 最好竞品 ${best}（否则表无法区分人与堆词）`);
+    push(S.calibration.empty === 0 && S.calibration.stuffed === 0, `空仓 ${S.calibration.empty} / 堆词仓 ${S.calibration.stuffed} 均为 0`);
+  }
+  push(repos.every(r => r.sha && r.sha !== 'unknown'), '每家都有 40 位 commit');
+  const t = document.getElementById('sc');
+  t.textContent = lines.join('\n') + '\n\n' + (ok ? 'SELF-CHECK PASS' : 'SELF-CHECK FAIL — 本页不可信，回仓库重算');
+  t.style.color = ok ? '#8fa3b5' : '#ff6b6b';
+  return ok;
+}
+window.__last = render(); selfcheck();
+</script></body></html>

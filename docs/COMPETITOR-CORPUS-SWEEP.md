@@ -194,3 +194,5 @@ python tools/stranger_competitor_check.py                         # 取上游 ta
 `tools/stranger_competitor_check.py` 现在多打一行 `ledger: 69 verdict, 88 signature-only, 14 nothing, 88 signatures verify`，并把这份收据**逐行**比对：某一条向量的可达级别动了，就算 `DID NOT MATCH`，不是四舍五入。
 
 一句话的差别：我们的 63 条**每一条都落在 `verdict` 层**；他们的 171 条里 69 条落在这一层，另 88 条只到签名，14 条连签名也到不了。
+
+画成一张图是同一件事：`docs/UPSTREAM-REACH-LADDER.svg`（`tools/build_reach_ladder_svg.py --write` 生成，`--check` 在任一份收据变动时失效）。三段柱共用 171 刻度，段长全部读自收据，柱下还按族给出 `verdict/signature-only/nothing` 三个计数；我方 63 条画在同一刻度上，整条落在 `verdict` 段。

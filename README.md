@@ -539,6 +539,46 @@ people who ran it, and disagreements stay in the file.
 Timing on a laptop: ~30 s (21 s of that is the corpus hashing). If it ever takes much longer,
 the corpus or the fixtures have grown and the README claim is stale.
 
+## What each clause is judged on — and one command to re-check it
+
+The tables under [`docs/CROSSWALK-*.md`](docs/) map regulatory and standard clauses to what
+this package actually carries, one row per clause, each row with a state and a reason. Six
+sources are covered:
+
+| file | source |
+|---|---|
+| `crosswalk/eu-mdr-2017-745.json` | EU MDR 2017/745, Annex I and Annex II |
+| `crosswalk/21cfr11.json` | 21 CFR Part 11 (verbatim from eCFR) |
+| `crosswalk/iec-62304-2006-a1.json` | IEC 62304:2006+A1 |
+| `crosswalk/iso-14971-2019.json` | ISO 14971:2019 |
+| `crosswalk/nist-sp800-53r5-au.json` | NIST SP 800-53 Rev. 5, AU family (verbatim from the PDF) |
+| `crosswalk/tool-contract.json` | this repository's own tool contract |
+
+Re-check the whole table, offline, with one command:
+
+```
+python tools/recheck.py
+```
+
+It re-runs every probe, compares each fresh result with `tools/out/crosswalk-<name>.json`
+byte for byte, and prints one row per file plus the total. Exit codes: `0` clean, `1` a row
+claimed more than its evidence (OVERCLAIM), `2` a file could not be read, `3` a result no
+longer reproduces the committed one. `crosswalk-gate` in CI runs this same command, so the
+check you run and the check the build runs are not two different things.
+
+**What the states mean.** `COVERED` needs a declared probe that passes. `PARTIAL` and `GAP`
+need a written reason saying what is *not* carried. `GAP` is a declaration, not a failure
+that was hidden; the seven declared gaps are clauses this package does not claim to meet.
+As of this writing: **25 regulatory clauses = 16 PARTIAL / 7 GAP / 2 COVERED**, plus 4
+tool-contract rows (3 COVERED / 1 GAP). The two carried regulatory clauses are 21 CFR
+11.70 and NIST AU-10, both resting on the same executed record-binding probe.
+
+**What this is not.** A crosswalk is not a regulatory acceptance, a certification, or a
+QMS. It states, clause by clause, which requirements a record layer can carry and which
+belong to the deploying organisation (retention policy, validation of the surrounding
+system, risk management, software lifecycle). Claims to the contrary are exactly what the
+`OVERCLAIM` state exists to catch.
+
 ## Memory Migration Fixtures (UIBC-MEM)
 
 

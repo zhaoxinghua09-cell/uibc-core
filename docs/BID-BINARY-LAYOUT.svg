@@ -1,0 +1,123 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<svg xmlns='http://www.w3.org/2000/svg' width='900' height='650' viewBox='0 0 900 650'>
+<rect width='100%' height='100%' fill='#ffffff'/>
+<text x='18' y='36' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='20' font-weight='600' fill='#0f172a'>RFC-011 message layout (generated from uibc_core.bid_binary constants)</text>
+<text x='18' y='58' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='11' fill='#475569'>header 16 bytes, headerLength counted in 4-byte units, unit = ID 2B + length 2B + payload</text>
+<text x='18' y='84' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='12' fill='#334155'>byte 0 — version | headerLength</text>
+<rect x='18' y='92' width='34' height='34' fill='#e2e8f0' stroke='#94a3b8'/>
+<rect x='52' y='92' width='34' height='34' fill='#e2e8f0' stroke='#94a3b8'/>
+<rect x='86' y='92' width='34' height='34' fill='#e2e8f0' stroke='#94a3b8'/>
+<rect x='120' y='92' width='34' height='34' fill='#e2e8f0' stroke='#94a3b8'/>
+<rect x='154' y='92' width='34' height='34' fill='#eef2f7' stroke='#94a3b8'/>
+<rect x='188' y='92' width='34' height='34' fill='#eef2f7' stroke='#94a3b8'/>
+<rect x='222' y='92' width='34' height='34' fill='#eef2f7' stroke='#94a3b8'/>
+<rect x='256' y='92' width='34' height='34' fill='#eef2f7' stroke='#94a3b8'/>
+<rect x='18' y='92' width='136' height='34' fill='#93c5fd' fill-opacity='0.55' stroke='#475569'/>
+<text x='86' y='114' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='12' fill='#0f172a' text-anchor='middle'>version</text>
+<rect x='154' y='92' width='136' height='34' fill='#93c5fd' fill-opacity='0.55' stroke='#475569'/>
+<text x='222' y='114' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='12' fill='#0f172a' text-anchor='middle'>hdrLen/4B</text>
+<text x='35' y='137' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='8' fill='#64748b' text-anchor='middle'>0</text>
+<text x='69' y='137' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='8' fill='#64748b' text-anchor='middle'>1</text>
+<text x='103' y='137' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='8' fill='#64748b' text-anchor='middle'>2</text>
+<text x='137' y='137' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='8' fill='#64748b' text-anchor='middle'>3</text>
+<text x='171' y='137' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='8' fill='#64748b' text-anchor='middle'>4</text>
+<text x='205' y='137' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='8' fill='#64748b' text-anchor='middle'>5</text>
+<text x='239' y='137' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='8' fill='#64748b' text-anchor='middle'>6</text>
+<text x='273' y='137' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='8' fill='#64748b' text-anchor='middle'>7</text>
+<text x='18' y='154' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='12' fill='#334155'>bytes 1–2 — flag: listed order, no bit numbers in the RFC</text>
+<rect x='18' y='162' width='34' height='34' fill='#e2e8f0' stroke='#94a3b8'/>
+<rect x='52' y='162' width='34' height='34' fill='#e2e8f0' stroke='#94a3b8'/>
+<rect x='86' y='162' width='34' height='34' fill='#e2e8f0' stroke='#94a3b8'/>
+<rect x='120' y='162' width='34' height='34' fill='#e2e8f0' stroke='#94a3b8'/>
+<rect x='154' y='162' width='34' height='34' fill='#eef2f7' stroke='#94a3b8'/>
+<rect x='188' y='162' width='34' height='34' fill='#eef2f7' stroke='#94a3b8'/>
+<rect x='222' y='162' width='34' height='34' fill='#eef2f7' stroke='#94a3b8'/>
+<rect x='256' y='162' width='34' height='34' fill='#eef2f7' stroke='#94a3b8'/>
+<rect x='290' y='162' width='34' height='34' fill='#e2e8f0' stroke='#94a3b8'/>
+<rect x='324' y='162' width='34' height='34' fill='#e2e8f0' stroke='#94a3b8'/>
+<rect x='358' y='162' width='34' height='34' fill='#e2e8f0' stroke='#94a3b8'/>
+<rect x='392' y='162' width='34' height='34' fill='#e2e8f0' stroke='#94a3b8'/>
+<rect x='426' y='162' width='34' height='34' fill='#eef2f7' stroke='#94a3b8'/>
+<rect x='460' y='162' width='34' height='34' fill='#eef2f7' stroke='#94a3b8'/>
+<rect x='494' y='162' width='34' height='34' fill='#eef2f7' stroke='#94a3b8'/>
+<rect x='528' y='162' width='34' height='34' fill='#eef2f7' stroke='#94a3b8'/>
+<rect x='18' y='162' width='34' height='34' fill='#93c5fd' fill-opacity='0.55' stroke='#475569'/>
+<text x='35' y='184' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='12' fill='#0f172a' text-anchor='middle'>qr</text>
+<rect x='52' y='162' width='34' height='34' fill='#93c5fd' fill-opacity='0.55' stroke='#475569'/>
+<text x='69' y='184' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='12' fill='#0f172a' text-anchor='middle'>tc</text>
+<rect x='86' y='162' width='34' height='34' fill='#93c5fd' fill-opacity='0.55' stroke='#475569'/>
+<text x='103' y='184' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='12' fill='#0f172a' text-anchor='middle'>rd</text>
+<rect x='120' y='162' width='34' height='34' fill='#93c5fd' fill-opacity='0.55' stroke='#475569'/>
+<text x='137' y='184' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='12' fill='#0f172a' text-anchor='middle'>dt</text>
+<rect x='154' y='162' width='34' height='34' fill='#93c5fd' fill-opacity='0.55' stroke='#475569'/>
+<text x='171' y='184' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='12' fill='#0f172a' text-anchor='middle'>tr</text>
+<rect x='188' y='162' width='34' height='34' fill='#93c5fd' fill-opacity='0.55' stroke='#475569'/>
+<text x='205' y='184' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='12' fill='#0f172a' text-anchor='middle'>ct</text>
+<rect x='222' y='162' width='136' height='34' fill='#93c5fd' fill-opacity='0.55' stroke='#475569'/>
+<text x='290' y='184' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='12' fill='#0f172a' text-anchor='middle'>opCode</text>
+<text x='35' y='207' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='8' fill='#64748b' text-anchor='middle'>0</text>
+<text x='69' y='207' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='8' fill='#64748b' text-anchor='middle'>1</text>
+<text x='103' y='207' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='8' fill='#64748b' text-anchor='middle'>2</text>
+<text x='137' y='207' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='8' fill='#64748b' text-anchor='middle'>3</text>
+<text x='171' y='207' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='8' fill='#64748b' text-anchor='middle'>4</text>
+<text x='205' y='207' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='8' fill='#64748b' text-anchor='middle'>5</text>
+<text x='239' y='207' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='8' fill='#64748b' text-anchor='middle'>6</text>
+<text x='273' y='207' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='8' fill='#64748b' text-anchor='middle'>7</text>
+<text x='307' y='207' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='8' fill='#64748b' text-anchor='middle'>8</text>
+<text x='341' y='207' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='8' fill='#64748b' text-anchor='middle'>9</text>
+<text x='375' y='207' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='8' fill='#64748b' text-anchor='middle'>10</text>
+<text x='409' y='207' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='8' fill='#64748b' text-anchor='middle'>11</text>
+<text x='443' y='207' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='8' fill='#64748b' text-anchor='middle'>12</text>
+<text x='477' y='207' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='8' fill='#64748b' text-anchor='middle'>13</text>
+<text x='511' y='207' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='8' fill='#64748b' text-anchor='middle'>14</text>
+<text x='545' y='207' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='8' fill='#64748b' text-anchor='middle'>15</text>
+<text x='18' y='216' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='9' fill='#b91c1c'>bit numbers shown are the msb-first assumption (flag_bit_order='msb'); 'lsb' flips them</text>
+<text x='18' y='246' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='12' fill='#334155'>bytes 3–15 — the rest of the header</text>
+<rect x='18' y='254' width='32' height='34' fill='#fde68a' stroke='#92400e'/>
+<text x='24' y='268' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='11' fill='#111827'>unUsed</text>
+<text x='24' y='281' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='9' fill='#78350f'>1 byte, reserved</text>
+<text x='42' y='285' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='8' fill='#64748b'>1B</text>
+<rect x='52' y='254' width='66' height='34' fill='#fde68a' stroke='#92400e'/>
+<text x='58' y='268' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='11' fill='#111827'>replyCode</text>
+<text x='58' y='281' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='9' fill='#78350f'>answer type (§5.1.2.1.2 table)</text>
+<text x='110' y='285' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='8' fill='#64748b'>2B</text>
+<rect x='120' y='254' width='66' height='34' fill='#fde68a' stroke='#92400e'/>
+<text x='126' y='268' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='11' fill='#111827'>messageID</text>
+<text x='126' y='281' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='9' fill='#78350f'>fragment id, first = 1</text>
+<text x='178' y='285' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='8' fill='#64748b'>2B</text>
+<rect x='188' y='254' width='134' height='34' fill='#fde68a' stroke='#92400e'/>
+<text x='194' y='268' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='11' fill='#111827'>transactionID</text>
+<text x='194' y='281' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='9' fill='#78350f'>request/answer correlation</text>
+<text x='314' y='285' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='8' fill='#64748b'>4B</text>
+<rect x='324' y='254' width='134' height='34' fill='#fde68a' stroke='#92400e'/>
+<text x='330' y='268' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='11' fill='#111827'>messageLength</text>
+<text x='330' y='281' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='9' fill='#78350f'>body length incl. signature</text>
+<text x='450' y='285' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='8' fill='#64748b'>4B</text>
+<text x='18' y='324' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='12' fill='#334155'>body — unit tree (payload may itself be units; that is the whole nesting rule)</text>
+<rect x='18' y='332' width='66' height='34' fill='#fde68a' stroke='#92400e'/>
+<text x='24' y='346' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='11' fill='#111827'>unitID</text>
+<text x='24' y='359' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='9' fill='#78350f'>field id</text>
+<text x='76' y='363' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='8' fill='#64748b'>2B</text>
+<rect x='86' y='332' width='66' height='34' fill='#fde68a' stroke='#92400e'/>
+<text x='92' y='346' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='11' fill='#111827'>length</text>
+<text x='92' y='359' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='9' fill='#78350f'>payload bytes</text>
+<text x='144' y='363' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='8' fill='#64748b'>2B</text>
+<rect x='154' y='332' width='202' height='34' fill='#fde68a' stroke='#92400e'/>
+<text x='160' y='346' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='11' fill='#111827'>payload / child units …</text>
+<text x='160' y='359' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='9' fill='#78350f'>nested = same structure</text>
+<text x='348' y='363' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='8' fill='#64748b'>6B</text>
+<text x='18' y='402' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='12' fill='#334155'>the six assumptions — each is a parameter in the module, not a comment</text>
+<rect x='18' y='410' width='864' height='26' fill='#dcfce7' stroke='#cbd5e1'/>
+<text x='24' y='427' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='10' fill='#111827'>flag_bit_order [flippable] first listed field = bit 15 (parameter: flag_bit_order='msb'|'lsb')</text>
+<rect x='18' y='440' width='864' height='26' fill='#dbeafe' stroke='#cbd5e1'/>
+<text x='24' y='457' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='10' fill='#111827'>integer_widths [caller-supplied] no width is assumed; caller passes integer_widths={'int':N,'long':M}</text>
+<rect x='18' y='470' width='864' height='26' fill='#dcfce7' stroke='#cbd5e1'/>
+<text x='24' y='487' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='10' fill='#111827'>acsns_spelling [flippable] encode 0x3610/0x3620 (parameter: acsns_spelling='3610'|'3601'); decode accepts both</text>
+<rect x='18' y='500' width='864' height='26' fill='#fef3c7' stroke='#cbd5e1'/>
+<text x='24' y='517' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='10' fill='#111827'>bid_document_collision [heuristic] payload that parses as units = container, otherwise = one key id</text>
+<rect x='18' y='530' width='864' height='26' fill='#fee2e2' stroke='#cbd5e1'/>
+<text x='24' y='547' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='10' fill='#111827'>fragment_reassembly [not-implemented] no reassembly; fragments are decoded one at a time</text>
+<rect x='18' y='560' width='864' height='26' fill='#fee2e2' stroke='#cbd5e1'/>
+<text x='24' y='577' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='10' fill='#111827'>signature_unit_ids [not-implemented] signature block is not located; signature_units_detectable is False</text>
+<text x='18' y='598' font-family='DejaVu Sans, Segoe UI, sans-serif' font-size='9' fill='#64748b'>regenerate: python tools/render_bid_binary_layout.py — the file is checked by tests/test_bid_binary_layout.py</text>
+</svg>

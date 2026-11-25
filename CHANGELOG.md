@@ -8,6 +8,7 @@
 - **宽度给了就严格**：`integer_widths` 与 payload 长度不符立刻 `raise`（`declared long=8 bytes but carries 4`）——真实样例到手时错宽度当场暴露，不会被读成错数。
 - **敌意输入**：2,000 组随机字节只许 `ValueError`；500 组随机 unit 序列解码后重编码语义必须一致。
 - 新增 `tests/test_bid_binary_codec.py` 31 条，连原 16 条共 47 条全绿。
+- **可运行 demo 与生成式布局图**：`tools/demo_bid_binary.py` 八幕（编→解→翻转假设→宽度硬校验→fuzz），末行 `ALL OK`、退出码 0；`tools/render_bid_binary_layout.py` 从模块常量生成 `docs/BID-BINARY-LAYOUT.svg`，生成器内断言各段字节和等于 `HEADER_MIN`，`tests/test_bid_binary_layout.py` 再拿生成结果与仓库那份做字节比较——手改图即红。新增 5 条测试，与解码/编解码合计 52 条。
 
 ## 0.5.5 — 2026-11-25（把 0.5.4 那次发布补成一次干净的）
 

@@ -93,6 +93,27 @@
 - `test_unit_layer_preserves_non_ascending_order`：故意倒序，证明规范序只发生在文档层，
   单元层不偷偷排序。
 
+## 三·八、跑得起来的例子，和一张不会骗人的图
+
+一条命令，不需要网络、不需要夹具、不需要起服务：
+
+```bash
+python tools/demo_bid_binary.py          # 八幕，最后一行为 ALL OK，退出码 0
+python tools/demo_bid_binary.py --flip   # 同一串字节，两种读法并排
+```
+
+demo 的每一幕都打印 `OK` 或 `HARD-FAIL`，退出码非 0 就说明模块被改坏了。它做的是同一件事的两面：
+把一份 DID 文档编成 342 字节、`hexdump` 出来、再原路解回，然后当场演示"推断是参数"——`msb` 读出
+`qr=1`、`lsb` 读出 `qr=0`；AC 号两套编号编出不同字节却解成同一份文档；宽度给错当场 raise。
+
+图不是画出来的，是**算出来的**：`tools/render_bid_binary_layout.py` 从
+`uibc_core.bid_binary` 里读 `HEADER_MIN`、`_FLAG_BITS`、`_OPCODE_SHIFT`、`ASSUMPTIONS`，生成
+[docs/BID-BINARY-LAYOUT.svg](BID-BINARY-LAYOUT.svg)。生成器里有一句断言：各位段的字节数相加必须
+等于 `HEADER_MIN`，否则直接失败——**图不可能和代码对不上而不被发现**。`tests/test_bid_binary_layout.py`
+再把生成的 SVG 与仓库里那份做字节比较，手改过就红。
+
+手绘图会随着代码演进而失真，而失真的图比没有图更糟：它看起来仍是证据。
+
 ## 四、正文没写够、因此没有实现的部分（逐条给理由）
 
 | 缺什么 | 正文实际情况 | 我们的处置 |

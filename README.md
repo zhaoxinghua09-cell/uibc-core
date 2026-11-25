@@ -89,6 +89,11 @@ Two things this paragraph will not hide, because both were measured today:
 
 So: `pip install uibc-core==0.5.3` gives you the verifier this README describes; `v0.5.3` as a *tag* does not. Cite the snapshot, install by version number, and do not treat a tag name as a proof of what it contains.
 
+**Citing and reuse — no permission needed.** You do not need to ask us to cite, quote, or reuse this work. Cite it, run it, build on it, and point others at it. Attribution in the usual form is appreciated: author, title, DOI or repository commit, and date. The code is under Apache-2.0 (keep the licence notice); the citation snapshot is cited by its DOI. There is no other condition.
+
+**引用、复用，不必事先征得我们同意。** 直接引用、直接复用、直接跑，不用再来问。按通常格式署名即可。代码为 Apache-2.0（保留许可证声明）；引用快照以 DOI 为准。除此之外没有任何条件。
+
+
 **External conformance, measured against someone else's corpus** — a different number from the one above, and a different kind of claim:
 
 | item | value |

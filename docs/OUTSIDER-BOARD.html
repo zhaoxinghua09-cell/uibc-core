@@ -38,6 +38,18 @@ opinion.</p>
 
 <h2>The ten gates</h3>
 <table><tr><th>gate</th><th>what it holds</th></tr><tr><td><code>own-corpus-receipt</code></td><td>tools/measure_own_corpus.py --check</td></tr><tr><td><code>coverage-picture</code></td><td>tools/build_corpus_sweep_svg.py --check</td></tr><tr><td><code>two-ruler-picture</code></td><td>tools/build_same_ruler_svg.py --check</td></tr><tr><td><code>reach-ladder-picture</code></td><td>tools/build_reach_ladder_svg.py --check</td></tr><tr><td><code>ledger-invariants</code></td><td>tools/build_upstream_ledger.py --selftest</td></tr><tr><td><code>claims-vs-receipts</code></td><td>tools/audit_claims_receipts.py</td></tr><tr><td><code>evidence-index</code></td><td>tools/build_evidence_index.py --check</td></tr><tr><td><code>vendored-corpus</code></td><td>tools/verify_vendored_corpus.py --check</td></tr><tr><td><code>outsider-receipt</code></td><td>tools/outsider_rerun.py --check</td></tr><tr><td><code>tree-digest-second-impl</code></td><td>tools/tree_digest_second_impl.py --check</td></tr></table>
+<h2>The same ten dimensions, everyone scored</h3>
+<p class="hint">Same ruler, applied to every repository we could read: five dimensions,
+two points each. This is the receipt's <code>parity</code> step, on the page.</p>
+<table>
+<tr><th>what</th><th>value</th></tr>
+<tr><td>repositories pinned and re-scored</td><td class="num" id="v-repos"></td></tr>
+<tr><td>dimensions</td><td class="num" id="v-dims"></td></tr>
+<tr><td>best competitor</td><td class="num" id="v-best"></td></tr>
+<tr><td>this repository</td><td class="num" id="v-ours"></td></tr>
+<tr><td>repositories scoring zero</td><td class="num" id="v-zero"></td></tr>
+</table>
+
 <p class="hint">Run all ten with <code>python tools/stranger_own_check.py</code>.
 A gate that cannot run is counted as skipped, never as passed.</p>
 
@@ -48,10 +60,10 @@ ships in the repository.</p>
 
 <script id="snap" type="application/json">
 {
- "generated_at": "2026-11-25T23:08:01Z",
- "tree_sha256": "02754ac6123a317252727a640014cd9148a7edf399dd14b469021d51b667c15e",
- "content_sha256": "30c548614ace9637f3c2510676728aa5d577abb2c4e086e8a059a743d0ec256d",
- "content_lf_sha256": "b2601ad04ae21309dd401620610c0d4f478876266cef2702dbd2659b39fd5e32",
+ "generated_at": "2026-11-25T23:21:46Z",
+ "tree_sha256": "c2ab574cdceda65c61c257ccb30200961917e887e696f8055dab916559acfdbf",
+ "content_sha256": "e1f6fbb23435cec183af5aa55a407b05f4e5274bb2dc3bbd6cba950912bf6c94",
+ "content_lf_sha256": "eb2cc8c7d5b66f2278de6fb7910acc24aff14b2fe1857607036a919eca501679",
  "delivery": "archive",
  "files_hashed": 2453,
  "steps": [
@@ -118,7 +130,15 @@ ships in the repository.</p>
    "what": "tools/tree_digest_second_impl.py --check"
   }
  ],
- "receipt_ok": true
+ "receipt_ok": true,
+ "parity": {
+  "repos": 25,
+  "best_repo": "sphereon-opensource/ssi-sdk",
+  "best_score": 3,
+  "ours": 10,
+  "zero_repos": 15,
+  "dimensions": 5
+ }
 }
 </script>
 <script>
@@ -131,6 +151,14 @@ ships in the repository.</p>
   document.getElementById("v-tree").textContent = s.tree_sha256;
   document.getElementById("v-content").textContent = s.content_sha256;
   document.getElementById("v-lf").textContent = s.content_lf_sha256 || "(absent)";
+  var par = s.parity;
+  if (par) {
+    document.getElementById("v-repos").textContent = par.repos;
+    document.getElementById("v-dims").textContent = par.dimensions;
+    document.getElementById("v-best").textContent = par.best_repo + " " + par.best_score + "/" + (par.dimensions * 2);
+    document.getElementById("v-ours").textContent = par.ours + "/" + (par.dimensions * 2);
+    document.getElementById("v-zero").textContent = par.zero_repos;
+  }
   var bad = [];
   ["tree_sha256", "content_sha256", "content_lf_sha256"].forEach(function (k) {
     if (!hex.test(String(s[k] || ""))) bad.push(k + " is not 64 hex characters");
@@ -139,6 +167,10 @@ ships in the repository.</p>
   if (!s.receipt_ok) bad.push("the receipt itself says one of its steps failed");
   s.steps.forEach(function (st) { if (!st.ok || st.rc !== 0) bad.push("step " + st.step + " did not pass"); });
   if (s.gates.length !== 10) bad.push("expected ten gates, the page carries " + s.gates.length);
+  if (s.parity) {
+    if (s.parity.ours !== s.parity.dimensions * 2) bad.push("this repository does not score full marks on its own ruler");
+    if (s.parity.best_score > s.parity.ours) bad.push("a competitor outscores this repository on this page");
+  }
   var v = document.getElementById("verdict");
   v.textContent = bad.length
     ? "SELF-CHECK FAIL: " + bad.join("; ")

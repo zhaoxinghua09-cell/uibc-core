@@ -36,9 +36,34 @@ import sys
 
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RECEIPT = os.path.join(HERE, "docs", "outsider-rerun-receipt.json")
+PARITY = os.path.join(HERE, "docs", "competitor-parity.json")
 BOARD = os.path.join(HERE, "docs", "OUTSIDER-BOARD.html")
 GATES_TOOL = os.path.join(HERE, "tools", "stranger_own_check.py")
 HEX64 = re.compile(r"^[0-9a-f]{64}$")
+
+
+def parity_snapshot():
+    """The one number that answers "超越在哪": same ten dimensions, everyone scored.
+
+    The receipt's own `parity` step prints this tail, but a stranger reading
+    one page should not have to open a second file to find it.
+    """
+    if not os.path.exists(PARITY):
+        return None
+    data = json.load(open(PARITY, encoding="utf-8"))
+    def total(entry):
+        return sum(int(v) for v in entry.get("dims", {}).values())
+    repos = data.get("repos", [])
+    scored = [(total(r), r.get("repo", "?")) for r in repos]
+    best_score, best_repo = max(scored) if scored else (0, "?")
+    return {
+        "repos": len(repos),
+        "best_repo": best_repo,
+        "best_score": best_score,
+        "ours": total(data.get("ours", {})),
+        "zero_repos": sum(1 for sc, _ in scored if sc == 0),
+        "dimensions": len(data.get("ours", {}).get("dims", {})),
+    }
 
 
 def gate_names():
@@ -65,6 +90,7 @@ def snapshot():
         "steps": [{"step": s["step"], "ok": bool(s["ok"]), "rc": s["rc"]} for s in receipt["steps"]],
         "gates": [{"name": n, "what": w} for n, w in gate_names()],
         "receipt_ok": bool(receipt.get("ok")),
+        "parity": parity_snapshot(),
     }
 
 
@@ -117,6 +143,18 @@ opinion.</p>
 
 <h2>The ten gates</h3>
 <table><tr><th>gate</th><th>what it holds</th></tr>{rows}</table>
+<h2>The same ten dimensions, everyone scored</h3>
+<p class="hint">Same ruler, applied to every repository we could read: five dimensions,
+two points each. This is the receipt's <code>parity</code> step, on the page.</p>
+<table>
+<tr><th>what</th><th>value</th></tr>
+<tr><td>repositories pinned and re-scored</td><td class="num" id="v-repos"></td></tr>
+<tr><td>dimensions</td><td class="num" id="v-dims"></td></tr>
+<tr><td>best competitor</td><td class="num" id="v-best"></td></tr>
+<tr><td>this repository</td><td class="num" id="v-ours"></td></tr>
+<tr><td>repositories scoring zero</td><td class="num" id="v-zero"></td></tr>
+</table>
+
 <p class="hint">Run all ten with <code>python tools/stranger_own_check.py</code>.
 A gate that cannot run is counted as skipped, never as passed.</p>
 
@@ -138,6 +176,14 @@ ships in the repository.</p>
   document.getElementById("v-tree").textContent = s.tree_sha256;
   document.getElementById("v-content").textContent = s.content_sha256;
   document.getElementById("v-lf").textContent = s.content_lf_sha256 || "(absent)";
+  var par = s.parity;
+  if (par) {{
+    document.getElementById("v-repos").textContent = par.repos;
+    document.getElementById("v-dims").textContent = par.dimensions;
+    document.getElementById("v-best").textContent = par.best_repo + " " + par.best_score + "/" + (par.dimensions * 2);
+    document.getElementById("v-ours").textContent = par.ours + "/" + (par.dimensions * 2);
+    document.getElementById("v-zero").textContent = par.zero_repos;
+  }}
   var bad = [];
   ["tree_sha256", "content_sha256", "content_lf_sha256"].forEach(function (k) {{
     if (!hex.test(String(s[k] || ""))) bad.push(k + " is not 64 hex characters");
@@ -146,6 +192,10 @@ ships in the repository.</p>
   if (!s.receipt_ok) bad.push("the receipt itself says one of its steps failed");
   s.steps.forEach(function (st) {{ if (!st.ok || st.rc !== 0) bad.push("step " + st.step + " did not pass"); }});
   if (s.gates.length !== 10) bad.push("expected ten gates, the page carries " + s.gates.length);
+  if (s.parity) {{
+    if (s.parity.ours !== s.parity.dimensions * 2) bad.push("this repository does not score full marks on its own ruler");
+    if (s.parity.best_score > s.parity.ours) bad.push("a competitor outscores this repository on this page");
+  }}
   var v = document.getElementById("verdict");
   v.textContent = bad.length
     ? "SELF-CHECK FAIL: " + bad.join("; ")
@@ -181,6 +231,8 @@ def check():
         bad.append("the page lists a different set of gates than stranger_own_check.py")
     if [s["step"] for s in embedded.get("steps", [])] != [s["step"] for s in fresh["steps"]]:
         bad.append("the page lists a different set of steps than the receipt")
+    if embedded.get("parity") != fresh["parity"]:
+        bad.append("the parity numbers on the page are not the ones docs/competitor-parity.json holds now")
     for url in re.findall(r"https?://[^\"' )]+", text):
         bad.append(f"the page links out: {url}")
     for b in bad:

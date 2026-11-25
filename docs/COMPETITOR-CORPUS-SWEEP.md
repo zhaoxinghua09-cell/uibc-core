@@ -136,6 +136,8 @@ manifest_digest = sha256("path<TAB>sha256<LF" 每行, 按 path 排序)
 
 这不是两个数字并排，而是**同一个判定函数的两行输出**：`classify()` 的规则也一样——accept 且折叠出所声明的根才算一致，reject 且算术确实说不行才算一致，其余都算矛盾或不可复算。收据 `docs/upstream-package/measurements/own-corpus-replay.json`（清单摘要 `f9079358fda950e1…`，63 条向量逐文件 sha256 在内）。
 
+画成图是同一件事，也来自同一对收据：`docs/CORPUS-REPLAYABILITY-SAME-RULER.svg`（由 `tools/build_same_ruler_svg.py` 生成，`--check` 让它在任一份收据变动时失效）。图的每一段长度都是读出来的，不是画的：`69 / 171 (40%)` 与 `63 / 63 (100%)` 两条柱子共用一个 171 的刻度，所以"比例"是眼睛也能核的。
+
 为了让"100%"不是自我美化，每条还过了三道互不替代的检查，分别计数：
 
 - **叶摘要可重建** 50/50：`SHA-256(0x00 ‖ leaf_input)` 必须等于文件自己写的 `digest_hex`。只折根不算数——叶都没重建出来，"可复算"就是半句。

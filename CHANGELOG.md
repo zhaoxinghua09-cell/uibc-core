@@ -1,14 +1,3 @@
-## 0.5.4 — 2026-11-25（条款级 crosswalk：29 行判词，机器可证伪）
-
-主题：竞品对照里"我们更全"是最容易说空的一句话。这一版把主张收窄到别人没发布的那一列——每个被监管条款对应一个判词，而判词可以被证伪。
-
-- **25 条法规条款 + 4 条工具契约 = 29 行**（`crosswalk/`）：COVERED 不是"我们实现了"，而是"有一个探针，曾经在该条款上被看见失败过"；PARTIAL / GAP 必须写理由；OVERCLAIM（声称覆盖但探针不存在）与 UNDECLARED（探针存在却没登记）直接 exit 1。
-- **`tools/recheck.py` 把公开表的每个数字回到字节**：六份 crosswalk 与 README 的声明同源，输出 `total clauses=29 COVERED=5 GAP=8 PARTIAL=16 bad=0`。CI 的 `crosswalk-gate` 与 `windows-probes` 都跑它；数字对不上就红，不靠人记。
-- **Windows 控制台的真缺陷**（`uibc_core/cli.py::_utf8_stdout`）：`verify` 在 cp1252 控制台抛 `UnicodeEncodeError`（position 564–587），stdout 为空，下游 `json.loads` 全挂——`windows-probes` 连红的真因。修法是在 `main()` 之前把 `sys.stdout/stderr` 重配成 UTF-8；新增 `tests/test_cli_stdout_encoding.py`，在 `PYTHONIOENCODING=cp1252` 下跑 `verify` 并要求输出可解析 JSON。这个场景在 Linux 上同样能复现，所以它不是 Windows 专属补丁。
-- **竞品节重写**（`docs/COMPETITORS.md`）：先承认 InSpec 的 control 确实带 `ref`/`url`/`tag cce:` 条款映射，不能写"他们没有"；再收窄到唯一可证伪的那一列，并自陈三条限制——29 行只是形式主张、InSpec 跑在活系统上、自家验证器的行在第二实现出现前仍是自评。基线 `COMPETITORS.json` 与图 `COMPETITORS.svg` 由脚本生成，改一次必须重跑一次；文档里写的命令都实跑过，没跑过的不写。
-- **发布资产**：`uibc-conformance-0.5.4.zip`，359,697 字节，456 例，sha256 `f0cb92932f1e10394343d55f530d534c1efe60860a4975ca49df7d0d4bba6a25`；pin 在 `anchors/pins/uibc-conformance-0.5.4.sha256`。
-- **本版是发布就绪门禁第一次真的拦人**（#445 引入的 `readiness` job）：`tools/check_release_readiness.py` 在 tag 上说四件事——三处版本串一致、tag 树里含自己版本的归档、归档内记录的版本一致、tag 名等于 `v<版本>`。它的由来是三连红：`v0.5.1/0.5.2/0.5.3` 各自切在自己的归档之前，于是 lab bundle 每次都在 tag 树上找不到自己那一版。负控制实测：把归档移开 → `NOT READY TO TAG`，rc=1，报的正是生产环境那句话。
-
 ## 未发布 — 2026-11-25（DID 对接：BID 协议层，按《星火·链网BID协议》正文实现）
 
 主题：上一版把 `did:bid` 的通路做通了（GET + errorCode + id 校验），但没有读懂回来的文档。读完协议正文后发现三处真缺口，这一版补齐，且每一处都对着条款写测试。
@@ -33,6 +22,12 @@
 - **可运行 demo**（`tools/demo_bid_trusted.py`）：起一个真的 `http.server` 当解析服务，四种答法（诚实 / 说验过但文档被动过 / 说没验过 / 带背书），打印五条裁决。第 2 条是全部意义所在：只读 `data.verify` 的客户端在那里会打印 OK。
 - 测试 `tests/test_bid_trusted.py` 15 条（请求形如 `{url}/{bid}?verify=true`、服务撒谎必被抓、`"true"` 字符串必拒、`verify=false` 是答案不是异常、背书四态各一条）。
 - 证据：`uibc_core/bid_protocol.py::resolve_bid_trusted`、`tests/test_bid_trusted.py`、`tools/demo_bid_trusted.py`
+- **竞品从"说法"变成"字节"**：`docs/COMPETITOR-EVIDENCE.md` 钉住 DIF Universal Resolver 的 did:bid 驱动（`caict-4iot-dev/uni-resolver-driver-did-bid`，commit `5a93365`，2022-11-09，Apache-2.0，324 行，`src/test` 无任何测试类），逐条给出行号：非零 `errorCode` 在 77–78 行坍缩成一句 `docuement not exist`、全文 `verify` 出现 0 次、`delegateSign` 9 行全部只做字段搬运（233–235 行）、174 行把 `proof` 原样塞进 metadata 不重算。
+- **这条主张自带反证工具**（`tools/audit_official_bid_driver.py`）：重新下载钉住的字节、重新算行号；**对方一旦修了其中任何一条，脚本退出码非 0**，文档必须跟着改。"他们没做 X"因此不再是一句可以烂在文档里的话。
+- 证据：`docs/COMPETITOR-EVIDENCE.md`、`tools/audit_official_bid_driver.py`
+- **一致性向量集 v1（`vectors/bid-resolution-v1.json`，22 条）+ 外部可跑的核对器（`tools/check_bid_vectors.py`）**：官方没有发布机可验向量，与其等，先把"读条款读出来的判据"写成**数据**而不是埋在测试代码里。每条向量带 `clause`（§4.2.1/§4.2.2/§4.2.4/§4.2.5/§5）和一句 `note` 说明它钉的是什么，期望值写在 JSON 里——外人可以直接改他不认同的那条，然后 `python tools/check_bid_vectors.py --subject <任意 checkout>` 复跑。**文件头写明：自撰，非 Caict 发布，不具权威**；与官方不一致时改这里，不许含糊过去。
+- 首次跑 22 条时抓到 4 处"期望与实现不一致"，逐条定性而不是改测试迁就：3 条是**期望写错了**（错误信封没有 `data`；`proof.creator` 指向不存在的键属结构错，`signatureValue` 非 Base58 也是结构错，都不该期望"返回 False"），已按条款改成"必须抛 `BIDDocumentError`"。这类不一致正是向量集存在的理由：手写期望会错，写错了要能看见。
+- 证据：`vectors/bid-resolution-v1.json`、`tools/check_bid_vectors.py`、`tests/test_bid_vectors.py`（4 条：22/22 全过、provenance 必须自称自撰、每条必须带条款与说明、id 唯一）
 
 ## 0.5.3 — 2026-11-25（一致性语料 36→58，第二实现对齐）
 

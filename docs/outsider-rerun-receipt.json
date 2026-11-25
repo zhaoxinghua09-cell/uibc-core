@@ -1,9 +1,9 @@
 {
- "generated_at": "2026-11-25T20:45:47Z",
- "tree_sha256": "4bef3fc0aabdf9c1421b9ab499ac1f0727f0ede3d0865867f672fdc3919bad34",
- "files_hashed": 2441,
- "content_sha256": "e8fe3d3d12bfa07719bf4435f65d13d226342f68194f5d2f1977b8c680ffcf0b",
- "content_files": 2441,
+ "generated_at": "2026-11-25T22:03:05Z",
+ "tree_sha256": "953e2eaeb7f05ad143863dcc6fe6d6f650958a5228339757744307d0921751d9",
+ "files_hashed": 2448,
+ "content_sha256": "6a68a23324e63c1fc0bdae65996be977fdb722dff3f746ce121cf719f6ef4196",
+ "content_files": 2448,
  "digest_excludes": [
   "docs/OUTSIDER-RERUN.md",
   "docs/outsider-rerun-receipt.json"
@@ -46,7 +46,7 @@
    "rc": 0,
    "expect": "PARITY OK",
    "ok": true,
-   "seconds": 0.5,
+   "seconds": 0.4,
    "tail": "PARITY OK: 25 repositories pinned and re-scored, best competitor 3/10, this repository 10/10"
   },
   {
@@ -55,17 +55,17 @@
    "rc": 0,
    "expect": "ALL OK",
    "ok": true,
-   "seconds": 0.2,
+   "seconds": 0.3,
    "tail": "ALL OK"
   },
   {
    "step": "tests",
-   "cmd": "-m pytest tests/test_mutation_gate.py tests/test_competitor_parity.py tests/test_parity_board.py tests/test_refs_check.py tests/test_parity_sensitivity.py -q",
+   "cmd": "-m pytest tests/test_mutation_gate.py tests/test_competitor_parity.py tests/test_parity_board.py tests/test_refs_check.py tests/test_parity_sensitivity.py tests/test_parity_audit.py -q",
    "rc": 0,
    "expect": "passed",
    "ok": true,
-   "seconds": 3.1,
-   "tail": "27 passed in 2.54s"
+   "seconds": 3.4,
+   "tail": "34 passed in 2.80s"
   }
  ],
  "ok": true

@@ -1,0 +1,1070 @@
+{
+ "audited_at": "2026-11-26",
+ "per_dim": 3,
+ "rows": [
+  {
+   "repo": "WeBankBlockchain/WeIdentity",
+   "sha": "2f8e4b5a7e208790af7e2697b061550c91560e98",
+   "dims": {
+    "D1": 0,
+    "D2": 0,
+    "D3": 0,
+    "D4": 0,
+    "D5": 0
+   },
+   "evidence": {
+    "D1": [
+     {
+      "file": "src/test/java/com/webank/weid/full/auth/TestAddIssuerIntoIssuerType.java",
+      "line": 286,
+      "text": "* case: invalid issuer."
+     },
+     {
+      "file": "src/test/java/com/webank/weid/full/auth/TestQueryAuthorityIssuerInfo.java",
+      "line": 100,
+      "text": "* case: WeIdentity DID is invalid."
+     },
+     {
+      "file": "src/test/java/com/webank/weid/full/auth/TestRegisterAuthorityIssuer.java",
+      "line": 34,
+      "text": "* case: WeIdentity DID is invalid."
+     }
+    ],
+    "D2": [],
+    "D3": [],
+    "D4": []
+   }
+  },
+  {
+   "repo": "caict-4iot-dev/uni-registrar-driver-did-bid",
+   "sha": "68f69ec419c0f23c1a7faf95dd8d73aeb5ff30a4",
+   "dims": {
+    "D1": 0,
+    "D2": 0,
+    "D3": 0,
+    "D4": 0,
+    "D5": 0
+   },
+   "evidence": {
+    "D1": [],
+    "D2": [],
+    "D3": [],
+    "D4": []
+   }
+  },
+  {
+   "repo": "caict-4iot-dev/uni-resolver-driver-did-bid",
+   "sha": "5a933656eb9631bc65ba535f4bb69aa893d79a79",
+   "dims": {
+    "D1": 0,
+    "D2": 0,
+    "D3": 0,
+    "D4": 0,
+    "D5": 0
+   },
+   "evidence": {
+    "D1": [],
+    "D2": [],
+    "D3": [],
+    "D4": []
+   }
+  },
+  {
+   "repo": "ceramicnetwork/js-did",
+   "sha": "def0a5fed152a42ffeef87bafb4619816f9954f6",
+   "dims": {
+    "D1": 1,
+    "D2": 0,
+    "D3": 1,
+    "D4": 0,
+    "D5": 0
+   },
+   "evidence": {
+    "D1": [
+     {
+      "file": "packages/codecs/test/binary.test.ts",
+      "line": 22,
+      "text": "test('throws on invalid encoding', () => {"
+     },
+     {
+      "file": "packages/did-session/test/lib.test.ts",
+      "line": 225,
+      "text": "await expect(DIDSession.get(account, authMethod, {})).rejects.toThrow(/Required:/)"
+     },
+     {
+      "file": "packages/did-session/test/lib.test.ts",
+      "line": 226,
+      "text": "await expect(DIDSession.get(account, authMethod, { resources: [] })).rejects.toThrow("
+     }
+    ],
+    "D2": [],
+    "D3": [
+     {
+      "file": "packages/did-session/test/lib.test.ts",
+      "line": 450,
+      "text": "const address = toString(ed25519.getPublicKey(walletKey.subarray(0, 32)), 'base58btc')"
+     },
+     {
+      "file": "packages/dids/test/jws-verification-behavior.test.ts",
+      "line": 15,
+      "text": "publicKeyBase58: '2BS946XE3ZGDEsFSq5G3ndodLnAz2TZu1SN1FUw8EwZUC',"
+     },
+     {
+      "file": "packages/dids/test/jws-verification-behavior.test.ts",
+      "line": 21,
+      "text": "publicKeyBase58: 'HZCZPM7PzCGow5WxopEKeQaKNGQgsZH2d9baiK3FpCYf',"
+     }
+    ],
+    "D4": []
+   }
+  },
+  {
+   "repo": "decentralized-identity/did-jwt",
+   "sha": "63663c1f40b4d6dd0d510847acfe5ae5ad230fd2",
+   "dims": {
+    "D1": 1,
+    "D2": 0,
+    "D3": 1,
+    "D4": 1,
+    "D5": 0
+   },
+   "evidence": {
+    "D1": [
+     {
+      "file": "src/__tests__/ConditionalAlgorithm.test.ts",
+      "line": 148,
+      "text": "await expect(verifyJWT(jwt, { resolver })).rejects.toThrow(JWT_ERROR.INVALID_SIGNATURE)"
+     },
+     {
+      "file": "src/__tests__/ConditionalAlgorithm.test.ts",
+      "line": 242,
+      "text": "await expect(verifyJWT(jwt, { resolver })).rejects.toThrow(JWT_ERROR.INVALID_SIGNATURE)"
+     },
+     {
+      "file": "src/__tests__/ConditionalAlgorithm.test.ts",
+      "line": 410,
+      "text": "await expect(verifyJWT(jwt, { resolver })).rejects.toThrow(JWT_ERROR.INVALID_SIGNATURE)"
+     }
+    ],
+    "D2": [],
+    "D3": [
+     {
+      "file": "src/__tests__/didkey.test.ts",
+      "line": 9,
+      "text": "publicKeyBase58: 'A12q688RGRdqshXhL9TW8QXQaX9H82ejU9DnqztLaAgy',"
+     },
+     {
+      "file": "src/__tests__/didkey.test.ts",
+      "line": 37,
+      "text": "publicKeyBase58: '4zvwRjXUKGfvwnParsHAS3HuSVzV5cA4McphgmoCtajS',"
+     },
+     {
+      "file": "src/__tests__/EdDSASigner.test.ts",
+      "line": 1,
+      "text": "import { base64ToBytes, base58ToBytes, hexToBytes } from '../util.js'"
+     }
+    ],
+    "D4": [
+     {
+      "file": "canary/canary.cjs.cjs",
+      "line": 56,
+      "text": "process.exit(1)"
+     },
+     {
+      "file": "canary/canary.cjs.cjs",
+      "line": 178,
+      "text": "process.exit(1)"
+     },
+     {
+      "file": "canary/unpack.mjs",
+      "line": 38,
+      "text": "process.exit(1)"
+     }
+    ]
+   }
+  },
+  {
+   "repo": "decentralized-identity/did-resolver",
+   "sha": "005411b26ac3002aa4f501673ee4e2ecc96b2a71",
+   "dims": {
+    "D1": 0,
+    "D2": 0,
+    "D3": 0,
+    "D4": 0,
+    "D5": 0
+   },
+   "evidence": {
+    "D1": [
+     {
+      "file": "src/__tests__/resolver.test.ts",
+      "line": 174,
+      "text": "it('rejects matrix parameters', () => {"
+     },
+     {
+      "file": "src/__tests__/resolver.test.ts",
+      "line": 655,
+      "text": "it('rejects invalid DID when resolver parser returns null', async () => {"
+     }
+    ],
+    "D2": [],
+    "D3": [],
+    "D4": []
+   }
+  },
+  {
+   "repo": "decentralized-identity/ethr-did-resolver",
+   "sha": "6e0bd47702495d259674c6a53e8be3037069dcc1",
+   "dims": {
+    "D1": 1,
+    "D2": 0,
+    "D3": 1,
+    "D4": 1,
+    "D5": 0
+   },
+   "evidence": {
+    "D1": [
+     {
+      "file": "examples/ethr-7702/test/cross-chain-sync.test.ts",
+      "line": 109,
+      "text": "it('rejects replayed signature (nonce already used)', async () => {"
+     },
+     {
+      "file": "examples/ethr-7702/test/cross-chain-sync.test.ts",
+      "line": 147,
+      "text": ").rejects.toThrow()"
+     },
+     {
+      "file": "examples/ethr-7702/test/cross-chain-sync.test.ts",
+      "line": 150,
+      "text": "it('rejects signature with wrong chain ID', async () => {"
+     }
+    ],
+    "D2": [],
+    "D3": [
+     {
+      "file": "examples/ethr-7702/test/batched-updates.test.ts",
+      "line": 98,
+      "text": "// 'ed25519pubkey' → publicKeyMultibase (base58btc of 0xed01 || bytes)"
+     },
+     {
+      "file": "examples/ethr-7702/test/simple-update.test.ts",
+      "line": 55,
+      "text": "// (base58btc of 0xed01 || bytes). 'base64encodedpubkey' → zFaHNPrHzCnSudUfDV1Vfo1hkkrR4t"
+     },
+     {
+      "file": "examples/ethr-7702/test/simple-update.test.ts",
+      "line": 91,
+      "text": "// (base58btc of 0xed01 || bytes) per the Multikey spec"
+     }
+    ],
+    "D4": [
+     {
+      "file": "examples/ethr-7702/scripts/compile.ts",
+      "line": 52,
+      "text": "process.exit(1)"
+     },
+     {
+      "file": "examples/ethr-7702/scripts/compile.ts",
+      "line": 58,
+      "text": "process.exit(1)"
+     },
+     {
+      "file": "examples/ethr-7702/scripts/diagnose-did.ts",
+      "line": 147,
+      "text": "main().catch((e) => { console.error('FATAL:', e?.shortMessage ?? e); process.exit(1) })"
+     }
+    ]
+   }
+  },
+  {
+   "repo": "decentralized-identity/ion",
+   "sha": "424ec87dda60c89c0b3c4e46c274eff3124fe484",
+   "dims": {
+    "D1": 0,
+    "D2": 0,
+    "D3": 0,
+    "D4": 0,
+    "D5": 0
+   },
+   "evidence": {
+    "D1": [
+     {
+      "file": "tests/src/bitcoin.spec.ts",
+      "line": 12,
+      "text": "it('should return 400 with error code when transaction fetch throws invalid hash error.', async () => {"
+     }
+    ],
+    "D2": [],
+    "D3": [],
+    "D4": [
+     {
+      "file": "src/bitcoin.ts",
+      "line": 207,
+      "text": "process.exit(1);"
+     },
+     {
+      "file": "src/bitcoin.ts",
+      "line": 214,
+      "text": "process.exit(1);"
+     },
+     {
+      "file": "src/core.ts",
+      "line": 124,
+      "text": "process.exit(1);"
+     }
+    ]
+   }
+  },
+  {
+   "repo": "decentralized-identity/sidetree-core",
+   "sha": "bb4bb16d23838cc02bbde0b4ac634e0491ae85fd",
+   "dims": {
+    "D1": 0,
+    "D2": 0,
+    "D3": 0,
+    "D4": 0,
+    "D5": 0
+   },
+   "evidence": {
+    "D1": [
+     {
+      "file": "docs/spec/json-web-signatures.md",
+      "line": 47,
+      "text": "Signatures on operations may be valid, but operations may be deemed invalid for other reasons (e.g. malformed delta payload or being stale)."
+     },
+     {
+      "file": "docs/spec/json-web-signatures.md",
+      "line": 65,
+      "text": "When an operation is stale according to the DID method’s parameters, the operation is deemed as invalid."
+     },
+     {
+      "file": "docs/spec/json-web-signatures.md",
+      "line": 67,
+      "text": "Operations that are anchored prior to `anchorFrom` are deemed invalid, if `anchorFrom` is set."
+     }
+    ],
+    "D2": [],
+    "D3": [
+     {
+      "file": "docs/spec/patches.md",
+      "line": 53,
+      "text": "For example, an implementer may support projecting `publicKeyBase58` into the resolution result for the `Ed25519VerificationKey2018` suite."
+     }
+    ],
+    "D4": []
+   }
+  },
+  {
+   "repo": "decentralized-identity/universal-resolver",
+   "sha": "99838d52a7a6c7424bf8c895d03d317dcd8cdb3a",
+   "dims": {
+    "D1": 0,
+    "D2": 0,
+    "D3": 0,
+    "D4": 0,
+    "D5": 0
+   },
+   "evidence": {
+    "D1": [
+     {
+      "file": "ci/pr-check/test/application-yml.test.ts",
+      "line": 23,
+      "text": "it('reports invalid YAML with its position', () => {"
+     },
+     {
+      "file": "ci/pr-check/test/application-yml.test.ts",
+      "line": 26,
+      "text": "assert.match(messages(s)[0] ?? '', /^error: Invalid YAML at line 4, column 1: /);"
+     },
+     {
+      "file": "ci/pr-check/test/application-yml.test.ts",
+      "line": 32,
+      "text": "assert.match(messages(s)[0] ?? '', /^error: Invalid YAML at line 4, column 7: Map keys must be unique$/);"
+     }
+    ],
+    "D2": [],
+    "D3": [],
+    "D4": []
+   }
+  },
+  {
+   "repo": "decentralized-identity/veramo",
+   "sha": "ac953d9a28db1faa57266636de7c4ed891bf1b0b",
+   "dims": {
+    "D1": 1,
+    "D2": 0,
+    "D3": 1,
+    "D4": 1,
+    "D5": 0
+   },
+   "evidence": {
+    "D1": [
+     {
+      "file": "packages/cli/src/__tests__/objectCreator.test.ts",
+      "line": 37,
+      "text": ").rejects.toThrow(/Error creating .*\\['undefined']/)"
+     },
+     {
+      "file": "packages/cli/src/__tests__/objectCreator.test.ts",
+      "line": 91,
+      "text": ").rejects.toThrow(/Error creating .*does-not-exist\\.js\\['Foo']/)"
+     },
+     {
+      "file": "packages/cli/src/__tests__/objectCreator.test.ts",
+      "line": 100,
+      "text": ").rejects.toThrow(/Error creating .*\\['doesNotExist']/)"
+     }
+    ],
+    "D2": [],
+    "D3": [
+     {
+      "file": "packages/credential-ld/src/__tests__/golden-compat.test.ts",
+      "line": 51,
+      "text": "const DID_KEY = `did:key:${bytesToMultibase(hexToBytes(ED25519.publicKeyHex), 'base58btc', 'ed25519-pub')}`"
+     },
+     {
+      "file": "packages/credential-ld/src/__tests__/jws-detached-signature.test.ts",
+      "line": 10,
+      "text": "bytesToBase58,"
+     },
+     {
+      "file": "packages/credential-ld/src/__tests__/jws-detached-signature.test.ts",
+      "line": 22,
+      "text": "const multikey = (prefix: number[], key: Uint8Array) => 'z' + bytesToBase58(concat([prefix, key]))"
+     }
+    ],
+    "D4": [
+     {
+      "file": "packages/cli/src/config.ts",
+      "line": 25,
+      "text": "process.exit(1)"
+     },
+     {
+      "file": "packages/cli/src/execute.ts",
+      "line": 44,
+      "text": "process.exit(1)"
+     },
+     {
+      "file": "packages/cli/src/execute.ts",
+      "line": 54,
+      "text": "process.exit(1)"
+     }
+    ]
+   }
+  },
+  {
+   "repo": "digitalbazaar/did-io",
+   "sha": "940555f002fbf69e081e4db5b44b3cd9e0234404",
+   "dims": {
+    "D1": 0,
+    "D2": 0,
+    "D3": 0,
+    "D4": 0,
+    "D5": 0
+   },
+   "evidence": {
+    "D1": [],
+    "D2": [],
+    "D3": [],
+    "D4": []
+   }
+  },
+  {
+   "repo": "docknetwork/sdk",
+   "sha": "1eadcdc7a9c1dd7a28a2df5ff2b3b969a51427a6",
+   "dims": {
+    "D1": 1,
+    "D2": 0,
+    "D3": 1,
+    "D4": 1,
+    "D5": 0
+   },
+   "evidence": {
+    "D1": [
+     {
+      "file": "packages/ap2/tests/mandates.test.js",
+      "line": 188,
+      "text": "test('rejects a Closed Checkout Mandate with a tampered checkout_hash', async () => {"
+     },
+     {
+      "file": "packages/ap2/tests/mandates.test.js",
+      "line": 225,
+      "text": "test('rejects a Closed Checkout Mandate closed by an unauthorized key', async () => {"
+     },
+     {
+      "file": "packages/ap2/tests/mandates.test.js",
+      "line": 300,
+      "text": "test('with userPublicKey, verifies the issuer signature and rejects the wrong key', async () => {"
+     }
+    ],
+    "D2": [],
+    "D3": [
+     {
+      "file": "packages/credential-sdk/tests/base-x.test.js",
+      "line": 4,
+      "text": "encodeAsBase58,"
+     },
+     {
+      "file": "packages/credential-sdk/tests/base-x.test.js",
+      "line": 5,
+      "text": "decodeFromBase58,"
+     },
+     {
+      "file": "packages/credential-sdk/tests/base-x.test.js",
+      "line": 6,
+      "text": "encodeAsBase58btc,"
+     }
+    ],
+    "D4": [
+     {
+      "file": "examples/src/blob.js",
+      "line": 112,
+      "text": "process.exit(1);"
+     },
+     {
+      "file": "examples/src/chain-ops.js",
+      "line": 240,
+      "text": "process.exit(1);"
+     },
+     {
+      "file": "examples/src/claim-deduction.js",
+      "line": 143,
+      "text": "process.exit(1);"
+     }
+    ]
+   }
+  },
+  {
+   "repo": "hyperledger/aries-cloudagent-python",
+   "sha": "daf7ff8d208a56bbfe5f66d879c638b2d2fb4a77",
+   "dims": {
+    "D1": 1,
+    "D2": 0,
+    "D3": 1,
+    "D4": 1,
+    "D5": 0
+   },
+   "evidence": {
+    "D1": [
+     {
+      "file": "acapy_agent/admin/tests/test_admin_server.py",
+      "line": 152,
+      "text": "side_effect=jwt.InvalidTokenError(\"Invalid token\")"
+     },
+     {
+      "file": "acapy_agent/admin/tests/test_admin_server.py",
+      "line": 256,
+      "text": "mock_extract.return_value = {\"field\": [\"Invalid input\"]}"
+     },
+     {
+      "file": "acapy_agent/admin/tests/test_admin_server.py",
+      "line": 265,
+      "text": "validation_error = ValidationError({\"field\": [\"Invalid input\"]})"
+     }
+    ],
+    "D2": [],
+    "D3": [
+     {
+      "file": "acapy_agent/anoncreds/default/legacy_indy/tests/test_recover.py",
+      "line": 7,
+      "text": "import base58"
+     },
+     {
+      "file": "acapy_agent/anoncreds/default/legacy_indy/tests/test_recover.py",
+      "line": 206,
+      "text": "base58,"
+     },
+     {
+      "file": "acapy_agent/anoncreds/default/legacy_indy/tests/test_registry.py",
+      "line": 11,
+      "text": "from base58 import alphabet"
+     }
+    ],
+    "D4": [
+     {
+      "file": "acapy_agent/commands/start.py",
+      "line": 97,
+      "text": "sys.exit(1)"
+     },
+     {
+      "file": "acapy_agent/commands/start.py",
+      "line": 137,
+      "text": "sys.exit(1)"
+     },
+     {
+      "file": "demo/runners/agent_container.py",
+      "line": 1475,
+      "text": "sys.exit(1)"
+     }
+    ]
+   }
+  },
+  {
+   "repo": "hyperledger/aries-framework-go",
+   "sha": "64dd8acc07506884f480719f7d9d960447d9a5ac",
+   "dims": {
+    "D1": 1,
+    "D2": 0,
+    "D3": 1,
+    "D4": 1,
+    "D5": 0
+   },
+   "evidence": {
+    "D1": [
+     {
+      "file": "test/aries-js-worker/init.js",
+      "line": 47,
+      "text": "return new Promise((resolve, reject) => {"
+     },
+     {
+      "file": "test/aries-js-worker/fixtures/data/agent-startup-contexts.json",
+      "line": 82,
+      "text": "\"invalid\":          \"odrl:invalid\","
+     },
+     {
+      "file": "test/aries-js-worker/test/common.js",
+      "line": 21,
+      "text": "return new Promise((resolve, reject) => {"
+     }
+    ],
+    "D2": [],
+    "D3": [
+     {
+      "file": "test/aries-js-worker/karma.conf.js",
+      "line": 34,
+      "text": "pattern: \"node_modules/base-58/Base58.js\","
+     },
+     {
+      "file": "test/aries-js-worker/test/presentproof/presentproof.js",
+      "line": 11,
+      "text": "import \"/base/node_modules/base-58/Base58.js\";"
+     },
+     {
+      "file": "test/aries-js-worker/test/presentproof/presentproof.js",
+      "line": 418,
+      "text": "let methodID = Base58.encode("
+     }
+    ],
+    "D4": [
+     {
+      "file": "cmd/aries-js-worker/src/worker-impl-node.js",
+      "line": 24,
+      "text": "process.exit(1);"
+     },
+     {
+      "file": "component/log/internal/modlog/deflog.go",
+      "line": 44,
+      "text": "// Fatalf is CRITICAL log formatted followed by a call to os.Exit(1)."
+     },
+     {
+      "file": "component/log/internal/modlog/deflog.go",
+      "line": 47,
+      "text": "os.Exit(1)"
+     }
+    ]
+   }
+  },
+  {
+   "repo": "hyperledger/indy-sdk",
+   "sha": "2d47f2ff1ca62563f0f85e52cc9378f133ad8a0d",
+   "dims": {
+    "D1": 1,
+    "D2": 0,
+    "D3": 1,
+    "D4": 1,
+    "D5": 0
+   },
+   "evidence": {
+    "D1": [
+     {
+      "file": "libindy/tests/anoncreds_demos.rs",
+      "line": 1791,
+      "text": "// - provide valid proof for invalid time"
+     },
+     {
+      "file": "libindy/tests/anoncreds_demos.rs",
+      "line": 1792,
+      "text": "// - provide hacked proof: specify requested timestamp, actually use invalid TS"
+     },
+     {
+      "file": "libindy/tests/ledger.rs",
+      "line": 2527,
+      "text": "let res = ledger::append_txn_author_agreement_acceptance_to_request(\"Invalid request string\","
+     }
+    ],
+    "D2": [],
+    "D3": [
+     {
+      "file": "libindy/tests/anoncreds.rs",
+      "line": 3823,
+      "text": "let res = anoncreds::issuer_create_schema(INVALID_BASE58_DID,"
+     },
+     {
+      "file": "libindy/tests/crypto.rs",
+      "line": 23,
+      "text": "use rust_base58::FromBase58;"
+     },
+     {
+      "file": "libindy/tests/crypto.rs",
+      "line": 29,
+      "text": "assert_eq!(verkey.from_base58().unwrap().len(), 32);"
+     }
+    ],
+    "D4": [
+     {
+      "file": "vcx/ci/scripts/create_npm_deb.py",
+      "line": 15,
+      "text": "sys.exit(1)"
+     },
+     {
+      "file": "vcx/ci/scripts/create_npm_deb.py",
+      "line": 19,
+      "text": "sys.exit(1)"
+     },
+     {
+      "file": "vcx/ci/scripts/create_npm_deb.py",
+      "line": 48,
+      "text": "sys.exit(1)"
+     }
+    ]
+   }
+  },
+  {
+   "repo": "hyperledger/indy-vdr",
+   "sha": "e4902fcd5638efb0aaded3a854a56e077f8b32f3",
+   "dims": {
+    "D1": 1,
+    "D2": 0,
+    "D3": 1,
+    "D4": 1,
+    "D5": 0
+   },
+   "evidence": {
+    "D1": [
+     {
+      "file": "libindy_vdr/tests/attrib.rs",
+      "line": 406,
+      "text": "helpers::check_response_type(&err, \"REJECT\");"
+     },
+     {
+      "file": "libindy_vdr/tests/author_agreement.rs",
+      "line": 371,
+      "text": "helpers::check_response_type(&err, \"REJECT\");"
+     },
+     {
+      "file": "libindy_vdr/tests/author_agreement.rs",
+      "line": 396,
+      "text": "// Try to send transactions using invalid TAA"
+     }
+    ],
+    "D2": [],
+    "D3": [
+     {
+      "file": "libindy_vdr/tests/utils/crypto.rs",
+      "line": 23,
+      "text": "let verkey = public_key.as_base58().unwrap().to_string();"
+     },
+     {
+      "file": "libindy_vdr/tests/utils/fixtures.rs",
+      "line": 1,
+      "text": "use bs58;"
+     },
+     {
+      "file": "libindy_vdr/tests/utils/fixtures.rs",
+      "line": 65,
+      "text": "let did = bs58::encode(rand_arr).into_string();"
+     }
+    ],
+    "D4": [
+     {
+      "file": "wrappers/javascript/indy-vdr-shared/installBinary.js",
+      "line": 77,
+      "text": "process.exit(1)"
+     }
+    ]
+   }
+  },
+  {
+   "repo": "ontio/ontology-did",
+   "sha": "9902c8f80f0610080008ddf0eb151dabb6340f2a",
+   "dims": {
+    "D1": 0,
+    "D2": 0,
+    "D3": 0,
+    "D4": 0,
+    "D5": 0
+   },
+   "evidence": {
+    "D1": [],
+    "D2": [],
+    "D3": [],
+    "D4": []
+   }
+  },
+  {
+   "repo": "sphereon-opensource/ssi-sdk",
+   "sha": "4f8b21c24659259843b4b802e4a68a635989a590",
+   "dims": {
+    "D1": 1,
+    "D2": 0,
+    "D3": 1,
+    "D4": 1,
+    "D5": 0
+   },
+   "evidence": {
+    "D1": [
+     {
+      "file": "packages/contact-manager/__tests__/shared/contactManagerAgentLogic.ts",
+      "line": 73,
+      "text": "await expect(agent.cmGetContact({ contactId })).rejects.toThrow(`No party found for id: ${contactId}`)"
+     },
+     {
+      "file": "packages/contact-manager/__tests__/shared/contactManagerAgentLogic.ts",
+      "line": 219,
+      "text": "await expect(agent.cmUpdateContact({ contact })).rejects.toThrow(`No party found for id: ${contactId}`)"
+     },
+     {
+      "file": "packages/contact-manager/__tests__/shared/contactManagerAgentLogic.ts",
+      "line": 235,
+      "text": ").rejects.toThrow(`No identity found for id: ${identityId}`)"
+     }
+    ],
+    "D2": [],
+    "D3": [
+     {
+      "file": "packages/credential-vcdm/src/__tests__/message-handler.test.ts",
+      "line": 52,
+      "text": "publicKeyBase58: 'CHWxr7EA5adxzgiYUzq1Gn7zZxVudLR4wM47ioEcSd1F',"
+     },
+     {
+      "file": "packages/credential-vcdm/src/__tests__/message-handler.test.ts",
+      "line": 58,
+      "text": "publicKeyBase58: 'A92PXJXX1ddJJdj6Av89WYvSWV5KgrhuqNcPMgpvPxj8',"
+     },
+     {
+      "file": "packages/credential-vcdm-jsonld-provider/src/__tests__/diwala.test.ts",
+      "line": 121,
+      "text": "// publicKeyBase58: 'DYGA3LbwgD66VokM9CQsB3XwrPNzoyX79P19mpPjTp4m',"
+     }
+    ],
+    "D4": [
+     {
+      "file": "packages/agent-config/src/agentCreator.ts",
+      "line": 68,
+      "text": "process.exit(1)"
+     },
+     {
+      "file": "packages/agent-config/src/agentCreator.ts",
+      "line": 77,
+      "text": "process.exit(1)"
+     },
+     {
+      "file": "packages/agent-config/src/agentCreator.ts",
+      "line": 82,
+      "text": "process.exit(1)"
+     }
+    ]
+   }
+  },
+  {
+   "repo": "spruceid/didkit",
+   "sha": "57a3b45111f8b1003ef1a50cf7cf21c81cd59cb1",
+   "dims": {
+    "D1": 0,
+    "D2": 0,
+    "D3": 0,
+    "D4": 0,
+    "D5": 0
+   },
+   "evidence": {
+    "D1": [],
+    "D2": [],
+    "D3": [
+     {
+      "file": "examples/java-springboot/src/test/java/VerifiablePresentationTests.java",
+      "line": 19,
+      "text": "return \"{\\\"@context\\\":[\\\"https://www.w3.org/2018/credentials/v1\\\"],\\\"id\\\":\\\"urn:uuid:5905fb5a-238d-4677-b925-b7c422b62650\\\",\\\"type\\\":[\\\"VerifiablePresentation\\\""
+     }
+    ],
+    "D4": []
+   }
+  },
+  {
+   "repo": "spruceid/ssi",
+   "sha": "726f49e7fefbb726ff41deba331428088bfa782d",
+   "dims": {
+    "D1": 0,
+    "D2": 0,
+    "D3": 0,
+    "D4": 0,
+    "D5": 0
+   },
+   "evidence": {
+    "D1": [
+     {
+      "file": "crates/dids/core/tests/document.rs",
+      "line": 58,
+      "text": "//     #[should_panic(expected = \"Invalid context\")]"
+     },
+     {
+      "file": "crates/dids/methods/test/src/main.rs",
+      "line": 505,
+      "text": "//         \"did:key;invalid\", // should return invalidDid error"
+     },
+     {
+      "file": "crates/dids/methods/test/src/main.rs",
+      "line": 688,
+      "text": "//         \"bad:invalid\","
+     }
+    ],
+    "D2": [],
+    "D3": [
+     {
+      "file": "crates/dids/core/tests/document.rs",
+      "line": 121,
+      "text": "//     fn vmm_bs58_to_jwk() {"
+     },
+     {
+      "file": "crates/dids/core/tests/document.rs",
+      "line": 122,
+      "text": "//         // publicKeyBase58 (deprecated) -> JWK"
+     },
+     {
+      "file": "crates/dids/core/tests/document.rs",
+      "line": 130,
+      "text": "//             public_key_base58: Some(\"2sXRz2VfrpySNEL6xmXJWQg6iY94qwNp1qrJJFBuPWmH\".to_string()),"
+     }
+    ],
+    "D4": []
+   }
+  },
+  {
+   "repo": "transmute-industries/sidetree.js",
+   "sha": "0b17eb9ed7aa787230bfdeaff92cc7eca05d0e7e",
+   "dims": {
+    "D1": 0,
+    "D2": 0,
+    "D3": 0,
+    "D4": 0,
+    "D5": 0
+   },
+   "evidence": {
+    "D1": [],
+    "D2": [],
+    "D3": [
+     {
+      "file": "packages/cas/src/tests/testSuite.ts",
+      "line": 119,
+      "text": "const notFoundCid = Encoder.bufferToBase58(hash);"
+     },
+     {
+      "file": "packages/crypto/src/__tests__/generate-key-fixture.test.ts",
+      "line": 37,
+      "text": "const k0Base58 = await k0.export({"
+     },
+     {
+      "file": "packages/crypto/src/__tests__/generate-key-fixture.test.ts",
+      "line": 42,
+      "text": "const k1Base58 = await k1.export({"
+     }
+    ],
+    "D4": []
+   }
+  },
+  {
+   "repo": "uport-project/ethr-did",
+   "sha": "4bbd2ef539ba532731508198e5828657c169ff66",
+   "dims": {
+    "D1": 0,
+    "D2": 0,
+    "D3": 0,
+    "D4": 0,
+    "D5": 0
+   },
+   "evidence": {
+    "D1": [
+     {
+      "file": "src/__tests__/index.test.ts",
+      "line": 578,
+      "text": "return expect(ethrDid.signJWT({ hello: 'world' })).rejects.toEqual(new Error('No signer configured'))"
+     }
+    ],
+    "D2": [],
+    "D3": [
+     {
+      "file": "src/__tests__/index.test.ts",
+      "line": 740,
+      "text": "describe('base58 key', () => {"
+     },
+     {
+      "file": "src/__tests__/index.test.ts",
+      "line": 741,
+      "text": "const publicKeyBase58 = 'SYnSwQmBmVwrHoGo6mnqFCX28sr3UzAZw9yyiBTLaf2foDfxDTgNdpn3MPD4gUGi4cgunK8cnGbPS5yjVh5uAXGr'"
+     },
+     {
+      "file": "src/__tests__/index.test.ts",
+      "line": 743,
+      "text": "it('supports base58 keys as hexstring', async () => {"
+     }
+    ],
+    "D4": []
+   }
+  },
+  {
+   "repo": "w3c-ccg/did-method-key",
+   "sha": "2cc490c38c5aacf58497a87fc0cf8794668bf716",
+   "dims": {
+    "D1": 0,
+    "D2": 0,
+    "D3": 0,
+    "D4": 0,
+    "D5": 0
+   },
+   "evidence": {
+    "D1": [],
+    "D2": [],
+    "D3": [],
+    "D4": []
+   }
+  },
+  {
+   "repo": "w3c-ccg/did-test-suite",
+   "sha": "addafb08c84ef3c4dd4a596ebe71f164daa4ceab",
+   "dims": {
+    "D1": 0,
+    "D2": 0,
+    "D3": 0,
+    "D4": 0,
+    "D5": 0
+   },
+   "evidence": {
+    "D1": [
+     {
+      "file": "test/latest/10-identifier.js",
+      "line": 84,
+      "text": "await util.generate('did/invalid-method-parameter.did', generatorOptions);"
+     },
+     {
+      "file": "test/latest/20-document.js",
+      "line": 150,
+      "text": "await util.generate('jsonld/invalid-id.jsonld', generatorOptions);"
+     },
+     {
+      "file": "test/latest/20-document.js",
+      "line": 168,
+      "text": "await util.generate('jsonld/invalid.txt', generatorOptions);"
+     }
+    ],
+    "D2": [],
+    "D3": [
+     {
+      "file": "test/latest/testTitles.json",
+      "line": 30,
+      "text": "\"keyMustHaveKeyMaterialType\": \" The value property of a public key MUST be exactly one of publicKeyPem, publicKeyJwk, publicKeyHex, publicKeyBase64, publicKeyBa"
+     }
+    ],
+    "D4": []
+   }
+  }
+ ]
+}

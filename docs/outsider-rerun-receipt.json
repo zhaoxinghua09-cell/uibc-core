@@ -1,9 +1,9 @@
 {
- "generated_at": "2026-11-25T20:06:04Z",
- "tree_sha256": "08e4fd6a23464782f1acf78b9c637497d300267b55c6ec940d96bb43088863a5",
- "files_hashed": 2430,
- "content_sha256": "41b8d1ef46746ccb3b49429ba5f5a6c19a42321dcaa354ea79333031e71ea6ae",
- "content_files": 2430,
+ "generated_at": "2026-11-25T20:22:00Z",
+ "tree_sha256": "72301b1bf28d8e76665b6e9f4b38de95ca548913ee4ae3e439680798553b3408",
+ "files_hashed": 2433,
+ "content_sha256": "0c3b52ac8f63e845678ad74407a95e07b42a53721b7bf87d9beb19a179c82ccd",
+ "content_files": 2433,
  "digest_excludes": [
   "docs/OUTSIDER-RERUN.md",
   "docs/outsider-rerun-receipt.json"
@@ -60,12 +60,12 @@
   },
   {
    "step": "tests",
-   "cmd": "-m pytest tests/test_mutation_gate.py tests/test_competitor_parity.py -q",
+   "cmd": "-m pytest tests/test_mutation_gate.py tests/test_competitor_parity.py tests/test_parity_board.py tests/test_refs_check.py -q",
    "rc": 0,
    "expect": "passed",
    "ok": true,
-   "seconds": 2.7,
-   "tail": "12 passed in 1.90s"
+   "seconds": 3.1,
+   "tail": "22 passed in 2.41s"
   }
  ],
  "ok": true

@@ -1,3 +1,12 @@
+## 0.5.3 — 2026-11-25（一致性语料 36→58，第二实现对齐）
+
+- **语料 36 → 58 条**：新增 `tools/redteam_scale.py`（22 条 scale 组变体）与 14 条补充变体（第二文件翻转/截断、第二条非法日期、第二条哈希截断、proof 索引偏移、截断 proof、清零 back-link、倒序 receipts）。期望值全部由实测 `failed_checks` 导出，不手填。
+- **6 条如实跳过**：`no check fired; not exportable as a vector`（未知 status、索引倒序、删 seal、砍 seal 签名、schema 拼错、媒体类型换标）。`tests/test_conformance.py` 由「skipped 必须为空」改为「每条 skipped 必须带规定 reason」——把静默跳过，而不是跳过，定义为缺陷。
+- **第二实现对齐 58/58**：`tools/verify-js/verify.mjs` 补「两条记录共用同一 evidence_id」与「逐条 created_at 存在但非法（`2026-11-31`）」两项检测；把两边检查编号不一致的 8 条按「一个缺陷一个编号」重划（S4 字节完整性 / S7 索引元数据 / S12 标识与日期 / S3 生命周期语义）。`python tools/assert_second_impl.py` → 58/58、18 检查、0 out of scope。
+- **覆盖 16/19**：S9 / S16 / S19 无直接用例，`conformance/coverage.json` 如实标注。
+- **发布资产**：`uibc-conformance-0.5.3.zip`，312,642 字节，sha256 `5f3a72cb277dac8f285cd50df304dd9befe762caf42f40b98b907bcfc20cce8c`；归档 = oracle（`SOURCE_DATE_EPOCH=1794700800` 重 emit）= MANIFEST（790 文件）= pin 四者同源。
+- **两处发布事故，如实记录**：`v0.5.1` 因先建非 draft release 再上传资产被 immutable 拒绝，删除重建又把 tag 名永久占用；`v0.5.2` 资产可下载，但 oracle 语料仍带旧版本串，不是本树语料。详见 `docs/KNOWN-LIMITS.md` 第 11–12 条。
+- **已知脱链**：`v0.5.3` 的 tag 指向 rebase 合入前的提交 `b60a2a00`，不在 `main` 祖先链；immutable release 使 tag 无法移动（422）。字节证明不受影响，但「tag 指向 main 某提交」这句话不成立。
 ## 未发布 — 2026-11-25（DID 对接：补 did:peer）
 
 - **`did:peer` numalgo 0/2 支持，全离线**：文档由标识本身推导，不需要端点也不需要注册中心。`0z<multibase ed25519>` 与同键 `did:key` 的文档键材料一致（规范明说二者等价）；`2` 解析 `.A/.E/.V/.I/.D` 键元素与 `.S<base64url>` 服务元素，按规范把 `t/s/r/a`、`dm` 还原成全称。

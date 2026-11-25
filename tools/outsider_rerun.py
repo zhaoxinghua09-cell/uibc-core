@@ -55,25 +55,47 @@ ENV_KEEP = ("PATH", "SYSTEMROOT", "SYSTEMDRIVE", "WINDIR", "TEMP", "TMP", "HOME"
             "USERPROFILE", "LANG", "LC_ALL", "PYTHONUTF8", "PYTHONIOENCODING")
 
 
-def tree_digest(root):
-    """sha256 over every file path and its content digest, in path order."""
-    entries = []
+def tracked_files(root):
+    """The files a clone would contain.
+
+    In a checkout, ask git: that set does not move when a test run drops
+    `.coverage` or `htmlcov/` into the tree. In a tarball there is no `.git`, so
+    walk with the same ignore list the producer used - the two agree because a
+    tarball carries no build artefacts.
+    """
+    if os.path.isdir(os.path.join(root, ".git")):
+        try:
+            out = subprocess.run(["git", "ls-files", "-z"], cwd=root, capture_output=True,
+                                 text=True, encoding="utf-8", errors="replace")
+            if out.returncode == 0 and out.stdout:
+                return [p for p in out.stdout.split("\0") if p]
+        except Exception:                                          # noqa: BLE001
+            pass
+    found = []
     for dirpath, dirnames, filenames in os.walk(root):
         dirnames[:] = sorted(d for d in dirnames if d not in
                              {".git", "__pycache__", ".pytest_cache", ".mypy_cache",
-                              ".ruff_cache", "node_modules", ".venv", "venv", "dist", "build"})
+                              ".ruff_cache", "node_modules", ".venv", "venv", "dist", "build",
+                              "htmlcov", ".tox", ".nox"})
         for fn in sorted(filenames):
-            if fn.endswith((".pyc", ".pyo")):
+            if fn.endswith((".pyc", ".pyo")) or fn in (".coverage", "coverage.xml"):
                 continue
-            p = os.path.join(dirpath, fn)
-            rel = os.path.relpath(p, root).replace("\\", "/")
-            if rel in GENERATED:
-                continue
-            try:
-                with open(p, "rb") as f:
-                    entries.append(rel + ":" + hashlib.sha256(f.read()).hexdigest())
-            except OSError:
-                entries.append(rel + ":unreadable")
+            found.append(os.path.relpath(os.path.join(dirpath, fn), root).replace("\\", "/"))
+    return found
+
+
+def tree_digest(root):
+    """sha256 over every file path and its content digest, in path order."""
+    entries = []
+    for rel in sorted(tracked_files(root)):
+        if rel in GENERATED:
+            continue
+        p = os.path.join(root, rel.replace("/", os.sep))
+        try:
+            with open(p, "rb") as f:
+                entries.append(rel + ":" + hashlib.sha256(f.read()).hexdigest())
+        except OSError:
+            entries.append(rel + ":unreadable")
     return hashlib.sha256("\n".join(entries).encode()).hexdigest(), len(entries)
 
 

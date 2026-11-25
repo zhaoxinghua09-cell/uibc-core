@@ -21,6 +21,21 @@ import pytest
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+FULL_TREE_MARKERS = ("CHANGELOG.md", "docs/COMPETITOR-GATE-PARITY.md", "tools/mutation_gate.py")
+
+
+def _require_full_tree():
+    """A receipt describes the source tree, not an sdist.
+
+    The packaging job runs these tests inside an extracted sdist, which carries
+    less than a clone. There the receipt can never match by design, so say so
+    instead of reporting a broken tree.
+    """
+    missing = [m for m in FULL_TREE_MARKERS if not os.path.exists(os.path.join(ROOT, m))]
+    if missing:
+        import pytest as _pytest
+        _pytest.skip("not the full source tree, missing " + ", ".join(missing))
+
 
 @pytest.fixture(scope="module")
 def tool():
@@ -32,6 +47,7 @@ def tool():
 
 
 def test_digest_is_stable_and_ignores_its_own_output(tool):
+    _require_full_tree()
     a = tool.tree_digest(ROOT)
     b = tool.tree_digest(ROOT)
     assert a == b
@@ -49,10 +65,12 @@ def test_clean_environment_carries_no_credentials(tool):
 
 
 def test_receipt_matches_this_tree(tool):
+    _require_full_tree()
     assert tool.check() == 0
 
 
 def test_one_edited_byte_breaks_the_match(tool, tmp_path):
+    _require_full_tree()
     receipt = json.load(open(tool.RECEIPT, encoding="utf-8"))
     copy = tmp_path / "repo"
     tool.copy_tree(str(copy))
@@ -64,6 +82,7 @@ def test_one_edited_byte_breaks_the_match(tool, tmp_path):
 
 
 def test_copy_has_no_history(tool, tmp_path):
+    _require_full_tree()
     copy = tmp_path / "repo"
     tool.copy_tree(str(copy))
     assert not (copy / ".git").exists()

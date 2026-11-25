@@ -1,6 +1,6 @@
 {
- "generated_at": "2026-11-25T15:51:24Z",
- "tree_sha256": "530d3512553deea38bac231443d0fa924c0b2311b3e4a880fe7cdfe34bc03f1b",
+ "generated_at": "2026-11-25T16:01:32Z",
+ "tree_sha256": "960351d3b7180f25d4adbf4499bd34a7069b58cf3c7bb50cdecd26a7b76fd12f",
  "files_hashed": 2234,
  "digest_excludes": [
   "docs/OUTSIDER-RERUN.md",
@@ -62,8 +62,8 @@
    "rc": 0,
    "expect": "passed",
    "ok": true,
-   "seconds": 2.6,
-   "tail": "10 passed in 1.96s"
+   "seconds": 2.8,
+   "tail": "10 passed in 2.07s"
   }
  ],
  "ok": true

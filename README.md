@@ -31,17 +31,14 @@ Fetch it anonymously, without cloning (no login, no token — measured 2026-11-2
 
 ```bash
 curl -fL -o corpus.zip \
-  https://github.com/zhaoxinghua09-cell/uibc-core/raw/main/conformance/uibc-conformance-0.5.0.zip
-sha256sum corpus.zip   # ad2b73ccdd8e5606364372350fc35134d8efe897f0382b36dd4ee65af341bfc0, 231,243 bytes
+  https://github.com/zhaoxinghua09-cell/uibc-core/raw/main/conformance/uibc-conformance-0.5.3.zip
+sha256sum corpus.zip   # 5f3a72cb277dac8f285cd50df304dd9befe762caf42f40b98b907bcfc20cce8c, 312,642 bytes
 unzip -q corpus.zip -d corpus && cd corpus && python run.py
 ```
 
-The release page also carries the same bytes, attached on 2026-11-20 by the release workflow:
-`https://github.com/zhaoxinghua09-cell/uibc-core/releases/download/v0.5.0/uibc-conformance-0.5.0.zip`.
-Either URL serves this hash; the older `v0.4.0` asset is a **different** corpus (30 cases) and not
-this one. The build is deterministic for a given tree, but "rebuilding gives the same bytes" is true only from the tree the archive was built from: `0.4.1` came out of commit `d72c4f9`, and the runner template was fixed for the unstartable-verifier case afterwards, so rebuilding `0.4.1` from today's tree yields a different archive (`083c0dbc…`). The builder now refuses to overwrite a pinned archive and prints both hashes instead (measured 2026-11-20, exit 3).
+The release page carries the same bytes, attached on 2026-11-25: `https://github.com/zhaoxinghua09-cell/uibc-core/releases/download/v0.5.3/uibc-conformance-0.5.3.zip`. Either URL serves this hash; the older `v0.5.0` asset is a different corpus (36 cases) and the `v0.4.0` one a third (30 cases). Neither is this one.. The build is deterministic for a given tree, but "rebuilding gives the same bytes" is true only from the tree the archive was built from: `0.4.1` came out of commit `d72c4f9`, and the runner template was fixed for the unstartable-verifier case afterwards, so rebuilding `0.4.1` from today's tree yields a different archive (`083c0dbc…`). The builder now refuses to overwrite a pinned archive and prints both hashes instead (measured 2026-11-20, exit 3).
 
-No repository, no network, no `pip install`: the archive carries its own verifier as a single file (`uibc_core.pyz`), and `run.py` uses it. Expected tail `strict 36/36` in about six seconds, and a `receipt.json` you can publish. A verifier that answers PASS to everything scores **6/36**, so refusing nothing does not pass.
+No repository, no network, no `pip install`: the archive carries its own verifier as a single file (`uibc_core.pyz`), and `run.py` uses it. Expected tail `strict 58/58` in about six seconds, and a `receipt.json` you can publish. A verifier that answers PASS to everything scores **6/58**, so refusing nothing does not pass.
 
 #### Or the RFC 9162 vector set — 41 vectors, and seven of them isolate path structure
 
@@ -152,7 +149,7 @@ the right thing. Run it yourself; the whole demo leaves nothing behind but a tem
 | item | state | how you check it yourself |
 |---|---|---|
 | RFC 3161 external timestamp (Free TSA) | verified | `python tools/anchor_tsa.py --verify tests/fixtures/anchor/freetsa.tsr --data tests/fixtures/anchor/anchored_head.json --cabundle tests/fixtures/anchor/freetsa_ca.pem` — token, its CA bundle and the anchored file are all in the repo, so no network and no account |
-| OpenTimestamps second anchor | **pending calendar only — not a Bitcoin anchor** | `pip install -e ".[interop]"` (brings `opentimestamps-client`), then `python tools/anchor_ots.py --verify tests/fixtures/anchor/anchored_head.json --proof tests/fixtures/anchor/anchored_head.json.ots` prints `pending_calendar` and never a Bitcoin claim. **Use `anchored_head.json.ots`, not the bare `ots_head.ots` beside it** — the bare proof binds to nothing and the tool refuses it with `the proof has no standard header`; that refusal is documented in `docs/EXTERNAL-ANCHOR.md`, not a failure of the claim |
+| OpenTimestamps second anchor | **pending calendar only — not a Bitcoin anchor** | `pip install -e ".[interop]"` (brings `opentimestamps-client`), then `python tools/anchor_ots.py --verify tests/fixtures/anchor/anchored_head.json --proof tests/fixtures/anchor/anchored_head.json.ots` prints `pending_calendar` from **three** calendars and never a Bitcoin claim; `ots --no-bitcoin verify -f tests/fixtures/anchor/anchored_head.json tests/fixtures/anchor/anchored_head.json.ots` says the same with the official client. **Use `anchored_head.json.ots`, not the bare `ots_head.ots` beside it** — the bare proof binds to nothing and the tool refuses it with `the proof has no standard header`; that refusal is documented in `docs/EXTERNAL-ANCHOR.md`, not a failure of the claim |
 | Rekor entry + SET signature | written and verified | `rekor-cli get --log-index 3944456520 --rekor_server https://rekor.sigstore.dev`, then check the SET with the log public key published in `tests/fixtures/anchor/rekor_log_pub.pem` — the verification needs only that public key, never Sigstore's private infrastructure |
 | Rekor **inclusion proof** | **does not verify** — ours and a third-party implementation both fail; published as-is | `python tools/anchor_rekor.py --verify tests/fixtures/anchor/rekor_entry.json --artifact …`; `python -m unittest tests.test_v13_rekor -v` shows the SET check passing and the inclusion proof not overclaimed. The failure is a defect we have not fixed, not a design choice |
 

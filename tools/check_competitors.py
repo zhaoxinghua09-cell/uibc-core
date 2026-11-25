@@ -87,7 +87,7 @@ def measure():
     try:
         out["ours"]["tests"] = _own_tests()
         out["ours"]["checks"] = 19
-        out["ours"]["conformance_cases"] = 36
+        out["ours"]["conformance_cases"] = len(json.load(open(os.path.join(HERE, "conformance", "manifest.json"), encoding="utf-8"))["cases"])
     except Exception as e:  # noqa: BLE001
         out["ours"]["tests_error"] = str(e)
     return out

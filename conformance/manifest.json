@@ -474,7 +474,320 @@
       ],
       "path": "cases/36-flip-one-bit-in-an-ed25519-signature",
       "sha256": "b0c68801698d5e503a79199a81d708a46f488ba5054c83e62efa79e84a5671d6"
+    },
+    {
+      "id": "37",
+      "group": "scale",
+      "attack": "swap the bytes of two evidence files",
+      "why": "S4 hashes are per-path, so a swap cannot pass",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S4"
+      ],
+      "path": "cases/37-swap-the-bytes-of-two-evidence-files",
+      "sha256": "65ebfd3d8516407c6862c04becaf34dfaf69d6d69c572b402f15015efaf13b4f"
+    },
+    {
+      "id": "38",
+      "group": "scale",
+      "attack": "append one newline to an evidence file",
+      "why": "one byte is enough for S4",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S4"
+      ],
+      "path": "cases/38-append-one-newline-to-an-evidence-file",
+      "sha256": "30a9786d099ca94df12b1fb62f1ae6188997ab002a87933b6fb556af106f6ef5"
+    },
+    {
+      "id": "39",
+      "group": "scale",
+      "attack": "give two entries the same evidence_id",
+      "why": "S12 judges identifier values",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S12"
+      ],
+      "path": "cases/39-give-two-entries-the-same-evidence-id",
+      "sha256": "3a28d742f5727767503d16b1744576b1b9bcd87384032c8d0e7046af176724f7"
+    },
+    {
+      "id": "40",
+      "group": "scale",
+      "attack": "set an evidence date to November 31",
+      "why": "S12 rejects impossible calendar values",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S12"
+      ],
+      "path": "cases/40-set-an-evidence-date-to-november-31",
+      "sha256": "14a97ce0920fecf48d2bf03f9552ee9514419cee16741ca57623284adbc1b148"
+    },
+    {
+      "id": "41",
+      "group": "scale",
+      "attack": "write a timestamp without the Z form",
+      "why": "S12 rejects a shape the schema does not allow",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S12"
+      ],
+      "path": "cases/41-write-a-timestamp-without-the-z-form",
+      "sha256": "48cc6d1bf70baaa78a8b597c7430ac2d29a72510a774fe4731c9dd528f08914c"
+    },
+    {
+      "id": "42",
+      "group": "scale",
+      "attack": "declare an evidence file that does not exist",
+      "why": "the declaration must resolve to bytes",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S12",
+        "S4"
+      ],
+      "path": "cases/42-declare-an-evidence-file-that-does-not-exist",
+      "sha256": "c8a7a2fa2d7a0858c7186b581d8c0a02643f61f5f0c70136d584766e1c441a00"
+    },
+    {
+      "id": "43",
+      "group": "scale",
+      "attack": "let an index path leave the evidence tree",
+      "why": "path confinement is part of the shape",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S4"
+      ],
+      "path": "cases/43-let-an-index-path-leave-the-evidence-tree",
+      "sha256": "67b4061f880e00d3801d70eefa70fc69f4422cceaf9df7d3bb179cca807e8fbc"
+    },
+    {
+      "id": "44",
+      "group": "scale",
+      "attack": "count one file fewer than declared",
+      "why": "S2 compares counts across files",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S12"
+      ],
+      "path": "cases/44-count-one-file-fewer-than-declared",
+      "sha256": "b9c60b39b8761541f240c55c486ff8803518c9379ff8c52d47dc483730ec26c4"
+    },
+    {
+      "id": "45",
+      "group": "scale",
+      "attack": "change the agent id in identity.json only",
+      "why": "S2 compares identity across files",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S2"
+      ],
+      "path": "cases/45-change-the-agent-id-in-identity-json-only",
+      "sha256": "d95e73563d5be7c410753c252d2a8030ec3c6207d7973065d2c7eefc7df4c8b7"
+    },
+    {
+      "id": "46",
+      "group": "scale",
+      "attack": "record a lifecycle event before creation",
+      "why": "ordering is a checkable claim, not a comment",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S3"
+      ],
+      "path": "cases/46-record-a-lifecycle-event-before-creation",
+      "sha256": "d3eb930a5aeba14b7fdeccd43a2675eecc6ad36a23263ea721b2448a59eb2fda"
+    },
+    {
+      "id": "47",
+      "group": "scale",
+      "attack": "upper-case one stored hash",
+      "why": "hash comparison is octet comparison, not case-insensitive text",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S4"
+      ],
+      "path": "cases/47-upper-case-one-stored-hash",
+      "sha256": "aa625d92d626006a115613c8cf864030080b09d228ae07ec8b422cef74876e3c"
+    },
+    {
+      "id": "48",
+      "group": "scale",
+      "attack": "truncate one stored hash to 16 characters",
+      "why": "S12 judges digest length",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S4"
+      ],
+      "path": "cases/48-truncate-one-stored-hash-to-16-characters",
+      "sha256": "0c1f3b7e83080704c052e683d46ea7f7bba5d14093b9e008c62f26b19b9854f8"
+    },
+    {
+      "id": "49",
+      "group": "scale",
+      "attack": "declare the same file twice",
+      "why": "a double count is not a count",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S12",
+        "S5"
+      ],
+      "path": "cases/49-declare-the-same-file-twice",
+      "sha256": "57ddf8cf46397662023d7e1a25882f0eea447f09c4f99eb27542d5568668217f"
+    },
+    {
+      "id": "50",
+      "group": "scale",
+      "attack": "truncate an evidence file to zero bytes",
+      "why": "S4 compares bytes, not intentions",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S4"
+      ],
+      "path": "cases/50-truncate-an-evidence-file-to-zero-bytes",
+      "sha256": "b3a9bee837d68b63d143dfe6ad051e293e1e43bfab8a9374d4a3d2fb43064d22"
+    },
+    {
+      "id": "51",
+      "group": "scale",
+      "attack": "flip one byte in the second evidence file",
+      "why": "S4 is per member, not first member only",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S4"
+      ],
+      "path": "cases/51-flip-one-byte-in-the-second-evidence-file",
+      "sha256": "8c32c471416755d85975c2f0290d652d76a06dce7cc2906e11fb27c6ebc672df"
+    },
+    {
+      "id": "52",
+      "group": "scale",
+      "attack": "truncate the second evidence file",
+      "why": "same, second member",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S4"
+      ],
+      "path": "cases/52-truncate-the-second-evidence-file",
+      "sha256": "3cc4cf901d2605919e6aacefb91befb2bbcc1dddcda5dc7decbef6e0fcb8407a"
+    },
+    {
+      "id": "53",
+      "group": "scale",
+      "attack": "set the second entry to February 30",
+      "why": "S12 judges every date, not the first",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S12"
+      ],
+      "path": "cases/53-set-the-second-entry-to-february-30",
+      "sha256": "679e89d4183cc9f449733f700117da19ff4c80b4fe2639ca3f57780c4de24da6"
+    },
+    {
+      "id": "54",
+      "group": "scale",
+      "attack": "truncate the second stored hash to 40 characters",
+      "why": "S12 judges every digest, not the first",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S4"
+      ],
+      "path": "cases/54-truncate-the-second-stored-hash-to-40-characters",
+      "sha256": "9202d98447248e89e9b8992cebb0594fd9692509eeab73e89be3b9323b1a4b9e"
+    },
+    {
+      "id": "55",
+      "group": "scale",
+      "attack": "shift every Merkle proof index by one",
+      "why": "S13 resolves the leaf the proof names",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S13"
+      ],
+      "path": "cases/55-shift-every-merkle-proof-index-by-one",
+      "sha256": "383524f1647557b1af2c3d3396fd71d4b12c14ce00dacf1eca70df84fd0d5c09"
+    },
+    {
+      "id": "56",
+      "group": "scale",
+      "attack": "cut one Merkle proof step",
+      "why": "a shorter path proves nothing",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S13"
+      ],
+      "path": "cases/56-cut-one-merkle-proof-step",
+      "sha256": "ef782d55646645836f59bf53483292b90902731ce030682ad5434adcab337f90"
+    },
+    {
+      "id": "57",
+      "group": "scale",
+      "attack": "zero the back-link of the second receipt",
+      "why": "S17 recomputes the link",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S17"
+      ],
+      "path": "cases/57-zero-the-back-link-of-the-second-receipt",
+      "sha256": "e24fa8c1d102f8fe618f9bef45301e3a16e0bbe98981323162ca27cbf25939c0"
+    },
+    {
+      "id": "58",
+      "group": "scale",
+      "attack": "swap the order of the receipt chain",
+      "why": "order is the claim, not a comment",
+      "expectation": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S17"
+      ],
+      "path": "cases/58-swap-the-order-of-the-receipt-chain",
+      "sha256": "b94b507b865b66061de02d82f6b172dc3e35e4a1a8b969c376bbd812dac03fc8"
     }
   ],
-  "skipped": []
+  "skipped": [
+    {
+      "attack": "use a status token outside the vocabulary",
+      "reason": "no check fired; not exportable as a vector"
+    },
+    {
+      "attack": "reverse the order of the evidence index",
+      "reason": "no check fired; not exportable as a vector"
+    },
+    {
+      "attack": "delete the seal",
+      "reason": "no check fired; not exportable as a vector"
+    },
+    {
+      "attack": "cut the seal signature in half",
+      "reason": "no check fired; not exportable as a vector"
+    },
+    {
+      "attack": "misspell the manifest schema string",
+      "reason": "no check fired; not exportable as a vector"
+    },
+    {
+      "attack": "relabel an evidence file's media type",
+      "reason": "no check fired; not exportable as a vector"
+    }
+  ]
 }

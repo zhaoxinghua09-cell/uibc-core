@@ -135,6 +135,28 @@ class OpenTimestampsTests(unittest.TestCase):
         self.assertNotIn("BitcoinBlockHeaderAttestation", kinds,
                          "the fixture must not pretend a block attestation exists")
 
+    def test_restamped_proof_names_several_calendars(self):
+        """One calendar is one point of failure; the fixture says how many witnessed it."""
+        from opentimestamps.core.serialize import BytesDeserializationContext
+        from opentimestamps.core.timestamp import DetachedTimestampFile
+
+        with open(RESTAMPED, "rb") as f:
+            ctx = BytesDeserializationContext(f.read())
+        dtf = DetachedTimestampFile.deserialize(ctx)
+        uris = []
+
+        def walk(t):
+            for att in t.attestations:
+                if type(att).__name__ == "PendingAttestation":
+                    uris.append(getattr(att, "uri", ""))
+            for _op, child in t.ops.items():
+                walk(child)
+
+        walk(dtf.timestamp)
+        self.assertGreaterEqual(len(set(uris)), 2,
+                                "the published proof must carry more than one calendar's "
+                                "attestation, and must not imply a single trusted one")
+
     def test_truncated_proof_does_not_yield_an_attestation(self):
         with open(PROOF, "rb") as f:
             blob = f.read()

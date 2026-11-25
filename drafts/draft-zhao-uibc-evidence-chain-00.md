@@ -363,6 +363,72 @@ Three rules bind the tiers, and each closes a gap someone else left open:
    holds, not that the record is true or that the issuer is trusted; that stays
    the reader's trust policy (Section 13).
 
+## 17. `pending` as a named absence (proposal — not implemented)
+
+_This section exists because the anchored vectors need a wire form for "not yet
+anchored". It is a **proposal**: the verifier reads `evidence/anchors.json` with
+resolver `evidence-merkle` today, and does **not** read a `state` field. No
+vector may claim anything under this section until the checks below exist._
+
+### 17.1 The object it extends
+
+Existing form, unchanged and still the default:
+
+```json
+{"resolver": "evidence-merkle", "anchors": [
+  {"id": "anchor-001", "version": 1,
+   "leaf_hash": "<64 lowercase hex>",
+   "anchored_at": "<RFC 3339 with zone>",
+   "root": "<64 hex>", "size": 3, "index": 1,
+   "proof": ["<64 hex>", "..."]}]}
+```
+
+Proposed additions, all optional, so existing packages and the 30-case corpus
+keep their meaning:
+
+| field | values | required when |
+|---|---|---|
+| `state` | `anchored` (default when absent) / `pending` | always readable |
+| `submitted_to` | `ots` / `nostr` / `tsa` | `state` is `pending` |
+| `absent_reason` | `not-submitted` / `submitted-no-receipt` / `receipt-withheld` | `state` is `pending` |
+| `resolves_externally` | `true` only when a receipt verifies against a public log | `state` is `anchored` |
+
+`pending` carries no `root`, `size`, `index` or `proof`; if any of them appear
+alongside `state: pending`, the record is rejected rather than reconciled.
+
+### 17.2 The four checks this section would require
+
+1. **Unresolvable is not the same as absent.** Today an anchor the verifier
+   cannot resolve is recorded as external/unresolved and never counted as
+   resolved. A `pending` anchor must reach **INCONCLUSIVE**, not the verdict an
+   unresolvable anchor gets. Which verdict the current verifier returns for an
+   unresolvable anchor is itself unmeasured — a vector has to pin it before
+   this rule can be claimed.
+2. **`pending` never yields PASS under `strict`.** Absence of a receipt is not
+   evidence against the record, and it is not evidence for it either.
+3. **`anchored` must carry a receipt whose chain reaches `head`.** A receipt
+   that verifies but covers a different head is FAIL — evidence to the contrary,
+   not missing evidence.
+4. **An unknown `state` is rejected.** `state` decides whether a verdict may be
+   PASS at all, so Section 15's "unregistered value is informational, never a
+   rejection" does not apply to it.
+
+### 17.3 Time is not implied
+
+`anchored_at` records what the producer says. It is not a time bound: only an
+RFC 3161 token from an authority the reader trusts gives one, an OTS proof shows
+only that the bytes existed before a block was mined, and a receipt of
+registration states no time at all.
+
+### 17.4 To implement, in order
+
+1. read `state` in `uibc_core/anchor.py`, default `anchored`;
+2. add the four rejections of 17.2 as distinct problems, not as generic
+   "unresolvable";
+3. pin the current verdict for an unresolvable anchor with a vector;
+4. build AC2 / AC4 / AC5 on top of a real fixture;
+5. only then name the tier in Section 16.
+
 ## Implementation Status
 
 _As of 2026-11-25, repository `232deb4`, reference verifier 0.5.5._

@@ -1,3 +1,14 @@
+## 未发布 — 2026-11-25（RFC-011 编解码器：把"只能读"补成"能反算"）
+
+主题：一个只会解码的实现没有办法被反驳。这一轮把它做成编解码器，并先把"官方到底有没有实现"查清楚。
+
+- **先取证再动工**：`headerLength`/`replyCode`/`messageLength`/`0x2100` 在 `caict-4iot-dev` 全组织的 code search 命中数都是 **1**，唯一命中是 RFC-011 正文。公开默认分支上不存在参考编解码器（`docs/COMPETITOR-EVIDENCE.md` 附节记了查询与计数，并写明"看不到私有仓，不能推出官方没有"）。
+- **三层互逆**：`encode_units`（字节级、含非升序顺序）/ `encode_document`（语义幂等，规范序按容器内 ID 升序）/ `encode_message`（头+option+体）。文档层为什么只承诺语义，写在 `docs/BINARY-PROTOCOL.md` 三·五。
+- **六条推断成为参数而非注释**（`ASSUMPTIONS`）：`flag_bit_order`（msb/lsb）、`acsns_spelling`（3610/3601）、`integer_widths`（调用方给，不给就 defer）、`bid_document_collision`（启发式）、分片重组与签名 unit ID（未实现）。两条可翻转的都有"翻转后输出确实变了"的断言。
+- **宽度给了就严格**：`integer_widths` 与 payload 长度不符立刻 `raise`（`declared long=8 bytes but carries 4`）——真实样例到手时错宽度当场暴露，不会被读成错数。
+- **敌意输入**：2,000 组随机字节只许 `ValueError`；500 组随机 unit 序列解码后重编码语义必须一致。
+- 新增 `tests/test_bid_binary_codec.py` 31 条，连原 16 条共 47 条全绿。
+
 ## 0.5.5 — 2026-11-25（把 0.5.4 那次发布补成一次干净的）
 
 主题：`0.5.4` 装上能用，但它的 sdist 里带的是一版之前的语料。这一版不新增能力，只把"发出去的东西"和"仓库里的树"重新对齐，并把产生那种错配的顺序固定下来。

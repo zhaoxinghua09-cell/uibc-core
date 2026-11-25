@@ -43,3 +43,14 @@ python tools/audit_official_bid_driver.py
 - 脚本默认走网络（`raw.githubusercontent.com`，失败会退回 GitHub contents API 并校验同一 commit）。离线环境用 `--file` 指向本地副本。
 - 脚本**不为 CI 强依赖**：它审的是别人的仓库，网络与对方仓库的稳定性不该让我们的 CI 变红或变绿。它是给人跑的工具，结论写在本页。
 - 对方一旦修了上面任何一条，脚本退出码非 0，本页必须跟着改。这就是它存在的价值。
+
+## 附：RFC-011（二进制解析）有没有公开实现
+
+同一天、同一套 code search 查询（`org:caict-4iot-dev`）：`headerLength`、`replyCode`、
+`messageLength`、`0x2100` 四个查询的 `total_count` **都是 1**，唯一命中就是 RFC-011
+正文文件本身。全站查 `unitId bidDocument` 共 51 条，该组织内仍只有这一份正文。
+
+因此对 §4.3 这条线，能说的只有：**公开默认分支上没有任何参考编解码器**。不能说官方没有
+实现——code search 不覆盖私有仓与未索引分支，链节点内部代码也看不到。这也决定了我们
+那一层的验收方式：不靠"跟官方一致"，靠编码/解码互逆、随机字节不崩、以及把每条推断做成
+可翻转的参数（`uibc_core/bid_binary.py::ASSUMPTIONS`）。

@@ -1,0 +1,81 @@
+# §4.3 二进制解析协议：正文在哪、我们读到哪（2026-11-25）
+
+## 一、协议正文指向的链接是空的
+
+《星火·链网BID协议》§4.3 全文只有一句：
+
+> 星火链网BID标识[二进制解析协议规范](https://github.com/caict-4iot-dev/bif-rfcs/tree/main/RFCs/3-ACCEPTED)
+
+`RFCs/3-ACCEPTED` 目录里**只有一个 `.gitkeep`（0 字节）**。所以此前"§4.3 正文未取到、只能明确拒绝"的判断，源于**主协议给的指针指空了**，不是协议没有正文。
+
+正文在隔壁目录：`RFCs/4-ADOPTED/星火链网RFC-011：星火链网BID标识二进制解析协议.md`
+
+| 项 | 值 |
+|---|---|
+| 仓库 | `caict-4iot-dev/bif-rfcs` |
+| commit | `5d471fc1f3d63c670c9d937bb1990fee089feb52`（2025-03-14） |
+| 文件 | `RFCs/4-ADOPTED/星火链网RFC-011：星火链网BID标识二进制解析协议.md`，31,156 字节 |
+| blob | `4acf27085711bd7149c6d09ee4d902c747d2445f` |
+| 本地 sha256 | `c6fc24dd325f98b022c559942f045ab25000fe17bba04da14d48c2a9d62408e5` |
+
+另有 `RFCs/1-PROPOSED/星火链网RFC-017`（二层网络接入）与 `4-ADOPTED` 下的 RFC-001~016；**3-ACCEPTED 与 2-DEMONSTRATED、5-RETIRED 三档都是空的**。也就是说这套 RFC 的分档目录目前只有 `1-PROPOSED` 和 `4-ADOPTED` 两档在用。
+
+## 二、读到的结构（可据此复算）
+
+**消息 = 消息头 + 消息体 + 消息签名**；传输允许 UDP/TCP/HTTP/HTTPS，TCP/UDP 建议端口 2259；UDP 单包 ≤1024 字节，超出分片。
+
+消息头最小 16 字节，大端序：
+
+| 偏移 | 长度 | 字段 | 说明 |
+|---|---|---|---|
+| 0 | 1 B | version(4bit) + headerLength(4bit) | headerLength 以**4 字节**为单位（16 字节 = 4） |
+| 1 | 2 B | flag | QR/TC/RD/DT/TR/CT 各 1 bit，opCode 4 bit，其余待扩展 |
+| 3 | 1 B | unUsed | 待扩展（**不解释**） |
+| 4 | 2 B | replyCode | 见下面的码表 |
+| 6 | 2 B | messageID | 分片序号 |
+| 8 | 4 B | transactionID | 会话 ID |
+| 12 | 4 B | messageLength | 消息体 + 签名长度 |
+| 16 | … | option | optionType(1B) + optionPayload，不足 4 倍数补 0 |
+
+**单元（unit）**：ID 2 B + length 2 B + payload；payload 本身可以再是单元序列。ID 范围：`0x1000–0x1FFF` 为 URP1.0，`0x2000–0x9FFF` 为 URP2.0，`0xA000–0xCFFF` 自定义扩展。
+
+## 三、已经实现的部分（`uibc_core/bid_binary.py`）
+
+- 消息头解析/构造（16 字节定长；变长 option 只读不写，因为正文没给任何 optionType 的 payload 定长）。
+- 单元树解析，含越界、长度不匹配、尾部残字节三类拒绝。
+- 文档应答与错误应答的**字符串字段**解码：`version`/`id`/`created`/`updated`/`publicKey.*`/`service.*`/`proof.*`/`extension.attributes.*`/`extension.acsns.*`/`extension.verifiableCredentials.*`/`errResponse.msg`。
+- 重复出现的叶子 → 列表；重复出现的容器 → 按字段合并（正文没有标记"实例边界"，见第四节）。
+- 未知 unit → 进 `unknown`（带 ID、长度、前 32 字节 hex），**不丢、不猜**。
+
+## 四、正文没写够、因此没有实现的部分（逐条给理由）
+
+| 缺什么 | 正文实际情况 | 我们的处置 |
+|---|---|---|
+| `Int` / `Long` 的字节宽度 | 全文只在**请求**里给过一个 `Short,2字节`；`ttl`、`extension.type`、`service.port`、`acsns` 的 `Int` 与 `ttl` 的 `Long` 都没给宽度 | 不解码，进 `_deferred`，附原始字节与"RFC-011 未给字节宽度"。**猜 4 或 8 再宣布"文档解出来了"是不可接受的** |
+| 消息签名单元的 ID | §5.1.2.3 描述签名由 `creator`/`digestAlgorithm`/`signatureValue` 三个 unit 组成，**从未给出它们的 ID** | 不定位签名块；`signature_units_detectable = False`。带签名的报文只做结构解析 |
+| 分片重组规则 | §5.1.3 说"第一个分片 messageID=1，后续依次加 1"，但没给"末片判据" | 不做重组 |
+| flag 位序 | 只按顺序列了 QR/TC/RD/DT/TR/CT/opCode，**没有位编号** | 按"列表顺序 = 高位在前"实现，并在模块里用 `FLAG_BIT_ORDER_IS_AN_ASSUMPTION` 标死这是假设 |
+| 两张返回码表 | §4.2.5：0=success；RFC-011 §5.1.2.1.2：**1=success**，新增 11=authentication required、255="码在扩展 option 里" | 两张表各自保留（`BID_RESPONSE_CODES` 与 `bid_binary.RCODES`），不合并、不互相覆盖 |
+
+## 五、正文自身的两处 ID 冲突
+
+| unitID | 冲突 | 我们怎么读 |
+|---|---|---|
+| `0x2100` | 既是 `bidDocument`（容器），又是 `bidDocument.authentication`（键 id 列表） | 按 payload 形状判别：能解析成单元序列 = 容器；解析失败 = 一个键 id 字符串。这是**对作者意图的启发式判断**，写在这里而不是藏起来 |
+| `0x3601/0x3602` vs `0x3610/0x3620` | §5.2.1.4.2 与 §5.2.1.1.2 对同一对字段给了两套编号 | 两个编号都进 `FIELD_TABLE`，指向同一字段名 |
+
+## 六、复跑
+
+```bash
+python -m pytest tests/test_bid_binary.py -q          # 16 条
+python -c "from uibc_core import bid_binary as b; print(b.RCODES[11], b.KNOWN_ID_COLLISIONS)"
+```
+
+取正文（钉在 commit 上，避免"哪天仓库改了、文档说的就不是那版"）：
+
+- 目录：`https://github.com/caict-4iot-dev/bif-rfcs/tree/5d471fc1f3d63c670c9d937bb1990fee089feb52/RFCs/4-ADOPTED`
+- 文件：同目录下 `星火链网RFC-011：星火链网BID标识二进制解析协议.md`（31,156 字节，blob `4acf2708…d2445f`）
+- 取下来后 `sha256` 应等于 `c6fc24dd325f98b022c559942f045ab25000fe17bba04da14d48c2a9d62408e5`
+
+文件名含全角冒号，命令行直接拼 URL 容易编码出错；用 GitHub 目录页点进去最稳，或用 API：
+`https://api.github.com/repos/caict-4iot-dev/bif-rfcs/contents/RFCs/4-ADOPTED?ref=5d471fc1f3d63c670c9d937bb1990fee089feb52` 拿到 `download_url` 再下载。

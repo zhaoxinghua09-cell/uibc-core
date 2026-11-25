@@ -16,6 +16,8 @@
 | 8 | **分发通道是"拉"，有盲窗**：`--coverage-url` 拉不到即 `HOLD`，检测延迟以轮询间隔为上界 | 没有推送通知，也没有第三方证明发布方把撤销都发出来了；轮询式验证方在两次 GET 之间是看不见新声明的 | 端点不可达一律 `HOLD(3)`（`coverage UNREACHABLE`），不回落 `ALLOW`；盲窗可测：本地回环、间隔 0.2 s、24 次随机相位发布 → 两次实测 median 69.3 / 136.1 ms、p95 195.0 / 198.2 ms、max 198.3 / 201.3 ms（`tools/coverage_latency.py`，中位数随发布相位浮动，理论上界仍是"间隔 + 一次 GET"）。对外只能说"上界已实测"，不能说"实时到达" |
 | 9 | **两个版本号不同，是有意的**：`pyproject.toml` 是包的发布号（`0.5.3`），`SPEC_VERSION` 是**线路格式**标识（`uibc-core/0.3.3-proposal`） | 已封签的包把 `SPEC_VERSION` 写进了自己的身份字节；改这个常量会让所有旧包的字节语境失效，静默作废它们的自证 | 两者**一起动会出错，所以要分开动**；读者要核"是不是同一份字节"，用 `spec_id()`（`<SPEC_VERSION>@<12 hex>`）而不是发布号。对外解释见 `CHANGELOG` 的 `0.4.0` 条目 |
 | 10 | **用例数与 `skipped` 会变，不是定值** | 语料随新增向量增长（`1056` → `1082` → `1086` 都出现过），跳过项随平台与是否装 extras 变化（同一套件见过 5、7、16、31） | 任何文档只写"无 `FAILED`/`ERROR`"，数字以当轮输出为准；已钉的规范计数看 `EVIDENCE-INDEX.md` V1，但它也随快照更新 |
+| 11 | **`v0.5.3` 的 tag 不在 `main` 祖先链上** | 仓库禁止 merge commit（405），PR #438 以 rebase 合入，`main` 头变成 `72b14f3d`，而 release tag 仍指向 rebase 前的 `b60a2a00`；仓库开启了 immutable release，`PATCH /git/refs/tags/v0.5.3` 返回 422，移不动 | 归档字节与 pin 一致（312,642 B / `5f3a72cb…`），`sha256sum -c MANIFEST.sha256` 与匿名重下载都能复核；但「tag 指向 main 某提交」不成立。下一版按「先合并 → 在 main 头打 tag → 再建 release」走 |
+| 12 | **`v0.5.1` 这个版本名作废，`v0.5.2` 不是本树语料** | `v0.5.1` 先建非 draft release 再上传资产，被 immutable release 拒绝（`Cannot upload assets to an immutable release`）；删除重建又被 `tag_name was used by an immutable release` 拒绝（422），tag 名被永久占用。`v0.5.2` 的资产（`917f8732…`/312,641 B）能下载，但 oracle 语料里仍是旧版本串 | 只以 `v0.5.3` 为可引用归档；发布顺序固化为 draft → 上传 → 匿名下载复算哈希 → publish；改号后必须固定 `SOURCE_DATE_EPOCH=1794700800` 重 emit oracle，否则 CI 的 `test_oracle_reproducible` 会红 |
 
 ## 怎么核对这一页
 

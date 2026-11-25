@@ -1,0 +1,109 @@
+name: 'uibc verify'
+description: 'Verify a UIBC evidence package and return its three-valued verdict (PASS / FAIL / INCONCLUSIVE). No repository, no account, no key required.'
+author: 'Xinghua Zhao'
+branding:
+  icon: 'shield'
+  color: 'blue'
+
+# Why this exists: until now an outsider had to clone the repository to run the
+# verifier (or click a workflow inside our own repo, which is not an outside run).
+# A composite action installs the verifier from the very commit the caller pinned
+# and runs it against a package the caller supplies, so the whole interface is one
+# line in someone else's workflow.
+#
+# Verdicts, not exit codes: the CLI exits 0 for PASS and 1 for everything else, so
+# the process status cannot tell FAIL from INCONCLUSIVE. This action reads the
+# verifier's own JSON and reports the three-valued result; the exit code stays
+# fail-closed (anything but PASS is non-zero).
+
+inputs:
+  path:
+    description: 'Path to the package directory to verify (relative to the caller workspace).'
+    required: true
+  strict:
+    description: 'true to fail any file under evidence/ the index never declared.'
+    required: false
+    default: 'false'
+  pubkey:
+    description: 'Optional hex Ed25519 public key file to pin the seal (S6). Empty = read the key out of the package.'
+    required: false
+    default: ''
+  extra_args:
+    description: 'Optional extra verifier flags, e.g. "--expect-head <head>" or "--state-file state.json".'
+    required: false
+    default: ''
+
+outputs:
+  verdict:
+    description: 'PASS / FAIL / INCONCLUSIVE, read from the verifier JSON.'
+  exit_code:
+    description: '0 PASS · 2 FAIL · 3 INCONCLUSIVE · 4 could not run.'
+  report:
+    description: 'Path to the verifier JSON report, kept in the run workspace.'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v7.1.0
+      with:
+        python-version: '3.12'
+
+    - name: Install the verifier from the pinned commit
+      shell: bash
+      # ${{ github.action_path }} is the action's own checkout, i.e. exactly the
+      # commit or tag the caller wrote in `uses:`. Installing it here is what makes
+      # the run reproducible instead of "whatever PyPI serves today".
+      run: |
+        python -m pip install --quiet --upgrade pip
+        python -m pip install --quiet "${{ github.action_path }}"
+
+    - name: Verify
+      id: v
+      shell: bash
+      run: |
+        set +e
+        args=("${{ inputs.path }}")
+        if [ "${{ inputs.strict }}" = "true" ]; then args+=(--strict); fi
+        if [ -n "${{ inputs.pubkey }}" ]; then args+=(--pubkey "${{ inputs.pubkey }}"); fi
+        if [ -n "${{ inputs.extra_args }}" ]; then
+          # shellcheck disable=SC2206
+          args+=(${{ inputs.extra_args }})
+        fi
+        out="$RUNNER_TEMP/uibc-report.json"
+        uibc verify "${args[@]}" > "$out" 2>"$RUNNER_TEMP/uibc-stderr.txt"
+        cli_rc=$?
+        echo "report=$out" >> "$GITHUB_OUTPUT"
+
+        if [ ! -s "$out" ]; then
+          echo "verdict=UNDECIDABLE" >> "$GITHUB_OUTPUT"
+          echo "exit_code=4" >> "$GITHUB_OUTPUT"
+          echo "::error::the verifier produced no report (rc=$cli_rc); stderr follows"
+          cat "$RUNNER_TEMP/uibc-stderr.txt"
+          exit 4
+        fi
+
+        verdict=$(python -c "import json,sys;print(json.load(open(sys.argv[1],encoding='utf-8')).get('result','UNDECIDABLE'))" "$out")
+        case "$verdict" in
+          PASS)         code=0 ;;
+          FAIL)         code=2 ;;
+          INCONCLUSIVE) code=3 ;;
+          *)            code=4 ;;
+        esac
+        echo "verdict=$verdict" >> "$GITHUB_OUTPUT"
+        echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+
+        echo "verdict: $verdict (cli rc=$cli_rc, action exit=$code)"
+        python - <<'PY' "$out"
+        import json, sys
+        r = json.load(open(sys.argv[1], encoding="utf-8"))
+        print("subject:", r.get("subject"))
+        print("verifier:", r.get("verifier_id"), r.get("verifier_version"), "| spec:", r.get("spec_id"))
+        for c in r.get("checks", []):
+            print("  %-4s %-9s %s" % (c.get("id"), c.get("result"), c.get("detail", "")[:110]))
+        print("statement:", r.get("statement"))
+        PY
+
+        # Fail-closed: only PASS is green. An outside gate that cannot tell why it
+        # went red is measuring the wrong thing, so the reason is in the log above.
+        exit "$code"

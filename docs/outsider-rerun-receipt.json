@@ -1,9 +1,9 @@
 {
- "generated_at": "2026-11-25T19:38:14Z",
- "tree_sha256": "f35bd3bd33701c5fe9fb33269a9ac6a5b03e6482627f911d5e9634969fec73fa",
- "files_hashed": 2426,
- "content_sha256": "a14ff1bbbc68f112b9fba12915b4221074e2b9aaad4e12378bd4fd492d03b38c",
- "content_files": 2426,
+ "generated_at": "2026-11-25T20:06:04Z",
+ "tree_sha256": "08e4fd6a23464782f1acf78b9c637497d300267b55c6ec940d96bb43088863a5",
+ "files_hashed": 2430,
+ "content_sha256": "41b8d1ef46746ccb3b49429ba5f5a6c19a42321dcaa354ea79333031e71ea6ae",
+ "content_files": 2430,
  "digest_excludes": [
   "docs/OUTSIDER-RERUN.md",
   "docs/outsider-rerun-receipt.json"
@@ -37,7 +37,7 @@
    "rc": 0,
    "expect": "GATE OK",
    "ok": true,
-   "seconds": 0.3,
+   "seconds": 0.4,
    "tail": "GATE OK"
   },
   {
@@ -64,8 +64,8 @@
    "rc": 0,
    "expect": "passed",
    "ok": true,
-   "seconds": 2.6,
-   "tail": "12 passed in 1.99s"
+   "seconds": 2.7,
+   "tail": "12 passed in 1.90s"
   }
  ],
  "ok": true

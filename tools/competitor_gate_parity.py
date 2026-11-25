@@ -280,6 +280,8 @@ python tools/competitor_gate_parity.py --json                    # 机读
 
 ## 八、引用
 
+每条引用都是 `github.com/<repo>/tree/<sha>` 固定入口。**这些链接不是"看起来能点"就算**：`tools/refs_check.py --run` 逐条实测状态码，结果见 `docs/REFS-DIRECT.md`（当前实测 0 条死链，若干条被上游改名后 301 到新仓）。
+
 """
     for row in repos:
         body += f"- `{row['repo']}` @ `{row['sha'][:12]}`：https://github.com/{row['repo']}/tree/{row['sha']}\n"

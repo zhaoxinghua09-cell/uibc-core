@@ -1,0 +1,42 @@
+name: Case record schema
+
+# A schema nobody runs is a document. This job runs it on every push, and then
+# runs the validator against four deliberately broken records — because a checker
+# that accepts everything passes every suite put in front of it.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  records:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Set up Python
+        uses: actions/setup-python@v7.1.0
+        with:
+          python-version: "3.12"
+
+      - name: Install the validator's dependency
+        run: python -m pip install --quiet jsonschema
+
+      - name: Every record in the suite validates
+        run: python tools/validate_case_records.py
+
+      - name: The validator can fail
+        # Four broken records in, four rejections out. If this step ever reports
+        # ACCEPTED, the previous step means nothing.
+        run: python tools/validate_case_records.py --self-test
+
+      - name: The sealed conformance tree still matches its manifest
+        # The schema lives in schemas/, not conformance/, on purpose: adding a
+        # file to conformance/ changes released bytes. This step keeps that true.
+        run: |
+          python -m pip install --quiet pytest
+          python -m pytest -q tests/test_conformance_package.py

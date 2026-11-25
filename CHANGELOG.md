@@ -1,3 +1,13 @@
+## 未发布 — 2026-11-26（真装真跑 + 301 落到新名 + D3 区间进正表）
+
+- **真装真跑（`tools/parity_realrun.py`）**：把 `did-jwt`@`63663c1f` 和 `ethr-did-resolver`@`6e0bd477` 装到 `D:\realrun` 跑它们自己的套件。
+  - `did-jwt`：16 文件 / **506 用例全过** / 4.22 s / exit 0。额外探针 `pnpm run canary` 退出 1，原因是 `canary/unpack.mjs` 用 `new URL(import.meta.url).pathname`，在 Windows 上把路径算成 `D:\D:\realrun\did-jwt`——是脚本的 POSIX-only 缺陷，不是它的三层一致性不存在。
+  - `ethr-did-resolver`：19 文件 / 182 用例，**178 过 / 1 红 / 3 跳过** / 19.51 s / exit 1。红的那条是 `resolves on mainnet with versionId`，与实时主网状态深比较不一致，网络/链状态相关。原样 `pnpm -r test` 在 Windows 上直接失败（脚本写成 `HARDHAT_CONFIG=... vitest run`），设环境变量后才是上面这份结果。
+  - **纪律**：实跑记录 `docs/competitor-realrun.json` 里 `affects_score` 全为 false，`score_impact.changed_scores=0`；`--check` 有一个用例专门拒绝"声称改分"的记录。绿不等于本表的任何一维——它量的是"有没有可复算的变异证据"。
+- **301 必须落到新名（`tools/refs_check.py`）**：被 301 的引用不再只记一条 WARN。现在会解析 `Location`、用**同一个 sha** 去新仓再打一次：6 条全部 200（`hyperledger-aries/…`、`hyperledger-indy/…`、`openwallet-foundation/acapy`、`w3c-ccg/did-key-spec`、`decentralized-identity/sidetree`）。新名下的 sha 打不到 404 时 `--check` 红——"改名"只有在同一内容还能打开时才是无害的。
+- **D3 区间进正表**：`COMPETITOR-GATE-PARITY.md` 的结论行现在同时写两端（"严规则后最好的一家仍是 3/10，本仓库 10/10"），数字从 `docs/parity-d3-bracket.json` 读，不手写；区间记录里补了 `ours_broad/ours_strict`（由 `score_ours()` 现算，不是写死 10），并加了"本仓行必须与快照一致"的失败条件。
+- 测试：`tests/test_parity_realrun.py` 五条（固定 commit 一致、计数与退出码自洽、不许改分、页面必须自述、`--check` 拒绝改分记录）；`tests/test_refs_check.py` 加两条（301 必须在新名下活着、落到 404 必须红）。外人重跑收据的测试清单已并入 `test_parity_realrun.py`。
+
 ## 未发布 — 2026-11-26（外人打开一屏就够，而且这一屏会自己算一遍）
 
 - **问题**：十道门都在仓库里，但一个陌生人拿到仓之后，第一眼看到的是 README 和一堆 Markdown。数字散在收据、页面、测试里，他无法在一屏里看到"我拿到的是什么、能用什么核"。

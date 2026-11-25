@@ -1,10 +1,10 @@
 {
- "generated_at": "2026-11-25T23:08:01Z",
- "tree_sha256": "02754ac6123a317252727a640014cd9148a7edf399dd14b469021d51b667c15e",
- "files_hashed": 2453,
- "content_sha256": "30c548614ace9637f3c2510676728aa5d577abb2c4e086e8a059a743d0ec256d",
- "content_files": 2453,
- "content_lf_sha256": "b2601ad04ae21309dd401620610c0d4f478876266cef2702dbd2659b39fd5e32",
+ "generated_at": "2026-11-25T23:26:54Z",
+ "tree_sha256": "71da66032f180785e3cfacbfb0f25e42c50fbedc0e8d992998fdd96b2884e814",
+ "files_hashed": 2457,
+ "content_sha256": "545c82f8f70fdcd82e7e690b161bec07b7dcc1d2c74c7eff5763b562acf293e3",
+ "content_files": 2457,
+ "content_lf_sha256": "4483750c1ad3f2cb289cfd260747571add89edf127d5227cb06cf21957104ef4",
  "delivery": "archive",
  "digest_excludes": [
   "docs/OUTSIDER-BOARD.html",
@@ -63,12 +63,12 @@
   },
   {
    "step": "tests",
-   "cmd": "-m pytest tests/test_mutation_gate.py tests/test_competitor_parity.py tests/test_parity_board.py tests/test_refs_check.py tests/test_parity_sensitivity.py tests/test_parity_audit.py -q",
+   "cmd": "-m pytest tests/test_mutation_gate.py tests/test_competitor_parity.py tests/test_parity_board.py tests/test_refs_check.py tests/test_parity_sensitivity.py tests/test_parity_audit.py tests/test_parity_realrun.py -q",
    "rc": 0,
    "expect": "passed",
    "ok": true,
    "seconds": 3.6,
-   "tail": "34 passed in 2.84s"
+   "tail": "41 passed in 2.98s"
   }
  ],
  "ok": true

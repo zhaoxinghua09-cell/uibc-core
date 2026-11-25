@@ -64,7 +64,7 @@ STEPS = (
     ("tests", [sys.executable, "-m", "pytest", "tests/test_mutation_gate.py",
                "tests/test_competitor_parity.py", "tests/test_parity_board.py",
                "tests/test_refs_check.py", "tests/test_parity_sensitivity.py",
-               "tests/test_parity_audit.py", "-q"], "passed"),
+               "tests/test_parity_audit.py", "tests/test_parity_realrun.py", "-q"], "passed"),
 )
 
 ENV_KEEP = ("PATH", "SYSTEMROOT", "SYSTEMDRIVE", "WINDIR", "TEMP", "TMP", "HOME",

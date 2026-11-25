@@ -27,7 +27,11 @@ receipt of this tree; the gates are the ten checks that a stranger can run.</p>
 <tr><td>content_lf_sha256 (content, CRLF folded)</td><td class="num" id="v-lf"></td></tr>
 </table>
 <p class="hint">Three digests, because one number cannot say why it moved: a mangled
-name, a different delivery channel, or a real edit.</p>
+name, a different delivery channel, or a real edit. The count above is the one the
+receipt recorded on the channel that wrote it; a checkout of the same commit can
+name one or two files fewer when an archive turns a symlink into a plain file, which
+is why <code>--check</code> trusts the digest and only asks the count as a second
+opinion.</p>
 
 <h2>The four steps it reruns</h3>
 <table><tr><th>step</th><th>exit</th><th>result</th></tr><tr><td><code>gate</code></td><td>0</td><td>ok</td></tr><tr><td><code>parity</code></td><td>0</td><td>ok</td></tr><tr><td><code>demo</code></td><td>0</td><td>ok</td></tr><tr><td><code>tests</code></td><td>0</td><td>ok</td></tr></table>
@@ -44,10 +48,10 @@ ships in the repository.</p>
 
 <script id="snap" type="application/json">
 {
- "generated_at": "2026-11-25T22:58:32Z",
- "tree_sha256": "ce6627e429e62038ce04c41d1a66143c877ef5adb8ae2b03e433b3186ba1a4ef",
- "content_sha256": "76bf62bbb2212ee659574fe0c17b753d5e068d0ca97d20cbcc57e3c026426a9c",
- "content_lf_sha256": "f25d6c7a3d439a7ae4bf0d0afd7cf2b67d43b65019a7625b792f485cfbe9cd5c",
+ "generated_at": "2026-11-25T23:08:01Z",
+ "tree_sha256": "02754ac6123a317252727a640014cd9148a7edf399dd14b469021d51b667c15e",
+ "content_sha256": "30c548614ace9637f3c2510676728aa5d577abb2c4e086e8a059a743d0ec256d",
+ "content_lf_sha256": "b2601ad04ae21309dd401620610c0d4f478876266cef2702dbd2659b39fd5e32",
  "delivery": "archive",
  "files_hashed": 2453,
  "steps": [

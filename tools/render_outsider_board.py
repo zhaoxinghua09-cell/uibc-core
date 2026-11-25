@@ -106,7 +106,11 @@ receipt of this tree; the gates are the ten checks that a stranger can run.</p>
 <tr><td>content_lf_sha256 (content, CRLF folded)</td><td class="num" id="v-lf"></td></tr>
 </table>
 <p class="hint">Three digests, because one number cannot say why it moved: a mangled
-name, a different delivery channel, or a real edit.</p>
+name, a different delivery channel, or a real edit. The count above is the one the
+receipt recorded on the channel that wrote it; a checkout of the same commit can
+name one or two files fewer when an archive turns a symlink into a plain file, which
+is why <code>--check</code> trusts the digest and only asks the count as a second
+opinion.</p>
 
 <h2>The four steps it reruns</h3>
 <table><tr><th>step</th><th>exit</th><th>result</th></tr>{steps}</table>

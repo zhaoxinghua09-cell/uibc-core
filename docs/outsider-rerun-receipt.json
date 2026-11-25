@@ -1,10 +1,10 @@
 {
- "generated_at": "2026-11-25T22:58:32Z",
- "tree_sha256": "ce6627e429e62038ce04c41d1a66143c877ef5adb8ae2b03e433b3186ba1a4ef",
+ "generated_at": "2026-11-25T23:08:01Z",
+ "tree_sha256": "02754ac6123a317252727a640014cd9148a7edf399dd14b469021d51b667c15e",
  "files_hashed": 2453,
- "content_sha256": "76bf62bbb2212ee659574fe0c17b753d5e068d0ca97d20cbcc57e3c026426a9c",
+ "content_sha256": "30c548614ace9637f3c2510676728aa5d577abb2c4e086e8a059a743d0ec256d",
  "content_files": 2453,
- "content_lf_sha256": "f25d6c7a3d439a7ae4bf0d0afd7cf2b67d43b65019a7625b792f485cfbe9cd5c",
+ "content_lf_sha256": "b2601ad04ae21309dd401620610c0d4f478876266cef2702dbd2659b39fd5e32",
  "delivery": "archive",
  "digest_excludes": [
   "docs/OUTSIDER-BOARD.html",
@@ -58,7 +58,7 @@
    "rc": 0,
    "expect": "ALL OK",
    "ok": true,
-   "seconds": 0.3,
+   "seconds": 0.2,
    "tail": "ALL OK"
   },
   {
@@ -67,8 +67,8 @@
    "rc": 0,
    "expect": "passed",
    "ok": true,
-   "seconds": 3.5,
-   "tail": "34 passed in 2.76s"
+   "seconds": 3.6,
+   "tail": "34 passed in 2.84s"
   }
  ],
  "ok": true

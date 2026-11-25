@@ -127,10 +127,30 @@ RESOLUTION_PROTOCOLS = {0: "UDP", 1: "TCP", 2: "HTTP", 3: "HTTPS"}
 _HEX_RE = re.compile(r"^[0-9a-fA-F]*$")
 _ISO_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$")
 
-# BID public keys are carried as hex. Implementations in the wild prefix an
-# Ed25519 key with the BIF algorithm byte 0xb0 (b06566... in the protocol's own
-# §5.4.1 example is b0 + 32 bytes of key material), so both widths are legal.
-_ED25519_HEX_LEN = {64, 66}
+# BID public keys are carried as hex with a BIF algorithm prefix. Three widths
+# occur in the wild, and the widest one is the normal case:
+#
+#   * 35 bytes `b0 65 66 || key` - what the official SDK emits and what the
+#     protocol's own §5.4.1 example shows (`b06566f76733ae...`). The trailing
+#     bytes 0x65/0x66 are the BID's own "ef" marker, not key material.
+#   * 33 bytes `b0 || key` - Ed25519 with just the algorithm byte.
+#   * 32 bytes `key`      - bare key material.
+#
+# The 35-byte form was found by asking the official SDK (`bid-sdk-nodejs` 1.0.1)
+# to derive a key from a fixed seed: it answered `b06566` + the same 32 bytes we
+# derived ourselves. Before that we only knew the 1-byte prefix, and would have
+# refused every real document. See tests/test_bid_address_rule.py.
+_KEY_PREFIXES = (b"\xb0\x65\x66", b"\xb0")
+_ED25519_HEX_LEN = {64, 66, 70}
+
+
+def strip_key_prefix(hexed: str):
+    """(key material 32 bytes, the prefix that was removed as text)."""
+    raw = bytes.fromhex(hexed)
+    for prefix in _KEY_PREFIXES:
+        if raw.startswith(prefix):
+            return raw[len(prefix):], prefix.hex()
+    return raw, ""
 
 
 def _is_hex(value: str) -> bool:
@@ -340,7 +360,7 @@ def parse_bid_document(doc: Any, did: str) -> BIDDocument:
             raise BIDDocumentError("%s: publicKeyHex is not hex: %r" % (did, str(hexed)[:16]))
         elif len(str(hexed)) not in _ED25519_HEX_LEN and str(entry.get("type", "")).upper() == "ED25519":
             parsed.warnings.append(
-                "publicKey %s: Ed25519 key is %d hex chars, expected 64 (bare) or 66 (0xb0-prefixed)"
+                "publicKey %s: Ed25519 key is %d hex chars; the real forms are 64 (bare), 66 (b0-prefixed) or 70 (b06566-prefixed)"
                 % (key_id, len(str(hexed))))
     parsed.public_key = keys
 
@@ -486,17 +506,17 @@ def verify_bid_document(doc: Any, did: Optional[str] = None) -> Tuple[bool, str]
     if not hexed:
         return False, "publicKey %r has no publicKeyHex to verify against" % (key.get("id"),)
     raw = bytes.fromhex(hexed)
-    if len(raw) == 33 and raw[0] == 0xB0:      # BIF algorithm-byte prefix
-        raw = raw[1:]
-    if len(raw) != 32:
-        return False, "only Ed25519 (32-byte) keys are verifiable here, got %d bytes" % (len(raw),)
+    key_material, prefix = strip_key_prefix(hexed)
+    if len(key_material) != 32:
+        return False, ("only Ed25519 (32-byte) keys are verifiable here, got %d bytes after a %r prefix"
+                       % (len(key_material), prefix))
     try:
         sig = base58_decode(parsed.proof["signatureValue"])
     except BIDDocumentError as exc:
         return False, str(exc)
     if len(sig) != 64:
         return False, "signatureValue decodes to %d bytes, expected 64" % (len(sig),)
-    if ed_verify(raw, signing_bytes(doc), sig):
+    if ed_verify(key_material, signing_bytes(doc), sig):
         return True, "ok"
     return False, "signature does not verify over the JCS form of the document"
 
@@ -510,6 +530,19 @@ def generate_ed25519_pair() -> Tuple[bytes, str]:
 
 
 # --------------------------------------------------- resolution / §4.2.3 chain
+def default_fetcher(url, timeout=10):
+    """Minimal GET as JSON. Callers that need auth or proxies inject their own."""
+    import urllib.request
+
+    request = urllib.request.Request(
+        url,
+        headers={"Accept": "application/json", "User-Agent": "uibc-core-bid-protocol/0.1"},
+        method="GET",
+    )
+    with urllib.request.urlopen(request, timeout=timeout) as response:  # nosec B310
+        return json.loads(response.read().decode("utf-8"))
+
+
 def resolve_bid(endpoint: str, did: str, fetcher: Optional[Callable[..., Any]] = None,
                 timeout: int = 10, retries: int = 2) -> BIDDocument:
     """One §4.2.1 read, with the documented transient codes retried.
@@ -517,18 +550,7 @@ def resolve_bid(endpoint: str, did: str, fetcher: Optional[Callable[..., Any]] =
     Codes 3 ("server too busy") and 7 ("server not response") are the only two
     a second attempt can fix; everything else is returned to the caller as-is.
     """
-    import urllib.request
-
-    if fetcher is None:
-        def fetcher(url, timeout=10, method="GET", payload=None, headers=None):  # noqa: ARG001
-            request = urllib.request.Request(
-                url,
-                headers={"Accept": "application/json",
-                         "User-Agent": "uibc-core-bid-protocol/0.1"},
-                method="GET",
-            )
-            with urllib.request.urlopen(request, timeout=timeout) as response:  # nosec B310
-                return json.loads(response.read().decode("utf-8"))
+    fetcher = fetcher or default_fetcher
 
     url = "%s/%s" % (endpoint.rstrip("/"), did)
     attempt = 0
@@ -579,6 +601,162 @@ def resolve_bid_chain(endpoint: str, did: str, fetcher: Optional[Callable[..., A
         seen_endpoints.add(target.rstrip("/"))
         hops += 1
         current_doc = resolve_bid(target, did, fetcher=fetcher)
+
+
+# --------------------------------------------- §4.2.2 field-level resolution
+#
+# The protocol gives five field endpoints under the same document. Each answers
+# with `data.version` ("1.0.0" in this version), `data.id` (the BID asked about),
+# and one field. Two of them change shape depending on whether you asked for all
+# of something or one of it - `public-keys` returns an array, and
+# `public-keys/{id}` returns a single object. That asymmetry is the protocol's,
+# not a mistake here; a caller that assumes "always a list" gets it wrong.
+PROTOCOL_VERSION = "1.0.0"
+
+
+def _field_answer(url: str, did: str, fetcher, timeout: int, retries: int) -> Dict[str, Any]:
+    """GET a §4.2.2 endpoint, apply the §4.2.5 codes, return the `data` object."""
+    attempt = 0
+    while True:
+        try:
+            payload = fetcher(url, timeout=timeout)
+        except Exception as exc:
+            if attempt >= retries:
+                raise BIDResponseError(7, str(exc), did) from None
+            attempt += 1
+            continue
+        if not isinstance(payload, dict):
+            raise BIDDocumentError("%s: field answer is %s, not an object"
+                                   % (did, type(payload).__name__))
+        code = payload.get("errorCode", 0)
+        if isinstance(code, bool) or not isinstance(code, int):
+            raise BIDResponseError(-1, "errorCode is not an integer: %r" % (code,), did)
+        if code != 0:
+            if BID_RESPONSE_CODES.get(code, ("", ""))[1] == "transient" and attempt < retries:
+                attempt += 1
+                continue
+            raise BIDResponseError(code, payload.get("message", ""), did)
+        data = payload.get("data")
+        if not isinstance(data, dict):
+            raise BIDDocumentError("%s: field answer carries no data object" % (did,))
+        if data.get("id") != did:
+            raise BIDDocumentError("%s: field answer is about %r" % (did, data.get("id")))
+        version = data.get("version")
+        if version is not None and not isinstance(version, str):
+            raise BIDDocumentError("%s: data.version is not a string: %r" % (did, version))
+        return data
+
+
+def _validate_public_key(entry: Any, did: str) -> Dict[str, Any]:
+    """One §3 publicKey entry, same rules whether it arrived in a document or alone."""
+    if not isinstance(entry, dict):
+        raise BIDDocumentError("%s: publicKey entry is not an object" % (did,))
+    key_id = entry.get("id")
+    if not isinstance(key_id, str) or "#" not in key_id:
+        raise BIDDocumentError("%s: publicKey.id must be a #key id, got %r" % (did, key_id))
+    if not key_id.startswith(did + "#"):
+        raise BIDDocumentError("%s: publicKey.id %r does not belong to this BID" % (did, key_id))
+    controller = entry.get("controller")
+    if controller is not None and not str(controller).startswith("did:bid:"):
+        raise BIDDocumentError("%s: publicKey.controller %r is not a BID" % (did, controller))
+    hexed = entry.get("publicKeyHex")
+    if hexed is not None and not _is_hex(str(hexed)):
+        raise BIDDocumentError("%s: publicKeyHex is not hex: %r" % (did, str(hexed)[:16]))
+    return entry
+
+
+def resolve_public_keys(endpoint: str, did: str, key_id: Optional[str] = None,
+                        fetcher: Optional[Callable[..., Any]] = None,
+                        timeout: int = 10, retries: int = 2):
+    """§4.2.2.1: all keys (a list) or one key (an object)."""
+    from urllib.parse import quote
+
+    fetcher = fetcher or default_fetcher
+    if key_id is None:
+        data = _field_answer("%s/%s/public-keys" % (endpoint.rstrip("/"), did),
+                             did, fetcher, timeout, retries)
+        keys = data.get("publicKey")
+        if not isinstance(keys, list):
+            raise BIDDocumentError("%s: public-keys answer should be a list, got %s"
+                                   % (did, type(keys).__name__))
+        return [_validate_public_key(entry, did) for entry in keys]
+    data = _field_answer("%s/%s/public-keys/%s" % (endpoint.rstrip("/"), did, quote(key_id, safe="")),
+                         did, fetcher, timeout, retries)
+    key = data.get("publicKey")
+    if isinstance(key, list):
+        raise BIDDocumentError("%s: single-key answer should be an object, got a list" % (did,))
+    return _validate_public_key(key, did)
+
+
+def resolve_attributes(endpoint: str, did: str, fetcher: Optional[Callable[..., Any]] = None,
+                       timeout: int = 10, retries: int = 2) -> List[Dict[str, Any]]:
+    """§4.2.2.2: the attribute list."""
+    fetcher = fetcher or default_fetcher
+    data = _field_answer("%s/%s/attributes" % (endpoint.rstrip("/"), did), did, fetcher, timeout, retries)
+    attrs = data.get("attributes")
+    if not isinstance(attrs, list):
+        raise BIDDocumentError("%s: attributes answer should be a list" % (did,))
+    for attr in attrs:
+        if not isinstance(attr, dict) or "key" not in attr:
+            raise BIDDocumentError("%s: attribute entries need key" % (did,))
+        if attr.get("encrypt", 0) not in (0, 1):
+            raise BIDDocumentError("%s: attribute.encrypt must be 0 or 1" % (did,))
+    return attrs
+
+
+def resolve_acsns(endpoint: str, did: str, fetcher: Optional[Callable[..., Any]] = None,
+                  timeout: int = 10, retries: int = 2) -> List[str]:
+    """§4.2.2.3: AC codes. The protocol says a main-chain resolver must offer this."""
+    fetcher = fetcher or default_fetcher
+    data = _field_answer("%s/%s/acsns" % (endpoint.rstrip("/"), did), did, fetcher, timeout, retries)
+    codes = data.get("acsns")
+    if not isinstance(codes, list):
+        raise BIDDocumentError("%s: acsns answer should be a list" % (did,))
+    for code in codes:
+        if not isinstance(code, str) or len(code) != 4:
+            raise BIDDocumentError("%s: AC code %r is not four characters" % (did, code))
+    return codes
+
+
+def resolve_credentials(endpoint: str, did: str, fetcher: Optional[Callable[..., Any]] = None,
+                        timeout: int = 10, retries: int = 2) -> List[Dict[str, Any]]:
+    """§4.2.2.4: the credential list."""
+    fetcher = fetcher or default_fetcher
+    data = _field_answer("%s/%s/verifiableCredentials" % (endpoint.rstrip("/"), did),
+                         did, fetcher, timeout, retries)
+    creds = data.get("verifiableCredentials")
+    if not isinstance(creds, list):
+        raise BIDDocumentError("%s: verifiableCredentials answer should be a list" % (did,))
+    for cred in creds:
+        if not isinstance(cred, dict) or not isinstance(cred.get("id"), str):
+            raise BIDDocumentError("%s: credential entries need a string id" % (did,))
+    return creds
+
+
+def resolve_service(endpoint: str, did: str, service_id: str,
+                    fetcher: Optional[Callable[..., Any]] = None,
+                    timeout: int = 10, retries: int = 2) -> Dict[str, Any]:
+    """§4.2.2.5: one service address by id.
+
+    The document prints the query with a full-width "？"; the wire form is a
+    normal "?", which is what is sent here.
+    """
+    from urllib.parse import quote
+
+    fetcher = fetcher or default_fetcher
+    data = _field_answer("%s/%s/services?id=%s" % (endpoint.rstrip("/"), did, quote(service_id, safe="")),
+                         did, fetcher, timeout, retries)
+    service = data.get("service")
+    if not isinstance(service, dict):
+        raise BIDDocumentError("%s: services answer should be one object, got %s"
+                               % (did, type(service).__name__))
+    if service.get("id") != service_id:
+        raise BIDDocumentError("%s: asked for service %r, got %r" % (did, service_id, service.get("id")))
+    if service.get("type") not in SERVICE_TYPES:
+        raise BIDDocumentError("%s: service type %r is not in appendix 1" % (did, service.get("type")))
+    if not service.get("serviceEndpoint"):
+        raise BIDDocumentError("%s: service %r has no serviceEndpoint" % (did, service_id))
+    return service
 
 
 def refuse_binary_resolution(did: str) -> None:

@@ -41,7 +41,8 @@ PAGE = os.path.join(HERE, "docs", "OUTSIDER-RERUN.md")
 GENERATED = {"docs/outsider-rerun-receipt.json", "docs/OUTSIDER-RERUN.md"}
 
 IGNORE = (".git", "__pycache__", ".pytest_cache", ".mypy_cache", ".ruff_cache",
-          "node_modules", ".venv", "venv", "dist", "build", "*.pyc", "*.pyo")
+          "node_modules", ".venv", "venv", "htmlcov", ".tox", ".nox",
+          "*.pyc", "*.pyo", "*.egg-info")
 
 STEPS = (
     ("gate", [sys.executable, "tools/mutation_gate.py"], "GATE OK"),
@@ -75,8 +76,7 @@ def tracked_files(root):
     for dirpath, dirnames, filenames in os.walk(root):
         dirnames[:] = sorted(d for d in dirnames if d not in
                              {".git", "__pycache__", ".pytest_cache", ".mypy_cache",
-                              ".ruff_cache", "node_modules", ".venv", "venv", "dist", "build",
-                              "htmlcov", ".tox", ".nox"})
+                              ".ruff_cache", "node_modules", ".venv", "venv", "htmlcov", ".tox", ".nox"})
         for fn in sorted(filenames):
             if fn.endswith((".pyc", ".pyo")) or fn in (".coverage", "coverage.xml"):
                 continue

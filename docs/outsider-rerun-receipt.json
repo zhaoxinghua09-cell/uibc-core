@@ -1,7 +1,7 @@
 {
- "generated_at": "2026-11-25T16:24:33Z",
- "tree_sha256": "a3d6b1818d8a478cf69ddf97ca09f95299324fb10a5b965029e95379fa2b0697",
- "files_hashed": 2244,
+ "generated_at": "2026-11-25T16:30:51Z",
+ "tree_sha256": "92acf3a9ccccc1c14cf712ac6803c52b5d2f3b044bfd0a5bc7550503ce58cb33",
+ "files_hashed": 2248,
  "digest_excludes": [
   "docs/OUTSIDER-RERUN.md",
   "docs/outsider-rerun-receipt.json"
@@ -44,7 +44,7 @@
    "rc": 0,
    "expect": "PARITY OK",
    "ok": true,
-   "seconds": 0.5,
+   "seconds": 0.4,
    "tail": "PARITY OK: 17 repositories pinned and re-scored, best competitor 3/10, this repository 10/10"
   },
   {
@@ -62,8 +62,8 @@
    "rc": 0,
    "expect": "passed",
    "ok": true,
-   "seconds": 2.7,
-   "tail": "10 passed in 1.94s"
+   "seconds": 2.8,
+   "tail": "10 passed in 1.92s"
   }
  ],
  "ok": true

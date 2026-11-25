@@ -1,0 +1,218 @@
+{
+  "summary": {
+    "mutants": 12,
+    "killed": 11,
+    "attributed": 8,
+    "survivors": [
+      "index-extra-field"
+    ],
+    "misattributed": [
+      "index-type",
+      "manifest-count",
+      "lifecycle-drop"
+    ],
+    "errors": [],
+    "as_of": "2026-11-25",
+    "source": "conformance/oracle/cases/oracle-clean"
+  },
+  "rows": [
+    {
+      "mutation": "evidence-byte",
+      "intended": "S4",
+      "verdict": "FAIL",
+      "failing": [
+        "S4",
+        "S8"
+      ],
+      "inconclusive": [
+        "S5"
+      ],
+      "killed": true,
+      "attributed": true,
+      "caught_by": [
+        "S4",
+        "S8"
+      ],
+      "unsupported": []
+    },
+    {
+      "mutation": "index-hash",
+      "intended": "S4",
+      "verdict": "FAIL",
+      "failing": [
+        "S4"
+      ],
+      "inconclusive": [
+        "S5"
+      ],
+      "killed": true,
+      "attributed": true,
+      "caught_by": [
+        "S4"
+      ],
+      "unsupported": []
+    },
+    {
+      "mutation": "index-type",
+      "intended": "S4",
+      "verdict": "FAIL",
+      "failing": [
+        "S7",
+        "S8"
+      ],
+      "inconclusive": [
+        "S4"
+      ],
+      "killed": true,
+      "attributed": false,
+      "caught_by": [
+        "S7",
+        "S8"
+      ],
+      "unsupported": []
+    },
+    {
+      "mutation": "index-duplicate",
+      "intended": "S12",
+      "verdict": "FAIL",
+      "failing": [
+        "S12",
+        "S7",
+        "S8",
+        "S5"
+      ],
+      "inconclusive": [],
+      "killed": true,
+      "attributed": true,
+      "caught_by": [
+        "S12",
+        "S7",
+        "S8",
+        "S5"
+      ],
+      "unsupported": []
+    },
+    {
+      "mutation": "manifest-count",
+      "intended": "S5",
+      "verdict": "FAIL",
+      "failing": [
+        "S12"
+      ],
+      "inconclusive": [],
+      "killed": true,
+      "attributed": false,
+      "caught_by": [
+        "S12"
+      ],
+      "unsupported": []
+    },
+    {
+      "mutation": "manifest-agent",
+      "intended": "S2",
+      "verdict": "FAIL",
+      "failing": [
+        "S2"
+      ],
+      "inconclusive": [],
+      "killed": true,
+      "attributed": true,
+      "caught_by": [
+        "S2"
+      ],
+      "unsupported": []
+    },
+    {
+      "mutation": "manifest-root",
+      "intended": "S5",
+      "verdict": "FAIL",
+      "failing": [
+        "S5"
+      ],
+      "inconclusive": [],
+      "killed": true,
+      "attributed": true,
+      "caught_by": [
+        "S5"
+      ],
+      "unsupported": []
+    },
+    {
+      "mutation": "extra-root-file",
+      "intended": "S1",
+      "verdict": "FAIL",
+      "failing": [
+        "S1"
+      ],
+      "inconclusive": [],
+      "killed": true,
+      "attributed": true,
+      "caught_by": [
+        "S1"
+      ],
+      "unsupported": []
+    },
+    {
+      "mutation": "evidence-removed",
+      "intended": "S4",
+      "verdict": "FAIL",
+      "failing": [
+        "S4",
+        "S8"
+      ],
+      "inconclusive": [
+        "S5"
+      ],
+      "killed": true,
+      "attributed": true,
+      "caught_by": [
+        "S4",
+        "S8"
+      ],
+      "unsupported": []
+    },
+    {
+      "mutation": "lifecycle-state",
+      "intended": "S3",
+      "verdict": "FAIL",
+      "failing": [
+        "S3",
+        "S8"
+      ],
+      "inconclusive": [],
+      "killed": true,
+      "attributed": true,
+      "caught_by": [
+        "S3",
+        "S8"
+      ],
+      "unsupported": []
+    },
+    {
+      "mutation": "lifecycle-drop",
+      "intended": "S3",
+      "verdict": "FAIL",
+      "failing": [
+        "S8"
+      ],
+      "inconclusive": [],
+      "killed": true,
+      "attributed": false,
+      "caught_by": [
+        "S8"
+      ],
+      "unsupported": []
+    },
+    {
+      "mutation": "index-extra-field",
+      "intended": "（无检查声明此约束）",
+      "verdict": "PASS",
+      "failing": [],
+      "inconclusive": [],
+      "killed": false,
+      "attributed": false,
+      "caught_by": [],
+      "unsupported": []
+    }
+  ]
+}

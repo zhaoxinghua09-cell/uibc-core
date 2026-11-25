@@ -1,0 +1,25 @@
+{
+  "kind": "uibc-attestation-v0",
+  "release": "v0.5.5",
+  "what": "These are the bytes v0.5.5 published, copied here so a reader can check the page against something that is not the page. The page was opened as a draft so an immutable release could still accept uploads, and the pin step failed on that draft (it asked /releases/tags, which answers 404 for drafts); this directory and anchors/pins/uibc-release-v0.5.5.json are the repository forms of what the page holds.",
+  "digest_file": "CORPUS-DIGESTS.txt",
+  "digest_file_sha256": "03552772c54c197b136d256877cc3cd2f6af0fa5c6cbb363d70792219ab36e19",
+  "signature": {
+    "file": "CORPUS-DIGESTS.txt.sig",
+    "kind": "uibc-detached-signature-v0",
+    "key_id": "179c615aef27cbcd"
+  },
+  "timestamp_on_the_digest": {
+    "file": "CORPUS-DIGESTS.txt",
+    "file_sha256": "03552772c54c197b136d256877cc3cd2f6af0fa5c6cbb363d70792219ab36e19",
+    "tsa": {
+      "state": "unverified here",
+      "detail": "anchor_freetsa.tsr is on the release; verify with tools/check_release_anchors.py, which needs the network"
+    },
+    "ots": {
+      "state": "copied",
+      "detail": "CORPUS-DIGESTS.txt.ots as the page serves it (670 bytes)"
+    }
+  },
+  "limits": "A signature says which key signed these bytes, not who controls that key outside this repository. The timestamp states what the token says; neither proves who published the page or that the workflow behaved."
+}

@@ -50,5 +50,8 @@
       "bytes": 327867,
       "sha256": "8df4b8c34cf46de464eee7979b8e69e264fd1e9c5b3eb3e0a3e3c51fedfdce04"
     }
+  ],
+  "excluded": [
+    "uibc-release-pin.json"
   ]
 }

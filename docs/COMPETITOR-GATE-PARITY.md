@@ -42,7 +42,7 @@
 | `uport-project/ethr-did` | 17 | 4 | 43 | 0 | 0 | 0 | 0 | 0 | 0 |
 | `w3c-ccg/did-method-key` | 4 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 | `w3c-ccg/did-test-suite` | 21 | 12 | 21 | 0 | 0 | 0 | 0 | 0 | 0 |
-| `zhaoxinghua09-cell/uibc-core` (this repository) | 1988 | 276 | 1075 | 2 | 2 | 2 | 2 | 2 | 10 |
+| `zhaoxinghua09-cell/uibc-core` (this repository) | 1992 | 277 | 1081 | 2 | 2 | 2 | 2 | 2 | 10 |
 
 D1 门槛＝测试文件内拒绝类断言 ≥10 次；D2＝位级关键词 ≥1；D3＝base58/地址派生关键词 ≥1；
 D4＝非测试代码里出现失败退出码 ≥1；D5 对 25 家一律记 0——"注入假断言要求门失败"这种用例，检索不到就当没有。
@@ -98,6 +98,8 @@ python tools/competitor_gate_parity.py --json                    # 机读
 矩阵图：`docs/COMPETITOR-GATE-PARITY.svg`（由快照生成，字节可复现）。
 
 ## 八、引用
+
+每条引用都是 `github.com/<repo>/tree/<sha>` 固定入口。**这些链接不是"看起来能点"就算**：`tools/refs_check.py --run` 逐条实测状态码，结果见 `docs/REFS-DIRECT.md`（当前实测 0 条死链，若干条被上游改名后 301 到新仓）。
 
 - `WeBankBlockchain/WeIdentity` @ `2f8e4b5a7e20`：https://github.com/WeBankBlockchain/WeIdentity/tree/2f8e4b5a7e208790af7e2697b061550c91560e98
 - `caict-4iot-dev/uni-registrar-driver-did-bid` @ `68f69ec419c0`：https://github.com/caict-4iot-dev/uni-registrar-driver-did-bid/tree/68f69ec419c0f23c1a7faf95dd8d73aeb5ff30a4

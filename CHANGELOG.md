@@ -1,3 +1,11 @@
+## 未发布 — 2026-11-26（引用逐条实测：25 条 0 死，6 条被上游改名后 301）
+
+- **问题**：表里每条引用都写成 `github.com/<repo>/tree/<sha>`，但"看起来能点"和"现在真能打开"是两件事。九门 S5 一直卡在"缺逐条 HTTP 三态"。
+- **做法**：新增 `tools/refs_check.py`，引用集合**从快照派生**（不手写清单），逐条 GET 并**禁止自动跟随重定向**（`_NoRedirect`），因此 200 / 301 / 404 / 超时四态都看得见；结果落 `docs/refs-report.json` 与 `docs/REFS-DIRECT.md`。
+- **实测（25 条竞品引用）**：200 **19** 条、301 **6** 条、**0** 条死。6 条不是死链而是**上游改名**，301 打到新仓：`decentralized-identity/sidetree-core`→`…/sidetree`、`hyperledger/aries-cloudagent-python`→`openwallet-foundation/acapy`、`hyperledger/aries-framework-go`→`hyperledger-aries/…`、`hyperledger/indy-sdk`、`hyperledger/indy-vdr`→`hyperledger-indy/…`、`w3c-ccg/did-method-key`→`…/did-key-spec`。
+- **口径**：301 记 `moved` 并在文档里点名去向，不记死；404/超时记死并让 `--check` 失败并点名仓库。本仓行在 tarball 里没有 `.git`（commit 只能是 `unknown`），**宁可不出现在引用表里也不写 `/tree/unknown`**，可用 `UIBC_COMMIT` 注入真实 sha 后再补。
+- **`tests/test_refs_check.py` 六条**：引用从快照派生且 URL 形状一致、绝不出现 `unknown`、报告集合与快照一一对应、404 必红并点名、301 记 moved 不记死、页面必须是生成页。
+- 生成文档"引用"一节改为指向 `docs/REFS-DIRECT.md`，并写明"不是看起来能点就算"。
 ## 未发布 — 2026-11-26（本仓那一行不再手写：10/10 由证据算出来）
 
 - **问题**：整张表都在读别人仓里的证据，唯独本仓那五个 2 是 `build_ours()` 里写死的常量。作者给自己打分，这是这类对照表最致命的一处。

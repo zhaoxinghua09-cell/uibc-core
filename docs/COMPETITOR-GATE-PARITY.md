@@ -42,11 +42,13 @@
 | `uport-project/ethr-did` | 17 | 4 | 43 | 0 | 0 | 0 | 0 | 0 | 0 |
 | `w3c-ccg/did-method-key` | 4 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 | `w3c-ccg/did-test-suite` | 21 | 12 | 21 | 0 | 0 | 0 | 0 | 0 | 0 |
-| `zhaoxinghua09-cell/uibc-core` (this repository) | 2009 | 281 | 1090 | 2 | 2 | 2 | 2 | 2 | 10 |
+| `zhaoxinghua09-cell/uibc-core` (this repository) | 2014 | 283 | 1100 | 2 | 2 | 2 | 2 | 2 | 10 |
 
-D1 门槛＝测试文件内拒绝类断言 ≥10 次；D2＝位级关键词 ≥1；D3＝base58/地址派生关键词 ≥1；
+D1 门槛＝测试文件内拒绝类断言 ≥10 次；D2＝位级关键词 ≥1；D3＝地址派生的**宽/严区间**（宽＝`base58|bs58|deriveAddress` 出现在测试里，严＝只认 `deriveAddress|addressFrom|publicKeyToAddress|toChecksumAddress`）；
 D4＝非测试代码里出现失败退出码 ≥1；D5 对 25 家一律记 0——"注入假断言要求门失败"这种用例，检索不到就当没有。
-**最好的一家 3/10，本仓库 10/10。**
+**最好的一家 3/10，本仓库 10/10；D3 换成严规则后最好的一家仍是 3/10，本仓库 10/10。**
+D3 两端都写在这里，是因为单一数字在这一维一定是偏的：宽规则会把 `publicKeyBase58: '...'` 这种字面量当成派生证据，
+严规则又会漏掉"绑了地址但没写 derive 函数"的仓（逐家两列见 `docs/D3-BRACKET.md`）。
 本仓库那一行**不是手写**：`score_ours()` 用同一套证据算出来——文档/二进制/地址三个探针是否在、门跑出来的覆盖数与 `[]` 静默集、退出码是否覆盖三层、自证测试是否真的要求门失败。
 删一个探针、或把门拿走，对应的分数就掉，`--check` 会发现快照与现算不一致并点名（`tests/test_ours_score.py` 四条反证）。
 
@@ -99,6 +101,7 @@ python tools/competitor_gate_parity.py --json                    # 机读
 看板：`docs/parity-board.html`（单文件、零外链，数据内嵌，**打开即自检**；`node tools/board_check.js` 可在无浏览器环境里跑它自己的脚本验收）。
 敏感性：`docs/PARITY-SENSITIVITY.md`（把 D1 的同行匹配放宽到 ±2 行，看"最好 3/10"会不会翻；`tools/parity_sensitivity.py --check` 离线拦）。
 证据行：`docs/COMPETITOR-EVIDENCE-LINES.md`（每个 1 分指到 `path:line`）；D3 区间：`docs/D3-BRACKET.md`（宽/严两端都给）。
+实跑：`docs/COMPETITOR-REALRUN.md`（把他们的测试真装真跑，记录退出码/用例数；**不改本表的任何分数**）。
 
 ## 八、引用
 

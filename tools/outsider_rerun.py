@@ -54,6 +54,7 @@ GENERATED = {"docs/outsider-rerun-receipt.json", "docs/OUTSIDER-RERUN.md",
              "docs/OUTSIDER-BOARD.html"}
 
 IGNORE = (".git", "__pycache__", ".pytest_cache", ".mypy_cache", ".ruff_cache",
+          "build", "*.egg-info",
           "node_modules", ".venv", "venv", "htmlcov", ".tox", ".nox",
           "*.pyc", "*.pyo", "*.egg-info")
 
@@ -64,7 +65,8 @@ STEPS = (
     ("tests", [sys.executable, "-m", "pytest", "tests/test_mutation_gate.py",
                "tests/test_competitor_parity.py", "tests/test_parity_board.py",
                "tests/test_refs_check.py", "tests/test_parity_sensitivity.py",
-               "tests/test_parity_audit.py", "-q"], "passed"),
+               "tests/test_parity_audit.py",
+               "tests/test_parity_realrun.py", "-q"], "passed"),
 )
 
 ENV_KEEP = ("PATH", "SYSTEMROOT", "SYSTEMDRIVE", "WINDIR", "TEMP", "TMP", "HOME",
@@ -90,7 +92,7 @@ def tracked_files(root):
     found = []
     for dirpath, dirnames, filenames in os.walk(root):
         dirnames[:] = sorted(d for d in dirnames if d not in
-                             {".git", "__pycache__", ".pytest_cache", ".mypy_cache",
+                             {".git", "__pycache__", ".pytest_cache", ".mypy_cache", "build",
                               ".ruff_cache", "node_modules", ".venv", "venv", "htmlcov", ".tox", ".nox"})
         for fn in sorted(filenames):
             if fn.endswith((".pyc", ".pyo")) or fn in (".coverage", "coverage.xml"):

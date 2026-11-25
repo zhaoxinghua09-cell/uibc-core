@@ -7,12 +7,14 @@
 - Standard: **Regulation (EU) 2017/745 (MDR)**
 - Source: https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32017R0745
 - Clauses mapped: **5**
-- Manifest digest: `71300f801c7295f179b8ad59688816249c0b2ed6e2e378651b0080b38741559e`
+- Manifest digest: `4a211d7d9b9227d06338534d72fa6ec081323eb89e26c6b4752c4271a695f4d8`
+- Verdict digest: `5d397f1d451f1d9116d722f640ccea2b8fc1d5a4aaa58892cbd7f12fa32d71b5` (identity of the verdict set, not of the clause text)
+- Determinism: re-running on the same input yields byte-identical output; `--check` exits 3 on any drift. Reproducible in the SLSA sense - not verified-reproducible, which would need a second independent host.
 - Counts: GAP=1, PARTIAL=4
 
 | Clause | Strength | State | Carrier | Probe | What is not covered |
 |---|---|---|---|---|---|
-| MDR Annex I 17.1 | partial | **PARTIAL** | three-valued verdict, per-check reason code, checked_at | `python -m uibc_core.cli demo` → exit 0 | The bundled demo builds, seals, verifies, tampers and re-verifies one package end to end, so the same input yields the same verdict and a tampered copy is caught. We do not test device performance, and we do not exercise single-fault behaviour of the device itself. |
+| MDR Annex I 17.1 | partial | **PARTIAL** | three-valued verdict, per-check reason code, checked_at | `python tools/probe_evidence_identity.py fixtures/tampered.uibc` → exit 1 | The probe re-computes every evidence digest and, on the tampered fixture, exits non-zero and names the entry whose digest no longer matches - so a single altered artefact cannot pass as a good one. The bundled demo builds, seals, verifies, tampers and re-verifies one package end to end, so the same input yields the same verdict and a tampered copy is caught. We do not test device performance, and we do not exercise single-fault behaviour of the device itself. |
 | MDR Annex I 17.2 | partial | **PARTIAL** | evidence entry type=EVAL, policy_hash, seal | `python -m pytest tests/test_seal_v03.py -q` → exit 0 | We record that a verification/validation document exists, is bound to the policy in force and has not been altered since sealing. We do not judge whether the plan behind that document is adequate, nor whether the development lifecycle followed it. |
 | MDR Annex I 17.4 | partial | **PARTIAL** | did:web fetch guards: public-host assertion, 2 MB cap, no 3xx downgrade | `python -m pytest tests/test_did_web_hardening.py -q` → exit 0 | The package states its own network and key-resolution requirements and refuses a document that is oversized, loopback/private, or reached through a downgrade. It does not specify hardware, and it does not audit the deployment's actual IT security measures. |
 | MDR Annex I 18.8 | gap | **GAP** | - | - | This is device and firmware design: physical access, boot integrity, network exposure of the device itself. A record layer cannot answer it, and claiming otherwise would be the kind of overclaim this file exists to prevent. |

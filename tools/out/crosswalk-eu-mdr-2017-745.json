@@ -7,7 +7,8 @@
     "scope_note": "Five clauses only. This is not the GSPR checklist: that has roughly 150-200 rows for a Class IIa/IIb device and is the manufacturer's document, not a library's. Rows were chosen because they are the ones a record layer can plausibly touch at all.",
     "source": "crosswalk/eu-mdr-2017-745.json"
   },
-  "manifest_sha256": "71300f801c7295f179b8ad59688816249c0b2ed6e2e378651b0080b38741559e",
+  "manifest_sha256": "4a211d7d9b9227d06338534d72fa6ec081323eb89e26c6b4752c4271a695f4d8",
+  "verdict_sha256": "5d397f1d451f1d9116d722f640ccea2b8fc1d5a4aaa58892cbd7f12fa32d71b5",
   "clause_count": 5,
   "counts": {
     "PARTIAL": 4,
@@ -22,7 +23,7 @@
       "verbatim": true,
       "state": "PARTIAL",
       "note": "",
-      "reason": "The bundled demo builds, seals, verifies, tampers and re-verifies one package end to end, so the same input yields the same verdict and a tampered copy is caught. We do not test device performance, and we do not exercise single-fault behaviour of the device itself.",
+      "reason": "The probe re-computes every evidence digest and, on the tampered fixture, exits non-zero and names the entry whose digest no longer matches - so a single altered artefact cannot pass as a good one. The bundled demo builds, seals, verifies, tampers and re-verifies one package end to end, so the same input yields the same verdict and a tampered copy is caught. We do not test device performance, and we do not exercise single-fault behaviour of the device itself.",
       "carrier": [
         "three-valued verdict",
         "per-check reason code",
@@ -30,19 +31,9 @@
       ],
       "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32017R0745",
       "probe": {
-        "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" -m uibc_core.cli demo",
-        "declared": "python -m uibc_core.cli demo",
-        "exit": 0,
-        "expect_exit": 0,
-        "stdout_contains": "Try it yourself",
-        "ok": true,
-        "duration_s": 0.53,
-        "tail": [
-          "[8/8] verify the same package PINNED to the owner's public key",
-          "     -> result: FAIL (expected FAIL: key substitution caught by pinning - publish your .pub where verifiers can pin it)",
-          "Try it yourself: python -m uibc_core.cli verify C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\uibc-demo-79ptfc9r\\demo   (no key needed - the seal is public)",
-          "                 python -m uibc_core.cli verify C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\uibc-demo-79ptfc9r\\forged --pubkey C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\uibc-demo-79ptfc9r\\owner.key.pub"
-        ]
+        "declared": "python tools/probe_evidence_identity.py fixtures/tampered.uibc",
+        "exit": 1,
+        "ok": true
       }
     },
     {
@@ -60,17 +51,9 @@
       ],
       "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32017R0745",
       "probe": {
-        "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" -m pytest tests/test_seal_v03.py -q",
         "declared": "python -m pytest tests/test_seal_v03.py -q",
         "exit": 0,
-        "expect_exit": 0,
-        "stdout_contains": null,
-        "ok": true,
-        "duration_s": 2.95,
-        "tail": [
-          ".........                                                                [100%]",
-          "9 passed in 0.92s"
-        ]
+        "ok": true
       }
     },
     {
@@ -86,17 +69,9 @@
       ],
       "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32017R0745",
       "probe": {
-        "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" -m pytest tests/test_did_web_hardening.py -q",
         "declared": "python -m pytest tests/test_did_web_hardening.py -q",
         "exit": 0,
-        "expect_exit": 0,
-        "stdout_contains": null,
-        "ok": true,
-        "duration_s": 2.16,
-        "tail": [
-          "...............                                               [100%]",
-          "15 passed, 11 subtests passed in 0.23s"
-        ]
+        "ok": true
       }
     },
     {
@@ -126,16 +101,9 @@
       ],
       "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32017R0745",
       "probe": {
-        "cmd": "\"C:\\Users\\Administrator\\AppData\\Local\\Temp\\uibc-audit\\.venv\\Scripts\\python.exe\" tools/probe_evidence_identity.py fixtures/clean.uibc",
         "declared": "python tools/probe_evidence_identity.py fixtures/clean.uibc",
         "exit": 0,
-        "expect_exit": 0,
-        "stdout_contains": "identities recompute",
-        "ok": true,
-        "duration_s": 0.2,
-        "tail": [
-          "OK 2/2 evidence identities recompute"
-        ]
+        "ok": true
       }
     }
   ],

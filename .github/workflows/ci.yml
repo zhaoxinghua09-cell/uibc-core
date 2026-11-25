@@ -419,3 +419,76 @@ jobs:
         # refused package it fails for an unrelated reason, or a check the
         # Python side gained that the JavaScript side never carried.
         run: python tools/assert_second_impl.py
+
+  # Measured 2026-11-25: the crosswalk had no gate at all. `crosswalk/*.json` and
+  # `tools/out/crosswalk-*.json` could drift apart, a clause could be demoted from
+  # carried to partial, or a declared probe could start failing, and CI would stay
+  # green - the counts in the documents were reproducible only by whoever ran the
+  # tool by hand. This job re-runs every probe and compares the fresh result with
+  # the committed file byte for byte (exit 3 on any difference), so a reader can
+  # re-run the same thing and get the same numbers, and a demotion cannot be made
+  # quietly. It also re-checks the generated evidence index against its sources.
+  crosswalk-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v7.1.0
+        with:
+          python-version: "3.12"
+
+      - name: Install test deps
+        run: python -m pip install --upgrade pip && pip install pytest ".[verify]"
+
+      - name: Install the package
+        run: python -m pip install .
+
+      - name: Every crosswalk reproduces its committed result
+        # One command, the same one a reader runs. It re-runs every probe, compares
+        # each fresh result with the committed file byte for byte, and prints the
+        # first differing line when they disagree (byte counts alone did not say
+        # which field moved the first time this failed on Linux). A failing probe
+        # on any non-gap row is OVERCLAIM; drift is exit 3.
+        run: python tools/recheck.py
+
+      - name: The evidence index matches its sources
+        run: python tools/build_evidence_index.py --check
+
+  # TC-4 says probe strings are handed to the platform shell, so quoting and path
+  # rules differ between POSIX sh and cmd.exe. `crosswalk-gate` above runs the
+  # probes under bash; until this job existed, nothing in CI had ever executed a
+  # probe string under cmd.exe - the Windows job only ran static tests
+  # (`evaluate(run=False)`), which is the opposite of what TC-4's reason claimed.
+  # Same command as a reader would run, so the workflow and the reader agree.
+  windows-probes:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v7.1.0
+        with:
+          python-version: "3.12"
+
+      - name: Install test deps
+        run: python -m pip install --upgrade pip && pip install pytest ".[verify]"
+
+      - name: Install the package
+        run: python -m pip install .
+
+      - name: Every crosswalk reproduces its committed result under cmd.exe
+        run: python tools/recheck.py
+
+      - name: The probe command is wired to more than one family
+        run: python tools/probe_platform_matrix.py
+
+      # First run of this job: 21cfr11 and tool-contract reported OVERCLAIM on
+      # Windows - the probe rows that shell out to pytest failed, while the rows
+      # that run tools/*.py all reproduced clean. recheck prints only the first
+      # differing line, so the job said nothing about why. This step exists to
+      # make the failure legible, and it runs only when something above failed.
+      - name: Why the probes failed (diagnosis only)
+        if: failure()
+        run: python -m pytest tests/test_crosswalk_probe.py tests/test_actor_attribution.py -q --tb=short
+

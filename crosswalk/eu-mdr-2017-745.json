@@ -15,10 +15,10 @@
       "strength": "partial",
       "carrier": ["three-valued verdict", "per-check reason code", "checked_at"],
       "probe": {
-        "cmd": "python -m uibc_core.cli demo",
-        "expect": {"exit": 0, "stdout_contains": "Try it yourself"}
+        "cmd": "python tools/probe_evidence_identity.py fixtures/tampered.uibc",
+        "expect": {"exit": 1, "stdout_contains": "digest mismatch"}
       },
-      "reason": "The bundled demo builds, seals, verifies, tampers and re-verifies one package end to end, so the same input yields the same verdict and a tampered copy is caught. We do not test device performance, and we do not exercise single-fault behaviour of the device itself."
+      "reason": "The probe re-computes every evidence digest and, on the tampered fixture, exits non-zero and names the entry whose digest no longer matches - so a single altered artefact cannot pass as a good one. The bundled demo builds, seals, verifies, tampers and re-verifies one package end to end, so the same input yields the same verdict and a tampered copy is caught. We do not test device performance, and we do not exercise single-fault behaviour of the device itself."
     },
     {
       "id": "MDR Annex I 17.2",

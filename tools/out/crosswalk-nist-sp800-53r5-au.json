@@ -1,0 +1,120 @@
+{
+  "schema": "uibc-crosswalk/1",
+  "standard": {
+    "id": "NIST SP 800-53 Rev. 5 (AU family)",
+    "title": "NIST SP 800-53 Rev. 5, Audit and Accountability — five controls mapped to what the package can carry",
+    "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-53r5.pdf",
+    "scope_note": "Five controls from the AU family. This is not a FISMA assessment and not an 800-53B baseline: a baseline is a selection made by an authorising official, and most AU controls assume a running system that logs, stores and reviews events. Rows were chosen because they name something a record layer can demonstrate or plainly cannot. Included partly to show the same judgement engine crossing an industry boundary - this is a federal information system control set, not a medical device one.",
+    "source": "crosswalk/nist-sp800-53r5-au.json"
+  },
+  "manifest_sha256": "aded4e1d0776ffcab414e49a4ae96d861ed249864ffe134cf8fffddb24c48ab5",
+  "verdict_sha256": "f7d94456436606261c40cc8ffd3965669a24a50847c5af44da8cfa6ebc055c93",
+  "clause_count": 5,
+  "counts": {
+    "PARTIAL": 4,
+    "COVERED": 1
+  },
+  "bad": 0,
+  "rows": [
+    {
+      "id": "NIST AU-9",
+      "applies": true,
+      "strength": "partial",
+      "verbatim": true,
+      "state": "PARTIAL",
+      "note": "",
+      "reason": "Modification and deletion of audit information are detected rather than trusted: the fixture expectations pin that tampering, a deleted event, a duplicated event and a reordering each stop the package from passing. Two halves are not carried: 'unauthorized access' is an access-control property of the running system, and the alerting in (b) is a response action somebody must receive.",
+      "carrier": [
+        "sealed lifecycle + manifest",
+        "tampered / deleted / duplicated / reordered fixtures all judged not PASS"
+      ],
+      "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-53r5.pdf",
+      "probe": {
+        "declared": "python -m pytest tests/test_fixture_expectations.py -q",
+        "exit": 0,
+        "ok": true
+      }
+    },
+    {
+      "id": "NIST AU-9(3)",
+      "applies": true,
+      "strength": "partial",
+      "verbatim": true,
+      "state": "PARTIAL",
+      "note": "",
+      "reason": "Audit information carries a cryptographic seal and a pinned key catches a substituted signer, so integrity of the records is protected by cryptographic mechanisms rather than by convention. What is not carried is the second noun: integrity of the audit *tools* themselves. We sign the records; we do not sign the verifier, and a compromised verifier is not detected by this layer.",
+      "carrier": [
+        "Ed25519 / HMAC-SHA256 seal over identity+manifest+lifecycle",
+        "pinned-key verification",
+        "key-substitution fixture staying INCONCLUSIVE"
+      ],
+      "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-53r5.pdf",
+      "probe": {
+        "declared": "python -m pytest tests/test_iverify_pubkey_pin.py -q",
+        "exit": 0,
+        "ok": true
+      }
+    },
+    {
+      "id": "NIST AU-10",
+      "applies": true,
+      "strength": "carried",
+      "verbatim": true,
+      "state": "COVERED",
+      "note": "",
+      "reason": "The control text names 'an individual (or process acting on behalf of an individual)', which is exactly the agent case. Each AEE observation record carries its own signature over its own PAE, verified against the key the consumer pinned; the probe shows a signature copied onto another record stops verifying, a deleted signature stops verifying, and the untouched record is unaffected. That is irrefutable evidence of which process acted, on a set of records it cannot afterwards deny or reassign. Not carried: the [organization-defined actions] list - which actions are in scope is a policy decision, and the mechanism does not choose it.",
+      "carrier": [
+        "AEE observationRecords: one DSSE signature per record",
+        "records.record_verified pins the signer key and ignores the carried keyid",
+        "vendored upstream conformance vector (Apache-2.0, suiteRevision 32)"
+      ],
+      "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-53r5.pdf",
+      "probe": {
+        "declared": "python tools/probe_record_binding.py",
+        "exit": 0,
+        "ok": true
+      }
+    },
+    {
+      "id": "NIST AU-10(1)",
+      "applies": true,
+      "strength": "partial",
+      "verbatim": true,
+      "state": "PARTIAL",
+      "note": "",
+      "reason": "The binding exists at key strength: the producer's key is inside the signature over that record, and a reader holding the pin can determine who produced it. What is not carried is identity at person strength. A key identifies a key; turning that into a named individual is identity proofing (NIST IA-12 / 21 CFR 11.100(b)), which is the deploying organisation's step, not the record layer's.",
+      "carrier": [
+        "producer key bound into each record's signature",
+        "pinned public key gives an authorised reader the producer identity"
+      ],
+      "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-53r5.pdf",
+      "probe": {
+        "declared": "python tools/probe_record_binding.py",
+        "exit": 0,
+        "ok": true
+      }
+    },
+    {
+      "id": "NIST AU-11",
+      "applies": true,
+      "strength": "partial",
+      "verbatim": true,
+      "state": "PARTIAL",
+      "note": "",
+      "reason": "The probe settles four things a retention requirement needs and one it cannot: the earliest instant is carried in the records and timestamps never run backwards (so 'retained since' is a property of the package); no expiry, retention or deletion field exists in manifest, identity or lifecycle (the format does not set the period); the package parses from files alone, with no key material, no service and no network (what an investigator a year later has); and every evidence digest recomputes while a tampered package does not match (so having the files is not the same as having the records). The period itself is the assignment: 'for [a period] consistent with records retention policy' is the organisation's decision, and a format cannot retain something 'for at least as long as required' without being told what is required.",
+      "carrier": [
+        "self-contained package: records readable without the producing system",
+        "earliest instant and monotonic timestamps are data, not memory",
+        "no automatic expiry or deletion path in the format",
+        "evidence digests recomputable, and a tampered package does not match"
+      ],
+      "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-53r5.pdf",
+      "probe": {
+        "declared": "python tools/probe_retention.py",
+        "exit": 0,
+        "ok": true
+      }
+    }
+  ],
+  "verdict": "OK"
+}

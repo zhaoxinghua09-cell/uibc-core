@@ -7,7 +7,9 @@
 - Standard: **ISO 14971:2019**
 - Source: https://www.iso.org/obp/ui/#iso:std:iso:14971:en
 - Clauses mapped: **5**
-- Manifest digest: `a17c54ff4891560a805f5609defefc3e0ffb405db325bc6544129fc93ca2f93e`
+- Manifest digest: `8ac29ebce68b42b78bf784e1f89098967944c8ca77c524e023585da89eed2426`
+- Verdict digest: `6a2fb50bb591e384e390215daded29f8a07c636517ca4113b9d09e9300da695e` (identity of the verdict set, not of the clause text)
+- Determinism: re-running on the same input yields byte-identical output; `--check` exits 3 on any drift. Reproducible in the SLSA sense - not verified-reproducible, which would need a second independent host.
 - Counts: GAP=3, PARTIAL=2
 
 | Clause | Strength | State | Carrier | Probe | What is not covered |
@@ -16,7 +18,7 @@
 | ISO 14971 4.4 Risk management plan | gap (titles only) | **GAP** | - | - | Scope, responsibilities, acceptability criteria and the overall-residual-risk method are authored by the manufacturer. A record layer can store the plan as evidence; it cannot write or judge it. |
 | ISO 14971 5.4 Identification of hazards and hazardous situations | gap (titles only) | **GAP** | - | - | Hazard identification is the analytical core of the standard. No check in this library invents hazards, and pretending to enumerate them from a package would invert the whole point. |
 | ISO 14971 7.2 Implementation of risk control measures | gap (titles only) | **GAP** | - | - | Implementation happens in the product. What a package can show is that a verification result was recorded against a control - not that the control is in the shipped software, and not that it works. |
-| ISO 14971 10.2 Information collection (production and post-production) | partial (titles only) | **PARTIAL** | checked_at on each verdict, commit-time recheck, revocation record | `python -m uibc_core.cli demo` → exit 0 | The demo re-verifies a package after it was sealed and catches a substituted key, which is the shape of a post-production signal. What is missing: a real collection channel - complaints, literature, other devices on the market - and the review that decides whether a signal is safety-relevant. |
+| ISO 14971 10.2 Information collection (production and post-production) | partial (titles only) | **PARTIAL** | checked_at on each verdict, commit-time recheck, revocation record | `python tools/probe_evidence_identity.py fixtures/tampered.uibc` → exit 1 | On the tampered fixture the probe exits non-zero and names the entry whose digest no longer matches - which is the shape of a post-production signal being caught rather than absorbed. The demo re-verifies a package after it was sealed and catches a substituted key, which is the shape of a post-production signal. What is missing: a real collection channel - complaints, literature, other devices on the market - and the review that decides whether a signal is safety-relevant. |
 
 ## How to re-run
 

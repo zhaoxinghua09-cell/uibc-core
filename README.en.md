@@ -87,6 +87,41 @@ Every verification report must state: `scope`, `limitations`, `checked`,
 signatures (Ed25519, v0.3 target), lifecycle event signatures, external
 timestamp anchoring, behavior evaluation, memory faithfulness/continuity.
 
+## What each clause is judged on — and one command to re-check it
+
+`docs/CROSSWALK-*.md` maps regulatory and standard clauses to what this package
+actually carries: one row per clause, each with a state and a reason. Six sources:
+
+| file | source |
+|---|---|
+| `crosswalk/eu-mdr-2017-745.json` | EU MDR 2017/745, Annex I and Annex II |
+| `crosswalk/21cfr11.json` | 21 CFR Part 11 (verbatim from eCFR) |
+| `crosswalk/iec-62304-2006-a1.json` | IEC 62304:2006+A1 |
+| `crosswalk/iso-14971-2019.json` | ISO 14971:2019 |
+| `crosswalk/nist-sp800-53r5-au.json` | NIST SP 800-53 Rev. 5, AU family (verbatim from the PDF) |
+| `crosswalk/tool-contract.json` | this repository's own tool contract |
+
+```
+python tools/recheck.py
+```
+
+Re-runs every probe offline, compares each fresh result with
+`tools/out/crosswalk-<name>.json` byte for byte, and prints one row per file plus
+the total. Exit codes: `0` clean, `1` a row claimed more than its evidence
+(OVERCLAIM), `2` unreadable, `3` a result no longer reproduces the committed one.
+CI runs this same command, so the check a reader runs and the check the build runs
+are not two different things.
+
+`COVERED` needs a declared probe that passes. `PARTIAL` and `GAP` need a written
+reason stating what is *not* carried — a gap is a declaration, not a failure that
+was hidden. Currently **25 regulatory clauses = 15 PARTIAL / 8 GAP / 2 COVERED**,
+plus 4 tool-contract rows (3 COVERED / 1 GAP); the two carried clauses are 21 CFR
+11.70 and NIST AU-10, both on the same executed record-binding probe.
+
+**What this is not**: not a regulatory acceptance, not a certification, not a QMS.
+It states where a record layer ends and where the deploying organisation begins
+(retention policy, system validation, risk management, software lifecycle).
+
 ## Known boundaries (the honest list)
 
 - **The seal is symmetric HMAC-SHA256 (v0.2 stopgap, stdlib-only)**:

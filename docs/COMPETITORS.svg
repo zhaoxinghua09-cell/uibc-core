@@ -7,16 +7,16 @@
 <rect x="930" y="30" width="14" height="10" fill="#c4622a"/>
 <text x="950" y="39" font-size="12" fill="#1b1b1b">peer</text>
 <text x="40" y="108" font-size="13.5" fill="#1b1b1b">Published releases</text>
-<rect x="350" y="94" width="112" height="13" fill="#1f5fa8" rx="2"/>
-<text x="470" y="105" font-size="12" font-weight="600" fill="#1b1b1b">7</text>
+<rect x="350" y="94" width="160" height="13" fill="#1f5fa8" rx="2"/>
+<text x="518" y="105" font-size="12" font-weight="600" fill="#1b1b1b">10</text>
 <rect x="350" y="110" width="400" height="13" fill="#c4622a" rx="2"/>
 <text x="758" y="121" font-size="12" font-weight="600" fill="#1b1b1b">25</text>
 <line x1="40" y1="144" x2="1000" y2="144" stroke="#dfe3e8" stroke-width="1"/>
 <text x="40" y="166" font-size="13.5" fill="#1b1b1b">Test functions</text>
-<rect x="350" y="152" width="373" height="13" fill="#1f5fa8" rx="2"/>
-<text x="731" y="163" font-size="12" font-weight="600" fill="#1b1b1b">1110</text>
-<rect x="350" y="168" width="400" height="13" fill="#c4622a" rx="2"/>
-<text x="758" y="179" font-size="12" font-weight="600" fill="#1b1b1b">1189</text>
+<rect x="350" y="152" width="400" height="13" fill="#1f5fa8" rx="2"/>
+<text x="758" y="163" font-size="12" font-weight="600" fill="#1b1b1b">1660</text>
+<rect x="350" y="168" width="286" height="13" fill="#c4622a" rx="2"/>
+<text x="644" y="179" font-size="12" font-weight="600" fill="#1b1b1b">1189</text>
 <line x1="40" y1="202" x2="1000" y2="202" stroke="#dfe3e8" stroke-width="1"/>
 <text x="40" y="224" font-size="13.5" fill="#1b1b1b">Verifier modules</text>
 <rect x="350" y="210" width="250" height="13" fill="#1f5fa8" rx="2"/>

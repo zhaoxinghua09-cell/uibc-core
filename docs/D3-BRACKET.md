@@ -1,6 +1,8 @@
 # D3 是个区间，不是一个数（每次 `--run` 重写本页）
 
-审计日 2026-11-26。**最好竞品：宽规则 3/10，严规则 3/10；本仓 10/10 两种规则下都不变。**
+审计日 2026-11-26。**最好竞品：宽规则 3/10，严规则 3/10；本仓 10/10 与 10/10 两种规则下不变。**
+
+本仓为什么两端同分：本仓 D3 来自可执行的地址探针（256 翻键 0 相撞 / 1710 次替换 0 通过），不依赖关键词，所以宽规则与严规则下同分。
 
 - 宽规则（表现行）：test 文件里出现 `base58|bs58|deriveAddress|derive_address` 即记 1 分。
 - 严规则：只认 `deriveAddress|derive_address|addressFrom(PublicKey|Key)?|publicKeyToAddress|toChecksumAddress`。

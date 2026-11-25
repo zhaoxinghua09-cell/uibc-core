@@ -47,6 +47,52 @@
 - 重复出现的叶子 → 列表；重复出现的容器 → 按字段合并（正文没有标记"实例边界"，见第四节）。
 - 未知 unit → 进 `unknown`（带 ID、长度、前 32 字节 hex），**不丢、不猜**。
 
+## 三·五、不只是解码器：三层都能反过来算
+
+一个只会解码的实现，外人无法反驳它，因为它说什么都是"读出来的"。所以这一层做成
+**编解码器**，三段各有一个可以逐字节检查的逆运算：
+
+| 层 | 正 | 逆 | 承诺 |
+|---|---|---|---|
+| 消息头 | `parse_header` | `encode_message`（头+可选 option+体） | 字节相同 |
+| 单元层 | `parse_units` | `encode_units` | **字节相同，顺序也相同**（含非升序的 unit 序列） |
+| 文档层 | `decode_document` | `encode_document` | **语义幂等**：`decode(encode(decode(b))) == decode(b)` |
+
+文档层只承诺语义，原因写在代码里而不是含糊过去：解码结果是一个 dict，dict 不保留
+"哪个 unit 在前"，所以逆运算只能给出**规范序**（容器内按 unit ID 升序）。把字节级
+承诺放在单元层，是因为那一层的顺序信息还在，能真的逐字节对上。
+
+`Int`/`Long` 的宽度仍然没有人给。现在它有两种走法，都由调用方决定：
+
+- 不给 `integer_widths` → 整数进 `_deferred`，带原始字节（默认，不猜）；
+- 给 `integer_widths={"int":2,"long":4}` → 按大端无符号解码；**长度与宽度不符立刻
+  raise**，报出 `declared long=8 bytes but carries 4`——真实样例一旦到手，错宽度会
+  当场暴露，而不是被悄悄读成错数。
+
+## 三·六、六条假设，每条都能被翻转（`ASSUMPTIONS`）
+
+`python -c "from uibc_core.bid_binary import assumption_report; print(assumption_report())"` 直接打印这张表；
+`tests/test_bid_binary_codec.py` 里对两条 `flippable` 的断言是"翻转后输出确实变了"，
+不是"文档里写了可翻转"。
+
+| 假设 | 正文缺口 | 处置 | 可翻转 |
+|---|---|---|---|
+| `flag_bit_order` | §5.1.2.1 按序列字段，无位编号 | 默认第一项=bit15；`flag_bit_order="lsb"` 换成第一项=bit0 | 是 |
+| `integer_widths` | `Int`/`Long` 无字节宽度 | 不给宽度不解码；给了就按宽度解，长度不符即报错 | 调用方 |
+| `acsns_spelling` | §5.2.1.1.2 用 `0x3610/0x3620`，§5.2.1.4.2 用 `0x3601/0x3602` | 编码默认 `3610`，可切 `3601`；解码两套都收 | 是 |
+| `bid_document_collision` | `0x2100` 既是容器又是键 id 列表 | payload 能解析成单元=容器，否则=一个键 id | 启发式 |
+| `fragment_reassembly` | 无末片判据 | 不重组，逐片解码 | 未实现 |
+| `signature_unit_ids` | 三个签名 unit 无 ID | 不定位签名块 | 未实现 |
+
+## 三·七、敌意输入不是免责声明，是测试
+
+- `test_random_bytes_never_crash_the_decoder`：2,000 组随机字节，解码只允许 `ValueError`。
+  面向网络的解码器崩在别的异常上，就是可以被远端打挂的路径。
+- `test_random_byte_strings_that_parse_are_stable_under_re_encode`：500 组随机 unit 序列，
+  能解开的重编码后语义必须一致——这一条同时否掉"只能解不能编"和"编出来的东西解不回去"。
+- `test_unit_layer_preserves_non_ascending_order`：故意倒序，证明规范序只发生在文档层，
+  单元层不偷偷排序。
+
 ## 四、正文没写够、因此没有实现的部分（逐条给理由）
 
 | 缺什么 | 正文实际情况 | 我们的处置 |
@@ -63,6 +109,29 @@
 |---|---|---|
 | `0x2100` | 既是 `bidDocument`（容器），又是 `bidDocument.authentication`（键 id 列表） | 按 payload 形状判别：能解析成单元序列 = 容器；解析失败 = 一个键 id 字符串。这是**对作者意图的启发式判断**，写在这里而不是藏起来 |
 | `0x3601/0x3602` vs `0x3610/0x3620` | §5.2.1.4.2 与 §5.2.1.1.2 对同一对字段给了两套编号 | 两个编号都进 `FIELD_TABLE`，指向同一字段名 |
+
+## 七、官方是否真有二进制实现：用 code search 查，而不是猜
+
+"没有参考实现"这种话必须能被别人重跑，所以下面每一条都是可复现的查询（GitHub code
+search，`org:caict-4iot-dev`）：
+
+| 查询 | total_count | 命中 |
+|---|---|---|
+| `headerLength org:caict-4iot-dev` | 1 | 只有 RFC-011 正文本身 |
+| `replyCode org:caict-4iot-dev` | 1 | 只有 RFC-011 正文本身 |
+| `messageLength org:caict-4iot-dev` | 1 | 只有 RFC-011 正文本身 |
+| `0x2100 org:caict-4iot-dev` | 1 | 只有 RFC-011 正文本身 |
+| `unitId bidDocument`（全站） | 51 | 该组织内唯一命中仍是 RFC-011；其余是招投标系统的同名变量 |
+
+结论收窄到能证伪的那一句：**截至 2026-11-25，`caict-4iot-dev` 公开默认分支上不存在
+RFC-011 的编解码实现，正文是该组织内唯一提到这些字段的地方。**
+
+不意味着：GitHub code search 只索引默认分支，看不到私有仓、未索引的分支、以及链节点内部
+代码；官方可能确有实现而未公开。所以这里不能说"官方没有实现"，只能说"公开可查范围内
+没有"。
+
+正因为没有参照物，这一层的正确性只能靠**自洽**（编码/解码互逆、fuzz 不崩、假设可翻转）
+而不是靠"和官方一样"。等第一份真实报文到手，`integer_widths` 会立刻用长度校验把错宽度顶出来。
 
 ## 六、复跑
 

@@ -1,3 +1,13 @@
+## 未发布 — 2026-11-26（隐私验证与选择性披露：四个模块进主树，十七项检验进台子）
+
+- **问题**：包里有"已签、已封"，但"这个人该不该看到这一条"没有机制——撤回只能换新包，披露只能整包给出，既不能只给一个字段，也无法让第三方判两个日志是不是同一个历史。
+- **做法**：主树新增四个模块。`uibc_core/tlog.py` 是 RFC 6962 一致性证明与离线校验；`uibc_core/status_list.py` 是 131072 位状态表（`MY_INDEX=7`、见证 `k=5/n=3`、`HISTORY=4`）与状态 token；`uibc_core/witness.py` 给 `cosign` / `verify_cosignature`（封条公钥只出验签不出签）；`uibc_core/witness_registry.py` 的 `load_policy` / `verify_quorum` 返回 `(ok, detail)`。七档原型 0.1→0.7 留在 `phase28` 工作区，主树只收模块与文档。
+- **台子**：`uibc-bench` 的 `harness/s11_privacy_disclosure.py` 新增 P1–P17（含 P17 双运营方跨进程共签），基线由 157 增至 158，跑出 **15 PASS / 2 REFERENCE / 0 FAIL**。两个 REFERENCE 是"需外部条件"，不计作通过。
+- **双运营方 PoC**：`poc/dual_operator_witness.py` 把见证方拆成两个独立子进程、独立密钥目录、独立工作目录，2-of-3 策略下第三家只列入不出签；六类伪造（缺 quorum、重复见证、签名改一字节、陌生密钥、错 checkpoint、封条公钥冒充）全部拒绝。**边界写进产物**：两个运营方同机模拟，不是第三方。
+- **文档守卫顺手修红**：`docs/CHECKS-REFERENCE.md` 用 `tools/build_checks_reference.py` 的 `render(build())` 重生成（96 行变动），`paper/paper.md` 的 43 modules 改 47；此前两条守卫在 CI 上红，根因是数字手写、没跟着代码走。
+- **没做到的写清楚**：外部独立评审尚未闭合（三条免费通道全堵：OpenRouter `Request path cannot be relayed`、DashScope `AllocationQuota.FreeTierOnly`、硅基流动保险库里没有该 key），现经 `ai-seats-bridge` 投递 Muse 席待回执；真实第三方见证与状态运营方未启用。
+- **测试**：`tests/test_checks_reference.py`、`tests/test_doc_facts.py` 守住上面两条文档断言（无新增断言）；合入时 CI 为 21 success / 1 skipped / 0 failure。
+
 ## 未发布 — 2026-11-26（把"超越在哪"搬上看板：同一把尺子，25 个仓，我们 10/10，最好竞品 3/10）
 
 - **问题**：`parity` 那一步的尾行已经写着 `25 repositories … best competitor 3/10, this repository 10/10`，但那一行只活在收据的 `tail` 里。读者要回答"凭什么说超越"，还得去开 `docs/competitor-parity.json`。

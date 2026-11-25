@@ -1,3 +1,13 @@
+## 未发布 — 2026-11-25（变异探针：把"改这一点，谁会发现"变成可复跑的账本）
+
+- **同一套问法打三层**：一次只改一处，只看改完落在哪一类（refused / warned / silent / wrong-error）。`silent` 是唯一要盯的列——它是"协议禁止、实现吞掉"的形状。
+- **文档形状 `tools/mutate_document_shapes.py`**：31 个变异体，25 个是 §4.2.1 禁止的形状，**25/25 被拒，silent=0**。删 `id`、`publicKey` 换成对象、`id` 无 `#`、`id` 重复、`controller` 非 BID、`publicKeyHex` 非 hex、`authentication` 指向未定义键、`alsoKnownAs.type` 给 `true`（bool 是 int 子类）、`DIDSubResolver` 缺 `serviceEndpoint` 等逐条拒，报错都点名被改的字段。
+- **探针抓到一个真缺口**：删掉 `created` 曾能解析成功。协议 §4.2.1 第 9、10 项原文是"**9.created**：必填字段"、"**10.updated**：必填字段"，原实现只校验格式不校验存在。已改为缺字段即 raise，报错带 `§4.2.1 9.created is 必填 (required)`，`tests/test_mutation_probes.py` 钉住两条。
+- **一处合法沉默被下游兜住（实测而非假设）**：`publicKey.type` 写成 `RSA` 解析不报错（正文只说是 String，无枚举）；用 Ed25519 真签后把 type 改成 `RSA`，验签返回 `False`，理由"signature does not verify over the JCS form"。
+- **地址绑定 `tools/probe_address_binding.py`**：256 次单比特翻键 → 地址全部改变、**0 次撞回原地址、0 次相互相撞**、每次改 30 字符里的 26–30 个；1710 次单字符替换 → **全部被拒**；截短/补长/中间删一位 → 全部不匹配。用 SDK 夹具而不是 RFC-003 正文印的例子，因为后者在本实现下不复现（两套变体见 `docs/ADDRESS-DERIVATION.md`）。
+- 新增 `tests/test_mutation_probes.py` 9 条；`docs/MUTATION-PROBES.md` 记方法、数字、以及这套方法量不到的三处（签名块 ID、分片末片判据、真机样例）。
+- 二进制层沿用同一账本：196 字节 / 1568 位，refused 328 / changed 1226 / blind 14（`docs/BINARY-PROTOCOL.md` 三·十）。
+
 ## 未发布 — 2026-11-25（RFC-011 编解码器：把"只能读"补成"能反算"）
 
 主题：一个只会解码的实现没有办法被反驳。这一轮把它做成编解码器，并先把"官方到底有没有实现"查清楚。

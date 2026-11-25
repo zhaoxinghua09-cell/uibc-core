@@ -256,3 +256,32 @@ VERDICT: REPRODUCED
 | ledger 的签名列（88 条） | 再加 `cryptography` |
 
 `tests/test_stranger_competitor_check.py` 用 `python -S` 跑该工具的 selftest 来钉住这条线：算术步骤在任何解释器上都必须能跑。
+
+## 外人的一次实跑，怎么留成可以被机器复核的东西
+
+前一节说的是"外人能自己跑出来"。跑出来之后呢？截图不可核，口述不可核，连"我跑过了"这句话本身也不可核。所以这条命令多了一个出口：
+
+```
+python tools/stranger_competitor_check.py --dir <corpus> --receipt out.json
+```
+
+`out.json` 只记这台机器当场算出来的东西：171 条的 `checked/match`、扫描四个计数、变异控制四个计数、ledger 四个计数（或"未评估"及其原因）、第三方折的 `compared / agree / not compared`、verdict、退出码、Python 与平台版本，以及**这份 receipt 自己的 sha256**。
+
+复核用另一条命令，在**另一台机器**上重算：
+
+```
+python tools/verify_external_run_receipt.py --receipt out.json --dir <corpus>
+```
+
+它核四件事：receipt 的 `format`、receipt 自身 sha256 是否覆盖它的内容、`tool_sha256` 是否等于本机正在跑的那份工具、以及每个计数/verdict/退出码是否与重算结果逐项相等。任何一项不符就点名到字段：
+
+```
+DIFF sweep.n_replayable: receipt says 70, this machine recomputes 69
+VERDICT: NOT VERIFIED
+```
+
+实测（本机 Windows，Python 3.13.18，装了 `cryptography`）：`--receipt` 写出后立刻复核 → `the receipt's 8 checks, verdict 'REPRODUCED' and code 0 are what this machine recomputes` / `VERDICT: VERIFIED`。
+
+### 这条通道不开哪扇门
+
+receipt 里**没有身份字段**，复核器也不声称知道是谁跑的。它能证明的是"这些数字在某台机器上被算出来过、且与我在本机重算的一致"，不能证明"跑的人是张三"。所以 `docs/EXTERNAL-RUNS.json` 的 `headline` 仍然是 **0**——我们自己跑的、包括在云主机裸解释器上跑的，都不算外部实跑。这条工具把"想让人核"变成"可以核"，但把"有人核过"留给真的有人来核。

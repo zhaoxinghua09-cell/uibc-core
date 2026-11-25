@@ -1,3 +1,11 @@
+## 未发布 — 2026-11-25（外人重跑：换目录、换环境、不带凭据，还成不成立）
+
+- **收据此前都是作者机器开的**，这是最弱的证人。`tools/outsider_rerun.py` 把证人做成机械的：整棵拷到临时目录（不含 `.git`、不含缓存）、用白名单变量的干净环境（不含任何 token）、在该目录下跑四个公开入口（`mutation_gate.py` / `competitor_gate_parity.py` / `demo_bid_binary.py` / 两个测试文件），逐步记退出码与输出末行，并把整棵树的 sha256 写进 `docs/outsider-rerun-receipt.json`。
+- **摘要排除它自己产出的两个文件**（receipt 与本页），生成与校验用同一套排除规则——所以收据不能在不改树的情况下被悄悄刷新。
+- `--check` 重算摘要并逐步判定：树被改一个字节、文件数变一个、某步没带自己的标记，都会失败并点名。
+- `tests/test_outsider_rerun.py` 五条：摘要稳定且排除自身产物、干净环境里没有凭据、收据与当前树一致、**在副本里多写一行注释摘要就对不上**、副本里没有 `.git`（无法借助作者的历史）。
+- 实测：4 步全过（gate 0.4s / parity 0.6s / demo 0.3s / tests 2.7s），树 `43f754c8137c`，2232 个文件。
+
 ## 未发布 — 2026-11-25（竞品对照：把"我们更强"换成外人可复算的一张表）
 
 - **一个主张需要一个测量**：`tools/competitor_gate_parity.py` 审计九个 DID 解析/驱动仓库（官方 `did:bid` 解析与注册驱动、DIF universal-resolver、did-resolver、sidetree-core、ION、sidetree.js、did-method-key、ethr-did-resolver），全部按**固定 commit** 取 tarball，记录 tarball 的 sha256 与字节数。

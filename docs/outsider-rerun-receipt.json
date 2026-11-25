@@ -1,0 +1,70 @@
+{
+ "generated_at": "2026-11-25T15:51:24Z",
+ "tree_sha256": "530d3512553deea38bac231443d0fa924c0b2311b3e4a880fe7cdfe34bc03f1b",
+ "files_hashed": 2234,
+ "digest_excludes": [
+  "docs/OUTSIDER-RERUN.md",
+  "docs/outsider-rerun-receipt.json"
+ ],
+ "runner": {
+  "python": "3.13.18",
+  "machine": "AMD64",
+  "system": "Windows"
+ },
+ "environment": {
+  "variables_kept": [
+   "PATH",
+   "SYSTEMROOT",
+   "SYSTEMDRIVE",
+   "WINDIR",
+   "TEMP",
+   "TMP",
+   "HOME",
+   "USERPROFILE",
+   "LANG",
+   "LC_ALL",
+   "PYTHONUTF8",
+   "PYTHONIOENCODING"
+  ],
+  "note": "no tokens, no cloud credentials, nothing from the author's shell"
+ },
+ "steps": [
+  {
+   "step": "gate",
+   "cmd": "tools/mutation_gate.py",
+   "rc": 0,
+   "expect": "GATE OK",
+   "ok": true,
+   "seconds": 0.4,
+   "tail": "GATE OK"
+  },
+  {
+   "step": "parity",
+   "cmd": "tools/competitor_gate_parity.py",
+   "rc": 0,
+   "expect": "PARITY OK",
+   "ok": true,
+   "seconds": 0.5,
+   "tail": "PARITY OK: 9 repositories pinned and re-scored, best competitor 3/10, this repository 10/10"
+  },
+  {
+   "step": "demo",
+   "cmd": "tools/demo_bid_binary.py",
+   "rc": 0,
+   "expect": "ALL OK",
+   "ok": true,
+   "seconds": 0.3,
+   "tail": "ALL OK"
+  },
+  {
+   "step": "tests",
+   "cmd": "-m pytest tests/test_mutation_gate.py tests/test_competitor_parity.py -q",
+   "rc": 0,
+   "expect": "passed",
+   "ok": true,
+   "seconds": 2.6,
+   "tail": "10 passed in 1.96s"
+  }
+ ],
+ "ok": true
+}

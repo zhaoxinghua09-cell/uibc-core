@@ -126,6 +126,15 @@ def cmd_chain(a):
         size = e.get("tree_size")
         if size is None:
             reasons.append(f"#{i}: no tree_size, so 'only grew' cannot be checked")
+        elif prev is None:
+            # The first head has no predecessor: whatever it says about its size
+            # is the signers' assertion, not a fact anyone can check. Same point
+            # the MMR receipts profile makes about verifying from the empty tree.
+            # It must be labelled, so a reader never mistakes bootstrap trust for
+            # evidence of growth.
+            if e.get("bootstrap") is not True:
+                reasons.append(f"#{i}: first head has no predecessor; it MUST be "
+                               f"marked bootstrap, since growth is unprovable here")
         elif prev is not None:
             if size < prev["tree_size"]:
                 reasons.append(f"#{i}: size shrank {prev['tree_size']} -> {size}")

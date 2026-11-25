@@ -288,11 +288,21 @@ def main(argv=None):
     ap.add_argument("--dir", help="an already unpacked corpus (skips the download)")
     ap.add_argument("--json", action="store_true",
                     help="print one JSON object and nothing else")
+    ap.add_argument("--receipt", help="write a checkable receipt of this run here")
     ap.add_argument("--selftest", action="store_true")
     a = ap.parse_args(argv)
     if a.selftest:
         return selftest()
     out = run(a.dir, verbose=not a.json)
+    if a.receipt:
+        # Written even when the run fails: a receipt that says DID NOT MATCH is a
+        # finding, and tools/verify_external_run_receipt.py has to be able to check it.
+        import verify_external_run_receipt as ver
+        body = ver.build_receipt(out)
+        with open(a.receipt, "w", encoding="utf-8", newline="\n") as f:
+            f.write(json.dumps(body, indent=2, sort_keys=True) + "\n")
+        if not a.json:
+            print("receipt: %s" % a.receipt)
     if a.json:
         # One object, nothing else, so a caller can parse it.
         print(json.dumps(out, indent=2, sort_keys=True))

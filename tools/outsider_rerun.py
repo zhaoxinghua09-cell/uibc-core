@@ -333,9 +333,11 @@ def check():
     names_only = False
     delivery_only = False
     matched = None
+    strict = False
     for name, (d, c, l, n) in views:
         if receipt.get("tree_sha256") == d:
             matched = (name, d, c, l, n)
+            strict = True
             break
     if matched is None:
         for name, (d, c, l, n) in views:
@@ -361,7 +363,12 @@ def check():
                          f"{str(receipt_content)[:12]} vs {c[:12]})")
             matched = (name, d, c, l, n)
     view_name, digest, cdigest, lfdigest, count = matched
-    if receipt.get("files_hashed") != count:
+    # The strict digest already encodes the file set: every path and every
+    # content hash is in it. The count is a second opinion worth asking when the
+    # digest did not match; when it did, a differing count means the two views
+    # count differently (a Windows extraction turning a symlink into a file),
+    # not that a file appeared.
+    if not strict and receipt.get("files_hashed") != count:
         fails.append(f"file count moved: receipt {receipt.get('files_hashed')}, tree {count}")
     steps = receipt.get("steps", [])
     if len(steps) != len(STEPS):

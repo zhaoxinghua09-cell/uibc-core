@@ -1,7 +1,9 @@
 {
- "generated_at": "2026-11-25T18:39:11Z",
- "tree_sha256": "9b60cead27e5d4a52189d0261771e88e6ceca748199b4911dde45ff03999b528",
+ "generated_at": "2026-11-25T19:38:14Z",
+ "tree_sha256": "f35bd3bd33701c5fe9fb33269a9ac6a5b03e6482627f911d5e9634969fec73fa",
  "files_hashed": 2426,
+ "content_sha256": "a14ff1bbbc68f112b9fba12915b4221074e2b9aaad4e12378bd4fd492d03b38c",
+ "content_files": 2426,
  "digest_excludes": [
   "docs/OUTSIDER-RERUN.md",
   "docs/outsider-rerun-receipt.json"
@@ -35,7 +37,7 @@
    "rc": 0,
    "expect": "GATE OK",
    "ok": true,
-   "seconds": 0.4,
+   "seconds": 0.3,
    "tail": "GATE OK"
   },
   {
@@ -63,7 +65,7 @@
    "expect": "passed",
    "ok": true,
    "seconds": 2.6,
-   "tail": "12 passed in 1.96s"
+   "tail": "12 passed in 1.99s"
   }
  ],
  "ok": true

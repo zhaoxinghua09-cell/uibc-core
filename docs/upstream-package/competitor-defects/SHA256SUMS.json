@@ -1,0 +1,37 @@
+{
+  "upstream": {
+    "repo": "https://github.com/probityai/agent-evidence-vectors",
+    "commit": "22764551",
+    "release": "v0.38.0",
+    "fetched": "2026-11-25",
+    "path": "vectors-poc-evidence/package/poc_evidence_vectors/corpus/"
+  },
+  "empty_tree_root": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "rule": "a vector that says size 0 must carry this root; any other root is the vector contradicting itself, and a 'reject' then cannot come from proof arithmetic",
+  "files": {
+    "v0.38.0/CON-N-old-size-zero.json": {
+      "sha256": "e836b8d5df4d41a7d4bf8a4dbf8950306fc0a8dcc9ae1690d17e3213c0337136",
+      "bytes": 735
+    },
+    "v0.38.0/INC-N-size-zero.json": {
+      "sha256": "44bf96eb5ea8ab987b53cddf686fd0b908620db77eef088b1b0cc35315171905",
+      "bytes": 564
+    },
+    "v0.38.0/TOK-N-tree-size-zero.json": {
+      "sha256": "e43368a09423bfc13dbdaf96cb066b5eaea31a486a0303b8aca15ae89d91d282",
+      "bytes": 1816
+    },
+    "v0.38.0-counter/CON-N-size-zero-counter.json": {
+      "sha256": "c91e0f791ac2e32e6151ebd30380ad2795fea3427f8319abb613a2923d8a160c",
+      "bytes": 725
+    },
+    "v0.38.0-counter/INC-N-size-zero-counter.json": {
+      "sha256": "b224959f9296e05f5ae1d4ba9e5c94525e50bbeb797640ce4e3de656b1d6a411",
+      "bytes": 561
+    },
+    "v0.38.0-counter/TOK-N-tree-size-zero-counter.json": {
+      "sha256": "3e50f633a5437729ec3edea5bec5a428b4279b63db18c7ff09f673f731d1e90d",
+      "bytes": 974
+    }
+  }
+}

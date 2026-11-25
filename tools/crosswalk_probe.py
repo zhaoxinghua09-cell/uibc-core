@@ -285,6 +285,23 @@ def render_md(result):
     return "\n".join(lines) + "\n"
 
 
+def repo_relative(path, repo=REPO):
+    """The path as it should be recorded: relative to the repo, forward slashes.
+
+    On Windows the repo and a caller's temp directory can sit on different drives,
+    where os.path.relpath raises ValueError ("path is on mount 'C:', start on
+    mount 'D:'"). Tests run from a temp dir hit this; the publish path never does,
+    since recheck and the repo share a drive. The fallback keeps a caller-supplied
+    path usable instead of inventing a relative path that does not exist, and only
+    that case can put a machine path in a result - which the byte-for-byte
+    comparison in recheck would catch before any published file changed.
+    """
+    try:
+        return os.path.relpath(path, repo).replace("\\", "/")
+    except ValueError:
+        return os.path.abspath(path).replace("\\", "/")
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Clause-level conformance probes with declared gaps.")
     ap.add_argument("crosswalk", help="path to a uibc-crosswalk/1 JSON file")
@@ -306,7 +323,7 @@ def main(argv=None):
         sys.stderr.write("refusing: schema is %r, expected %r\n" % (doc.get("schema"), SCHEMA))
         return 2
 
-    doc.setdefault("standard", {})["source"] = os.path.relpath(path, REPO).replace("\\", "/")
+    doc.setdefault("standard", {})["source"] = repo_relative(path)
     result = evaluate(doc, cwd=REPO, run=not args.no_probe)
 
     if args.check_against:

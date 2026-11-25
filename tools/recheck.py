@@ -62,7 +62,7 @@ def main(argv=None):
             return 2
         # Same as the single-file tool: the source path is part of the result,
         # so a re-run elsewhere produces the same bytes as the committed file.
-        doc.setdefault("standard", {})["source"] = os.path.relpath(f, REPO).replace("\\", "/")
+        doc.setdefault("standard", {})["source"] = cp.repo_relative(f, REPO)
         res = cp.evaluate(doc, cwd=REPO, run=not args.no_probe)
 
         committed = out_dir / ("crosswalk-%s.json" % name)

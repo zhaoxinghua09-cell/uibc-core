@@ -375,13 +375,19 @@ def _decode_leaf(unit: Unit, doc: DecodedDocument,
             doc.integers[path] = int.from_bytes(unit.payload, "big")
 
 
-def decode_message(data: bytes) -> Tuple[Header, DecodedDocument]:
-    """Header + body of a document answer, in one call."""
-    header = parse_header(data)
+def decode_message(data: bytes, *, integer_widths: Optional[Dict[str, int]] = None,
+                   flag_bit_order: str = "msb") -> Tuple[Header, DecodedDocument]:
+    """Header + body of a document answer, in one call.
+
+    ``integer_widths`` and ``flag_bit_order`` are forwarded, because a caller who
+    had to supply them to decode one layer should not have to supply them again to
+    decode the layer above.
+    """
+    header = parse_header(data, flag_bit_order=flag_bit_order)
     body_start = header.header_length
     body = data[body_start:body_start + header.message_length]
     units = parse_units(body)
-    doc = decode_document(units)
+    doc = decode_document(units, integer_widths=integer_widths)
     return header, doc
 
 # ---------------------------------------------------------------- codec

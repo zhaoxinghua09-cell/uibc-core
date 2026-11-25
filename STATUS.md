@@ -12,8 +12,8 @@ A conformance corpus and verifier for a per-action evidence format, published wi
 |---|---|---|
 | version | 0.5.4 | `pyproject.toml` |
 | conformance archive | `conformance/uibc-conformance-0.5.4.zip` | `conformance/uibc-conformance-0.5.4.zip` |
-| archive sha256 | `285919ffbe2bd073d169f11779caf53785258ccb8e4a30b7c52cd6921fb1655d` | pin file |
-| archive bytes | 359714 | pin file |
+| archive sha256 | `f0cb92932f1e10394343d55f530d534c1efe60860a4975ca49df7d0d4bba6a25` | pin file |
+| archive bytes | 359697 | pin file |
 | cases inside the archive | 58 | counted from the zip |
 | archive carries its own verifier | yes | zip listing |
 | oracle cases | 30 | `conformance/oracle/cases` |

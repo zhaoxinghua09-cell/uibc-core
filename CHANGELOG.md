@@ -1,11 +1,13 @@
-## 0.5.4 — 2026-11-25（版本串、归档与 tag 同一提交；发布就绪闸；一行接入）
+## 0.5.4 — 2026-11-25（条款级 crosswalk：29 行判词，机器可证伪）
 
-- **先合再打：tag 与字节同源**：本版按「合并 → 在 `main` 头打 tag → 再建 release」的顺序走。`v0.5.4` 指向的提交里同时有 `version = "0.5.4"`（pyproject / `uibc_core.__version__` / server.json 两处）和 `conformance/uibc-conformance-0.5.4.zip`，所以 `release-lab-bundle` 找得到自己那一版归档 —— 这是 v0.5.1/0.5.2/0.5.3 三连败的真因。
-- **发布就绪闸**：`tools/check_release_readiness.py` + `version-gate.yml` 的 `readiness` 作业（`if: startsWith(github.ref,'refs/tags/v')`）。它查四件事：三处版本串等于 tag、该版本归档存在、非空、归档清单里记的版本一致。6 条测试把树逐项造错，断言闸点名。
-- **一行接入（外部）**：新增 `action.yml`。外部仓库 `uses: zhaoxinghua09-cell/uibc-core@<ref>` 即可验证，装的是对方 pin 的那个提交。三值从验证器 JSON 读（`PASS` 0 / `FAIL` 2 / `INCONCLUSIVE` 3 / 无报告 4），只有 PASS 绿；**CLI 的 `verify` 对 PASS 之外一律 exit 1，进程状态分不出 FAIL 与 INCONCLUSIVE，这一点如实写在动作注释里，没有改 CLI 契约**。
-- **发布资产**：`uibc-conformance-0.5.4.zip`，359,714 字节，sha256 `285919ffbe2bd073d169f11779caf53785258ccb8e4a30b7c52cd6921fb1655d`；`MANIFEST.sha256` 791 文件、`anchors/pins/uibc-conformance-0.5.4.sha256` 与归档同源。
-- **本版同时带上了下方仍标为「未发布」的 DID / BID / crosswalk 内容**：它们的作者尚未各自改标，但 `v0.5.4` 这个 tag 里已有这些代码。
-- **仍未闭合**：PyPI 的 attestation 依赖 PyPI 侧 trusted publisher 条目（`invalid-publisher`），未配置前上传走 API token 兜底，产出的文件没有 provenance；见 README 的版本段与 `docs/KNOWN-LIMITS.md`。
+主题：竞品对照里"我们更全"是最容易说空的一句话。这一版把主张收窄到别人没发布的那一列——每个被监管条款对应一个判词，而判词可以被证伪。
+
+- **25 条法规条款 + 4 条工具契约 = 29 行**（`crosswalk/`）：COVERED 不是"我们实现了"，而是"有一个探针，曾经在该条款上被看见失败过"；PARTIAL / GAP 必须写理由；OVERCLAIM（声称覆盖但探针不存在）与 UNDECLARED（探针存在却没登记）直接 exit 1。
+- **`tools/recheck.py` 把公开表的每个数字回到字节**：六份 crosswalk 与 README 的声明同源，输出 `total clauses=29 COVERED=5 GAP=8 PARTIAL=16 bad=0`。CI 的 `crosswalk-gate` 与 `windows-probes` 都跑它；数字对不上就红，不靠人记。
+- **Windows 控制台的真缺陷**（`uibc_core/cli.py::_utf8_stdout`）：`verify` 在 cp1252 控制台抛 `UnicodeEncodeError`（position 564–587），stdout 为空，下游 `json.loads` 全挂——`windows-probes` 连红的真因。修法是在 `main()` 之前把 `sys.stdout/stderr` 重配成 UTF-8；新增 `tests/test_cli_stdout_encoding.py`，在 `PYTHONIOENCODING=cp1252` 下跑 `verify` 并要求输出可解析 JSON。这个场景在 Linux 上同样能复现，所以它不是 Windows 专属补丁。
+- **竞品节重写**（`docs/COMPETITORS.md`）：先承认 InSpec 的 control 确实带 `ref`/`url`/`tag cce:` 条款映射，不能写"他们没有"；再收窄到唯一可证伪的那一列，并自陈三条限制——29 行只是形式主张、InSpec 跑在活系统上、自家验证器的行在第二实现出现前仍是自评。基线 `COMPETITORS.json` 与图 `COMPETITORS.svg` 由脚本生成，改一次必须重跑一次；文档里写的命令都实跑过，没跑过的不写。
+- **发布资产**：`uibc-conformance-0.5.4.zip`，359,697 字节，456 例，sha256 `f0cb92932f1e10394343d55f530d534c1efe60860a4975ca49df7d0d4bba6a25`；pin 在 `anchors/pins/uibc-conformance-0.5.4.sha256`。
+- **本版是发布就绪门禁第一次真的拦人**（#445 引入的 `readiness` job）：`tools/check_release_readiness.py` 在 tag 上说四件事——三处版本串一致、tag 树里含自己版本的归档、归档内记录的版本一致、tag 名等于 `v<版本>`。它的由来是三连红：`v0.5.1/0.5.2/0.5.3` 各自切在自己的归档之前，于是 lab bundle 每次都在 tag 树上找不到自己那一版。负控制实测：把归档移开 → `NOT READY TO TAG`，rc=1，报的正是生产环境那句话。
 
 ## 未发布 — 2026-11-25（DID 对接：BID 协议层，按《星火·链网BID协议》正文实现）
 

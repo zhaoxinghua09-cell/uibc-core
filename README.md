@@ -32,7 +32,7 @@ Fetch it anonymously, without cloning (no login, no token — measured 2026-11-2
 ```bash
 curl -fL -o corpus.zip \
   https://github.com/zhaoxinghua09-cell/uibc-core/raw/main/conformance/uibc-conformance-0.5.4.zip
-sha256sum corpus.zip   # 285919ffbe2bd073d169f11779caf53785258ccb8e4a30b7c52cd6921fb1655d, 359,714 bytes
+sha256sum corpus.zip   # f0cb92932f1e10394343d55f530d534c1efe60860a4975ca49df7d0d4bba6a25, 359,697 bytes
 unzip -q corpus.zip -d corpus && cd corpus && python run.py
 ```
 
@@ -45,7 +45,7 @@ No repository, no network, no `pip install`: the archive carries its own verifie
 This repository now ships a composite action, so a package can be verified inside someone else's CI without them installing anything:
 
 ```yaml
-- uses: zhaoxinghua09-cell/uibc-core@v0.5.4
+- uses: zhaoxinghua09-cell/uibc-core@v0.5.3
   with:
     path: path/to/package        # the package directory to verify
     strict: 'true'               # optional: fail on undeclared files under evidence/
@@ -80,15 +80,14 @@ The number above is **our own run**. It becomes an external node report only whe
 
 **Seven machine reviews do exist, and they are not this number.** `docs/external-review/` holds seven receipts written on 2026-11-17 by an external model (DeepSeek-V3 via SiliconFlow) in four lenses (expert / process / adversary / outsider). Under `INDEPENDENCE.md` those are stage **S3m/S4m** machine reviews: they must be labelled `reviewer_type: machine`, and they may not be described as a third party, because no human and no separate administration stands behind them. Counted by category: human independent reproduction **2** (EXTERNAL-NODE-001 — third-party execution, requested, and he is a correspondent in the same working group, so not a disinterested auditor; EXTERNAL-NODE-002 — requested by us as well, run on his own Mac, returned file + sha256, and he maintains a related specification, so again execution not interest); external machine review 7; external document citing this repository 0; adoption by any group 0. Quoting any one of those four as "external 0" without saying which line is meant is the kind of collapse this repository exists to catch.
 
-**Version numbers, updated 2026-11-25:** `main` is **0.5.4**, and `v0.5.4` is cut from `main`'s head — the first release where the version strings, the conformance archive and the tag are one commit. `pypi.org/pypi/uibc-core/json` is the authority for what PyPI serves: 0.5.4 after this release's publish run, 0.5.3 before it. The archived citation snapshot is still **0.2.1** (2026-09-17), which is what a citation should point at.
+**Version numbers, updated 2026-11-25:** `main` is **0.5.3** and PyPI carries **0.5.3** (both `uibc_core-0.5.3-py3-none-any.whl` and the sdist). The archived citation snapshot is still **0.2.1** (2026-09-17), which is what a citation should point at.
 
-Three things this paragraph will not hide, because all three were measured:
+Two things this paragraph will not hide, because both were measured today:
 
-- **attestation is missing until a publisher entry exists.** PyPI trusted publishing answered `invalid-publisher` (no entry matched the workflow), the upload fell back to a long-lived API token, and `tools/check_pypi_provenance.py` reported `2 of 2 file(s) lack provenance` for 0.5.3 (run `45538833447`). 0.5.0 has the same defect, and any version published before the entry is added will have it too. "Published" still does not mean "attested".
-- **the `v0.5.3` tag does not name the 0.5.3 code.** It was cut before the version bump landed; the release is immutable, so the tag cannot be moved. That is the history behind three failed `release-lab-bundle` runs at one step. `tools/check_release_readiness.py` now refuses a tag that does not carry its own archive, runs first on every `v*` tag, and is why `v0.5.4` is cut only after the archive is committed.
-- **`v0.5.1` and `v0.5.2` are not citable.** `v0.5.1`'s tag name was burned by an immutable-release retry; `v0.5.2`'s archive carries stale oracle strings. `docs/KNOWN-LIMITS.md` is the single source for both.
+- **0.5.3 on PyPI carries no attestation.** PyPI trusted publishing answered `invalid-publisher` (no publisher entry matched the workflow), the upload fell back to a long-lived API token, and `tools/check_pypi_provenance.py` reports `2 of 2 file(s) lack provenance` for 0.5.3 (run `45538833447`). 0.5.0 has the same defect. Until the publisher entry exists, "published" does not mean "attested".
+- **the `v0.5.3` tag does not name the 0.5.3 code.** The tag was cut before the version bump landed; the release is immutable, so the tag cannot be moved. The archive and the code are on `main`; the tag points at a commit where the version strings still say `0.5.2`. This is why `release-lab-bundle` failed on v0.5.1, v0.5.2 and v0.5.3 at the same step. `tools/check_release_readiness.py` now refuses a tag that does not carry its own archive, and it runs first on every `v*` tag.
 
-So: install by version number, cite the snapshot, and do not treat a tag name as a proof of what it contains.
+So: `pip install uibc-core==0.5.3` gives you the verifier this README describes; `v0.5.3` as a *tag* does not. Cite the snapshot, install by version number, and do not treat a tag name as a proof of what it contains.
 
 **External conformance, measured against someone else's corpus** — a different number from the one above, and a different kind of claim:
 

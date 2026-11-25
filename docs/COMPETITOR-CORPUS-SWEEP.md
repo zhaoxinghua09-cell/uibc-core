@@ -196,3 +196,37 @@ python tools/stranger_competitor_check.py                         # 取上游 ta
 一句话的差别：我们的 63 条**每一条都落在 `verdict` 层**；他们的 171 条里 69 条落在这一层，另 88 条只到签名，14 条连签名也到不了。
 
 画成一张图是同一件事：`docs/UPSTREAM-REACH-LADDER.svg`（`tools/build_reach_ladder_svg.py --write` 生成，`--check` 在任一份收据变动时失效）。三段柱共用 171 刻度，段长全部读自收据，柱下还按族给出 `verdict/signature-only/nothing` 三个计数；我方 63 条画在同一刻度上，整条落在 `verdict` 段。
+
+## 那 69 里有 36 条不靠我们的代码
+
+到上一层为止，69 个可复算的 verdict 全是我们自己的折叠函数算出来的——这正是我们自己立的规矩所反对的：得出数字的代码同时充当数字的证书。
+
+所以把竞品的 inclusion 字节交给一份**不是我们写的**实现：`tools/third_party/sigstore_merkle.py`（上游 Rekor 的 Trillian 折法，随仓 vendored，与 `tools/verify_rekor_inclusion.py` 不同一条代码路径），只问一件事——按对方自述的叶子、下标、证明往上折，能不能落在对方自述的根上。
+
+| 口径 | 数字 |
+|---|---|
+| 竞品 inclusion 向量 | 37 |
+| 被该实现折过、可比 | **36** |
+| 与其发布 verdict 一致 | **36 / 36** |
+| 与我们扫描收据的行一致 | **36 / 36，0 分歧** |
+| 未比 | 1（`INC-N-size-zero`：该实现没有 `MTH({})`，不比不判） |
+
+三条边界必须一起说：
+
+1. **只覆盖 inclusion。** consistency 23 条与 canonical 9 条仍是我们自己的算术——这份 vendored 代码没有 consistency 折法，我们也不拿它冒充。收据 `covers` 字段写死这句。
+2. **size=0 的那条不比，不算通过。** Sigstore 的空树无根，我们的常量在那里无法被它佐证；把它计成一致就是拿缺席当证据。
+3. **一致不等于我们对。** 两份实现同错是可能的；这条只说明"不是我们一家算出来的"。
+
+收据 `docs/upstream-package/competitor-defects/inclusion-second-implementation.json`（逐条 37 行，清单摘要与扫描收据同一批字节），`--check` 任一行变动即失败；外人一条命令 `tools/stranger_competitor_check.py` 现在多打一行：
+
+```
+inclusion folded by vendored Sigstore: 36 of 36 agree with the published verdict, 1 not compared
+```
+
+复跑：
+
+```bash
+python tools/crosscheck_competitor_inclusion_sigstore.py --dir <…/corpus>            # 摘要
+python tools/crosscheck_competitor_inclusion_sigstore.py --dir <…/corpus> --check    # 任一行变动即失败
+python tools/crosscheck_competitor_inclusion_sigstore.py --selftest                  # 7 条
+```

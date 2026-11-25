@@ -1,0 +1,6 @@
+89adac169c49be9a5ebae8097f84d1c4ece053fee30be57cdb4a918cdb738cad  README.md
+ba26be15204ede0e31eee082edc73b2d6a680e5d1f5fcc72372a69e7c0922724  expected.json
+fc2b578242f6ec064db8de687d5b380c4a41d4bea7c7013091c5cd094e070af7  manifest.json
+8568e3ad650138dd2452773955a3f5d3a1e430434827138e4b882729f8295ad2  run.py
+837a6364b89f4df9c1a18f783f7a88b6e0c7ae8136edc0dca0939bab5fe2649e  uibc_core.pyz
+# 5 kit file(s); case files are covered by MANIFEST.sha256

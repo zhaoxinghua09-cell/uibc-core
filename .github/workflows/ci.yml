@@ -336,6 +336,10 @@ jobs:
           # with arithmetic alone; the sweep has to keep saying which it cannot, and
           # its selftest fails if the classifier starts flattering us.
           python tools/sweep_competitor_corpus.py --selftest
+          # And a sweep that reports zero contradictions has to be seen failing:
+          # this one mutates a correct vector until the sweep refuses it, and keeps
+          # the one blind spot it cannot see (a changed tree size) reported apart.
+          python tools/sweep_mutation_control.py --selftest
           python tools/check_competitor_vectors.py \
             --dir docs/upstream-package/competitor-defects/v0.38.0 \
             --dir docs/upstream-package/competitor-defects/v0.38.0-counter --json \

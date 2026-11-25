@@ -32,6 +32,8 @@
 | A15 | 公开合规包**字节自证**（不是结论自证）：下载物、pin、用例三者对得上，且 58 例全过 | `python tools/check_vector_package.py` | 四行 ok（MANIFEST / archive pin / coverage / suite 58/58）；另 `sha256sum -c conformance/MANIFEST.sha256` 独立复算 | 任一行为 FAIL，说明发布物与清单脱节——此时所有"可复跑"的说法都不成立。**边界**：它证明的是"你拿到的字节是我们发布的字节"，不证明用例设计正确，也不证明判定结论必真 |
 | A16 | 覆盖矩阵公开且含空白单元：19 项检查中 16 项有用例，S9/S16/S19 无**直接**用例，逐条给出理由与替代验证路径（替代路径不计为向量覆盖） | `python tools/conformance_coverage.py --print` | 打印 `16/19 covered`，并列出 `S9, S16, S19`；`conformance/coverage.json` 的 `reason` 字段写替代路径 | 若某空白项没有 reason，说明是用例缺口而非结构限制——必须补用例，不能补说明 |
 | A17 | 突变基准报告 α 也报告 β，并给 Wilson 上界；第二套算子族单列 | `python tools/mutation_controls.py` | 保持型 10 例假拒绝 **0/10**（两模式，上界 ≤27.8%）；第二套算子 11 例假接受 **0/11**（三模式，上界 ≤25.9%）；3 个变异在 `ambiguous_excluded` 里写明裁决理由 | 若只报 α 或把 0 写成“0%”，即违反本法：0/10 的上界仍是 27.8%，不能当日结论 |
+| A18 | 竞品 171 条语料里 69 条（40%）能被外人按公开标准复算，69 自洽、0 矛盾、102 不可复算（HEAD `39daf704`） | 抓 `probityai/agent-evidence-vectors` 到 `39daf704`，`python tools/sweep_competitor_corpus.py --dir <…/corpus> --json` | 末行 `TOTAL 171 vectors, replayable without their code 69 (40%), consistent 69, inconsistent 0, not replayable 102`；逐文件 sha256 见收据 `docs/upstream-package/competitor-defects/corpus-sweep-39daf704.json` | 任一数字变动＝语料被改过，或我们的判据被放宽；必须先解释再改文档 |
+| A19 | 那个“0 矛盾”是检测器真的会失手才有的：196 处注入改动，183 处被认出，13 处属尺寸歧义，0 处无法解释 | 同一份语料上 `python tools/sweep_mutation_control.py --dir <…/corpus>` | `TOTAL applied 196, detected 183, ambiguous 13, unexplained 0`；收据 `…/sweep-mutation-control.json` | 若 `unexplained` 出现非零，说明漏检而不只是歧义——“0 矛盾”立刻失去支撑，须撤回该句 |
 
 ## 二、未建（**这些句子现在不许对外说**）
 

@@ -159,7 +159,8 @@ jobs:
                   echo "refusing to replace a published asset; re-run with replace=true to accept it"
                   exit 1
                 fi
-                echo "replace=true: the change above is on the record"              fi
+                echo "replace=true: the change above is on the record"
+              fi
             fi
           done
           # A file that this run did not produce but the page still carries is stale by

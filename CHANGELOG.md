@@ -1,3 +1,10 @@
+## 未发布 — 2026-11-26（敏感性检验：把 D1 规则放松，"最好 3/10"会不会翻）
+
+- **为什么要做**：D1 的判据是"一行里同时出现断言和拒绝词"。这门规则是我们自己写的，所以"最好竞品只有 3/10"也可能是我们拼写方式的产物——这正是这类对照表最容易自欺的地方。
+- **做法**：`tools/parity_sensitivity.py` 用同一批固定 commit 的 tarball，把规则放宽成"断言行前后 ±2 行内出现拒绝词"，只加分不减分，逐家重算并写 `docs/parity-sensitivity.json` + `docs/PARITY-SENSITIVITY.md`。
+- **结果**：25 家里只有 1 家（`decentralized-identity/universal-resolver`）由 0→1，**最好仍是 3/10**，本仓 10/10。多个仓的断言行数翻倍（`did-jwt` 51→117、`ssi-sdk` 123→148），但都早已在 1 分之上，不改变排序。
+- **结论写死成判据**：`--check` 离线核对"放宽后最好分不得高于严格最好分"，一旦有竞品在宽松规则下拿到 4 分，直接输出 `withdraw the headline`——那时该撤的是主张，不是把规则改回去。
+- **`tests/test_parity_sensitivity.py` 五条**：记录必须覆盖快照全部仓库、放宽不得抬高最好分、只有 D1 可移动、放宽必须真的对至少一家有影响（否则不算敏感性检验）、页面必须写出结论。
 ## 未发布 — 2026-11-26（看板：单文件、零外链、打开就自己算一遍，算错就红）
 - **顺手修红**：`tools/tree_digest_second_impl.py` 把成员清单交给 Python 侧（`tree_digest(root, files)`），但 `outsider_rerun.py` 的两个摘要函数只收 `root`，`second-implementation` 这条 CI 因此在 main 上是红的（`takes 1 positional argument but 2 were given`）。给两个函数加可选 `files=None`（省略时行为不变），本地 `--check` 得 `TREE OK`：Python 与 Node 在 2437 个文件上 `tree_sha256` / `content_sha256` 双轴一致。
 

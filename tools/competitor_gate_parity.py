@@ -279,6 +279,7 @@ python tools/competitor_gate_parity.py --json                    # 机读
 快照：`docs/competitor-parity.json`（含每个仓库的 sha、tarball sha256、字节数、原始计数）。
 矩阵图：`docs/COMPETITOR-GATE-PARITY.svg`（由快照生成，字节可复现）。
 看板：`docs/parity-board.html`（单文件、零外链，数据内嵌，**打开即自检**；`node tools/board_check.js` 可在无浏览器环境里跑它自己的脚本验收）。
+敏感性：`docs/PARITY-SENSITIVITY.md`（把 D1 的同行匹配放宽到 ±2 行，看"最好 3/10"会不会翻；`tools/parity_sensitivity.py --check` 离线拦）。
 
 ## 八、引用
 

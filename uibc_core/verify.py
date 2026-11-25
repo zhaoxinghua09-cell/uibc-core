@@ -11,7 +11,7 @@ import os
 import re
 from datetime import datetime, timedelta, timezone
 
-from .canonical import evidence_root, hash_file
+from .canonical import evidence_root, evidence_root_for, hash_file
 from .lifecycle import validate_lifecycle, validate_lifecycle_strict
 from .signing import (ALGORITHM, ALGORITHM_ED25519, b64decode_strict,
                       ed_key_id, ed_seal_verify_scoped, key_id, seal_verify)
@@ -1027,7 +1027,9 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
     from .canonical import lifecycle_head as _lh
     actual_lc_head = _lh(events)
     try:
-        actual_ckpt = _ch(actual_lc_head, evidence_root(recomputed_hashes),
+        actual_ckpt = _ch(actual_lc_head,
+                          evidence_root_for(recomputed_hashes,
+                                            manifest.get("root_algorithm")),
                           _imd2(index), len(entries))
     except Exception as e:
         # a NaN / non-ECMAScript number anywhere in the state we commit to
@@ -1129,7 +1131,8 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
 
     # S5 evidence root
     if entries and not s4_failures:
-        computed = evidence_root(recomputed_hashes)
+        computed = evidence_root_for(recomputed_hashes,
+                                     manifest.get("root_algorithm"))
         root_ok = computed == manifest.get("evidence_root")
         record("S5", "evidence root", root_ok,
                f"computed={computed}, manifest={manifest.get('evidence_root')}")

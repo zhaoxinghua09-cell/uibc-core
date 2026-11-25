@@ -170,3 +170,27 @@ def b64decode_strict(text):
         return base64.b64decode(text.encode("ascii"), validate=True)
     except Exception:
         return None
+
+
+def context_sign(seed: bytes, seal_signature: str, context: dict) -> str:
+    """v0.7: sign {"seal_signature", "context"} - binds a use-case context to the
+    exact seal it accompanies. Tampering purpose/nonce/verifier breaks it."""
+    return base64.b64encode(
+        _ed.sign(seed, canonicalize({"seal_signature": seal_signature,
+                                     "context": context}))).decode("ascii")
+
+
+def context_verify(public_key: bytes, seal_signature: str, context: dict,
+                   sig_b64: str) -> bool:
+    if not isinstance(sig_b64, str):
+        return False
+    try:
+        sig = base64.b64decode(sig_b64.encode("ascii"), validate=True)
+        payload = canonicalize({"seal_signature": seal_signature, "context": context})
+    except Exception:
+        return False
+    try:
+        return _ed.verify(bytes(public_key), payload, sig)
+    except Exception:
+        return False
+

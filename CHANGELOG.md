@@ -1,3 +1,12 @@
+## 0.5.4 — 2026-11-25（版本串、归档与 tag 同一提交；发布就绪闸；一行接入）
+
+- **先合再打：tag 与字节同源**：本版按「合并 → 在 `main` 头打 tag → 再建 release」的顺序走。`v0.5.4` 指向的提交里同时有 `version = "0.5.4"`（pyproject / `uibc_core.__version__` / server.json 两处）和 `conformance/uibc-conformance-0.5.4.zip`，所以 `release-lab-bundle` 找得到自己那一版归档 —— 这是 v0.5.1/0.5.2/0.5.3 三连败的真因。
+- **发布就绪闸**：`tools/check_release_readiness.py` + `version-gate.yml` 的 `readiness` 作业（`if: startsWith(github.ref,'refs/tags/v')`）。它查四件事：三处版本串等于 tag、该版本归档存在、非空、归档清单里记的版本一致。6 条测试把树逐项造错，断言闸点名。
+- **一行接入（外部）**：新增 `action.yml`。外部仓库 `uses: zhaoxinghua09-cell/uibc-core@<ref>` 即可验证，装的是对方 pin 的那个提交。三值从验证器 JSON 读（`PASS` 0 / `FAIL` 2 / `INCONCLUSIVE` 3 / 无报告 4），只有 PASS 绿；**CLI 的 `verify` 对 PASS 之外一律 exit 1，进程状态分不出 FAIL 与 INCONCLUSIVE，这一点如实写在动作注释里，没有改 CLI 契约**。
+- **发布资产**：`uibc-conformance-0.5.4.zip`，357,701 字节，sha256 `dacf026954e15e73782aba814a74571a700efbca55d083f40038d7845623e0e7`；`MANIFEST.sha256` 791 文件、`anchors/pins/uibc-conformance-0.5.4.sha256` 与归档同源。
+- **本版同时带上了下方仍标为「未发布」的 DID / BID 内容**：它们的作者尚未各自改标，但 `v0.5.4` 这个 tag 里已经有这些代码，不写这一句就等于让读者以为 tag 不含它们。
+- **仍未闭合**：PyPI 的 attestation 依赖 PyPI 侧 trusted publisher 条目（`invalid-publisher`），未配置前上传走 API token 兜底，产出的文件没有 provenance；见 README 的版本段与 `docs/KNOWN-LIMITS.md`。
+
 ## 未发布 — 2026-11-25（DID 对接：BID 协议层，按《星火·链网BID协议》正文实现）
 
 主题：上一版把 `did:bid` 的通路做通了（GET + errorCode + id 校验），但没有读懂回来的文档。读完协议正文后发现三处真缺口，这一版补齐，且每一处都对着条款写测试。

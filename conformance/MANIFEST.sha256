@@ -598,6 +598,8 @@ eda9c75e6836d3302fdb543c9277f633105c3e2dd56d24db05c5dc914d459a02  oracle/cases/a
 bdd5373052466661dac94bcd1d9f093ffeba1e921848bcfc339367c117f8ef56  oracle/cases/accept-typed-evidence/signatures/seal.json
 6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d  oracle/cases/accept-unicode-names/evidence/.lock
 751e7ba32ae2038db2f8f36d4a34f2a93494b643796169ded3c2144547e2adec  oracle/cases/accept-unicode-names/evidence/files/accept-unicode-names-résumé.md
+751e7ba32ae2038db2f8f36d4a34f2a93494b643796169ded3c2144547e2adec  oracle/cases/accept-unicode-names/evidence/files/accept-unicode-names-r茅sum茅.md
+46c4a85e2c3655edeb56fbc630191eb5538b2970a1be84963a594f686ff32271  oracle/cases/accept-unicode-names/evidence/files/accept-unicode-names-杩愯鏃ュ織.txt
 46c4a85e2c3655edeb56fbc630191eb5538b2970a1be84963a594f686ff32271  oracle/cases/accept-unicode-names/evidence/files/accept-unicode-names-运行日志.txt
 12ba6e113ca8ff229674ea84e8bc23faecf06e412404d880a2093f160bafb5f4  oracle/cases/accept-unicode-names/evidence/index.json
 eda9c75e6836d3302fdb543c9277f633105c3e2dd56d24db05c5dc914d459a02  oracle/cases/accept-unicode-names/identity.json
@@ -788,3 +790,4 @@ a8964cd7ab6a9863754d6b808efb016b9549adcca803ca3313d4e7e7df4b6b09  oracle/cases/o
 711fa82c9f183066cfae6441a4fe3fc27fcc516b25f2a976cad5e0dd61b5135f  uibc-conformance-0.4.1.zip
 ad2b73ccdd8e5606364372350fc35134d8efe897f0382b36dd4ee65af341bfc0  uibc-conformance-0.5.0.zip
 5f3a72cb277dac8f285cd50df304dd9befe762caf42f40b98b907bcfc20cce8c  uibc-conformance-0.5.3.zip
+dacf026954e15e73782aba814a74571a700efbca55d083f40038d7845623e0e7  uibc-conformance-0.5.4.zip

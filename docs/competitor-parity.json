@@ -38,9 +38,9 @@
  "ours": {
   "repo": "zhaoxinghua09-cell/uibc-core",
   "commit": "unknown",
-  "code_files": 1811,
-  "test_files": 273,
-  "test_text_kb": 1068,
+  "code_files": 1986,
+  "test_files": 275,
+  "test_text_kb": 1073,
   "test_hits": {
    "fuzz": 0,
    "mutation_testing": 4,
@@ -48,16 +48,16 @@
    "bit_level": 1,
    "address_derive": 42,
    "exit_code_gate": 1,
-   "reject_assertion": 165
+   "reject_assertion": 167
   },
   "nontest_hits": {
-   "fuzz": 71,
-   "mutation_testing": 29,
+   "fuzz": 95,
+   "mutation_testing": 32,
    "property_based": 13,
-   "bit_level": 7,
-   "address_derive": 100,
-   "exit_code_gate": 6,
-   "reject_assertion": 2599
+   "bit_level": 9,
+   "address_derive": 102,
+   "exit_code_gate": 7,
+   "reject_assertion": 2729
   },
   "dims": {
    "D1": 2,
@@ -117,12 +117,13 @@
     ]
    },
    "dims": {
-    "D1": 1,
+    "D1": 0,
     "D2": 0,
     "D3": 0,
     "D4": 0,
     "D5": 0
-   }
+   },
+   "assertion_lines": 0
   },
   {
    "repo": "caict-4iot-dev/uni-registrar-driver-did-bid",
@@ -167,7 +168,8 @@
     "D3": 0,
     "D4": 0,
     "D5": 0
-   }
+   },
+   "assertion_lines": 0
   },
   {
    "repo": "caict-4iot-dev/uni-resolver-driver-did-bid",
@@ -212,7 +214,8 @@
     "D3": 0,
     "D4": 0,
     "D5": 0
-   }
+   },
+   "assertion_lines": 0
   },
   {
    "repo": "ceramicnetwork/js-did",
@@ -265,7 +268,8 @@
     "D3": 1,
     "D4": 0,
     "D5": 0
-   }
+   },
+   "assertion_lines": 28
   },
   {
    "repo": "decentralized-identity/did-jwt",
@@ -318,7 +322,8 @@
     "D3": 1,
     "D4": 1,
     "D5": 0
-   }
+   },
+   "assertion_lines": 51
   },
   {
    "repo": "decentralized-identity/did-resolver",
@@ -365,7 +370,8 @@
     "D3": 0,
     "D4": 0,
     "D5": 0
-   }
+   },
+   "assertion_lines": 0
   },
   {
    "repo": "decentralized-identity/ethr-did-resolver",
@@ -413,12 +419,13 @@
     ]
    },
    "dims": {
-    "D1": 1,
+    "D1": 0,
     "D2": 0,
-    "D3": 1,
-    "D4": 1,
+    "D3": 0,
+    "D4": 0,
     "D5": 0
-   }
+   },
+   "assertion_lines": 6
   },
   {
    "repo": "decentralized-identity/ion",
@@ -463,9 +470,10 @@
     "D1": 0,
     "D2": 0,
     "D3": 0,
-    "D4": 1,
+    "D4": 0,
     "D5": 0
-   }
+   },
+   "assertion_lines": 0
   },
   {
    "repo": "decentralized-identity/sidetree-core",
@@ -511,12 +519,13 @@
     ]
    },
    "dims": {
-    "D1": 1,
+    "D1": 0,
     "D2": 0,
-    "D3": 1,
+    "D3": 0,
     "D4": 0,
     "D5": 0
-   }
+   },
+   "assertion_lines": 0
   },
   {
    "repo": "decentralized-identity/universal-resolver",
@@ -560,12 +569,13 @@
     ]
    },
    "dims": {
-    "D1": 1,
+    "D1": 0,
     "D2": 0,
     "D3": 0,
     "D4": 0,
     "D5": 0
-   }
+   },
+   "assertion_lines": 2
   },
   {
    "repo": "decentralized-identity/veramo",
@@ -620,7 +630,8 @@
     "D3": 1,
     "D4": 1,
     "D5": 0
-   }
+   },
+   "assertion_lines": 66
   },
   {
    "repo": "digitalbazaar/did-io",
@@ -665,7 +676,8 @@
     "D3": 0,
     "D4": 0,
     "D5": 0
-   }
+   },
+   "assertion_lines": 0
   },
   {
    "repo": "docknetwork/sdk",
@@ -720,7 +732,8 @@
     "D3": 1,
     "D4": 1,
     "D5": 0
-   }
+   },
+   "assertion_lines": 15
   },
   {
    "repo": "hyperledger/aries-cloudagent-python",
@@ -777,7 +790,8 @@
     "D3": 1,
     "D4": 1,
     "D5": 0
-   }
+   },
+   "assertion_lines": 22
   },
   {
    "repo": "hyperledger/aries-framework-go",
@@ -834,7 +848,8 @@
     "D3": 1,
     "D4": 1,
     "D5": 0
-   }
+   },
+   "assertion_lines": 11
   },
   {
    "repo": "hyperledger/indy-sdk",
@@ -891,7 +906,8 @@
     "D3": 1,
     "D4": 1,
     "D5": 0
-   }
+   },
+   "assertion_lines": 10
   },
   {
    "repo": "hyperledger/indy-vdr",
@@ -938,12 +954,13 @@
     ]
    },
    "dims": {
-    "D1": 1,
+    "D1": 0,
     "D2": 0,
-    "D3": 1,
-    "D4": 1,
+    "D3": 0,
+    "D4": 0,
     "D5": 0
-   }
+   },
+   "assertion_lines": 9
   },
   {
    "repo": "ontio/ontology-did",
@@ -988,7 +1005,8 @@
     "D3": 0,
     "D4": 0,
     "D5": 0
-   }
+   },
+   "assertion_lines": 0
   },
   {
    "repo": "sphereon-opensource/ssi-sdk",
@@ -1045,7 +1063,8 @@
     "D3": 1,
     "D4": 1,
     "D5": 0
-   }
+   },
+   "assertion_lines": 123
   },
   {
    "repo": "spruceid/didkit",
@@ -1089,10 +1108,11 @@
    "dims": {
     "D1": 0,
     "D2": 0,
-    "D3": 1,
+    "D3": 0,
     "D4": 0,
     "D5": 0
-   }
+   },
+   "assertion_lines": 0
   },
   {
    "repo": "spruceid/ssi",
@@ -1145,10 +1165,11 @@
    "dims": {
     "D1": 0,
     "D2": 0,
-    "D3": 1,
+    "D3": 0,
     "D4": 0,
     "D5": 0
-   }
+   },
+   "assertion_lines": 0
   },
   {
    "repo": "transmute-industries/sidetree.js",
@@ -1193,10 +1214,11 @@
    "dims": {
     "D1": 0,
     "D2": 0,
-    "D3": 1,
+    "D3": 0,
     "D4": 0,
     "D5": 0
-   }
+   },
+   "assertion_lines": 0
   },
   {
    "repo": "uport-project/ethr-did",
@@ -1242,10 +1264,11 @@
    "dims": {
     "D1": 0,
     "D2": 0,
-    "D3": 1,
+    "D3": 0,
     "D4": 0,
     "D5": 0
-   }
+   },
+   "assertion_lines": 1
   },
   {
    "repo": "w3c-ccg/did-method-key",
@@ -1290,7 +1313,8 @@
     "D3": 0,
     "D4": 0,
     "D5": 0
-   }
+   },
+   "assertion_lines": 0
   },
   {
    "repo": "w3c-ccg/did-test-suite",
@@ -1338,10 +1362,17 @@
    "dims": {
     "D1": 0,
     "D2": 0,
-    "D3": 1,
+    "D3": 0,
     "D4": 0,
     "D5": 0
-   }
+   },
+   "assertion_lines": 0
   }
- ]
+ ],
+ "calibration": {
+  "empty": 0,
+  "stuffed": 0,
+  "honest": 1,
+  "ceiling": 0
+ }
 }

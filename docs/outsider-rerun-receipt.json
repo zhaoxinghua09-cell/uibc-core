@@ -1,15 +1,15 @@
 {
- "generated_at": "2026-11-25T17:43:13Z",
- "tree_sha256": "e7fcbb1f5a7476a6b8d9a45d2d35305183cfe78b9d007b450554fdd7acda7509",
- "files_hashed": 2424,
+ "generated_at": "2026-11-25T18:11:10Z",
+ "tree_sha256": "e86895c26d211b9983579abde06ce4b577a18b7e7c1e8a661f595770aa6b7ed0",
+ "files_hashed": 2425,
  "digest_excludes": [
   "docs/OUTSIDER-RERUN.md",
   "docs/outsider-rerun-receipt.json"
  ],
  "runner": {
-  "python": "3.12.11",
-  "machine": "x86_64",
-  "system": "Linux"
+  "python": "3.13.18",
+  "machine": "AMD64",
+  "system": "Windows"
  },
  "environment": {
   "variables_kept": [
@@ -35,7 +35,7 @@
    "rc": 0,
    "expect": "GATE OK",
    "ok": true,
-   "seconds": 0.2,
+   "seconds": 0.4,
    "tail": "GATE OK"
   },
   {
@@ -44,7 +44,7 @@
    "rc": 0,
    "expect": "PARITY OK",
    "ok": true,
-   "seconds": 0.2,
+   "seconds": 0.6,
    "tail": "PARITY OK: 25 repositories pinned and re-scored, best competitor 3/10, this repository 10/10"
   },
   {
@@ -53,7 +53,7 @@
    "rc": 0,
    "expect": "ALL OK",
    "ok": true,
-   "seconds": 0.1,
+   "seconds": 0.3,
    "tail": "ALL OK"
   },
   {
@@ -62,8 +62,8 @@
    "rc": 0,
    "expect": "passed",
    "ok": true,
-   "seconds": 3.6,
-   "tail": "12 passed in 0.73s"
+   "seconds": 2.7,
+   "tail": "12 passed in 1.99s"
   }
  ],
  "ok": true

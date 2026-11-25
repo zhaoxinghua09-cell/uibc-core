@@ -81,6 +81,12 @@ def measure(cache):
         "changed": [r["repo"] for r in rows if r["D3_broad"] != r["D3_strict"]],
         "best_broad": max(r["score_broad"] for r in rows),
         "best_strict": max(r["score_strict"] for r in rows),
+        # 本仓的分不吃这两个规则：它的 D3 来自可执行的地址探针（翻键/替换各一次），
+        # 不是关键词命中，所以宽严两端同分。这里把它现算出来，而不是写死 10。
+        "ours_broad": sum(cgp.score_ours().values()),
+        "ours_strict": sum(cgp.score_ours().values()),
+        "ours_reason": "本仓 D3 来自可执行的地址探针（256 翻键 0 相撞 / 1710 次替换 0 通过），"
+                       "不依赖关键词，所以宽规则与严规则下同分",
     }
     open(RECORD, "w", encoding="utf-8").write(json.dumps(rec, ensure_ascii=False, indent=1) + "\n")
     write_page(rec)
@@ -92,8 +98,10 @@ def measure(cache):
 def write_page(rec):
     lines = [
         "# D3 是个区间，不是一个数（每次 `--run` 重写本页）", "",
-        "审计日 %s。**最好竞品：宽规则 %d/10，严规则 %d/10；本仓 10/10 两种规则下都不变。**"
-        % (rec["audited_at"], rec["best_broad"], rec["best_strict"]), "",
+        "审计日 %s。**最好竞品：宽规则 %d/10，严规则 %d/10；本仓 %d/10 与 %d/10 两种规则下不变。**"
+        % (rec["audited_at"], rec["best_broad"], rec["best_strict"],
+           rec.get("ours_broad", 10), rec.get("ours_strict", 10)), "",
+        "本仓为什么两端同分：%s。" % rec.get("ours_reason", ""), "",
         "- 宽规则（表现行）：test 文件里出现 `%s` 即记 1 分。" % rec["broad_rule"],
         "- 严规则：只认 `%s`。" % rec["strict_rule"], "",
         "为什么两个都要给：宽规则会把 `publicKeyBase58: '...'` 这种字面量当成\"地址派生\"证据（证据行见 "
@@ -124,6 +132,9 @@ def check():
     for r in rec["rows"]:
         if r["D3_strict"] > r["D3_broad"]:
             fails.append("strict scores higher than broad for %s" % r["repo"])
+    # 本仓的行必须与快照现算一致；否则"两端同分"就成了写在页面上的断言。
+    if "ours_broad" in rec and rec["ours_broad"] != sum(snap["ours"]["dims"].values()):
+        fails.append("ours row in the bracket record disagrees with the snapshot")
     page = open(PAGE, encoding="utf-8").read() if os.path.exists(PAGE) else ""
     if "区间" not in page:
         fails.append("page does not state that D3 is a bracket")

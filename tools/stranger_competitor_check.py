@@ -42,12 +42,14 @@ sys.path.insert(0, _REPO)
 
 import sweep_competitor_corpus as sweep
 import sweep_mutation_control as control
+import build_upstream_ledger as ledger
 
 UPSTREAM_REPO = "probityai/agent-evidence-vectors"
 SWEEP_RECEIPT = os.path.join(_REPO, "docs", "upstream-package", "competitor-defects",
                              "corpus-sweep-39daf704.json")
 CONTROL_RECEIPT = os.path.join(_REPO, "docs", "upstream-package", "competitor-defects",
                                "sweep-mutation-control.json")
+LEDGER_RECEIPT = ledger.RECEIPT
 
 
 def _sha256_file(path):
@@ -160,21 +162,32 @@ def run(dir_arg=None, verbose=True):
 
         out["sweep"] = sweep.run(corpus)["totals"]
         out["control"] = control.control(corpus)["totals"]
+        fresh_ledger = ledger.build(corpus)
+        out["ledger"] = fresh_ledger["totals"]
+        with open(LEDGER_RECEIPT, encoding="utf-8") as f:
+            stored_ledger = f.read()
         diffs = compare_totals("sweep", out["sweep"], sweep_receipt["totals"],
                                ("vectors", "n_replayable", "consistent",
                                 "inconsistent", "none"))
         diffs += compare_totals("control", out["control"], control_receipt["totals"],
                                 ("applied", "detected", "ambiguous", "unexplained"))
+        # The ledger is compared row by row: a single vector whose reach level
+        # moved is a difference, not a rounding error.
+        diffs += ["ledger " + d for d in ledger._compare(stored_ledger,
+                                                         ledger._dump(fresh_ledger))]
         out["diffs"] = diffs
         out["verdict"] = "REPRODUCED" if not diffs else "DID NOT MATCH"
         if verbose:
-            s, c = out["sweep"], out["control"]
+            s, c, g = out["sweep"], out["control"], out["ledger"]
             print("sweep: %d vectors, %d replayable, %d consistent, %d inconsistent, "
                   "%d not replayable"
                   % (s["vectors"], s["n_replayable"], s["consistent"],
                      s["inconsistent"], s["vectors"] - s["n_replayable"]))
             print("control: %d applied, %d detected, %d ambiguous, %d unexplained"
                   % (c["applied"], c["detected"], c["ambiguous"], c["unexplained"]))
+            print("ledger: %d verdict, %d signature-only, %d nothing, %d signatures verify"
+                  % (g["verdict"], g["signature-only"], g["nothing"],
+                     g["signature_verified"]))
             for d in diffs:
                 print("  DIFF %s" % d)
             print("VERDICT: %s" % out["verdict"])

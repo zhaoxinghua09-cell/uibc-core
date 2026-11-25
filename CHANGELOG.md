@@ -44,6 +44,9 @@
 - **可运行 demo**（`tools/demo_bid_trusted.py`）：起一个真的 `http.server` 当解析服务，四种答法（诚实 / 说验过但文档被动过 / 说没验过 / 带背书），打印五条裁决。第 2 条是全部意义所在：只读 `data.verify` 的客户端在那里会打印 OK。
 - 测试 `tests/test_bid_trusted.py` 15 条（请求形如 `{url}/{bid}?verify=true`、服务撒谎必被抓、`"true"` 字符串必拒、`verify=false` 是答案不是异常、背书四态各一条）。
 - 证据：`uibc_core/bid_protocol.py::resolve_bid_trusted`、`tests/test_bid_trusted.py`、`tools/demo_bid_trusted.py`
+- **竞品从"说法"变成"字节"**：`docs/COMPETITOR-EVIDENCE.md` 钉住 DIF Universal Resolver 的 did:bid 驱动（`caict-4iot-dev/uni-resolver-driver-did-bid`，commit `5a93365`，2022-11-09，Apache-2.0，324 行，`src/test` 无任何测试类），逐条给出行号：非零 `errorCode` 在 77–78 行坍缩成一句 `docuement not exist`、全文 `verify` 出现 0 次、`delegateSign` 9 行全部只做字段搬运（233–235 行）、174 行把 `proof` 原样塞进 metadata 不重算。
+- **这条主张自带反证工具**（`tools/audit_official_bid_driver.py`）：重新下载钉住的字节、重新算行号；**对方一旦修了其中任何一条，脚本退出码非 0**，文档必须跟着改。"他们没做 X"因此不再是一句可以烂在文档里的话。
+- 证据：`docs/COMPETITOR-EVIDENCE.md`、`tools/audit_official_bid_driver.py`
 
 ## 0.5.3 — 2026-11-25（一致性语料 36→58，第二实现对齐）
 

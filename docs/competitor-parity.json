@@ -1,0 +1,509 @@
+{
+ "audited_at": "2026-11-25",
+ "method": {
+  "fetcher": "codeload tar.gz at pinned commit, sha256 of the tarball recorded",
+  "patterns": {
+   "fuzz": "\\bfuzz(y|er|ing)?\\b|libfuzzer|atheris|go-fuzz|jazzer|jqf",
+   "mutation_testing": "\\bmutation test(ing)?\\b|mutmut|stryker|pitest|cosmic-ray|\\bmutant\\b",
+   "property_based": "hypothesis|quickcheck|jqwik|fast-check|proptest|property[- ]based",
+   "bit_level": "\\bbit-?flip|\\bbyte-?flip|bit_position|bitmask",
+   "address_derive": "base58|bs58|deriveAddress|derive_address",
+   "exit_code_gate": "process\\.exit\\(\\s*1|sys\\.exit\\(\\s*1|System\\.exit\\(\\s*[2-9]|os\\.exit\\(\\s*1",
+   "reject_assertion": "\\binvalid\\b|\\bmalformed\\b|\\bforbidden\\b|\\breject(s|ed|ion)?\\b"
+  },
+  "dimensions": [
+   {
+    "id": "D1",
+    "what": "rejected document shapes"
+   },
+   {
+    "id": "D2",
+    "what": "bit-level message sweep"
+   },
+   {
+    "id": "D3",
+    "what": "address binding under mutation"
+   },
+   {
+    "id": "D4",
+    "what": "one exit code across layers"
+   },
+   {
+    "id": "D5",
+    "what": "the gate is proven able to fail"
+   }
+  ],
+  "scores": "0 no evidence, 1 point evidence, 2 systematic sweep plus a gate that can fail"
+ },
+ "ours": {
+  "repo": "zhaoxinghua09-cell/uibc-core",
+  "commit": "f99c202ebd46445596bff27143d15d5c914dc619",
+  "code_files": 1800,
+  "test_files": 271,
+  "test_text_kb": 1065,
+  "test_hits": {
+   "fuzz": 0,
+   "mutation_testing": 4,
+   "property_based": 0,
+   "bit_level": 1,
+   "address_derive": 42,
+   "exit_code_gate": 1,
+   "reject_assertion": 165
+  },
+  "nontest_hits": {
+   "fuzz": 49,
+   "mutation_testing": 29,
+   "property_based": 13,
+   "bit_level": 7,
+   "address_derive": 100,
+   "exit_code_gate": 8,
+   "reject_assertion": 2589
+  },
+  "dims": {
+   "D1": 2,
+   "D2": 2,
+   "D3": 2,
+   "D4": 2,
+   "D5": 2
+  },
+  "evidence": {
+   "D1": "tools/mutate_document_shapes.py",
+   "D2": "tools/mutate_bid_binary.py",
+   "D3": "tools/probe_address_binding.py",
+   "D4": "tools/mutation_gate.py",
+   "D5": "tests/test_mutation_gate.py"
+  }
+ },
+ "repos": [
+  {
+   "repo": "caict-4iot-dev/uni-resolver-driver-did-bid",
+   "sha": "5a933656eb9631bc65ba535f4bb69aa893d79a79",
+   "tarball_sha256": "9f02daf93c5d2fe932e97f4ba99db801fea1a0ace7661540d7565e9e50c517b4",
+   "tarball_bytes": 12276,
+   "code_files": 4,
+   "test_files": 0,
+   "test_lines": 0,
+   "code_lines": 545,
+   "test_text_kb": 0,
+   "test_hits": {
+    "fuzz": 0,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 0,
+    "exit_code_gate": 0,
+    "reject_assertion": 0
+   },
+   "nontest_hits": {
+    "fuzz": 0,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 20,
+    "exit_code_gate": 0,
+    "reject_assertion": 1
+   },
+   "test_hit_examples": {
+    "fuzz": [],
+    "mutation_testing": [],
+    "property_based": [],
+    "bit_level": [],
+    "address_derive": [],
+    "exit_code_gate": [],
+    "reject_assertion": []
+   },
+   "dims": {
+    "D1": 0,
+    "D2": 0,
+    "D3": 0,
+    "D4": 0,
+    "D5": 0
+   }
+  },
+  {
+   "repo": "caict-4iot-dev/uni-registrar-driver-did-bid",
+   "sha": "68f69ec419c0f23c1a7faf95dd8d73aeb5ff30a4",
+   "tarball_sha256": "e6d56e97cc8d67f92695d6f17fd2110c0f07d377930a2c19c37332c5411e4605",
+   "tarball_bytes": 13169,
+   "code_files": 10,
+   "test_files": 0,
+   "test_lines": 0,
+   "code_lines": 723,
+   "test_text_kb": 0,
+   "test_hits": {
+    "fuzz": 0,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 0,
+    "exit_code_gate": 0,
+    "reject_assertion": 0
+   },
+   "nontest_hits": {
+    "fuzz": 0,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 5,
+    "exit_code_gate": 0,
+    "reject_assertion": 11
+   },
+   "test_hit_examples": {
+    "fuzz": [],
+    "mutation_testing": [],
+    "property_based": [],
+    "bit_level": [],
+    "address_derive": [],
+    "exit_code_gate": [],
+    "reject_assertion": []
+   },
+   "dims": {
+    "D1": 0,
+    "D2": 0,
+    "D3": 0,
+    "D4": 0,
+    "D5": 0
+   }
+  },
+  {
+   "repo": "decentralized-identity/universal-resolver",
+   "sha": "99838d52a7a6c7424bf8c895d03d317dcd8cdb3a",
+   "tarball_sha256": "507aa5db7df0bd4b80e1f8dd188e23e158f96b84910fff791450924786e3d21b",
+   "tarball_bytes": 558922,
+   "code_files": 155,
+   "test_files": 20,
+   "test_lines": 752,
+   "code_lines": 10798,
+   "test_text_kb": 26,
+   "test_hits": {
+    "fuzz": 0,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 0,
+    "exit_code_gate": 0,
+    "reject_assertion": 10
+   },
+   "nontest_hits": {
+    "fuzz": 0,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 2,
+    "exit_code_gate": 0,
+    "reject_assertion": 31
+   },
+   "test_hit_examples": {
+    "fuzz": [],
+    "mutation_testing": [],
+    "property_based": [],
+    "bit_level": [],
+    "address_derive": [],
+    "exit_code_gate": [],
+    "reject_assertion": [
+     "ci/pr-check/test/application-yml.test.ts",
+     "ci/pr-check/test/cli.test.ts",
+     "ci/pr-check/test/dot-env.test.ts"
+    ]
+   },
+   "dims": {
+    "D1": 1,
+    "D2": 0,
+    "D3": 0,
+    "D4": 0,
+    "D5": 0
+   }
+  },
+  {
+   "repo": "decentralized-identity/did-resolver",
+   "sha": "005411b26ac3002aa4f501673ee4e2ecc96b2a71",
+   "tarball_sha256": "9e643b02a61540583d3052dd9accde4e8651782fda87f63ac53f2d5809944eab",
+   "tarball_bytes": 50148,
+   "code_files": 14,
+   "test_files": 1,
+   "test_lines": 644,
+   "code_lines": 3528,
+   "test_text_kb": 21,
+   "test_hits": {
+    "fuzz": 0,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 0,
+    "exit_code_gate": 0,
+    "reject_assertion": 3
+   },
+   "nontest_hits": {
+    "fuzz": 0,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 1,
+    "exit_code_gate": 0,
+    "reject_assertion": 2
+   },
+   "test_hit_examples": {
+    "fuzz": [],
+    "mutation_testing": [],
+    "property_based": [],
+    "bit_level": [],
+    "address_derive": [],
+    "exit_code_gate": [],
+    "reject_assertion": [
+     "src/__tests__/resolver.test.ts"
+    ]
+   },
+   "dims": {
+    "D1": 0,
+    "D2": 0,
+    "D3": 0,
+    "D4": 0,
+    "D5": 0
+   }
+  },
+  {
+   "repo": "decentralized-identity/sidetree-core",
+   "sha": "bb4bb16d23838cc02bbde0b4ac634e0491ae85fd",
+   "tarball_sha256": "4f8b1b17472376685e6ccd46e580f29b4aa9a869a69d3eeee8c1485e2c586b67",
+   "tarball_bytes": 2916815,
+   "code_files": 62,
+   "test_files": 21,
+   "test_lines": 1325,
+   "code_lines": 30064,
+   "test_text_kb": 132,
+   "test_hits": {
+    "fuzz": 0,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 1,
+    "exit_code_gate": 0,
+    "reject_assertion": 20
+   },
+   "nontest_hits": {
+    "fuzz": 2,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 10,
+    "exit_code_gate": 0,
+    "reject_assertion": 17
+   },
+   "test_hit_examples": {
+    "fuzz": [],
+    "mutation_testing": [],
+    "property_based": [],
+    "bit_level": [],
+    "address_derive": [
+     "docs/spec/patches.md"
+    ],
+    "exit_code_gate": [],
+    "reject_assertion": [
+     "docs/spec/json-web-signatures.md",
+     "docs/spec/pof.md",
+     "docs/spec/processing.md"
+    ]
+   },
+   "dims": {
+    "D1": 1,
+    "D2": 0,
+    "D3": 1,
+    "D4": 0,
+    "D5": 0
+   }
+  },
+  {
+   "repo": "decentralized-identity/ion",
+   "sha": "424ec87dda60c89c0b3c4e46c274eff3124fe484",
+   "tarball_sha256": "276c6bb8d8b55eafc5ad1fad04824b11fb97602f8f96d34e00f3183ae93ea349",
+   "tarball_bytes": 2677171,
+   "code_files": 67,
+   "test_files": 4,
+   "test_lines": 64,
+   "code_lines": 26922,
+   "test_text_kb": 1,
+   "test_hits": {
+    "fuzz": 0,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 0,
+    "exit_code_gate": 0,
+    "reject_assertion": 1
+   },
+   "nontest_hits": {
+    "fuzz": 7,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 44,
+    "exit_code_gate": 3,
+    "reject_assertion": 153
+   },
+   "test_hit_examples": {
+    "fuzz": [],
+    "mutation_testing": [],
+    "property_based": [],
+    "bit_level": [],
+    "address_derive": [],
+    "exit_code_gate": [],
+    "reject_assertion": [
+     "tests/src/bitcoin.spec.ts"
+    ]
+   },
+   "dims": {
+    "D1": 0,
+    "D2": 0,
+    "D3": 0,
+    "D4": 1,
+    "D5": 0
+   }
+  },
+  {
+   "repo": "transmute-industries/sidetree.js",
+   "sha": "0b17eb9ed7aa787230bfdeaff92cc7eca05d0e7e",
+   "tarball_sha256": "af6ff03f24ea57a6e6d9a1b8aaa462673c27b83038c0ae783d3a5dcbd69c7a10",
+   "tarball_bytes": 13343791,
+   "code_files": 500,
+   "test_files": 82,
+   "test_lines": 3320,
+   "code_lines": 221931,
+   "test_text_kb": 101,
+   "test_hits": {
+    "fuzz": 0,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 7,
+    "exit_code_gate": 0,
+    "reject_assertion": 0
+   },
+   "nontest_hits": {
+    "fuzz": 8,
+    "mutation_testing": 0,
+    "property_based": 5,
+    "bit_level": 0,
+    "address_derive": 130,
+    "exit_code_gate": 0,
+    "reject_assertion": 53
+   },
+   "test_hit_examples": {
+    "fuzz": [],
+    "mutation_testing": [],
+    "property_based": [],
+    "bit_level": [],
+    "address_derive": [
+     "packages/cas/src/tests/testSuite.ts",
+     "packages/crypto/src/__tests__/generate-key-fixture.test.ts"
+    ],
+    "exit_code_gate": [],
+    "reject_assertion": []
+   },
+   "dims": {
+    "D1": 0,
+    "D2": 0,
+    "D3": 1,
+    "D4": 0,
+    "D5": 0
+   }
+  },
+  {
+   "repo": "w3c-ccg/did-method-key",
+   "sha": "2cc490c38c5aacf58497a87fc0cf8794668bf716",
+   "tarball_sha256": "bc3af779f36c375ddf73e8c4719ec93c2c99cb0299a3f4114ad4e608f768597d",
+   "tarball_bytes": 19847,
+   "code_files": 4,
+   "test_files": 0,
+   "test_lines": 0,
+   "code_lines": 346,
+   "test_text_kb": 0,
+   "test_hits": {
+    "fuzz": 0,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 0,
+    "exit_code_gate": 0,
+    "reject_assertion": 0
+   },
+   "nontest_hits": {
+    "fuzz": 0,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 0,
+    "exit_code_gate": 0,
+    "reject_assertion": 0
+   },
+   "test_hit_examples": {
+    "fuzz": [],
+    "mutation_testing": [],
+    "property_based": [],
+    "bit_level": [],
+    "address_derive": [],
+    "exit_code_gate": [],
+    "reject_assertion": []
+   },
+   "dims": {
+    "D1": 0,
+    "D2": 0,
+    "D3": 0,
+    "D4": 0,
+    "D5": 0
+   }
+  },
+  {
+   "repo": "decentralized-identity/ethr-did-resolver",
+   "sha": "6e0bd47702495d259674c6a53e8be3037069dcc1",
+   "tarball_sha256": "29608bc5b49406a3571c470fdf260d29f525b1cd46a1cadabafa5c08fa412d5d",
+   "tarball_bytes": 332063,
+   "code_files": 120,
+   "test_files": 44,
+   "test_lines": 28879,
+   "code_lines": 42962,
+   "test_text_kb": 1190,
+   "test_hits": {
+    "fuzz": 0,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 5,
+    "exit_code_gate": 0,
+    "reject_assertion": 62
+   },
+   "nontest_hits": {
+    "fuzz": 2,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 22,
+    "exit_code_gate": 3,
+    "reject_assertion": 41
+   },
+   "test_hit_examples": {
+    "fuzz": [],
+    "mutation_testing": [],
+    "property_based": [],
+    "bit_level": [],
+    "address_derive": [
+     "examples/ethr-7702/test/batched-updates.test.ts",
+     "examples/ethr-7702/test/simple-update.test.ts",
+     "packages/ethr-did-resolver/src/__tests__/resolver.regression.test.ts"
+    ],
+    "exit_code_gate": [],
+    "reject_assertion": [
+     "examples/ethr-7702/test/cross-chain-sync.test.ts",
+     "examples/ethr-7702/test/delegation-lifecycle.test.ts",
+     "examples/ethr-7702/test/edge-cases.test.ts"
+    ]
+   },
+   "dims": {
+    "D1": 1,
+    "D2": 0,
+    "D3": 1,
+    "D4": 1,
+    "D5": 0
+   }
+  }
+ ]
+}

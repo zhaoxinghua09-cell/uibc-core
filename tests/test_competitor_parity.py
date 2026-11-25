@@ -45,7 +45,7 @@ def test_clean_tree_passes(parity):
 
 def test_every_audit_is_pinned(snap):
     repos = [r for r in snap["repos"] if "error" not in r]
-    assert len(repos) >= 15, "the audited set may grow, not shrink"
+    assert len(repos) >= 25, "the audited set may grow, not shrink"
     for row in repos:
         assert len(row["sha"]) == 40, row["repo"]
         assert len(row["tarball_sha256"]) == 64, row["repo"]
@@ -73,3 +73,24 @@ def test_gate_still_covers_the_three_layers(parity):
     for dim, _ in parity.DIMS:
         assert f"| {dim} |" in doc
     assert "10/10" in doc
+
+
+def test_the_doc_states_the_denominator_the_snapshot_holds(parity, snap):
+    """A hand-typed denominator is how this kind of table rots: the snapshot
+    grows, the prose keeps saying nine. The prose is generated, so pin it."""
+    doc = open(parity.DOC, encoding="utf-8").read()
+    n = len([r for r in snap["repos"] if "error" not in r])
+    assert f"{n} 个 DID" in doc, f"doc does not state the audited count {n}"
+    for row in snap["repos"]:
+        if "error" in row:
+            continue
+        assert f"| `{row['repo']}` |" in doc, row["repo"]
+
+
+def test_the_sample_spans_more_than_one_vendor(snap):
+    """Sampling all from one organisation would make the comparison a selfie."""
+    repos = [r["repo"] for r in snap["repos"] if "error" not in r]
+    orgs = {r.split("/")[0].lower() for r in repos}
+    assert len(orgs) >= 10, sorted(orgs)
+    # and the Chinese domestic stack has to be represented, not only DIF/W3C
+    assert any(o in {"webankblockchain", "caict-4iot-dev", "ontio"} for o in orgs)

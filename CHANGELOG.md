@@ -1,3 +1,10 @@
+## 未发布 — 2026-11-26（竞品对照扩到 25 家：把"抽样"本身也钉住）
+
+- **第三批 8 家入库**：`WeBankBlockchain/WeIdentity`、`hyperledger/aries-framework-go`、`hyperledger/aries-cloudagent-python`、`decentralized-identity/did-jwt`、`docknetwork/sdk`、`ceramicnetwork/js-did`、`ontio/ontology-did`、`hyperledger/indy-sdk`。与前两批同一组正则、同一 `score_one`，HEAD 由 `/commits` 取定后记 sha + tarball sha256。
+- **25 家的结论**：逐位变异 0 家、门自证 0 家、跨层单一退出码 10 家、文档层拒绝断言 13 家；最好仍是 **3/10**（现在有 8 家并列），本仓库 **10/10**。
+- **`MIN_REPOS` 抬到 25**，删任何一家都会失败；`tests/test_competitor_parity.py` 同步 ≥25。
+- **新增两条反漂移测试**：文档里的家数必须等于快照家数、且每一行都在表里（防止"表长了、文没动"）；取样必须跨 ≥10 个组织并包含中国国内栈（`WeBankBlockchain`/`caict-4iot-dev`/`ontio`），防止样本变成一个厂商的自拍。
+- 推送脚本 `_gh_push_new.py` 新增 `UIBC_PARENT`（固定父提交）与 `UIBC_TREE_ROOT`（本地树文件数与父树不符时**拒绝推送**）——上一轮收据对不上树就是这一类错，现在由脚本先拦。
 ## 未发布 — 2026-11-26（竞品对照扩到 17 家：结论的分母不再是 9）
 
 - **第二批 8 家入库**：`decentralized-identity/veramo`、`spruceid/ssi`、`spruceid/didkit`、`digitalbazaar/did-io`、`uport-project/ethr-did`、`hyperledger/indy-vdr`、`w3c-ccg/did-test-suite`、`sphereon-opensource/ssi-sdk`，全部按固定 commit 取 tarball、记 sha256，与第一批用同一组正则与同一套打分。

@@ -55,7 +55,7 @@ GATE = os.path.join(HERE, "tools", "mutation_gate.py")
 OURS = "zhaoxinghua09-cell/uibc-core"
 # The audit may grow; it may not quietly shrink back to the first nine. Anybody
 # who wants to remove a repository has to say so in the document.
-MIN_REPOS = 15
+MIN_REPOS = 25
 
 PATTERNS = {
     "fuzz": r"\bfuzz(y|er|ing)?\b|libfuzzer|atheris|go-fuzz|jazzer|jqf",

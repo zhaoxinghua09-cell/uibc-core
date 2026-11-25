@@ -127,10 +127,30 @@ RESOLUTION_PROTOCOLS = {0: "UDP", 1: "TCP", 2: "HTTP", 3: "HTTPS"}
 _HEX_RE = re.compile(r"^[0-9a-fA-F]*$")
 _ISO_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$")
 
-# BID public keys are carried as hex. Implementations in the wild prefix an
-# Ed25519 key with the BIF algorithm byte 0xb0 (b06566... in the protocol's own
-# §5.4.1 example is b0 + 32 bytes of key material), so both widths are legal.
-_ED25519_HEX_LEN = {64, 66}
+# BID public keys are carried as hex with a BIF algorithm prefix. Three widths
+# occur in the wild, and the widest one is the normal case:
+#
+#   * 35 bytes `b0 65 66 || key` - what the official SDK emits and what the
+#     protocol's own §5.4.1 example shows (`b06566f76733ae...`). The trailing
+#     bytes 0x65/0x66 are the BID's own "ef" marker, not key material.
+#   * 33 bytes `b0 || key` - Ed25519 with just the algorithm byte.
+#   * 32 bytes `key`      - bare key material.
+#
+# The 35-byte form was found by asking the official SDK (`bid-sdk-nodejs` 1.0.1)
+# to derive a key from a fixed seed: it answered `b06566` + the same 32 bytes we
+# derived ourselves. Before that we only knew the 1-byte prefix, and would have
+# refused every real document. See tests/test_bid_address_rule.py.
+_KEY_PREFIXES = (b"\xb0\x65\x66", b"\xb0")
+_ED25519_HEX_LEN = {64, 66, 70}
+
+
+def strip_key_prefix(hexed: str):
+    """(key material 32 bytes, the prefix that was removed as text)."""
+    raw = bytes.fromhex(hexed)
+    for prefix in _KEY_PREFIXES:
+        if raw.startswith(prefix):
+            return raw[len(prefix):], prefix.hex()
+    return raw, ""
 
 
 def _is_hex(value: str) -> bool:
@@ -340,7 +360,7 @@ def parse_bid_document(doc: Any, did: str) -> BIDDocument:
             raise BIDDocumentError("%s: publicKeyHex is not hex: %r" % (did, str(hexed)[:16]))
         elif len(str(hexed)) not in _ED25519_HEX_LEN and str(entry.get("type", "")).upper() == "ED25519":
             parsed.warnings.append(
-                "publicKey %s: Ed25519 key is %d hex chars, expected 64 (bare) or 66 (0xb0-prefixed)"
+                "publicKey %s: Ed25519 key is %d hex chars; the real forms are 64 (bare), 66 (b0-prefixed) or 70 (b06566-prefixed)"
                 % (key_id, len(str(hexed))))
     parsed.public_key = keys
 
@@ -486,17 +506,17 @@ def verify_bid_document(doc: Any, did: Optional[str] = None) -> Tuple[bool, str]
     if not hexed:
         return False, "publicKey %r has no publicKeyHex to verify against" % (key.get("id"),)
     raw = bytes.fromhex(hexed)
-    if len(raw) == 33 and raw[0] == 0xB0:      # BIF algorithm-byte prefix
-        raw = raw[1:]
-    if len(raw) != 32:
-        return False, "only Ed25519 (32-byte) keys are verifiable here, got %d bytes" % (len(raw),)
+    key_material, prefix = strip_key_prefix(hexed)
+    if len(key_material) != 32:
+        return False, ("only Ed25519 (32-byte) keys are verifiable here, got %d bytes after a %r prefix"
+                       % (len(key_material), prefix))
     try:
         sig = base58_decode(parsed.proof["signatureValue"])
     except BIDDocumentError as exc:
         return False, str(exc)
     if len(sig) != 64:
         return False, "signatureValue decodes to %d bytes, expected 64" % (len(sig),)
-    if ed_verify(raw, signing_bytes(doc), sig):
+    if ed_verify(key_material, signing_bytes(doc), sig):
         return True, "ok"
     return False, "signature does not verify over the JCS form of the document"
 

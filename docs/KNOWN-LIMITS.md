@@ -18,6 +18,7 @@
 | 10 | **用例数与 `skipped` 会变，不是定值** | 语料随新增向量增长（`1056` → `1082` → `1086` 都出现过），跳过项随平台与是否装 extras 变化（同一套件见过 5、7、16、31） | 任何文档只写"无 `FAILED`/`ERROR`"，数字以当轮输出为准；已钉的规范计数看 `EVIDENCE-INDEX.md` V1，但它也随快照更新 |
 | 11 | **`v0.5.3` 的 tag 不在 `main` 祖先链上** | 仓库禁止 merge commit（405），PR #438 以 rebase 合入，`main` 头变成 `72b14f3d`，而 release tag 仍指向 rebase 前的 `b60a2a00`；仓库开启了 immutable release，`PATCH /git/refs/tags/v0.5.3` 返回 422，移不动 | 归档字节与 pin 一致（312,642 B / `5f3a72cb…`），`sha256sum -c MANIFEST.sha256` 与匿名重下载都能复核；但「tag 指向 main 某提交」不成立。下一版按「先合并 → 在 main 头打 tag → 再建 release」走 |
 | 12 | **`v0.5.1` 这个版本名作废，`v0.5.2` 不是本树语料** | `v0.5.1` 先建非 draft release 再上传资产，被 immutable release 拒绝（`Cannot upload assets to an immutable release`）；删除重建又被 `tag_name was used by an immutable release` 拒绝（422），tag 名被永久占用。`v0.5.2` 的资产（`917f8732…`/312,641 B）能下载，但 oracle 语料里仍是旧版本串 | 只以 `v0.5.3` 为可引用归档；发布顺序固化为 draft → 上传 → 匿名下载复算哈希 → publish；改号后必须固定 `SOURCE_DATE_EPOCH=1794700800` 重 emit oracle，否则 CI 的 `test_oracle_reproducible` 会红 |
+| 13 | **PyPI 上最新是 `0.5.2`，GitHub 上是 `0.5.3`：两个渠道版本号不一致** | `0.5.1`（2026-11-24 23:48）与 `0.5.2`（2026-11-25 00:08）经 twine 上传到 PyPI；`0.5.3` 只发布在 GitHub release（zip 归档），未上传 PyPI。`pip install uibc-core` 因此拿到 0.5.2：其 `pyproject.toml` 是 `0.5.2`，`conformance/manifest.json` 已是 58 例 6 跳过（与 0.5.3 同），但 `conformance/oracle` 的 `min_verifier_version` 仍写 `0.5.0` | 可引用的归档一律用 GitHub `v0.5.3`（312,642 B / `5f3a72cb…`）；`pip` 用户须知版本号低一档、`oracle` 的最小验证器串停在 0.5.0。在该包内实测 `python tools/oracle_check.py` 为 PASS（30 例、0 分歧）。上传 `0.5.3` 或 yank `0.5.2` 要在所有者本机执行，本页不代为操作 |
 
 ## 怎么核对这一页
 

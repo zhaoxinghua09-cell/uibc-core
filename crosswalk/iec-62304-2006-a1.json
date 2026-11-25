@@ -66,10 +66,10 @@
       "strength": "partial",
       "carrier": ["lifecycle.json events", "inspect output"],
       "probe": {
-        "cmd": "python -m uibc_core.cli inspect fixtures/clean.uibc",
-        "expect": {"exit": 0, "stdout_contains": "events:"}
+        "cmd": "python tools/probe_retention.py",
+        "expect": {"exit": 0}
       },
-      "reason": "Problem and change events are appended with identity and time and can be read back in one command. What is missing: the content requirements of the records (who investigated, what was concluded, which verification closed it) and retention rules."
+      "reason": "The retention probe re-computes every evidence digest (2/2 on the clean fixture), parses the package with no key, no service and no network, and confirms the format carries no expiry field of its own - so records stay readable and still theirs after the fact. Problem and change events are appended with identity and time and can be read back in one command. What is missing: the content requirements of the records (who investigated, what was concluded, which verification closed it) and retention rules."
     }
   ]
 }

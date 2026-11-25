@@ -7,7 +7,7 @@
     "scope_note": "The standard text is paid (CHF 1,150 for the consolidated version). Only the table of contents - clause numbers and titles - is public, and that is all this file quotes. Every row therefore carries verbatim=false and may be PARTIAL or GAP, never carried: a clause whose requirement text nobody on this project has read cannot be claimed as covered. Five clauses, chosen because a record layer might plausibly touch them; the other thirty-five are not listed, which is itself the answer.",
     "source": "crosswalk/iec-62304-2006-a1.json"
   },
-  "manifest_sha256": "b5c4b74be4796aee9d284d920cdac226da302104aaed17f647e5edf84d9e10f7",
+  "manifest_sha256": "a590b878e3248cbf77da5aaa56206099f8b62e4135553eed6aca625e555679a2",
   "verdict_sha256": "875a509ac1062338d68f0cdf06654a3acb9e6626082a78caf3b3cd8f66bc76e9",
   "clause_count": 5,
   "counts": {
@@ -87,14 +87,14 @@
       "verbatim": false,
       "state": "PARTIAL",
       "note": "",
-      "reason": "Problem and change events are appended with identity and time and can be read back in one command. What is missing: the content requirements of the records (who investigated, what was concluded, which verification closed it) and retention rules.",
+      "reason": "The retention probe re-computes every evidence digest (2/2 on the clean fixture), parses the package with no key, no service and no network, and confirms the format carries no expiry field of its own - so records stay readable and still theirs after the fact. Problem and change events are appended with identity and time and can be read back in one command. What is missing: the content requirements of the records (who investigated, what was concluded, which verification closed it) and retention rules.",
       "carrier": [
         "lifecycle.json events",
         "inspect output"
       ],
       "url": "https://www.iso.org/obp/ui/#iso:std:iec:62304:ed-1:v1:en",
       "probe": {
-        "declared": "python -m uibc_core.cli inspect fixtures/clean.uibc",
+        "declared": "python tools/probe_retention.py",
         "exit": 0,
         "ok": true
       }

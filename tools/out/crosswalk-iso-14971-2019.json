@@ -7,8 +7,8 @@
     "scope_note": "The standard text is paid. Only clause numbers and titles are public (ISO OBP table of contents), and that is all this file quotes, so every row is verbatim=false and no row may be carried. Five of the ten clauses are mapped; the rest are not, because a risk-management process is engineering work and listing it as 'partial' would only pad the table.",
     "source": "crosswalk/iso-14971-2019.json"
   },
-  "manifest_sha256": "a17c54ff4891560a805f5609defefc3e0ffb405db325bc6544129fc93ca2f93e",
-  "verdict_sha256": "66428bdac058480811f022c120af623ce9d400a5b6b76b256d6df80db2ce8137",
+  "manifest_sha256": "8ac29ebce68b42b78bf784e1f89098967944c8ca77c524e023585da89eed2426",
+  "verdict_sha256": "6a2fb50bb591e384e390215daded29f8a07c636517ca4113b9d09e9300da695e",
   "clause_count": 5,
   "counts": {
     "PARTIAL": 2,
@@ -79,7 +79,7 @@
       "verbatim": false,
       "state": "PARTIAL",
       "note": "",
-      "reason": "The demo re-verifies a package after it was sealed and catches a substituted key, which is the shape of a post-production signal. What is missing: a real collection channel - complaints, literature, other devices on the market - and the review that decides whether a signal is safety-relevant.",
+      "reason": "On the tampered fixture the probe exits non-zero and names the entry whose digest no longer matches - which is the shape of a post-production signal being caught rather than absorbed. The demo re-verifies a package after it was sealed and catches a substituted key, which is the shape of a post-production signal. What is missing: a real collection channel - complaints, literature, other devices on the market - and the review that decides whether a signal is safety-relevant.",
       "carrier": [
         "checked_at on each verdict",
         "commit-time recheck",
@@ -87,8 +87,8 @@
       ],
       "url": "https://www.iso.org/obp/ui/#iso:std:iso:14971:en",
       "probe": {
-        "declared": "python -m uibc_core.cli demo",
-        "exit": 0,
+        "declared": "python tools/probe_evidence_identity.py fixtures/tampered.uibc",
+        "exit": 1,
         "ok": true
       }
     }

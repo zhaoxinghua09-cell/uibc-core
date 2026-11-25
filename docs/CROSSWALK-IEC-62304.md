@@ -7,7 +7,7 @@
 - Standard: **IEC 62304:2006+AMD1:2015**
 - Source: https://www.iso.org/obp/ui/#iso:std:iec:62304:ed-1:v1:en
 - Clauses mapped: **5**
-- Manifest digest: `b5c4b74be4796aee9d284d920cdac226da302104aaed17f647e5edf84d9e10f7`
+- Manifest digest: `a590b878e3248cbf77da5aaa56206099f8b62e4135553eed6aca625e555679a2`
 - Verdict digest: `875a509ac1062338d68f0cdf06654a3acb9e6626082a78caf3b3cd8f66bc76e9` (identity of the verdict set, not of the clause text)
 - Determinism: re-running on the same input yields byte-identical output; `--check` exits 3 on any drift. Reproducible in the SLSA sense - not verified-reproducible, which would need a second independent host.
 - Counts: GAP=2, PARTIAL=3
@@ -18,7 +18,7 @@
 | IEC 62304 5.8 Software release | partial (titles only) | **PARTIAL** | evidence/index.json digests, manifest evidence_root, seal | `python tools/probe_evidence_identity.py fixtures/clean.uibc` → exit 0 | A released package names every artefact by digest and seals the set, so the released thing is identifiable and a later edit is detectable. What is missing: the release decision itself - who approved it, against which verification results, and whether every required task for the assigned safety class was actually performed. |
 | IEC 62304 8.2 Change control | partial (titles only) | **PARTIAL** | seal over manifest, lifecycle events, tamper detection | `python -m pytest tests/test_seal_v03.py -q` → exit 0 | The seal makes an uncontrolled change visible: alter a byte and verification stops agreeing with the manifest. That is detection, not control - approval of a change, impact analysis and re-baselining stay in the manufacturer's configuration management process. |
 | IEC 62304 7.1 Analysis of software contributing to hazardous situations | gap (titles only) | **GAP** | - | - | This is engineering analysis: which software functions can contribute to which hazardous situations. Nothing in a record layer performs it, and a placeholder table of hazards would be worse than an acknowledged gap. |
-| IEC 62304 9.5 Maintain records | partial (titles only) | **PARTIAL** | lifecycle.json events, inspect output | `python -m uibc_core.cli inspect fixtures/clean.uibc` → exit 0 | Problem and change events are appended with identity and time and can be read back in one command. What is missing: the content requirements of the records (who investigated, what was concluded, which verification closed it) and retention rules. |
+| IEC 62304 9.5 Maintain records | partial (titles only) | **PARTIAL** | lifecycle.json events, inspect output | `python tools/probe_retention.py` → exit 0 | The retention probe re-computes every evidence digest (2/2 on the clean fixture), parses the package with no key, no service and no network, and confirms the format carries no expiry field of its own - so records stay readable and still theirs after the fact. Problem and change events are appended with identity and time and can be read back in one command. What is missing: the content requirements of the records (who investigated, what was concluded, which verification closed it) and retention rules. |
 
 ## How to re-run
 

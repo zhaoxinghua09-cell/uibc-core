@@ -63,10 +63,10 @@
       "strength": "partial",
       "carrier": ["checked_at on each verdict", "commit-time recheck", "revocation record"],
       "probe": {
-        "cmd": "python -m uibc_core.cli demo",
-        "expect": {"exit": 0, "stdout_contains": "Try it yourself"}
+        "cmd": "python tools/probe_evidence_identity.py fixtures/tampered.uibc",
+        "expect": {"exit": 1, "stdout_contains": "digest mismatch"}
       },
-      "reason": "The demo re-verifies a package after it was sealed and catches a substituted key, which is the shape of a post-production signal. What is missing: a real collection channel - complaints, literature, other devices on the market - and the review that decides whether a signal is safety-relevant."
+      "reason": "On the tampered fixture the probe exits non-zero and names the entry whose digest no longer matches - which is the shape of a post-production signal being caught rather than absorbed. The demo re-verifies a package after it was sealed and catches a substituted key, which is the shape of a post-production signal. What is missing: a real collection channel - complaints, literature, other devices on the market - and the review that decides whether a signal is safety-relevant."
     }
   ]
 }

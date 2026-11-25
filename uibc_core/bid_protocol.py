@@ -439,10 +439,14 @@ def parse_bid_document(doc: Any, did: str) -> BIDDocument:
             parsed.warnings.append("credential type %r is not in appendix 1 (extensible)" % (cred_type,))
     parsed.extension = ext
 
-    for name in ("created", "updated"):
+    # §4.2.1 items 9.created / 10.updated are "必填字段" in the text, so absence
+    # is a violation, not a missing optional - the probe found this by deleting
+    # the field and watching the document parse cleanly.
+    for name, item in (("created", "9.created"), ("updated", "10.updated")):
         value = doc.get(name)
         if value is None:
-            continue
+            raise BIDDocumentError("%s: §4.2.1 %s is 必填 (required); %r is absent"
+                                   % (did, item, name))
         if not isinstance(value, str) or not _ISO_RE.match(value):
             raise BIDDocumentError("%s: %s is not an ISO-8601 timestamp: %r" % (did, name, value))
         setattr(parsed, name, value)

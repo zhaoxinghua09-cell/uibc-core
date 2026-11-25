@@ -1,0 +1,1769 @@
+{
+  "corpus": "probityai/agent-evidence-vectors @ 39daf704",
+  "families": {
+    "canonical": {
+      "missing": "nothing: the text and its expected digest and length are stated",
+      "nothing": 0,
+      "signature-only": 0,
+      "signature_verified": 0,
+      "vectors": 9,
+      "verdict": 9
+    },
+    "chain": {
+      "missing": "the rule that links consecutive records (chain-break, sequence-gap, truncation, measurement) -- the records state per-record claims and signatures, not the hash that chains them",
+      "nothing": 1,
+      "signature-only": 14,
+      "signature_verified": 14,
+      "vectors": 15,
+      "verdict": 0
+    },
+    "consistency": {
+      "missing": "nothing: both roots, both sizes and the proof are all stated",
+      "nothing": 0,
+      "signature-only": 0,
+      "signature_verified": 0,
+      "vectors": 23,
+      "verdict": 23
+    },
+    "inclusion": {
+      "missing": "nothing: leaf, index, proof and tree size are all stated",
+      "nothing": 0,
+      "signature-only": 0,
+      "signature_verified": 0,
+      "vectors": 37,
+      "verdict": 37
+    },
+    "token": {
+      "missing": "the acceptance rule (which claims are required, of what type, how tagged) -- the text states claims, key and signature, not the rule",
+      "nothing": 13,
+      "signature-only": 74,
+      "signature_verified": 74,
+      "vectors": 87,
+      "verdict": 0
+    }
+  },
+  "manifest": {
+    "count": 171,
+    "digest": "7169d8760d1ac869bc0e75140bddf07991bea89ee24a7148bbfd29c6c2ea8b2e"
+  },
+  "totals": {
+    "nothing": 14,
+    "signature-only": 88,
+    "signature_verified": 88,
+    "vectors": 171,
+    "verdict": 69
+  },
+  "vectors": [
+    {
+      "arith": "match",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "accept",
+      "family": "canonical",
+      "id": "CAN-P-astral-values",
+      "path": "canonical/CAN-P-astral-values.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "match",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "accept",
+      "family": "canonical",
+      "id": "CAN-P-combining-vs-precomposed",
+      "path": "canonical/CAN-P-combining-vs-precomposed.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "match",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "accept",
+      "family": "canonical",
+      "id": "CAN-P-empty-containers",
+      "path": "canonical/CAN-P-empty-containers.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "match",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "accept",
+      "family": "canonical",
+      "id": "CAN-P-escapes-and-controls",
+      "path": "canonical/CAN-P-escapes-and-controls.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "match",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "accept",
+      "family": "canonical",
+      "id": "CAN-P-key-order-bmp-above-surrogates",
+      "path": "canonical/CAN-P-key-order-bmp-above-surrogates.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "match",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "accept",
+      "family": "canonical",
+      "id": "CAN-P-key-order-digits-upper-lower",
+      "path": "canonical/CAN-P-key-order-digits-upper-lower.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "match",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "accept",
+      "family": "canonical",
+      "id": "CAN-P-nested-key-order",
+      "path": "canonical/CAN-P-nested-key-order.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "match",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "accept",
+      "family": "canonical",
+      "id": "CAN-P-numbers-integers",
+      "path": "canonical/CAN-P-numbers-integers.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "match",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "accept",
+      "family": "canonical",
+      "id": "CAN-P-unicode-line-separators",
+      "path": "canonical/CAN-P-unicode-line-separators.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "none",
+      "detail": "6 of 6 record signatures verify under the shipped key",
+      "expect": "reject",
+      "family": "chain",
+      "id": "CHN-N-altered-snapshot-resigned",
+      "path": "chain/CHN-N-altered-snapshot-resigned.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "6 of 6 record signatures verify under the shipped key",
+      "expect": "reject",
+      "family": "chain",
+      "id": "CHN-N-altered-verdict-resigned",
+      "path": "chain/CHN-N-altered-verdict-resigned.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "5 of 6 record signatures verify under the shipped key",
+      "expect": "reject",
+      "family": "chain",
+      "id": "CHN-N-bad-signature-mid-chain",
+      "path": "chain/CHN-N-bad-signature-mid-chain.json",
+      "reach": "nothing",
+      "signature": "failed"
+    },
+    {
+      "arith": "none",
+      "detail": "5 of 5 record signatures verify under the shipped key",
+      "expect": "reject",
+      "family": "chain",
+      "id": "CHN-N-first-record-missing",
+      "path": "chain/CHN-N-first-record-missing.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "6 of 6 record signatures verify under the shipped key",
+      "expect": "accept",
+      "family": "chain",
+      "id": "CHN-N-history-rewritten-no-anchor",
+      "path": "chain/CHN-N-history-rewritten-no-anchor.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "6 of 6 record signatures verify under the shipped key",
+      "expect": "reject",
+      "family": "chain",
+      "id": "CHN-N-history-rewritten-resigned",
+      "path": "chain/CHN-N-history-rewritten-resigned.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "6 of 6 record signatures verify under the shipped key",
+      "expect": "reject",
+      "family": "chain",
+      "id": "CHN-N-measurement-changed",
+      "path": "chain/CHN-N-measurement-changed.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "5 of 5 record signatures verify under the shipped key",
+      "expect": "reject",
+      "family": "chain",
+      "id": "CHN-N-record-deleted",
+      "path": "chain/CHN-N-record-deleted.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "7 of 7 record signatures verify under the shipped key",
+      "expect": "reject",
+      "family": "chain",
+      "id": "CHN-N-record-inserted",
+      "path": "chain/CHN-N-record-inserted.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "6 of 6 record signatures verify under the shipped key",
+      "expect": "reject",
+      "family": "chain",
+      "id": "CHN-N-records-reordered",
+      "path": "chain/CHN-N-records-reordered.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "4 of 4 record signatures verify under the shipped key",
+      "expect": "accept",
+      "family": "chain",
+      "id": "CHN-N-tail-truncated-no-anchor",
+      "path": "chain/CHN-N-tail-truncated-no-anchor.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "4 of 4 record signatures verify under the shipped key",
+      "expect": "reject",
+      "family": "chain",
+      "id": "CHN-N-tail-truncated-with-anchor",
+      "path": "chain/CHN-N-tail-truncated-with-anchor.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "3 of 3 record signatures verify under the shipped key",
+      "expect": "accept",
+      "family": "chain",
+      "id": "CHN-P-prefix-of-anchored",
+      "path": "chain/CHN-P-prefix-of-anchored.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "6 of 6 record signatures verify under the shipped key",
+      "expect": "accept",
+      "family": "chain",
+      "id": "CHN-P-six-steps-anchored",
+      "path": "chain/CHN-P-six-steps-anchored.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "6 of 6 record signatures verify under the shipped key",
+      "expect": "accept",
+      "family": "chain",
+      "id": "CHN-P-six-steps",
+      "path": "chain/CHN-P-six-steps.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "mismatch",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "reject",
+      "family": "consistency",
+      "id": "CON-N-forked-history",
+      "path": "consistency/CON-N-forked-history.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "mismatch",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "reject",
+      "family": "consistency",
+      "id": "CON-N-history-reordered",
+      "path": "consistency/CON-N-history-reordered.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "mismatch",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "reject",
+      "family": "consistency",
+      "id": "CON-N-new-root-altered",
+      "path": "consistency/CON-N-new-root-altered.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "mismatch",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "reject",
+      "family": "consistency",
+      "id": "CON-N-old-root-altered",
+      "path": "consistency/CON-N-old-root-altered.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "mismatch",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "reject",
+      "family": "consistency",
+      "id": "CON-N-old-size-zero",
+      "path": "consistency/CON-N-old-size-zero.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "mismatch",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "reject",
+      "family": "consistency",
+      "id": "CON-N-proof-empty",
+      "path": "consistency/CON-N-proof-empty.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "mismatch",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "reject",
+      "family": "consistency",
+      "id": "CON-N-proof-extra-hash",
+      "path": "consistency/CON-N-proof-extra-hash.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "mismatch",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "reject",
+      "family": "consistency",
+      "id": "CON-N-proof-missing-hash",
+      "path": "consistency/CON-N-proof-missing-hash.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "mismatch",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "reject",
+      "family": "consistency",
+      "id": "CON-N-proof-of-other-pair",
+      "path": "consistency/CON-N-proof-of-other-pair.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "mismatch",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "reject",
+      "family": "consistency",
+      "id": "CON-N-roots-swapped",
+      "path": "consistency/CON-N-roots-swapped.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "mismatch",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "reject",
+      "family": "consistency",
+      "id": "CON-N-same-size-different-root",
+      "path": "consistency/CON-N-same-size-different-root.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "mismatch",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "reject",
+      "family": "consistency",
+      "id": "CON-N-same-size-with-proof",
+      "path": "consistency/CON-N-same-size-with-proof.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "mismatch",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "reject",
+      "family": "consistency",
+      "id": "CON-N-shrinking",
+      "path": "consistency/CON-N-shrinking.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "match",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "accept",
+      "family": "consistency",
+      "id": "CON-P-1-2",
+      "path": "consistency/CON-P-1-2.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "match",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "accept",
+      "family": "consistency",
+      "id": "CON-P-1-9",
+      "path": "consistency/CON-P-1-9.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "match",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "accept",
+      "family": "consistency",
+      "id": "CON-P-2-4",
+      "path": "consistency/CON-P-2-4.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "match",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "accept",
+      "family": "consistency",
+      "id": "CON-P-2-5",
+      "path": "consistency/CON-P-2-5.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "match",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "accept",
+      "family": "consistency",
+      "id": "CON-P-3-7",
+      "path": "consistency/CON-P-3-7.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "match",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "accept",
+      "family": "consistency",
+      "id": "CON-P-4-8",
+      "path": "consistency/CON-P-4-8.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "match",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "accept",
+      "family": "consistency",
+      "id": "CON-P-5-5",
+      "path": "consistency/CON-P-5-5.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "match",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "accept",
+      "family": "consistency",
+      "id": "CON-P-6-9",
+      "path": "consistency/CON-P-6-9.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "match",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "accept",
+      "family": "consistency",
+      "id": "CON-P-7-8",
+      "path": "consistency/CON-P-7-8.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "match",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "accept",
+      "family": "consistency",
+      "id": "CON-P-8-9",
+      "path": "consistency/CON-P-8-9.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "mismatch",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "reject",
+      "family": "inclusion",
+      "id": "INC-N-index-equals-size",
+      "path": "inclusion/INC-N-index-equals-size.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "mismatch",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "reject",
+      "family": "inclusion",
+      "id": "INC-N-index-negative",
+      "path": "inclusion/INC-N-index-negative.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "mismatch",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "reject",
+      "family": "inclusion",
+      "id": "INC-N-interior-node-as-leaf",
+      "path": "inclusion/INC-N-interior-node-as-leaf.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "mismatch",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "reject",
+      "family": "inclusion",
+      "id": "INC-N-leaf-hash-as-record",
+      "path": "inclusion/INC-N-leaf-hash-as-record.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "mismatch",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "reject",
+      "family": "inclusion",
+      "id": "INC-N-odd-leaf-duplication",
+      "path": "inclusion/INC-N-odd-leaf-duplication.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "mismatch",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "reject",
+      "family": "inclusion",
+      "id": "INC-N-proof-empty",
+      "path": "inclusion/INC-N-proof-empty.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "mismatch",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "reject",
+      "family": "inclusion",
+      "id": "INC-N-proof-extra-hash",
+      "path": "inclusion/INC-N-proof-extra-hash.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "mismatch",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "reject",
+      "family": "inclusion",
+      "id": "INC-N-proof-missing-hash",
+      "path": "inclusion/INC-N-proof-missing-hash.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "mismatch",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "reject",
+      "family": "inclusion",
+      "id": "INC-N-proof-order-swapped",
+      "path": "inclusion/INC-N-proof-order-swapped.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "mismatch",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "reject",
+      "family": "inclusion",
+      "id": "INC-N-record-altered",
+      "path": "inclusion/INC-N-record-altered.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "mismatch",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "reject",
+      "family": "inclusion",
+      "id": "INC-N-record-from-other-tree",
+      "path": "inclusion/INC-N-record-from-other-tree.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "mismatch",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "reject",
+      "family": "inclusion",
+      "id": "INC-N-root-altered",
+      "path": "inclusion/INC-N-root-altered.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "mismatch",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "reject",
+      "family": "inclusion",
+      "id": "INC-N-size-zero",
+      "path": "inclusion/INC-N-size-zero.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "mismatch",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "reject",
+      "family": "inclusion",
+      "id": "INC-N-wrong-index",
+      "path": "inclusion/INC-N-wrong-index.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "mismatch",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "reject",
+      "family": "inclusion",
+      "id": "INC-N-wrong-tree-size",
+      "path": "inclusion/INC-N-wrong-tree-size.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "match",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "accept",
+      "family": "inclusion",
+      "id": "INC-O-size-not-bound-by-root",
+      "path": "inclusion/INC-O-size-not-bound-by-root.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "match",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "accept",
+      "family": "inclusion",
+      "id": "INC-P-n1-i0",
+      "path": "inclusion/INC-P-n1-i0.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "match",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "accept",
+      "family": "inclusion",
+      "id": "INC-P-n2-i0",
+      "path": "inclusion/INC-P-n2-i0.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "match",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "accept",
+      "family": "inclusion",
+      "id": "INC-P-n2-i1",
+      "path": "inclusion/INC-P-n2-i1.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "match",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "accept",
+      "family": "inclusion",
+      "id": "INC-P-n3-i0",
+      "path": "inclusion/INC-P-n3-i0.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "match",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "accept",
+      "family": "inclusion",
+      "id": "INC-P-n3-i1",
+      "path": "inclusion/INC-P-n3-i1.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "match",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "accept",
+      "family": "inclusion",
+      "id": "INC-P-n3-i2",
+      "path": "inclusion/INC-P-n3-i2.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "match",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "accept",
+      "family": "inclusion",
+      "id": "INC-P-n4-i0",
+      "path": "inclusion/INC-P-n4-i0.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "match",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "accept",
+      "family": "inclusion",
+      "id": "INC-P-n4-i2",
+      "path": "inclusion/INC-P-n4-i2.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "match",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "accept",
+      "family": "inclusion",
+      "id": "INC-P-n4-i3",
+      "path": "inclusion/INC-P-n4-i3.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "match",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "accept",
+      "family": "inclusion",
+      "id": "INC-P-n5-i0",
+      "path": "inclusion/INC-P-n5-i0.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "match",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "accept",
+      "family": "inclusion",
+      "id": "INC-P-n5-i2",
+      "path": "inclusion/INC-P-n5-i2.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "match",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "accept",
+      "family": "inclusion",
+      "id": "INC-P-n5-i4",
+      "path": "inclusion/INC-P-n5-i4.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "match",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "accept",
+      "family": "inclusion",
+      "id": "INC-P-n7-i0",
+      "path": "inclusion/INC-P-n7-i0.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "match",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "accept",
+      "family": "inclusion",
+      "id": "INC-P-n7-i3",
+      "path": "inclusion/INC-P-n7-i3.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "match",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "accept",
+      "family": "inclusion",
+      "id": "INC-P-n7-i6",
+      "path": "inclusion/INC-P-n7-i6.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "match",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "accept",
+      "family": "inclusion",
+      "id": "INC-P-n8-i0",
+      "path": "inclusion/INC-P-n8-i0.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "match",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "accept",
+      "family": "inclusion",
+      "id": "INC-P-n8-i4",
+      "path": "inclusion/INC-P-n8-i4.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "match",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "accept",
+      "family": "inclusion",
+      "id": "INC-P-n8-i7",
+      "path": "inclusion/INC-P-n8-i7.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "match",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "accept",
+      "family": "inclusion",
+      "id": "INC-P-n9-i0",
+      "path": "inclusion/INC-P-n9-i0.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "match",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "accept",
+      "family": "inclusion",
+      "id": "INC-P-n9-i4",
+      "path": "inclusion/INC-P-n9-i4.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "match",
+      "detail": "arithmetic decides these; no signature is involved",
+      "expect": "accept",
+      "family": "inclusion",
+      "id": "INC-P-n9-i8",
+      "path": "inclusion/INC-P-n9-i8.json",
+      "reach": "verdict",
+      "signature": "not-applicable"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "accept",
+      "family": "token",
+      "id": "TOK-A-allow-with-dispatch-hash",
+      "path": "token/TOK-A-allow-with-dispatch-hash.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) does not verify",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-A-nonbmp-extension-key-codepoint-order",
+      "path": "token/TOK-A-nonbmp-extension-key-codepoint-order.json",
+      "reach": "nothing",
+      "signature": "failed"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "accept",
+      "family": "token",
+      "id": "TOK-A-nonbmp-extension-key-utf16-order",
+      "path": "token/TOK-A-nonbmp-extension-key-utf16-order.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-F-amd-sev-snp-measurement-sha256",
+      "path": "token/TOK-F-amd-sev-snp-measurement-sha256.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-F-integer-beyond-2-53",
+      "path": "token/TOK-F-integer-beyond-2-53.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-F-intel-tdx-measurement-sha256",
+      "path": "token/TOK-F-intel-tdx-measurement-sha256.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-F-modify-same-as-proposed",
+      "path": "token/TOK-F-modify-same-as-proposed.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-F-reason-empty-string",
+      "path": "token/TOK-F-reason-empty-string.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-F-reference-values-uri-empty",
+      "path": "token/TOK-F-reference-values-uri-empty.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "the text is not JSON, so nothing can be checked",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-F-trailing-garbage",
+      "path": "token/TOK-F-trailing-garbage.json",
+      "reach": "nothing",
+      "signature": "unparsable"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-agent-id-empty",
+      "path": "token/TOK-N-agent-id-empty.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-alg-hmac",
+      "path": "token/TOK-N-alg-hmac.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-alg-none",
+      "path": "token/TOK-N-alg-none.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) does not verify",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-claim-altered-after-signing",
+      "path": "token/TOK-N-claim-altered-after-signing.json",
+      "reach": "nothing",
+      "signature": "failed"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-digest-short",
+      "path": "token/TOK-N-digest-short.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-digest-unknown-alg",
+      "path": "token/TOK-N-digest-unknown-alg.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-digest-uppercase-hex-core-claim",
+      "path": "token/TOK-N-digest-uppercase-hex-core-claim.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-digest-uppercase-hex-extension",
+      "path": "token/TOK-N-digest-uppercase-hex-extension.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-digest-uppercase-hex-submod",
+      "path": "token/TOK-N-digest-uppercase-hex-submod.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-digest-uppercase-tag",
+      "path": "token/TOK-N-digest-uppercase-tag.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-digest-width-sha256-as-sha512",
+      "path": "token/TOK-N-digest-width-sha256-as-sha512.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-dup-escaped-equivalent",
+      "path": "token/TOK-N-dup-escaped-equivalent.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-dup-nested-submods",
+      "path": "token/TOK-N-dup-nested-submods.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-dup-top-level",
+      "path": "token/TOK-N-dup-top-level.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-initiating-user-empty",
+      "path": "token/TOK-N-initiating-user-empty.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-missing-claim-agbom-digest",
+      "path": "token/TOK-N-missing-claim-agbom-digest.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-missing-claim-agent-id",
+      "path": "token/TOK-N-missing-claim-agent-id.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-missing-claim-alg",
+      "path": "token/TOK-N-missing-claim-alg.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-missing-claim-canonical-snapshot-hash",
+      "path": "token/TOK-N-missing-claim-canonical-snapshot-hash.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-missing-claim-chain-head",
+      "path": "token/TOK-N-missing-claim-chain-head.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-missing-claim-initiating-user",
+      "path": "token/TOK-N-missing-claim-initiating-user.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-missing-claim-interception-point",
+      "path": "token/TOK-N-missing-claim-interception-point.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-missing-claim-merkle-root",
+      "path": "token/TOK-N-missing-claim-merkle-root.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-missing-claim-path-summary-hash",
+      "path": "token/TOK-N-missing-claim-path-summary-hash.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-missing-claim-policy-bundle-hash",
+      "path": "token/TOK-N-missing-claim-policy-bundle-hash.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-missing-claim-step-index",
+      "path": "token/TOK-N-missing-claim-step-index.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-missing-claim-target-resource",
+      "path": "token/TOK-N-missing-claim-target-resource.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-missing-claim-tree-size",
+      "path": "token/TOK-N-missing-claim-tree-size.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-missing-claim-verdict",
+      "path": "token/TOK-N-missing-claim-verdict.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-missing-eat-profile",
+      "path": "token/TOK-N-missing-eat-profile.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-missing-iat",
+      "path": "token/TOK-N-missing-iat.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-missing-iss",
+      "path": "token/TOK-N-missing-iss.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-missing-nonce",
+      "path": "token/TOK-N-missing-nonce.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-missing-submods",
+      "path": "token/TOK-N-missing-submods.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-modify-without-dispatch-hash",
+      "path": "token/TOK-N-modify-without-dispatch-hash.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-nonce-short",
+      "path": "token/TOK-N-nonce-short.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-null-for-optional",
+      "path": "token/TOK-N-null-for-optional.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "the text is not JSON, so nothing can be checked",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-parse-bom",
+      "path": "token/TOK-N-parse-bom.json",
+      "reach": "nothing",
+      "signature": "unparsable"
+    },
+    {
+      "arith": "none",
+      "detail": "the vector carries no public key",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-parse-lone-surrogate",
+      "path": "token/TOK-N-parse-lone-surrogate.json",
+      "reach": "nothing",
+      "signature": "no-key"
+    },
+    {
+      "arith": "none",
+      "detail": "the text is not JSON, so nothing can be checked",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-parse-trailing-comma",
+      "path": "token/TOK-N-parse-trailing-comma.json",
+      "reach": "nothing",
+      "signature": "unparsable"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-profile-trailing-slash",
+      "path": "token/TOK-N-profile-trailing-slash.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "the vector carries no public key",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-reference-time-float",
+      "path": "token/TOK-N-reference-time-float.json",
+      "reach": "nothing",
+      "signature": "no-key"
+    },
+    {
+      "arith": "none",
+      "detail": "the text names no signature",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-signature-absent-with-key",
+      "path": "token/TOK-N-signature-absent-with-key.json",
+      "reach": "nothing",
+      "signature": "no-signature"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) does not verify",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-signature-flipped-bit",
+      "path": "token/TOK-N-signature-flipped-bit.json",
+      "reach": "nothing",
+      "signature": "failed"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) does not verify",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-signature-s-not-reduced",
+      "path": "token/TOK-N-signature-s-not-reduced.json",
+      "reach": "nothing",
+      "signature": "failed"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) does not verify",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-signature-truncated",
+      "path": "token/TOK-N-signature-truncated.json",
+      "reach": "nothing",
+      "signature": "failed"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-signature-uppercase",
+      "path": "token/TOK-N-signature-uppercase.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) does not verify",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-signed-with-other-key",
+      "path": "token/TOK-N-signed-with-other-key.json",
+      "reach": "nothing",
+      "signature": "failed"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-step-index-bool",
+      "path": "token/TOK-N-step-index-bool.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "the vector carries no public key",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-step-index-float-integral",
+      "path": "token/TOK-N-step-index-float-integral.json",
+      "reach": "nothing",
+      "signature": "no-key"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-step-index-negative",
+      "path": "token/TOK-N-step-index-negative.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-step-index-string",
+      "path": "token/TOK-N-step-index-string.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-tree-size-equals-step-index",
+      "path": "token/TOK-N-tree-size-equals-step-index.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-tree-size-zero",
+      "path": "token/TOK-N-tree-size-zero.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-untagged-agbom-digest",
+      "path": "token/TOK-N-untagged-agbom-digest.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-untagged-canonical-snapshot-hash",
+      "path": "token/TOK-N-untagged-canonical-snapshot-hash.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-untagged-chain-head",
+      "path": "token/TOK-N-untagged-chain-head.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-untagged-merkle-root",
+      "path": "token/TOK-N-untagged-merkle-root.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-untagged-path-summary-hash",
+      "path": "token/TOK-N-untagged-path-summary-hash.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-untagged-policy-bundle-hash",
+      "path": "token/TOK-N-untagged-policy-bundle-hash.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-verdict-lowercase",
+      "path": "token/TOK-N-verdict-lowercase.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "reject",
+      "family": "token",
+      "id": "TOK-N-verdict-unknown",
+      "path": "token/TOK-N-verdict-unknown.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "accept",
+      "family": "token",
+      "id": "TOK-P-base",
+      "path": "token/TOK-P-base.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "accept",
+      "family": "token",
+      "id": "TOK-P-crlf-whitespace",
+      "path": "token/TOK-P-crlf-whitespace.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "accept",
+      "family": "token",
+      "id": "TOK-P-deny",
+      "path": "token/TOK-P-deny.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "accept",
+      "family": "token",
+      "id": "TOK-P-escalate",
+      "path": "token/TOK-P-escalate.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "accept",
+      "family": "token",
+      "id": "TOK-P-extension-ascii",
+      "path": "token/TOK-P-extension-ascii.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "accept",
+      "family": "token",
+      "id": "TOK-P-hook-context-assembly",
+      "path": "token/TOK-P-hook-context-assembly.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "accept",
+      "family": "token",
+      "id": "TOK-P-hook-memory-write",
+      "path": "token/TOK-P-hook-memory-write.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "accept",
+      "family": "token",
+      "id": "TOK-P-hook-plan-generation",
+      "path": "token/TOK-P-hook-plan-generation.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "accept",
+      "family": "token",
+      "id": "TOK-P-hook-post-call-tool-result",
+      "path": "token/TOK-P-hook-post-call-tool-result.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "accept",
+      "family": "token",
+      "id": "TOK-P-hook-subagent-delegation",
+      "path": "token/TOK-P-hook-subagent-delegation.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "accept",
+      "family": "token",
+      "id": "TOK-P-hook-task-completion",
+      "path": "token/TOK-P-hook-task-completion.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "accept",
+      "family": "token",
+      "id": "TOK-P-hook-task-initialization",
+      "path": "token/TOK-P-hook-task-initialization.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "accept",
+      "family": "token",
+      "id": "TOK-P-modify-dispatch-differs",
+      "path": "token/TOK-P-modify-dispatch-differs.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "accept",
+      "family": "token",
+      "id": "TOK-P-pretty-vs-compact",
+      "path": "token/TOK-P-pretty-vs-compact.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    },
+    {
+      "arith": "none",
+      "detail": "JCS(body without signature) verifies",
+      "expect": "accept",
+      "family": "token",
+      "id": "TOK-P-sha3-digest",
+      "path": "token/TOK-P-sha3-digest.json",
+      "reach": "signature-only",
+      "signature": "verified"
+    }
+  ],
+  "what": "how far a stranger gets on each upstream vector, from the file alone"
+}

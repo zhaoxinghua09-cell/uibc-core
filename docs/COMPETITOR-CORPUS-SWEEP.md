@@ -156,5 +156,43 @@ python tools/measure_own_corpus.py --selftest # 14 条：常量、折叠、条�
 
 这是本轮唯一可比的"体量"：**可被外人独立复算的向量条数**，不是总条数。总数（3,069 套件条目 vs 63）我们不比，因为追不上也不影响可核验性。真正的差别是**比例**：每一条我们的向量，读者都能用别的实现复算；对方的每一条，只有 40% 能做到这一点，其余 60% 只能选择相信。
 
+## 那 102 条不是一句"不可复算"，是三种断法
 
+"102 不可复算"这种话对读者没用：它只说了做不到，没说断在哪。`tools/build_upstream_ledger.py` 把 171 条逐条记成三层，**每一层只用文件自己写下的东西**：
 
+| 层 | 判据 | 条数 | 占 171 |
+|---|---|---|---|
+| `verdict` | 用文件自述的叶、下标、证明、树尺寸、正文做 RFC 6962/9162 折叠与 RFC 8785 规范化，能直接得出发布 verdict | **69** | 40% |
+| `signature-only` | 没有算术可言，但文件携带的每一个签名都在文件自携带的公钥下、对 `JCS(body−signature)` 验得过 | **88** | 51% |
+| `nothing` | 以上都不成立：正文解析不了、没有签名、或签名验不过 | **14** | 8% |
+
+逐族拆开（读自收据，不是手填）：
+
+| 族 | 条数 | verdict | signature-only | nothing | 文件缺什么 |
+|---|---|---|---|---|---|
+| inclusion | 37 | 37 | 0 | 0 | 不缺：叶、下标、证明、树尺寸都在 |
+| consistency | 23 | 23 | 0 | 0 | 不缺：两个根、两个尺寸、证明都在 |
+| canonical | 9 | 9 | 0 | 0 | 不缺：正文与期望摘要、长度都在 |
+| token | 87 | 0 | 74 | 13 | 验收规则（哪些 claim 必填、什么类型、怎么打标签）；正文只给 claim、密钥、签名 |
+| chain | 15 | 0 | 14 | 1 | 把相邻记录串起来的规则（chain-break / sequence-gap / truncation / measurement）；记录只给单条 claim 与签名 |
+
+三点值得说清：
+
+1. **"签名验得过"不是 verdict。** 88 条里大多数发布结论是 reject——签名有效恰恰说明它不是被签名否掉的，而是被那套没随文件发布的 schema 否掉的。所以这一层只证明"这堆字节是自洽签过名的"，证明不了"他们的判定对不对"。我们把它单列一层，正是为了不把它混进 69。
+2. **14 条 `nothing` 里没有一条是因为"我们懒"。** 13 条 token 是正文非 JSON（`parse-bom`、`trailing-comma`、`lone-surrogate` 等）、不带签名、或签名对不上；1 条 chain（`CHN-N-bad-signature-mid-chain`）是 6 条记录里第几条的签名翻了一位——这一条恰恰是这一层**抓到**的唯一缺陷，也是我们留着它的原因：这一层会失手，也会命中。
+3. **判据没有任何一处来自向量名。** 名字只当标签用，`reach` 由 `arith` 与 `signature` 两列算出来，收据里每一行都带着这两列，读的人可以自己重算一遍 `reach`（`tests/test_upstream_ledger.py` 就是这样断言全部 171 行的）。
+
+收据 `docs/upstream-package/competitor-defects/corpus-ledger-39daf704.json`（171 行逐文件、清单摘要 `7169d8760d1ac869…`，与扫描收据同一批字节）；`--check` 在任一行变动时失败。外人一条命令复得：
+
+```bash
+python tools/build_upstream_ledger.py --dir <…/corpus>            # 摘要打印
+python tools/build_upstream_ledger.py --dir <…/corpus> --check    # 任一行与收据不符即退出非零
+python tools/build_upstream_ledger.py --selftest                  # 7 条：可达级、翻转一位、正文非 JSON、自洽
+python tools/stranger_competitor_check.py                         # 取上游 tarball，连这一层一起比
+```
+
+`tools/stranger_competitor_check.py` 现在多打一行 `ledger: 69 verdict, 88 signature-only, 14 nothing, 88 signatures verify`，并把这份收据**逐行**比对：某一条向量的可达级别动了，就算 `DID NOT MATCH`，不是四舍五入。
+
+一句话的差别：我们的 63 条**每一条都落在 `verdict` 层**；他们的 171 条里 69 条落在这一层，另 88 条只到签名，14 条连签名也到不了。
+
+画成一张图是同一件事：`docs/UPSTREAM-REACH-LADDER.svg`（`tools/build_reach_ladder_svg.py --write` 生成，`--check` 在任一份收据变动时失效）。三段柱共用 171 刻度，段长全部读自收据，柱下还按族给出 `verdict/signature-only/nothing` 三个计数；我方 63 条画在同一刻度上，整条落在 `verdict` 段。

@@ -361,6 +361,9 @@ jobs:
           # third-party implementation vendored in the tree; its selftest
           # has to keep showing a wrong root coming back as reject.
           python tools/crosscheck_competitor_inclusion_sigstore.py --selftest
+          # Seven gates at once, in this checkout: receipts fresh, pictures rebuilt
+          # from them, ledger invariants, claims vs receipts, index current.
+          python tools/stranger_own_check.py
           python tools/check_competitor_vectors.py \
             --dir docs/upstream-package/competitor-defects/v0.38.0 \
             --dir docs/upstream-package/competitor-defects/v0.38.0-counter --json \

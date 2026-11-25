@@ -285,3 +285,17 @@ VERDICT: NOT VERIFIED
 ### 这条通道不开哪扇门
 
 receipt 里**没有身份字段**，复核器也不声称知道是谁跑的。它能证明的是"这些数字在某台机器上被算出来过、且与我在本机重算的一致"，不能证明"跑的人是张三"。所以 `docs/EXTERNAL-RUNS.json` 的 `headline` 仍然是 **0**——我们自己跑的、包括在云主机裸解释器上跑的，都不算外部实跑。这条工具把"想让人核"变成"可以核"，但把"有人核过"留给真的有人来核。
+
+### 一栏在两边不对称时：说明范围，而不是判它错
+
+ledger 那一栏取决于机器：没有 `cryptography` 的机器写出的 receipt 没有这一行，有库的机器能算出来；反过来也一样。所以复核器碰到这种不对称时不报 `DIFF`，而是给一句范围说明，并把结论写成 `VERDICT: VERIFIED (arithmetic only)`：
+
+```
+note: the receipt's ledger step was not evaluated where it was written
+      (no cryptography); this machine has it, so that row cannot be
+      compared - the arithmetic can
+the receipt's 6 comparable checks and verdict 'PARTIAL' are what this machine recomputes
+VERDICT: VERIFIED (arithmetic only)
+```
+
+这条规则的理由和上一节一样：**读者少装一个库，不该被记成我们数字不对**；但也不能把"少核了一栏"说成"全核过了"，所以结论后面直接带上 `(arithmetic only)`。

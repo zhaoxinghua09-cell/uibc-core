@@ -299,3 +299,30 @@ VERDICT: VERIFIED (arithmetic only)
 ```
 
 verdict 与退出码跟着那一栏走：跳过了 ledger 的 receipt 记 `PARTIAL`/3，能算的那台记 `REPRODUCED`/0，所以它们也不跨这一栏比；但 receipt 自身必须自洽——跳过 ledger 却写 `REPRODUCED` 会被直接点名（测试里有这条）。\n\n这条规则的理由和上一节一样：**读者少装一个库，不该被记成我们数字不对**；但也不能把"少核了一栏"说成"全核过了"，所以结论后面直接带上 `(arithmetic only)`。
+
+## 最后一条：审我们自己，也只要一条命令
+
+上面每条结论都有各自的 `--check`。但它们是**分开**跑的，而且通常是在一个被很多次编辑过的树里跑——那正是陈旧最容易藏身的地方。
+
+`tools/stranger_own_check.py` 把七件事一次跑完，并可以在**一份不是我们生成的副本**上跑：
+
+| 检查 | 对应的 `--check` / 门 |
+|---|---|
+| `own-corpus-receipt` | 我方 63 条收据是一次新鲜测量（`measure_own_corpus.py --check`） |
+| `coverage-picture` | 覆盖度图由扫描收据重建（`build_corpus_sweep_svg.py --check`） |
+| `two-ruler-picture` | 两比例同轴图由两份收据重建（`build_same_ruler_svg.py --check`） |
+| `reach-ladder-picture` | 可达阶梯图由收据重建（`build_reach_ladder_svg.py --check`） |
+| `ledger-invariants` | 分层账自身不变量成立（`build_upstream_ledger.py --selftest`） |
+| `claims-vs-receipts` | 每个锁定断言仍等于其收据（`audit_claims_receipts.py`） |
+| `evidence-index` | 证据索引是这棵树的扫描（`build_evidence_index.py --check`） |
+
+两种跑法：
+
+```bash
+python tools/stranger_own_check.py            # 当前检出
+python tools/stranger_own_check.py --fresh    # 抓 main tarball，在干净副本上跑
+```
+
+实跑两种路径都是 `7 passed, 0 failed` → `VERDICT: SELF-CONSISTENT`。`--fresh` 那条尤其值得看：它证明的不是"我的树是干净的"，而是"**别人拿到的那份 main，七道门全过**"。任一检查失败会打一行原因（失败检查的首行输出），所以"不复现"从来不是一句没有下文的话。
+
+边界：它审**自洽**，不审**正确**。收据可以是错的，只要七处都与它一致；正确性靠前面的算术、第三方实现、变异控制与外部实跑去证明。这条只保证一件事——**没有任何一页比它引用的收据更新或更旧**。

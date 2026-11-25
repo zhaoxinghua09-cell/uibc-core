@@ -38,7 +38,7 @@
  "ours": {
   "repo": "zhaoxinghua09-cell/uibc-core",
   "commit": "unknown",
-  "code_files": 1806,
+  "code_files": 1811,
   "test_files": 273,
   "test_text_kb": 1068,
   "test_hits": {
@@ -57,7 +57,7 @@
    "bit_level": 7,
    "address_derive": 100,
    "exit_code_gate": 6,
-   "reject_assertion": 2590
+   "reject_assertion": 2599
   },
   "dims": {
    "D1": 2,
@@ -75,6 +75,55 @@
   }
  },
  "repos": [
+  {
+   "repo": "WeBankBlockchain/WeIdentity",
+   "sha": "2f8e4b5a7e208790af7e2697b061550c91560e98",
+   "tarball_sha256": "c1667cabf48267be6d3adcb612faf56be1e9e6c2dcc60db7de0970df900d8bcb",
+   "tarball_bytes": 5169271,
+   "code_files": 290,
+   "test_files": 97,
+   "test_lines": 16574,
+   "code_lines": 47141,
+   "test_text_kb": 713,
+   "test_hits": {
+    "fuzz": 0,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 0,
+    "exit_code_gate": 0,
+    "reject_assertion": 26
+   },
+   "nontest_hits": {
+    "fuzz": 0,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 23,
+    "exit_code_gate": 0,
+    "reject_assertion": 80
+   },
+   "test_hit_examples": {
+    "fuzz": [],
+    "mutation_testing": [],
+    "property_based": [],
+    "bit_level": [],
+    "address_derive": [],
+    "exit_code_gate": [],
+    "reject_assertion": [
+     "src/test/java/com/webank/weid/full/auth/TestAddIssuerIntoIssuerType.java",
+     "src/test/java/com/webank/weid/full/auth/TestQueryAuthorityIssuerInfo.java",
+     "src/test/java/com/webank/weid/full/auth/TestRegisterAuthorityIssuer.java"
+    ]
+   },
+   "dims": {
+    "D1": 1,
+    "D2": 0,
+    "D3": 0,
+    "D4": 0,
+    "D5": 0
+   }
+  },
   {
    "repo": "caict-4iot-dev/uni-registrar-driver-did-bid",
    "sha": "68f69ec419c0f23c1a7faf95dd8d73aeb5ff30a4",
@@ -162,6 +211,112 @@
     "D2": 0,
     "D3": 0,
     "D4": 0,
+    "D5": 0
+   }
+  },
+  {
+   "repo": "ceramicnetwork/js-did",
+   "sha": "def0a5fed152a42ffeef87bafb4619816f9954f6",
+   "tarball_sha256": "94f5e8974f8030c8b56ea114afc66fbee49e370a5e8374a3a1f2af2513f0eaaa",
+   "tarball_bytes": 437936,
+   "code_files": 307,
+   "test_files": 36,
+   "test_lines": 3406,
+   "code_lines": 36444,
+   "test_text_kb": 127,
+   "test_hits": {
+    "fuzz": 0,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 73,
+    "exit_code_gate": 0,
+    "reject_assertion": 53
+   },
+   "nontest_hits": {
+    "fuzz": 13,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 79,
+    "exit_code_gate": 0,
+    "reject_assertion": 78
+   },
+   "test_hit_examples": {
+    "fuzz": [],
+    "mutation_testing": [],
+    "property_based": [],
+    "bit_level": [],
+    "address_derive": [
+     "packages/did-session/test/lib.test.ts",
+     "packages/dids/test/jws-verification-behavior.test.ts",
+     "packages/dids/test/provider-behavior.test.ts"
+    ],
+    "exit_code_gate": [],
+    "reject_assertion": [
+     "packages/codecs/test/binary.test.ts",
+     "packages/did-session/test/lib.test.ts",
+     "packages/dids/test/jws-verification-behavior.test.ts"
+    ]
+   },
+   "dims": {
+    "D1": 1,
+    "D2": 0,
+    "D3": 1,
+    "D4": 0,
+    "D5": 0
+   }
+  },
+  {
+   "repo": "decentralized-identity/did-jwt",
+   "sha": "63663c1f40b4d6dd0d510847acfe5ae5ad230fd2",
+   "tarball_sha256": "bcc1284e11c9cf244f77746300f1d8e4fcdd3b1c02919a80b51c06700ca1cc45",
+   "tarball_bytes": 146903,
+   "code_files": 64,
+   "test_files": 18,
+   "test_lines": 5182,
+   "code_lines": 12574,
+   "test_text_kb": 219,
+   "test_hits": {
+    "fuzz": 0,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 55,
+    "exit_code_gate": 0,
+    "reject_assertion": 127
+   },
+   "nontest_hits": {
+    "fuzz": 0,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 33,
+    "exit_code_gate": 3,
+    "reject_assertion": 28
+   },
+   "test_hit_examples": {
+    "fuzz": [],
+    "mutation_testing": [],
+    "property_based": [],
+    "bit_level": [],
+    "address_derive": [
+     "src/__tests__/didkey.test.ts",
+     "src/__tests__/EdDSASigner.test.ts",
+     "src/__tests__/ES256KSigner.test.ts"
+    ],
+    "exit_code_gate": [],
+    "reject_assertion": [
+     "src/__tests__/ConditionalAlgorithm.test.ts",
+     "src/__tests__/ConditionalAlgorithmResolverHelper.ts",
+     "src/__tests__/EdDSASigner.test.ts"
+    ]
+   },
+   "dims": {
+    "D1": 1,
+    "D2": 0,
+    "D3": 1,
+    "D4": 1,
     "D5": 0
    }
   },
@@ -513,6 +668,232 @@
    }
   },
   {
+   "repo": "docknetwork/sdk",
+   "sha": "1eadcdc7a9c1dd7a28a2df5ff2b3b969a51427a6",
+   "tarball_sha256": "6370e574113a06f88f3e6deccf68706a70f5d78a7549f7a97a581752fd624d4e",
+   "tarball_bytes": 864936,
+   "code_files": 670,
+   "test_files": 119,
+   "test_lines": 15950,
+   "code_lines": 67321,
+   "test_text_kb": 490,
+   "test_hits": {
+    "fuzz": 1,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 78,
+    "exit_code_gate": 0,
+    "reject_assertion": 129
+   },
+   "nontest_hits": {
+    "fuzz": 1,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 181,
+    "exit_code_gate": 12,
+    "reject_assertion": 119
+   },
+   "test_hit_examples": {
+    "fuzz": [
+     "packages/credential-sdk/tests/ipfs/ipfs.test.disabled.js"
+    ],
+    "mutation_testing": [],
+    "property_based": [],
+    "bit_level": [],
+    "address_derive": [
+     "packages/credential-sdk/tests/base-x.test.js",
+     "packages/credential-sdk/tests/claim-deduction.test.js",
+     "packages/credential-sdk/tests/did.test.js"
+    ],
+    "exit_code_gate": [],
+    "reject_assertion": [
+     "packages/ap2/tests/mandates.test.js",
+     "packages/ap2/tests/receipts.test.js",
+     "packages/ap2/tests/utils.test.js"
+    ]
+   },
+   "dims": {
+    "D1": 1,
+    "D2": 0,
+    "D3": 1,
+    "D4": 1,
+    "D5": 0
+   }
+  },
+  {
+   "repo": "hyperledger/aries-cloudagent-python",
+   "sha": "daf7ff8d208a56bbfe5f66d879c638b2d2fb4a77",
+   "tarball_sha256": "8cadfa637d62bf93f38b71a9ae22d606c4b79d9ed157f90f098bf4142517b5ac",
+   "tarball_bytes": 17256075,
+   "code_files": 1820,
+   "test_files": 698,
+   "test_lines": 135271,
+   "code_lines": 319984,
+   "test_text_kb": 5764,
+   "test_hits": {
+    "fuzz": 5,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 195,
+    "exit_code_gate": 0,
+    "reject_assertion": 102
+   },
+   "nontest_hits": {
+    "fuzz": 0,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 124,
+    "exit_code_gate": 6,
+    "reject_assertion": 281
+   },
+   "test_hit_examples": {
+    "fuzz": [
+     "acapy_agent/anoncreds/tests/mock_objects.py",
+     "acapy_agent/ledger/merkel_validation/tests/test_data.py",
+     "acapy_agent/protocols/present_proof/dif/tests/test_data.py"
+    ],
+    "mutation_testing": [],
+    "property_based": [],
+    "bit_level": [],
+    "address_derive": [
+     "acapy_agent/anoncreds/default/legacy_indy/tests/test_recover.py",
+     "acapy_agent/anoncreds/default/legacy_indy/tests/test_registry.py",
+     "acapy_agent/connections/models/diddoc/tests/test_diddoc.py"
+    ],
+    "exit_code_gate": [],
+    "reject_assertion": [
+     "acapy_agent/admin/tests/test_admin_server.py",
+     "acapy_agent/admin/tests/test_oauth_validator.py",
+     "acapy_agent/anoncreds/revocation/tests/test_event_storage.py"
+    ]
+   },
+   "dims": {
+    "D1": 1,
+    "D2": 0,
+    "D3": 1,
+    "D4": 1,
+    "D5": 0
+   }
+  },
+  {
+   "repo": "hyperledger/aries-framework-go",
+   "sha": "64dd8acc07506884f480719f7d9d960447d9a5ac",
+   "tarball_sha256": "28c247dd6134e065efa836d82ab84404ec9d1dbef1b862bdd7dd5bed9462a64c",
+   "tarball_bytes": 2090418,
+   "code_files": 1389,
+   "test_files": 125,
+   "test_lines": 29257,
+   "code_lines": 281831,
+   "test_text_kb": 1028,
+   "test_hits": {
+    "fuzz": 1,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 25,
+    "exit_code_gate": 2,
+    "reject_assertion": 59
+   },
+   "nontest_hits": {
+    "fuzz": 5,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 592,
+    "exit_code_gate": 4,
+    "reject_assertion": 1670
+   },
+   "test_hit_examples": {
+    "fuzz": [
+     "test/aries-js-worker/package-lock.json"
+    ],
+    "mutation_testing": [],
+    "property_based": [],
+    "bit_level": [],
+    "address_derive": [
+     "test/aries-js-worker/karma.conf.js",
+     "test/aries-js-worker/test/presentproof/presentproof.js",
+     "test/aries-js-worker/test/vdr/vdr.js"
+    ],
+    "exit_code_gate": [
+     "test/bbs/src/wasm_exec.js"
+    ],
+    "reject_assertion": [
+     "test/aries-js-worker/init.js",
+     "test/aries-js-worker/fixtures/data/agent-startup-contexts.json",
+     "test/aries-js-worker/test/common.js"
+    ]
+   },
+   "dims": {
+    "D1": 1,
+    "D2": 0,
+    "D3": 1,
+    "D4": 1,
+    "D5": 0
+   }
+  },
+  {
+   "repo": "hyperledger/indy-sdk",
+   "sha": "2d47f2ff1ca62563f0f85e52cc9378f133ad8a0d",
+   "tarball_sha256": "768eadeb1bd39367ffcdd2bd084d1975ba4e8fd3cb322367ca9abaf95676d125",
+   "tarball_bytes": 52688186,
+   "code_files": 1566,
+   "test_files": 416,
+   "test_lines": 42814,
+   "code_lines": 253827,
+   "test_text_kb": 2084,
+   "test_hits": {
+    "fuzz": 0,
+    "mutation_testing": 9,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 73,
+    "exit_code_gate": 0,
+    "reject_assertion": 92
+   },
+   "nontest_hits": {
+    "fuzz": 3,
+    "mutation_testing": 0,
+    "property_based": 2,
+    "bit_level": 18,
+    "address_derive": 373,
+    "exit_code_gate": 14,
+    "reject_assertion": 1453
+   },
+   "test_hit_examples": {
+    "fuzz": [],
+    "mutation_testing": [
+     "vcx/wrappers/java/src/test/java/com/evernym/sdk/vcx/ConnectionApiTest.java",
+     "vcx/wrappers/java/src/test/java/com/evernym/sdk/vcx/CredentialApiTest.java",
+     "vcx/wrappers/java/src/test/java/com/evernym/sdk/vcx/CredentialDefApiTest.java"
+    ],
+    "property_based": [],
+    "bit_level": [],
+    "address_derive": [
+     "libindy/tests/anoncreds.rs",
+     "libindy/tests/crypto.rs",
+     "libindy/tests/did.rs"
+    ],
+    "exit_code_gate": [],
+    "reject_assertion": [
+     "libindy/tests/anoncreds_demos.rs",
+     "libindy/tests/ledger.rs",
+     "libindy/tests/payments.rs"
+    ]
+   },
+   "dims": {
+    "D1": 1,
+    "D2": 0,
+    "D3": 1,
+    "D4": 1,
+    "D5": 0
+   }
+  },
+  {
    "repo": "hyperledger/indy-vdr",
    "sha": "e4902fcd5638efb0aaded3a854a56e077f8b32f3",
    "tarball_sha256": "862aff2938161c8a04ead4bbf94a44a50d0387b750454d64fe4438ef8c08ec9a",
@@ -561,6 +942,51 @@
     "D2": 0,
     "D3": 1,
     "D4": 1,
+    "D5": 0
+   }
+  },
+  {
+   "repo": "ontio/ontology-did",
+   "sha": "9902c8f80f0610080008ddf0eb151dabb6340f2a",
+   "tarball_sha256": "dafedb46c972be90e9f993f9af2d9bf2ee00d94a71ab7a7f7a167d80f5fe2468",
+   "tarball_bytes": 1774459,
+   "code_files": 25,
+   "test_files": 0,
+   "test_lines": 0,
+   "code_lines": 3686,
+   "test_text_kb": 0,
+   "test_hits": {
+    "fuzz": 0,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 0,
+    "exit_code_gate": 0,
+    "reject_assertion": 0
+   },
+   "nontest_hits": {
+    "fuzz": 0,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 4,
+    "exit_code_gate": 0,
+    "reject_assertion": 3
+   },
+   "test_hit_examples": {
+    "fuzz": [],
+    "mutation_testing": [],
+    "property_based": [],
+    "bit_level": [],
+    "address_derive": [],
+    "exit_code_gate": [],
+    "reject_assertion": []
+   },
+   "dims": {
+    "D1": 0,
+    "D2": 0,
+    "D3": 0,
+    "D4": 0,
     "D5": 0
    }
   },

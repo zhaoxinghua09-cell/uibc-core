@@ -4,61 +4,98 @@
   "canonical": {
    "counts": {
     "vectors": 9,
-    "replayable": 0,
+    "replayable": 9,
     "accept_published": 9,
     "reject_published": 0,
-    "consistent": 0,
+    "signature_verifies": 0,
+    "consistent": 9,
     "inconsistent": 0,
-    "none": 9
+    "none": 0
    },
    "vectors": [
     {
      "id": "CAN-P-astral-values",
+     "file": "CAN-P-astral-values.json",
+     "class": "positive",
      "expects": "accept",
-     "replay": "none"
+     "arith": "match",
+     "replay": "consistent",
+     "detail": "JCS(text) reproduces the published digest and length"
     },
     {
      "id": "CAN-P-combining-vs-precomposed",
+     "file": "CAN-P-combining-vs-precomposed.json",
+     "class": "positive",
      "expects": "accept",
-     "replay": "none"
+     "arith": "match",
+     "replay": "consistent",
+     "detail": "JCS(text) reproduces the published digest and length"
     },
     {
      "id": "CAN-P-empty-containers",
+     "file": "CAN-P-empty-containers.json",
+     "class": "positive",
      "expects": "accept",
-     "replay": "none"
+     "arith": "match",
+     "replay": "consistent",
+     "detail": "JCS(text) reproduces the published digest and length"
     },
     {
      "id": "CAN-P-escapes-and-controls",
+     "file": "CAN-P-escapes-and-controls.json",
+     "class": "positive",
      "expects": "accept",
-     "replay": "none"
+     "arith": "match",
+     "replay": "consistent",
+     "detail": "JCS(text) reproduces the published digest and length"
     },
     {
      "id": "CAN-P-key-order-bmp-above-surrogates",
+     "file": "CAN-P-key-order-bmp-above-surrogates.json",
+     "class": "positive",
      "expects": "accept",
-     "replay": "none"
+     "arith": "match",
+     "replay": "consistent",
+     "detail": "JCS(text) reproduces the published digest and length"
     },
     {
      "id": "CAN-P-key-order-digits-upper-lower",
+     "file": "CAN-P-key-order-digits-upper-lower.json",
+     "class": "positive",
      "expects": "accept",
-     "replay": "none"
+     "arith": "match",
+     "replay": "consistent",
+     "detail": "JCS(text) reproduces the published digest and length"
     },
     {
      "id": "CAN-P-nested-key-order",
+     "file": "CAN-P-nested-key-order.json",
+     "class": "positive",
      "expects": "accept",
-     "replay": "none"
+     "arith": "match",
+     "replay": "consistent",
+     "detail": "JCS(text) reproduces the published digest and length"
     },
     {
      "id": "CAN-P-numbers-integers",
+     "file": "CAN-P-numbers-integers.json",
+     "class": "positive",
      "expects": "accept",
-     "replay": "none"
+     "arith": "match",
+     "replay": "consistent",
+     "detail": "JCS(text) reproduces the published digest and length"
     },
     {
      "id": "CAN-P-unicode-line-separators",
+     "file": "CAN-P-unicode-line-separators.json",
+     "class": "positive",
      "expects": "accept",
-     "replay": "none"
+     "arith": "match",
+     "replay": "consistent",
+     "detail": "JCS(text) reproduces the published digest and length"
     }
    ],
-   "why_not_numeric": "a canonicalisation digest: a canonicaliser decides"
+   "why_not_numeric": ""
   },
   "chain": {
    "counts": {
@@ -66,6 +103,7 @@
     "replayable": 0,
     "accept_published": 5,
     "reject_published": 10,
+    "signature_verifies": 0,
     "consistent": 0,
     "inconsistent": 0,
     "none": 15
@@ -74,80 +112,95 @@
     {
      "id": "CHN-N-altered-snapshot-resigned",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "a record chain: signatures over records decide, and the vector does not state the signed bytes"
     },
     {
      "id": "CHN-N-altered-verdict-resigned",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "a record chain: signatures over records decide, and the vector does not state the signed bytes"
     },
     {
      "id": "CHN-N-bad-signature-mid-chain",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "a record chain: signatures over records decide, and the vector does not state the signed bytes"
     },
     {
      "id": "CHN-N-first-record-missing",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "a record chain: signatures over records decide, and the vector does not state the signed bytes"
     },
     {
      "id": "CHN-N-history-rewritten-no-anchor",
      "expects": "accept",
-     "replay": "none"
+     "replay": "none",
+     "detail": "a record chain: signatures over records decide, and the vector does not state the signed bytes"
     },
     {
      "id": "CHN-N-history-rewritten-resigned",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "a record chain: signatures over records decide, and the vector does not state the signed bytes"
     },
     {
      "id": "CHN-N-measurement-changed",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "a record chain: signatures over records decide, and the vector does not state the signed bytes"
     },
     {
      "id": "CHN-N-record-deleted",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "a record chain: signatures over records decide, and the vector does not state the signed bytes"
     },
     {
      "id": "CHN-N-record-inserted",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "a record chain: signatures over records decide, and the vector does not state the signed bytes"
     },
     {
      "id": "CHN-N-records-reordered",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "a record chain: signatures over records decide, and the vector does not state the signed bytes"
     },
     {
      "id": "CHN-N-tail-truncated-no-anchor",
      "expects": "accept",
-     "replay": "none"
+     "replay": "none",
+     "detail": "a record chain: signatures over records decide, and the vector does not state the signed bytes"
     },
     {
      "id": "CHN-N-tail-truncated-with-anchor",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "a record chain: signatures over records decide, and the vector does not state the signed bytes"
     },
     {
      "id": "CHN-P-prefix-of-anchored",
      "expects": "accept",
-     "replay": "none"
+     "replay": "none",
+     "detail": "a record chain: signatures over records decide, and the vector does not state the signed bytes"
     },
     {
      "id": "CHN-P-six-steps-anchored",
      "expects": "accept",
-     "replay": "none"
+     "replay": "none",
+     "detail": "a record chain: signatures over records decide, and the vector does not state the signed bytes"
     },
     {
      "id": "CHN-P-six-steps",
      "expects": "accept",
-     "replay": "none"
+     "replay": "none",
+     "detail": "a record chain: signatures over records decide, and the vector does not state the signed bytes"
     }
    ],
-   "why_not_numeric": "a record chain: signatures over records decide"
+   "why_not_numeric": "a record chain: signatures over records decide, and the vector does not state the signed bytes"
   },
   "consistency": {
    "counts": {
@@ -155,6 +208,7 @@
     "replayable": 23,
     "accept_published": 10,
     "reject_published": 13,
+    "signature_verifies": 0,
     "consistent": 23,
     "inconsistent": 0,
     "none": 0
@@ -376,6 +430,7 @@
     "replayable": 37,
     "accept_published": 22,
     "reject_published": 15,
+    "signature_verifies": 0,
     "consistent": 37,
     "inconsistent": 0,
     "none": 0
@@ -723,6 +778,7 @@
     "replayable": 0,
     "accept_published": 17,
     "reject_published": 70,
+    "signature_verifies": 74,
     "consistent": 0,
     "inconsistent": 0,
     "none": 87
@@ -731,450 +787,537 @@
     {
      "id": "TOK-A-allow-with-dispatch-hash",
      "expects": "accept",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-A-nonbmp-extension-key-codepoint-order",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) does not verify; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-A-nonbmp-extension-key-utf16-order",
      "expects": "accept",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-F-amd-sev-snp-measurement-sha256",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-F-integer-beyond-2-53",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-F-intel-tdx-measurement-sha256",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-F-modify-same-as-proposed",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-F-reason-empty-string",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-F-reference-values-uri-empty",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-F-trailing-garbage",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "no public key or no text"
     },
     {
      "id": "TOK-N-agent-id-empty",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-alg-hmac",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-alg-none",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-claim-altered-after-signing",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) does not verify; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-digest-short",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-digest-unknown-alg",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-digest-uppercase-hex-core-claim",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-digest-uppercase-hex-extension",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-digest-uppercase-hex-submod",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-digest-uppercase-tag",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-digest-width-sha256-as-sha512",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-dup-escaped-equivalent",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-dup-nested-submods",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-dup-top-level",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-initiating-user-empty",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-missing-claim-agbom-digest",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-missing-claim-agent-id",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-missing-claim-alg",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-missing-claim-canonical-snapshot-hash",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-missing-claim-chain-head",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-missing-claim-initiating-user",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-missing-claim-interception-point",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-missing-claim-merkle-root",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-missing-claim-path-summary-hash",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-missing-claim-policy-bundle-hash",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-missing-claim-step-index",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-missing-claim-target-resource",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-missing-claim-tree-size",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-missing-claim-verdict",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-missing-eat-profile",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-missing-iat",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-missing-iss",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-missing-nonce",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-missing-submods",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-modify-without-dispatch-hash",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-nonce-short",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-null-for-optional",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-parse-bom",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "no public key or no text"
     },
     {
      "id": "TOK-N-parse-lone-surrogate",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "no public key or no text"
     },
     {
      "id": "TOK-N-parse-trailing-comma",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "no public key or no text"
     },
     {
      "id": "TOK-N-profile-trailing-slash",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-reference-time-float",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "no public key or no text"
     },
     {
      "id": "TOK-N-signature-absent-with-key",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the text names no signature"
     },
     {
      "id": "TOK-N-signature-flipped-bit",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) does not verify; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-signature-s-not-reduced",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) does not verify; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-signature-truncated",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) does not verify; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-signature-uppercase",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-signed-with-other-key",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) does not verify; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-step-index-bool",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-step-index-float-integral",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "no public key or no text"
     },
     {
      "id": "TOK-N-step-index-negative",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-step-index-string",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-tree-size-equals-step-index",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-tree-size-zero",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-untagged-agbom-digest",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-untagged-canonical-snapshot-hash",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-untagged-chain-head",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-untagged-merkle-root",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-untagged-path-summary-hash",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-untagged-policy-bundle-hash",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-verdict-lowercase",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-N-verdict-unknown",
      "expects": "reject",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-P-base",
      "expects": "accept",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-P-crlf-whitespace",
      "expects": "accept",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-P-deny",
      "expects": "accept",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-P-escalate",
      "expects": "accept",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-P-extension-ascii",
      "expects": "accept",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-P-hook-context-assembly",
      "expects": "accept",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-P-hook-memory-write",
      "expects": "accept",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-P-hook-plan-generation",
      "expects": "accept",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-P-hook-post-call-tool-result",
      "expects": "accept",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-P-hook-subagent-delegation",
      "expects": "accept",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-P-hook-task-completion",
      "expects": "accept",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-P-hook-task-initialization",
      "expects": "accept",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-P-modify-dispatch-differs",
      "expects": "accept",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-P-pretty-vs-compact",
      "expects": "accept",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     },
     {
      "id": "TOK-P-sha3-digest",
      "expects": "accept",
-     "replay": "none"
+     "replay": "none",
+     "detail": "the signature would have to cover bytes the vector does not state; JCS(body without signature) VERIFIES; JCS(body with an empty signature) does not verify"
     }
    ],
-   "why_not_numeric": "a signed token: a signature and schema semantics decide"
+   "why_not_numeric": "a signature over bytes the vector does not state, plus schema semantics"
   }
  },
  "totals": {
   "vectors": 171,
-  "n_replayable": 60,
+  "n_replayable": 69,
   "n_accept_published": 63,
   "n_reject_published": 108,
-  "consistent": 60,
+  "consistent": 69,
   "inconsistent": 0,
-  "none": 111
+  "none": 102
  },
  "manifest": {
   "files": [

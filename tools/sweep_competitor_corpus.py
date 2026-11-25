@@ -50,6 +50,10 @@ try:
 except ImportError:
     from verify_rekor_inclusion import (_decomp_incl_proof, fold, leaf_hash,
                                         root_from_consistency_proof)
+try:
+    from tools import jcs
+except ImportError:
+    import jcs
 
 
 def _sha256_file(path):
@@ -122,12 +126,71 @@ def _consistency(v):
         computed.hex()[:8], new_root[:8])
 
 
-REPLAY = {"inclusion": _inclusion, "consistency": _consistency}
+def _canonical(v):
+    """Their canonical digests, against RFC 8785 rather than against their code."""
+    text = v.get("text")
+    want = (v.get("canonical_sha256") or "").lower()
+    want_len = v.get("canonical_len")
+    if text is None or not want:
+        return "none", "no text or no canonical_sha256"
+    try:
+        _data, _out, raw = jcs.canonicalise_text(text)
+    except jcs.NonIntegral as e:
+        return "none", "outside what JCS covers here: %s" % e
+    except ValueError as e:
+        return "none", "text is not JSON: %s" % e
+    if hashlib.sha256(raw).hexdigest() == want and (want_len is None or len(raw) == want_len):
+        return "match", "JCS(text) reproduces the published digest and length"
+    return "mismatch", "JCS(text) gives %s.. / %d bytes, not %s.. / %s" % (
+        hashlib.sha256(raw).hexdigest()[:8], len(raw), want[:8], want_len)
+
+
+def _token(v):
+    """Can the signature be checked from the file alone? Say what was tried.
+
+    Never "match": a verdict that also depends on schema semantics is not decided
+    by cryptography, so the honest answer stays "no", with the attempt recorded.
+    """
+    try:
+        from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
+    except ImportError:
+        return "none", "cryptography is not installed, so no signature was attempted"
+    pk = v.get("public_key")
+    text = v.get("text")
+    if not pk or text is None:
+        return "none", "no public key or no text"
+    try:
+        body = json.loads(text)
+    except ValueError:
+        return "none", "text is not JSON, so there is nothing to sign over"
+    sig_hex = body.get("signature") or ""
+    if not sig_hex:
+        return "none", "the text names no signature"
+    try:
+        pub = Ed25519PublicKey.from_public_bytes(bytes.fromhex(pk))
+        sig = bytes.fromhex(sig_hex)
+    except (ValueError, TypeError) as e:
+        return "none", "public key or signature is not hex: %s" % e
+    stripped = {k: val for k, val in body.items() if k != "signature"}
+    tried = []
+    for label, obj in (("JCS(body without signature)", stripped),
+                       ("JCS(body with an empty signature)", dict(stripped, signature=""))):
+        try:
+            pub.verify(sig, jcs.canonicalise(obj).encode("utf-8"))
+            tried.append(label + " VERIFIES")
+        except Exception:
+            tried.append(label + " does not verify")
+    return "none", ("the signature would have to cover bytes the vector does not "
+                    "state; " + "; ".join(tried))
+
+
+REPLAY = {"inclusion": _inclusion, "consistency": _consistency,
+          "canonical": _canonical, "token": _token}
 
 NOT_NUMERIC = {
-    "token": "a signed token: a signature and schema semantics decide",
-    "chain": "a record chain: signatures over records decide",
-    "canonical": "a canonicalisation digest: a canonicaliser decides",
+    "token": "a signature over bytes the vector does not state, plus schema semantics",
+    "chain": "a record chain: signatures over records decide, and the vector does not "
+             "state the signed bytes",
 }
 
 VERDICTS = ("consistent", "inconsistent", "none")
@@ -172,7 +235,13 @@ def run(corpus_dir):
         counts = {"vectors": len(vectors),
                   "replayable": sum(1 for x in vectors if x["arith"] != "none"),
                   "accept_published": sum(1 for x in vectors if x["expects"] == "accept"),
-                  "reject_published": sum(1 for x in vectors if x["expects"] == "reject")}
+                  "reject_published": sum(1 for x in vectors if x["expects"] == "reject"),
+                  # A signature is not a verdict, but "can the signature be checked
+                  # at all" is a fact worth counting: it decides whether the vectors
+                  # are opaque or merely schema-bound.
+                  "signature_verifies": sum(
+                      1 for x in vectors
+                      if "without signature) VERIFIES" in (x.get("detail") or ""))}
         for k in VERDICTS:
             counts[k] = sum(1 for x in vectors if x["replay"] == k)
         out["categories"][kind] = {"counts": counts, "vectors": vectors,
@@ -225,13 +294,20 @@ def main(argv=None):
         assert _inclusion(dict(one, index=-1))[0] == "mismatch"
         assert _consistency({"old_size": 3, "new_size": 2, "old_root": "00" * 32,
                              "new_root": "11" * 32, "proof": []})[0] == "mismatch"
+        # Canonical digests are judged against RFC 8785, not against their code.
+        assert _canonical({"text": '{"b":1,"a":2}',
+                           "canonical_sha256": hashlib.sha256(b'{"a":2,"b":1}').hexdigest(),
+                           "canonical_len": 13})[0] == "match"
+        assert _canonical({"text": '{"b":1,"a":2}',
+                           "canonical_sha256": "00" * 32,
+                           "canonical_len": 13})[0] == "mismatch"
         # Classification is where a sweep can flatter itself, so it is tested.
         assert classify("accept", "match") == "consistent"
         assert classify("accept", "mismatch") == "inconsistent"
         assert classify("reject", "mismatch") == "consistent"
         assert classify("reject", "match") == "inconsistent"
         assert classify("accept", "none") == "none"
-        print("selftest: 13/13")
+        print("selftest: 15/15")
         return 0
 
     if not a.dir:

@@ -29,17 +29,17 @@ def _receipt():
 def test_the_tool_still_passes_its_own_selftest():
     out = subprocess.run([sys.executable, os.path.join(ROOT, "tools", "sweep_competitor_corpus.py"),
                           "--selftest"], capture_output=True, text=True, check=True)
-    assert "selftest: 13/13" in out.stdout
+    assert "selftest: 15/15" in out.stdout
 
 
 def test_the_totals_are_the_totals():
     r = _receipt()
     t = r["totals"]
     assert t["vectors"] == 171
-    assert t["n_replayable"] == 60
-    assert t["consistent"] == 60
+    assert t["n_replayable"] == 69
+    assert t["consistent"] == 69
     assert t["inconsistent"] == 0
-    assert t["none"] == 111
+    assert t["none"] == 102
     # The two halves have to add up, and so do the published expectations.
     assert t["n_replayable"] + t["none"] == t["vectors"]
     assert t["n_accept_published"] + t["n_reject_published"] == t["vectors"]
@@ -79,19 +79,41 @@ def test_the_vendored_three_are_the_same_bytes_as_in_the_swept_corpus():
 
 def test_the_sweep_is_not_a_uniform_pass():
     """A sweep that only ever says "consistent" would be worthless. The receipt
-    has to show the 111 it could not replay, per category, with a reason."""
+    has to show the 102 it could not replay, per category, with a reason."""
     r = _receipt()
-    for kind in ("token", "chain", "canonical"):
+    for kind in ("token", "chain"):
         c = r["categories"][kind]
         assert c["counts"]["replayable"] == 0
         assert c["why_not_numeric"], kind
     assert r["categories"]["token"]["counts"]["vectors"] == 87
+    assert r["categories"]["chain"]["counts"]["vectors"] == 15
+
+
+def test_the_canonical_digests_are_reproduced_by_a_public_standard():
+    """9 of 171 became replayable when RFC 8785 was applied instead of their code."""
+    r = _receipt()
+    c = r["categories"]["canonical"]["counts"]
+    assert c["vectors"] == 9 and c["replayable"] == 9 and c["consistent"] == 9
+    assert c["inconsistent"] == 0
+
+
+def test_the_token_signatures_are_counted_separately_from_verdicts():
+    """74 of 87 sign over JCS(body without signature); that is not a verdict."""
+    r = _receipt()
+    c = r["categories"]["token"]["counts"]
+    assert c["signature_verifies"] == 74
+    assert c["replayable"] == 0
+    assert c["accept_published"] == 17
+    # Every accept-side token must be among the ones whose signature holds.
+    accepts = [v for v in r["categories"]["token"]["vectors"] if v["expects"] == "accept"]
+    assert len(accepts) == 17
+    assert all("VERIFIES" in v["detail"] for v in accepts)
 
 
 def test_the_doc_carries_the_same_numbers():
     with open(DOC, encoding="utf-8") as f:
         doc = f.read()
-    for needle in ("171", "60（35%）", "111", "0 条出现", "39daf704",
+    for needle in ("171", "69（40%）", "102", "0 条出现", "39daf704",
                    "COMPETITOR-CORPUS-COVERAGE.svg"):
         assert needle in doc, needle
 
@@ -104,6 +126,6 @@ def test_the_picture_is_drawn_from_the_receipt():
     assert out.returncode == 0, out.stdout + out.stderr
     with open(SVG, encoding="utf-8") as f:
         svg = f.read()
-    assert "60 of 171" in svg
+    assert "69 of 171" in svg
     assert "replayable" in svg
 

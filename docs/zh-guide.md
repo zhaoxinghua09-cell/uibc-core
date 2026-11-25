@@ -120,7 +120,7 @@ cd uibc-core && python tools/external_node_check.py
 下载（或直接读仓内）`conformance/` 之后，**先证明你拿到的字节就是我们发布的那一份**，再谈结论。三条命令，都不联网、不要账号：
 
 ```bash
-python tools/check_vector_package.py     # ① 逐文件比对 MANIFEST.sha256 ② 核对 0.5.2 压缩包的 pin ③ 覆盖表自检 ④ 跑完 58 例
+python tools/check_vector_package.py     # ① 逐文件比对 MANIFEST.sha256 ② 核对 0.5.3 压缩包的 pin ③ 覆盖表自检 ④ 跑完 58 例
 sha256sum -c conformance/MANIFEST.sha256  # 只用系统自带工具也能复核（清单就是 sha256sum 格式）
 python tools/conformance_coverage.py --print  # 每个检查项由哪些用例覆盖；哪几项没有用例、为什么
 ```

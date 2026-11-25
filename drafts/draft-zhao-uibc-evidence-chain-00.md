@@ -398,12 +398,16 @@ alongside `state: pending`, the record is rejected rather than reconciled.
 
 ### 17.2 The four checks this section would require
 
-1. **Unresolvable is not the same as absent.** Today an anchor the verifier
-   cannot resolve is recorded as external/unresolved and never counted as
-   resolved. A `pending` anchor must reach **INCONCLUSIVE**, not the verdict an
-   unresolvable anchor gets. Which verdict the current verifier returns for an
-   unresolvable anchor is itself unmeasured — a vector has to pin it before
-   this rule can be claimed.
+1. **Unsupported is a rejection; missing is an INCONCLUSIVE.** Measured on
+   2026-11-25: changing a package's `resolver` from `evidence-merkle` to
+   `sigstore` makes the verdict FAIL, because we cannot resolve it. That is the
+   right answer for an algorithm we do not support — the MMR receipts profile
+   requires rejecting a receipt whose `vds` the verifier does not support, and
+   "I do not implement this" is not "this is false". What must reach
+   INCONCLUSIVE is a different case: an anchor that **claims** to be anchored
+   but carries no receipt the reader can check (`state: pending`) — missing
+   evidence, not contrary evidence. A receipt that verifies but covers another
+   head is FAIL, as rule 3 says: that is evidence to the contrary.
 2. **`pending` never yields PASS under `strict`.** Absence of a receipt is not
    evidence against the record, and it is not evidence for it either.
 3. **`anchored` must carry a receipt whose chain reaches `head`.** A receipt

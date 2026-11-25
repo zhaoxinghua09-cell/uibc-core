@@ -343,6 +343,9 @@ jobs:
           # The stranger's one-command check has to keep failing when bytes or
           # counts move, so its own failure paths are asserted here (no network).
           python tools/stranger_competitor_check.py --selftest
+          # Two snapshots of the same corpus must keep comparing equal, by digest
+          # rather than by memory (the older receipt ships no file list).
+          python tools/compare_corpus_snapshots.py --selftest
           python tools/check_competitor_vectors.py \
             --dir docs/upstream-package/competitor-defects/v0.38.0 \
             --dir docs/upstream-package/competitor-defects/v0.38.0-counter --json \

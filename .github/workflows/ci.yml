@@ -468,3 +468,12 @@ jobs:
       - name: The probe command is wired to more than one family
         run: python tools/probe_platform_matrix.py
 
+      # First run of this job: 21cfr11 and tool-contract reported OVERCLAIM on
+      # Windows - the probe rows that shell out to pytest failed, while the rows
+      # that run tools/*.py all reproduced clean. recheck prints only the first
+      # differing line, so the job said nothing about why. This step exists to
+      # make the failure legible, and it runs only when something above failed.
+      - name: Why the probes failed (diagnosis only)
+        if: failure()
+        run: python -m pytest tests/test_crosswalk_probe.py tests/test_actor_attribution.py -q --tb=short
+

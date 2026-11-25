@@ -8,8 +8,11 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "tools" / "probe_platform_matrix.py"
+WORKFLOW = ROOT / ".github" / "workflows" / "ci.yml"
 
 
 def run(workflow=None):
@@ -26,6 +29,11 @@ def write(tmp_path, name, body):
 
 
 def test_repository_workflow_proves_two_families():
+    if not WORKFLOW.exists():
+        # MANIFEST.in grafts the directories a test reads; .github/ is not one of
+        # them, so inside an sdist there is no workflow to read. Skipping states
+        # that rather than pretending the check ran.
+        pytest.skip("the sdist does not graft .github/, so the repository workflow is absent")
     res = run()
     assert res.returncode == 0, res.stdout + res.stderr
     for check in ("two-families", "same-command", "not-echoed"):

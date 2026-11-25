@@ -506,6 +506,8 @@ def verify_bid_document(doc: Any, did: Optional[str] = None) -> Tuple[bool, str]
     if not hexed:
         return False, "publicKey %r has no publicKeyHex to verify against" % (key.get("id"),)
     raw = bytes.fromhex(hexed)
+    if "SM2" in str(key.get("type") or "").upper():
+        return _verify_sm2_key(key, doc, parsed)
     key_material, prefix = strip_key_prefix(hexed)
     if len(key_material) != 32:
         return False, ("only Ed25519 (32-byte) keys are verifiable here, got %d bytes after a %r prefix"
@@ -519,6 +521,35 @@ def verify_bid_document(doc: Any, did: Optional[str] = None) -> Tuple[bool, str]
     if ed_verify(key_material, signing_bytes(doc), sig):
         return True, "ok"
     return False, "signature does not verify over the JCS form of the document"
+
+
+def _verify_sm2_key(key, doc, parsed) -> Tuple[bool, str]:
+    """§5 with SM2: signature over the same JCS bytes, verified on the national curve.
+
+    Two things BID does not specify, and this does not invent silently:
+      * the distinguisher ID: GM/T's default "1234567812345678" is used, and the
+        success reason says so - a chain that signs under another ID will simply
+        fail here rather than be reported as verified;
+      * the key encoding: 64-byte x||y, with the same optional b0 / b06566 head
+        Ed25519 keys carry.
+    """
+    from . import sm2 as _sm2
+
+    try:
+        px, py = _sm2.parse_public_key_hex(key.get("publicKeyHex"))
+    except _sm2.SM2Error as exc:
+        return False, str(exc)
+    try:
+        r, s = _sm2.parse_signature(base58_decode(parsed.proof["signatureValue"]))
+    except (BIDDocumentError, _sm2.SM2Error) as exc:
+        return False, str(exc)
+    try:
+        ok = _sm2.verify(px, py, signing_bytes(doc), r, s)
+    except _sm2.SM2Error as exc:
+        return False, str(exc)
+    if ok:
+        return True, "ok (SM2; distinguisher ID = GM/T default 1234567812345678)"
+    return False, "SM2 signature does not verify over the JCS form of the document"
 
 
 def generate_ed25519_pair() -> Tuple[bytes, str]:

@@ -44,6 +44,11 @@
 - **可运行 demo**（`tools/demo_bid_trusted.py`）：起一个真的 `http.server` 当解析服务，四种答法（诚实 / 说验过但文档被动过 / 说没验过 / 带背书），打印五条裁决。第 2 条是全部意义所在：只读 `data.verify` 的客户端在那里会打印 OK。
 - 测试 `tests/test_bid_trusted.py` 15 条（请求形如 `{url}/{bid}?verify=true`、服务撒谎必被抓、`"true"` 字符串必拒、`verify=false` 是答案不是异常、背书四态各一条）。
 - 证据：`uibc_core/bid_protocol.py::resolve_bid_trusted`、`tests/test_bid_trusted.py`、`tools/demo_bid_trusted.py`
+- **SM2 不再"此处不可验证"**：协议 §5 允许 Ed25519 与 SM2 两种，此前我们只做 Ed25519 并如实写明。这一轮把向量问题解决了——不是自己造，而是引国标自己的例题：GM/T 0003.5-2012（GB/T 32918.5）附录 A 给出曲线参数、`dA`、`PA`、`ZA`、`e`、`k`、`(x1,y1)`、`r`、`s` 全套数字，于是实现可以钉在**别人的**数字上。
+- 新增 `uibc_core/sm2.py`（纯 Python 大整数 + OpenSSL 的 SM3，无第三方依赖）：曲线运算、`ZA`、`e`、签名与验签。`tests/test_sm2.py` 18 条，逐项对上国标：`PA = [dA]G`、`ZA = b2e14c5c…a4f3`、`e = f0b43e94…8640`、`[k]G` 的 x 坐标、以及用国标给的 `k` 复算出**同一个** `r=F5A03B06…`、`s=B1B6AA29…`。
+- **一个自己抓到的错**：`s` 里的 `(1+d)^-1` 一开始用了模 `p` 的逆元，签出来的签名自己的验签器都不认——这正是"能签也能验"要一起实现的原因，只验不签复现不出国标的 r/s，也就发现不了这类错。
+- **接进 BID 文档验签**：`verify_bid_document` 见 `publicKey.type` 含 SM2 即走 SM2 路径（64 字节 `x||y`，可带 `b0`/`b06566` 头）。两处协议没规定的地方**明说不猜**：区分标识用 GM/T 默认 `1234567812345678`，成功理由里写出这一点；不同 ID 签的链会判不通过，而不是被当成"验过了"。
+- 证据：`uibc_core/sm2.py`、`tests/test_sm2.py`、`uibc_core/bid_protocol.py::_verify_sm2_key`
 - **竞品从"说法"变成"字节"**：`docs/COMPETITOR-EVIDENCE.md` 钉住 DIF Universal Resolver 的 did:bid 驱动（`caict-4iot-dev/uni-resolver-driver-did-bid`，commit `5a93365`，2022-11-09，Apache-2.0，324 行，`src/test` 无任何测试类），逐条给出行号：非零 `errorCode` 在 77–78 行坍缩成一句 `docuement not exist`、全文 `verify` 出现 0 次、`delegateSign` 9 行全部只做字段搬运（233–235 行）、174 行把 `proof` 原样塞进 metadata 不重算。
 - **这条主张自带反证工具**（`tools/audit_official_bid_driver.py`）：重新下载钉住的字节、重新算行号；**对方一旦修了其中任何一条，脚本退出码非 0**，文档必须跟着改。"他们没做 X"因此不再是一句可以烂在文档里的话。
 - 证据：`docs/COMPETITOR-EVIDENCE.md`、`tools/audit_official_bid_driver.py`

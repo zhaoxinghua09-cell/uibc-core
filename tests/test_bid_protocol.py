@@ -238,12 +238,14 @@ def test_a_proof_naming_a_non_authentication_key_is_not_accepted():
     assert ok is False and "authentication" in reason
 
 
-def test_a_sm2_document_is_reported_unverifiable_not_silently_accepted():
+def test_an_sm2_key_of_the_wrong_length_is_refused_as_sm2_not_as_ed25519():
+    # Since SM2 is implemented, a bad SM2 key must fail *on the SM2 path* and say so.
+    # Rejecting it because "it is not Ed25519" would mean the SM2 branch never ran.
     doc = _doc(publicKey=[dict(_doc()["publicKey"][0], type="SM2",
                               publicKeyHex="04" + "ab" * 32)])
     signed = B.sign_bid_document(doc, b"\x01" * 32, KEY_ID)
     ok, reason = B.verify_bid_document(signed, DID)
-    assert ok is False and "Ed25519" in reason
+    assert ok is False and "SM2" in reason and "Ed25519" not in reason
 
 
 # --------------------------------------------------------- §4.2.1 / §4.2.3 解析

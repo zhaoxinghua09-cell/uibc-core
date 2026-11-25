@@ -300,6 +300,37 @@ VERDICT: VERIFIED (arithmetic only)
 
 verdict 与退出码跟着那一栏走：跳过了 ledger 的 receipt 记 `PARTIAL`/3，能算的那台记 `REPRODUCED`/0，所以它们也不跨这一栏比；但 receipt 自身必须自洽——跳过 ledger 却写 `REPRODUCED` 会被直接点名（测试里有这条）。\n\n这条规则的理由和上一节一样：**读者少装一个库，不该被记成我们数字不对**；但也不能把"少核了一栏"说成"全核过了"，所以结论后面直接带上 `(arithmetic only)`。
 
+## 那 171 条现在就在仓里：复算不需要下载
+
+此前"你自己跑一遍"隐含一个条件——codeload 要通。对一个要证明"可独立复算"的项目，这是没必要的门槛，也是没必要的争点。
+
+这 171 个向量现在原样躺在 `docs/upstream-package/competitor/corpus/`（340 KB，171 个 JSON，Apache-2.0，`NOTICE.md` 写清来源与"字节未改"）：
+
+```
+python tools/stranger_competitor_check.py      # 不加 --dir，读的就是随仓的那份
+```
+
+```
+bytes: 171 checked, 171 match
+sweep: 171 vectors, 69 replayable, 69 consistent, 0 inconsistent, 102 not replayable
+control: 196 applied, 183 detected, 13 ambiguous, 0 unexplained
+ledger: 69 verdict, 88 signature-only, 14 nothing, 88 signatures verify
+inclusion folded by vendored Sigstore: 36 of 36 agree with the published verdict, 1 not compared
+VERDICT: REPRODUCED
+```
+
+**代价是要多守一件事**：字节进了仓，"有人改了一个向量而收据照旧"就成了真实风险。所以多了第八道门 `tools/verify_vendored_corpus.py --check`，它不信清单、只信字节：
+
+| 断言 | 内容 |
+|---|---|
+| 文件列表 | 磁盘上 171 个文件与 `MANIFEST.json` 逐条对齐，缺、多、改都点名 |
+| 清单自身 | 清单写的 `manifest_digest` 必须等于它自己那些行重新哈希的结果 |
+| 与旧账对得上 | 该摘要必须等于快照收据 `corpus-snapshots-22764551-39daf704.json` 里记下的 `b_digest` = `7169d876…` |
+
+第三条是最要紧的：清单的摘要口径**不是我新定的**，就是扫描与分层账在用的那套（`corpus/` 前缀 + 制表符 + sha256 + 换行，按路径排序）。如果我用一套新口径，一致性就成了自己跟自己比。
+
+`--selftest` 8 条，其中两条是负对照：翻一位必须被抓到且点名文件；私自塞进一个向量必须判"多出来的"而不是默认采纳。测试 `tests/test_vendored_corpus.py` 6 条，另钉住一条——**不加 `--dir` 时必须跑随仓那份，并且打出 `VERDICT: REPRODUCED`**。
+
 ## 最后一条：审我们自己，也只要一条命令
 
 上面每条结论都有各自的 `--check`。但它们是**分开**跑的，而且通常是在一个被很多次编辑过的树里跑——那正是陈旧最容易藏身的地方。
@@ -323,6 +354,6 @@ python tools/stranger_own_check.py            # 当前检出
 python tools/stranger_own_check.py --fresh    # 抓 main tarball，在干净副本上跑
 ```
 
-实跑两种路径都是 `7 passed, 0 failed` → `VERDICT: SELF-CONSISTENT`。`--fresh` 那条尤其值得看：它证明的不是"我的树是干净的"，而是"**别人拿到的那份 main，七道门全过**"。任一检查失败会打一行原因（失败检查的首行输出），所以"不复现"从来不是一句没有下文的话。
+实跑两种路径都是 `8 passed, 0 failed` → `VERDICT: SELF-CONSISTENT`。`--fresh` 那条尤其值得看：它证明的不是"我的树是干净的"，而是"**别人拿到的那份 main，七道门全过**"。任一检查失败会打一行原因（失败检查的首行输出），所以"不复现"从来不是一句没有下文的话。
 
 边界：它审**自洽**，不审**正确**。收据可以是错的，只要七处都与它一致；正确性靠前面的算术、第三方实现、变异控制与外部实跑去证明。这条只保证一件事——**没有任何一页比它引用的收据更新或更旧**。

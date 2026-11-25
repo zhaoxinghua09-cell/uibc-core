@@ -46,6 +46,10 @@ CHECKS = (
     ("ledger-invariants", ("tools/build_upstream_ledger.py", "--selftest")),
     ("claims-vs-receipts", ("tools/audit_claims_receipts.py",)),
     ("evidence-index", ("tools/build_evidence_index.py", "--check")),
+    # The competitor's 171 vectors ride in the repository, so the numbers can be
+    # recomputed with no download. That makes "did anyone edit a vector" a real
+    # risk, and this is the gate that answers it.
+    ("vendored-corpus", ("tools/verify_vendored_corpus.py", "--check")),
 )
 
 

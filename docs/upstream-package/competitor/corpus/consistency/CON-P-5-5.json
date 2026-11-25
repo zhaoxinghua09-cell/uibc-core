@@ -1,0 +1,17 @@
+{
+  "class": "positive",
+  "expect": {
+    "result": "accept"
+  },
+  "id": "CON-P-5-5",
+  "kind": "consistency",
+  "new_root": "39b5942c2fec0d6d122912a4a645a608c48e972aa5edaa8f338c83e63b0d88f8",
+  "new_size": 5,
+  "note": "size 5 extends size 5",
+  "old_root": "39b5942c2fec0d6d122912a4a645a608c48e972aa5edaa8f338c83e63b0d88f8",
+  "old_size": 5,
+  "proof": [],
+  "requirements": [
+    "7.3.5"
+  ]
+}

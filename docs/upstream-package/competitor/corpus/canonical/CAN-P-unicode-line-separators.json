@@ -1,0 +1,16 @@
+{
+  "canonical_len": 35,
+  "canonical_sha256": "4861108ac777757e2a82ffa847c712e79ae6def78450dda7ba8ffd00dcd952d5",
+  "class": "positive",
+  "expect": {
+    "result": "accept"
+  },
+  "id": "CAN-P-unicode-line-separators",
+  "kind": "canonical",
+  "note": "published canonical digest for unicode-line-separators",
+  "requirements": [
+    "7.7.2",
+    "7.7.4"
+  ],
+  "text": "{\n \"ls\": \"\u2028\",\n \"ps\": \"\u2029\",\n \"bom\": \"\ufeff\"\n}\n"
+}

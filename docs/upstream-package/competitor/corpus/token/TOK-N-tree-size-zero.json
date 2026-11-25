@@ -1,0 +1,17 @@
+{
+  "class": "negative",
+  "expect": {
+    "code": [
+      "schema"
+    ],
+    "result": "reject"
+  },
+  "id": "TOK-N-tree-size-zero",
+  "kind": "token",
+  "note": "empty tree",
+  "public_key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+  "requirements": [
+    "7.7.1"
+  ],
+  "text": "{\n  \"eat_profile\": \"https://advancedaisociety.org/poc/v0.1\",\n  \"iat\": 1754400000,\n  \"iss\": \"https://verifier.example/poc\",\n  \"nonce\": \"nonce-00000000\",\n  \"poc_claims\": {\n    \"agbom_digest\": \"sha-256:8ccf1344a2087a19f5bd874fa3ae8486dce9ddfed60f17856d9a0cfe6540e868\",\n    \"agent_id\": \"did:web:example.org:agents:ref-1\",\n    \"alg\": \"EdDSA\",\n    \"canonical_snapshot_hash\": \"sha-256:c226b25c8824057dbd989d38f0f059c3d70ac113a7a84bf3ef198141a026d91e\",\n    \"chain_head\": \"sha-256:e233e46088682e38fe26dabed2cbf54b87ddd0fb8532c849fa4656b6df210c8d\",\n    \"initiating_user\": \"user:alice\",\n    \"interception_point\": \"PRE_CALL_TOOL_INVOCATION\",\n    \"merkle_root\": \"sha-256:5604d10f2e5c64b662bb88a97692f2d13cc19fb968bf9be33c8c3ab483793703\",\n    \"path_summary_hash\": \"sha-256:05029682c9bfd6e0897b15dc6356885c31db9fb537017ccd9480fcaf789ab82c\",\n    \"policy_bundle_hash\": \"sha-256:0ec0b48a1641c2fc90febb60cc988021b7c947b00a17a7ffb8f61cdcad162bd4\",\n    \"reason\": \"within grant\",\n    \"step_index\": 0,\n    \"target_resource\": \"customers\",\n    \"tree_size\": 0,\n    \"verdict\": \"ALLOW\"\n  },\n  \"signature\": \"6bacf82614bae6b1fe3236db0f95f8dc7a5b3a3addd70167b0e438e0d99d3f3b231663b66eeee23563d9aa3cb66ece42a44ebdc57470694c23da86818f3c1a0f\",\n  \"submods\": {\n    \"attestation\": {\n      \"measurement\": \"sha-256:a1d0bdcf12b227dbe4347ce7a24a9a385a92369cd671fc1deaf9d2f7bb35cb81\",\n      \"platform\": \"SOFTWARE\"\n    }\n  }\n}\n"
+}

@@ -1,0 +1,20 @@
+{
+  "class": "negative",
+  "expect": {
+    "code": [
+      "not-consistent"
+    ],
+    "result": "reject"
+  },
+  "id": "CON-N-proof-empty",
+  "kind": "consistency",
+  "new_root": "5488b5f193283d9d01a5af8b92db51e0fa56b79f9f4adb07f444af88f16ed1f6",
+  "new_size": 7,
+  "note": "an empty proof between two different sizes",
+  "old_root": "b3d9166b00949dfdf3b99d4241c5df573dc29fd68e478d72f30b70ff86d74c30",
+  "old_size": 3,
+  "proof": [],
+  "requirements": [
+    "7.3.5"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "canonical_len": 93,
+  "canonical_sha256": "601b8591fb6f74454033ffe450d59c7f95da9b60839472e6eb03439c702f7a41",
+  "class": "positive",
+  "expect": {
+    "result": "accept"
+  },
+  "id": "CAN-P-escapes-and-controls",
+  "kind": "canonical",
+  "note": "published canonical digest for escapes-and-controls",
+  "requirements": [
+    "7.7.2",
+    "7.7.4"
+  ],
+  "text": "{\n \"q\": \"a\\\"b\",\n \"bs\": \"a\\\\b\",\n \"nl\": \"x\\ny\",\n \"tab\": \"x\\ty\",\n \"c1\": \"\\u0001\\u001f\",\n \"del\": \"\u007f\",\n \"slash\": \"a/b\"\n}\n"
+}

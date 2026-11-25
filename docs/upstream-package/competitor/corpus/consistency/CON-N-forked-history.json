@@ -1,0 +1,25 @@
+{
+  "class": "negative",
+  "expect": {
+    "code": [
+      "not-consistent"
+    ],
+    "result": "reject"
+  },
+  "id": "CON-N-forked-history",
+  "kind": "consistency",
+  "new_root": "3a184829e767d800654ff047d979a0052707d6ba211e0edcded96179bac1dd7c",
+  "new_size": 7,
+  "note": "size 7 of a history in which leaf 1 was rewritten, proven against the size 3 root already published",
+  "old_root": "b3d9166b00949dfdf3b99d4241c5df573dc29fd68e478d72f30b70ff86d74c30",
+  "old_size": 3,
+  "proof": [
+    "dd8078535f89767b91a1d5e5b7df8520ecdbba74fc60d9701e0e18fb9654a6cb",
+    "f638e625afb7959f939a9106a5d3346b270c3f69715c74868cfb840f60b4ce02",
+    "dba24887ea2f2c8e490d22ba243263cd6a6de03f75dc3c638108b3f2a0c1bc78",
+    "5519021853b5f08080938cca405b96c16e62c42b85279745328673ee33fbf358"
+  ],
+  "requirements": [
+    "7.3.5"
+  ]
+}

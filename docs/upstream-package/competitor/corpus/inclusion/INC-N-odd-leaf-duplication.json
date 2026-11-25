@@ -1,0 +1,22 @@
+{
+  "class": "adversarial",
+  "expect": {
+    "code": [
+      "not-included"
+    ],
+    "result": "reject"
+  },
+  "id": "INC-N-odd-leaf-duplication",
+  "index": 2,
+  "kind": "inclusion",
+  "note": "record 2 of 3 proved against the root a tree that duplicates an odd last node would publish; an RFC 6962 verifier recomputes a different root, so the two trees cannot be confused",
+  "proof": [
+    "a1ab874a47a34ae9d836dc94df2446cfa363b7be528785cc1d4a464d192ba415"
+  ],
+  "record_hex": "7b22736e617073686f74223a2232633361343234396437373037303035383634396462643832326463616637393537353836666365343238636662326361383862393437343165646138623037222c2276657264696374223a22414c4c4f57227d",
+  "requirements": [
+    "7.3.4"
+  ],
+  "root": "f66ea9b7c2f614682126fbcea4b45c8414b6ffe0cf815c8579d94d35ebf5d5ad",
+  "tree_size": 3
+}

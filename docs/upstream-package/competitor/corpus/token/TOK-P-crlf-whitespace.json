@@ -1,0 +1,14 @@
+{
+  "class": "positive",
+  "expect": {
+    "result": "accept"
+  },
+  "id": "TOK-P-crlf-whitespace",
+  "kind": "token",
+  "note": "insignificant whitespace and CRLF line ends change no meaning",
+  "public_key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+  "requirements": [
+    "7.7.2"
+  ],
+  "text": "{\r\n    \"iss\": \"https://verifier.example/poc\",\r\n    \"iat\": 1754400000,\r\n    \"nonce\": \"nonce-00000000\",\r\n    \"eat_profile\": \"https://advancedaisociety.org/poc/v0.1\",\r\n    \"poc_claims\": {\r\n        \"agent_id\": \"did:web:example.org:agents:ref-1\",\r\n        \"initiating_user\": \"user:alice\",\r\n        \"agbom_digest\": \"sha-256:8ccf1344a2087a19f5bd874fa3ae8486dce9ddfed60f17856d9a0cfe6540e868\",\r\n        \"interception_point\": \"PRE_CALL_TOOL_INVOCATION\",\r\n        \"step_index\": 0,\r\n        \"chain_head\": \"sha-256:e233e46088682e38fe26dabed2cbf54b87ddd0fb8532c849fa4656b6df210c8d\",\r\n        \"merkle_root\": \"sha-256:5604d10f2e5c64b662bb88a97692f2d13cc19fb968bf9be33c8c3ab483793703\",\r\n        \"tree_size\": 1,\r\n        \"policy_bundle_hash\": \"sha-256:0ec0b48a1641c2fc90febb60cc988021b7c947b00a17a7ffb8f61cdcad162bd4\",\r\n        \"target_resource\": \"customers\",\r\n        \"canonical_snapshot_hash\": \"sha-256:c226b25c8824057dbd989d38f0f059c3d70ac113a7a84bf3ef198141a026d91e\",\r\n        \"path_summary_hash\": \"sha-256:05029682c9bfd6e0897b15dc6356885c31db9fb537017ccd9480fcaf789ab82c\",\r\n        \"verdict\": \"ALLOW\",\r\n        \"reason\": \"within grant\",\r\n        \"alg\": \"EdDSA\"\r\n    },\r\n    \"submods\": {\r\n        \"attestation\": {\r\n            \"platform\": \"SOFTWARE\",\r\n            \"measurement\": \"sha-256:a1d0bdcf12b227dbe4347ce7a24a9a385a92369cd671fc1deaf9d2f7bb35cb81\"\r\n        }\r\n    },\r\n    \"signature\": \"8b4b61b5210667dda30968624448c5045427bb670df558435d44452d74d323087d4f3d0bbf3d2f860d166df526751181a43cc84d0aeb934d4ef7d25fbb38fa0b\"\r\n}\r\n"
+}

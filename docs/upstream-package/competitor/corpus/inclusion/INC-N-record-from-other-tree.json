@@ -1,0 +1,24 @@
+{
+  "class": "negative",
+  "expect": {
+    "code": [
+      "not-included"
+    ],
+    "result": "reject"
+  },
+  "id": "INC-N-record-from-other-tree",
+  "index": 4,
+  "kind": "inclusion",
+  "note": "a record and proof from a different 7-leaf tree against this root",
+  "proof": [
+    "36ea2cff2f39e4312fbf7c190aef61e5e47f85c3f742773eab2b0f624ec745d9",
+    "7b0906a825b347a2338fd50de6a2709c956e681f7f0a098cd174ec2b98277ee2",
+    "8e62007f28aa97f5f77c1518c86d432def718404b97f1a149e09093974d8ebe9"
+  ],
+  "record_hex": "7b22736e617073686f74223a2234383662616363356332643861373161373364353162663865353232646561613236346563323632386463613239353564613165396238653030663231393433222c2276657264696374223a22414c4c4f57227d",
+  "requirements": [
+    "7.3.4"
+  ],
+  "root": "5488b5f193283d9d01a5af8b92db51e0fa56b79f9f4adb07f444af88f16ed1f6",
+  "tree_size": 7
+}

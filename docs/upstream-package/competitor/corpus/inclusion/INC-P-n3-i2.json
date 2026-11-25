@@ -1,0 +1,19 @@
+{
+  "class": "positive",
+  "expect": {
+    "result": "accept"
+  },
+  "id": "INC-P-n3-i2",
+  "index": 2,
+  "kind": "inclusion",
+  "note": "record 2 of a 3-leaf tree",
+  "proof": [
+    "a1ab874a47a34ae9d836dc94df2446cfa363b7be528785cc1d4a464d192ba415"
+  ],
+  "record_hex": "7b22736e617073686f74223a2232633361343234396437373037303035383634396462643832326463616637393537353836666365343238636662326361383862393437343165646138623037222c2276657264696374223a22414c4c4f57227d",
+  "requirements": [
+    "7.3.4"
+  ],
+  "root": "b3d9166b00949dfdf3b99d4241c5df573dc29fd68e478d72f30b70ff86d74c30",
+  "tree_size": 3
+}

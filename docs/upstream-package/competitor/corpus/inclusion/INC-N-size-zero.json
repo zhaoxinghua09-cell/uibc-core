@@ -1,0 +1,20 @@
+{
+  "class": "negative",
+  "expect": {
+    "code": [
+      "not-included"
+    ],
+    "result": "reject"
+  },
+  "id": "INC-N-size-zero",
+  "index": 0,
+  "kind": "inclusion",
+  "note": "tree_size zero",
+  "proof": [],
+  "record_hex": "7b22736e617073686f74223a2234353339653462343838393037396332613030616665616530626663313433393834306566323337396131666238316338626132373336316164343736643662222c2276657264696374223a22414c4c4f57227d",
+  "requirements": [
+    "7.3.4"
+  ],
+  "root": "5488b5f193283d9d01a5af8b92db51e0fa56b79f9f4adb07f444af88f16ed1f6",
+  "tree_size": 0
+}

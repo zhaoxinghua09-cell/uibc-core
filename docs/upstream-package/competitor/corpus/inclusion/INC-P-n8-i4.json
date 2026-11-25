@@ -1,0 +1,21 @@
+{
+  "class": "positive",
+  "expect": {
+    "result": "accept"
+  },
+  "id": "INC-P-n8-i4",
+  "index": 4,
+  "kind": "inclusion",
+  "note": "record 4 of a 8-leaf tree",
+  "proof": [
+    "d02d417baa449d3316639f48ca10a3bf5edf4f190acdd22efe5cc0d06bde9b65",
+    "c364d6332ee38b3ef241c78b43573e7a6ae0a4a5abb40732b6cde6b529f7917a",
+    "ab8c24f1dcade85a5df62b815ebf86e4720cbfef69fed2b7b8a8717e8cd8e66c"
+  ],
+  "record_hex": "7b22736e617073686f74223a2234353339653462343838393037396332613030616665616530626663313433393834306566323337396131666238316338626132373336316164343736643662222c2276657264696374223a22414c4c4f57227d",
+  "requirements": [
+    "7.3.4"
+  ],
+  "root": "799f8fd273f614988eed0eeb74544f1668c5ac0705d2aa21a4303f508fe37fd8",
+  "tree_size": 8
+}

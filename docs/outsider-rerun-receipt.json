@@ -1,7 +1,7 @@
 {
- "generated_at": "2026-11-25T18:30:10Z",
- "tree_sha256": "529faecff809cbc096d6e75d67e3856a34f55d262db2336dc9ff56e926fea388",
- "files_hashed": 2425,
+ "generated_at": "2026-11-25T18:39:11Z",
+ "tree_sha256": "9b60cead27e5d4a52189d0261771e88e6ceca748199b4911dde45ff03999b528",
+ "files_hashed": 2426,
  "digest_excludes": [
   "docs/OUTSIDER-RERUN.md",
   "docs/outsider-rerun-receipt.json"
@@ -62,8 +62,8 @@
    "rc": 0,
    "expect": "passed",
    "ok": true,
-   "seconds": 2.7,
-   "tail": "12 passed in 1.94s"
+   "seconds": 2.6,
+   "tail": "12 passed in 1.96s"
   }
  ],
  "ok": true

@@ -43,6 +43,27 @@ RECEIPT = os.path.join(os.path.dirname(HERE), "docs", "upstream-package",
 
 REACH = ("verdict", "signature-only", "nothing")
 
+try:  # the signature layer is the only part of this tool that needs a third party
+    from cryptography.exceptions import InvalidSignature
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
+    HAVE_CRYPTO = True
+except ImportError:  # pragma: no cover - exercised by the no-library test
+    HAVE_CRYPTO = False
+
+
+class SignatureLayerUnavailable(Exception):
+    """Raised instead of reporting a signature layer we could not evaluate."""
+
+
+def _require_crypto():
+    if not HAVE_CRYPTO:
+        raise SignatureLayerUnavailable(
+            "the signature layer needs `cryptography`; without it this tool would "
+            "have to report 88 vectors as `nothing`, which is a lie about what was "
+            "checked. Install it (`pip install cryptography`), or use the sweep, "
+            "which needs nothing beyond the standard library.")
+
+
 # Family prose: what the file does not carry. Kept separate from measurements so
 # no number in the receipt depends on a sentence written by hand.
 MISSING = {
@@ -63,10 +84,7 @@ def _sha256_bytes(data):
 
 def _verify_ed25519(key_hex, sig_hex, body):
     """True if sig verifies over the RFC 8785 bytes of body. Never raises."""
-    try:
-        from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
-        from cryptography.exceptions import InvalidSignature
-    except ImportError:  # pragma: no cover - cryptography is a test dependency
+    if not HAVE_CRYPTO:
         return None
     try:
         pub = Ed25519PublicKey.from_public_bytes(bytes.fromhex(key_hex))
@@ -145,6 +163,7 @@ def _reach(arith, sig_status):
 
 def build(corpus_dir):
     """Walk the corpus and return the ledger (no I/O beyond reads)."""
+    _require_crypto()
     base = sweep.run(corpus_dir)
     rows = []
     for kind in sorted(base["categories"]):
@@ -250,6 +269,11 @@ def _selftest():
         else:
             fails.append(label)
 
+    if not HAVE_CRYPTO:
+        print("SELFTEST SKIPPED: this selftest signs with `cryptography`; "
+              "install it to run these checks")
+        return 0
+
     import tempfile
 
     d = tempfile.mkdtemp()
@@ -329,14 +353,17 @@ def main(argv=None):
     if not args.dir:
         p.error("--dir is required unless --selftest is given")
 
-    ledger = build(args.dir)
-    text = _dump(ledger)
-
+    try:
+        ledger_data = build(args.dir)
+    except SignatureLayerUnavailable as e:
+        print("NOT EVALUATED: %s" % e)
+        return 4
+    text = _dump(ledger_data)
     if args.write:
         os.makedirs(os.path.dirname(RECEIPT), exist_ok=True)
         with open(RECEIPT, "w", encoding="utf-8", newline="\n") as fh:
             fh.write(text)
-        print(_summary(ledger))
+        print(_summary(ledger_data))
         print("wrote %s" % RECEIPT)
         return 0
     if args.check:
@@ -351,14 +378,15 @@ def main(argv=None):
                 print("  " + d_line)
             return 1
         print("RECEIPT CURRENT: %d vectors match field for field"
-              % ledger["totals"]["vectors"])
+              % ledger_data["totals"]["vectors"])
         return 0
     if args.json:
         print(text, end="")
         return 0
-    print(_summary(ledger))
+    print(_summary(ledger_data))
     return 0
 
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

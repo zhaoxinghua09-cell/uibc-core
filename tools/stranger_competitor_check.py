@@ -15,8 +15,13 @@ This does those steps in the right order and refuses to continue when they disag
      same receipts
 
 Every count printed is compared against a receipt, so "matches" is a comparison and
-not a claim. Exit code 1 means something did not match, and the failing line says
-which.
+not a claim. Exit codes: 0 REPRODUCED, 1 DID NOT MATCH (a failing line says which),
+2 no corpus in the tarball, 3 PARTIAL.
+
+Dependencies: the byte check and the arithmetic steps need nothing beyond the
+standard library. The ledger's signature column needs `cryptography`; without it
+the run stops short and says PARTIAL rather than reporting 88 vectors as differing
+ones - a missing verifier is not a disagreement with our receipts.
 
 Usage
 -----
@@ -163,8 +168,16 @@ def run(dir_arg=None, verbose=True):
 
         out["sweep"] = sweep.run(corpus)["totals"]
         out["control"] = control.control(corpus)["totals"]
-        fresh_ledger = ledger.build(corpus)
-        out["ledger"] = fresh_ledger["totals"]
+        try:
+            fresh_ledger = ledger.build(corpus)
+            ledger_skipped = None
+        except ledger.SignatureLayerUnavailable as e:
+            # The arithmetic steps above are complete without any dependency; the
+            # ledger's signature column is not. Saying "did not match" here would
+            # blame our numbers for a missing library, so this is a separate state.
+            fresh_ledger, ledger_skipped = None, str(e)
+            out["ledger_skipped"] = ledger_skipped
+        out["ledger"] = fresh_ledger["totals"] if fresh_ledger else None
         with open(LEDGER_RECEIPT, encoding="utf-8") as f:
             stored_ledger = f.read()
         diffs = compare_totals("sweep", out["sweep"], sweep_receipt["totals"],
@@ -174,8 +187,9 @@ def run(dir_arg=None, verbose=True):
                                 ("applied", "detected", "ambiguous", "unexplained"))
         # The ledger is compared row by row: a single vector whose reach level
         # moved is a difference, not a rounding error.
-        diffs += ["ledger " + d for d in ledger._compare(stored_ledger,
-                                                         ledger._dump(fresh_ledger))]
+        if fresh_ledger is not None:
+            diffs += ["ledger " + d for d in ledger._compare(
+                stored_ledger, ledger._dump(fresh_ledger))]
         # The inclusion vectors are also folded by a vendored third-party
         # implementation; if that stops agreeing, the "independently replayable"
         # half of A18 is what breaks, so it is compared here too.
@@ -186,7 +200,16 @@ def run(dir_arg=None, verbose=True):
         diffs += ["inclusion " + d for d in
                   sigstore_inclusion._compare(stored_sig, sigstore_inclusion._dump(fresh_sig))]
         out["diffs"] = diffs
-        out["verdict"] = "REPRODUCED" if not diffs else "DID NOT MATCH"
+        if diffs:
+            out["verdict"] = "DID NOT MATCH"
+            out["code"] = 1
+        elif ledger_skipped:
+            out["verdict"] = ("PARTIAL: the arithmetic matched; the ledger's "
+                              "signature layer was not evaluated")
+            out["code"] = 3
+        else:
+            out["verdict"] = "REPRODUCED"
+            out["code"] = 0
         if verbose:
             s, c, g = out["sweep"], out["control"], out["ledger"]
             print("sweep: %d vectors, %d replayable, %d consistent, %d inconsistent, "
@@ -195,9 +218,15 @@ def run(dir_arg=None, verbose=True):
                      s["inconsistent"], s["vectors"] - s["n_replayable"]))
             print("control: %d applied, %d detected, %d ambiguous, %d unexplained"
                   % (c["applied"], c["detected"], c["ambiguous"], c["unexplained"]))
-            print("ledger: %d verdict, %d signature-only, %d nothing, %d signatures verify"
-                  % (g["verdict"], g["signature-only"], g["nothing"],
-                     g["signature_verified"]))
+            if g is None:
+                print("ledger: SKIPPED - %s" % ledger_skipped)
+                print("        install it (`pip install cryptography`) and rerun for "
+                      "the complete check")
+            else:
+                print("ledger: %d verdict, %d signature-only, %d nothing, "
+                      "%d signatures verify"
+                      % (g["verdict"], g["signature-only"], g["nothing"],
+                         g["signature_verified"]))
             si = out["sigstore_inclusion"]
             print("inclusion folded by vendored Sigstore: %d of %d agree with the "
                   "published verdict, %d not compared"
@@ -206,7 +235,6 @@ def run(dir_arg=None, verbose=True):
             for d in diffs:
                 print("  DIFF %s" % d)
             print("VERDICT: %s" % out["verdict"])
-        out["code"] = 0 if not diffs else 1
         return out
     finally:
         if workdir:

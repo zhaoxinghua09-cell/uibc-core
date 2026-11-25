@@ -52,6 +52,24 @@ def test_it_checks_the_bytes_before_it_checks_the_numbers():
     assert src.index("verify_bytes(corpus") < src.index("sweep.run(corpus)")
 
 
+def test_a_missing_signature_library_is_not_called_a_mismatch():
+    """No cryptography must read as PARTIAL (code 3), never as "our numbers failed".
+
+    Measured on a bare interpreter (`python3 -S`): before this guard the ledger
+    step reported 171 rows as differing ones, and the command said DID NOT MATCH -
+    blaming our receipt for a library the reader had not installed.
+    """
+    with open(TOOL, encoding="utf-8") as f:
+        src = f.read()
+    assert "SignatureLayerUnavailable" in src
+    assert "PARTIAL" in src
+    assert 'out["code"] = 3' in src
+    # The other four steps must still run without that library.
+    out = subprocess.run([sys.executable, "-S", TOOL, "--selftest"],
+                         capture_output=True, text=True)
+    assert out.returncode == 0, out.stderr
+
+
 def test_the_doc_and_the_register_both_carry_the_entry_point():
     with open(DOC, encoding="utf-8") as f:
         doc = f.read()

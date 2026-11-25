@@ -402,6 +402,11 @@ def check():
         return 1
     print(f"OUTSIDER OK: receipt matches this {view_name} ({count} files, {digest[:12]}, "
           f"content {cdigest[:12]}), {len(steps)} steps passed")
+    for name, (d, c, l, n) in views:
+        if name != view_name and d != digest:
+            print(f"NOTE: the {name} view differs from the {view_name} one. The receipt answers "
+                  f"for the {view_name}; uncommitted edits and files dropped by other steps live "
+                  f"only in the {name} view and are not what this number describes.")
     return 0
 
 

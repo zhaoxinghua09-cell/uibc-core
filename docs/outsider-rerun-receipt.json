@@ -1,10 +1,10 @@
 {
- "generated_at": "2026-11-25T22:24:26Z",
- "tree_sha256": "5dfeee64820518813fb61239379e9bd1ce7d395fd998ab2066983a272c2c63b5",
+ "generated_at": "2026-11-25T22:26:46Z",
+ "tree_sha256": "56aac06c3317f4204663dd0253ee45f5a507686310673e1cd69d09b91db8582c",
  "files_hashed": 2443,
- "content_sha256": "61cf56319326c99bd0256616cd23a452f242ec56f21a8adc86cdad59cef6b6e2",
+ "content_sha256": "3c49eab97789202d330293452849aa43dfe2665fe2fb4baa0967016d2e1a63a3",
  "content_files": 2443,
- "content_lf_sha256": "59ce262ca5d520564e4a632b6bd91dc5b52dd21121bc03215961c4fe7ac7277e",
+ "content_lf_sha256": "2b45b0608492943746fdc57d0865d8827efc53914b2c9d58e401769932a1e504",
  "delivery": "archive",
  "digest_excludes": [
   "docs/OUTSIDER-RERUN.md",
@@ -39,7 +39,7 @@
    "rc": 0,
    "expect": "GATE OK",
    "ok": true,
-   "seconds": 0.3,
+   "seconds": 0.4,
    "tail": "GATE OK"
   },
   {
@@ -57,7 +57,7 @@
    "rc": 0,
    "expect": "ALL OK",
    "ok": true,
-   "seconds": 0.2,
+   "seconds": 0.3,
    "tail": "ALL OK"
   },
   {
@@ -66,8 +66,8 @@
    "rc": 0,
    "expect": "passed",
    "ok": true,
-   "seconds": 3.1,
-   "tail": "27 passed in 2.53s"
+   "seconds": 3.2,
+   "tail": "27 passed in 2.55s"
   }
  ],
  "ok": true

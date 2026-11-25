@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="560" viewBox="0 0 1040 560" font-family="DejaVu Sans, Helvetica, sans-serif">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="24" y="40" font-size="20" font-weight="600" fill="#111">How much of a competitor's corpus a stranger can replay</text>
+<text x="24" y="66" font-size="14" fill="#444">probityai/agent-evidence-vectors, commit 39daf704, 2026-11-25 &#183; arithmetic only, no upstream code</text>
+<rect x="24" y="96" width="14" height="14" fill="#1f5fa8"/>
+<text x="44" y="108" font-size="13" fill="#333">replayable from the file's own numbers</text>
+<rect x="24" y="120" width="14" height="14" fill="#c9cdd3"/>
+<text x="44" y="132" font-size="13" fill="#333">needs a signature, a chain or a canonicaliser</text>
+<text x="178" y="192" font-size="15" fill="#222">inclusion</text>
+<rect x="210" y="174" width="263.7" height="26" fill="#c9cdd3" rx="3"/>
+<rect x="210" y="174" width="263.7" height="26" fill="#1f5fa8" rx="3"/>
+<text x="485.7" y="192" font-size="13" fill="#444">37 / 37 replayable</text>
+<text x="178" y="248" font-size="15" fill="#222">consistency</text>
+<rect x="210" y="230" width="163.9" height="26" fill="#c9cdd3" rx="3"/>
+<rect x="210" y="230" width="163.9" height="26" fill="#1f5fa8" rx="3"/>
+<text x="385.9" y="248" font-size="13" fill="#444">23 / 23 replayable</text>
+<text x="178" y="304" font-size="15" fill="#222">token</text>
+<rect x="210" y="286" width="620.0" height="26" fill="#c9cdd3" rx="3"/>
+<rect x="210" y="286" width="0.0" height="26" fill="#1f5fa8" rx="3"/>
+<text x="842.0" y="304" font-size="13" fill="#444">0 / 87 replayable</text>
+<text x="178" y="360" font-size="15" fill="#222">chain</text>
+<rect x="210" y="342" width="106.9" height="26" fill="#c9cdd3" rx="3"/>
+<rect x="210" y="342" width="0.0" height="26" fill="#1f5fa8" rx="3"/>
+<text x="328.9" y="360" font-size="13" fill="#444">0 / 15 replayable</text>
+<text x="178" y="416" font-size="15" fill="#222">canonical</text>
+<rect x="210" y="398" width="64.1" height="26" fill="#c9cdd3" rx="3"/>
+<rect x="210" y="398" width="0.0" height="26" fill="#1f5fa8" rx="3"/>
+<text x="286.1" y="416" font-size="13" fill="#444">0 / 9 replayable</text>
+<text x="24" y="534" font-size="15" fill="#111">60 of 171 vectors (35%) replayable; 60 agree with their published verdict; 0 contradict it.</text>
+</svg>

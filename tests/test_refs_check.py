@@ -90,6 +90,39 @@ def test_a_redirect_is_moved_not_dead(refs):
     assert not refs.alive({"status": 0, "error": "timeout"})
 
 
+def test_a_move_must_be_live_at_the_new_name(refs):
+    """301 alone is not enough: the pinned sha has to answer under the new name."""
+    if not refs.os.path.exists(refs.REPORT):
+        pytest.skip("no report")
+    report = json.load(open(refs.REPORT, encoding="utf-8"))
+    moves = [e for e in report["entries"] if refs.moved(e)]
+    if not moves:
+        pytest.skip("this report has no moves")
+    for e in moves:
+        f = e.get("followed") or {}
+        assert f.get("repo_now"), (e["repo"], "moved without recording where to")
+        assert refs.alive(f), (e["repo"], "still not reachable at", f.get("repo_now"))
+
+
+def test_a_moved_citation_that_lands_on_404_fails(refs, capsys):
+    """The WARN about a rename must not paper over a citation that is really gone."""
+    if not refs.os.path.exists(refs.REPORT):
+        pytest.skip("no report")
+    original = open(refs.REPORT, encoding="utf-8").read()
+    report = json.loads(original)
+    idx = next((i for i, e in enumerate(report["entries"]) if refs.moved(e)), None)
+    if idx is None:
+        pytest.skip("this report has no moves")
+    report["entries"][idx]["followed"] = {"repo_now": "nowhere/renamed", "url": "u",
+                                          "status": 404, "error": "", "final_url": ""}
+    try:
+        open(refs.REPORT, "w", encoding="utf-8").write(json.dumps(report))
+        assert refs.check() == 1
+        assert "new location is not reachable" in capsys.readouterr().out
+    finally:
+        open(refs.REPORT, "w", encoding="utf-8").write(original)
+
+
 def test_the_page_is_generated(refs):
     page = open(refs.PAGE, encoding="utf-8").read()
     assert "条引用" in page

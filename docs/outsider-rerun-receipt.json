@@ -1,10 +1,10 @@
 {
- "generated_at": "2026-11-25T23:21:46Z",
- "tree_sha256": "c2ab574cdceda65c61c257ccb30200961917e887e696f8055dab916559acfdbf",
- "files_hashed": 2453,
- "content_sha256": "e1f6fbb23435cec183af5aa55a407b05f4e5274bb2dc3bbd6cba950912bf6c94",
- "content_files": 2453,
- "content_lf_sha256": "eb2cc8c7d5b66f2278de6fb7910acc24aff14b2fe1857607036a919eca501679",
+ "generated_at": "2026-11-25T23:31:39Z",
+ "tree_sha256": "5198f95d72d0fbf39937a0c4273f23ad2fad7994d4a2316a824fdac96b466bbe",
+ "files_hashed": 2457,
+ "content_sha256": "88f1ddd001f1599707bf36c7ed0f64c4f37096732143c28557293cc1bf53743a",
+ "content_files": 2457,
+ "content_lf_sha256": "4cdc5cff8e015bd9d2dce10e601ff9ce6df2f5fbe768eae9551ea1cefb4e3c18",
  "delivery": "archive",
  "digest_excludes": [
   "docs/OUTSIDER-BOARD.html",
@@ -40,7 +40,7 @@
    "rc": 0,
    "expect": "GATE OK",
    "ok": true,
-   "seconds": 0.4,
+   "seconds": 0.9,
    "tail": "GATE OK"
   },
   {
@@ -49,7 +49,7 @@
    "rc": 0,
    "expect": "PARITY OK",
    "ok": true,
-   "seconds": 0.5,
+   "seconds": 0.6,
    "tail": "PARITY OK: 25 repositories pinned and re-scored, best competitor 3/10, this repository 10/10"
   },
   {
@@ -58,17 +58,17 @@
    "rc": 0,
    "expect": "ALL OK",
    "ok": true,
-   "seconds": 0.2,
+   "seconds": 0.3,
    "tail": "ALL OK"
   },
   {
    "step": "tests",
-   "cmd": "-m pytest tests/test_mutation_gate.py tests/test_competitor_parity.py tests/test_parity_board.py tests/test_refs_check.py tests/test_parity_sensitivity.py tests/test_parity_audit.py -q",
+   "cmd": "-m pytest tests/test_mutation_gate.py tests/test_competitor_parity.py tests/test_parity_board.py tests/test_refs_check.py tests/test_parity_sensitivity.py tests/test_parity_audit.py tests/test_parity_realrun.py -q",
    "rc": 0,
    "expect": "passed",
    "ok": true,
-   "seconds": 3.6,
-   "tail": "34 passed in 2.81s"
+   "seconds": 4.5,
+   "tail": "41 passed in 3.58s"
   }
  ],
  "ok": true

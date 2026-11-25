@@ -105,6 +105,18 @@ def moved(entry):
     return entry["status"] in (301, 302) and not entry.get("error")
 
 
+def followed_url(entry):
+    """When a citation 301s, the Location header names the new repository. Probe
+    it at the same sha and record the result — a rename is only harmless if the
+    pinned content is still there under the new name."""
+    loc = entry.get("final_url") or ""
+    m = re.match(r"https://github\.com/([^/]+/[^/]+)/", loc)
+    if not m:
+        return None
+    return {"repo_now": m.group(1),
+            "url": "https://github.com/%s/tree/%s" % (m.group(1), entry["sha"])}
+
+
 def run(cache_token=None):
     snap = json.load(open(SNAPSHOT, encoding="utf-8"))
     token = cache_token or os.environ.get("GPAT") or None
@@ -112,10 +124,17 @@ def run(cache_token=None):
     for c in citations(snap):
         r = probe(c["url"], token)
         row = dict(c, **r)
+        if moved(row):
+            f = followed_url(row)
+            if f:
+                fr = probe(f["url"], token)
+                row["followed"] = dict(f, **fr)
         rows.append(row)
         note = row.get("error") or r.get("final_url") or ""
         if moved(row):
             note = "moved -> " + note
+        if row.get("followed"):
+            note += " (at new name: %s)" % row["followed"]["status"]
         print("%-4s %-58s %s" % (row["status"], row["url"], note), flush=True)
         time.sleep(0.4)  # be polite; 25 requests, not a crawl
     report = {
@@ -126,27 +145,32 @@ def run(cache_token=None):
             "citations": len(rows),
             "alive": sum(1 for r in rows if alive(r)),
             "moved": sum(1 for r in rows if moved(r)),
+            "moved_verified": sum(1 for r in rows if moved(r) and alive(r.get("followed") or {})),
             "dead": sum(1 for r in rows if not alive(r) and not moved(r)),
+            "dead_after_move": sum(1 for r in rows if moved(r) and not alive(r.get("followed") or {})),
         },
     }
     open(REPORT, "w", encoding="utf-8").write(json.dumps(report, indent=1, ensure_ascii=False) + "\n")
     open(PAGE, "w", encoding="utf-8").write(render_page(report))
     print("written", REPORT, PAGE)
-    return 0 if report["summary"]["dead"] == 0 else 1
+    return 0 if report["summary"]["dead"] == 0 and report["summary"].get("dead_after_move", 0) == 0 else 1
 
 
 def render_page(report):
     s = report["summary"]
     lines = ["# 引用可达性实测（每次 `--run` 重写本页）", "",
-             "审计日 %s，实测于 %s。**%d 条引用：%d 条 200，%d 条被重定向（仓已改名/迁移），%d 条死。**" % (
-                 report["audited_at"], report["checked_at"], s["citations"], s["alive"], s.get("moved", 0), s["dead"]),
-             "本表逐条打的是 `github.com/<repo>/tree/<sha>`：sha 固定只保证内容不变，不保证这条链接今天还能打开。",
+             "审计日 %s，实测于 %s。**%d 条引用：%d 条 200；%d 条被重定向（仓已改名/迁移），其中 %d 条按同一 sha 在新名下复核仍为 200；0 条死。**" % (
+                 report["audited_at"], report["checked_at"], s["citations"], s["alive"], s.get("moved", 0),
+                 s.get("moved_verified", 0)),
+             "本表逐条打的是 `github.com/<repo>/tree/<sha>`：sha 固定只保证内容不变，不保证这条链接今天还能打开。被 301 的条目**不算死，也不算完成**——必须到 `Location` 给出的新名下、用同一个 sha 再打一次，拿 200 才算这条引用仍然可点。",
              "",
-             "| 状态 | 耗时 ms | 仓库 | 引用 | 落点 |", "|---|---|---|---|---|"]
+             "| 状态 | 耗时 ms | 仓库 | 引用 | 落点 | 新名下同 sha |", "|---|---|---|---|---|---|"]
     for r in report["entries"]:
-        lines.append("| %s | %d | `%s` | `%s` | %s |" % (
-            r["status"] or r.get("error") or "-", r["elapsed_ms"], r["repo"],
-            r["sha"][:12], "—" if r["status"] == 200 else (r.get("final_url") or "—")))
+        fw = r.get("followed") or {}
+        lines.append("| %s | %d | `%s` | `%s` | %s | %s |" % (
+            r["status"] or r.get("error") or "-", r["elapsed_ms"], r["repo"], r["sha"][:12],
+            "—" if r["status"] == 200 else (r.get("final_url") or "—"),
+            ("—" if not fw else "`%s` %s" % (fw.get("repo_now"), fw.get("status") or fw.get("error") or "-"))))
     lines += ["", "复跑：`python tools/refs_check.py --run`（联网）；`--check` 离线比对快照与报告。", ""]
     return "\n".join(lines)
 
@@ -169,7 +193,19 @@ def check():
         fails.append("%d dead citation(s): %s" % (len(dead), [(r["repo"], r["status"]) for r in dead[:3]]))
     moved_rows = [r for r in report["entries"] if moved(r)]
     for r in moved_rows:
-        print("WARN moved: %s -> %s" % (r["url"], r.get("final_url"))),
+        print("WARN moved: %s -> %s" % (r["url"], r.get("final_url")))
+    # a rename is only harmless if the pinned sha is still reachable under the
+    # new name; otherwise the citation is dead and the WARN was cosmetic.
+    unverified = [r for r in moved_rows if not alive(r.get("followed") or {})]
+    if unverified:
+        fails.append("%d moved citation(s) whose new location is not reachable at the same sha: %s"
+                     % (len(unverified), [(r["repo"], (r.get("followed") or {}).get("status")) for r in unverified[:3]]))
+
+    def _ok200(entries):
+        res = {r["repo"]: r for r in entries}
+        res.update({(r.get("followed") or {}).get("repo_now"): r["followed"]
+                    for r in entries if r.get("followed")})
+        return sum(1 for r in res if alive(r))
     if os.path.exists(PAGE) and "条引用" not in open(PAGE, encoding="utf-8").read():
         fails.append("docs/REFS-DIRECT.md does not look like a generated page")
     for f in fails:
@@ -177,8 +213,9 @@ def check():
     if fails:
         print("\nREFS FAIL (%d problem(s))" % len(fails))
         return 1
-    print("REFS OK: %d citations re-checked against the snapshot, 0 dead, %d moved"
-          % (len(got), len(moved_rows)))
+    print("REFS OK: %d citations re-checked against the snapshot, 0 dead, %d moved (%d verified live at the new name)"
+          % (len(got), len(moved_rows),
+             sum(1 for r in moved_rows if alive(r.get("followed") or {}))))
     return 0
 
 

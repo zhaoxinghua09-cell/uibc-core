@@ -216,5 +216,8 @@
   "sphereon-opensource/ssi-sdk"
  ],
  "best_broad": 3,
- "best_strict": 3
+ "best_strict": 3,
+ "ours_broad": 10,
+ "ours_strict": 10,
+ "ours_reason": "本仓 D3 来自可执行的地址探针（256 翻键 0 相撞 / 1710 次替换 0 通过），不依赖关键词，所以宽规则与严规则下同分"
 }

@@ -1,3 +1,18 @@
+## 未发布 — 2026-11-25（DID 对接：BID 协议层，按《星火·链网BID协议》正文实现）
+
+主题：上一版把 `did:bid` 的通路做通了（GET + errorCode + id 校验），但没有读懂回来的文档。读完协议正文后发现三处真缺口，这一版补齐，且每一处都对着条款写测试。
+
+- **§4.2.5 的 11 档响应码不再被压成一个异常**（`uibc_core/bid_protocol.py::BID_RESPONSE_CODES`）：协议给了 0–10 共 11 个码，旧实现把非 0 一律抛成同一句话，于是"没找到"（6，重试无益）和"服务器繁忙"（3，重试有效）在日志里长得一模一样，而"验签失败"（9）这个安全信号也被混进了传输错误。现在每个码带协议原文名字和一个处理类（ok/refused/protocol/transient/security/not_found），`retryable` 与 `not_found` 是可问的属性；未记载的码也保留数字，不假装认识。
+- **BID 文档不是 DID Core 文档，这一版把文档读懂**（`parse_bid_document`）：协议 §4.2.1 的文档带 `publicKey[]`（`publicKeyHex`/`controller`/`type`）、`authentication`、`alsoKnownAs{type:Int}`、`extension`（ttl/type/attributes/encrypt/acsns/verifiableCredentials）、`service`、`proof{creator,signatureValue}`。逐条校验：id 必须等于请求的 BID；`publicKey.id` 文档内唯一且必须带 `#`；`controller` 必须是 BID；`publicKeyHex` 必须是十六进制；`authentication` 不能引用未定义的键；`alsoKnownAs.type` 必须是 Int；`DIDSubResolver` 必须有 `serviceEndpoint` 且 `protocol ∈ 0..3`（附录一第 5 张表）；`ttl` 非负整数；`attribute.encrypt ∈ {0,1}`；时间戳必须是 ISO-8601；`proof.creator` 必须是本文档的键。附录一点名的码值之外的值只记 `warnings` 不拒收——附录自己写着"待扩展"。
+- **`to_did_core()` 单向投影**：DID Core 侧只认 `verificationMethod`/`authentication`/`service`/`alsoKnownAs`，而 BID 侧是 `publicKey`/`extension` 等；投影时 BID 自有字段全部保留在 `extension` 里，丢掉信息不如不投影。
+- **§5 签名真的能跑了**（`sign_bid_document` / `verify_bid_document`）：去 `proof` → 按 RFC 8785/JCS 规范化 → 签名 → Base58。JCS 用的就是仓里已有的 `canonical.canonicalize`（它已与 JS 实现逐字节对齐），所以第三方拿任意 JCS 工具就能重算待签字节；补了 Bitcoin 字母表 Base58（含前导零字节）。Ed25519 闭环自签自验；`proof.creator` 必须同时出现在 `authentication` 里，否则拒绝。SM2 **不做**：没有可独立复算的向量，宁可在文档里写明"此处不可验证"也不假装验过。
+- **§4.2.3 子链递归解析**（`resolve_bid_chain`）：主链文档里 `service.type=DIDSubResolver` 指向子链解析地址 → 再解析。带跳数预算和已访问端点集合，环会给 `cycle` 而不是转圈；端点必须是 HTTP(S)。
+- **§4.3 二进制解析明确拒绝**（`refuse_binary_resolution`）：用协议自己的 5（operation not supported），不猜格式。
+- **`did_cn.resolve()` 的 bid 分支改用同一套信封解析**：错误信息不再坍缩，仍以 `DIDCNError` 抛出以兼容既有调用方；需要码与可重试性的调用方用 `bid_protocol.resolve_bid`。
+- 测试 `tests/test_bid_protocol.py` 37 条，每条在名字里写明它钉的是哪一条款（§4.2.1 / §4.2.5 / §5 / 附录一 / §4.2.3）。
+- **跨实现核验（这是本轮最该被外人复查的一条）**：签名不是我们自己验自己。`tools/verify-js/bid.mjs` 用**另一套 RFC 8785 实现**（JS 里按 RFC 原文重写，未复用 Python 代码）规范化、用 **node/OpenSSL** 验 Ed25519，对 `fixtures/bid/signed_document.json` 给出 `signature-verified true`，并打印规范化字节的 sha256 与 Python 逐字符比对。两次实现算出同一个 sha256，才叫"第三方能重算"。夹具由 `tools/make_bid_fixture.py` 以固定种子生成（随机种子会让已提交的夹具无法复现，等于把可证伪性换成了一次性快照）。测试 `tests/test_bid_crossjs.py` 4 条：夹具仍能自验、node 能验、两侧 sha256 相同、改一个字段 node 必须拒。
+- 证据：`uibc_core/bid_protocol.py`、`tests/test_bid_protocol.py`、`tests/test_bid_crossjs.py`、`tools/verify-js/bid.mjs`
+
 ## 0.5.3 — 2026-11-25（一致性语料 36→58，第二实现对齐）
 
 - **语料 36 → 58 条**：新增 `tools/redteam_scale.py`（22 条 scale 组变体）与 14 条补充变体（第二文件翻转/截断、第二条非法日期、第二条哈希截断、proof 索引偏移、截断 proof、清零 back-link、倒序 receipts）。期望值全部由实测 `failed_checks` 导出，不手填。

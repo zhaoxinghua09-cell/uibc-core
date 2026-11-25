@@ -38,7 +38,7 @@
  "ours": {
   "repo": "zhaoxinghua09-cell/uibc-core",
   "commit": "unknown",
-  "code_files": 1986,
+  "code_files": 1987,
   "test_files": 275,
   "test_text_kb": 1073,
   "test_hits": {
@@ -57,7 +57,7 @@
    "bit_level": 9,
    "address_derive": 102,
    "exit_code_gate": 7,
-   "reject_assertion": 2729
+   "reject_assertion": 2728
   },
   "dims": {
    "D1": 2,
@@ -419,10 +419,10 @@
     ]
    },
    "dims": {
-    "D1": 0,
+    "D1": 1,
     "D2": 0,
-    "D3": 0,
-    "D4": 0,
+    "D3": 1,
+    "D4": 1,
     "D5": 0
    },
    "assertion_lines": 6
@@ -954,10 +954,10 @@
     ]
    },
    "dims": {
-    "D1": 0,
+    "D1": 1,
     "D2": 0,
-    "D3": 0,
-    "D4": 0,
+    "D3": 1,
+    "D4": 1,
     "D5": 0
    },
    "assertion_lines": 9

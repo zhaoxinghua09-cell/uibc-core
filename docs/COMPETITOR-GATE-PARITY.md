@@ -23,7 +23,7 @@
 | `ceramicnetwork/js-did` | 307 | 36 | 127 | 1 | 0 | 1 | 0 | 0 | 2 |
 | `decentralized-identity/did-jwt` | 64 | 18 | 219 | 1 | 0 | 1 | 1 | 0 | 3 |
 | `decentralized-identity/did-resolver` | 14 | 1 | 21 | 0 | 0 | 0 | 0 | 0 | 0 |
-| `decentralized-identity/ethr-did-resolver` | 120 | 44 | 1190 | 0 | 0 | 0 | 0 | 0 | 0 |
+| `decentralized-identity/ethr-did-resolver` | 120 | 44 | 1190 | 1 | 0 | 1 | 1 | 0 | 3 |
 | `decentralized-identity/ion` | 67 | 4 | 1 | 0 | 0 | 0 | 0 | 0 | 0 |
 | `decentralized-identity/sidetree-core` | 62 | 21 | 132 | 0 | 0 | 0 | 0 | 0 | 0 |
 | `decentralized-identity/universal-resolver` | 155 | 20 | 26 | 0 | 0 | 0 | 0 | 0 | 0 |
@@ -33,7 +33,7 @@
 | `hyperledger/aries-cloudagent-python` | 1820 | 698 | 5764 | 1 | 0 | 1 | 1 | 0 | 3 |
 | `hyperledger/aries-framework-go` | 1389 | 125 | 1028 | 1 | 0 | 1 | 1 | 0 | 3 |
 | `hyperledger/indy-sdk` | 1566 | 416 | 2084 | 1 | 0 | 1 | 1 | 0 | 3 |
-| `hyperledger/indy-vdr` | 254 | 54 | 174 | 0 | 0 | 0 | 0 | 0 | 0 |
+| `hyperledger/indy-vdr` | 254 | 54 | 174 | 1 | 0 | 1 | 1 | 0 | 3 |
 | `ontio/ontology-did` | 25 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 | `sphereon-opensource/ssi-sdk` | 1448 | 260 | 3678 | 1 | 0 | 1 | 1 | 0 | 3 |
 | `spruceid/didkit` | 132 | 10 | 41 | 0 | 0 | 0 | 0 | 0 | 0 |
@@ -42,7 +42,7 @@
 | `uport-project/ethr-did` | 17 | 4 | 43 | 0 | 0 | 0 | 0 | 0 | 0 |
 | `w3c-ccg/did-method-key` | 4 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 | `w3c-ccg/did-test-suite` | 21 | 12 | 21 | 0 | 0 | 0 | 0 | 0 | 0 |
-| `zhaoxinghua09-cell/uibc-core` (this repository) | 1986 | 275 | 1073 | 2 | 2 | 2 | 2 | 2 | 10 |
+| `zhaoxinghua09-cell/uibc-core` (this repository) | 1987 | 275 | 1073 | 2 | 2 | 2 | 2 | 2 | 10 |
 
 D1 门槛＝测试文件内拒绝类断言 ≥10 次；D2＝位级关键词 ≥1；D3＝base58/地址派生关键词 ≥1；
 D4＝非测试代码里出现失败退出码 ≥1；D5 对 25 家一律记 0——"注入假断言要求门失败"这种用例，检索不到就当没有。
@@ -52,10 +52,10 @@ D4＝非测试代码里出现失败退出码 ≥1；D5 对 25 家一律记 0—�
 
 1. **逐位变异：25 家里有 0 家。** 这一维要的是"把一条报文的每一位翻一遍并归类"；
    没有二进制报文层的实现，连可翻的对象都没有——RFC-011 在本轮之前没有公开实现（`docs/CODEC.md` 有取证）。
-2. **跨层单一退出码：25 家里有 7 家。** 那 7 家记 1 是因为仓内有失败退出码（CLI 行为），
+2. **跨层单一退出码：25 家里有 9 家。** 那 9 家记 1 是因为仓内有失败退出码（CLI 行为），
    不是把多层证据收进一个码。
 3. **门自证：25 家里有 0 家。** 一个没人证伪过的门，通过时说的话只是自我声明。
-4. **文档层拒绝断言：25 家里有 8 家**，其中达到 D1 门槛（≥10 次）的按点状证据记 1；
+4. **文档层拒绝断言：25 家里有 10 家**，其中达到 D1 门槛（≥10 次）的按点状证据记 1；
    本仓库记 2 的依据是 31 个变异体、25 个必拒、silent 必须为空——同分不同质，见第四节。
 
 所以"全面超越"这句，能成立的范围只有一句：**在公开仓库里，把文档层、二进制层、地址层的变异证据收进

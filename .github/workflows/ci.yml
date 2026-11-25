@@ -370,6 +370,9 @@ jobs:
           # Seven gates at once, in this checkout: receipts fresh, pictures rebuilt
           # from them, ledger invariants, claims vs receipts, index current.
           python tools/stranger_own_check.py
+          # And the one-screen page a stranger opens offline must still say
+          # the numbers the receipt says, and must not link out to anyone.
+          python tools/render_outsider_board.py --check
           python tools/check_competitor_vectors.py \
             --dir docs/upstream-package/competitor-defects/v0.38.0 \
             --dir docs/upstream-package/competitor-defects/v0.38.0-counter --json \

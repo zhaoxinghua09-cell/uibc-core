@@ -50,7 +50,8 @@ import time
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RECEIPT = os.path.join(HERE, "docs", "outsider-rerun-receipt.json")
 PAGE = os.path.join(HERE, "docs", "OUTSIDER-RERUN.md")
-GENERATED = {"docs/outsider-rerun-receipt.json", "docs/OUTSIDER-RERUN.md"}
+GENERATED = {"docs/outsider-rerun-receipt.json", "docs/OUTSIDER-RERUN.md",
+             "docs/OUTSIDER-BOARD.html"}
 
 IGNORE = (".git", "__pycache__", ".pytest_cache", ".mypy_cache", ".ruff_cache",
           "node_modules", ".venv", "venv", "htmlcov", ".tox", ".nox",

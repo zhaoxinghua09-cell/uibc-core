@@ -1,3 +1,14 @@
+## 0.5.5 — 2026-11-25（把 0.5.4 那次发布补成一次干净的）
+
+主题：`0.5.4` 装上能用，但它的 sdist 里带的是一版之前的语料。这一版不新增能力，只把"发出去的东西"和"仓库里的树"重新对齐，并把产生那种错配的顺序固定下来。
+
+- **0.5.4 到底错在哪**：`v0.5.4` 切在 `be99eae`，那次改了版本串、重建了归档，**没有重 emit 语料**——59 个 `manifest.json`/`seal.json` 里仍写着 `0.5.3`。`oracle_check.py --emit` 从同一棵树能重新产出的字节与提交的对不上，所以 `sdist-self-check` 在 main 上红；也是为什么那次打的包是 359,714 字节，而正确的重建是 359,696 字节（它装的是旧语料，多出的字节就是那两处版本串的差）。
+- **这一版按顺序做**：`bump 0.5.5` → `oracle_check.py --emit`（`SOURCE_DATE_EPOCH=1794700800`，与 pin 同一锚点）→ `build_conformance_manifest.py`（792 文件）→ `build_conformance_bundle.py 0.5.5` → 写 pin → `status_page.py` → README/AUDIT-KIT 指向同一哈希。四者同源，`sdist-self-check` 与 `test_oracle_reproducible` 才有东西可对。
+- **发布资产**：`uibc-conformance-0.5.5.zip`，359,696 字节，456 例，sha256 `9cab24943117801ed4f02c8400a899916f237a1e2e668116eaac4accfb17932e`；pin 在 `anchors/pins/uibc-conformance-0.5.5.sha256`。
+- **顺序本身被写进流程**（`221d004`）：发布只在字节已经落在页面上之后才发生。这正是 `publish-mcp` 在 v0.5.3 上撞到的那类竞态——同一个 tag 触发，注册表先查 PyPI，而 PyPI 那时还没有文件（`files=0`），于是它把自己判成失败。重跑一次就过，但"要靠重跑才对"不是流程。
+- **门禁**：`check_release_readiness.py --version 0.5.5 --tag v0.5.5` → `READY`；`version_gate.py` → `GATE PASS`；`check_doc_facts.py` → 0 mismatch；`status_page.py --check` → `CURRENT`；`build_conformance_manifest.py --check` → 792 files；`recheck.py` → `29 / COVERED=5 / GAP=8 / PARTIAL=16 / bad=0`。
+- **对 0.5.4 的处置，如实写**：PyPI 上的 0.5.4 撤不回来（PyPI 不复用版本号），它的 sdist 就带着旧语料留着；`v0.5.4` 的 release 页为空资产，这一版不回头去补它，因为补上去的只会是那份旧归档。装上 0.5.4 的机器升到 0.5.5 即可，代码路径没有变化，变的是随包附带的语料与哈希。
+
 ## 0.5.4 — 2026-11-25（条款级 crosswalk：29 行判词，机器可证伪）
 
 主题：竞品对照里"我们更全"是最容易说空的一句话。这一版把主张收窄到别人没发布的那一列——每个被监管条款对应一个判词，而判词可以被证伪。

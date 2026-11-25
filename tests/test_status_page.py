@@ -22,7 +22,10 @@ def test_the_facts_come_from_the_repository_not_from_prose():
                encoding="utf-8").read()
     import re as _re
     assert _re.search(r"([0-9a-f]{64})  conformance/", pin).group(1) == f["archive_sha256"]
-    assert f["archive_cases"] == 36
+    # The zip and the manifest must agree: a case added to the tree but not to
+    # the archive is a case a downloader cannot run.
+    manifest = json.load(open(os.path.join(REPO, "conformance", "manifest.json"), encoding="utf-8"))
+    assert f["archive_cases"] == len(manifest["cases"])
     assert f["archive_carries_verifier"] is True
     assert f["oracle_cases"] >= 25
     assert isinstance(f["external_third_party"], int)

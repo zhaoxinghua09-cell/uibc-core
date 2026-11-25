@@ -1,0 +1,111 @@
+{
+  "schema": "uibc-crosswalk/1",
+  "standard": {
+    "id": "Regulation (EU) 2017/745 (MDR)",
+    "title": "EU MDR — Annex I software clauses and Annex II 4(d), mapped to what the package can carry",
+    "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32017R0745",
+    "scope_note": "Five clauses only. This is not the GSPR checklist: that has roughly 150-200 rows for a Class IIa/IIb device and is the manufacturer's document, not a library's. Rows were chosen because they are the ones a record layer can plausibly touch at all.",
+    "source": "crosswalk/eu-mdr-2017-745.json"
+  },
+  "manifest_sha256": "4a211d7d9b9227d06338534d72fa6ec081323eb89e26c6b4752c4271a695f4d8",
+  "verdict_sha256": "5d397f1d451f1d9116d722f640ccea2b8fc1d5a4aaa58892cbd7f12fa32d71b5",
+  "clause_count": 5,
+  "counts": {
+    "PARTIAL": 4,
+    "GAP": 1
+  },
+  "bad": 0,
+  "rows": [
+    {
+      "id": "MDR Annex I 17.1",
+      "applies": true,
+      "strength": "partial",
+      "verbatim": true,
+      "state": "PARTIAL",
+      "note": "",
+      "reason": "The probe re-computes every evidence digest and, on the tampered fixture, exits non-zero and names the entry whose digest no longer matches - so a single altered artefact cannot pass as a good one. The bundled demo builds, seals, verifies, tampers and re-verifies one package end to end, so the same input yields the same verdict and a tampered copy is caught. We do not test device performance, and we do not exercise single-fault behaviour of the device itself.",
+      "carrier": [
+        "three-valued verdict",
+        "per-check reason code",
+        "checked_at"
+      ],
+      "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32017R0745",
+      "probe": {
+        "declared": "python tools/probe_evidence_identity.py fixtures/tampered.uibc",
+        "exit": 1,
+        "ok": true
+      }
+    },
+    {
+      "id": "MDR Annex I 17.2",
+      "applies": true,
+      "strength": "partial",
+      "verbatim": true,
+      "state": "PARTIAL",
+      "note": "",
+      "reason": "We record that a verification/validation document exists, is bound to the policy in force and has not been altered since sealing. We do not judge whether the plan behind that document is adequate, nor whether the development lifecycle followed it.",
+      "carrier": [
+        "evidence entry type=EVAL",
+        "policy_hash",
+        "seal"
+      ],
+      "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32017R0745",
+      "probe": {
+        "declared": "python -m pytest tests/test_seal_v03.py -q",
+        "exit": 0,
+        "ok": true
+      }
+    },
+    {
+      "id": "MDR Annex I 17.4",
+      "applies": true,
+      "strength": "partial",
+      "verbatim": true,
+      "state": "PARTIAL",
+      "note": "",
+      "reason": "The package states its own network and key-resolution requirements and refuses a document that is oversized, loopback/private, or reached through a downgrade. It does not specify hardware, and it does not audit the deployment's actual IT security measures.",
+      "carrier": [
+        "did:web fetch guards: public-host assertion, 2 MB cap, no 3xx downgrade"
+      ],
+      "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32017R0745",
+      "probe": {
+        "declared": "python -m pytest tests/test_did_web_hardening.py -q",
+        "exit": 0,
+        "ok": true
+      }
+    },
+    {
+      "id": "MDR Annex I 18.8",
+      "applies": true,
+      "strength": "gap",
+      "verbatim": true,
+      "state": "GAP",
+      "note": "",
+      "reason": "This is device and firmware design: physical access, boot integrity, network exposure of the device itself. A record layer cannot answer it, and claiming otherwise would be the kind of overclaim this file exists to prevent.",
+      "carrier": [],
+      "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32017R0745",
+      "probe": null
+    },
+    {
+      "id": "MDR Annex II 4(d)",
+      "applies": true,
+      "strength": "partial",
+      "verbatim": true,
+      "state": "PARTIAL",
+      "note": "",
+      "reason": "Every evidence entry carries a relative path and a sha256 over its bytes, and a probe recomputes both: 2/2 on the clean fixture, and on the tampered fixture it names the entry whose digest no longer matches. What is still missing is document control - approval, revision history and the controlled-document numbering scheme remain with the manufacturer's QMS (EN ISO 13485 4.2.4).",
+      "carrier": [
+        "evidence/index.json: path + content_hash per document",
+        "evidence_root in manifest",
+        "tools/probe_evidence_identity.py"
+      ],
+      "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32017R0745",
+      "probe": {
+        "declared": "python tools/probe_evidence_identity.py fixtures/clean.uibc",
+        "exit": 0,
+        "ok": true
+      }
+    }
+  ],
+  "verdict": "OK"
+}

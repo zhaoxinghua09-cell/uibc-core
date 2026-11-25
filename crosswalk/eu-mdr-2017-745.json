@@ -1,0 +1,73 @@
+{
+  "schema": "uibc-crosswalk/1",
+  "standard": {
+    "id": "Regulation (EU) 2017/745 (MDR)",
+    "title": "EU MDR — Annex I software clauses and Annex II 4(d), mapped to what the package can carry",
+    "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32017R0745",
+    "scope_note": "Five clauses only. This is not the GSPR checklist: that has roughly 150-200 rows for a Class IIa/IIb device and is the manufacturer's document, not a library's. Rows were chosen because they are the ones a record layer can plausibly touch at all."
+  },
+  "clauses": [
+    {
+      "id": "MDR Annex I 17.1",
+      "text": "Devices that incorporate electronic programmable systems, including software, or software that are devices in themselves, shall be designed to ensure repeatability, reliability and performance in line with their intended use. In the event of a single fault condition, appropriate means shall be adopted to eliminate or reduce as far as possible consequent risks or impairment of performance.",
+      "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32017R0745",
+      "applies": true,"verbatim": true,
+      "strength": "partial",
+      "carrier": ["three-valued verdict", "per-check reason code", "checked_at"],
+      "probe": {
+        "cmd": "python tools/probe_evidence_identity.py fixtures/tampered.uibc",
+        "expect": {"exit": 1, "stdout_contains": "digest mismatch"}
+      },
+      "reason": "The probe re-computes every evidence digest and, on the tampered fixture, exits non-zero and names the entry whose digest no longer matches - so a single altered artefact cannot pass as a good one. The bundled demo builds, seals, verifies, tampers and re-verifies one package end to end, so the same input yields the same verdict and a tampered copy is caught. We do not test device performance, and we do not exercise single-fault behaviour of the device itself."
+    },
+    {
+      "id": "MDR Annex I 17.2",
+      "text": "For devices that incorporate software or for software that are devices in themselves, the software shall be developed and manufactured in accordance with the state of the art taking into account the principles of development life cycle, risk management, including information security, verification and validation.",
+      "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32017R0745",
+      "applies": true,"verbatim": true,
+      "strength": "partial",
+      "carrier": ["evidence entry type=EVAL", "policy_hash", "seal"],
+      "probe": {
+        "cmd": "python -m pytest tests/test_seal_v03.py -q",
+        "expect": {"exit": 0}
+      },
+      "reason": "We record that a verification/validation document exists, is bound to the policy in force and has not been altered since sealing. We do not judge whether the plan behind that document is adequate, nor whether the development lifecycle followed it."
+    },
+    {
+      "id": "MDR Annex I 17.4",
+      "text": "Manufacturers shall set out minimum requirements concerning hardware, IT networks characteristics and IT security measures, including protection against unauthorised access, necessary to run the software as intended.",
+      "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32017R0745",
+      "applies": true,"verbatim": true,
+      "strength": "partial",
+      "carrier": ["did:web fetch guards: public-host assertion, 2 MB cap, no 3xx downgrade"],
+      "probe": {
+        "cmd": "python -m pytest tests/test_did_web_hardening.py -q",
+        "expect": {"exit": 0}
+      },
+      "reason": "The package states its own network and key-resolution requirements and refuses a document that is oversized, loopback/private, or reached through a downgrade. It does not specify hardware, and it does not audit the deployment's actual IT security measures."
+    },
+    {
+      "id": "MDR Annex I 18.8",
+      "text": "Devices shall be designed and manufactured in such a way as to protect, as far as possible, against unauthorised access that could hamper the device from functioning as intended.",
+      "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32017R0745",
+      "applies": true,"verbatim": true,
+      "strength": "gap",
+      "carrier": [],
+      "probe": null,
+      "reason": "This is device and firmware design: physical access, boot integrity, network exposure of the device itself. A record layer cannot answer it, and claiming otherwise would be the kind of overclaim this file exists to prevent."
+    },
+    {
+      "id": "MDR Annex II 4(d)",
+      "text": "the precise identity of the controlled documents offering evidence of conformity with each harmonised standard, CS or other method applied to demonstrate conformity with the general safety and performance requirements ... shall incorporate a cross-reference to the location of such evidence within the full technical documentation",
+      "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32017R0745",
+      "applies": true,"verbatim": true,
+      "strength": "partial",
+      "carrier": ["evidence/index.json: path + content_hash per document", "evidence_root in manifest", "tools/probe_evidence_identity.py"],
+      "probe": {
+        "cmd": "python tools/probe_evidence_identity.py fixtures/clean.uibc",
+        "expect": {"exit": 0, "stdout_contains": "identities recompute"}
+      },
+      "reason": "Every evidence entry carries a relative path and a sha256 over its bytes, and a probe recomputes both: 2/2 on the clean fixture, and on the tampered fixture it names the entry whose digest no longer matches. What is still missing is document control - approval, revision history and the controlled-document numbering scheme remain with the manufacturer's QMS (EN ISO 13485 4.2.4)."
+    }
+  ]
+}

@@ -1,3 +1,130 @@
+## 未发布 — 2026-11-25（RFC-011 编解码器：把"只能读"补成"能反算"）
+
+主题：一个只会解码的实现没有办法被反驳。这一轮把它做成编解码器，并先把"官方到底有没有实现"查清楚。
+
+- **先取证再动工**：`headerLength`/`replyCode`/`messageLength`/`0x2100` 在 `caict-4iot-dev` 全组织的 code search 命中数都是 **1**，唯一命中是 RFC-011 正文。公开默认分支上不存在参考编解码器（`docs/COMPETITOR-EVIDENCE.md` 附节记了查询与计数，并写明"看不到私有仓，不能推出官方没有"）。
+- **三层互逆**：`encode_units`（字节级、含非升序顺序）/ `encode_document`（语义幂等，规范序按容器内 ID 升序）/ `encode_message`（头+option+体）。文档层为什么只承诺语义，写在 `docs/BINARY-PROTOCOL.md` 三·五。
+- **六条推断成为参数而非注释**（`ASSUMPTIONS`）：`flag_bit_order`（msb/lsb）、`acsns_spelling`（3610/3601）、`integer_widths`（调用方给，不给就 defer）、`bid_document_collision`（启发式）、分片重组与签名 unit ID（未实现）。两条可翻转的都有"翻转后输出确实变了"的断言。
+- **宽度给了就严格**：`integer_widths` 与 payload 长度不符立刻 `raise`（`declared long=8 bytes but carries 4`）——真实样例到手时错宽度当场暴露，不会被读成错数。
+- **敌意输入**：2,000 组随机字节只许 `ValueError`；500 组随机 unit 序列解码后重编码语义必须一致。
+- 新增 `tests/test_bid_binary_codec.py` 31 条，连原 16 条共 47 条全绿。
+- **可运行 demo 与生成式布局图**：`tools/demo_bid_binary.py` 八幕（编→解→翻转假设→宽度硬校验→fuzz），末行 `ALL OK`、退出码 0；`tools/render_bid_binary_layout.py` 从模块常量生成 `docs/BID-BINARY-LAYOUT.svg`，生成器内断言各段字节和等于 `HEADER_MIN`，`tests/test_bid_binary_layout.py` 再拿生成结果与仓库那份做字节比较——手改图即红。新增 5 条测试，与解码/编解码合计 52 条。
+
+### 同一轮的硬化：把"解码器看不出来的改动"补掉
+
+- **逐位翻转探针** `tools/mutate_bid_binary.py`：对一条 196 字节 / 1568 位的有效报文逐位翻转，归成 rejected 328（20.9%）/ changed 1226（78.2%）/ blind 14（0.9%）。盲位只有 6 个未分配 flag 位和整个 `unUsed` 字节，**正文一位都不盲**。
+- **探针抓到的第一件事是我们自己的比较写错了**：只比较解出的文档，会把 `replyCode`、`transactionID` 也算成盲位（22 个改为比全部可观测状态后 15 个）。
+- **探针抓到的第二个是结构漏洞**：字段按绝对路径写入，容器改了名也解不出差别——把 `publicKey`(0x2110) 改成文档包装层 0x2100，文档一字不差。现在字段必须坐进 `FIELD_TABLE` 路径对应的容器（`documented_parent` 取最长前缀），协议 §5.2.2 的 `errResponse` 例外用 `CONTAINER_EXTRA_PATHS` 显式放行并在注释里引原文；宽容读法用 `strict_placement=False`，把错位记进 `misplaced` 而不是拒收。
+- **第二个真漏洞**：编码器把 `authentication` 包成 `0x2100 > 0x2100` 两层壳，示范报文 342 字节。改成裸 `0x2100` 叶子后 196 字节，`0x2100` 的双重身份仍按 payload 形状判别。
+- 新增 `tests/test_bid_binary_mutation.py` 5 条（含"盲位恰好是保留位"的断言，期望集合从 `_FLAG_BITS`/`_OPCODE_SHIFT` 推出，不手抄）；`tests/test_bid_binary_codec.py` 31 → 35 条；二进制四组合计 61 条。
+- demo 增两幕：`6b` 错容器被拒 + 宽容模式记账，`6c` 逐位翻转的统计；仍以 `ALL OK` 收尾。
+- `docs/BINARY-PROTOCOL.md` 增三·九（字段归属）与三·十（逐位翻转）。
+
+
+## 0.5.5 — 2026-11-25（把 0.5.4 那次发布补成一次干净的）
+
+主题：`0.5.4` 装上能用，但它的 sdist 里带的是一版之前的语料。这一版不新增能力，只把"发出去的东西"和"仓库里的树"重新对齐，并把产生那种错配的顺序固定下来。
+
+- **0.5.4 到底错在哪**：`v0.5.4` 切在 `be99eae`，那次改了版本串、重建了归档，**没有重 emit 语料**——59 个 `manifest.json`/`seal.json` 里仍写着 `0.5.3`。`oracle_check.py --emit` 从同一棵树能重新产出的字节与提交的对不上，所以 `sdist-self-check` 在 main 上红；也是为什么那次打的包是 359,714 字节，而正确的重建是 359,696 字节（它装的是旧语料，多出的字节就是那两处版本串的差）。
+- **这一版按顺序做**：`bump 0.5.5` → `oracle_check.py --emit`（`SOURCE_DATE_EPOCH=1794700800`，与 pin 同一锚点）→ `build_conformance_manifest.py`（792 文件）→ `build_conformance_bundle.py 0.5.5` → 写 pin → `status_page.py` → README/AUDIT-KIT 指向同一哈希。四者同源，`sdist-self-check` 与 `test_oracle_reproducible` 才有东西可对。
+- **发布资产**：`uibc-conformance-0.5.5.zip`，359,696 字节，456 例，sha256 `9cab24943117801ed4f02c8400a899916f237a1e2e668116eaac4accfb17932e`；pin 在 `anchors/pins/uibc-conformance-0.5.5.sha256`。
+- **顺序本身被写进流程**（`221d004`）：发布只在字节已经落在页面上之后才发生。这正是 `publish-mcp` 在 v0.5.3 上撞到的那类竞态——同一个 tag 触发，注册表先查 PyPI，而 PyPI 那时还没有文件（`files=0`），于是它把自己判成失败。重跑一次就过，但"要靠重跑才对"不是流程。
+- **门禁**：`check_release_readiness.py --version 0.5.5 --tag v0.5.5` → `READY`；`version_gate.py` → `GATE PASS`；`check_doc_facts.py` → 0 mismatch；`status_page.py --check` → `CURRENT`；`build_conformance_manifest.py --check` → 792 files；`recheck.py` → `29 / COVERED=5 / GAP=8 / PARTIAL=16 / bad=0`。
+- **对 0.5.4 的处置，如实写**：PyPI 上的 0.5.4 撤不回来（PyPI 不复用版本号），它的 sdist 就带着旧语料留着；`v0.5.4` 的 release 页为空资产，这一版不回头去补它，因为补上去的只会是那份旧归档。装上 0.5.4 的机器升到 0.5.5 即可，代码路径没有变化，变的是随包附带的语料与哈希。
+
+## 0.5.4 — 2026-11-25（条款级 crosswalk：29 行判词，机器可证伪）
+
+主题：竞品对照里"我们更全"是最容易说空的一句话。这一版把主张收窄到别人没发布的那一列——每个被监管条款对应一个判词，而判词可以被证伪。
+
+- **25 条法规条款 + 4 条工具契约 = 29 行**（`crosswalk/`）：COVERED 不是"我们实现了"，而是"有一个探针，曾经在该条款上被看见失败过"；PARTIAL / GAP 必须写理由；OVERCLAIM（声称覆盖但探针不存在）与 UNDECLARED（探针存在却没登记）直接 exit 1。
+- **`tools/recheck.py` 把公开表的每个数字回到字节**：六份 crosswalk 与 README 的声明同源，输出 `total clauses=29 COVERED=5 GAP=8 PARTIAL=16 bad=0`。CI 的 `crosswalk-gate` 与 `windows-probes` 都跑它；数字对不上就红，不靠人记。
+- **Windows 控制台的真缺陷**（`uibc_core/cli.py::_utf8_stdout`）：`verify` 在 cp1252 控制台抛 `UnicodeEncodeError`（position 564–587），stdout 为空，下游 `json.loads` 全挂——`windows-probes` 连红的真因。修法是在 `main()` 之前把 `sys.stdout/stderr` 重配成 UTF-8；新增 `tests/test_cli_stdout_encoding.py`，在 `PYTHONIOENCODING=cp1252` 下跑 `verify` 并要求输出可解析 JSON。这个场景在 Linux 上同样能复现，所以它不是 Windows 专属补丁。
+- **竞品节重写**（`docs/COMPETITORS.md`）：先承认 InSpec 的 control 确实带 `ref`/`url`/`tag cce:` 条款映射，不能写"他们没有"；再收窄到唯一可证伪的那一列，并自陈三条限制——29 行只是形式主张、InSpec 跑在活系统上、自家验证器的行在第二实现出现前仍是自评。基线 `COMPETITORS.json` 与图 `COMPETITORS.svg` 由脚本生成，改一次必须重跑一次；文档里写的命令都实跑过，没跑过的不写。
+- **发布资产**：`uibc-conformance-0.5.4.zip`，359,697 字节，456 例，sha256 `f0cb92932f1e10394343d55f530d534c1efe60860a4975ca49df7d0d4bba6a25`；pin 在 `anchors/pins/uibc-conformance-0.5.4.sha256`。
+- **本版是发布就绪门禁第一次真的拦人**（#445 引入的 `readiness` job）：`tools/check_release_readiness.py` 在 tag 上说四件事——三处版本串一致、tag 树里含自己版本的归档、归档内记录的版本一致、tag 名等于 `v<版本>`。它的由来是三连红：`v0.5.1/0.5.2/0.5.3` 各自切在自己的归档之前，于是 lab bundle 每次都在 tag 树上找不到自己那一版。负控制实测：把归档移开 → `NOT READY TO TAG`，rc=1，报的正是生产环境那句话。
+
+## 未发布 — 2026-11-25（§4.3 二进制解析：指针指空了，正文在隔壁）
+
+主题：此前把 §4.3 记成"正文未取到、只能明确拒绝"。这一轮把正文找到了，也把"缺什么"写成了清单。
+
+- **主协议 §4.3 的链接是空的**：它指向 `bif-rfcs` 的 `RFCs/3-ACCEPTED`，该目录只有一个 0 字节 `.gitkeep`。正文在 `RFCs/4-ADOPTED/星火链网RFC-011…md`（31,156 字节，commit `5d471fc1…`）。"协议没写"是误判，**是主文档的指针坏了**。
+- **能读的部分**（`uibc_core/bid_binary.py`）：16 字节消息头、单元树（ID 2B + 长度 2B + payload 可递归）、文档应答与错误应答的字符串字段；未知 unit 进 `unknown` 带原始字节；越界/长度不匹配/尾部残字节三类拒绝。
+- **不读的部分逐条给理由**：`Int`/`Long` 无字节宽度（整数进 `_deferred` 附原始字节）；消息签名三个 unit 的 ID 正文从未给出（`signature_units_detectable=False`）；分片重组无末片判据；flag 位序无编号（`FLAG_BIT_ORDER_IS_AN_ASSUMPTION`）。
+- **正文自身两处冲突**：`0x2100` 同时是 `bidDocument` 与 `authentication`（按 payload 形状判别，启发式写在 `KNOWN_ID_COLLISIONS`）；AC 号子字段 `0x3601/0x3602` 与 `0x3610/0x3620` 两套编号都收。
+- **两张返回码表不合并**：§4.2.5 `0=success` vs RFC-011 `1=success`（另有 11、255），合并会把 0 与 1 混成"成功"。
+- 测试 `tests/test_bid_binary.py` 16 条；`docs/BINARY-PROTOCOL.md` 记 commit/blob/字节数。
+
+## 未发布 — 2026-11-25（地址可复算：把 4 个大小写字母钉成规则）
+
+主题：上一版把 `did:bid` 地址判成"不透明、只能校验"。这一版把它算清楚，并记下标准与参考实现在同一处步骤上的分叉。
+
+- **根因是字母表**：`brdc-sjcl` 的 Base58 与比特币表只差 4 个字母（`b/B`、`u/U` 各自对调；前 9 位共享），见 `docs/ADDRESS-DERIVATION.md`。这解释了 7/50 的巧合，也让 50/50 成立。
+- **版本字节是开关不是默认**：RFC-003 §5.1 第三步要求前置 `0x01`，官方 SDK 注释掉了（`keypair/index.js` 60–62 行）。返回字典带 `version_byte`/`hash_hex`/`key_bytes`。
+- **RFC 示例瑕疵也钉住**：打印的 `did:bid:38VPR…` 省略算法与编码字母（应为 `did:bid:ef38VPR…`）；正文给的后缀 22–31 与实测 30–32 不符。
+- **语义边界**：地址推导只做自洽性检查，**不做准入**（解析仍按 ABNF 接受）。
+- 测试 `tests/test_bid_address.py` 13 条。
+
+## 未发布 — 2026-11-25（DID 对接：BID 协议层，按《星火·链网BID协议》正文实现）
+
+主题：上一版把 `did:bid` 的通路做通了（GET + errorCode + id 校验），但没有读懂回来的文档。读完协议正文后发现三处真缺口，这一版补齐，且每一处都对着条款写测试。
+
+- **§4.2.5 的 11 档响应码不再被压成一个异常**（`uibc_core/bid_protocol.py::BID_RESPONSE_CODES`）：协议给了 0–10 共 11 个码，旧实现把非 0 一律抛成同一句话，于是"没找到"（6，重试无益）和"服务器繁忙"（3，重试有效）在日志里长得一模一样，而"验签失败"（9）这个安全信号也被混进了传输错误。现在每个码带协议原文名字和一个处理类（ok/refused/protocol/transient/security/not_found），`retryable` 与 `not_found` 是可问的属性；未记载的码也保留数字，不假装认识。
+- **BID 文档不是 DID Core 文档，这一版把文档读懂**（`parse_bid_document`）：协议 §4.2.1 的文档带 `publicKey[]`（`publicKeyHex`/`controller`/`type`）、`authentication`、`alsoKnownAs{type:Int}`、`extension`（ttl/type/attributes/encrypt/acsns/verifiableCredentials）、`service`、`proof{creator,signatureValue}`。逐条校验：id 必须等于请求的 BID；`publicKey.id` 文档内唯一且必须带 `#`；`controller` 必须是 BID；`publicKeyHex` 必须是十六进制；`authentication` 不能引用未定义的键；`alsoKnownAs.type` 必须是 Int；`DIDSubResolver` 必须有 `serviceEndpoint` 且 `protocol ∈ 0..3`（附录一第 5 张表）；`ttl` 非负整数；`attribute.encrypt ∈ {0,1}`；时间戳必须是 ISO-8601；`proof.creator` 必须是本文档的键。附录一点名的码值之外的值只记 `warnings` 不拒收——附录自己写着"待扩展"。
+- **`to_did_core()` 单向投影**：DID Core 侧只认 `verificationMethod`/`authentication`/`service`/`alsoKnownAs`，而 BID 侧是 `publicKey`/`extension` 等；投影时 BID 自有字段全部保留在 `extension` 里，丢掉信息不如不投影。
+- **§5 签名真的能跑了**（`sign_bid_document` / `verify_bid_document`）：去 `proof` → 按 RFC 8785/JCS 规范化 → 签名 → Base58。JCS 用的就是仓里已有的 `canonical.canonicalize`（它已与 JS 实现逐字节对齐），所以第三方拿任意 JCS 工具就能重算待签字节；补了 Bitcoin 字母表 Base58（含前导零字节）。Ed25519 闭环自签自验；`proof.creator` 必须同时出现在 `authentication` 里，否则拒绝。SM2 **不做**：没有可独立复算的向量，宁可在文档里写明"此处不可验证"也不假装验过。
+- **§4.2.3 子链递归解析**（`resolve_bid_chain`）：主链文档里 `service.type=DIDSubResolver` 指向子链解析地址 → 再解析。带跳数预算和已访问端点集合，环会给 `cycle` 而不是转圈；端点必须是 HTTP(S)。
+- **§4.3 二进制解析明确拒绝**（`refuse_binary_resolution`）：用协议自己的 5（operation not supported），不猜格式。
+- **`did_cn.resolve()` 的 bid 分支改用同一套信封解析**：错误信息不再坍缩，仍以 `DIDCNError` 抛出以兼容既有调用方；需要码与可重试性的调用方用 `bid_protocol.resolve_bid`。
+- 测试 `tests/test_bid_protocol.py` 37 条，每条在名字里写明它钉的是哪一条款（§4.2.1 / §4.2.5 / §5 / 附录一 / §4.2.3）。
+- **跨实现核验（这是本轮最该被外人复查的一条）**：签名不是我们自己验自己。`tools/verify-js/bid.mjs` 用**另一套 RFC 8785 实现**（JS 里按 RFC 原文重写，未复用 Python 代码）规范化、用 **node/OpenSSL** 验 Ed25519，对 `fixtures/bid/signed_document.json` 给出 `signature-verified true`，并打印规范化字节的 sha256 与 Python 逐字符比对。两次实现算出同一个 sha256，才叫"第三方能重算"。夹具由 `tools/make_bid_fixture.py` 以固定种子生成（随机种子会让已提交的夹具无法复现，等于把可证伪性换成了一次性快照）。测试 `tests/test_bid_crossjs.py` 4 条：夹具仍能自验、node 能验、两侧 sha256 相同、改一个字段 node 必须拒。
+- **用官方 SDK 反查，抓到一个会让真实文档全部被拒的缺陷**：`bid-sdk-nodejs` 1.0.1（Caict 发布）对固定种子给出的 `encPublicKey` 是 `b0 65 66 || 32 字节`——**35 字节**，而协议 §5.4.1 的样例 `b06566f76733ae…` 正是这个形状。此前我们只认 `b0 || key`（33 字节），于是真实 BID 文档的 `publicKeyHex` 一律被当成 35 字节的非法长度，验签直接失败。现在前缀按 `b06566` → `b0` → 裸键三档剥离（`strip_key_prefix`），边长集合 64/70/66；夹具也改用真实编码，JS 侧同步。
+- **地址：先撤回一条被放大成"定律"的巧合，再把它算到底**。上一稿写过"`base58(sha256(pub)[10:])` 能复算出官方 SDK 打的同一个地址"，只在一个样本上成立；拿 50 个固定种子批量复算只有 **7/50** 一致，于是又写成"能校验、不能反推"。两句话错在同一处：**字母表用错了**。官方 SDK 走的是 `brdc-sjcl` 的 Base58，字母表与比特币表**只差 4 处**（位置 10 `b/B`、27 `u/U`、34 `B/b`、52 `U/u`，全是大小写对调）；前 9 位 `1`–`9` 相同，所以 7 个不含这 4 个字母的地址偶然相等。换表后 **50/50** 逐字节复现——地址是完全可推导的。
+- **新模块 `uibc_core/bid_address.py`**：`derive_did` / `address_matches` / `bitcoin_to_bid_suffix`。版本字节（RFC-003 §5.1 第三步 `0x01`）做成显式开关：RFC 的唯一示例用"带版本字节"精确复现出 `38VPR182Y4uTkq32fykXjbKBPdQZutH`，50 条现行地址用"不带"精确复现——标准文本与参考实现在这一步分叉了，不替任何一方选默认。
+- 现在钉住的四条性质（`tests/test_bid_address.py`）：50/50 精确复现；带版本字节时 0/50；用比特币字母表时恰好 7/50；SM2 走 SM3 且落在 ABNF 区间。
+- 证据（地址性质）：`tests/test_bid_address.py`（13 条）、`docs/ADDRESS-DERIVATION.md`、`tests/test_bid_address_rule.py`（55 条）、`tools/bid_sdk_address_batch.mjs`、`fixtures/bid/sdk_address_batch.json`；单样本记录 `fixtures/bid/sdk_address.json` 保留，只作"官方输出原样快照"，不再当作可复算的证据。
+- **§4.2.2 五个字段接口落地**（`resolve_public_keys` / `resolve_attributes` / `resolve_acsns` / `resolve_credentials` / `resolve_service`）：协议给了五个字段端点，其中 `public-keys` 返回数组而 `public-keys/{id}` 返回单个对象——这个**形状不对称是协议自己的**，调用方若假定"永远是列表"就会错。都按 §4.2.5 的码处理（3/7 重试、6 不重试），都校验 `data.id` 必须等于请求的 BID、`data.version` 必须是字符串，单键查询必须真的是一把键、服务查询必须真的问什么答什么。键 id 要百分号编码（`#` → `%23`），服务查询用半角 `?id=`（协议里印的是全角"？"）。测试 `tests/test_bid_fields.py` 15 条。
+- 证据：`uibc_core/bid_protocol.py`、`tests/test_bid_fields.py`
+- **§4.2.4 可信解析（`resolve_bid_trusted`）**：协议说可信解析要"对BID文档的公钥和签名内容进行可信验证"，"确保递归解析过程中每个经过的解析服务都是可信的"。最容易犯的错是把 `data.verify` 当结论——那等于把核查交给了被核查方。所以返回的是一个把三件事分开的对象：`server_verify`（解析服务自述，必须是 Bool 字面 `true`，字符串 `"true"` 直接拒）、`signature_ok`（我们自己按 §5 重验文档签名）、`delegate_state`（`extension.delegateSign` 第三方背书：`absent`/`verified`/`invalid`/`unchecked`）。`trusted` = 服务自述 **且** 我们自己验过；`fully_trusted` 还要求背书被核。**签名者公钥取不到时是 `unchecked` 而不是默认通过**——"没有证据"和"证据成立"必须能被区分。
+- **`extension.delegateSign` 真的能验**（`verify_delegate_sign`）：`signer` 必须是 BID 键 id，`signatureValue` 是 Base58 的 Ed25519 签名，待签字节是 `publicKey` 字段的 JCS 形式（§5.2 已把排序规则写死，所以这里不另立一套编码）。三方背书没写怎么规范化，这一层是**我们选的**，写进文档而不是留给读者猜。
+- **可运行 demo**（`tools/demo_bid_trusted.py`）：起一个真的 `http.server` 当解析服务，四种答法（诚实 / 说验过但文档被动过 / 说没验过 / 带背书），打印五条裁决。第 2 条是全部意义所在：只读 `data.verify` 的客户端在那里会打印 OK。
+- 测试 `tests/test_bid_trusted.py` 15 条（请求形如 `{url}/{bid}?verify=true`、服务撒谎必被抓、`"true"` 字符串必拒、`verify=false` 是答案不是异常、背书四态各一条）。
+- 证据：`uibc_core/bid_protocol.py::resolve_bid_trusted`、`tests/test_bid_trusted.py`、`tools/demo_bid_trusted.py`
+- **SM2 不再"此处不可验证"**：协议 §5 允许 Ed25519 与 SM2 两种，此前我们只做 Ed25519 并如实写明。这一轮把向量问题解决了——不是自己造，而是引国标自己的例题：GM/T 0003.5-2012（GB/T 32918.5）附录 A 给出曲线参数、`dA`、`PA`、`ZA`、`e`、`k`、`(x1,y1)`、`r`、`s` 全套数字，于是实现可以钉在**别人的**数字上。
+- 新增 `uibc_core/sm2.py`（纯 Python 大整数 + OpenSSL 的 SM3，无第三方依赖）：曲线运算、`ZA`、`e`、签名与验签。`tests/test_sm2.py` 18 条，逐项对上国标：`PA = [dA]G`、`ZA = b2e14c5c…a4f3`、`e = f0b43e94…8640`、`[k]G` 的 x 坐标、以及用国标给的 `k` 复算出**同一个** `r=F5A03B06…`、`s=B1B6AA29…`。
+- **一个自己抓到的错**：`s` 里的 `(1+d)^-1` 一开始用了模 `p` 的逆元，签出来的签名自己的验签器都不认——这正是"能签也能验"要一起实现的原因，只验不签复现不出国标的 r/s，也就发现不了这类错。
+- **接进 BID 文档验签**：`verify_bid_document` 见 `publicKey.type` 含 SM2 即走 SM2 路径（64 字节 `x||y`，可带 `b0`/`b06566` 头）。两处协议没规定的地方**明说不猜**：区分标识用 GM/T 默认 `1234567812345678`，成功理由里写出这一点；不同 ID 签的链会判不通过，而不是被当成"验过了"。
+- 证据：`uibc_core/sm2.py`、`tests/test_sm2.py`、`uibc_core/bid_protocol.py::_verify_sm2_key`
+- **竞品从"说法"变成"字节"**：`docs/COMPETITOR-EVIDENCE.md` 钉住 DIF Universal Resolver 的 did:bid 驱动（`caict-4iot-dev/uni-resolver-driver-did-bid`，commit `5a93365`，2022-11-09，Apache-2.0，324 行，`src/test` 无任何测试类），逐条给出行号：非零 `errorCode` 在 77–78 行坍缩成一句 `docuement not exist`、全文 `verify` 出现 0 次、`delegateSign` 9 行全部只做字段搬运（233–235 行）、174 行把 `proof` 原样塞进 metadata 不重算。
+- **这条主张自带反证工具**（`tools/audit_official_bid_driver.py`）：重新下载钉住的字节、重新算行号；**对方一旦修了其中任何一条，脚本退出码非 0**，文档必须跟着改。"他们没做 X"因此不再是一句可以烂在文档里的话。
+- 证据：`docs/COMPETITOR-EVIDENCE.md`、`tools/audit_official_bid_driver.py`
+
+## 0.5.3 — 2026-11-25（一致性语料 36→58，第二实现对齐）
+
+- **语料 36 → 58 条**：新增 `tools/redteam_scale.py`（22 条 scale 组变体）与 14 条补充变体（第二文件翻转/截断、第二条非法日期、第二条哈希截断、proof 索引偏移、截断 proof、清零 back-link、倒序 receipts）。期望值全部由实测 `failed_checks` 导出，不手填。
+- **6 条如实跳过**：`no check fired; not exportable as a vector`（未知 status、索引倒序、删 seal、砍 seal 签名、schema 拼错、媒体类型换标）。`tests/test_conformance.py` 由「skipped 必须为空」改为「每条 skipped 必须带规定 reason」——把静默跳过，而不是跳过，定义为缺陷。
+- **第二实现对齐 58/58**：`tools/verify-js/verify.mjs` 补「两条记录共用同一 evidence_id」与「逐条 created_at 存在但非法（`2026-11-31`）」两项检测；把两边检查编号不一致的 8 条按「一个缺陷一个编号」重划（S4 字节完整性 / S7 索引元数据 / S12 标识与日期 / S3 生命周期语义）。`python tools/assert_second_impl.py` → 58/58、18 检查、0 out of scope。
+- **覆盖 16/19**：S9 / S16 / S19 无直接用例，`conformance/coverage.json` 如实标注。
+- **发布资产**：`uibc-conformance-0.5.3.zip`，312,642 字节，sha256 `5f3a72cb277dac8f285cd50df304dd9befe762caf42f40b98b907bcfc20cce8c`；归档 = oracle（`SOURCE_DATE_EPOCH=1794700800` 重 emit）= MANIFEST（790 文件）= pin 四者同源。
+- **两处发布事故，如实记录**：`v0.5.1` 因先建非 draft release 再上传资产被 immutable 拒绝，删除重建又把 tag 名永久占用；`v0.5.2` 资产可下载，但 oracle 语料仍带旧版本串，不是本树语料。详见 `docs/KNOWN-LIMITS.md` 第 11–12 条。
+- **已知脱链**：`v0.5.3` 的 tag 指向 rebase 合入前的提交 `b60a2a00`，不在 `main` 祖先链；immutable release 使 tag 无法移动（422）。字节证明不受影响，但「tag 指向 main 某提交」这句话不成立。
+## 未发布 — 2026-11-25（DID 对接：补 did:peer）
+
+- **`did:peer` numalgo 0/2 支持，全离线**：文档由标识本身推导，不需要端点也不需要注册中心。`0z<multibase ed25519>` 与同键 `did:key` 的文档键材料一致（规范明说二者等价）；`2` 解析 `.A/.E/.V/.I/.D` 键元素与 `.S<base64url>` 服务元素，按规范把 `t/s/r/a`、`dm` 还原成全称。
+- **numalgo 1/3/4 报 `UNRESOLVED` 而不是 `INVALID`**：它们的文档不在标识里（1 是创世文档的哈希、3 是 numalgo-2 DID 的哈希、4 短形态是长形态的哈希），需要对方提供。新增 `NotSelfResolving` 异常，适配器单独接住——这是同一类"错误信息坍缩"的第三例（前两例是 RegistryEndpointRequired 与线上 did:cn 形态）。
+- 明确不声明 `keyAgreement`：从 Ed25519 公钥推 X25519 需要双有理映射，本实现没做，宁可不给也不给一个看起来对的错键。
+- 测试 `tests/test_did_peer.py` 24 条，向量取自 Peer DID 方法规范原文样例。
+
+## 未发布 — 2026-11-24（DID 对接：补 did:jwk / did:bid + 修线上 did:cn 误判）
+
+主题：把"身份无关"从口号变成能点名的清单。两件事，一件加能力，一件修错误结论。
+
+- **新增 `did:jwk`**（`uibc_core/did.py::did_jwk_document`）：离线解析（文档就是标识）。两条硬拒绝：JWK 里出现 `d/p/q/dp/dq/qi/oth/k` 一律拒绝（DID 是公开标识，解析器不该替人搬运私钥）；JWK 超过 4096 字节拒绝（不让一条长字符串把本地解码变成无界工作量）。ed25519 → `VERIFIED`，其它键型 → `INCONCLUSIVE`。测试 `tests/test_did_jwk.py` 15 条
+- **修 `did:cn` 线上形态被误判为 `INVALID`**：信通院线上平台发的 `did:cn:agent:<base58>` 不在已发布 ABNF 内，`validate()` 拒绝是对的，但适配器把这次拒绝说成了"标识写错了"——等于告诉一个分配正确的智能体它的标识非法。现改为 `UNRESOLVED` 并保留标签（形态可识别 ≠ 分配已确认），回归测试钉住。这是本仓第二次"错误信息坍缩"（第一次是 `RegistryEndpointRequired`）
+- **新增 `did:bid`**（`uibc_core/did_cn.py::_check_bid`）：星火·链网 BID，ABNF 两种形状——主链 `ef<base58>`（首字符加密算法、次字符编码算法，按规范两张表读出）与子链 `AC01:<suffix>`；`did:bid:byol` 作为规范明列的例外单独识别，不硬塞进正则。`read` 走 HTTP GET，`errorCode` 非 0 直接抛出，端点必须调用方给（不默认 URL）。测试 `tests/test_did_bid.py` 14 条
+- **记下一处规范间冲突**：BID 的 ABNF 允许 `acsn ":" 0*1(suffix)` 的空后缀形态（如 `did:bid:AC01:`），但 DID Core 的 `method-specific-id` 必须以 idchar 结尾；两者不能同时满足。我们按 DID Core 拒绝，冲突写在测试与 `docs/DID-LANDSCAPE.md` §4，不装作看不见
+- 新增 `docs/DID-LANDSCAPE.md`：DID 对接全景（9 种已接、主流方法矩阵、三档策略、与 Universal Resolver 的差距口径）
+- `docs/EVIDENCE-INDEX.md` 由生成器重算（静态用例数 1557），口径改为"静态计数 ≠ 运行期收集数（参数化会更多、平台跳过会更少）"；`check_doc_facts` 0 mismatch
+- 证据：`tests/test_did_jwk.py`、`tests/test_identity_adapter.py`、`docs/DID-LANDSCAPE.md`
 ## The suite count, counted where it cannot drift
 
 - `docs/EVIDENCE-INDEX.md` carries one published number, and the tool that generates it (`suite_size()` in `tools/build_evidence_index.py`) asked `unittest` discovery how many cases the suite has. That number depends on **where** you run it: the same commit counts **1157 on Linux and 1156 on Windows**, because discovery imports modules and platform-gated imports differ. So the page was guaranteed to be stale on one platform, and `test_the_doc_in_the_repo_matches_a_fresh_build`, `check_says_what_it_means` and `test_index_number_matches_what_is_measured` failed there. This was found the honest way — `uibc-bench` D1 ("outsider runs the whole suite") failed on a clean Linux clone of main.
@@ -1557,3 +1684,16 @@ Initial proposal.
 ### Known issues at this version
 - No signatures ⇒ malicious forgery undetected.
 - No certificate, gate-decision, memory-migration or registry layer.
+
+
+## 未发布 — 2026-11-25（修 did:web 策略随传输路径漂移，s02b 三例根因）
+
+- **发现**：`assert_public_host`、禁降级 302、文档体积上限三处限制原先只写在 `_fetch_json` 里。
+  任何**自带 fetcher** 的调用方（测试替身、bench 的本地服务用例、适配器）从 `resolve()` 进来时，
+  `did:web:127.0.0.1` 会被正常解析——限制"生效与否"取决于哪条代码路径搬字节。这正是 issue #434
+  里三个用例 Linux PASS / Windows FAIL 的根因，不是平台差异。
+- **修法**：把主机策略与体积上限搬进 `resolve()` 的解析契约（loopback/私网/`.local` 一律拒；返回的文档按
+  UTF-8 序列化后超过 2 MiB 一律拒），传输层 `_fetch_json` 保留原检查作为纵深防御。
+- 降级 302 仍只能在传输层拒绝（注入 fetcher 时看不到重定向）；这一点在测试与文档里明说，不假装覆盖。
+- 新增 `tests/test_did_web_policy.py`（6 条）：注入 fetcher 的 loopback / 私网 / localhost 一律拒，
+  公网照常；2.2 MB 文档拒绝、1.5 MB 接受。

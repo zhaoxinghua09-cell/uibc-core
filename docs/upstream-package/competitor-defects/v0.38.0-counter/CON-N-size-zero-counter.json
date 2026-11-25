@@ -1,0 +1,23 @@
+{
+  "class": "negative",
+  "expect": {
+    "code": [
+      "schema"
+    ],
+    "result": "reject"
+  },
+  "id": "CON-N-size-zero-counter",
+  "kind": "consistency",
+  "new_root": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "new_size": 0,
+  "note": "same shape as CON-N-old-size-zero, with the RFC 6962 constant on both ends; the reject is forced by the proof shape (equal sizes 0=0 require an empty proof), not by a root",
+  "old_root": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "old_size": 0,
+  "proof": [
+    "0000000000000000000000000000000000000000000000000000000000000000"
+  ],
+  "requirements": [
+    "7.3.5"
+  ],
+  "source": "uibc-core counter-vector, 2026-11-25"
+}

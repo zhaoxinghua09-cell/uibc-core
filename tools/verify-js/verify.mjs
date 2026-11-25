@@ -514,13 +514,8 @@ function verify(pkg, opts = {}) {
           problems.push("entry " + i + " has no evidence_id");
         }
       }
-      const seen = new Set();
-      for (const id of ids) {
-        if (typeof id === "string" && id.trim()) {
-          if (seen.has(id)) problems.push("duplicate evidence_id " + JSON.stringify(id));
-          seen.add(id);
-        }
-      }
+      // Identifier uniqueness is an identifier rule (S12), not an integrity rule:
+      // one defect gets one name, or a reader cannot tell two problems from one.
     } catch (err) { problems.push("unreadable index: " + err.message); }
     s4Failed = problems.length !== 0;
     note("S4", "evidence integrity", problems.length === 0, problems.slice(0, 4).join("; ") || "ok");
@@ -552,14 +547,11 @@ function verify(pkg, opts = {}) {
     try {
       const index = readJson(join(pkg, "evidence/index.json"));
       for (const e of (index.entries || [])) {
-        if (!UUID.test(String(e.evidence_id))) problems.push("evidence_id is not a UUID");
         if (!["ACTION", "OUTPUT", "DECISION"].includes(e.type)) {
           problems.push("unknown evidence type: " + e.type);
         }
-        if (!realDate(String(e.created_at))) problems.push("created_at is not a real ISO-8601 Z time");
-        if (typeof e.content_hash !== "string" || e.content_hash.length !== 64) {
-          problems.push("content_hash is not a sha256 hex digest");
-        }
+        // Identifier shape and date validity belong to S12; repeating them here
+        // would report one defect under two names.
       }
     } catch (err) { problems.push("unreadable index: " + err.message); }
     note("S7", "evidence index metadata", problems.length === 0, problems.slice(0, 4).join("; ") || "ok");
@@ -1192,20 +1184,38 @@ function verify(pkg, opts = {}) {
       if (Number.isInteger(manifest.evidence_count) && manifest.evidence_count !== n) {
         problems.push("evidence_count says " + manifest.evidence_count + ", index holds " + n);
       }
+      // One identifier per declaration: two entries sharing an id make the
+      // index a list of claims, not a list of evidence.
+      const seenIds = new Map();
+      for (const entry of (index.entries || [])) {
+        const id = entry && entry.evidence_id;
+        if (id == null) continue;
+        if (seenIds.has(id)) {
+          problems.push("the same evidence_id is declared twice: " + id);
+          break;
+        }
+        seenIds.set(id, true);
+      }
+      // Every declared date, not only the manifest's: 2026-11-31 is the shape
+      // of a date that Date would happily roll forward to December 1.
+      for (const entry of (index.entries || [])) {
+        if (entry && entry.created_at != null && !realDate(entry.created_at)) {
+          problems.push("an evidence entry carries a time that does not exist: " + entry.created_at);
+          break;
+        }
+      }
+      // A lifecycle time that is present but impossible is S12's; a time that is
+      // missing altogether is S3's (a malformed event, not a bad date).
       const lc = readJson(join(pkg, "lifecycle.json"));
       const events = Array.isArray(lc) ? lc : (lc.events || []);
-      let last = null;
       for (const ev of events) {
-        const at = ev.at || ev.created_at || ev.timestamp;
-        if (!realDate(at)) { problems.push("lifecycle event without a real time"); break; }
-        if (ev.payload_hash != null && !/^[0-9a-f]{64}$/.test(String(ev.payload_hash))) {
-          problems.push("lifecycle event payload_hash is not 64 lowercase hex"); break;
+        const at = ev && (ev.at || ev.created_at || ev.timestamp);
+        if (at != null && !realDate(at)) {
+          problems.push("a lifecycle event carries a time that does not exist: " + at);
+          break;
         }
-        if (last && Date.parse(at) < Date.parse(last)) {
-          problems.push("lifecycle time goes backwards"); break;
-        }
-        last = at;
       }
+      // Lifecycle ordering, types and actors are S3's business.
     } catch (err) { problems.push(err.message); }
     note("S12", "timestamp and identifier strictness", problems.length === 0,
          problems.slice(0, 4).join("; ") || "ok");

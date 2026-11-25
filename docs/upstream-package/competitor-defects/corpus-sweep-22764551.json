@@ -1,0 +1,19 @@
+{
+  "corpus": "unpacked corpus at upstream HEAD 22764551 (path omitted: local checkout)",
+  "head": "22764551",
+  "manifest": {
+    "count": 171,
+    "files": []
+  },
+  "manifest_digest": "7169d8760d1ac869bc0e75140bddf07991bea89ee24a7148bbfd29c6c2ea8b2e",
+  "note": "Only the digest of the 171-file list is kept here: the bytes are the same as the 39daf704 snapshot, whose full list is in corpus-sweep-39daf704.json. tools/compare_corpus_snapshots.py is what says so, and it fails when this digest stops matching that list.",
+  "totals": {
+    "consistent": 69,
+    "inconsistent": 0,
+    "n_accept_published": 63,
+    "n_reject_published": 108,
+    "n_replayable": 69,
+    "none": 102,
+    "vectors": 171
+  }
+}

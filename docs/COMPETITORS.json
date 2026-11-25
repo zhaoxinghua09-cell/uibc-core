@@ -1,21 +1,27 @@
 {
   "ours": {
     "checks": 19,
-    "conformance_cases": 36,
-    "github_error": "HTTPError: HTTP Error 403: Forbidden",
-    "pypi_last_upload": "2026-11-18T17:19:15",
-    "pypi_latest": "0.4.0",
-    "pypi_releases": 5,
+    "conformance_cases": 58,
+    "created_at": "2026-09-17T16:52:14Z",
+    "forks": 2,
+    "license": "Apache-2.0",
+    "pushed_at": "2026-11-25T07:23:11Z",
+    "pypi_last_upload": "2026-11-25T06:31:54",
+    "pypi_latest": "0.5.5",
+    "pypi_releases": 12,
     "pypi_requires_python": ">=3.10",
-    "stars": null,
-    "tests": 594
+    "stars": 12,
+    "tests": 1765
   },
   "peer": {
-    "github_error": "HTTPError: HTTP Error 403: Forbidden",
-    "pypi_last_upload": "2026-11-18T05:03:38",
-    "pypi_latest": "0.17.0",
-    "pypi_releases": 23,
+    "created_at": "2026-06-13T21:55:39Z",
+    "forks": 6,
+    "license": "BSD-3-Clause",
+    "pushed_at": "2026-11-25T07:07:49Z",
+    "pypi_last_upload": "2026-11-22T03:43:30",
+    "pypi_latest": "0.19.0",
+    "pypi_releases": 25,
     "pypi_requires_python": ">=3.9",
-    "stars": null
+    "stars": 2
   }
 }

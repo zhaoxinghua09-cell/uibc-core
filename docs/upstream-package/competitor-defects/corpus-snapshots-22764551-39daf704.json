@@ -1,0 +1,11 @@
+{
+  "a": "22764551",
+  "a_count": 171,
+  "a_digest": "7169d8760d1ac869bc0e75140bddf07991bea89ee24a7148bbfd29c6c2ea8b2e",
+  "b": "39daf704",
+  "b_count": 171,
+  "b_digest": "7169d8760d1ac869bc0e75140bddf07991bea89ee24a7148bbfd29c6c2ea8b2e",
+  "changed": [],
+  "method": "digest only",
+  "verdict": "IDENTICAL"
+}

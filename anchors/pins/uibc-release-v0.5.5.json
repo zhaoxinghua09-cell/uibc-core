@@ -1,0 +1,57 @@
+{
+  "kind": "uibc-release-pin-v0",
+  "tag": "v0.5.5",
+  "frozen_at": "2026-11-25T06:57:11Z",
+  "measured": "gh api repos/zhaoxinghua09-cell/uibc-core/releases/tags/v0.5.5, 2026-11-25 (9 assets, digests as the page reports them)",
+  "why": "The pin step in release-lab-bundle.yml could not read a draft release (/releases/tags returns 404 for drafts), so it failed after the assets were uploaded and the page was published without its self pin. This file is the repository form, read from the published page rather than from memory. The tool now falls back to listing releases, so the next cut writes both forms on its own.",
+  "assets": [
+    {
+      "name": "ANCHORS.json",
+      "bytes": 367,
+      "sha256": "823b15c6149138c0bb242c68e7aa11ae7775d5309af9307ad0d86777d29bcb36"
+    },
+    {
+      "name": "anchor_freetsa.tsr",
+      "bytes": 4644,
+      "sha256": "e8c3a91507eefdf107441c7bd42fd3a122bf8d23df5d50a18659dd5102f90a17"
+    },
+    {
+      "name": "anchor_freetsa_ca.pem",
+      "bytes": 5107,
+      "sha256": "b8201c19ae46a882ceb83ce58251662fa0e47b0ebff40d6bc025f3e4626ab51e"
+    },
+    {
+      "name": "CORPUS-DIGESTS.txt",
+      "bytes": 288,
+      "sha256": "03552772c54c197b136d256877cc3cd2f6af0fa5c6cbb363d70792219ab36e19"
+    },
+    {
+      "name": "CORPUS-DIGESTS.txt.ots",
+      "bytes": 670,
+      "sha256": "2a95c137cd8807321ac63e183506fde7f5d73f6819cdaa3556c853dce115cd4f"
+    },
+    {
+      "name": "CORPUS-DIGESTS.txt.sig",
+      "bytes": 467,
+      "sha256": "551d8e9036ba088d8556418239890b44907b6c114583f8231df5a2d41b21b6ee"
+    },
+    {
+      "name": "receipt.json",
+      "bytes": 13936,
+      "sha256": "aaaf078af3f0e39a309adde0fad9b89d34e3445b07990dbd696a4b9be9129d87"
+    },
+    {
+      "name": "uibc-conformance-0.5.5.zip",
+      "bytes": 359696,
+      "sha256": "9cab24943117801ed4f02c8400a899916f237a1e2e668116eaac4accfb17932e"
+    },
+    {
+      "name": "uibc-lab-bundle-0.5.5.json",
+      "bytes": 327867,
+      "sha256": "8df4b8c34cf46de464eee7979b8e69e264fd1e9c5b3eb3e0a3e3c51fedfdce04"
+    }
+  ],
+  "excluded": [
+    "uibc-release-pin.json"
+  ]
+}

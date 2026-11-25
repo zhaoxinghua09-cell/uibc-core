@@ -9,7 +9,7 @@
   "evidence_index_digest": "sha256:9c6c1076231f9ce79f6c544b723d6cc74988e08d8dccbe2d4e6da7081d9f586b",
   "lifecycle_head": "sha256:d37288ae87ce2627ff0b88afeaaa8a809c64e743cce8175df01392e6fef2bde1",
   "checkpoint_head": "sha256:7b793a384b1d873b03f2bbb829b6e4e159c37c41476e7ad27d59dc2fec700f1d",
-  "min_verifier_version": "0.5.0",
+  "min_verifier_version": "0.5.5",
   "closure": {
     "model_weights": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
     "tokenizer": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",

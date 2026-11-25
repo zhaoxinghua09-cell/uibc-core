@@ -1,0 +1,97 @@
+{
+  "schema": "uibc-crosswalk/1",
+  "standard": {
+    "id": "uibc-crosswalk/1 (tool contract)",
+    "title": "The crosswalk tool's own contract, mapped to the tests that hold it",
+    "url": "https://github.com/zhaoxinghua09-cell/uibc-core/blob/main/tools/crosswalk_probe.py",
+    "scope_note": "Not a regulation. This file exists so the COVERED path has at least one real customer: a clause whose probe genuinely runs and passes. Keeping it separate from the MDR file avoids inflating a regulatory crosswalk with self-tests.",
+    "source": "crosswalk/tool-contract.json"
+  },
+  "manifest_sha256": "de5618e9a9760d0b6c5bd4b9953bd2cf206957654b312e1c52c6b8d8caa46134",
+  "verdict_sha256": "19fb29aaf69adc4bbddccbfc823b43e0ae10123ddfe69a9b245957e3e63d4f36",
+  "clause_count": 4,
+  "counts": {
+    "COVERED": 3,
+    "PARTIAL": 1
+  },
+  "bad": 0,
+  "rows": [
+    {
+      "id": "TC-1 three-state decision is a pure function",
+      "applies": true,
+      "strength": "carried",
+      "verbatim": true,
+      "state": "COVERED",
+      "note": "",
+      "reason": "",
+      "carrier": [
+        "classify()",
+        "unit tests drive it directly"
+      ],
+      "url": "https://github.com/zhaoxinghua09-cell/uibc-core/blob/main/tools/crosswalk_probe.py",
+      "probe": {
+        "declared": "python -m pytest tests/test_crosswalk_probe.py -q -k classify",
+        "exit": 0,
+        "ok": true
+      }
+    },
+    {
+      "id": "TC-2 a declared gap stays green and is counted",
+      "applies": true,
+      "strength": "carried",
+      "verbatim": true,
+      "state": "COVERED",
+      "note": "",
+      "reason": "",
+      "carrier": [
+        "classify()",
+        "exit code rule"
+      ],
+      "url": "https://github.com/zhaoxinghua09-cell/uibc-core/blob/main/tools/crosswalk_probe.py",
+      "probe": {
+        "declared": "python -m pytest tests/test_crosswalk_probe.py -q -k declared_gap",
+        "exit": 0,
+        "ok": true
+      }
+    },
+    {
+      "id": "TC-3 an unproven claim turns the run red",
+      "applies": true,
+      "strength": "carried",
+      "verbatim": true,
+      "state": "COVERED",
+      "note": "",
+      "reason": "",
+      "carrier": [
+        "classify()",
+        "main() exit code"
+      ],
+      "url": "https://github.com/zhaoxinghua09-cell/uibc-core/blob/main/tools/crosswalk_probe.py",
+      "probe": {
+        "declared": "python -m pytest tests/test_crosswalk_probe.py -q -k overclaim",
+        "exit": 0,
+        "ok": true
+      }
+    },
+    {
+      "id": "TC-4 shell semantics across platforms",
+      "applies": true,
+      "strength": "partial",
+      "verbatim": true,
+      "state": "PARTIAL",
+      "note": "",
+      "reason": "CI now runs the same command - tools/recheck.py - on ubuntu-latest and windows-latest, so all six probe strings are executed under POSIX sh and cmd.exe, and recheck exits 3 if either platform produces different bytes. Before this job existed, the Windows runner only ran static tests (evaluate(run=False)), so nothing in CI had ever executed a probe string under cmd.exe - which is the opposite of what this reason used to claim. What is still missing: macOS, and any shell that is neither posix-sh nor cmd.exe; quoting there is untested, and this probe reads the workflow rather than exercising those shells.",
+      "carrier": [
+        "ci.yml runs tools/recheck.py on ubuntu-latest and windows-latest",
+        "the same six probe strings execute under bash and cmd.exe"
+      ],
+      "url": "https://github.com/zhaoxinghua09-cell/uibc-core/blob/main/tools/crosswalk_probe.py",
+      "probe": {
+        "declared": "python tools/probe_platform_matrix.py",
+        "exit": 0,
+        "ok": true
+      }
+    }
+  ],
+  "verdict": "OK"
+}

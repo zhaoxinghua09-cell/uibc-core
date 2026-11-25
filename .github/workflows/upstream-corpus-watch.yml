@@ -1,0 +1,37 @@
+name: upstream corpus watch
+
+# Our pages quote "69 of 171" about specific bytes. Nothing checked those bytes
+# again after the day we swept them, so if the upstream corpus moves the page
+# stays green and wrong. This job runs the check on a schedule: NO DRIFT is quiet,
+# DRIFT turns the job red with the changed file names.
+#
+# It compares, it does not update. Re-sweeping and rewriting the receipts is a
+# human act -- the numbers, the doc, the picture and the register row all move
+# together -- and this job's only purpose is that we hear about it the same day.
+
+on:
+  schedule:
+    - cron: "10 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v7.1.0
+        with:
+          python-version: "3.12"
+
+      - name: No installs (the check is standard library only)
+        run: python -c "import sys; print(sys.version)"
+
+      - name: The corpus we cite is still the corpus upstream serves
+        # Fails with the file names when anything was added, removed or edited;
+        # prints NO DRIFT and exits 0 when the digest still matches the receipt.
+        run: python tools/watch_upstream_corpus.py

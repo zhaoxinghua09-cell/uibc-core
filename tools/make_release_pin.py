@@ -36,23 +36,44 @@ def _gh_releases_url(tag):
 
 
 def _asset_rows(tag):
-    """[(name, size, digest)] straight from the API."""
+    """[(name, size, digest)] straight from the API.
+
+    Two queries, in this order, because a draft release is invisible to
+    `/releases/tags/<tag>` — measured 2026-11-25 on run 45563463379 (v0.5.5, the
+    release opened as a draft so an immutable page could still accept uploads):
+    the tag endpoint answered HTTP 404 while `gh release view` saw the same
+    release and the same nine assets. The pin step therefore failed with
+    `cannot read v0.5.5: gh: Not Found` *after* the assets were already on the
+    page, and the page was published without its self pin. Listing every release
+    and matching on `tag_name` sees drafts; the tag endpoint stays first because
+    it is exact.
+    """
     gh = shutil.which("gh")
     if not gh:
         raise RuntimeError("gh is not on PATH; the pin must be read from the page")
-    proc = subprocess.run(
-        [gh, "api", _gh_releases_url(tag), "--jq",
-         r'.assets[] | "\(.name)\t\(.size)\t\(.digest // "-")"'],
-        capture_output=True, text=True, timeout=60)
-    if proc.returncode != 0:
-        raise RuntimeError("cannot read %s: %s" % (tag, proc.stderr.strip()[:200]))
-    rows = []
-    for line in (proc.stdout or "").splitlines():
-        parts = line.split("\t")
-        if len(parts) != 3:
+    jq = r'.assets[] | "\(.name)\t\(.size)\t\(.digest // "-")"'
+    queries = [
+        (_gh_releases_url(tag), jq),
+        ("repos/%s/releases?per_page=100" % REPO,
+         r'.[] | select(.tag_name == "%s") | .assets[] | ' % tag + jq),
+    ]
+    last_err = ""
+    for url, query in queries:
+        proc = subprocess.run([gh, "api", url, "--jq", query],
+                              capture_output=True, text=True, timeout=60)
+        if proc.returncode != 0:
+            last_err = proc.stderr.strip()[:200]
             continue
-        rows.append((parts[0], int(parts[1]), "" if parts[2] == "-" else parts[2]))
-    return rows
+        rows = []
+        for line in (proc.stdout or "").splitlines():
+            parts = line.split("\t")
+            if len(parts) != 3:
+                continue
+            rows.append((parts[0], int(parts[1]), "" if parts[2] == "-" else parts[2]))
+        if rows:
+            return rows
+        last_err = "no assets found for %s" % tag
+    raise RuntimeError("cannot read %s: %s" % (tag, last_err))
 
 
 def _download_and_hash(tag, name, tmpdir):

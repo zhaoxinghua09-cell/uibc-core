@@ -1,0 +1,104 @@
+{
+  "schema": "uibc-crosswalk/1",
+  "standard": {
+    "id": "IEC 62304:2006+AMD1:2015",
+    "title": "IEC 62304 — software life cycle processes, mapped by clause title only",
+    "url": "https://www.iso.org/obp/ui/#iso:std:iec:62304:ed-1:v1:en",
+    "scope_note": "The standard text is paid (CHF 1,150 for the consolidated version). Only the table of contents - clause numbers and titles - is public, and that is all this file quotes. Every row therefore carries verbatim=false and may be PARTIAL or GAP, never carried: a clause whose requirement text nobody on this project has read cannot be claimed as covered. Five clauses, chosen because a record layer might plausibly touch them; the other thirty-five are not listed, which is itself the answer.",
+    "source": "crosswalk/iec-62304-2006-a1.json"
+  },
+  "manifest_sha256": "a590b878e3248cbf77da5aaa56206099f8b62e4135553eed6aca625e555679a2",
+  "verdict_sha256": "875a509ac1062338d68f0cdf06654a3acb9e6626082a78caf3b3cd8f66bc76e9",
+  "clause_count": 5,
+  "counts": {
+    "GAP": 2,
+    "PARTIAL": 3
+  },
+  "bad": 0,
+  "rows": [
+    {
+      "id": "IEC 62304 4.3 Software safety classification",
+      "applies": true,
+      "strength": "gap",
+      "verbatim": false,
+      "state": "GAP",
+      "note": "",
+      "reason": "Class A/B/C is assigned from the device risk analysis and drives which tasks are mandatory. This is a decision about the product, made by the manufacturer against ISO 14971; a record layer has nothing to classify and cannot answer it.",
+      "carrier": [],
+      "url": "https://www.iso.org/obp/ui/#iso:std:iec:62304:ed-1:v1:en",
+      "probe": null
+    },
+    {
+      "id": "IEC 62304 5.8 Software release",
+      "applies": true,
+      "strength": "partial",
+      "verbatim": false,
+      "state": "PARTIAL",
+      "note": "",
+      "reason": "A released package names every artefact by digest and seals the set, so the released thing is identifiable and a later edit is detectable. What is missing: the release decision itself - who approved it, against which verification results, and whether every required task for the assigned safety class was actually performed.",
+      "carrier": [
+        "evidence/index.json digests",
+        "manifest evidence_root",
+        "seal"
+      ],
+      "url": "https://www.iso.org/obp/ui/#iso:std:iec:62304:ed-1:v1:en",
+      "probe": {
+        "declared": "python tools/probe_evidence_identity.py fixtures/clean.uibc",
+        "exit": 0,
+        "ok": true
+      }
+    },
+    {
+      "id": "IEC 62304 8.2 Change control",
+      "applies": true,
+      "strength": "partial",
+      "verbatim": false,
+      "state": "PARTIAL",
+      "note": "",
+      "reason": "The seal makes an uncontrolled change visible: alter a byte and verification stops agreeing with the manifest. That is detection, not control - approval of a change, impact analysis and re-baselining stay in the manufacturer's configuration management process.",
+      "carrier": [
+        "seal over manifest",
+        "lifecycle events",
+        "tamper detection"
+      ],
+      "url": "https://www.iso.org/obp/ui/#iso:std:iec:62304:ed-1:v1:en",
+      "probe": {
+        "declared": "python -m pytest tests/test_seal_v03.py -q",
+        "exit": 0,
+        "ok": true
+      }
+    },
+    {
+      "id": "IEC 62304 7.1 Analysis of software contributing to hazardous situations",
+      "applies": true,
+      "strength": "gap",
+      "verbatim": false,
+      "state": "GAP",
+      "note": "",
+      "reason": "This is engineering analysis: which software functions can contribute to which hazardous situations. Nothing in a record layer performs it, and a placeholder table of hazards would be worse than an acknowledged gap.",
+      "carrier": [],
+      "url": "https://www.iso.org/obp/ui/#iso:std:iec:62304:ed-1:v1:en",
+      "probe": null
+    },
+    {
+      "id": "IEC 62304 9.5 Maintain records",
+      "applies": true,
+      "strength": "partial",
+      "verbatim": false,
+      "state": "PARTIAL",
+      "note": "",
+      "reason": "The retention probe re-computes every evidence digest (2/2 on the clean fixture), parses the package with no key, no service and no network, and confirms the format carries no expiry field of its own - so records stay readable and still theirs after the fact. Problem and change events are appended with identity and time and can be read back in one command. What is missing: the content requirements of the records (who investigated, what was concluded, which verification closed it) and retention rules.",
+      "carrier": [
+        "lifecycle.json events",
+        "inspect output"
+      ],
+      "url": "https://www.iso.org/obp/ui/#iso:std:iec:62304:ed-1:v1:en",
+      "probe": {
+        "declared": "python tools/probe_retention.py",
+        "exit": 0,
+        "ok": true
+      }
+    }
+  ],
+  "verdict": "OK"
+}

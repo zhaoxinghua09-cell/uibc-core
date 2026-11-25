@@ -99,37 +99,18 @@ jobs:
         # signal exists. 0.5.0 passed that check while every provenance URL
         # returned 404. A check that cannot fail on the property you care about is
         # not a check, so this one asks PyPI for the attestation itself.
+        #
+        # The decision logic lives in tools/check_pypi_provenance.py instead of an
+        # inline heredoc, so it can be unit tested without network: a fake fetch
+        # stands in for PyPI and the four outcomes (all present, one missing, none
+        # present, no files) are asserted in tests/test_check_pypi_provenance.py.
         if: always()
         env:
           PKG: uibc-core
-          MANIFEST: pyproject.toml
           TAG: ${{ github.event.release.tag_name }}
         run: |
-          python - <<'PY'
-          import json, os, re, sys, urllib.request
-          pkg = os.environ["PKG"]
-          want = (os.environ.get("TAG") or "").lstrip("v")
-          if not want:
-              txt = open(os.environ["MANIFEST"], encoding="utf-8").read()
-              m = re.search(r'^version\s*=\s*"([^"]+)"', txt, re.M)
-              want = m.group(1) if m else ""
-          if not want:
-              print("cannot determine a version; refusing to claim provenance")
-              sys.exit(1)
-          data = json.load(urllib.request.urlopen("https://pypi.org/pypi/%s/json" % pkg, timeout=20))
-          files = [f["filename"] for f in (data.get("releases") or {}).get(want, [])]
-          if not files:
-              print("no files published for %s %s" % (pkg, want))
-              sys.exit(1)
-          missing = []
-          for fn in files:
-              url = "https://pypi.org/integrity/%s/%s/%s/provenance" % (pkg, want, fn)
-              try:
-                  urllib.request.urlopen(url, timeout=20).read()
-                  print("provenance present: %s" % fn)
-              except Exception as e:
-                  missing.append((fn, str(e)))
-          for fn, e in missing:
-              print("MISSING provenance: %s (%s)" % (fn, e))
-          sys.exit(1 if missing else 0)
-          PY
+          ver="${TAG#v}"
+          if [ -z "$ver" ]; then
+            ver=$(python -c "import re;print(re.search(r'^version\s*=\s*\"([^\"]+)\"', open('pyproject.toml', encoding='utf-8').read(), re.M).group(1))")
+          fi
+          python tools/check_pypi_provenance.py --pkg "$PKG" --version "$ver"

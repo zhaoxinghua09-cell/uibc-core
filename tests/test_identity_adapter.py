@@ -78,3 +78,22 @@ def test_records_are_serialisable_without_secrets():
     rec = ia.check("did:key:z6MkpTHR8VNsBxYAAWHut2Geadd9jSwuBV8xRoAnwWsdvktH")
     d = rec.as_dict()
     assert d["adapter"] == "did" and "state" in d
+
+
+def test_live_did_cn_agent_form_is_unresolved_not_invalid():
+    """2026-11-24. The platform hands out `did:cn:agent:<base58>`, which is absent
+    from the published ABNF. `validate()` refuses it (correct), and the adapter
+    used to turn that refusal into INVALID -- telling a correctly-allocated agent
+    that its identifier was malformed. Same collapse as the
+    RegistryEndpointRequired case, second instance. Shape is recognisable,
+    allocation is not, so the honest word is UNRESOLVED, and it stays labelled.
+    """
+    live = "did:cn:agent:sf3xF9qT7bN2pRkLmWvYcZd"
+    rec = ia.check(live)
+    assert rec.state == "UNRESOLVED"
+    assert "published ABNF" in rec.notes
+    assert rec.state != "VERIFIED"          # shape proves nothing about allocation
+    # a string that is neither the published form nor the live shape stays INVALID
+    assert ia.check("did:cn:agent:bad!").state == "INVALID"
+    # the published form keeps its own answer
+    assert ia.check("did:cn:11.318.12345").state == "UNRESOLVED"

@@ -107,17 +107,29 @@ jobs:
       # there is none. Measured 2026-11-20: the repository had a v0.4.1 tag and no v0.4.1
       # release, which is why the only release asset for this corpus was 0.4.0. This step
       # opens the release if the tag has none, so the four artifacts have somewhere to go.
+      #
+      # It opens it as a DRAFT. Measured 2026-11-25 on run 45556633612 (v0.5.4): this
+      # repository has immutable releases switched on, so a release created without
+      # `--draft` published an empty one at once and the very next upload was refused with
+      #   HTTP 422: Cannot upload assets to an immutable release
+      # A published release can never gain assets here; a draft can, and publishing it
+      # later fixes the byte set. The tag that carried that empty release became unusable
+      # for any future release of the same name, which is why the assets for 0.5.4 live
+      # on the conformance tag `uibc-conformance-0.5.4` pointing at the same commit.
       - name: Open the release if the tag has none
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if gh release view "${{ steps.v.outputs.tag }}" > /dev/null 2>&1; then
             echo "release already exists for ${{ steps.v.outputs.tag }}"
+            gh release view "${{ steps.v.outputs.tag }}" --json isDraft,isImmutable \
+              --jq '"draft=\(.isDraft) immutable=\(.isImmutable)"'
           else
             gh release create "${{ steps.v.outputs.tag }}" \
               --title "${{ steps.v.outputs.tag }}" \
+              --draft \
               --generate-notes
-            echo "created release ${{ steps.v.outputs.tag }}"
+            echo "opened ${{ steps.v.outputs.tag }} as a draft; it is published after it holds its bytes"
           fi
 
       # A published release is a fixed set of bytes, and this workflow broke that rule.
@@ -196,3 +208,20 @@ jobs:
           gh release upload "${{ steps.v.outputs.tag }}" \
             "release/uibc-release-pin.json"
           echo "pin: release/uibc-release-pin.json is on the release"
+
+      # Publishing is the last action, and it is what makes the page a fixed set of
+      # bytes. Every asset above has to be in place first, because an immutable release
+      # accepts no upload after it is published (measured 2026-11-25, run 45556633612).
+      - name: Publish the release once it holds its bytes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          draft="$(gh release view "${{ steps.v.outputs.tag }}" --json isDraft --jq .isDraft)"
+          if [ "$draft" = "true" ]; then
+            gh release edit "${{ steps.v.outputs.tag }}" --draft=false
+            echo "published ${{ steps.v.outputs.tag }}"
+          else
+            echo "${{ steps.v.outputs.tag }} was already published; its bytes stay as they are"
+          fi
+          gh release view "${{ steps.v.outputs.tag }}" --json assets \
+            --jq '.assets[] | "\(.name) \(.size)"'

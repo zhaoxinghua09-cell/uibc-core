@@ -31,17 +31,27 @@ Fetch it anonymously, without cloning (no login, no token — measured 2026-11-2
 
 ```bash
 curl -fL -o corpus.zip \
-  https://github.com/zhaoxinghua09-cell/uibc-core/raw/main/conformance/uibc-conformance-0.5.0.zip
-sha256sum corpus.zip   # ad2b73ccdd8e5606364372350fc35134d8efe897f0382b36dd4ee65af341bfc0, 231,243 bytes
+  https://github.com/zhaoxinghua09-cell/uibc-core/raw/main/conformance/uibc-conformance-0.5.5.zip
+sha256sum corpus.zip   # 9cab24943117801ed4f02c8400a899916f237a1e2e668116eaac4accfb17932e, 359,696 bytes
 unzip -q corpus.zip -d corpus && cd corpus && python run.py
 ```
 
-The release page also carries the same bytes, attached on 2026-11-20 by the release workflow:
-`https://github.com/zhaoxinghua09-cell/uibc-core/releases/download/v0.5.0/uibc-conformance-0.5.0.zip`.
-Either URL serves this hash; the older `v0.4.0` asset is a **different** corpus (30 cases) and not
-this one. The build is deterministic for a given tree, but "rebuilding gives the same bytes" is true only from the tree the archive was built from: `0.4.1` came out of commit `d72c4f9`, and the runner template was fixed for the unstartable-verifier case afterwards, so rebuilding `0.4.1` from today's tree yields a different archive (`083c0dbc…`). The builder now refuses to overwrite a pinned archive and prints both hashes instead (measured 2026-11-20, exit 3).
+The release page carries the same bytes, attached on 2026-11-25: `https://github.com/zhaoxinghua09-cell/uibc-core/releases/download/v0.5.5/uibc-conformance-0.5.5.zip`. Either URL serves this hash; the older `v0.5.0` asset is a different corpus (36 cases) and the `v0.4.0` one a third (30 cases). Neither is this one.. The build is deterministic for a given tree, but "rebuilding gives the same bytes" is true only from the tree the archive was built from: `0.4.1` came out of commit `d72c4f9`, and the runner template was fixed for the unstartable-verifier case afterwards, so rebuilding `0.4.1` from today's tree yields a different archive (`083c0dbc…`). The builder now refuses to overwrite a pinned archive and prints both hashes instead (measured 2026-11-20, exit 3).
 
-No repository, no network, no `pip install`: the archive carries its own verifier as a single file (`uibc_core.pyz`), and `run.py` uses it. Expected tail `strict 36/36` in about six seconds, and a `receipt.json` you can publish. A verifier that answers PASS to everything scores **6/36**, so refusing nothing does not pass.
+No repository, no network, no `pip install`: the archive carries its own verifier as a single file (`uibc_core.pyz`), and `run.py` uses it. Expected tail `strict 58/58` in about six seconds, and a `receipt.json` you can publish. A verifier that answers PASS to everything scores **6/58**, so refusing nothing does not pass.
+
+#### Or one line in your own workflow — no clone, no install
+
+This repository now ships a composite action, so a package can be verified inside someone else's CI without them installing anything:
+
+```yaml
+- uses: zhaoxinghua09-cell/uibc-core@v0.5.3
+  with:
+    path: path/to/package        # the package directory to verify
+    strict: 'true'               # optional: fail on undeclared files under evidence/
+```
+
+Three outputs, read from the verifier's own JSON rather than from the process status: `verdict` (`PASS` / `FAIL` / `INCONCLUSIVE`), `exit_code` (0 / 2 / 3 / 4), and `report` (the path to the JSON). Only `PASS` is green — the action is fail-closed — but the log says which of the three it was and why, because a gate that cannot say why it went red is measuring the wrong thing. This exists so that "an outsider ran it" never again means "somebody clicked a button inside our own repository".
 
 #### Or the RFC 9162 vector set — 41 vectors, and seven of them isolate path structure
 
@@ -70,7 +80,14 @@ The number above is **our own run**. It becomes an external node report only whe
 
 **Seven machine reviews do exist, and they are not this number.** `docs/external-review/` holds seven receipts written on 2026-11-17 by an external model (DeepSeek-V3 via SiliconFlow) in four lenses (expert / process / adversary / outsider). Under `INDEPENDENCE.md` those are stage **S3m/S4m** machine reviews: they must be labelled `reviewer_type: machine`, and they may not be described as a third party, because no human and no separate administration stands behind them. Counted by category: human independent reproduction **2** (EXTERNAL-NODE-001 — third-party execution, requested, and he is a correspondent in the same working group, so not a disinterested auditor; EXTERNAL-NODE-002 — requested by us as well, run on his own Mac, returned file + sha256, and he maintains a related specification, so again execution not interest); external machine review 7; external document citing this repository 0; adoption by any group 0. Quoting any one of those four as "external 0" without saying which line is meant is the kind of collapse this repository exists to catch.
 
-**Three version numbers, and they disagree — read this before installing:** `main` is **0.4.0**, unreleased. PyPI carries **0.3.3** (2026-11-15). The archived citation snapshot is **0.2.1** (2026-09-17). If you `pip install uibc-core` you get the 0.3.3 verifier, which reports six checks on the clean package where `main` reports eight — S11 (strict serialization) and S12 (identifier strictness, `evidence_count`) came after that release. The measurement, with commands and timings, is in [docs/STRANGER-TRIAL.md](docs/STRANGER-TRIAL.md). Cite the snapshot, run `main`, and do not assume the PyPI build is the one these documents describe.
+**Version numbers, updated 2026-11-25:** `main` is **0.5.3** and PyPI carries **0.5.3** (both `uibc_core-0.5.3-py3-none-any.whl` and the sdist). The archived citation snapshot is still **0.2.1** (2026-09-17), which is what a citation should point at.
+
+Two things this paragraph will not hide, because both were measured today:
+
+- **0.5.3 on PyPI carries no attestation.** PyPI trusted publishing answered `invalid-publisher` (no publisher entry matched the workflow), the upload fell back to a long-lived API token, and `tools/check_pypi_provenance.py` reports `2 of 2 file(s) lack provenance` for 0.5.3 (run `45538833447`). 0.5.0 has the same defect. Until the publisher entry exists, "published" does not mean "attested".
+- **the `v0.5.3` tag does not name the 0.5.3 code.** The tag was cut before the version bump landed; the release is immutable, so the tag cannot be moved. The archive and the code are on `main`; the tag points at a commit where the version strings still say `0.5.2`. This is why `release-lab-bundle` failed on v0.5.1, v0.5.2 and v0.5.3 at the same step. `tools/check_release_readiness.py` now refuses a tag that does not carry its own archive, and it runs first on every `v*` tag.
+
+So: `pip install uibc-core==0.5.3` gives you the verifier this README describes; `v0.5.3` as a *tag* does not. Cite the snapshot, install by version number, and do not treat a tag name as a proof of what it contains.
 
 **External conformance, measured against someone else's corpus** — a different number from the one above, and a different kind of claim:
 
@@ -152,7 +169,7 @@ the right thing. Run it yourself; the whole demo leaves nothing behind but a tem
 | item | state | how you check it yourself |
 |---|---|---|
 | RFC 3161 external timestamp (Free TSA) | verified | `python tools/anchor_tsa.py --verify tests/fixtures/anchor/freetsa.tsr --data tests/fixtures/anchor/anchored_head.json --cabundle tests/fixtures/anchor/freetsa_ca.pem` — token, its CA bundle and the anchored file are all in the repo, so no network and no account |
-| OpenTimestamps second anchor | **pending calendar only — not a Bitcoin anchor** | `pip install -e ".[interop]"` (brings `opentimestamps-client`), then `python tools/anchor_ots.py --verify tests/fixtures/anchor/anchored_head.json --proof tests/fixtures/anchor/anchored_head.json.ots` prints `pending_calendar` and never a Bitcoin claim. **Use `anchored_head.json.ots`, not the bare `ots_head.ots` beside it** — the bare proof binds to nothing and the tool refuses it with `the proof has no standard header`; that refusal is documented in `docs/EXTERNAL-ANCHOR.md`, not a failure of the claim |
+| OpenTimestamps second anchor | **pending calendar only — not a Bitcoin anchor** | `pip install -e ".[interop]"` (brings `opentimestamps-client`), then `python tools/anchor_ots.py --verify tests/fixtures/anchor/anchored_head.json --proof tests/fixtures/anchor/anchored_head.json.ots` prints `pending_calendar` from **three** calendars and never a Bitcoin claim; `ots --no-bitcoin verify -f tests/fixtures/anchor/anchored_head.json tests/fixtures/anchor/anchored_head.json.ots` says the same with the official client. **Use `anchored_head.json.ots`, not the bare `ots_head.ots` beside it** — the bare proof binds to nothing and the tool refuses it with `the proof has no standard header`; that refusal is documented in `docs/EXTERNAL-ANCHOR.md`, not a failure of the claim |
 | Rekor entry + SET signature | written and verified | `rekor-cli get --log-index 3944456520 --rekor_server https://rekor.sigstore.dev`, then check the SET with the log public key published in `tests/fixtures/anchor/rekor_log_pub.pem` — the verification needs only that public key, never Sigstore's private infrastructure |
 | Rekor **inclusion proof** | **does not verify** — ours and a third-party implementation both fail; published as-is | `python tools/anchor_rekor.py --verify tests/fixtures/anchor/rekor_entry.json --artifact …`; `python -m unittest tests.test_v13_rekor -v` shows the SET check passing and the inclusion proof not overclaimed. The failure is a defect we have not fixed, not a design choice |
 
@@ -538,6 +555,46 @@ people who ran it, and disagreements stay in the file.
 
 Timing on a laptop: ~30 s (21 s of that is the corpus hashing). If it ever takes much longer,
 the corpus or the fixtures have grown and the README claim is stale.
+
+## What each clause is judged on — and one command to re-check it
+
+The tables under [`docs/CROSSWALK-*.md`](docs/) map regulatory and standard clauses to what
+this package actually carries, one row per clause, each row with a state and a reason. Six
+sources are covered:
+
+| file | source |
+|---|---|
+| `crosswalk/eu-mdr-2017-745.json` | EU MDR 2017/745, Annex I and Annex II |
+| `crosswalk/21cfr11.json` | 21 CFR Part 11 (verbatim from eCFR) |
+| `crosswalk/iec-62304-2006-a1.json` | IEC 62304:2006+A1 |
+| `crosswalk/iso-14971-2019.json` | ISO 14971:2019 |
+| `crosswalk/nist-sp800-53r5-au.json` | NIST SP 800-53 Rev. 5, AU family (verbatim from the PDF) |
+| `crosswalk/tool-contract.json` | this repository's own tool contract |
+
+Re-check the whole table, offline, with one command:
+
+```
+python tools/recheck.py
+```
+
+It re-runs every probe, compares each fresh result with `tools/out/crosswalk-<name>.json`
+byte for byte, and prints one row per file plus the total. Exit codes: `0` clean, `1` a row
+claimed more than its evidence (OVERCLAIM), `2` a file could not be read, `3` a result no
+longer reproduces the committed one. `crosswalk-gate` in CI runs this same command, so the
+check you run and the check the build runs are not two different things.
+
+**What the states mean.** `COVERED` needs a declared probe that passes. `PARTIAL` and `GAP`
+need a written reason saying what is *not* carried. `GAP` is a declaration, not a failure
+that was hidden; the seven declared gaps are clauses this package does not claim to meet.
+As of this writing: **25 regulatory clauses = 15 PARTIAL / 8 GAP / 2 COVERED**, plus 4
+tool-contract rows (3 COVERED / 1 GAP). The two carried regulatory clauses are 21 CFR
+11.70 and NIST AU-10, both resting on the same executed record-binding probe.
+
+**What this is not.** A crosswalk is not a regulatory acceptance, a certification, or a
+QMS. It states, clause by clause, which requirements a record layer can carry and which
+belong to the deploying organisation (retention policy, validation of the surrounding
+system, risk management, software lifecycle). Claims to the contrary are exactly what the
+`OVERCLAIM` state exists to catch.
 
 ## Memory Migration Fixtures (UIBC-MEM)
 

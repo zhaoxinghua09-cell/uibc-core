@@ -196,7 +196,7 @@ def test_registry_document_id_must_match():
 def test_matrix_covers_the_six_methods_with_honest_levels():
     rows = did_cn.matrix()
     assert {r["method"] for r in rows} == {
-        "did:cn", "did:ioa", "did:cndid", "did:ctid", "did:oan", "did:cndomain"}
+        "did:cn", "did:ioa", "did:cndid", "did:ctid", "did:oan", "did:cndomain", "did:bid"}
     by_method = {r["method"]: r for r in rows}
     assert by_method["did:ctid"]["resolution"].startswith("none published")
     assert by_method["did:oan"]["resolution"].startswith("none published")

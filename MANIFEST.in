@@ -48,6 +48,17 @@ graft registry
 graft registry_server
 graft timestamps
 
+# Sixth pass, 2026-11-25. crosswalk/ arrived with #435 and was not grafted, so
+# the sdist carried the test that reads it and not the four JSON files it opens.
+# Caught by sdist-self-check on main itself -- same failure class as schemas/ above.
+graft crosswalk
+
+# Seventh pass, 2026-11-26. vectors/ arrived with the BID resolution vectors, and
+# tests/test_bid_vectors.py opens vectors/bid-resolution-v1.json. Same failure
+# class as schemas/ and crosswalk/ above -- caught again by sdist-self-check,
+# which is exactly why that job exists.
+graft vectors
+
 # Built output and byte-code never belong in a source distribution.
 prune tools/out
 prune build

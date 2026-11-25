@@ -21,6 +21,9 @@ import sys
 import urllib.error
 import urllib.request
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import gh_api  # noqa: E402  (keeps the credential across a 307, refuses cross-host)
+
 API = "https://api.github.com"
 EXPECTED_LOGIN = "zhaoxinghua09-cell"
 OWNER = "zhaoxinghua09-cell"
@@ -54,17 +57,13 @@ def tokens():
 
 
 def call(url, token, method="GET", payload=None):
-    data = json.dumps(payload).encode("utf-8") if payload is not None else None
-    req = urllib.request.Request(url, data=data, method=method,
-                                 headers={"Authorization": "Bearer " + token,
-                                          "Accept": "application/vnd.github+json",
-                                          "Content-Type": "application/json"})
-    try:
-        with urllib.request.urlopen(req, timeout=60) as resp:
-            body = resp.read().decode("utf-8", "replace")
-            return resp.status, (json.loads(body) if body.strip() else {})
-    except urllib.error.HTTPError as e:
-        return e.code, json.loads(e.read().decode("utf-8", "replace") or "{}")
+    """One request through gh_api, which re-sends 307 on the same host with the token.
+
+    A repository that has moved answers 307 to `api.github.com/repositories/<id>`.
+    Following it with urllib's own handler is fine on one host and a token leak on
+    two, so the hop is ours to take.
+    """
+    return gh_api.request(url, token=token, method=method, payload=payload)
 
 
 def pick_token():

@@ -29,6 +29,7 @@ for p in (_REPO, TOOLS):
         sys.path.insert(0, p)
 
 import outsider_audit as oa  # noqa: E402
+import redteam_scale as rscale  # noqa: E402
 from uibc_core.verify import verify  # noqa: E402
 
 CLEAN = os.path.join(_REPO, "fixtures", "clean.uibc")
@@ -92,7 +93,7 @@ GROUPS = (
     ("extended", oa.EXT_RED_TEAM),
     ("checkpoint", oa.CKPT_RED_TEAM),
 )
-GROUPS = GROUPS + SEAL_GROUP
+GROUPS = GROUPS + SEAL_GROUP + (("scale", rscale.EXTRA_RED_TEAM),)
 
 
 def slug(name):
@@ -272,3 +273,4 @@ if __name__ == "__main__":
     print(json.dumps({"cases": len(m["cases"]), "skipped": m["skipped"]},
                      ensure_ascii=False, indent=2) if a.json
           else "exported %d cases, skipped %d" % (len(m["cases"]), len(m["skipped"])))
+

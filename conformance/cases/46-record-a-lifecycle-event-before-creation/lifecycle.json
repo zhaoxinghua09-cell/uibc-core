@@ -1,0 +1,13 @@
+{
+  "schema": "uibc-core/0.2.2-proposal",
+  "events": [
+    {
+      "type": "CREATED",
+      "at": "2026-11-06T06:20:53Z"
+    },
+    {
+      "type": "SUBMITTED",
+      "at": "2026-11-05T06:20:53Z"
+    }
+  ]
+}

@@ -1,8 +1,10 @@
 # Two projects in the same neighbourhood, measured on the same day
 
-**Date of measurement: 2026-11-18.** Every number below can be re-run with the
-command beside it. Nothing here is a claim about quality — the table lists what
-each project ships, and the section after it says plainly where this project is
+**This project re-measured 2026-11-25; the other project's column is unchanged
+since 2026-11-18.** Where the two columns come from different dates the row says
+so in its note. Every number for this project can be re-run with the command
+beside it; nothing here is a claim about quality — the table lists what each
+project ships, and the section after it says plainly where this project is
 behind.
 
 The other project is **`agent-action-capsule`** (AAC), the reference verifier for
@@ -15,13 +17,13 @@ verifier that refuses malformed input).
 
 | | `uibc-core` | `agent-action-capsule` |
 |---|---|---|
-| Version measured | 0.4.0-dev on `main` (`1f7c957`); 0.3.3 on PyPI | 0.17.0 on PyPI |
-| First published | 4 releases, latest 2026-11-15 | 23 releases, latest 2026-11-18 |
+| Version measured | 0.5.5 on PyPI; `main` at `5f9c603` (2026-11-25) | 0.17.0 on PyPI (2026-11-18) |
+| First published | 12 releases, latest 2026-11-25 | 23 releases, latest 2026-11-18 |
 | Specification | In this repo: `drafts/draft-zhao-uibc-evidence-chain-00.md`, **not submitted** | IETF Internet-Draft `draft-mih-scitt-agent-action-capsule`, referenced from the package itself |
 | Licence | Apache-2.0 | BSD-3-Clause |
 | Language of the verifier | Python (first) **and JavaScript (second, independent)** | Python, TypeScript, Go and Rust, all driven by the same vector corpus |
-| Verifier modules | 27 | 40 |
-| Test files / test functions | 131 / 816 | 95 / 1189 |
+| Verifier modules | 40 | 40 |
+| Test files / test functions | 221 / 1765 (1919 collected, parametrised cases counted once each) | 95 / 1189 |
 | Conformance material | 30 packages (20 must-reject, 1 control, 9 must-accept), shipped with per-case `expected.json`, two of them carrying the outside input S9 and S19 need, rebuildable byte for byte, and every must-reject case naming its basis in `docs/GROUNDS.md` | 1,952 cases in 55 sets under `vectors/`, referenced by tests, in neither the sdist nor the wheel |
 | Second implementation is a **CI gate** | Yes — `second-implementation` job, 18 of 20 checks, 36/36 identical FAIL sets | No second implementation to gate |
 | Hostile-input suite | `tools/redteam_robustness.py`, 10 cases, table in `docs/ROBUSTNESS.md` | `tests/test_json_nesting_vectors.py`, `tests/test_verify_bounds.py`, `tests/test_parse.py` |
@@ -92,12 +94,12 @@ measured by hand on the date at the top of this page, and the picture says so.
    working group's repository, a third-party product shipping their verifier, an
    independent draft building on theirs, and a public log with 15134 entries. We
    have none of these; see the table above.
-3. **Release cadence.** 23 releases against 4. AAC ships weekly; this project
+3. **Release cadence.** 23 releases against 12 (their figure 2026-11-18, ours 2026-11-25). AAC ships weekly; this project
    tags when a chapter of work closes.
-4. **Surface area.** 40 modules against 25. AAC covers COSE/CBOR carriers,
+4. **Surface area.** 40 modules against 40 - same size now, but the shape differs. AAC covers COSE/CBOR carriers,
    bilateral flows, ERC-8183 and x402 adapters, an anchor client, witness
    records. This project covers one format and one verifier, and says so.
-5. **Test count.** 1189 against 527.
+5. **Test count.** 1189 against 1765 (their figure 2026-11-18, ours 2026-11-25).
 
 ## Adoption, measured the peer's own way
 
@@ -255,3 +257,57 @@ Still not claimable: stricter (SCC-1 has obligations with no counterpart here);
 complete (this project has no audit-framework mapping, no identity standard
 binding, no cross-sink semantics); or adopted (real-TSA anchoring and outside
 reproduction remain zero).
+
+## 2026-11-25 — the one column nobody else publishes: a verdict a machine can falsify
+
+Measured today on `feat/crosswalk-probe` (`6bb5d97`), 20 of 20 checks green.
+This is the first column in this page that is about *how a claim is written
+down*, not about how many cases exist.
+
+The artefact is `crosswalk/` — 29 rows, each one a clause or a tool-contract
+item, each carrying a verdict, a reason, and the command that decides it:
+
+| | this project, 2026-11-25 |
+|---|---|
+| Rows | **29** — 25 regulatory clauses + 4 tool-contract items |
+| Verdicts | 25 regulatory: **15 PARTIAL / 8 GAP / 2 COVERED**; tools: **3 COVERED / 1 PARTIAL / 0 GAP** |
+| What COVERED requires | the artefact is actually carried **and** a probe exits 0 on it — not "we have a doc" |
+| What PARTIAL / GAP requires | a written reason, in the row, that a stranger can argue with |
+| What fails the build | `OVERCLAIM` (row says COVERED, probe fails) and `UNDECLARED` (probe exists, no row) → **exit 1** |
+| What stops a quiet edit | `tools/recheck.py` re-runs every probe and compares each fresh result to the committed file byte for byte — a verdict that changed without its reason exits **3** |
+| Can the probes be seen failing? | yes — `fixtures/tampered.uibc` must exit 1 and name `digest mismatch`; a probe that cannot fail is not counted as evidence |
+
+Re-run all of it, no fixtures to install:
+
+```
+python tools/recheck.py                              # all six files, byte for byte, exit 0/1/2/3
+python tools/crosswalk_probe.py crosswalk/21cfr11.json  # one of the six files: verdict vs probe vs reason
+python tools/probe_platform_matrix.py                # which shells the probes are actually run under
+```
+
+**Where the peers actually stand on this, measured, not assumed.** InSpec
+controls carry `ref` metadata — `ref 'NSA-RH6-STIG - Section 3.5.2.1', url: ...`,
+`tag cce: 'CCE-27072-8'` (docs.chef.io, read 2026-11-25) — so **it is wrong to
+say InSpec has no clause mapping; it has a declared one**. What it does not have
+is a mechanism that checks whether the assertion and the cited clause are about
+the same thing, or that a control's verdict is accompanied by a reason a reader
+can contest. OSCAL/trestle models the mapping as data (component definitions,
+assessment results) and leaves the verdict to the assessor. PayloadGuard ships
+evidence bundles; the judgement of sufficiency stays human.
+
+So the honest sentence is narrow: **of the projects measured here, this is the
+only one where a crosswalk row that overstates itself is a build failure rather
+than a documentation issue, and where each COVERED row has a probe that has been
+seen to fail.** Three things follow, and they are limits, not modesty:
+
+1. 29 rows against InSpec's community profiles (thousands of controls over
+   thousands of targets) is not a comparison of coverage. It is a comparison of
+   *form* on a much smaller set.
+2. InSpec's model is executable against a live system, which is what a QMS
+   auditor wants; this project's rows describe what an evidence *package* can
+   prove, which is a different subject.
+3. The crosswalk is about this project's own verifier. Rows about it are
+   therefore self-assessment unless a second implementation or an outside
+   reader re-runs them — which is the F6/P1 work, still open.
+
+That is the whole claim: not "more covered", but "**falsifiable**".

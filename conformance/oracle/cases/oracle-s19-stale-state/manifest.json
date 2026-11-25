@@ -11,7 +11,7 @@
     "subject": "oracle"
   },
   "lifecycle_head": "sha256:276cd07e5279158aedf9c458bbb34116cb4a54567dc9f2a89eca70d6948f025c",
-  "min_verifier_version": "0.5.0",
+  "min_verifier_version": "0.5.5",
   "schema": "uibc-core/0.3.3-proposal",
   "status": "SUBMITTED"
 }

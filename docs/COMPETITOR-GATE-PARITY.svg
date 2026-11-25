@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="784" height="470" viewBox="0 0 784 470">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="12" y="24" font-family="Helvetica,Arial,sans-serif" font-size="14" fill="#161616">Which layers an outsider can re-run (2 = systematic + gate, 1 = point evidence, 0 = none found)</text>
+<text x="12" y="42" font-family="Helvetica,Arial,sans-serif" font-size="10" fill="#6b6b6b">audited 2026-11-25, pinned commits, see docs/COMPETITOR-GATE-PARITY.md</text>
+<text x="349.0" y="46" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="10" fill="#3a3a3a">D1</text>
+<text x="427.0" y="46" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="10" fill="#3a3a3a">D2</text>
+<text x="505.0" y="46" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="10" fill="#3a3a3a">D3</text>
+<text x="583.0" y="46" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="10" fill="#3a3a3a">D4</text>
+<text x="661.0" y="46" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="10" fill="#3a3a3a">D5</text>
+<text x="12" y="406" font-family="Helvetica,Arial,sans-serif" font-size="9" fill="#6b6b6b">D1  rejected document shapes</text>
+<text x="404" y="406" font-family="Helvetica,Arial,sans-serif" font-size="9" fill="#6b6b6b">D2  bit-level message sweep</text>
+<text x="12" y="422" font-family="Helvetica,Arial,sans-serif" font-size="9" fill="#6b6b6b">D3  address binding under mutation</text>
+<text x="404" y="422" font-family="Helvetica,Arial,sans-serif" font-size="9" fill="#6b6b6b">D4  one exit code across layers</text>
+<text x="12" y="438" font-family="Helvetica,Arial,sans-serif" font-size="9" fill="#6b6b6b">D5  the gate is proven able to fail</text>
+<text x="714" y="46" font-family="Helvetica,Arial,sans-serif" font-size="10" fill="#3a3a3a">score</text>
+<text x="12" y="74" font-family="Helvetica,Arial,sans-serif" font-size="10" fill="#161616">caict-4iot-dev/uni-resolver-driver-did-bid</text>
+<rect x="312" y="54" width="74" height="30" rx="3" fill="#efecea"/>
+<rect x="390" y="54" width="74" height="30" rx="3" fill="#efecea"/>
+<rect x="468" y="54" width="74" height="30" rx="3" fill="#efecea"/>
+<rect x="546" y="54" width="74" height="30" rx="3" fill="#efecea"/>
+<rect x="624" y="54" width="74" height="30" rx="3" fill="#efecea"/>
+<text x="724" y="74" font-family="Helvetica,Arial,sans-serif" font-size="11" fill="#161616">0/10</text>
+<text x="12" y="108" font-family="Helvetica,Arial,sans-serif" font-size="10" fill="#161616">caict-4iot-dev/uni-registrar-driver-did-bid</text>
+<rect x="312" y="88" width="74" height="30" rx="3" fill="#efecea"/>
+<rect x="390" y="88" width="74" height="30" rx="3" fill="#efecea"/>
+<rect x="468" y="88" width="74" height="30" rx="3" fill="#efecea"/>
+<rect x="546" y="88" width="74" height="30" rx="3" fill="#efecea"/>
+<rect x="624" y="88" width="74" height="30" rx="3" fill="#efecea"/>
+<text x="724" y="108" font-family="Helvetica,Arial,sans-serif" font-size="11" fill="#161616">0/10</text>
+<text x="12" y="142" font-family="Helvetica,Arial,sans-serif" font-size="10" fill="#161616">decentralized-identity/universal-resolver</text>
+<rect x="312" y="122" width="74" height="30" rx="3" fill="#b8d8c6"/>
+<text x="349.0" y="142" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="11" fill="#ffffff">1</text>
+<rect x="390" y="122" width="74" height="30" rx="3" fill="#efecea"/>
+<rect x="468" y="122" width="74" height="30" rx="3" fill="#efecea"/>
+<rect x="546" y="122" width="74" height="30" rx="3" fill="#efecea"/>
+<rect x="624" y="122" width="74" height="30" rx="3" fill="#efecea"/>
+<text x="724" y="142" font-family="Helvetica,Arial,sans-serif" font-size="11" fill="#161616">1/10</text>
+<text x="12" y="176" font-family="Helvetica,Arial,sans-serif" font-size="10" fill="#161616">decentralized-identity/did-resolver</text>
+<rect x="312" y="156" width="74" height="30" rx="3" fill="#efecea"/>
+<rect x="390" y="156" width="74" height="30" rx="3" fill="#efecea"/>
+<rect x="468" y="156" width="74" height="30" rx="3" fill="#efecea"/>
+<rect x="546" y="156" width="74" height="30" rx="3" fill="#efecea"/>
+<rect x="624" y="156" width="74" height="30" rx="3" fill="#efecea"/>
+<text x="724" y="176" font-family="Helvetica,Arial,sans-serif" font-size="11" fill="#161616">0/10</text>
+<text x="12" y="210" font-family="Helvetica,Arial,sans-serif" font-size="10" fill="#161616">decentralized-identity/sidetree-core</text>
+<rect x="312" y="190" width="74" height="30" rx="3" fill="#b8d8c6"/>
+<text x="349.0" y="210" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="11" fill="#ffffff">1</text>
+<rect x="390" y="190" width="74" height="30" rx="3" fill="#efecea"/>
+<rect x="468" y="190" width="74" height="30" rx="3" fill="#b8d8c6"/>
+<text x="505.0" y="210" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="11" fill="#ffffff">1</text>
+<rect x="546" y="190" width="74" height="30" rx="3" fill="#efecea"/>
+<rect x="624" y="190" width="74" height="30" rx="3" fill="#efecea"/>
+<text x="724" y="210" font-family="Helvetica,Arial,sans-serif" font-size="11" fill="#161616">2/10</text>
+<text x="12" y="244" font-family="Helvetica,Arial,sans-serif" font-size="10" fill="#161616">decentralized-identity/ion</text>
+<rect x="312" y="224" width="74" height="30" rx="3" fill="#efecea"/>
+<rect x="390" y="224" width="74" height="30" rx="3" fill="#efecea"/>
+<rect x="468" y="224" width="74" height="30" rx="3" fill="#efecea"/>
+<rect x="546" y="224" width="74" height="30" rx="3" fill="#b8d8c6"/>
+<text x="583.0" y="244" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="11" fill="#ffffff">1</text>
+<rect x="624" y="224" width="74" height="30" rx="3" fill="#efecea"/>
+<text x="724" y="244" font-family="Helvetica,Arial,sans-serif" font-size="11" fill="#161616">1/10</text>
+<text x="12" y="278" font-family="Helvetica,Arial,sans-serif" font-size="10" fill="#161616">transmute-industries/sidetree.js</text>
+<rect x="312" y="258" width="74" height="30" rx="3" fill="#efecea"/>
+<rect x="390" y="258" width="74" height="30" rx="3" fill="#efecea"/>
+<rect x="468" y="258" width="74" height="30" rx="3" fill="#b8d8c6"/>
+<text x="505.0" y="278" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="11" fill="#ffffff">1</text>
+<rect x="546" y="258" width="74" height="30" rx="3" fill="#efecea"/>
+<rect x="624" y="258" width="74" height="30" rx="3" fill="#efecea"/>
+<text x="724" y="278" font-family="Helvetica,Arial,sans-serif" font-size="11" fill="#161616">1/10</text>
+<text x="12" y="312" font-family="Helvetica,Arial,sans-serif" font-size="10" fill="#161616">w3c-ccg/did-method-key</text>
+<rect x="312" y="292" width="74" height="30" rx="3" fill="#efecea"/>
+<rect x="390" y="292" width="74" height="30" rx="3" fill="#efecea"/>
+<rect x="468" y="292" width="74" height="30" rx="3" fill="#efecea"/>
+<rect x="546" y="292" width="74" height="30" rx="3" fill="#efecea"/>
+<rect x="624" y="292" width="74" height="30" rx="3" fill="#efecea"/>
+<text x="724" y="312" font-family="Helvetica,Arial,sans-serif" font-size="11" fill="#161616">0/10</text>
+<text x="12" y="346" font-family="Helvetica,Arial,sans-serif" font-size="10" fill="#161616">decentralized-identity/ethr-did-resolver</text>
+<rect x="312" y="326" width="74" height="30" rx="3" fill="#b8d8c6"/>
+<text x="349.0" y="346" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="11" fill="#ffffff">1</text>
+<rect x="390" y="326" width="74" height="30" rx="3" fill="#efecea"/>
+<rect x="468" y="326" width="74" height="30" rx="3" fill="#b8d8c6"/>
+<text x="505.0" y="346" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="11" fill="#ffffff">1</text>
+<rect x="546" y="326" width="74" height="30" rx="3" fill="#b8d8c6"/>
+<text x="583.0" y="346" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="11" fill="#ffffff">1</text>
+<rect x="624" y="326" width="74" height="30" rx="3" fill="#efecea"/>
+<text x="724" y="346" font-family="Helvetica,Arial,sans-serif" font-size="11" fill="#161616">3/10</text>
+<text x="12" y="380" font-family="Helvetica,Arial,sans-serif" font-size="10" fill="#1f6f4a">zhaoxinghua09-cell/uibc-core  (this repo)</text>
+<rect x="312" y="360" width="74" height="30" rx="3" fill="#1f6f4a"/>
+<text x="349.0" y="380" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="11" fill="#ffffff">2</text>
+<rect x="390" y="360" width="74" height="30" rx="3" fill="#1f6f4a"/>
+<text x="427.0" y="380" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="11" fill="#ffffff">2</text>
+<rect x="468" y="360" width="74" height="30" rx="3" fill="#1f6f4a"/>
+<text x="505.0" y="380" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="11" fill="#ffffff">2</text>
+<rect x="546" y="360" width="74" height="30" rx="3" fill="#1f6f4a"/>
+<text x="583.0" y="380" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="11" fill="#ffffff">2</text>
+<rect x="624" y="360" width="74" height="30" rx="3" fill="#1f6f4a"/>
+<text x="661.0" y="380" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="11" fill="#ffffff">2</text>
+<text x="724" y="380" font-family="Helvetica,Arial,sans-serif" font-size="11" fill="#1f6f4a">10/10</text>
+</svg>

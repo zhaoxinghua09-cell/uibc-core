@@ -569,7 +569,7 @@ check you run and the check the build runs are not two different things.
 **What the states mean.** `COVERED` needs a declared probe that passes. `PARTIAL` and `GAP`
 need a written reason saying what is *not* carried. `GAP` is a declaration, not a failure
 that was hidden; the seven declared gaps are clauses this package does not claim to meet.
-As of this writing: **25 regulatory clauses = 16 PARTIAL / 7 GAP / 2 COVERED**, plus 4
+As of this writing: **25 regulatory clauses = 15 PARTIAL / 8 GAP / 2 COVERED**, plus 4
 tool-contract rows (3 COVERED / 1 GAP). The two carried regulatory clauses are 21 CFR
 11.70 and NIST AU-10, both resting on the same executed record-binding probe.
 

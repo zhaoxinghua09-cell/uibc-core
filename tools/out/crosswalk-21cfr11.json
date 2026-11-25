@@ -7,13 +7,13 @@
     "scope_note": "Five clauses of Subpart B/C. This is not a Part 11 compliance checklist: Part 11 binds the person who uses the system to keep records, and the controls it names (validation, access control, training, written policy) live in that person's quality system. Rows were chosen because they name something a record layer can either demonstrate or plainly not.",
     "source": "crosswalk/21cfr11.json"
   },
-  "manifest_sha256": "06eb7e27aa25847e5da0ae3c3baf94cf70abc748beba7aad1b0c326979eef240",
-  "verdict_sha256": "9938bb44526573c796aca318952e791ae20663521d070fdd36d1ab3ace9f043f",
+  "manifest_sha256": "448186909ee7fd57a226500152173824ec56c4ac8459dab4c25432b34aabbcfe",
+  "verdict_sha256": "f249c873528229eed26782c142922fddffd49f272d7c892956d5c98b239648c7",
   "clause_count": 5,
   "counts": {
-    "PARTIAL": 3,
-    "COVERED": 1,
-    "GAP": 1
+    "PARTIAL": 2,
+    "GAP": 2,
+    "COVERED": 1
   },
   "bad": 0,
   "rows": [
@@ -61,22 +61,14 @@
     {
       "id": "21 CFR 11.50(a)",
       "applies": true,
-      "strength": "partial",
+      "strength": "gap",
       "verbatim": true,
-      "state": "PARTIAL",
+      "state": "GAP",
       "note": "",
-      "reason": "Two of the three elements are present and checkable: when the seal was applied, and what it means (the verdict it asserts). The printed name of the signer is not: the package carries a key identity, not a person's name, and mapping a key to a named individual is the user's identity-proofing step under 11.100(b).",
-      "carrier": [
-        "checked_at timestamp",
-        "verdict as the stated meaning",
-        "signer key identity in the manifest"
-      ],
+      "reason": "The signature block carries a key id, an algorithm, what it covers and a created_at field - and nothing that names the signer or states what the signer was doing. A key identity is not a person, and 'the package verified' is not 'I approved it'. Both belong to a signed-record schema this format does not have; adding a name field without an identity-proofing step would produce an unattributable signature, which is the failure the rule exists to prevent. Key-to-person mapping is 11.100(b) work and belongs to the deployer, not to the format.",
+      "carrier": [],
       "url": "https://www.ecfr.gov/current/title-21/chapter-I/subchapter-A/part-11",
-      "probe": {
-        "declared": "python -m pytest tests/test_seal_v03.py -q",
-        "exit": 0,
-        "ok": true
-      }
+      "probe": null
     },
     {
       "id": "21 CFR 11.70",

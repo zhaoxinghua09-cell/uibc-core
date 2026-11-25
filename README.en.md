@@ -114,7 +114,7 @@ are not two different things.
 
 `COVERED` needs a declared probe that passes. `PARTIAL` and `GAP` need a written
 reason stating what is *not* carried — a gap is a declaration, not a failure that
-was hidden. Currently **25 regulatory clauses = 16 PARTIAL / 7 GAP / 2 COVERED**,
+was hidden. Currently **25 regulatory clauses = 15 PARTIAL / 8 GAP / 2 COVERED**,
 plus 4 tool-contract rows (3 COVERED / 1 GAP); the two carried clauses are 21 CFR
 11.70 and NIST AU-10, both on the same executed record-binding probe.
 

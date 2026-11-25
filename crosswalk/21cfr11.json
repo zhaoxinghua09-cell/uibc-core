@@ -38,13 +38,8 @@
       "text": "Signed electronic records shall contain information associated with the signing that clearly indicates all of the following: (1) The printed name of the signer; (2) The date and time when the signature was executed; and (3) The meaning (such as review, approval, responsibility, or authorship) associated with the signature.",
       "url": "https://www.ecfr.gov/current/title-21/chapter-I/subchapter-A/part-11",
       "applies": true, "verbatim": true,
-      "strength": "partial",
-      "carrier": ["checked_at timestamp", "verdict as the stated meaning", "signer key identity in the manifest"],
-      "probe": {
-        "cmd": "python -m pytest tests/test_seal_v03.py -q",
-        "expect": {"exit": 0}
-      },
-      "reason": "Two of the three elements are present and checkable: when the seal was applied, and what it means (the verdict it asserts). The printed name of the signer is not: the package carries a key identity, not a person's name, and mapping a key to a named individual is the user's identity-proofing step under 11.100(b)."
+      "strength": "gap",
+      "reason": "The signature block carries a key id, an algorithm, what it covers and a created_at field - and nothing that names the signer or states what the signer was doing. A key identity is not a person, and 'the package verified' is not 'I approved it'. Both belong to a signed-record schema this format does not have; adding a name field without an identity-proofing step would produce an unattributable signature, which is the failure the rule exists to prevent. Key-to-person mapping is 11.100(b) work and belongs to the deployer, not to the format."
     },
     {
       "id": "21 CFR 11.70",

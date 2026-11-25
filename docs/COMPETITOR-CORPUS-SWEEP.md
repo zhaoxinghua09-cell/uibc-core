@@ -123,9 +123,36 @@ manifest_digest = sha256("path<TAB>sha256<LF" 每行, 按 path 排序)
 
 有的读者会问得更远：这两个快照之后他们又改了吗？答案不能靠人记得。`tools/watch_upstream_corpus.py` 取上游**当前 head** 的语料、逐个摘要，与我们收据逐文件比对，只输出两种结论：`NO DRIFT`（同一批字节）或 `DRIFT`（点名改了/多了/少了哪些文件，并退出非零）。`.github/workflows/upstream-corpus-watch.yml` 每天 03:10 UTC 跑一次：没有漂移就安静，漂移就变红。它**只比对、不更新**——重扫并改收据是人做的事（数字、文档、图、登记行要一起动），这个作业只保证这件事不会被漏掉。
 
-## 与我们自己的语料摆在一起
+## 与我们自己的语料摆在一起：同一把尺子，两边都量
 
-我们 63 条 RFC 9162 语料（inclusion 50 + consistency 13）没有一条要求读者信任我们的代码：每条都带正孪生、拒绝词表，并被 pymerkle、Sigstore `merkle.py`、Go `transparency-dev/merkle` 三份实现各自独立判过（`docs/THIRD-PARTY-CROSSCHECK.md`）。对方 171 条里 69 条能这样被判，102 条不能。
+我们 63 条 RFC 9162 语料（inclusion 50 + consistency 13）没有一条要求读者信任我们的代码：每条都带正孪生、拒绝词表，并被 pymerkle、Sigstore `merkle.py`、Go `transparency-dev/merkle` 三份实现各自独立判过（`docs/THIRD-PARTY-CROSSCHECK.md`）。
 
-这是本轮唯一可比的"体量"：**可被外人独立复算的向量条数**，不是总条数。总数（3,069 套件条目 vs 63）我们不比，因为追不上也不影响可核验性。
+但上面那句是**我们的自述**，而 69/171 是**我们量出来的**。把自述和测量摆在一起，读者只能信前者。所以最后一步是把同一把尺子转过来量自己：`tools/measure_own_corpus.py` 读 `docs/upstream-package/scitt-rfc9162/manifest.json` 与每条 `v1/<id>/expected.json`，用**与竞品扫描同一组函数**（`tools/verify_rekor_inclusion.py` 的 `_decomp_incl_proof` / `fold` / `root_from_consistency_proof`，直接 import，不是另写一份）重放全部 63 条。
+
+| 语料 | 向量 | 可独立复算 | 一致 | 矛盾 | 不可复算 |
+|---|---|---|---|---|---|
+| 上游 `probityai/agent-evidence-vectors`（`39daf704`） | 171 | **69（40%）** | 69 | 0 | 102 |
+| 本仓 `scitt-rfc9162` v1 | 63 | **63（100%）** | 63 | 0 | 0 |
+
+这不是两个数字并排，而是**同一个判定函数的两行输出**：`classify()` 的规则也一样——accept 且折叠出所声明的根才算一致，reject 且算术确实说不行才算一致，其余都算矛盾或不可复算。收据 `docs/upstream-package/measurements/own-corpus-replay.json`（清单摘要 `f9079358fda950e1…`，63 条向量逐文件 sha256 在内）。
+
+为了让"100%"不是自我美化，每条还过了三道互不替代的检查，分别计数：
+
+- **叶摘要可重建** 50/50：`SHA-256(0x00 ‖ leaf_input)` 必须等于文件自己写的 `digest_hex`。只折根不算数——叶都没重建出来，"可复算"就是半句。
+- **文件自己的重构根与我们的折叠一致** 57/57（有 57 条写了 `reconstructed_root`，另 6 条本来就无折叠可言：`tree_size=0`、新旧尺寸倒置、证明走不下去）。
+- **拒绝词来自算术**：17 条 `INVALID_*` 全部由下标越界、证明条数不符、折叠不等、尺寸倒置、旧根不符这类**数字**触发，没有一条是"因为文件写了 INVALID 所以 INVALID"。
+
+第三条之外还有一处必须自己说出来：63 条里有 **4 条是 `VALID_BUT_SIZE_UNAUTHENTICATED`**——根能认证叶，但认证不了声明的树尺寸。这不是我们语料的缺陷，是 RFC 6962 的算术边界；我们把它作为**独立结论词**写进向量、单独计数，而不是折成 VALID 混进 100%。上游同样的边界散在三条形似的向量里（`INC-N-root-altered` / `INC-N-wrong-tree-size` / `INC-O-size-not-bound-by-root`），只能靠上面的变异控制反向发现。
+
+复跑（不需要网络、不需要上游语料）：
+
+```bash
+python tools/measure_own_corpus.py            # 63 vectors, replayable 63 (100%), inconsistent 0
+python tools/measure_own_corpus.py --check    # 收据与语料不符则退出非零
+python tools/measure_own_corpus.py --selftest # 14 条：常量、折叠、条数、下标、尺寸倒置、分类函数
+```
+
+这是本轮唯一可比的"体量"：**可被外人独立复算的向量条数**，不是总条数。总数（3,069 套件条目 vs 63）我们不比，因为追不上也不影响可核验性。真正的差别是**比例**：每一条我们的向量，读者都能用别的实现复算；对方的每一条，只有 40% 能做到这一点，其余 60% 只能选择相信。
+
+
 

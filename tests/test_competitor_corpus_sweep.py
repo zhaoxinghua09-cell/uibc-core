@@ -17,6 +17,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RECEIPT = os.path.join(ROOT, "docs", "upstream-package", "competitor-defects",
                        "corpus-sweep-39daf704.json")
 DOC = os.path.join(ROOT, "docs", "COMPETITOR-CORPUS-SWEEP.md")
+SVG = os.path.join(ROOT, "docs", "COMPETITOR-CORPUS-COVERAGE.svg")
 VENDORED = os.path.join(ROOT, "docs", "upstream-package", "competitor-defects", "v0.38.0")
 
 
@@ -90,5 +91,19 @@ def test_the_sweep_is_not_a_uniform_pass():
 def test_the_doc_carries_the_same_numbers():
     with open(DOC, encoding="utf-8") as f:
         doc = f.read()
-    for needle in ("171", "60（35%）", "111", "0 条出现", "39daf704"):
+    for needle in ("171", "60（35%）", "111", "0 条出现", "39daf704",
+                   "COMPETITOR-CORPUS-COVERAGE.svg"):
         assert needle in doc, needle
+
+
+def test_the_picture_is_drawn_from_the_receipt():
+    """The SVG carries numbers, so it can rot. --check rebuilds it and compares."""
+    out = subprocess.run([sys.executable,
+                          os.path.join(ROOT, "tools", "build_corpus_sweep_svg.py"),
+                          "--check"], capture_output=True, text=True)
+    assert out.returncode == 0, out.stdout + out.stderr
+    with open(SVG, encoding="utf-8") as f:
+        svg = f.read()
+    assert "60 of 171" in svg
+    assert "replayable" in svg
+

@@ -13,6 +13,10 @@
 - **consistency**：用 `old_root` 和 `proof` 推出第二棵树应有的根，比对 `new_root`；`old_size = 0` 但 `old_root` 不是空树常量、`new_size < old_size`、证明链不通，同样是数字自己给出的结论。
 - **token / chain / canonical**：判定靠签名与 schema、靠记录签名、靠规范化器，**没有数字可折叠**，一律记成“不可复算”，不计入分母之外的任何“通过”。
 
+![覆盖度](COMPETITOR-CORPUS-COVERAGE.svg)
+
+（图由 `tools/build_corpus_sweep_svg.py` 从收据生成，`--check` 在 CI 里跑；数字改不了图，图也不会自己漂。）
+
 ## 结果（`corpus-sweep-39daf704.json` 是收据）
 
 | 类别 | 向量 | 可复算 | 发布 accept | 发布 reject | 与数字一致 | 与数字矛盾 |

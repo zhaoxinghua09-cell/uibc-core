@@ -341,13 +341,22 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
     checks = []
     ok = True
 
-    def record(cid, name, passed, detail=""):
+    def record(cid, name, passed, detail="", unsupported=None):
         nonlocal ok
         # Every check carries the basis it is allowed to claim, so a caller can
         # tell "this rule is in a draft" from "this rule is ours" without
         # consulting a second document.
-        checks.append({"id": cid, "name": name, "result": "PASS" if passed else "FAIL",
-                       "detail": detail, "basis": _basis.for_check(cid)})
+        row = {"id": cid, "name": name, "result": "PASS" if passed else "FAIL",
+               "detail": detail, "basis": _basis.for_check(cid)}
+        # `unsupported` names the case where the scheme is real but this verifier
+        # cannot evaluate it. The verdict stays FAIL (a reader must not accept
+        # what was not checked), but the reason is no longer "the record was
+        # refuted". Without this field the two become indistinguishable, which is
+        # the one thing the peer drafts (gruszka UNSUPPORTED, nestorov HALT) keep
+        # apart and we did not.
+        if unsupported:
+            row["unsupported"] = True
+        checks.append(row)
         if not passed:
             ok = False
 
@@ -857,10 +866,12 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
         aroot = _mk2.root_hash(leaves) if leaves else None
         a_problems, a_resolved, a_external = _anchor.check_document(
             adoc, root=aroot, leaves=leaves)
+        _a_unresolvable = any(p.startswith("UNSUPPORTED:") for p in a_problems)
         record("S15", "anchor event resolution", not a_problems,
-               "; ".join(a_problems[:3]) if a_problems else
+               "; ".join(p.replace("UNSUPPORTED: ", "") for p in a_problems[:3]) if a_problems else
                "%d anchor(s) resolved against the evidence Merkle root; "
-               "%d external anchor(s) unresolved by design" % (a_resolved, a_external))
+               "%d external anchor(s) unresolved by design" % (a_resolved, a_external),
+               unsupported=_a_unresolvable)
 
     # S16 external timestamp (v1.1). Everything above is witnessed by parties we
     # choose: our tree, our head file, our pin. An RFC 3161 token is the one
@@ -1285,6 +1296,12 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
         "key_custody": identity.get("key_custody"),
         "subject": manifest.get("agent_id"),
         "checks": checks,
+        # Checks that failed because the scheme is one this verifier does not
+        # implement, as distinct from checks that found contrary evidence. The
+        # verdict still counts them as FAIL; this list exists so a reader (and a
+        # cross-implementation comparison) can tell "could not check" from
+        # "checked and refused".
+        "unsupported": [c["id"] for c in checks if c.get("unsupported")],
         "root_algorithm": "sha256(canonical-json(sorted(content_hashes))) v0.1-provisional",
         "assurance": assurance,
         # --- report discipline (archive SS16) ---

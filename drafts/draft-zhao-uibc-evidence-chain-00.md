@@ -446,11 +446,13 @@ The distinction this forces into the open: a verifier that does not implement a
 named scheme is **not** producing contrary evidence. Whether that is HALT or
 REJECT is a **policy choice**, and this document chooses REJECT, matching the
 MMR receipts profile's requirement to reject a receipt whose VDS is unsupported.
-That choice is defensible but it hides a difference that other drafts keep
-(`draft-gruszka-scitt-statement-identification-04` reports UNSUPPORTED as its
-own class; `draft-nestorov-scitt-p10-underdetermination-03` HALTs). Until the
-verifier reports UNSUPPORTED separately, no claim here should be read as
-"cannot check" — it currently reads as "rejected".
+To keep that choice from erasing the distinction, the verifier now carries a
+report-level `unsupported` list naming the checks that failed this way: the
+verdict stays FAIL, but a reader can separate "could not check" from "checked and
+refused". This is the minimum other drafts already require of themselves
+(`draft-gruszka-scitt-statement-identification-04` reports UNSUPPORTED as its own
+class; `draft-nestorov-scitt-p10-underdetermination-03` HALTs), and until this
+field existed no claim here could honestly be read as "cannot check".
 
 ## Implementation Status
 

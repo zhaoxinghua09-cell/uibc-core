@@ -135,7 +135,7 @@ def check_document(doc, root=None, leaves=None):
         return ["anchors.json is not an object"], 0, 0
     resolver = doc.get("resolver")
     if resolver not in SUPPORTED_RESOLVERS:
-        problems.append("resolver %r is not one we can resolve offline "
+        problems.append("UNSUPPORTED: resolver %r is not one we can resolve offline "
                         "(supported: %s)" % (resolver, ", ".join(SUPPORTED_RESOLVERS)))
         return problems, 0, 0
     anchors = doc.get("anchors")

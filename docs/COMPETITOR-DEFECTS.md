@@ -57,9 +57,9 @@ Check here rather than assuming: `python tools/check_competitor_vectors.py --dir
 ## Three is a sample: the whole corpus has been swept
 
 `docs/COMPETITOR-CORPUS-SWEEP.md` replays every one of the 171 corpus files at
-`39daf704` with arithmetic alone. 60 of them (35%) carry numbers a stranger can fold;
-those 60 all agree with their own published verdict, and there is no fourth `size=0`
-case among them. The other 111 need a signature, a chain or a canonicaliser, so an
+`39daf704` with arithmetic alone. 69 of them (40%) carry numbers a stranger can fold;
+those 69 all agree with their own published verdict, and there is no fourth `size=0`
+case among them. The other 102 need a signature, a chain or a canonicaliser, so an
 outsider cannot judge them without the upstream code. That sweep exists to stop this
 page from growing into "they have 171 problems", which would be false.
 

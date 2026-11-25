@@ -276,6 +276,80 @@ Informative: [RFC3161] (external timestamp tokens, S16), [AER1] (`draft-zambo-ae
 the receipt format this mapping targets), [BIP340] (Schnorr signatures used by
 the Nostr backend), [NIP01] (Nostr event serialization).
 
+## 9.1 Carriage in a verdict record
+
+A package verdict can be carried by a `verdict-record/1` record without changing
+either format. Our three outcomes map to that record's **state** axis, not to its
+`check.result` axis:
+
+| this document | verdict-record state | why |
+|---|---|---|
+| `PASS` | released | all applicable checks held |
+| `INCONCLUSIVE` | held | an input is missing; the claim is neither supported nor refused |
+| `FAIL` | refused | a check contradicted the bytes |
+
+Folding `INCONCLUSIVE` into `refused` would state "the evidence contradicts" where
+the truth is "no evidence yet". Three rules keep the mapping honest: evidence is
+cited by digest and not copied; a missing input stays `held`; a granularity
+difference (one package verdict vs many per-claim records) is declared, not
+scored.
+
+## 13. Trust is a separate ladder from validity
+
+`PASS` answers one question: is the evidence sufficient? It does not answer
+whether the signer is someone the reader trusts. Conflating the two turns
+`INCONCLUSIVE` into a bucket for two different problems. Three levels:
+
+- **well-formed** — the package parses and its structure holds (no `FAIL` on the
+  structural checks S1/S2/S3/S4/S5/S7/S8/S11/S12/S14);
+- **valid** — the verdict is `PASS` with the key supplied;
+- **trusted** — valid, and the signer's key fingerprint appears in the reader's
+  trust list.
+
+Trust is a policy input of the reader, not a property of the bytes: the same
+package is trusted for one reader and not for another. A key on the trust list
+does **not** make an invalid package trusted; the ladder is climbed, not bypassed.
+
+## 14. Verification bundle
+
+Everything a reader needs to re-check a package travels in one file, and the
+owner key does not travel with it:
+
+- the artifact digest (SHA-256 over the sorted `path\0sha256` list), file count
+  and byte count;
+- the verifier identity, version and spec id that produced the verdict;
+- the inputs that were used (key fingerprint, expected head, whether a remembered
+  state was supplied) — never the key itself;
+- the verdict, trust level, per-axis outcome and first failing check;
+- the anchors present in the package.
+
+A reader holding the artifact, the bundle and their own key can recompute
+everything. If the artifact changed, the bundle must refuse rather than compare.
+The bundle carries claims and inputs, not secrets.
+
+## 15. Vocabularies: informational, never a rejection
+
+Outcome, action and disposition vocabularies are published with this document and
+follow a `Specification Required` policy. A verifier **MUST NOT** reject a record
+for carrying an unregistered value: registration governs shared meaning, never
+acceptance. Every vocabulary check is performable from the record's own bytes.
+
+## Implementation Status
+
+_As of 2026-11-25, repository `232deb4`, reference verifier 0.5.5._
+
+- Implemented and re-runnable: the 19-check procedure, the 58-case corpus with a
+  validator, anchor handling (OpenTimestamps + Nostr, `pending` vs `anchored`),
+  the differential report with two denominators.
+- Prototyped outside the published CLI: the per-axis report, the verification
+  bundle and the trust ladder described above. They are `tools/` prototypes and
+  are **not** part of the shipped interface; no conformance claim is made for
+  them until they carry their own vectors.
+- Not implemented: witness co-signing of the head; a `--bundle` mode in the CLI;
+  a trust-list flag in the CLI.
+- This document remains a local draft: it is not in the IETF archive, carries no
+  IETF copyright notice, and claims no standards status.
+
 ## Appendix A. Relationship to AER-1
 
 | Aspect | AER-1 | This document |

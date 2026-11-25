@@ -61,7 +61,8 @@ STEPS = (
     ("parity", [sys.executable, "tools/competitor_gate_parity.py"], "PARITY OK"),
     ("demo", [sys.executable, "tools/demo_bid_binary.py"], "ALL OK"),
     ("tests", [sys.executable, "-m", "pytest", "tests/test_mutation_gate.py",
-               "tests/test_competitor_parity.py", "-q"], "passed"),
+               "tests/test_competitor_parity.py", "tests/test_parity_board.py",
+               "tests/test_refs_check.py", "-q"], "passed"),
 )
 
 ENV_KEEP = ("PATH", "SYSTEMROOT", "SYSTEMDRIVE", "WINDIR", "TEMP", "TMP", "HOME",
@@ -99,9 +100,9 @@ def tracked_files(root):
 def tree_digest(root, files=None):
     """sha256 over every file path and its content digest, in path order.
 
-    `files` lets a caller hand over a membership it already has (the second
-    implementation in tools/tree_digest_second_impl.py does exactly that, so the
-    two cannot pass by agreeing on a different set of files).
+    `files` lets a caller hand over its own membership list (used by the
+    cross-implementation check, so Python and Node cannot pass by agreeing on
+    different file sets); omitted, membership is derived here.
     """
     entries = []
     for rel in sorted(files if files is not None else tracked_files(root)):

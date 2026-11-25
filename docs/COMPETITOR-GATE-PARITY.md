@@ -42,7 +42,7 @@
 | `uport-project/ethr-did` | 17 | 4 | 43 | 0 | 0 | 0 | 0 | 0 | 0 |
 | `w3c-ccg/did-method-key` | 4 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 | `w3c-ccg/did-test-suite` | 21 | 12 | 21 | 0 | 0 | 0 | 0 | 0 | 0 |
-| `zhaoxinghua09-cell/uibc-core` (this repository) | 1992 | 277 | 1081 | 2 | 2 | 2 | 2 | 2 | 10 |
+| `zhaoxinghua09-cell/uibc-core` (this repository) | 1997 | 279 | 1086 | 2 | 2 | 2 | 2 | 2 | 10 |
 
 D1 门槛＝测试文件内拒绝类断言 ≥10 次；D2＝位级关键词 ≥1；D3＝base58/地址派生关键词 ≥1；
 D4＝非测试代码里出现失败退出码 ≥1；D5 对 25 家一律记 0——"注入假断言要求门失败"这种用例，检索不到就当没有。
@@ -96,6 +96,7 @@ python tools/competitor_gate_parity.py --json                    # 机读
 
 快照：`docs/competitor-parity.json`（含每个仓库的 sha、tarball sha256、字节数、原始计数）。
 矩阵图：`docs/COMPETITOR-GATE-PARITY.svg`（由快照生成，字节可复现）。
+看板：`docs/parity-board.html`（单文件、零外链，数据内嵌，**打开即自检**；`node tools/board_check.js` 可在无浏览器环境里跑它自己的脚本验收）。
 
 ## 八、引用
 

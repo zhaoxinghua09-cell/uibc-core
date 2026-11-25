@@ -1,0 +1,239 @@
+{
+ "audited_at": "2026-11-26",
+ "window": 2,
+ "rule_strict": "assertion line must also contain the reject word",
+ "rule_window": "assertion line counts if a reject word is within +/-2 lines",
+ "rows": [
+  {
+   "repo": "WeBankBlockchain/WeIdentity",
+   "assert_lines_strict": 0,
+   "assert_lines_window": 0,
+   "D1_strict": 0,
+   "D1_window": 0,
+   "score_strict": 0,
+   "score_window": 0
+  },
+  {
+   "repo": "caict-4iot-dev/uni-registrar-driver-did-bid",
+   "assert_lines_strict": 0,
+   "assert_lines_window": 0,
+   "D1_strict": 0,
+   "D1_window": 0,
+   "score_strict": 0,
+   "score_window": 0
+  },
+  {
+   "repo": "caict-4iot-dev/uni-resolver-driver-did-bid",
+   "assert_lines_strict": 0,
+   "assert_lines_window": 0,
+   "D1_strict": 0,
+   "D1_window": 0,
+   "score_strict": 0,
+   "score_window": 0
+  },
+  {
+   "repo": "ceramicnetwork/js-did",
+   "assert_lines_strict": 28,
+   "assert_lines_window": 43,
+   "D1_strict": 1,
+   "D1_window": 1,
+   "score_strict": 2,
+   "score_window": 2
+  },
+  {
+   "repo": "decentralized-identity/did-jwt",
+   "assert_lines_strict": 51,
+   "assert_lines_window": 117,
+   "D1_strict": 1,
+   "D1_window": 1,
+   "score_strict": 3,
+   "score_window": 3
+  },
+  {
+   "repo": "decentralized-identity/did-resolver",
+   "assert_lines_strict": 0,
+   "assert_lines_window": 2,
+   "D1_strict": 0,
+   "D1_window": 0,
+   "score_strict": 0,
+   "score_window": 0
+  },
+  {
+   "repo": "decentralized-identity/ethr-did-resolver",
+   "assert_lines_strict": 6,
+   "assert_lines_window": 23,
+   "D1_strict": 1,
+   "D1_window": 1,
+   "score_strict": 3,
+   "score_window": 3
+  },
+  {
+   "repo": "decentralized-identity/ion",
+   "assert_lines_strict": 0,
+   "assert_lines_window": 0,
+   "D1_strict": 0,
+   "D1_window": 0,
+   "score_strict": 0,
+   "score_window": 0
+  },
+  {
+   "repo": "decentralized-identity/sidetree-core",
+   "assert_lines_strict": 0,
+   "assert_lines_window": 0,
+   "D1_strict": 0,
+   "D1_window": 0,
+   "score_strict": 0,
+   "score_window": 0
+  },
+  {
+   "repo": "decentralized-identity/universal-resolver",
+   "assert_lines_strict": 2,
+   "assert_lines_window": 6,
+   "D1_strict": 0,
+   "D1_window": 1,
+   "score_strict": 0,
+   "score_window": 1
+  },
+  {
+   "repo": "decentralized-identity/veramo",
+   "assert_lines_strict": 66,
+   "assert_lines_window": 129,
+   "D1_strict": 1,
+   "D1_window": 1,
+   "score_strict": 3,
+   "score_window": 3
+  },
+  {
+   "repo": "digitalbazaar/did-io",
+   "assert_lines_strict": 0,
+   "assert_lines_window": 0,
+   "D1_strict": 0,
+   "D1_window": 0,
+   "score_strict": 0,
+   "score_window": 0
+  },
+  {
+   "repo": "docknetwork/sdk",
+   "assert_lines_strict": 15,
+   "assert_lines_window": 54,
+   "D1_strict": 1,
+   "D1_window": 1,
+   "score_strict": 3,
+   "score_window": 3
+  },
+  {
+   "repo": "hyperledger/aries-cloudagent-python",
+   "assert_lines_strict": 22,
+   "assert_lines_window": 50,
+   "D1_strict": 1,
+   "D1_window": 1,
+   "score_strict": 3,
+   "score_window": 3
+  },
+  {
+   "repo": "hyperledger/aries-framework-go",
+   "assert_lines_strict": 11,
+   "assert_lines_window": 11,
+   "D1_strict": 1,
+   "D1_window": 1,
+   "score_strict": 3,
+   "score_window": 3
+  },
+  {
+   "repo": "hyperledger/indy-sdk",
+   "assert_lines_strict": 10,
+   "assert_lines_window": 53,
+   "D1_strict": 1,
+   "D1_window": 1,
+   "score_strict": 3,
+   "score_window": 3
+  },
+  {
+   "repo": "hyperledger/indy-vdr",
+   "assert_lines_strict": 9,
+   "assert_lines_window": 9,
+   "D1_strict": 1,
+   "D1_window": 1,
+   "score_strict": 3,
+   "score_window": 3
+  },
+  {
+   "repo": "ontio/ontology-did",
+   "assert_lines_strict": 0,
+   "assert_lines_window": 0,
+   "D1_strict": 0,
+   "D1_window": 0,
+   "score_strict": 0,
+   "score_window": 0
+  },
+  {
+   "repo": "sphereon-opensource/ssi-sdk",
+   "assert_lines_strict": 123,
+   "assert_lines_window": 148,
+   "D1_strict": 1,
+   "D1_window": 1,
+   "score_strict": 3,
+   "score_window": 3
+  },
+  {
+   "repo": "spruceid/didkit",
+   "assert_lines_strict": 0,
+   "assert_lines_window": 0,
+   "D1_strict": 0,
+   "D1_window": 0,
+   "score_strict": 0,
+   "score_window": 0
+  },
+  {
+   "repo": "spruceid/ssi",
+   "assert_lines_strict": 0,
+   "assert_lines_window": 3,
+   "D1_strict": 0,
+   "D1_window": 0,
+   "score_strict": 0,
+   "score_window": 0
+  },
+  {
+   "repo": "transmute-industries/sidetree.js",
+   "assert_lines_strict": 0,
+   "assert_lines_window": 0,
+   "D1_strict": 0,
+   "D1_window": 0,
+   "score_strict": 0,
+   "score_window": 0
+  },
+  {
+   "repo": "uport-project/ethr-did",
+   "assert_lines_strict": 1,
+   "assert_lines_window": 1,
+   "D1_strict": 0,
+   "D1_window": 0,
+   "score_strict": 0,
+   "score_window": 0
+  },
+  {
+   "repo": "w3c-ccg/did-method-key",
+   "assert_lines_strict": 0,
+   "assert_lines_window": 0,
+   "D1_strict": 0,
+   "D1_window": 0,
+   "score_strict": 0,
+   "score_window": 0
+  },
+  {
+   "repo": "w3c-ccg/did-test-suite",
+   "assert_lines_strict": 0,
+   "assert_lines_window": 0,
+   "D1_strict": 0,
+   "D1_window": 0,
+   "score_strict": 0,
+   "score_window": 0
+  }
+ ],
+ "changed": [
+  "decentralized-identity/universal-resolver"
+ ],
+ "best_strict": 3,
+ "best_window": 3,
+ "verdict": "headline survives a more permissive rule"
+}

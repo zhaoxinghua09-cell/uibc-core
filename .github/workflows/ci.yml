@@ -323,6 +323,21 @@ jobs:
         # Not the weaker "names an expected check": the same set, on all 36.
         run: python tools/cross_impl_check.py --json | python3 -c "import json,sys; d=json.load(sys.stdin); assert d['agree_with_python']==d['cases'], d; print('agree', d['agree_with_python'], 'of', d['cases'])"
 
+      - name: A competitor's "reject" must come from the numbers
+        # Three vectors from probityai/agent-evidence-vectors v0.38.0 declare an
+        # empty tree and carry a non-empty-tree root, so their published reject is
+        # forced by the input contradicting itself. The step fails if their files
+        # ever start agreeing with their own published code without the constant
+        # changing - i.e. if this stops being true, we want to know, not to keep an
+        # old page. The counter-vectors are the control: they must all agree.
+        run: |
+          python tools/check_competitor_vectors.py --self-test
+          python tools/check_competitor_vectors.py \
+            --dir docs/upstream-package/competitor-defects/v0.38.0 \
+            --dir docs/upstream-package/competitor-defects/v0.38.0-counter --json \
+            | python3 -c "import json,sys; d=json.load(sys.stdin); u=[v for dd in d['dirs'] for v in dd['vectors'] if dd['dir'].rstrip('/').endswith('/v0.38.0') or dd['dir'].rstrip('/')=='v0.38.0']; c=[v for dd in d['dirs'] for v in dd['vectors'] if 'counter' in dd['dir']]; assert len(u)==3 and not any(v['agrees'] for v in u), u; assert len(c)==3 and all(v['agrees'] for v in c), c; print('upstream 0/3 agree, counter 3/3 agree')"
+
+
       - name: Every check has an artefact that makes it fail
         # Nineteen checks, and for each one a package (or, for S9 and S16, a
         # mutation run by outsider_audit) that drives it to FAIL. A check

@@ -172,6 +172,7 @@ def main(argv=None):
     if args.json:
         print(json.dumps({"empty_tree_root": EMPTY_ROOT,
                           "dirs": [{"dir": d, "vectors": run(d)} for d in args.dir]}, indent=2))
+        return 0
     agree = total = 0
     for d in args.dir:
         print("== %s" % d)

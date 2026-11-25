@@ -1,12 +1,13 @@
 {
- "generated_at": "2026-11-25T22:39:15Z",
- "tree_sha256": "f751318a9bdff521c1e6c19f9cf7fd21263ace0535bfec6d5d0b34ec29319981",
- "files_hashed": 2450,
- "content_sha256": "d7dbbbe409c4b6a68f736cb1cf2463fa7a3ea057ec2414a7aeb91c80c01ed96a",
- "content_files": 2450,
- "content_lf_sha256": "8378a55036266d16c2f09ab3f474617d731d16f137b170c15a202710d55acd8d",
+ "generated_at": "2026-11-25T22:58:32Z",
+ "tree_sha256": "ce6627e429e62038ce04c41d1a66143c877ef5adb8ae2b03e433b3186ba1a4ef",
+ "files_hashed": 2453,
+ "content_sha256": "76bf62bbb2212ee659574fe0c17b753d5e068d0ca97d20cbcc57e3c026426a9c",
+ "content_files": 2453,
+ "content_lf_sha256": "f25d6c7a3d439a7ae4bf0d0afd7cf2b67d43b65019a7625b792f485cfbe9cd5c",
  "delivery": "archive",
  "digest_excludes": [
+  "docs/OUTSIDER-BOARD.html",
   "docs/OUTSIDER-RERUN.md",
   "docs/outsider-rerun-receipt.json"
  ],
@@ -57,7 +58,7 @@
    "rc": 0,
    "expect": "ALL OK",
    "ok": true,
-   "seconds": 0.2,
+   "seconds": 0.3,
    "tail": "ALL OK"
   },
   {
@@ -66,8 +67,8 @@
    "rc": 0,
    "expect": "passed",
    "ok": true,
-   "seconds": 3.2,
-   "tail": "34 passed in 2.60s"
+   "seconds": 3.5,
+   "tail": "34 passed in 2.76s"
   }
  ],
  "ok": true

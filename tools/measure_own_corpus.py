@@ -194,7 +194,10 @@ def _entries(root):
                 continue
             files.append({"path": rel, "bytes": os.path.getsize(path),
                           "sha256": _sha256_file(path)})
-    return files
+    # Sorted here, not left to os.walk: directory order differs between filesystems,
+    # and an unsorted list makes the same corpus produce two different receipts on
+    # Linux and Windows even when every digest in it agrees.
+    return sorted(files, key=lambda e: e["path"])
 
 
 def manifest_digest(entries):

@@ -740,11 +740,6 @@
         "sha256": "4c95df8d741fbcfd2d284c364bd45f614e4800e2e71abc4f4f3476fb1c9f9d5d"
       },
       {
-        "bytes": 1353,
-        "path": "docs/upstream-package/scitt-rfc9162/v1/ambiguous-tree-size/expected.json",
-        "sha256": "88336aada10ffebcbe640924ad8004af91c03983e936cfdf85a44f9ae5f0c6c8"
-      },
-      {
         "bytes": 1041,
         "path": "docs/upstream-package/scitt-rfc9162/v1/ambiguous-tree-size-2/expected.json",
         "sha256": "a3fc2d1150e15a4e061c8d6a935bfc83351418213271b468b2b508463e4f4c65"
@@ -758,6 +753,11 @@
         "bytes": 1327,
         "path": "docs/upstream-package/scitt-rfc9162/v1/ambiguous-tree-size-8/expected.json",
         "sha256": "1b03633b973b4b4c6a64bb37c42268250c6a8a1b05d434b138dc35431107a671"
+      },
+      {
+        "bytes": 1353,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/ambiguous-tree-size/expected.json",
+        "sha256": "88336aada10ffebcbe640924ad8004af91c03983e936cfdf85a44f9ae5f0c6c8"
       },
       {
         "bytes": 823,
@@ -835,11 +835,6 @@
         "sha256": "23fe30e328e5118b699238caffc0b4783aa8c3069261f81d372fea43b76d61c1"
       },
       {
-        "bytes": 989,
-        "path": "docs/upstream-package/scitt-rfc9162/v1/fail-path-short/expected.json",
-        "sha256": "9b1a2868f57a71a7852c54ac09f01b324365e43aedfe3c8fc37998b1c999e061"
-      },
-      {
         "bytes": 900,
         "path": "docs/upstream-package/scitt-rfc9162/v1/fail-path-short-tampered/expected.json",
         "sha256": "d889a9d4a82504c50e0cc9540e01ffa8b9aa67ee2a78fa141e573ae24746164c"
@@ -855,9 +850,9 @@
         "sha256": "ab1214ebb27495e2fe9a616e669cb2e4bcddf1eef19397c2e9c25593042e4f3e"
       },
       {
-        "bytes": 1072,
-        "path": "docs/upstream-package/scitt-rfc9162/v1/fail-path-swap/expected.json",
-        "sha256": "75eced23f59a8a48cc4888b54498f6ffcf2679ccb669d848423d21b96022da5a"
+        "bytes": 989,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/fail-path-short/expected.json",
+        "sha256": "9b1a2868f57a71a7852c54ac09f01b324365e43aedfe3c8fc37998b1c999e061"
       },
       {
         "bytes": 1125,
@@ -870,6 +865,11 @@
         "sha256": "915d5558448474380ee321ec420dc03b557f25d2fa32653e5b9063737d3ef8ca"
       },
       {
+        "bytes": 1072,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/fail-path-swap/expected.json",
+        "sha256": "75eced23f59a8a48cc4888b54498f6ffcf2679ccb669d848423d21b96022da5a"
+      },
+      {
         "bytes": 1082,
         "path": "docs/upstream-package/scitt-rfc9162/v1/fail-path-too-long/expected.json",
         "sha256": "f0ea79d75f1d3efb3572507c5d97219f526758ca871d06850e6fed075cd1b62d"
@@ -878,11 +878,6 @@
         "bytes": 962,
         "path": "docs/upstream-package/scitt-rfc9162/v1/fail-tampered-leaf/expected.json",
         "sha256": "4c09ca83f54012ced6a8fa191cc2493d29ae38e75fc81847a3279354168e3130"
-      },
-      {
-        "bytes": 1004,
-        "path": "docs/upstream-package/scitt-rfc9162/v1/fail-tampered-path/expected.json",
-        "sha256": "7e2cea24732841d94f35e9c370e904c70f225c4c58717e12af4881c1a184cd67"
       },
       {
         "bytes": 1092,
@@ -895,9 +890,9 @@
         "sha256": "abd020546e2f35da562857845d343846f7bb2d41972da6470dcf49b792156efb"
       },
       {
-        "bytes": 992,
-        "path": "docs/upstream-package/scitt-rfc9162/v1/fail-wrong-leaf-index/expected.json",
-        "sha256": "ec4e908bbbf686f1c4c68dda809cb0ce79b2233daee16c5669a118450b28f2dd"
+        "bytes": 1004,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/fail-tampered-path/expected.json",
+        "sha256": "7e2cea24732841d94f35e9c370e904c70f225c4c58717e12af4881c1a184cd67"
       },
       {
         "bytes": 1091,
@@ -905,19 +900,24 @@
         "sha256": "1c40215de832da20806abc647e8013411b476a133bf4c50446b39d86785486df"
       },
       {
+        "bytes": 992,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/fail-wrong-leaf-index/expected.json",
+        "sha256": "ec4e908bbbf686f1c4c68dda809cb0ce79b2233daee16c5669a118450b28f2dd"
+      },
+      {
         "bytes": 936,
         "path": "docs/upstream-package/scitt-rfc9162/v1/fail-wrong-tree-size/expected.json",
         "sha256": "9edee83fbdec2ac4a4f96dc86d2471468a0eb6ad39cab930770944b08c414a83"
       },
       {
-        "bytes": 764,
-        "path": "docs/upstream-package/scitt-rfc9162/v1/valid-empty-leaf/expected.json",
-        "sha256": "c059a733792f79ec9c2b20dc2c46e67e1d206c9e8931bdf7bdeca8de7cb29303"
-      },
-      {
         "bytes": 801,
         "path": "docs/upstream-package/scitt-rfc9162/v1/valid-empty-leaf-tree2/expected.json",
         "sha256": "a09cc95f1347a2c9b778f41f7486bb80384f93f2f6b907affd06532fecca4ff1"
+      },
+      {
+        "bytes": 764,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/valid-empty-leaf/expected.json",
+        "sha256": "c059a733792f79ec9c2b20dc2c46e67e1d206c9e8931bdf7bdeca8de7cb29303"
       },
       {
         "bytes": 762,

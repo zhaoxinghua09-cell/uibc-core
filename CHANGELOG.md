@@ -10,6 +10,17 @@
 - 新增 `tests/test_bid_binary_codec.py` 31 条，连原 16 条共 47 条全绿。
 - **可运行 demo 与生成式布局图**：`tools/demo_bid_binary.py` 八幕（编→解→翻转假设→宽度硬校验→fuzz），末行 `ALL OK`、退出码 0；`tools/render_bid_binary_layout.py` 从模块常量生成 `docs/BID-BINARY-LAYOUT.svg`，生成器内断言各段字节和等于 `HEADER_MIN`，`tests/test_bid_binary_layout.py` 再拿生成结果与仓库那份做字节比较——手改图即红。新增 5 条测试，与解码/编解码合计 52 条。
 
+### 同一轮的硬化：把"解码器看不出来的改动"补掉
+
+- **逐位翻转探针** `tools/mutate_bid_binary.py`：对一条 196 字节 / 1568 位的有效报文逐位翻转，归成 rejected 328（20.9%）/ changed 1226（78.2%）/ blind 14（0.9%）。盲位只有 6 个未分配 flag 位和整个 `unUsed` 字节，**正文一位都不盲**。
+- **探针抓到的第一件事是我们自己的比较写错了**：只比较解出的文档，会把 `replyCode`、`transactionID` 也算成盲位（22 个改为比全部可观测状态后 15 个）。
+- **探针抓到的第二个是结构漏洞**：字段按绝对路径写入，容器改了名也解不出差别——把 `publicKey`(0x2110) 改成文档包装层 0x2100，文档一字不差。现在字段必须坐进 `FIELD_TABLE` 路径对应的容器（`documented_parent` 取最长前缀），协议 §5.2.2 的 `errResponse` 例外用 `CONTAINER_EXTRA_PATHS` 显式放行并在注释里引原文；宽容读法用 `strict_placement=False`，把错位记进 `misplaced` 而不是拒收。
+- **第二个真漏洞**：编码器把 `authentication` 包成 `0x2100 > 0x2100` 两层壳，示范报文 342 字节。改成裸 `0x2100` 叶子后 196 字节，`0x2100` 的双重身份仍按 payload 形状判别。
+- 新增 `tests/test_bid_binary_mutation.py` 5 条（含"盲位恰好是保留位"的断言，期望集合从 `_FLAG_BITS`/`_OPCODE_SHIFT` 推出，不手抄）；`tests/test_bid_binary_codec.py` 31 → 35 条；二进制四组合计 61 条。
+- demo 增两幕：`6b` 错容器被拒 + 宽容模式记账，`6c` 逐位翻转的统计；仍以 `ALL OK` 收尾。
+- `docs/BINARY-PROTOCOL.md` 增三·九（字段归属）与三·十（逐位翻转）。
+
+
 ## 0.5.5 — 2026-11-25（把 0.5.4 那次发布补成一次干净的）
 
 主题：`0.5.4` 装上能用，但它的 sdist 里带的是一版之前的语料。这一版不新增能力，只把"发出去的东西"和"仓库里的树"重新对齐，并把产生那种错配的顺序固定下来。

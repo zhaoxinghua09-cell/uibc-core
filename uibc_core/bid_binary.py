@@ -46,6 +46,12 @@ RFC does not settle is listed in ``ASSUMPTIONS`` and wired to a real parameter,
 so a reader who disagrees flips the switch and reruns - nothing here has to be
 taken on trust.
 
+A leaf must sit in the container its field table path says it belongs to: decoding
+checks the container prefix and refuses a mismatch. Without that check a mutated
+container ID decodes to an identical document - the field paths are absolute, so
+the nesting would be unobservable. That hole was found by flipping bits
+(``tools/mutate_bid_binary.py``), not by reading the RFC.
+
 Two ID collisions in the RFC itself are recorded in ``KNOWN_ID_COLLISIONS`` and
 left visible rather than resolved: ``0x2100`` is ``bidDocument`` *and*
 ``bidDocument.authentication``; the AC-number children are ``0x3601/0x3602`` in
@@ -266,6 +272,7 @@ class DecodedDocument:
     fields: Dict[str, Any] = field(default_factory=dict)
     deferred: Dict[str, str] = field(default_factory=dict)   # path -> reason
     integers: Dict[str, int] = field(default_factory=dict)   # only with integer_widths
+    misplaced: Dict[str, str] = field(default_factory=dict)  # lenient mode only
     unknown: List[Dict[str, Any]] = field(default_factory=list)
     signature_units_detectable: bool = False
 
@@ -274,6 +281,8 @@ class DecodedDocument:
         out.update(self.integers)
         if self.deferred:
             out["_deferred"] = dict(self.deferred)
+        if self.misplaced:
+            out["_misplaced"] = dict(self.misplaced)
         if self.unknown:
             out["_unknown"] = list(self.unknown)
         return out
@@ -297,7 +306,9 @@ def _put(target: Dict[str, Any], path: str, value: Any):
 
 
 def decode_document(units: List[Unit], into: Optional[DecodedDocument] = None, *,
-                    integer_widths: Optional[Dict[str, int]] = None) -> DecodedDocument:
+                    integer_widths: Optional[Dict[str, int]] = None,
+                    prefix: str = "", container_id: Optional[int] = None,
+                    depth: int = 0, strict_placement: bool = True) -> DecodedDocument:
     """Decode the unit tree of a document (or error) answer.
 
     ``FIELD_TABLE`` paths are absolute (``publicKey.id``), so containers need no
@@ -322,7 +333,13 @@ def decode_document(units: List[Unit], into: Optional[DecodedDocument] = None, *
                 except ValueError:
                     children = None
             if children:
-                decode_document(children, doc, integer_widths=integer_widths)
+                # bidDocument (0x2100) is the document wrapper: its children are the
+                # top-level fields, which have no path prefix. Every other container
+                # holds one named subtree.
+                expected = "" if unit.id == 0x2100 else CONTAINER_BY_ID.get(unit.id, "")
+                decode_document(children, doc, integer_widths=integer_widths,
+                                prefix=expected, container_id=unit.id, depth=depth + 1,
+                                strict_placement=strict_placement)
             else:
                 _put(doc.fields, key, unit.payload.decode("utf-8", "strict"))
             continue
@@ -339,22 +356,48 @@ def decode_document(units: List[Unit], into: Optional[DecodedDocument] = None, *
                 except ValueError:
                     children = None
             if children:
-                decode_document(children, doc, integer_widths=integer_widths)
+                # The document wrapper exists once, at the top. If one appears inside
+                # another container, its leaves would be re-parented to the top level
+                # and the document would come back identical - a real blind spot the
+                # bit-flip probe found (publicKey 0x2110 flipped to 0x2100).
+                if depth:
+                    raise ValueError("nested bidDocument wrapper (0x2100) at depth %d: "
+                                     "the document wrapper belongs at the top level only"
+                                     % depth)
+                decode_document(children, doc, integer_widths=integer_widths, prefix="",
+                                container_id=unit.id, depth=depth + 1,
+                                strict_placement=strict_placement)
             else:
                 _put(doc.fields, "authentication", unit.payload.decode("utf-8", "strict"))
             continue
-        _decode_leaf(unit, doc, integer_widths)
+        _decode_leaf(unit, doc, integer_widths, prefix, container_id,
+                     CONTAINER_EXTRA_PATHS.get(container_id, frozenset()),
+                     strict_placement)
     return doc
 
 
 def _decode_leaf(unit: Unit, doc: DecodedDocument,
-                 integer_widths: Optional[Dict[str, int]] = None):
+                 integer_widths: Optional[Dict[str, int]] = None, prefix: str = "",
+                 container_id: Optional[int] = None,
+                 extra_paths: frozenset = frozenset(),
+                 strict_placement: bool = True):
     entry = FIELD_TABLE.get(unit.id)
     if entry is None:
         doc.unknown.append({"id": "0x%04x" % unit.id, "len": len(unit.payload),
                             "hex": unit.payload[:32].hex()})
         return
     path, kind = entry
+    wants = documented_parent(path)
+    placed_right = (container_id == wants) or (wants is None and container_id in (None, 0x2100))
+    if not placed_right and path not in extra_paths and not strict_placement:
+        doc.misplaced[path] = ("unit 0x%04x is documented under 0x%s but sits in 0x%s"
+                               % (unit.id, "----" if wants is None else "%04x" % wants,
+                                  "----" if container_id is None else "%04x" % container_id))
+    elif not placed_right and path not in extra_paths:
+        raise ValueError("unit 0x%04x is documented as %r under 0x%s but sits in 0x%s; "
+                         "the container ID is wrong or the unit was moved"
+                         % (unit.id, path, "----" if wants is None else "%04x" % wants,
+                            "----" if container_id is None else "%04x" % container_id))
     if kind == STRING:
         try:
             _put(doc.fields, path, unit.payload.decode("utf-8"))
@@ -376,7 +419,8 @@ def _decode_leaf(unit: Unit, doc: DecodedDocument,
 
 
 def decode_message(data: bytes, *, integer_widths: Optional[Dict[str, int]] = None,
-                   flag_bit_order: str = "msb") -> Tuple[Header, DecodedDocument]:
+                   flag_bit_order: str = "msb", strict_placement: bool = True
+                   ) -> Tuple[Header, DecodedDocument]:
     """Header + body of a document answer, in one call.
 
     ``integer_widths`` and ``flag_bit_order`` are forwarded, because a caller who
@@ -387,7 +431,8 @@ def decode_message(data: bytes, *, integer_widths: Optional[Dict[str, int]] = No
     body_start = header.header_length
     body = data[body_start:body_start + header.message_length]
     units = parse_units(body)
-    doc = decode_document(units, integer_widths=integer_widths)
+    doc = decode_document(units, integer_widths=integer_widths,
+                          strict_placement=strict_placement)
     return header, doc
 
 # ---------------------------------------------------------------- codec
@@ -432,6 +477,34 @@ CONTAINER_PATHS: Dict[str, int] = {
     "extension.acsns": 0x3600,
     "extension.verifiableCredentials": 0x3700,
 }
+
+# Container ID -> the path it is allowed to hold. The decoder needs this to
+# refuse a leaf that sits in the wrong container: without that check a mutated
+# container ID decodes to exactly the same document, because field paths are
+# absolute. The bit-flip probe in tools/mutate_bid_binary.py found that hole.
+CONTAINER_BY_ID: Dict[int, str] = {uid: path for path, uid in CONTAINER_PATHS.items()}
+
+# Containers that legitimately hold a leaf from outside their own subtree, with the
+# section that says so. §5.2.2: errResponse (0x2010) carries two units -
+# ``didDocument.id`` (0x2102) and ``Result.msg`` (0x2011) - so the document id is
+# allowed inside it even though its field path is top-level ``id``.
+CONTAINER_EXTRA_PATHS: Dict[int, frozenset] = {0x2010: frozenset({"id"})}
+
+
+def documented_parent(path: str) -> Optional[int]:
+    """The container a field path belongs to, taken from the longest matching prefix.
+
+    ``publicKey.id`` -> 0x2110, ``extension.attributes.key`` -> 0x3500, ``id`` -> None
+    (a top-level field). Used to reject a leaf that was moved to a different container:
+    without it, renaming ``publicKey`` (0x2110) to the document wrapper (0x2100) left
+    the document byte-identical, because the field paths are absolute.
+    """
+    best = None
+    for prefix, uid in CONTAINER_PATHS.items():
+        if path == prefix or path.startswith(prefix + "."):
+            if best is None or len(prefix) > len(best[1]):
+                best = (uid, prefix)
+    return None if best is None else best[0]
 
 # Containers whose payload is a bare string, not a unit sequence
 # (``recovery`` holds a key id; ``authentication`` does too - see the 0x2100
@@ -533,10 +606,12 @@ def encode_document(fields: Dict[str, Any], *, integer_widths: Optional[Dict[str
                 continue   # _deferred / _unknown are report buckets, not fields
             path = (prefix + "." + name) if prefix else name
             if path == "authentication":
-                holder = tree["_children"].setdefault("bidDocument",
-                                                      {"_leaf": [], "_children": {}})
+                # 0x2100 is bidDocument *and* the authentication key-id list (the RFC's
+                # own collision). A key id is a bare string, so it is emitted as a bare
+                # 0x2100 leaf - wrapping it in another 0x2100 container would add a
+                # nesting level that nothing in the document asks for.
                 for item in (value if isinstance(value, list) else [value]):
-                    holder["_leaf"].append((0x2100, _as_string(path, item).encode("utf-8")))
+                    tree["_leaf"].append((0x2100, _as_string(path, item).encode("utf-8")))
                 continue
             if path == "recovery":
                 holder = tree["_children"].setdefault("recovery",

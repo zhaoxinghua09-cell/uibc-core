@@ -28,8 +28,8 @@ from uibc_core.bid_binary import (
 )
 
 
-def _doc_fields(units, widths=None):
-    return decode_document(units, integer_widths=widths).as_dict()
+def _doc_fields(units, widths=None, strict=True):
+    return decode_document(units, integer_widths=widths, strict_placement=strict).as_dict()
 
 
 # ---------------------------------------------------------------- header
@@ -137,7 +137,7 @@ def test_document_layer_is_idempotent_under_decode_encode():
 
 
 def test_repeated_leaf_becomes_a_list_and_survives_the_roundtrip():
-    units = [Unit(0x2111, b"k1"), Unit(0x2111, b"k2")]
+    units = [Unit(0x2110, build_unit(0x2111, b"k1") + build_unit(0x2111, b"k2"))]
     fields = _doc_fields(units)
     assert fields["publicKey"]["id"] == ["k1", "k2"]
     back = _doc_fields(encode_document(fields))
@@ -197,14 +197,15 @@ def test_unknown_unit_is_reported_not_dropped_and_survives_as_opaque():
 # ---------------------------------------------------------------- deferred integers
 
 def test_integer_without_a_declared_width_is_deferred_with_its_raw_bytes():
-    units = [Unit(0x3200, b"\x00\x00\x00\x05")]
+    units = [Unit(0x3000, build_unit(0x3200, b"\x00\x00\x00\x05"))]
     doc = decode_document(units)
     assert "extension.ttl" in doc.deferred
     assert doc.deferred["extension.ttl"].endswith("raw=00000005")
 
 
 def test_integer_width_supplied_by_the_caller_decodes():
-    units = [Unit(0x3200, b"\x00\x00\x00\x05"), Unit(0x2137, b"\x1f\x90")]
+    units = [Unit(0x3000, build_unit(0x3200, b"\x00\x00\x00\x05")),
+             Unit(0x2130, build_unit(0x2137, b"\x1f\x90"))]
     doc = decode_document(units, integer_widths={"long": 4, "int": 2})
     assert doc.integers["extension.ttl"] == 5
     assert doc.integers["service.port"] == 8080
@@ -213,7 +214,8 @@ def test_integer_width_supplied_by_the_caller_decodes():
 
 def test_wrong_width_fails_loudly_instead_of_misreading():
     with pytest.raises(ValueError, match="declared long=8 bytes but carries 4"):
-        decode_document([Unit(0x3200, b"\x00\x00\x00\x05")], integer_widths={"long": 8})
+        decode_document([Unit(0x3000, build_unit(0x3200, b"\x00\x00\x00\x05"))],
+                        integer_widths={"long": 8})
 
 
 def test_encoding_an_integer_without_a_width_says_which_parameter_to_pass():
@@ -309,3 +311,41 @@ def test_the_two_flippable_assumptions_change_observable_output():
            encode_units(encode_document(fields, acsns_spelling="3601"))
     assert set(FLAG_ORDER_CHOICES) == {"msb", "lsb"}
     assert set(ACSNS_SPELLINGS) == {"3610", "3601"}
+
+# -------------------------------------------------- placement of a field
+
+def test_a_field_must_sit_in_the_container_the_table_puts_it_in():
+    """Renaming the publicKey container to the document wrapper used to decode
+    identically, because field paths are absolute. Now it is refused."""
+    units = [Unit(0x2100, build_unit(0x2111, b"did:bid:efX#key-1"))]
+    with pytest.raises(ValueError, match="under 0x2110 but sits in 0x2100"):
+        decode_document(units)
+
+
+def test_lenient_mode_records_the_misplacement_instead_of_raising():
+    units = [Unit(0x2100, build_unit(0x2111, b"did:bid:efX#key-1"))]
+    doc = decode_document(units, strict_placement=False)
+    assert doc.fields["publicKey"]["id"] == "did:bid:efX#key-1"
+    assert "publicKey.id" in doc.misplaced
+    assert doc.as_dict()["_misplaced"]["publicKey.id"].endswith("sits in 0x2100")
+
+
+def test_documented_parent_picks_the_longest_prefix():
+    from uibc_core.bid_binary import documented_parent
+    assert documented_parent("id") is None
+    assert documented_parent("publicKey.id") == 0x2110
+    assert documented_parent("extension.ttl") == 0x3000
+    assert documented_parent("extension.attributes.key") == 0x3500
+    assert documented_parent("extension.attributes.proof.creator") == 0x3560
+    assert documented_parent("errResponse.msg") == 0x2010
+
+
+def test_err_response_id_is_allowed_by_the_rfc_5_2_2_whitelist():
+    """§5.2.2 puts didDocument.id (0x2102) inside errResponse (0x2010)."""
+    units = [Unit(0x2010, build_unit(0x2102, b"did:bid:efA") + build_unit(0x2011, b"boom"))]
+    doc = decode_document(units)          # must not raise: the whitelist allows it
+    # 0x2011's table path is errResponse.msg, but 0x2102's is plain `id`, so the
+    # two levels land in different places. That asymmetry is the RFC's, not a bug
+    # here: §5.2.2's errResponse carries the *document* id.
+    assert doc.fields["errResponse"] == {"msg": "boom"}
+    assert doc.fields["id"] == "did:bid:efA"

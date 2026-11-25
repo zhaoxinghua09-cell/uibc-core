@@ -109,8 +109,8 @@ jobs:
       # opens the release if the tag has none, so the four artifacts have somewhere to go.
       #
       # It opens it as a DRAFT. Measured 2026-11-25 on run 45556633612 (v0.5.4): this
-      # repository has immutable releases switched on, so `gh release create` published an
-      # empty release at once and the very next upload was refused with
+      # repository has immutable releases switched on, so a release created without
+      # `--draft` published an empty one at once and the very next upload was refused with
       #   HTTP 422: Cannot upload assets to an immutable release
       # A published release can never gain assets here; a draft can, and publishing it
       # later fixes the byte set. The tag that carried that empty release became unusable

@@ -56,6 +56,10 @@ OURS = "zhaoxinghua09-cell/uibc-core"
 # The audit may grow; it may not quietly shrink back to the first nine. Anybody
 # who wants to remove a repository has to say so in the document.
 MIN_REPOS = 25
+# A point is only worth something in a repository that asserts anything at all.
+# Ten real rejection assertions is the smallest honest sample this metric can
+# see, and it is the same floor the calibration block uses.
+ASSERT_FLOOR = 10
 
 PATTERNS = {
     "fuzz": r"\bfuzz(y|er|ing)?\b|libfuzzer|atheris|go-fuzz|jazzer|jqf",
@@ -82,6 +86,9 @@ TEST_RE = re.compile(
 )
 CODELIKE = (".java", ".js", ".ts", ".mjs", ".cjs", ".py", ".go", ".rs", ".kt", ".c", ".h",
             ".json", ".yaml", ".yml", ".md")
+# A rejection *assertion* is a line that both names a rejected thing and asserts.
+# Counting bare words is what makes a keyword metric foolable, so D1 asks for both.
+ASSERT_LINE_RE = re.compile(r"\bassert|assertEqual|assertThat|expect\(|require\(|t\.Fatal|t\.Error|Assert\.|fail\(", re.I)
 
 
 def score_one(raw):
@@ -89,11 +96,18 @@ def score_one(raw):
     --refresh cannot drift apart."""
     th = raw["test_hits"]
     nth = raw["nontest_hits"]
+    # assertion_lines may be missing in older snapshots; treat as 0 rather than
+    # silently passing the D1 floor.
+    asserts = raw.get("assertion_lines", 0)
+    # Every dimension that costs points is conditioned on the repository actually
+    # asserting something. Words in comments are not evidence: the calibration
+    # block measures exactly how much a keyword-stuffed tree can earn, and this
+    # floor is what keeps that number at zero.
     return {
-        "D1": 1 if th["reject_assertion"] >= 10 else 0,
-        "D2": 1 if th["bit_level"] >= 1 else 0,
-        "D3": 1 if th["address_derive"] >= 1 else 0,
-        "D4": 1 if nth["exit_code_gate"] >= 1 else 0,
+        "D1": 1 if (th["reject_assertion"] >= 10 and asserts >= ASSERT_FLOOR) else 0,
+        "D2": 1 if (th["bit_level"] >= 1 and asserts >= ASSERT_FLOOR) else 0,
+        "D3": 1 if (th["address_derive"] >= 1 and asserts >= ASSERT_FLOOR) else 0,
+        "D4": 1 if (nth["exit_code_gate"] >= 1 and asserts >= ASSERT_FLOOR) else 0,
         "D5": 0,
     }
 
@@ -101,7 +115,7 @@ def score_one(raw):
 def survey_tree(root):
     compiled = {k: re.compile(v, re.I) for k, v in PATTERNS.items()}
     res = {"code_files": 0, "test_files": 0, "test_lines": 0, "code_lines": 0,
-           "test_text_kb": 0,
+           "test_text_kb": 0, "assertion_lines": 0,
            "test_hits": {k: 0 for k in PATTERNS},
            "nontest_hits": {k: 0 for k in PATTERNS},
            "test_hit_examples": {k: [] for k in PATTERNS}}
@@ -123,6 +137,9 @@ def survey_tree(root):
                 res["test_files"] += 1
                 res["test_lines"] += sum(1 for line in txt.splitlines() if line.strip())
                 res["test_text_kb"] += len(txt.encode("utf-8")) // 1024
+                res["assertion_lines"] += sum(
+                    1 for line in txt.splitlines()
+                    if ASSERT_LINE_RE.search(line) and re.search(PATTERNS["reject_assertion"], line, re.I))
             for key, rx in compiled.items():
                 n = len(rx.findall(txt))
                 if not n:
@@ -185,6 +202,8 @@ def render_doc(snap):
     n = len(repos)
     best = max(sum(r["dims"].values()) for r in repos)
     ours = sum(snap["ours"]["dims"].values())
+    cal = snap.get("calibration") or calibrate()
+    cal_empty, cal_ceiling, cal_honest = cal["empty"], cal["ceiling"], cal["honest"]
     at_least = {k: sum(1 for r in repos if r["dims"][k] >= 1) for k, _ in DIMS}
     zero = {k: n - at_least[k] for k, _ in DIMS}
     body = f"""# 竞品门禁对照：外人能在仓库里复跑什么
@@ -224,14 +243,29 @@ D4＝非测试代码里出现失败退出码 ≥1；D5 对 {n} 家一律记 0—
 一道可失败的门，并让门与自证一起随仓交付——{n} 家里只有本仓库具备完整闭环（{ours}/10，最好的一家 {best}/10）。**
 其余任何"比竞品强"的说法都超出本表。
 
-## 四、本表量不到的
+## 五、这个度量能被怎么骗（上限是量出来的，不是嘴上说"关键词会漏"）
+
+`calibrate()` 用三棵合成仓库把这件事做成数字：一个**没有任何关键词**的空仓、一个**只把关键词写进注释、
+测试里一句断言都没有**的"堆词仓"、一个**真有 12 条拒绝断言**的仓。
+
+| 合成仓库 | 得分 | 说明 |
+|---|---|---|
+| 空仓 | {cal_empty}/10 | 必须为 0，否则计数器连空号都在给分 |
+| 堆词仓（注释里堆满关键词、零断言） | **{cal_ceiling}/10** | 这就是**关键词谎报的上限** |
+| 诚实仓（12 条拒绝断言，无铺扫、无门） | {cal_honest}/10 | D1 必须记到分 |
+
+上限 {cal_ceiling}/10 的意思是：一个仓库只要把词摆对、什么都不测，最多能拿到 {cal_ceiling}/10。
+所以 D1 现在要求**同时**满足"拒绝类词 ≥10"和"真断言行 ≥10"（`ASSERT_LINE_RE`），只堆词的仓拿不到 D1。
+这条上限写进快照，`--check` 每次重算一遍并比对，谁放松阈值、这个数字就变、门就红。
+
+## 六、本表量不到的
 
 - 关键词检索漏报：竞品可能用别的词（"negative cases"、把 fuzz 写进 CI 配置而非源码）。
 - 私有仓库与内部流水线：他们内部做没做，本表无从判断。
 - 质量差异：D1 记 1 的家，其拒绝用例是点状的；本仓库量的是另一件事。
 - 抽样：{n} 家是"能代表各条技术路线"的取样，不是 DID 生态的全集。
 
-## 五、复跑
+## 七、复跑
 
 ```
 python tools/competitor_gate_parity.py --check                   # 离线：快照+重算+表格一致性
@@ -242,7 +276,7 @@ python tools/competitor_gate_parity.py --json                    # 机读
 快照：`docs/competitor-parity.json`（含每个仓库的 sha、tarball sha256、字节数、原始计数）。
 矩阵图：`docs/COMPETITOR-GATE-PARITY.svg`（由快照生成，字节可复现）。
 
-## 六、引用
+## 八、引用
 
 """
     for row in repos:
@@ -333,8 +367,60 @@ def render_png(snap, path):
     return path
 
 
+def calibrate():
+    """Measure how badly this metric can be fooled.
+
+    The counters are regexes, so a repository that writes the right words in
+    comments and tests nothing would score points. That is not a hypothetical:
+    it is the reason this tool refuses to claim more than it measures. Instead
+    of arguing about it, build three synthetic repositories and score them.
+
+      empty   no keyword at all                 -> must be 0
+      stuffed comments full of the keywords,
+              a test file with no assertion     -> the false-positive ceiling
+      honest  12 real rejection assertions       -> must reach D1
+
+    The ceiling is recorded in the snapshot and re-measured by --check, so if
+    somebody loosens a threshold the number moves and the check fails.
+    """
+    base = tempfile.mkdtemp(prefix="parity-calib-")
+    try:
+        # 1) empty
+        e = os.path.join(base, "empty")
+        os.makedirs(os.path.join(e, "src"))
+        open(os.path.join(e, "src", "main.py"), "w", encoding="utf-8").write(
+            "def resolve(did):\n    return {'id': did}\n")
+        # 2) stuffed: keywords in comments, zero assertions
+        s = os.path.join(base, "stuffed")
+        os.makedirs(os.path.join(s, "tests"))
+        open(os.path.join(s, "src.py"), "w", encoding="utf-8").write(
+            "# bit-flip handling, base58 address derived here\n"
+            "import sys\n"
+            "if not ok:\n    sys.exit(1)\n")
+        open(os.path.join(s, "tests", "test_shapes.py"), "w", encoding="utf-8").write(
+            "# invalid did, malformed payload, forbidden key, rejected document\n"
+            "# rejected, rejected, rejected, rejected, rejected, rejected\n"
+            "# reject reject reject reject; bit-flip every byte; base58 address derived\n"
+            "def test_nothing():\n    pass\n")
+        # 3) honest: assertions, no sweep, no gate
+        h = os.path.join(base, "honest")
+        os.makedirs(os.path.join(h, "tests"))
+        open(os.path.join(h, "tests", "test_reject.py"), "w", encoding="utf-8").write(
+            "def test_rejects():\n" + "".join(
+                "    assert parse('invalid-%d') is None  # malformed rejected\n" % i
+                for i in range(12)))
+        out = {}
+        for name, root in (("empty", e), ("stuffed", s), ("honest", h)):
+            out[name] = sum(score_one(survey_tree(root)).values())
+        out["ceiling"] = out["stuffed"]
+        return out
+    finally:
+        shutil.rmtree(base, ignore_errors=True)
+
+
 def build_ours():
     """Survey this repository the same way the competitors were surveyed."""
+
     root = HERE
     raw = survey_tree(root)
     # the competitor pattern set does not know our gate names, so count them the
@@ -411,6 +497,20 @@ def check(snap):
             fails.append("docs/COMPETITOR-GATE-PARITY.md table does not match the snapshot (re-run --render)")
     else:
         fails.append("docs/COMPETITOR-GATE-PARITY.md is missing")
+    # the false-positive ceiling is a measured claim: re-measure it, and refuse
+    # to publish a number the counters no longer produce.
+    cal = snap.get("calibration")
+    fresh = calibrate()
+    if not cal:
+        fails.append("snapshot carries no calibration block (re-run --render)")
+    elif {k: cal.get(k) for k in ("empty", "stuffed", "honest", "ceiling")} != fresh:
+        fails.append("calibration moved: snapshot says %r, counters now produce %r"
+                     % ({k: cal.get(k) for k in ("empty", "stuffed", "honest", "ceiling")}, fresh))
+    elif fresh["empty"] != 0:
+        fails.append("the empty synthetic repository does not score 0: %d" % fresh["empty"])
+    elif fresh["ceiling"] >= 3:
+        fails.append("a repository that only stuffs keywords can reach %d/10 - the metric can no "
+                     "longer tell it apart from real point evidence (best real is 3/10)" % fresh["ceiling"])
     best = max(sum(r["dims"].values()) for r in repos) if repos else 0
     if best >= sum(ours["dims"].values()):
         fails.append(f"best competitor {best}/10 is not below this repository's score")
@@ -440,6 +540,7 @@ def refresh(snap, cache):
 
 
 def save(snap):
+    snap["calibration"] = calibrate()
     open(SNAPSHOT, "w", encoding="utf-8").write(json.dumps(snap, indent=1, ensure_ascii=False) + "\n")
     open(DOC, "w", encoding="utf-8").write(render_doc(snap))
     open(SVG, "w", encoding="utf-8").write(render_svg(snap))

@@ -1,10 +1,20 @@
-## 未发布 — 2026-11-26（竞品对照扩到 25 家：把"抽样"本身也钉住）
+## 未发布 — 2026-11-26（给度量本身做校准：堆词能骗到几分，量出来是 0）
+
+- **问题**：竞品表数的是关键词，一个仓只要把词写进注释、什么都不测，也能拿分。此前的说法是"关键词检索有漏报"，那是辩解，不是数据。
+- **做法**：`calibrate()` 现造三棵合成仓库并按同一 `score_one` 打分——空仓必须 0；**注释里堆满关键词、测试里零断言**的"堆词仓"就是谎报上限；真有 12 条拒绝断言的仓必须拿到 D1。
+- **量出的上限**：堆词仓 **0/10**（不是 3、不是 4），因为四个计分维度现在都要求仓内**真断言行 ≥ `ASSERT_FLOOR`=10**（`ASSERT_LINE_RE`）。D1 另加"拒绝类词 ≥10"一条。
+- **上限写进快照、每次 `--check` 重算**：`calibration` 块与现算不一致就红；上限 ≥ 最好竞品（3/10）也红——那意味着表已经不能区分人和堆词，主张必须主动缩。
+- **重算后的分布（25 家）**：D1 8 家、D2 0 家、D3 8 家、D4 7 家、D5 0 家；最好仍 3/10，本仓 10/10。比上一口径更严，所以有 5 家从 13 掉到 8（它们只有词、断言密度不够）。
+- **`tests/test_parity_calibration.py` 六条**：快照校准与现算一致、空仓 0、堆词 0、诚实仓拿分、公开上限必须低于最好竞品、篡改上限被 `--check` 抓。
+
+
 
 - **第三批 8 家入库**：`WeBankBlockchain/WeIdentity`、`hyperledger/aries-framework-go`、`hyperledger/aries-cloudagent-python`、`decentralized-identity/did-jwt`、`docknetwork/sdk`、`ceramicnetwork/js-did`、`ontio/ontology-did`、`hyperledger/indy-sdk`。与前两批同一组正则、同一 `score_one`，HEAD 由 `/commits` 取定后记 sha + tarball sha256。
 - **25 家的结论**：逐位变异 0 家、门自证 0 家、跨层单一退出码 10 家、文档层拒绝断言 13 家；最好仍是 **3/10**（现在有 8 家并列），本仓库 **10/10**。
 - **`MIN_REPOS` 抬到 25**，删任何一家都会失败；`tests/test_competitor_parity.py` 同步 ≥25。
 - **新增两条反漂移测试**：文档里的家数必须等于快照家数、且每一行都在表里（防止"表长了、文没动"）；取样必须跨 ≥10 个组织并包含中国国内栈（`WeBankBlockchain`/`caict-4iot-dev`/`ontio`），防止样本变成一个厂商的自拍。
 - 推送脚本 `_gh_push_new.py` 新增 `UIBC_PARENT`（固定父提交）与 `UIBC_TREE_ROOT`（本地树文件数与父树不符时**拒绝推送**）——上一轮收据对不上树就是这一类错，现在由脚本先拦。
+
 ## 未发布 — 2026-11-26（竞品对照扩到 17 家：结论的分母不再是 9）
 
 - **第二批 8 家入库**：`decentralized-identity/veramo`、`spruceid/ssi`、`spruceid/didkit`、`digitalbazaar/did-io`、`uport-project/ethr-did`、`hyperledger/indy-vdr`、`w3c-ccg/did-test-suite`、`sphereon-opensource/ssi-sdk`，全部按固定 commit 取 tarball、记 sha256，与第一批用同一组正则与同一套打分。

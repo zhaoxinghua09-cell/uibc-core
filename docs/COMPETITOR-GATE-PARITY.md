@@ -17,32 +17,32 @@
 
 | repository | code files | test files | test KB | D1 | D2 | D3 | D4 | D5 | score |
 |---|---|---|---|---|---|---|---|---|---|
-| `WeBankBlockchain/WeIdentity` | 290 | 97 | 713 | 1 | 0 | 0 | 0 | 0 | 1 |
+| `WeBankBlockchain/WeIdentity` | 290 | 97 | 713 | 0 | 0 | 0 | 0 | 0 | 0 |
 | `caict-4iot-dev/uni-registrar-driver-did-bid` | 10 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 | `caict-4iot-dev/uni-resolver-driver-did-bid` | 4 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 | `ceramicnetwork/js-did` | 307 | 36 | 127 | 1 | 0 | 1 | 0 | 0 | 2 |
 | `decentralized-identity/did-jwt` | 64 | 18 | 219 | 1 | 0 | 1 | 1 | 0 | 3 |
 | `decentralized-identity/did-resolver` | 14 | 1 | 21 | 0 | 0 | 0 | 0 | 0 | 0 |
-| `decentralized-identity/ethr-did-resolver` | 120 | 44 | 1190 | 1 | 0 | 1 | 1 | 0 | 3 |
-| `decentralized-identity/ion` | 67 | 4 | 1 | 0 | 0 | 0 | 1 | 0 | 1 |
-| `decentralized-identity/sidetree-core` | 62 | 21 | 132 | 1 | 0 | 1 | 0 | 0 | 2 |
-| `decentralized-identity/universal-resolver` | 155 | 20 | 26 | 1 | 0 | 0 | 0 | 0 | 1 |
+| `decentralized-identity/ethr-did-resolver` | 120 | 44 | 1190 | 0 | 0 | 0 | 0 | 0 | 0 |
+| `decentralized-identity/ion` | 67 | 4 | 1 | 0 | 0 | 0 | 0 | 0 | 0 |
+| `decentralized-identity/sidetree-core` | 62 | 21 | 132 | 0 | 0 | 0 | 0 | 0 | 0 |
+| `decentralized-identity/universal-resolver` | 155 | 20 | 26 | 0 | 0 | 0 | 0 | 0 | 0 |
 | `decentralized-identity/veramo` | 576 | 99 | 771 | 1 | 0 | 1 | 1 | 0 | 3 |
 | `digitalbazaar/did-io` | 14 | 3 | 8 | 0 | 0 | 0 | 0 | 0 | 0 |
 | `docknetwork/sdk` | 670 | 119 | 490 | 1 | 0 | 1 | 1 | 0 | 3 |
 | `hyperledger/aries-cloudagent-python` | 1820 | 698 | 5764 | 1 | 0 | 1 | 1 | 0 | 3 |
 | `hyperledger/aries-framework-go` | 1389 | 125 | 1028 | 1 | 0 | 1 | 1 | 0 | 3 |
 | `hyperledger/indy-sdk` | 1566 | 416 | 2084 | 1 | 0 | 1 | 1 | 0 | 3 |
-| `hyperledger/indy-vdr` | 254 | 54 | 174 | 1 | 0 | 1 | 1 | 0 | 3 |
+| `hyperledger/indy-vdr` | 254 | 54 | 174 | 0 | 0 | 0 | 0 | 0 | 0 |
 | `ontio/ontology-did` | 25 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 | `sphereon-opensource/ssi-sdk` | 1448 | 260 | 3678 | 1 | 0 | 1 | 1 | 0 | 3 |
-| `spruceid/didkit` | 132 | 10 | 41 | 0 | 0 | 1 | 0 | 0 | 1 |
-| `spruceid/ssi` | 448 | 59 | 424 | 0 | 0 | 1 | 0 | 0 | 1 |
-| `transmute-industries/sidetree.js` | 500 | 82 | 101 | 0 | 0 | 1 | 0 | 0 | 1 |
-| `uport-project/ethr-did` | 17 | 4 | 43 | 0 | 0 | 1 | 0 | 0 | 1 |
+| `spruceid/didkit` | 132 | 10 | 41 | 0 | 0 | 0 | 0 | 0 | 0 |
+| `spruceid/ssi` | 448 | 59 | 424 | 0 | 0 | 0 | 0 | 0 | 0 |
+| `transmute-industries/sidetree.js` | 500 | 82 | 101 | 0 | 0 | 0 | 0 | 0 | 0 |
+| `uport-project/ethr-did` | 17 | 4 | 43 | 0 | 0 | 0 | 0 | 0 | 0 |
 | `w3c-ccg/did-method-key` | 4 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| `w3c-ccg/did-test-suite` | 21 | 12 | 21 | 0 | 0 | 1 | 0 | 0 | 1 |
-| `zhaoxinghua09-cell/uibc-core` (this repository) | 1811 | 273 | 1068 | 2 | 2 | 2 | 2 | 2 | 10 |
+| `w3c-ccg/did-test-suite` | 21 | 12 | 21 | 0 | 0 | 0 | 0 | 0 | 0 |
+| `zhaoxinghua09-cell/uibc-core` (this repository) | 1986 | 275 | 1073 | 2 | 2 | 2 | 2 | 2 | 10 |
 
 D1 门槛＝测试文件内拒绝类断言 ≥10 次；D2＝位级关键词 ≥1；D3＝base58/地址派生关键词 ≥1；
 D4＝非测试代码里出现失败退出码 ≥1；D5 对 25 家一律记 0——"注入假断言要求门失败"这种用例，检索不到就当没有。
@@ -52,24 +52,39 @@ D4＝非测试代码里出现失败退出码 ≥1；D5 对 25 家一律记 0—�
 
 1. **逐位变异：25 家里有 0 家。** 这一维要的是"把一条报文的每一位翻一遍并归类"；
    没有二进制报文层的实现，连可翻的对象都没有——RFC-011 在本轮之前没有公开实现（`docs/CODEC.md` 有取证）。
-2. **跨层单一退出码：25 家里有 10 家。** 那 10 家记 1 是因为仓内有失败退出码（CLI 行为），
+2. **跨层单一退出码：25 家里有 7 家。** 那 7 家记 1 是因为仓内有失败退出码（CLI 行为），
    不是把多层证据收进一个码。
 3. **门自证：25 家里有 0 家。** 一个没人证伪过的门，通过时说的话只是自我声明。
-4. **文档层拒绝断言：25 家里有 13 家**，其中达到 D1 门槛（≥10 次）的按点状证据记 1；
+4. **文档层拒绝断言：25 家里有 8 家**，其中达到 D1 门槛（≥10 次）的按点状证据记 1；
    本仓库记 2 的依据是 31 个变异体、25 个必拒、silent 必须为空——同分不同质，见第四节。
 
 所以"全面超越"这句，能成立的范围只有一句：**在公开仓库里，把文档层、二进制层、地址层的变异证据收进
 一道可失败的门，并让门与自证一起随仓交付——25 家里只有本仓库具备完整闭环（10/10，最好的一家 3/10）。**
 其余任何"比竞品强"的说法都超出本表。
 
-## 四、本表量不到的
+## 五、这个度量能被怎么骗（上限是量出来的，不是嘴上说"关键词会漏"）
+
+`calibrate()` 用三棵合成仓库把这件事做成数字：一个**没有任何关键词**的空仓、一个**只把关键词写进注释、
+测试里一句断言都没有**的"堆词仓"、一个**真有 12 条拒绝断言**的仓。
+
+| 合成仓库 | 得分 | 说明 |
+|---|---|---|
+| 空仓 | 0/10 | 必须为 0，否则计数器连空号都在给分 |
+| 堆词仓（注释里堆满关键词、零断言） | **0/10** | 这就是**关键词谎报的上限** |
+| 诚实仓（12 条拒绝断言，无铺扫、无门） | 1/10 | D1 必须记到分 |
+
+上限 0/10 的意思是：一个仓库只要把词摆对、什么都不测，最多能拿到 0/10。
+所以 D1 现在要求**同时**满足"拒绝类词 ≥10"和"真断言行 ≥10"（`ASSERT_LINE_RE`），只堆词的仓拿不到 D1。
+这条上限写进快照，`--check` 每次重算一遍并比对，谁放松阈值、这个数字就变、门就红。
+
+## 六、本表量不到的
 
 - 关键词检索漏报：竞品可能用别的词（"negative cases"、把 fuzz 写进 CI 配置而非源码）。
 - 私有仓库与内部流水线：他们内部做没做，本表无从判断。
 - 质量差异：D1 记 1 的家，其拒绝用例是点状的；本仓库量的是另一件事。
 - 抽样：25 家是"能代表各条技术路线"的取样，不是 DID 生态的全集。
 
-## 五、复跑
+## 七、复跑
 
 ```
 python tools/competitor_gate_parity.py --check                   # 离线：快照+重算+表格一致性
@@ -80,7 +95,7 @@ python tools/competitor_gate_parity.py --json                    # 机读
 快照：`docs/competitor-parity.json`（含每个仓库的 sha、tarball sha256、字节数、原始计数）。
 矩阵图：`docs/COMPETITOR-GATE-PARITY.svg`（由快照生成，字节可复现）。
 
-## 六、引用
+## 八、引用
 
 - `WeBankBlockchain/WeIdentity` @ `2f8e4b5a7e20`：https://github.com/WeBankBlockchain/WeIdentity/tree/2f8e4b5a7e208790af7e2697b061550c91560e98
 - `caict-4iot-dev/uni-registrar-driver-did-bid` @ `68f69ec419c0`：https://github.com/caict-4iot-dev/uni-registrar-driver-did-bid/tree/68f69ec419c0f23c1a7faf95dd8d73aeb5ff30a4

@@ -6,6 +6,9 @@
 - **一处合法沉默被下游兜住（实测而非假设）**：`publicKey.type` 写成 `RSA` 解析不报错（正文只说是 String，无枚举）；用 Ed25519 真签后把 type 改成 `RSA`，验签返回 `False`，理由"signature does not verify over the JCS form"。
 - **地址绑定 `tools/probe_address_binding.py`**：256 次单比特翻键 → 地址全部改变、**0 次撞回原地址、0 次相互相撞**、每次改 30 字符里的 26–30 个；1710 次单字符替换 → **全部被拒**；截短/补长/中间删一位 → 全部不匹配。用 SDK 夹具而不是 RFC-003 正文印的例子，因为后者在本实现下不复现（两套变体见 `docs/ADDRESS-DERIVATION.md`）。
 - 新增 `tests/test_mutation_probes.py` 9 条；`docs/MUTATION-PROBES.md` 记方法、数字、以及这套方法量不到的三处（签名块 ID、分片末片判据、真机样例）。
+- **把三个探针收成一道门 `tools/mutation_gate.py`**：一条命令、14 项检查、一个退出码（`GATE OK` / `GATE FAIL`）。门只保留"让数字有意义"的性质——被禁形状全拒且 `silent` 为空、缺 `created`/`updated` 的报错必须带 §4.2.1 项目号、未知字段必须被接受、改标类型必须由验签挡、每一位必被归类且盲位恰等于保留位、翻键必变且 0 相撞、单字符替换全拒。不联网、无额外依赖，单次不到两秒。
+- **门要能失败才算门**：`tests/test_mutation_gate.py` 五条，其中两条注入假断言，要求账本报 `failed` 并且失败项点名——证明它不是一个只会打印 OK 的脚本。常规 `pytest` 即门。
+
 - 二进制层沿用同一账本：196 字节 / 1568 位，refused 328 / changed 1226 / blind 14（`docs/BINARY-PROTOCOL.md` 三·十）。
 
 ## 未发布 — 2026-11-25（RFC-011 编解码器：把"只能读"补成"能反算"）

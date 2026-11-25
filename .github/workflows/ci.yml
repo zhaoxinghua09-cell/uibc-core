@@ -357,6 +357,10 @@ jobs:
           # receipt. Unlocked rows are counted out loud, not silently passed.
           python tools/audit_claims_receipts.py
           python tools/audit_claims_receipts.py --selftest
+          # The inclusion half of A18 is folded by construction by a
+          # third-party implementation vendored in the tree; its selftest
+          # has to keep showing a wrong root coming back as reject.
+          python tools/crosscheck_competitor_inclusion_sigstore.py --selftest
           python tools/check_competitor_vectors.py \
             --dir docs/upstream-package/competitor-defects/v0.38.0 \
             --dir docs/upstream-package/competitor-defects/v0.38.0-counter --json \

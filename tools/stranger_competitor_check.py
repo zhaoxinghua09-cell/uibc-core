@@ -43,6 +43,7 @@ sys.path.insert(0, _REPO)
 import sweep_competitor_corpus as sweep
 import sweep_mutation_control as control
 import build_upstream_ledger as ledger
+import crosscheck_competitor_inclusion_sigstore as sigstore_inclusion
 
 UPSTREAM_REPO = "probityai/agent-evidence-vectors"
 SWEEP_RECEIPT = os.path.join(_REPO, "docs", "upstream-package", "competitor-defects",
@@ -175,6 +176,15 @@ def run(dir_arg=None, verbose=True):
         # moved is a difference, not a rounding error.
         diffs += ["ledger " + d for d in ledger._compare(stored_ledger,
                                                          ledger._dump(fresh_ledger))]
+        # The inclusion vectors are also folded by a vendored third-party
+        # implementation; if that stops agreeing, the "independently replayable"
+        # half of A18 is what breaks, so it is compared here too.
+        fresh_sig = sigstore_inclusion.build(corpus)
+        with open(sigstore_inclusion.RECEIPT, encoding="utf-8") as f:
+            stored_sig = f.read()
+        out["sigstore_inclusion"] = fresh_sig["totals"]
+        diffs += ["inclusion " + d for d in
+                  sigstore_inclusion._compare(stored_sig, sigstore_inclusion._dump(fresh_sig))]
         out["diffs"] = diffs
         out["verdict"] = "REPRODUCED" if not diffs else "DID NOT MATCH"
         if verbose:
@@ -188,6 +198,11 @@ def run(dir_arg=None, verbose=True):
             print("ledger: %d verdict, %d signature-only, %d nothing, %d signatures verify"
                   % (g["verdict"], g["signature-only"], g["nothing"],
                      g["signature_verified"]))
+            si = out["sigstore_inclusion"]
+            print("inclusion folded by vendored Sigstore: %d of %d agree with the "
+                  "published verdict, %d not compared"
+                  % (si["agree_with_published"], si["compared"],
+                     si["skipped_no_empty_root"] + si["unusable"]))
             for d in diffs:
                 print("  DIFF %s" % d)
             print("VERDICT: %s" % out["verdict"])

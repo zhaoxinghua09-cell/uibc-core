@@ -16,6 +16,13 @@ So this runs the lot in one pass, in a directory it did not create:
   5. the ledger's own invariants hold               (build_upstream_ledger --selftest)
   6. every locked claim still equals its receipt    (audit_claims_receipts)
   7. the evidence index is a scan of this tree      (build_evidence_index --check)
+  8. the vendored competitor corpus is these bytes   (verify_vendored_corpus --check)
+  9. the outsider receipt describes *this* tree      (outsider_rerun --check)
+ 10. its two digests, recomputed in another language (tree_digest_second_impl --check)
+
+Exit 77 from a check means "the runtime for it is absent" (today: node). That is
+reported as SKIP and counted, never as a pass: a gate nobody exercised is not a
+gate that held.
 
     python3 tools/stranger_own_check.py            # audit this checkout
     python3 tools/stranger_own_check.py --fresh    # fetch main, audit a clean copy
@@ -50,6 +57,12 @@ CHECKS = (
     # recomputed with no download. That makes "did anyone edit a vector" a real
     # risk, and this is the gate that answers it.
     ("vendored-corpus", ("tools/verify_vendored_corpus.py", "--check")),
+    # The receipt the gate leans on, checked against this tree: not only "the run
+    # passed somewhere" but "the run describes the bytes in front of you".
+    ("outsider-receipt", ("tools/outsider_rerun.py", "--check")),
+    # And the two numbers inside that receipt recomputed by a second language.
+    # Exit 77 means "node is not here", which is a skip, not an agreement.
+    ("tree-digest-second-impl", ("tools/tree_digest_second_impl.py", "--check")),
 )
 
 
@@ -70,12 +83,14 @@ def run_checks(root, runner=None):
             "check": name,
             "argv": " ".join(argv),
             "code": code,
-            "status": "PASS" if code == 0 else "FAIL",
+            "status": "PASS" if code == 0 else ("SKIP" if code == 77 else "FAIL"),
             "last_line": lines[-1] if lines else "",
         })
-    failed = [r for r in rows if r["code"] != 0]
-    return {"root": root, "checks": rows, "passed": len(rows) - len(failed),
-            "failed": len(failed),
+    failed = [r for r in rows if r["status"] == "FAIL"]
+    skipped = [r for r in rows if r["status"] == "SKIP"]
+    return {"root": root, "checks": rows,
+            "passed": len(rows) - len(failed) - len(skipped),
+            "failed": len(failed), "skipped": len(skipped),
             "verdict": "SELF-CONSISTENT" if not failed else "NOT SELF-CONSISTENT"}
 
 
@@ -130,6 +145,29 @@ def _selftest():
     check("the failure line is carried", "stale" in
           [c["last_line"] for c in r["checks"] if c["status"] == "FAIL"][0])
 
+    # A gate whose runtime is missing must say so, not quietly pass.
+    def node_missing(argv, cwd):
+        if "tree_digest_second_impl" in " ".join(argv):
+            return 77, "SKIP: no node binary"
+        return 0, "ok"
+
+    r = run_checks("x", node_missing)
+    check("exit 77 is a skip, not a pass",
+          [c["status"] for c in r["checks"] if c["check"] == "tree-digest-second-impl"] == ["SKIP"])
+    check("a skip keeps the verdict and is counted",
+          r["verdict"] == "SELF-CONSISTENT" and r["skipped"] == 1
+          and r["passed"] == len(CHECKS) - 1)
+
+    # And a skip must not be able to hide a failure elsewhere.
+    def node_missing_and_one_fails(argv, cwd):
+        if "tree_digest_second_impl" in " ".join(argv):
+            return 77, "SKIP: no node binary"
+        return one_fails(argv, cwd)
+
+    r = run_checks("x", node_missing_and_one_fails)
+    check("a skip does not mask a failure",
+          r["verdict"] == "NOT SELF-CONSISTENT" and r["failed"] == 1 and r["skipped"] == 1)
+
     # No check may depend on a network or a corpus it does not fetch itself.
     for _name, argv in CHECKS:
         check("%s is a local tool" % _name, argv[0].startswith("tools/"))
@@ -145,10 +183,11 @@ def _print(report):
     print("%d checks against %s" % (len(report["checks"]), report["root"]))
     for c in report["checks"]:
         print("  %-22s %s" % (c["check"], c["status"]))
-        if c["status"] == "FAIL":
+        if c["status"] in ("FAIL", "SKIP"):
             print("    %s" % c["last_line"])
-    print("VERDICT: %s (%d passed, %d failed)"
-          % (report["verdict"], report["passed"], report["failed"]))
+    tail = ", %d skipped" % report["skipped"] if report.get("skipped") else ""
+    print("VERDICT: %s (%d passed, %d failed%s)"
+          % (report["verdict"], report["passed"], report["failed"], tail))
 
 
 def main(argv=None):

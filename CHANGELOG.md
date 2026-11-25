@@ -1,3 +1,36 @@
+## 未发布 — 2026-11-26（收据比的是 HEAD，不是工作区）
+
+- **第二次红，原因不同**：加上折行轴后 CI 仍红。在 Linux 干净克隆上重跑十门是 `10 passed`，说明不是提交的问题——是**工作区**。同一条 job 里排在审计之前的步骤会往树里丢文件（重建的页面、临时产物），工作区因此不再是那个提交。拿工作区当基准，就得接受"别人刚跑过的树"与"这个提交"不是一回事。
+- **做法**：`commit_blobs()` 用 `git ls-tree -r` + `git cat-file --batch` 直接读 HEAD 的 blob，`digests_from_blobs()` 在内存里算三根轴；`all_digests()` 同时给两个视图（`commit`、`disk`），`--check` 依次比对，命中哪个就说哪个。`--run` 有 `.git` 时记 `delivery: commit`（与 `git archive` 的字节一致，因此克隆与解包终于对同一个数）。
+- **效果**：审计不再被同一 job 里别人的副作用弄红；同时保留了折行轴，解包的人仍可用 `DELIVERY MATCH` 判读。
+- **代价写清楚**：`commit` 视图要求 `.git` 与能跑通的 `git`；取不到时自动退回 `disk` 视图，收据里 `delivery` 记 `archive`/`worktree`，判定逻辑不变。
+
+## 未发布 — 2026-11-26（同一个提交、两条通道，两套字节：收据现在说得出来是哪一套）
+
+- **问题**：把 `outsider_rerun.py --check` 收进十门审计后，CI 红了，而红得很委屈——文件集 2437 个两边完全一样，`windows-clone-bytes` 步骤也报 `diverged: 0`。真相是**投递方式**：本仓有 83 个 blob 按 CRLF 存，`.gitattributes` 写的却是 `text=auto eol=lf`；`git archive`（codeload 包）发的是存储的 blob，Linux 检出按属性把行尾折成 LF。所以同一个提交，克隆的人和解包的人手里本来就是两套字节。
+- **做法**：`outsider_rerun.py` 加第三根轴 `content_lf_sha256`（每个文件先 CRLF→LF 再哈希），收据多记 `content_lf_sha256` 与 `delivery`（`worktree` / `archive`）。`--check` 四态：字节全同 → OK；仅名字坏 → `NAMES-ONLY` exit 2；**仅换行差 → `VERDICT: DELIVERY MATCH` exit 0**；真有字节动 → `CONTENT` exit 1。
+- **实测**：本仓 archive 树 `tree 07d6b0c5ca52 / content 94c43f5e3575 / lf f29a…`；把整棵树 98 个文件折成 LF 后 `--check` 打 `DELIVERY MATCH` 而不是红。
+- **不修的代价写清楚**：没有去改那 83 个 blob 的存储形态——那会动全仓摘要、既有快照与随仓语料的哈希；这根轴只负责让收据可判定，不负责抹平通道差异。断言 A32。
+- **测试**：`tests/test_outsider_rerun.py` 11 条（新增：折行只动内容摘要、单文件折行被判 DELIVERY MATCH 且严摘要仍不符）。
+
+## 未发布 — 2026-11-26（敏感性检验：把 D1 规则放松，"最好 3/10"会不会翻）
+
+- **为什么要做**：D1 的判据是"一行里同时出现断言和拒绝词"。这门规则是我们自己写的，所以"最好竞品只有 3/10"也可能是我们拼写方式的产物——这正是这类对照表最容易自欺的地方。
+- **做法**：`tools/parity_sensitivity.py` 用同一批固定 commit 的 tarball，把规则放宽成"断言行前后 ±2 行内出现拒绝词"，只加分不减分，逐家重算并写 `docs/parity-sensitivity.json` + `docs/PARITY-SENSITIVITY.md`。
+- **结果**：25 家里只有 1 家（`decentralized-identity/universal-resolver`）由 0→1，**最好仍是 3/10**，本仓 10/10。多个仓的断言行数翻倍（`did-jwt` 51→117、`ssi-sdk` 123→148），但都早已在 1 分之上，不改变排序。
+- **结论写死成判据**：`--check` 离线核对"放宽后最好分不得高于严格最好分"，一旦有竞品在宽松规则下拿到 4 分，直接输出 `withdraw the headline`——那时该撤的是主张，不是把规则改回去。
+- **`tests/test_parity_sensitivity.py` 五条**：记录必须覆盖快照全部仓库、放宽不得抬高最好分、只有 D1 可移动、放宽必须真的对至少一家有影响（否则不算敏感性检验）、页面必须写出结论。
+## 未发布 — 2026-11-26（看板：单文件、零外链、打开就自己算一遍，算错就红）
+- **顺手修红**：`tools/tree_digest_second_impl.py` 把成员清单交给 Python 侧（`tree_digest(root, files)`），但 `outsider_rerun.py` 的两个摘要函数只收 `root`，`second-implementation` 这条 CI 因此在 main 上是红的（`takes 1 positional argument but 2 were given`）。给两个函数加可选 `files=None`（省略时行为不变），本地 `--check` 得 `TREE OK`：Python 与 Node 在 2437 个文件上 `tree_sha256` / `content_sha256` 双轴一致。
+
+
+- **问题**：九门 S6 要的是"一屏看板、数字现读、单文件零外链、打开自检"。此前只有 PNG/SVG 和 Markdown 表——数字是生成那一刻刻进去的，读者无法分辨哪一行是被手改过的。
+- **做法**：`render_html()` 生成 `docs/parity-board.html`：快照 JSON 内嵌在 `<script id="snap">` 里，页面用自己的 JS 现场重算行数、最好竞品、本仓五维之和、谎报上限与最好竞品的大小关系、每家 40 位 commit，把每一条 PASS/FAIL 打在页面上，最后一行给 `SELF-CHECK PASS` / `FAIL — 本页不可信`。
+- **零外链是可测的**：全文不含 `http://` / `https://`，也没有任何 `src=`/`href=`（由测试断言），离线双击即可看。
+- **无浏览器也能验收**：`tools/board_check.js` 用五行 DOM 桩把页面自己的脚本跑一遍，页面说 PASS 才返回 0，并核对渲染出的行数 = 快照家数 + 1（本仓行）。
+- **两个真实 bug 是被这个验收抓出来的**（不是靠人眼）：① Python 模板里的转义被解释成真换行，写进 JS 单引号字符串，页面一打开就 `SyntaxError`；② 页面内嵌 JSON 里的 `<` 未转义会提前闭合块。
+- **`tests/test_parity_board.py` 四条**：单文件零外链、内嵌数字与快照逐项一致、页面必须自述"打开自检"且占位符已替换、有 node 时真跑页面脚本并必须 PASS（无 node 则跳过，不是假绿）。
+- **外人重跑的第四步顺手扩了**：pytest 列表加入 `test_parity_board.py` 与 `test_refs_check.py`，收据仍四步（不破坏 bench 对 steps=4 的断言），但外人现在连看板与引用一起验。
 ## 未发布 — 2026-11-26（每一分指到哪一行；D3 从"一个数"改成"一个区间"）
 
 - **问题**：表里写"9 家断言拒绝、9 家有地址派生证据"，读者只能看到计数，看不到是哪一行；也就无法分辨那是真断言还是注释/字面量蹭到的词。

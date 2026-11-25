@@ -331,6 +331,8 @@ VERDICT: REPRODUCED
 
 `--selftest` 8 条，其中两条是负对照：翻一位必须被抓到且点名文件；私自塞进一个向量必须判"多出来的"而不是默认采纳。测试 `tests/test_vendored_corpus.py` 6 条，另钉住一条——**不加 `--dir` 时必须跑随仓那份，并且打出 `VERDICT: REPRODUCED`**。
 
+**一条补充（本轮实测）**：把 `outsider_rerun.py --check` 收进审计时它红了，原因不是编辑而是**投递**——本仓 83 个 blob 按 CRLF 存、`.gitattributes` 声明 `text=auto eol=lf`，于是 `git archive` 的字节与 Linux 检出的字节不同。收据因此多记一根折行轴（`content_lf_sha256`）与 `delivery`，`--check` 只在纯换行差异时报 `VERDICT: DELIVERY MATCH`（exit 0），真有字节动仍报 `CONTENT`（exit 1）。另外它比的是**提交（HEAD）**而不是工作区：同一个 job 里排在它前面的步骤会往树里丢文件。见 A32、A33。
+
 ## 最后一条：审我们自己，也只要一条命令
 
 上面每条结论都有各自的 `--check`。但它们是**分开**跑的，而且通常是在一个被很多次编辑过的树里跑——那正是陈旧最容易藏身的地方。

@@ -93,6 +93,13 @@ def main():
     ap.add_argument("--json", action="store_true")
     ap.add_argument("--check", action="store_true", help="exit 1 unless the two agree")
     args = ap.parse_args()
+    if not node_binary():
+        # 77 is "the gate was not exercised", not "the gate passed": a missing
+        # runtime is not an agreement, and a caller that wants to call this a
+        # failure can map 77 to one. tools/stranger_own_check.py reports it as a
+        # skip and keeps it in the count.
+        print("SKIP: no node binary (set NODE or put node on PATH)")
+        return 77
     out = compare()
     if args.json:
         print(json.dumps(out, ensure_ascii=False))

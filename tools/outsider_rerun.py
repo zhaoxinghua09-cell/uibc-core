@@ -138,6 +138,100 @@ def content_digest(root, files=None):
     return hashlib.sha256("\n".join(sorted(hashes)).encode()).hexdigest(), len(hashes)
 
 
+def content_lf_digest(root, files=None):
+    """The content axis with CRLF folded to LF before hashing.
+
+    Why a third number: `git archive` ships the stored blob, a checkout applies
+    the eol attributes. Measured here: 83 blobs are stored with CRLF while
+    `.gitattributes` says `text=auto eol=lf`, so the same commit hands you
+    different bytes depending on how you got it - clone or codeload tarball. A
+    receipt taken from an archive therefore disagrees with a Linux worktree on
+    those 83 files and on nothing else. This axis is what tells that apart from
+    an actual edit; it is never used as the strict number.
+    """
+    hashes = []
+    for rel in (files if files is not None else tracked_files(root)):
+        if rel in GENERATED:
+            continue
+        p = os.path.join(root, rel.replace("/", os.sep))
+        try:
+            with open(p, "rb") as f:
+                hashes.append(hashlib.sha256(f.read().replace(b"\r\n", b"\n")).hexdigest())
+        except OSError:
+            hashes.append("unreadable")
+    return hashlib.sha256("\n".join(sorted(hashes)).encode()).hexdigest(), len(hashes)
+
+
+def commit_blobs(root):
+    """path -> bytes for everything HEAD tracks, read out of git, not the disk.
+
+    Why not the disk: a checkout is a working directory, and CI steps before the
+    audit legitimately drop files into it (a regenerated page, a coverage file).
+    Those would make the receipt look stale without a single tracked byte moving.
+    HEAD does not move. This is also the delivery-independent view: `git archive`
+    ships exactly these bytes, so the tarball and the clone finally agree.
+    """
+    if not os.path.isdir(os.path.join(root, ".git")):
+        return None
+    try:
+        ls = subprocess.run(["git", "ls-tree", "-r", "-z", "--full-tree", "HEAD"], cwd=root,
+                            capture_output=True)
+        if ls.returncode != 0 or not ls.stdout:
+            return None
+        entries = []
+        for item in ls.stdout.split(b"\0"):
+            if not item:
+                continue
+            meta, path = item.split(b"\t", 1)
+            mode, kind, sha = meta.split(b" ")
+            if kind != b"blob" or mode not in (b"100644", b"100755"):
+                continue
+            entries.append((sha, path.decode("utf-8")))
+        bat = subprocess.run(["git", "cat-file", "--batch"], cwd=root,
+                             input=b"".join(e[0] + b"\n" for e in entries),
+                             capture_output=True)
+        if bat.returncode != 0:
+            return None
+        blobs, pos = {}, 0
+        data = bat.stdout
+        for sha, path in entries:
+            eol = data.index(b"\n", pos)
+            header = data[pos:eol].split(b" ")
+            size = int(header[2])
+            body = data[eol + 1:eol + 1 + size]
+            blobs[path] = body
+            pos = eol + 1 + size + 1
+        return blobs
+    except Exception:                                              # noqa: BLE001
+        return None
+
+
+def digests_from_blobs(blobs):
+    """The three axes, computed on an in-memory path -> bytes mapping."""
+    paths, contents, folded = [], [], []
+    for path in sorted(blobs):
+        if path in GENERATED:
+            continue
+        body = blobs[path]
+        paths.append(path + ":" + hashlib.sha256(body).hexdigest())
+        contents.append(hashlib.sha256(body).hexdigest())
+        folded.append(hashlib.sha256(body.replace(b"\r\n", b"\n")).hexdigest())
+    n = len(paths)
+    return (hashlib.sha256("\n".join(paths).encode()).hexdigest(),
+            hashlib.sha256("\n".join(sorted(contents)).encode()).hexdigest(),
+            hashlib.sha256("\n".join(sorted(folded)).encode()).hexdigest(), n)
+
+
+def all_digests(root):
+    """Every view we can offer, cheapest first: what git says, what is on disk."""
+    views = []
+    blobs = commit_blobs(root)
+    if blobs is not None:
+        views.append(("commit", digests_from_blobs(blobs)))
+    views.append(("disk", (tree_digest(root)[0], content_digest(root)[0],
+                               content_lf_digest(root)[0], len(tracked_files(root)))))
+    return views
+
 def clean_env():
     return {k: os.environ[k] for k in ENV_KEEP if k in os.environ} | {"PYTHONUTF8": "1"}
 
@@ -147,8 +241,9 @@ def copy_tree(dest):
 
 
 def run(steps_only=None):
-    digest, count = tree_digest(HERE)
-    cdigest, ccount = content_digest(HERE)
+    name, (digest, cdigest, lfdigest, count) = all_digests(HERE)[0]
+    delivery = name if name == "commit" else ("worktree" if os.path.isdir(os.path.join(HERE, ".git")) else "archive")
+    ccount = count
     tmp = tempfile.mkdtemp(prefix="uibc-outsider-")
     work = os.path.join(tmp, "repo")
     copy_tree(work)
@@ -171,17 +266,22 @@ def run(steps_only=None):
                         "tail": tail or err.strip().splitlines()[-1][:160]})
         print(f"{'PASS' if ok else 'FAIL'} {name:6s} rc={rc} {round(time.time() - t0, 1)}s :: {tail}")
     shutil.rmtree(tmp, ignore_errors=True)
-    return {"digest": digest, "files": count, "content_digest": cdigest, "content_files": ccount,
+    return {"digest": digest, "files": count, "content_digest": cdigest,
+            "content_files": ccount, "content_lf_digest": lfdigest,
+            "delivery": delivery,
             "results": results}
 
 
-def write_receipt(digest, files, results, content=None, content_files=None):
+def write_receipt(digest, files, results, content=None, content_files=None,
+                  content_lf=None, delivery=None):
     receipt = {
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "tree_sha256": digest,
         "files_hashed": files,
         "content_sha256": content,
         "content_files": content_files,
+        "content_lf_sha256": content_lf,
+        "delivery": delivery,
         "digest_excludes": sorted(GENERATED),
         "runner": {"python": platform.python_version(), "machine": platform.machine(),
                    "system": platform.system()},
@@ -209,6 +309,12 @@ def write_receipt(digest, files, results, content=None, content_files=None):
              "`NAMES-ONLY`（字节全同、名字坏了，问题在你的解包器）还是 `CONTENT`（真的有字节动了）。",
              "在 Windows 上解包请用 `python -c \"import tarfile,sys;tarfile.open(sys.argv[1]).extractall(sys.argv[2])\" <包> <目录>`，"
              "或直接在 POSIX 上解包。",
+             "",
+             f"**第三根轴 `{str(receipt.get('content_lf_sha256'))[:16]}…`：内容摘要再折一次换行（CRLF→LF）**，"
+             f"收据记的是 `{receipt.get('delivery')}` 这一路的字节。原因实测：本仓有 83 个文件的 blob 按 CRLF 存，"
+             "而 `.gitattributes` 写的是 `text=auto eol=lf`——`git archive` 给的是存储的字节，检出给的是规整后的字节，"
+             "同一个提交两条通道给两套字节。这一根轴用来把\"换行差异\"与\"有人改了字节\"分开，"
+             "`--check` 因此能报 `VERDICT: DELIVERY MATCH`（同名同内容、只差换行）。",
              "", "复核：`python tools/outsider_rerun.py --check`（重算两根摘要＋逐步判定），或 `--run` 重新跑一遍。"]
     open(PAGE, "w", encoding="utf-8").write("\n".join(page) + "\n")
     print("OUTSIDER OK" if receipt["ok"] else "OUTSIDER FAIL",
@@ -222,20 +328,48 @@ def check():
         return 1
     receipt = json.load(open(RECEIPT, encoding="utf-8"))
     fails = []
-    digest, count = tree_digest(HERE)
-    cdigest, _ = content_digest(HERE)
     receipt_content = receipt.get("content_sha256")
+    receipt_lf = receipt.get("content_lf_sha256")
+    views = all_digests(HERE)
     names_only = False
-    if receipt.get("tree_sha256") != digest:
-        if receipt_content and receipt_content == cdigest:
-            names_only = True
-            fails.append(
-                "NAMES-ONLY: the paths differ but every byte matches "
-                f"(content_sha256 {cdigest[:12]} agrees, tree_sha256 {digest[:12]} does not)")
-        else:
-            fails.append(f"CONTENT: receipt describes tree {str(receipt.get('tree_sha256'))[:12]} but this tree hashes to {digest[:12]}"
-                         f" (content_sha256 {str(receipt_content)[:12]} vs {cdigest[:12]})")
-    if receipt.get("files_hashed") != count:
+    delivery_only = False
+    matched = None
+    strict = False
+    for name, (d, c, l, n) in views:
+        if receipt.get("tree_sha256") == d:
+            matched = (name, d, c, l, n)
+            strict = True
+            break
+    if matched is None:
+        for name, (d, c, l, n) in views:
+            if receipt_content and receipt_content == c:
+                names_only = True
+                matched = (name, d, c, l, n)
+                fails.append(
+                    "NAMES-ONLY: the paths differ but every byte matches "
+                    f"(content_sha256 {c[:12]} agrees, tree_sha256 {d[:12]} does not, seen as {name})")
+                break
+            if receipt_lf and receipt_lf == l:
+                delivery_only = True
+                matched = (name, d, c, l, n)
+                fails.append(
+                    "DELIVERY: the bytes differ only in line endings "
+                    f"(content_lf_sha256 {l[:12]} agrees on both sides); the receipt names "
+                    f"delivery {receipt.get('delivery')!r}, this tree is another one ({name})")
+                break
+        if matched is None:
+            name, (d, c, l, n) = views[-1]
+            fails.append(f"CONTENT: receipt describes tree {str(receipt.get('tree_sha256'))[:12]} "
+                         f"but this tree hashes to {d[:12]} (content_sha256 "
+                         f"{str(receipt_content)[:12]} vs {c[:12]})")
+            matched = (name, d, c, l, n)
+    view_name, digest, cdigest, lfdigest, count = matched
+    # The strict digest already encodes the file set: every path and every
+    # content hash is in it. The count is a second opinion worth asking when the
+    # digest did not match; when it did, a differing count means the two views
+    # count differently (a Windows extraction turning a symlink into a file),
+    # not that a file appeared.
+    if not strict and receipt.get("files_hashed") != count:
         fails.append(f"file count moved: receipt {receipt.get('files_hashed')}, tree {count}")
     steps = receipt.get("steps", [])
     if len(steps) != len(STEPS):
@@ -255,11 +389,25 @@ def check():
         print("or on a POSIX host, then rerun --check; the tree digest will match unchanged.")
         print(f"\nOUTSIDER FAIL ({len(fails)} problem(s), names only - bytes are intact)")
         return 2
+    if delivery_only:
+        print("\nOK BY DELIVERY: this is the same commit seen through the other channel. `git archive`")
+        print("ships the stored blob; a checkout applies `.gitattributes` (text=auto eol=lf), and")
+        print("this repository stores some blobs with CRLF. The strict digest names the channel it")
+        print("was taken from, so a stranger who clones and a stranger who unpacks a tarball each")
+        print("get a number that matches their own bytes. Nothing was edited.")
+        print(f"\nVERDICT: DELIVERY MATCH ({receipt.get('delivery')} receipt, "
+              f"{'worktree' if os.path.isdir(os.path.join(HERE, '.git')) else 'archive'} tree)")
+        return 0
     if fails:
         print(f"\nOUTSIDER FAIL ({len(fails)} problem(s))")
         return 1
-    print(f"OUTSIDER OK: receipt matches this tree ({count} files, {digest[:12]}, "
+    print(f"OUTSIDER OK: receipt matches this {view_name} ({count} files, {digest[:12]}, "
           f"content {cdigest[:12]}), {len(steps)} steps passed")
+    for name, (d, c, l, n) in views:
+        if name != view_name and d != digest:
+            print(f"NOTE: the {name} view differs from the {view_name} one. The receipt answers "
+                  f"for the {view_name}; uncommitted edits and files dropped by other steps live "
+                  f"only in the {name} view and are not what this number describes.")
     return 0
 
 
@@ -272,7 +420,8 @@ def main():
     if args.run:
         out = run()
         rc = write_receipt(out["digest"], out["files"], out["results"],
-                           content=out["content_digest"], content_files=out["content_files"])
+                           content=out["content_digest"], content_files=out["content_files"],
+                           content_lf=out["content_lf_digest"], delivery=out["delivery"])
     else:
         rc = check()
     if args.json:

@@ -435,12 +435,18 @@ def resolve(did, endpoint=None, timeout=10, fetcher=None):
         # document, and some deployments nest it as data.didDocument. Both shapes
         # are accepted -- and both still have to answer with the id we asked about,
         # which the check below enforces.
+        #
+        # The envelope is unwrapped by bid_protocol.parse_bid_envelope so that the
+        # eleven documented response codes (spec 4.2.5) are not flattened into one
+        # opaque failure: callers that need the code, and whether it is retryable,
+        # use bid_protocol.resolve_bid instead of this transport-level helper.
+        from .bid_protocol import BIDProtocolError, parse_bid_envelope
+
         envelope = _fetch_json("%s/%s" % (endpoint, did), timeout, fetcher)
-        if isinstance(envelope, dict) and envelope.get("errorCode") not in (None, 0):
-            raise DIDCNError("%s: registry refused: errorCode=%r message=%r"
-                             % (did, envelope.get("errorCode"), envelope.get("message")))
-        data = envelope.get("data") if isinstance(envelope, dict) else None
-        doc = data.get("didDocument") if isinstance(data, dict) and data.get("didDocument") else envelope
+        try:
+            doc = parse_bid_envelope(envelope, did)
+        except BIDProtocolError as exc:
+            raise DIDCNError(str(exc)) from None
     else:
         raise DIDCNError("%s: no read shape implemented for did:%s" % (did, method))
     if not isinstance(doc, dict):

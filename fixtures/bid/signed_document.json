@@ -1,0 +1,56 @@
+{
+  "@context": [
+    "https://w3.org/ns/did/v1"
+  ],
+  "id": "did:bid:ef18F9AVK4SQLZPRrPkrVWwp9kbpdXHx",
+  "created": "2021-06-24T09:10:09Z",
+  "updated": "2021-06-24T09:10:09Z",
+  "authentication": [
+    "did:bid:ef18F9AVK4SQLZPRrPkrVWwp9kbpdXHx#key-1"
+  ],
+  "publicKey": [
+    {
+      "controller": "did:bid:ef18F9AVK4SQLZPRrPkrVWwp9kbpdXHx",
+      "id": "did:bid:ef18F9AVK4SQLZPRrPkrVWwp9kbpdXHx#key-1",
+      "publicKeyHex": "b003a107bff3ce10be1d70dd18e74bc09967e4d6309ba50d5f1ddc8664125531b8",
+      "type": "ED25519"
+    }
+  ],
+  "alsoKnownAs": [
+    {
+      "type": 101,
+      "id": "did:bid:efOtherAliasForTheSameKey"
+    }
+  ],
+  "extension": {
+    "recovery": [
+      "did:bid:ef18F9AVK4SQLZPRrPkrVWwp9kbpdXHx#key-1"
+    ],
+    "ttl": 86400,
+    "type": 105,
+    "attributes": [
+      {
+        "key": "contract",
+        "desc": "contract address",
+        "encrypt": 1,
+        "format": "text",
+        "value": "did:bid:efJgt44mNDewKK1VEN454R17cjso3mSG"
+      }
+    ]
+  },
+  "service": [
+    {
+      "id": "did:bid:ef18F9AVK4SQLZPRrPkrVWwp9kbpdXHx#resolver",
+      "type": "DIDSubResolver",
+      "version": "1.0",
+      "protocol": 2,
+      "serverType": 1,
+      "serviceEndpoint": "http://sub.example.com/"
+    }
+  ],
+  "proof": {
+    "creator": "did:bid:ef18F9AVK4SQLZPRrPkrVWwp9kbpdXHx#key-1",
+    "signatureValue": "648Sg7gHynEuP8gGy5s2g7mbFAtpxVqKZJWjvNBsMkUi38XYmHEKypxjGTAV4JEZ7s5YypSwkPGnHcdAQGL7Cj9T",
+    "type": "Ed25519Signature2018"
+  }
+}

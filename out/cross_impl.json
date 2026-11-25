@@ -1,0 +1,623 @@
+{
+  "summary": {
+    "cases": 30,
+    "compared": 30,
+    "errors": 0,
+    "verdict_agree": 20,
+    "first_agree": 17,
+    "set_agree": 14,
+    "both_match_oracle": 18,
+    "coverage_gap": 7,
+    "contradiction": 2,
+    "accept_divergence": 1,
+    "covered_checks": 10,
+    "uncovered_checks": [
+      "S9",
+      "S11",
+      "S13",
+      "S14",
+      "S15",
+      "S16",
+      "S17",
+      "S18",
+      "S19"
+    ],
+    "as_of": "2026-11-25"
+  },
+  "rows": [
+    {
+      "case": "oracle-clean",
+      "mode": "strict",
+      "expected": "PASS",
+      "ref": "PASS",
+      "ind": "PASS",
+      "verdict_agree": true,
+      "ref_first": null,
+      "ind_first": null,
+      "first_agree": true,
+      "ref_set": [],
+      "ind_set": [],
+      "set_agree": true,
+      "both_match_oracle": true,
+      "designed_uncovered": [],
+      "kind": "agree"
+    },
+    {
+      "case": "oracle-tampered",
+      "mode": "strict",
+      "expected": "FAIL",
+      "ref": "FAIL",
+      "ind": "FAIL",
+      "verdict_agree": true,
+      "ref_first": "S4",
+      "ind_first": "S4",
+      "first_agree": true,
+      "ref_set": [
+        "S4",
+        "S8"
+      ],
+      "ind_set": [
+        "S4"
+      ],
+      "set_agree": false,
+      "both_match_oracle": true,
+      "designed_uncovered": [],
+      "kind": "agree"
+    },
+    {
+      "case": "oracle-deleted",
+      "mode": "strict",
+      "expected": "FAIL",
+      "ref": "FAIL",
+      "ind": "FAIL",
+      "verdict_agree": true,
+      "ref_first": "S4",
+      "ind_first": "S4",
+      "first_agree": true,
+      "ref_set": [
+        "S4",
+        "S8"
+      ],
+      "ind_set": [
+        "S4"
+      ],
+      "set_agree": false,
+      "both_match_oracle": true,
+      "designed_uncovered": [],
+      "kind": "agree"
+    },
+    {
+      "case": "oracle-duplicated",
+      "mode": "strict",
+      "expected": "FAIL",
+      "ref": "FAIL",
+      "ind": "FAIL",
+      "verdict_agree": true,
+      "ref_first": "S5",
+      "ind_first": "S5",
+      "first_agree": true,
+      "ref_set": [
+        "S5",
+        "S7",
+        "S8",
+        "S12"
+      ],
+      "ind_set": [
+        "S5",
+        "V8",
+        "V9"
+      ],
+      "set_agree": false,
+      "both_match_oracle": true,
+      "designed_uncovered": [],
+      "kind": "agree"
+    },
+    {
+      "case": "oracle-unsealed",
+      "mode": "strict",
+      "expected": "FAIL",
+      "ref": "FAIL",
+      "ind": "FAIL",
+      "verdict_agree": true,
+      "ref_first": "S6",
+      "ind_first": "S6",
+      "first_agree": true,
+      "ref_set": [
+        "S6"
+      ],
+      "ind_set": [
+        "S6"
+      ],
+      "set_agree": true,
+      "both_match_oracle": true,
+      "designed_uncovered": [],
+      "kind": "agree"
+    },
+    {
+      "case": "oracle-s12-id-only",
+      "mode": "strict",
+      "expected": "FAIL",
+      "ref": "FAIL",
+      "ind": "INCONCLUSIVE",
+      "verdict_agree": false,
+      "ref_first": "S12",
+      "ind_first": null,
+      "first_agree": false,
+      "ref_set": [
+        "S12"
+      ],
+      "ind_set": [],
+      "set_agree": false,
+      "both_match_oracle": false,
+      "designed_uncovered": [],
+      "kind": "contradiction"
+    },
+    {
+      "case": "oracle-s01-undeclared-file",
+      "mode": "open",
+      "expected": "FAIL",
+      "ref": "FAIL",
+      "ind": "FAIL",
+      "verdict_agree": true,
+      "ref_first": "S1",
+      "ind_first": "V7",
+      "first_agree": false,
+      "ref_set": [
+        "S1"
+      ],
+      "ind_set": [
+        "V7"
+      ],
+      "set_agree": false,
+      "both_match_oracle": true,
+      "designed_uncovered": [],
+      "kind": "agree"
+    },
+    {
+      "case": "oracle-s02-identity",
+      "mode": "open",
+      "expected": "FAIL",
+      "ref": "FAIL",
+      "ind": "FAIL",
+      "verdict_agree": true,
+      "ref_first": "S2",
+      "ind_first": "S2",
+      "first_agree": true,
+      "ref_set": [
+        "S2"
+      ],
+      "ind_set": [
+        "S2"
+      ],
+      "set_agree": true,
+      "both_match_oracle": true,
+      "designed_uncovered": [],
+      "kind": "agree"
+    },
+    {
+      "case": "oracle-s03-calendar",
+      "mode": "open",
+      "expected": "FAIL",
+      "ref": "FAIL",
+      "ind": "FAIL",
+      "verdict_agree": true,
+      "ref_first": "S3",
+      "ind_first": "V9",
+      "first_agree": false,
+      "ref_set": [
+        "S3",
+        "S8",
+        "S12"
+      ],
+      "ind_set": [
+        "V9",
+        "V10"
+      ],
+      "set_agree": false,
+      "both_match_oracle": true,
+      "designed_uncovered": [],
+      "kind": "agree"
+    },
+    {
+      "case": "oracle-s08-log-truncated",
+      "mode": "open",
+      "expected": "FAIL",
+      "ref": "FAIL",
+      "ind": "FAIL",
+      "verdict_agree": true,
+      "ref_first": "S8",
+      "ind_first": "V9",
+      "first_agree": false,
+      "ref_set": [
+        "S8"
+      ],
+      "ind_set": [
+        "V9"
+      ],
+      "set_agree": false,
+      "both_match_oracle": true,
+      "designed_uncovered": [],
+      "kind": "agree"
+    },
+    {
+      "case": "oracle-s10-closure",
+      "mode": "open",
+      "expected": "FAIL",
+      "ref": "FAIL",
+      "ind": "INCONCLUSIVE",
+      "verdict_agree": false,
+      "ref_first": "S10",
+      "ind_first": null,
+      "first_agree": false,
+      "ref_set": [
+        "S10"
+      ],
+      "ind_set": [],
+      "set_agree": false,
+      "both_match_oracle": false,
+      "designed_uncovered": [],
+      "kind": "contradiction"
+    },
+    {
+      "case": "oracle-s11-duplicate-member",
+      "mode": "open",
+      "expected": "FAIL",
+      "ref": "FAIL",
+      "ind": "INCONCLUSIVE",
+      "verdict_agree": false,
+      "ref_first": "S11",
+      "ind_first": null,
+      "first_agree": false,
+      "ref_set": [
+        "S11"
+      ],
+      "ind_set": [],
+      "set_agree": false,
+      "both_match_oracle": false,
+      "designed_uncovered": [
+        "S11"
+      ],
+      "kind": "coverage-gap"
+    },
+    {
+      "case": "oracle-s13-merkle-root",
+      "mode": "open",
+      "expected": "FAIL",
+      "ref": "FAIL",
+      "ind": "INCONCLUSIVE",
+      "verdict_agree": false,
+      "ref_first": "S13",
+      "ind_first": null,
+      "first_agree": false,
+      "ref_set": [
+        "S13"
+      ],
+      "ind_set": [],
+      "set_agree": false,
+      "both_match_oracle": false,
+      "designed_uncovered": [
+        "S13"
+      ],
+      "kind": "coverage-gap"
+    },
+    {
+      "case": "oracle-s14-base64-padding",
+      "mode": "open",
+      "expected": "FAIL",
+      "ref": "FAIL",
+      "ind": "INCONCLUSIVE",
+      "verdict_agree": false,
+      "ref_first": "S14",
+      "ind_first": null,
+      "first_agree": false,
+      "ref_set": [
+        "S14"
+      ],
+      "ind_set": [],
+      "set_agree": false,
+      "both_match_oracle": false,
+      "designed_uncovered": [
+        "S14"
+      ],
+      "kind": "coverage-gap"
+    },
+    {
+      "case": "oracle-s15-anchor-time",
+      "mode": "open",
+      "expected": "FAIL",
+      "ref": "FAIL",
+      "ind": "INCONCLUSIVE",
+      "verdict_agree": false,
+      "ref_first": "S15",
+      "ind_first": null,
+      "first_agree": false,
+      "ref_set": [
+        "S15"
+      ],
+      "ind_set": [],
+      "set_agree": false,
+      "both_match_oracle": false,
+      "designed_uncovered": [
+        "S15"
+      ],
+      "kind": "coverage-gap"
+    },
+    {
+      "case": "oracle-s16-token-byte",
+      "mode": "open",
+      "expected": "FAIL",
+      "ref": "FAIL",
+      "ind": "INCONCLUSIVE",
+      "verdict_agree": false,
+      "ref_first": "S16",
+      "ind_first": null,
+      "first_agree": false,
+      "ref_set": [
+        "S16"
+      ],
+      "ind_set": [],
+      "set_agree": false,
+      "both_match_oracle": false,
+      "designed_uncovered": [
+        "S16"
+      ],
+      "kind": "coverage-gap"
+    },
+    {
+      "case": "oracle-s17-receipt-body",
+      "mode": "open",
+      "expected": "FAIL",
+      "ref": "FAIL",
+      "ind": "INCONCLUSIVE",
+      "verdict_agree": false,
+      "ref_first": "S17",
+      "ind_first": null,
+      "first_agree": false,
+      "ref_set": [
+        "S17"
+      ],
+      "ind_set": [],
+      "set_agree": false,
+      "both_match_oracle": false,
+      "designed_uncovered": [
+        "S17"
+      ],
+      "kind": "coverage-gap"
+    },
+    {
+      "case": "oracle-s18-policy-artefact",
+      "mode": "open",
+      "expected": "FAIL",
+      "ref": "FAIL",
+      "ind": "INCONCLUSIVE",
+      "verdict_agree": false,
+      "ref_first": "S18",
+      "ind_first": null,
+      "first_agree": false,
+      "ref_set": [
+        "S18"
+      ],
+      "ind_set": [],
+      "set_agree": false,
+      "both_match_oracle": false,
+      "designed_uncovered": [
+        "S18"
+      ],
+      "kind": "coverage-gap"
+    },
+    {
+      "case": "oracle-s07-index-metadata",
+      "mode": "open",
+      "expected": "FAIL",
+      "ref": "FAIL",
+      "ind": "FAIL",
+      "verdict_agree": true,
+      "ref_first": "S7",
+      "ind_first": "V8",
+      "first_agree": false,
+      "ref_set": [
+        "S7",
+        "S8"
+      ],
+      "ind_set": [
+        "V8",
+        "V9"
+      ],
+      "set_agree": false,
+      "both_match_oracle": true,
+      "designed_uncovered": [],
+      "kind": "agree"
+    },
+    {
+      "case": "accept-one-file",
+      "mode": "strict",
+      "expected": "PASS",
+      "ref": "PASS",
+      "ind": "PASS",
+      "verdict_agree": true,
+      "ref_first": null,
+      "ind_first": null,
+      "first_agree": true,
+      "ref_set": [],
+      "ind_set": [],
+      "set_agree": true,
+      "both_match_oracle": true,
+      "designed_uncovered": [],
+      "kind": "agree"
+    },
+    {
+      "case": "accept-many-files",
+      "mode": "strict",
+      "expected": "PASS",
+      "ref": "PASS",
+      "ind": "PASS",
+      "verdict_agree": true,
+      "ref_first": null,
+      "ind_first": null,
+      "first_agree": true,
+      "ref_set": [],
+      "ind_set": [],
+      "set_agree": true,
+      "both_match_oracle": true,
+      "designed_uncovered": [],
+      "kind": "agree"
+    },
+    {
+      "case": "accept-unicode-names",
+      "mode": "strict",
+      "expected": "PASS",
+      "ref": "PASS",
+      "ind": "PASS",
+      "verdict_agree": true,
+      "ref_first": null,
+      "ind_first": null,
+      "first_agree": true,
+      "ref_set": [],
+      "ind_set": [],
+      "set_agree": true,
+      "both_match_oracle": true,
+      "designed_uncovered": [],
+      "kind": "agree"
+    },
+    {
+      "case": "accept-binary",
+      "mode": "strict",
+      "expected": "PASS",
+      "ref": "PASS",
+      "ind": "PASS",
+      "verdict_agree": true,
+      "ref_first": null,
+      "ind_first": null,
+      "first_agree": true,
+      "ref_set": [],
+      "ind_set": [],
+      "set_agree": true,
+      "both_match_oracle": true,
+      "designed_uncovered": [],
+      "kind": "agree"
+    },
+    {
+      "case": "accept-large-text",
+      "mode": "strict",
+      "expected": "PASS",
+      "ref": "PASS",
+      "ind": "PASS",
+      "verdict_agree": true,
+      "ref_first": null,
+      "ind_first": null,
+      "first_agree": true,
+      "ref_set": [],
+      "ind_set": [],
+      "set_agree": true,
+      "both_match_oracle": true,
+      "designed_uncovered": [],
+      "kind": "agree"
+    },
+    {
+      "case": "accept-resubmitted",
+      "mode": "strict",
+      "expected": "PASS",
+      "ref": "PASS",
+      "ind": "PASS",
+      "verdict_agree": true,
+      "ref_first": null,
+      "ind_first": null,
+      "first_agree": true,
+      "ref_set": [],
+      "ind_set": [],
+      "set_agree": true,
+      "both_match_oracle": true,
+      "designed_uncovered": [],
+      "kind": "agree"
+    },
+    {
+      "case": "accept-typed-evidence",
+      "mode": "strict",
+      "expected": "PASS",
+      "ref": "PASS",
+      "ind": "PASS",
+      "verdict_agree": true,
+      "ref_first": null,
+      "ind_first": null,
+      "first_agree": true,
+      "ref_set": [],
+      "ind_set": [],
+      "set_agree": true,
+      "both_match_oracle": true,
+      "designed_uncovered": [],
+      "kind": "agree"
+    },
+    {
+      "case": "accept-lifecycle-events",
+      "mode": "strict",
+      "expected": "PASS",
+      "ref": "PASS",
+      "ind": "PASS",
+      "verdict_agree": true,
+      "ref_first": null,
+      "ind_first": null,
+      "first_agree": true,
+      "ref_set": [],
+      "ind_set": [],
+      "set_agree": true,
+      "both_match_oracle": true,
+      "designed_uncovered": [],
+      "kind": "agree"
+    },
+    {
+      "case": "accept-anchored-policy",
+      "mode": "strict",
+      "expected": "PASS",
+      "ref": "PASS",
+      "ind": "INCONCLUSIVE",
+      "verdict_agree": false,
+      "ref_first": null,
+      "ind_first": null,
+      "first_agree": true,
+      "ref_set": [],
+      "ind_set": [],
+      "set_agree": true,
+      "both_match_oracle": false,
+      "designed_uncovered": [],
+      "kind": "accept-divergence"
+    },
+    {
+      "case": "oracle-s09-rollback-pin",
+      "mode": "strict",
+      "expected": "FAIL",
+      "ref": "PASS",
+      "ind": "PASS",
+      "verdict_agree": true,
+      "ref_first": null,
+      "ind_first": null,
+      "first_agree": true,
+      "ref_set": [],
+      "ind_set": [],
+      "set_agree": true,
+      "both_match_oracle": false,
+      "designed_uncovered": [
+        "S9"
+      ],
+      "kind": "agree"
+    },
+    {
+      "case": "oracle-s19-stale-state",
+      "mode": "strict",
+      "expected": "FAIL",
+      "ref": "PASS",
+      "ind": "PASS",
+      "verdict_agree": true,
+      "ref_first": null,
+      "ind_first": null,
+      "first_agree": true,
+      "ref_set": [],
+      "ind_set": [],
+      "set_agree": true,
+      "both_match_oracle": false,
+      "designed_uncovered": [
+        "S19"
+      ],
+      "kind": "agree"
+    }
+  ]
+}

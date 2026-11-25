@@ -1,0 +1,20 @@
+{
+  "class": "positive",
+  "expect": {
+    "result": "accept"
+  },
+  "id": "CON-P-2-5",
+  "kind": "consistency",
+  "new_root": "39b5942c2fec0d6d122912a4a645a608c48e972aa5edaa8f338c83e63b0d88f8",
+  "new_size": 5,
+  "note": "size 5 extends size 2",
+  "old_root": "a1ab874a47a34ae9d836dc94df2446cfa363b7be528785cc1d4a464d192ba415",
+  "old_size": 2,
+  "proof": [
+    "a97aeefb10ef831f16f2323fabafe84c014ba8c43f35fc152364bf0139ceaa64",
+    "c81244ea404372139935e4b912915cf5eeca5655eb9950078e3b15b902f87678"
+  ],
+  "requirements": [
+    "7.3.5"
+  ]
+}

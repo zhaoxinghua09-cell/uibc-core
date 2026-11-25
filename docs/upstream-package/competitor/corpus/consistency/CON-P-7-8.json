@@ -1,0 +1,22 @@
+{
+  "class": "positive",
+  "expect": {
+    "result": "accept"
+  },
+  "id": "CON-P-7-8",
+  "kind": "consistency",
+  "new_root": "799f8fd273f614988eed0eeb74544f1668c5ac0705d2aa21a4303f508fe37fd8",
+  "new_size": 8,
+  "note": "size 8 extends size 7",
+  "old_root": "5488b5f193283d9d01a5af8b92db51e0fa56b79f9f4adb07f444af88f16ed1f6",
+  "old_size": 7,
+  "proof": [
+    "bdc808b10e405990c112966b82cd8a3a826b9a3519e92c89651cb3a4ea1bd09c",
+    "491f130e24274e003adc9c661b19fb5f423721ce2545b9c0ade1a93fb83c5b8e",
+    "51d025b2ac53fdc0d0ad72bb3e3f44a1fc0559bb215fc093c929ed35cd8125cc",
+    "ab8c24f1dcade85a5df62b815ebf86e4720cbfef69fed2b7b8a8717e8cd8e66c"
+  ],
+  "requirements": [
+    "7.3.5"
+  ]
+}

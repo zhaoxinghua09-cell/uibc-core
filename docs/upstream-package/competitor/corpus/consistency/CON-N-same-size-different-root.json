@@ -1,0 +1,20 @@
+{
+  "class": "negative",
+  "expect": {
+    "code": [
+      "not-consistent"
+    ],
+    "result": "reject"
+  },
+  "id": "CON-N-same-size-different-root",
+  "kind": "consistency",
+  "new_root": "3a184829e767d800654ff047d979a0052707d6ba211e0edcded96179bac1dd7c",
+  "new_size": 7,
+  "note": "equal sizes with different roots",
+  "old_root": "5488b5f193283d9d01a5af8b92db51e0fa56b79f9f4adb07f444af88f16ed1f6",
+  "old_size": 7,
+  "proof": [],
+  "requirements": [
+    "7.3.5"
+  ]
+}

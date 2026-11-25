@@ -1,0 +1,21 @@
+{
+  "class": "positive",
+  "expect": {
+    "result": "accept"
+  },
+  "id": "INC-P-n8-i7",
+  "index": 7,
+  "kind": "inclusion",
+  "note": "record 7 of a 8-leaf tree",
+  "proof": [
+    "bdc808b10e405990c112966b82cd8a3a826b9a3519e92c89651cb3a4ea1bd09c",
+    "51d025b2ac53fdc0d0ad72bb3e3f44a1fc0559bb215fc093c929ed35cd8125cc",
+    "ab8c24f1dcade85a5df62b815ebf86e4720cbfef69fed2b7b8a8717e8cd8e66c"
+  ],
+  "record_hex": "7b22736e617073686f74223a2232303337376365633966353166366266356261316661363436343966336231363134653465656538333366643066633538393366323466366530616363626166222c2276657264696374223a22414c4c4f57227d",
+  "requirements": [
+    "7.3.4"
+  ],
+  "root": "799f8fd273f614988eed0eeb74544f1668c5ac0705d2aa21a4303f508fe37fd8",
+  "tree_size": 8
+}

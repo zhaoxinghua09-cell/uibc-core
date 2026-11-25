@@ -1,7 +1,7 @@
 {
- "generated_at": "2026-11-25T16:48:39Z",
- "tree_sha256": "3163aff2f57f77e627656dff1bdac1b868dbc9ef65b0fb801b2fbca4af158c14",
- "files_hashed": 2248,
+ "generated_at": "2026-11-25T17:38:50Z",
+ "tree_sha256": "8e0b99334eac6f724bb2d5a58f67b4e6fd766efacdefa6c30137d864d74ba166",
+ "files_hashed": 2424,
  "digest_excludes": [
   "docs/OUTSIDER-RERUN.md",
   "docs/outsider-rerun-receipt.json"
@@ -35,7 +35,7 @@
    "rc": 0,
    "expect": "GATE OK",
    "ok": true,
-   "seconds": 0.5,
+   "seconds": 0.4,
    "tail": "GATE OK"
   },
   {
@@ -62,8 +62,8 @@
    "rc": 0,
    "expect": "passed",
    "ok": true,
-   "seconds": 3.1,
-   "tail": "12 passed in 2.27s"
+   "seconds": 3.0,
+   "tail": "12 passed in 1.96s"
   }
  ],
  "ok": true

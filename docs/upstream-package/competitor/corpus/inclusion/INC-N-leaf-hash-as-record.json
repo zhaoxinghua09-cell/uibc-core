@@ -1,0 +1,24 @@
+{
+  "class": "adversarial",
+  "expect": {
+    "code": [
+      "not-included"
+    ],
+    "result": "reject"
+  },
+  "id": "INC-N-leaf-hash-as-record",
+  "index": 0,
+  "kind": "inclusion",
+  "note": "the leaf HASH of record 0 presented as the record itself (a verifier that hashes twice, or never, agrees with the wrong value)",
+  "proof": [
+    "cb93afde92d95208f40a1da41bb5f4c36680c0e19d7306d39cfae3bb108f0991",
+    "a97aeefb10ef831f16f2323fabafe84c014ba8c43f35fc152364bf0139ceaa64",
+    "5519021853b5f08080938cca405b96c16e62c42b85279745328673ee33fbf358"
+  ],
+  "record_hex": "30600aa0c9c6af7f4fc1081dddfc2d358b452cbee79f248df91c076783020b1e",
+  "requirements": [
+    "7.3.4"
+  ],
+  "root": "5488b5f193283d9d01a5af8b92db51e0fa56b79f9f4adb07f444af88f16ed1f6",
+  "tree_size": 7
+}

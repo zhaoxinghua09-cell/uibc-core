@@ -1,0 +1,20 @@
+{
+  "class": "adversarial",
+  "expect": {
+    "code": [
+      "not-included"
+    ],
+    "result": "reject"
+  },
+  "id": "INC-N-interior-node-as-leaf",
+  "index": 0,
+  "kind": "inclusion",
+  "note": "the byte string 0x01 || left || right, which is how an interior node is hashed, presented as the only leaf of a size-1 tree whose root is the real size-8 root; a verifier that hashes leaves without the 0x00 prefix accepts it",
+  "proof": [],
+  "record_hex": "01ab8c24f1dcade85a5df62b815ebf86e4720cbfef69fed2b7b8a8717e8cd8e66cf21fc8a6526a54c15ce8ad6624d0b4cb113fb858e6afc5f7a2800a9098342341",
+  "requirements": [
+    "7.3.4"
+  ],
+  "root": "799f8fd273f614988eed0eeb74544f1668c5ac0705d2aa21a4303f508fe37fd8",
+  "tree_size": 1
+}

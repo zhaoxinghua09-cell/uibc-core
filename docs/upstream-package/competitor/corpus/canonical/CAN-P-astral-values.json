@@ -1,0 +1,16 @@
+{
+  "canonical_len": 17,
+  "canonical_sha256": "0ce14dcaa9149d946a314fd2f971d93f932ac03b07e693fd5b6f6d06d938e0c5",
+  "class": "positive",
+  "expect": {
+    "result": "accept"
+  },
+  "id": "CAN-P-astral-values",
+  "kind": "canonical",
+  "note": "published canonical digest for astral-values",
+  "requirements": [
+    "7.7.2",
+    "7.7.4"
+  ],
+  "text": "{\n \"k\": \"\ud83d\udddd \ud83d\ude00\"\n}\n"
+}

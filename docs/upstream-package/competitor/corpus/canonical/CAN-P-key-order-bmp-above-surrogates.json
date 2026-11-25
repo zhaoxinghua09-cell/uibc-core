@@ -1,0 +1,16 @@
+{
+  "canonical_len": 24,
+  "canonical_sha256": "e7286ce065b2cc74ec502be56a09b4210f1533604cb4929d1ca01559ef1b8b76",
+  "class": "positive",
+  "expect": {
+    "result": "accept"
+  },
+  "id": "CAN-P-key-order-bmp-above-surrogates",
+  "kind": "canonical",
+  "note": "published canonical digest for key-order-bmp-above-surrogates",
+  "requirements": [
+    "7.7.2",
+    "7.7.4"
+  ],
+  "text": "{\n \"\ue000\": 1,\n \"\ud800\udc00\": 2,\n \"a\": 3\n}\n"
+}

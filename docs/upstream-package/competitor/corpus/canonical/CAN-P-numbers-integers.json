@@ -1,0 +1,16 @@
+{
+  "canonical_len": 54,
+  "canonical_sha256": "f0f3b49412a75526384feb361622455a3af6e393a5bf6131c8e1b5902c04d92d",
+  "class": "positive",
+  "expect": {
+    "result": "accept"
+  },
+  "id": "CAN-P-numbers-integers",
+  "kind": "canonical",
+  "note": "published canonical digest for numbers-integers",
+  "requirements": [
+    "7.7.2",
+    "7.7.4"
+  ],
+  "text": "{\n \"zero\": 0,\n \"neg\": -7,\n \"big\": 9007199254740991,\n \"e5\": 100000\n}\n"
+}

@@ -1,0 +1,26 @@
+{
+  "class": "adversarial",
+  "expect": {
+    "code": [
+      "not-consistent"
+    ],
+    "result": "reject"
+  },
+  "id": "CON-N-history-reordered",
+  "kind": "consistency",
+  "new_root": "467ad3b69c7bedc40d20fe11afb20d81d28a71ea7381fc1ba681d1fa63d8dd49",
+  "new_size": 9,
+  "note": "the first two records exchanged in a larger tree: the same set of records, a different order; a tree built over sorted or unordered leaves cannot tell the two histories apart",
+  "old_root": "b3d9166b00949dfdf3b99d4241c5df573dc29fd68e478d72f30b70ff86d74c30",
+  "old_size": 3,
+  "proof": [
+    "dd8078535f89767b91a1d5e5b7df8520ecdbba74fc60d9701e0e18fb9654a6cb",
+    "f638e625afb7959f939a9106a5d3346b270c3f69715c74868cfb840f60b4ce02",
+    "a9e9c4a8b5d1c9269f2c6cc1041fb2d836c543949ba3d1c140f6a1e2bddf5f11",
+    "f21fc8a6526a54c15ce8ad6624d0b4cb113fb858e6afc5f7a2800a9098342341",
+    "aa1bdb0f4167338e3ac1c4eebf01e7a7d9ee4e56772eb24afeecb9029ce49461"
+  ],
+  "requirements": [
+    "7.3.5"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "canonical_len": 22,
+  "canonical_sha256": "c127f9b3c6f4233b3976f8e2d54486ab15f9a46cfa50fc14ae6d0787d1ac2917",
+  "class": "positive",
+  "expect": {
+    "result": "accept"
+  },
+  "id": "CAN-P-empty-containers",
+  "kind": "canonical",
+  "note": "published canonical digest for empty-containers",
+  "requirements": [
+    "7.7.2",
+    "7.7.4"
+  ],
+  "text": "{\n \"o\": {},\n \"a\": [],\n \"s\": \"\"\n}\n"
+}

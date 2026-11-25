@@ -1,0 +1,19 @@
+{
+  "class": "positive",
+  "expect": {
+    "result": "accept"
+  },
+  "id": "INC-P-n2-i1",
+  "index": 1,
+  "kind": "inclusion",
+  "note": "record 1 of a 2-leaf tree",
+  "proof": [
+    "30600aa0c9c6af7f4fc1081dddfc2d358b452cbee79f248df91c076783020b1e"
+  ],
+  "record_hex": "7b22736e617073686f74223a2266353566663136663636663433333630323636623935646236663866656330316437363033313035343330366165346134623338303539386636636664313134222c2276657264696374223a22414c4c4f57227d",
+  "requirements": [
+    "7.3.4"
+  ],
+  "root": "a1ab874a47a34ae9d836dc94df2446cfa363b7be528785cc1d4a464d192ba415",
+  "tree_size": 2
+}

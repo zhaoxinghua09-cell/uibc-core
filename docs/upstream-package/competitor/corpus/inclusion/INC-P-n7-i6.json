@@ -1,0 +1,20 @@
+{
+  "class": "positive",
+  "expect": {
+    "result": "accept"
+  },
+  "id": "INC-P-n7-i6",
+  "index": 6,
+  "kind": "inclusion",
+  "note": "record 6 of a 7-leaf tree",
+  "proof": [
+    "51d025b2ac53fdc0d0ad72bb3e3f44a1fc0559bb215fc093c929ed35cd8125cc",
+    "ab8c24f1dcade85a5df62b815ebf86e4720cbfef69fed2b7b8a8717e8cd8e66c"
+  ],
+  "record_hex": "7b22736e617073686f74223a2237333062656134666631366632303066623933316230366361653038613564613865323739383133373735643765643831653638306234613737393436666531222c2276657264696374223a22414c4c4f57227d",
+  "requirements": [
+    "7.3.4"
+  ],
+  "root": "5488b5f193283d9d01a5af8b92db51e0fa56b79f9f4adb07f444af88f16ed1f6",
+  "tree_size": 7
+}

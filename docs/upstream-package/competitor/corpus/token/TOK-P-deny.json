@@ -1,0 +1,14 @@
+{
+  "class": "positive",
+  "expect": {
+    "result": "accept"
+  },
+  "id": "TOK-P-deny",
+  "kind": "token",
+  "note": "a DENY record is evidence too",
+  "public_key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+  "requirements": [
+    "7.7.1"
+  ],
+  "text": "{\n  \"eat_profile\": \"https://advancedaisociety.org/poc/v0.1\",\n  \"iat\": 1754400000,\n  \"iss\": \"https://verifier.example/poc\",\n  \"nonce\": \"nonce-00000001\",\n  \"poc_claims\": {\n    \"agbom_digest\": \"sha-256:8ccf1344a2087a19f5bd874fa3ae8486dce9ddfed60f17856d9a0cfe6540e868\",\n    \"agent_id\": \"did:web:example.org:agents:ref-1\",\n    \"alg\": \"EdDSA\",\n    \"canonical_snapshot_hash\": \"sha-256:2cc07f6d79a6951ddee18d3fc7fceca0d07680e1ee500155caf09c88b307926c\",\n    \"chain_head\": \"sha-256:d4470346f523320b0e65cbca81c1b635f143581564333a9bc387f6152dcfa6fb\",\n    \"initiating_user\": \"user:alice\",\n    \"interception_point\": \"PRE_CALL_TOOL_INVOCATION\",\n    \"merkle_root\": \"sha-256:56b740034941313698c2f5f5393e047bc3a27c359298adcdd15ed471a382f7d7\",\n    \"path_summary_hash\": \"sha-256:a297c1081fbd4d2d791e65ff90a41d88832e3498110010c0e0a243d1153115b1\",\n    \"policy_bundle_hash\": \"sha-256:0ec0b48a1641c2fc90febb60cc988021b7c947b00a17a7ffb8f61cdcad162bd4\",\n    \"reason\": \"egress after reading confidential data exceeds permitted egress class\",\n    \"step_index\": 1,\n    \"target_resource\": \"api.partner.com\",\n    \"tree_size\": 2,\n    \"verdict\": \"DENY\"\n  },\n  \"signature\": \"fe83aa632d514960be2c4d2887b90552621abf38f6ebd9af641098e998964e93f5e9da3f0826bb3a49af15644d76aa02ab6b4f29376c78f5f1635035d5fd580a\",\n  \"submods\": {\n    \"attestation\": {\n      \"measurement\": \"sha-256:a1d0bdcf12b227dbe4347ce7a24a9a385a92369cd671fc1deaf9d2f7bb35cb81\",\n      \"platform\": \"SOFTWARE\"\n    }\n  }\n}\n"
+}

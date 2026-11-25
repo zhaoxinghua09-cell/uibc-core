@@ -1,0 +1,16 @@
+{
+  "canonical_len": 41,
+  "canonical_sha256": "ed803808828c77823cf802a2c4ebef3ada64e50f58f7022604bb61dfc19f817b",
+  "class": "positive",
+  "expect": {
+    "result": "accept"
+  },
+  "id": "CAN-P-nested-key-order",
+  "kind": "canonical",
+  "note": "published canonical digest for nested-key-order",
+  "requirements": [
+    "7.7.2",
+    "7.7.4"
+  ],
+  "text": "{\n \"b\": {\n  \"d\": 1,\n  \"c\": 2\n },\n \"a\": [\n  3,\n  {\n   \"z\": 1,\n   \"y\": 2\n  }\n ]\n}\n"
+}

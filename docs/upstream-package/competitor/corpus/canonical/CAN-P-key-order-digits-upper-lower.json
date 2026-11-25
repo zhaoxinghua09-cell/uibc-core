@@ -1,0 +1,16 @@
+{
+  "canonical_len": 44,
+  "canonical_sha256": "dba4f6cd092945989802a309e4d156ab1c91b1fb374a676f960479d9ad5ab63c",
+  "class": "positive",
+  "expect": {
+    "result": "accept"
+  },
+  "id": "CAN-P-key-order-digits-upper-lower",
+  "kind": "canonical",
+  "note": "published canonical digest for key-order-digits-upper-lower",
+  "requirements": [
+    "7.7.2",
+    "7.7.4"
+  ],
+  "text": "{\n \"b\": 1,\n \"B\": 2,\n \"a\": 3,\n \"A\": 4,\n \"1\": 5,\n \"10\": 6,\n \"2\": 7\n}\n"
+}

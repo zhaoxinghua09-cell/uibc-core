@@ -56,6 +56,9 @@ SWEEP_RECEIPT = os.path.join(_REPO, "docs", "upstream-package", "competitor-defe
 CONTROL_RECEIPT = os.path.join(_REPO, "docs", "upstream-package", "competitor-defects",
                                "sweep-mutation-control.json")
 LEDGER_RECEIPT = ledger.RECEIPT
+# The same 171 files we scanned, shipped in the repository (Apache-2.0, see the
+# NOTICE beside them). Reproduction stops depending on codeload being up.
+VENDORED = os.path.join(_REPO, "docs", "upstream-package", "competitor", "corpus")
 
 
 def _sha256_file(path):
@@ -285,7 +288,8 @@ def selftest():
 
 def main(argv=None):
     ap = argparse.ArgumentParser()
-    ap.add_argument("--dir", help="an already unpacked corpus (skips the download)")
+    ap.add_argument("--dir", help="an already unpacked corpus (skips the download); "
+                                 "default: the vendored copy, which needs no network")
     ap.add_argument("--json", action="store_true",
                     help="print one JSON object and nothing else")
     ap.add_argument("--receipt", help="write a checkable receipt of this run here")
@@ -293,6 +297,14 @@ def main(argv=None):
     a = ap.parse_args(argv)
     if a.selftest:
         return selftest()
+    # No --dir, and the repository ships the bytes: use them. The point of the
+    # vendored copy is that reproducing these 171 numbers needs no download and
+    # no network -- otherwise "run it yourself" quietly means "run it where
+    # codeload is reachable".
+    if a.dir is None and os.path.isdir(VENDORED):
+        a.dir = VENDORED
+        if not a.json:
+            print("corpus: the vendored copy at docs/upstream-package/competitor/corpus")
     out = run(a.dir, verbose=not a.json)
     if a.receipt:
         # Written even when the run fails: a receipt that says DID NOT MATCH is a

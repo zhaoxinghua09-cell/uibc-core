@@ -1,0 +1,20 @@
+{
+  "class": "positive",
+  "expect": {
+    "result": "accept"
+  },
+  "id": "INC-P-n4-i3",
+  "index": 3,
+  "kind": "inclusion",
+  "note": "record 3 of a 4-leaf tree",
+  "proof": [
+    "dd8078535f89767b91a1d5e5b7df8520ecdbba74fc60d9701e0e18fb9654a6cb",
+    "a1ab874a47a34ae9d836dc94df2446cfa363b7be528785cc1d4a464d192ba415"
+  ],
+  "record_hex": "7b22736e617073686f74223a2266343664643238613534393964386566656630623866623865653165633163356135653430376339333831373431643537366261386465623466353965633366222c2276657264696374223a22414c4c4f57227d",
+  "requirements": [
+    "7.3.4"
+  ],
+  "root": "ab8c24f1dcade85a5df62b815ebf86e4720cbfef69fed2b7b8a8717e8cd8e66c",
+  "tree_size": 4
+}

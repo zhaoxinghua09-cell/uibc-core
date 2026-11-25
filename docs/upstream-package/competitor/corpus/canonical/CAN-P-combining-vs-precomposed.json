@@ -1,0 +1,16 @@
+{
+  "canonical_len": 39,
+  "canonical_sha256": "c57984b0473441c370eb2a4c714ab07e698c13c59a816c319f421fc3fe3de928",
+  "class": "positive",
+  "expect": {
+    "result": "accept"
+  },
+  "id": "CAN-P-combining-vs-precomposed",
+  "kind": "canonical",
+  "note": "published canonical digest for combining-vs-precomposed",
+  "requirements": [
+    "7.7.2",
+    "7.7.4"
+  ],
+  "text": "{\n \"e\u0301\": \"decomposed\",\n \"\u00e9\": \"precomposed\"\n}\n"
+}

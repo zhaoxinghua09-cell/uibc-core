@@ -230,3 +230,29 @@ python tools/crosscheck_competitor_inclusion_sigstore.py --dir <…/corpus>     
 python tools/crosscheck_competitor_inclusion_sigstore.py --dir <…/corpus> --check    # 任一行变动即失败
 python tools/crosscheck_competitor_inclusion_sigstore.py --selftest                  # 7 条
 ```
+
+## 干净机器上的实测：一条命令，和一个必须先说清的依赖
+
+2026-11-25 在云主机（Linux，Python 3.12.11，全新解包的 `232deb4c` tarball，没有 clone、没有装包）跑了 `python3 tools/stranger_competitor_check.py`：
+
+```
+bytes: 171 checked, 171 match
+sweep: 171 vectors, 69 replayable, 69 consistent, 0 inconsistent, 102 not replayable
+control: 196 applied, 183 detected, 13 ambiguous, 0 unexplained
+ledger: 69 verdict, 88 signature-only, 14 nothing, 88 signatures verify
+inclusion folded by vendored Sigstore: 36 of 36 agree with the published verdict, 1 not compared
+VERDICT: REPRODUCED
+```
+
+同一台机器上用**裸解释器**（`python3 -S`，无 site-packages）再跑一次，暴露出一个此前只有 Windows 测试时才看不见的问题：**ledger 的签名字段需要 `cryptography`**，缺失时它把 88 条记成 `nothing`，于是逐行比对全部不符，命令输出 `DID NOT MATCH`。这等于把"读者少装一个库"报成"我们的数字对不上"。
+
+修法不是让它猜，而是让它**拒绝**：`build_upstream_ledger.py` 在缺库时抛 `SignatureLayerUnavailable`（exit 4，`NOT EVALUATED`），`stranger_competitor_check.py` 捕获后输出 `PARTIAL: the arithmetic matched; the ledger's signature layer was not evaluated`（exit 3），并提示 `pip install cryptography` 以拿到完整结论。
+
+于是依赖边界现在写在了两条命令的头上，而不是写在文档的脚注里：
+
+| 步骤 | 需要什么 |
+|---|---|
+| 171 个 sha256、扫描、变异控制、Sigstore inclusion 折 | 仅标准库 |
+| ledger 的签名列（88 条） | 再加 `cryptography` |
+
+`tests/test_stranger_competitor_check.py` 用 `python -S` 跑该工具的 selftest 来钉住这条线：算术步骤在任何解释器上都必须能跑。

@@ -64,6 +64,32 @@ def test_no_family_claims_a_count_it_does_not_have():
     assert r["totals"]["vectors"] == sr["totals"]["vectors"]
 
 
+def test_without_cryptography_it_refuses_instead_of_reporting_nothing(tmp_path, monkeypatch):
+    """A missing verifier must not be reported as 88 vectors of "nothing"."""
+    corpus = tmp_path / "corpus"
+    (corpus / "token").mkdir(parents=True)
+    (corpus / "token" / "t.json").write_text(json.dumps(
+        {"id": "t", "public_key": "00", "text": "{}", "expect": {"result": "accept"}}),
+        encoding="utf-8")
+    monkeypatch.setattr(ledger, "HAVE_CRYPTO", False)
+    with pytest.raises(ledger.SignatureLayerUnavailable):
+        ledger.build(str(corpus))
+
+
+def test_the_cli_turns_that_refusal_into_exit_code_four(tmp_path, monkeypatch, capsys):
+    corpus = tmp_path / "corpus-cli"
+    (corpus / "token").mkdir(parents=True)
+    (corpus / "token" / "t.json").write_text(json.dumps(
+        {"id": "t", "public_key": "00", "text": "{}", "expect": {"result": "accept"}}),
+        encoding="utf-8")
+    monkeypatch.setattr(ledger, "HAVE_CRYPTO", False)
+    code = ledger.main(["--dir", str(corpus)])
+    out = capsys.readouterr().out
+    assert code == 4
+    assert "NOT EVALUATED" in out
+    assert "cryptography" in out
+
+
 def test_a_flipped_signature_drops_the_vector_to_nothing(tmp_path):
     """The layer that says "verified" must be able to say "failed"."""
     from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey

@@ -27,7 +27,9 @@
       "kind": "reject-or-accept",
       "mode": "strict",
       "expected_verdict": "FAIL",
-      "expected_first_fail": "S5"
+      "expected_first_fail": "S12",
+      "expected_failed_checks": ["S12", "S7", "S8", "S5"],
+      "note": "first_fail is the first check in procedure order that fails, so it follows the verifier's order, not a severity ranking. This case fails four checks at once; the set is recorded above so a reader does not lose the other three."
     },
     {
       "case": "oracle-unsealed",

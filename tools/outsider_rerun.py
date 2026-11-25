@@ -18,6 +18,18 @@ and `docs/OUTSIDER-RERUN.md`) - otherwise it would have to contain itself. Both
 producer and checker skip the same two paths, so the exclusion is symmetric and
 the receipt cannot be quietly freshened without the tree actually matching.
 
+The receipt carries two axes, because a single number cannot say *why* it moved:
+
+  * `tree_sha256` - path and content together, the strict one;
+  * `content_sha256` - content only, path-independent, so a tree whose file
+    *names* were mangled by an extractor still matches on bytes.
+
+That second axis is not a concession. Windows `tar` decodes UTF-8 names as
+CP936, so a perfectly good tarball lands as `r茅sum茅.md` and the strict digest
+goes red while every byte is untouched. `--check` distinguishes the two cases
+and says which one it is: `NAMES-ONLY` (bytes identical, names broken - your
+extractor, not this repository) or `CONTENT` (a byte really moved).
+
 If a stranger can run this, they do not have to take anyone's word for the gate,
 the parity table or the demo.
 """
@@ -99,6 +111,26 @@ def tree_digest(root):
     return hashlib.sha256("\n".join(entries).encode()).hexdigest(), len(entries)
 
 
+def content_digest(root):
+    """sha256 over every file's content digest, paths deliberately left out.
+
+    Used as the second axis: it answers "did any byte move" without caring how
+    the extractor spelled the names. Sorting the hashes rather than the paths
+    keeps it independent of the path strings entirely.
+    """
+    hashes = []
+    for rel in tracked_files(root):
+        if rel in GENERATED:
+            continue
+        p = os.path.join(root, rel.replace("/", os.sep))
+        try:
+            with open(p, "rb") as f:
+                hashes.append(hashlib.sha256(f.read()).hexdigest())
+        except OSError:
+            hashes.append("unreadable")
+    return hashlib.sha256("\n".join(sorted(hashes)).encode()).hexdigest(), len(hashes)
+
+
 def clean_env():
     return {k: os.environ[k] for k in ENV_KEEP if k in os.environ} | {"PYTHONUTF8": "1"}
 
@@ -109,6 +141,7 @@ def copy_tree(dest):
 
 def run(steps_only=None):
     digest, count = tree_digest(HERE)
+    cdigest, ccount = content_digest(HERE)
     tmp = tempfile.mkdtemp(prefix="uibc-outsider-")
     work = os.path.join(tmp, "repo")
     copy_tree(work)
@@ -131,14 +164,17 @@ def run(steps_only=None):
                         "tail": tail or err.strip().splitlines()[-1][:160]})
         print(f"{'PASS' if ok else 'FAIL'} {name:6s} rc={rc} {round(time.time() - t0, 1)}s :: {tail}")
     shutil.rmtree(tmp, ignore_errors=True)
-    return {"digest": digest, "files": count, "results": results}
+    return {"digest": digest, "files": count, "content_digest": cdigest, "content_files": ccount,
+            "results": results}
 
 
-def write_receipt(digest, files, results):
+def write_receipt(digest, files, results, content=None, content_files=None):
     receipt = {
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "tree_sha256": digest,
         "files_hashed": files,
+        "content_sha256": content,
+        "content_files": content_files,
         "digest_excludes": sorted(GENERATED),
         "runner": {"python": platform.python_version(), "machine": platform.machine(),
                    "system": platform.system()},
@@ -159,7 +195,14 @@ def write_receipt(digest, files, results):
             step=r["step"], cmd=r["cmd"], rc=r["rc"], ok="PASS" if r["ok"] else "FAIL",
             seconds=r["seconds"]))
     page += ["", f"**树摘要 `{receipt['tree_sha256'][:16]}…`（{files} 个文件，排除本页与 receipt 自身）**。",
-             "", "复核：`python tools/outsider_rerun.py --check`（重算摘要＋逐步判定），或 `--run` 重新跑一遍。"]
+             f"**内容摘要 `{str(receipt.get('content_sha256'))[:16]}…`（只看每个文件的字节，不看文件名）**。",
+             "", "为什么有两根轴：路径与内容一起算的那个摘要最严，但也会被解包器连累。"
+             "Windows 自带的 `tar` 把 UTF-8 文件名当 CP936 解，出来的 `r茅sum茅.md` 一个字节都没错，"
+             "严摘要却红。于是收据同时记一根只算内容的摘要，`--check` 因此能说出是 "
+             "`NAMES-ONLY`（字节全同、名字坏了，问题在你的解包器）还是 `CONTENT`（真的有字节动了）。",
+             "在 Windows 上解包请用 `python -c \"import tarfile,sys;tarfile.open(sys.argv[1]).extractall(sys.argv[2])\" <包> <目录>`，"
+             "或直接在 POSIX 上解包。",
+             "", "复核：`python tools/outsider_rerun.py --check`（重算两根摘要＋逐步判定），或 `--run` 重新跑一遍。"]
     open(PAGE, "w", encoding="utf-8").write("\n".join(page) + "\n")
     print("OUTSIDER OK" if receipt["ok"] else "OUTSIDER FAIL",
           f"tree={digest[:12]} steps={len(results)}")
@@ -173,8 +216,18 @@ def check():
     receipt = json.load(open(RECEIPT, encoding="utf-8"))
     fails = []
     digest, count = tree_digest(HERE)
+    cdigest, _ = content_digest(HERE)
+    receipt_content = receipt.get("content_sha256")
+    names_only = False
     if receipt.get("tree_sha256") != digest:
-        fails.append(f"receipt describes tree {str(receipt.get('tree_sha256'))[:12]} but this tree hashes to {digest[:12]}")
+        if receipt_content and receipt_content == cdigest:
+            names_only = True
+            fails.append(
+                "NAMES-ONLY: the paths differ but every byte matches "
+                f"(content_sha256 {cdigest[:12]} agrees, tree_sha256 {digest[:12]} does not)")
+        else:
+            fails.append(f"CONTENT: receipt describes tree {str(receipt.get('tree_sha256'))[:12]} but this tree hashes to {digest[:12]}"
+                         f" (content_sha256 {str(receipt_content)[:12]} vs {cdigest[:12]})")
     if receipt.get("files_hashed") != count:
         fails.append(f"file count moved: receipt {receipt.get('files_hashed')}, tree {count}")
     steps = receipt.get("steps", [])
@@ -189,10 +242,17 @@ def check():
         fails.append("receipt excludes a different set of files than the checker")
     for f in fails:
         print("FAIL", f)
+    if names_only:
+        print("\nHOW TO FIX: your extractor mangled the file names, not the files. Windows `tar`")
+        print("decodes UTF-8 names as CP936. Re-extract with Python's tarfile (it honours UTF-8)")
+        print("or on a POSIX host, then rerun --check; the tree digest will match unchanged.")
+        print(f"\nOUTSIDER FAIL ({len(fails)} problem(s), names only - bytes are intact)")
+        return 2
     if fails:
         print(f"\nOUTSIDER FAIL ({len(fails)} problem(s))")
         return 1
-    print(f"OUTSIDER OK: receipt matches this tree ({count} files, {digest[:12]}), {len(steps)} steps passed")
+    print(f"OUTSIDER OK: receipt matches this tree ({count} files, {digest[:12]}, "
+          f"content {cdigest[:12]}), {len(steps)} steps passed")
     return 0
 
 
@@ -204,11 +264,12 @@ def main():
     args = ap.parse_args()
     if args.run:
         out = run()
-        rc = write_receipt(out["digest"], out["files"], out["results"])
+        rc = write_receipt(out["digest"], out["files"], out["results"],
+                           content=out["content_digest"], content_files=out["content_files"])
     else:
         rc = check()
     if args.json:
-        print(json.dumps({"ok": rc == 0}, ensure_ascii=False))
+        print(json.dumps({"ok": rc == 0, "exit": rc}, ensure_ascii=False))
     return rc
 
 

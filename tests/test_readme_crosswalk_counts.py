@@ -1,9 +1,11 @@
-"""The counts quoted in the README must equal the counts the tools produce.
+"""The counts quoted in the READMEs must equal the counts the tools produce.
 
 A number written into a README is a claim like any other. It goes stale the day
 a row changes state, and nothing notices unless something compares the two. This
 does, using the committed results (the same files `tools/recheck.py` compares
-against a fresh run).
+against a fresh run), and it does it for both entry points: `README.md` and
+`README.en.md`. Two files carrying the same sentence drift apart the moment one
+is edited alone.
 
 Skipped inside an sdist, where `tools/out` is pruned by MANIFEST.in - the same
 condition `tests/test_recheck.py` skips on.
@@ -16,7 +18,7 @@ import pytest
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "tools" / "out"
-README = ROOT / "README.md"
+READMES = [ROOT / "README.md", ROOT / "README.en.md"]
 
 PATTERN = re.compile(
     r"(\d+)\s+regulatory clauses\s*=\s*(\d+)\s+PARTIAL\s*/\s*(\d+)\s+GAP\s*/\s*(\d+)\s+COVERED")
@@ -38,33 +40,30 @@ def _regulated_counts():
 
 def test_readme_counts_match_the_committed_results():
     totals = _regulated_counts()
-    text = README.read_text(encoding="utf-8")
-    m = PATTERN.search(text)
-    assert m, "the README no longer states the regulated clause counts"
-    claimed = {
-        "clauses": int(m.group(1)),
-        "PARTIAL": int(m.group(2)),
-        "GAP": int(m.group(3)),
-        "COVERED": int(m.group(4)),
-    }
     actual = {
         "clauses": sum(totals.values()),
         "PARTIAL": totals.get("PARTIAL", 0),
         "GAP": totals.get("GAP", 0),
         "COVERED": totals.get("COVERED", 0),
     }
-    assert claimed == actual, "README says %s; results say %s" % (claimed, actual)
+    for readme in READMES:
+        text = readme.read_text(encoding="utf-8")
+        m = PATTERN.search(text)
+        assert m, "%s no longer states the regulated clause counts" % readme.name
+        claimed = {
+            "clauses": int(m.group(1)),
+            "PARTIAL": int(m.group(2)),
+            "GAP": int(m.group(3)),
+            "COVERED": int(m.group(4)),
+        }
+        assert claimed == actual, "%s says %s; results say %s" % (readme.name, claimed, actual)
 
 
-def test_readme_states_which_two_clauses_are_carried():
+def test_both_readmes_name_the_two_carried_clauses():
     totals = _regulated_counts()
-    carried = [f for f in sorted(OUT.glob("crosswalk-*.json"))
-               if f.name != "crosswalk-tool-contract.json"
-               and any(r["state"] == "COVERED"
-                       for r in json.loads(f.read_text(encoding="utf-8"))["rows"])]
-    text = README.read_text(encoding="utf-8")
-    if totals.get("COVERED", 0) == 2:
-        # The README names both, so a reader can check them without the tool.
-        assert "21 CFR\n11.70" in text or "21 CFR 11.70" in text
-        assert "AU-10" in text
-    assert len(carried) >= 1
+    if totals.get("COVERED", 0) != 2:
+        return  # the sentence names the current pair; two is what it is about
+    for readme in READMES:
+        text = readme.read_text(encoding="utf-8").replace("21 CFR\n11.70", "21 CFR 11.70")
+        assert "21 CFR 11.70" in text, readme.name
+        assert "AU-10" in text, readme.name

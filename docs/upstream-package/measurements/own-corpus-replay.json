@@ -1,0 +1,1076 @@
+{
+  "categories": {
+    "consistency": {
+      "counts": {
+        "accept_published": 6,
+        "consistent": 13,
+        "inconsistent": 0,
+        "leaf_digest_rebuilt": 0,
+        "leaf_digest_stated": 0,
+        "none": 0,
+        "own_reconstruction_agrees": 8,
+        "own_reconstruction_stated": 8,
+        "reject_published": 7,
+        "replayable": 13,
+        "size_unauthenticated": 0,
+        "vectors": 13
+      },
+      "vectors": [
+        {
+          "arith": "match",
+          "detail": "1->2: root recomputed from the old root matches",
+          "dir": "v1/cons-1-2",
+          "expected": "VALID",
+          "id": "cons-1-2",
+          "leaf_digest_rebuilt": null,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "match",
+          "detail": "2->5: root recomputed from the old root matches",
+          "dir": "v1/cons-2-5",
+          "expected": "VALID",
+          "id": "cons-2-5",
+          "leaf_digest_rebuilt": null,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "match",
+          "detail": "3->7: root recomputed from the old root matches",
+          "dir": "v1/cons-3-7",
+          "expected": "VALID",
+          "id": "cons-3-7",
+          "leaf_digest_rebuilt": null,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "match",
+          "detail": "4->8: root recomputed from the old root matches",
+          "dir": "v1/cons-4-8",
+          "expected": "VALID",
+          "id": "cons-4-8",
+          "leaf_digest_rebuilt": null,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "match",
+          "detail": "6->9: root recomputed from the old root matches",
+          "dir": "v1/cons-6-9",
+          "expected": "VALID",
+          "id": "cons-6-9",
+          "leaf_digest_rebuilt": null,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "match",
+          "detail": "9->9: root recomputed from the old root matches",
+          "dir": "v1/cons-9-9",
+          "expected": "VALID",
+          "id": "cons-9-9",
+          "leaf_digest_rebuilt": null,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "mismatch",
+          "detail": "the proof does not chain: the proof does not chain to the earlier root",
+          "dir": "v1/cons-fail-old-root",
+          "expected": "INVALID_CONSISTENCY_PROOF",
+          "id": "cons-fail-old-root",
+          "leaf_digest_rebuilt": null,
+          "own_reconstruction_agrees": null,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "mismatch",
+          "detail": "recomputed e51147a4.. != published 30ce5c53..",
+          "dir": "v1/cons-fail-new-root",
+          "expected": "INVALID_CONSISTENCY_PROOF",
+          "id": "cons-fail-new-root",
+          "leaf_digest_rebuilt": null,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "mismatch",
+          "detail": "recomputed adf2cf29.. != published 6a36bbc6..",
+          "dir": "v1/cons-fail-proof-last",
+          "expected": "INVALID_CONSISTENCY_PROOF",
+          "id": "cons-fail-proof-last",
+          "leaf_digest_rebuilt": null,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "mismatch",
+          "detail": "the proof does not chain: wrong proof size 3, want 4",
+          "dir": "v1/cons-fail-proof-short",
+          "expected": "INVALID_CONSISTENCY_PROOF",
+          "id": "cons-fail-proof-short",
+          "leaf_digest_rebuilt": null,
+          "own_reconstruction_agrees": null,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "mismatch",
+          "detail": "the proof does not chain: wrong proof size 3, want 2",
+          "dir": "v1/cons-fail-proof-long",
+          "expected": "INVALID_CONSISTENCY_PROOF",
+          "id": "cons-fail-proof-long",
+          "leaf_digest_rebuilt": null,
+          "own_reconstruction_agrees": null,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "mismatch",
+          "detail": "the proof does not chain: the proof does not chain to the earlier root",
+          "dir": "v1/cons-fail-proof-swap",
+          "expected": "INVALID_CONSISTENCY_PROOF",
+          "id": "cons-fail-proof-swap",
+          "leaf_digest_rebuilt": null,
+          "own_reconstruction_agrees": null,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "mismatch",
+          "detail": "new_size 3 < old_size 5: no proof can exist",
+          "dir": "v1/cons-fail-size-order",
+          "expected": "INVALID_CONSISTENCY_PROOF",
+          "id": "cons-fail-size-order",
+          "leaf_digest_rebuilt": null,
+          "own_reconstruction_agrees": null,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        }
+      ]
+    },
+    "inclusion": {
+      "counts": {
+        "accept_published": 33,
+        "consistent": 50,
+        "inconsistent": 0,
+        "leaf_digest_rebuilt": 50,
+        "leaf_digest_stated": 50,
+        "none": 0,
+        "own_reconstruction_agrees": 49,
+        "own_reconstruction_stated": 49,
+        "reject_published": 17,
+        "replayable": 50,
+        "size_unauthenticated": 4,
+        "vectors": 50
+      },
+      "vectors": [
+        {
+          "arith": "match",
+          "detail": "size 1 index 0 folds to 96e6ce00..",
+          "dir": "v1/valid-tree1-index0",
+          "expected": "VALID",
+          "id": "valid-tree1-index0",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "match",
+          "detail": "size 2 index 0 folds to 7aa766b6..",
+          "dir": "v1/valid-tree2-index0",
+          "expected": "VALID",
+          "id": "valid-tree2-index0",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "match",
+          "detail": "size 2 index 1 folds to 5e33db6d..",
+          "dir": "v1/valid-tree2-index1",
+          "expected": "VALID",
+          "id": "valid-tree2-index1",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "match",
+          "detail": "size 3 index 2 folds to 3b0fb0cf..",
+          "dir": "v1/valid-tree3-index2",
+          "expected": "VALID",
+          "id": "valid-tree3-index2",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "match",
+          "detail": "size 4 index 0 folds to 67b8802e..",
+          "dir": "v1/valid-tree4-index0",
+          "expected": "VALID",
+          "id": "valid-tree4-index0",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "match",
+          "detail": "size 5 index 2 folds to cdc40751..",
+          "dir": "v1/valid-tree5-index2",
+          "expected": "VALID",
+          "id": "valid-tree5-index2",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "match",
+          "detail": "size 6 index 4 folds to 7b822b94..",
+          "dir": "v1/valid-tree6-index4",
+          "expected": "VALID",
+          "id": "valid-tree6-index4",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "match",
+          "detail": "size 7 index 3 folds to d97fd25f..",
+          "dir": "v1/valid-tree7-index3",
+          "expected": "VALID",
+          "id": "valid-tree7-index3",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "match",
+          "detail": "size 8 index 2 folds to 7437f940..",
+          "dir": "v1/valid-tree8-index2",
+          "expected": "VALID",
+          "id": "valid-tree8-index2",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "match",
+          "detail": "size 9 index 8 folds to 373e47b5..",
+          "dir": "v1/valid-tree9-index8",
+          "expected": "VALID",
+          "id": "valid-tree9-index8",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "match",
+          "detail": "size 15 index 7 folds to c3ac436d..",
+          "dir": "v1/valid-tree15-index7",
+          "expected": "VALID",
+          "id": "valid-tree15-index7",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "match",
+          "detail": "size 16 index 0 folds to 599faea3..",
+          "dir": "v1/valid-tree16-index0",
+          "expected": "VALID",
+          "id": "valid-tree16-index0",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "match",
+          "detail": "size 17 index 8 folds to 32928419..",
+          "dir": "v1/valid-tree17-index8",
+          "expected": "VALID",
+          "id": "valid-tree17-index8",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "match",
+          "detail": "size 17 index 16 folds to 5b4c1777..",
+          "dir": "v1/valid-tree17-index16",
+          "expected": "VALID",
+          "id": "valid-tree17-index16",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "match",
+          "detail": "size 31 index 15 folds to a8df8708..",
+          "dir": "v1/valid-tree31-index15",
+          "expected": "VALID",
+          "id": "valid-tree31-index15",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "match",
+          "detail": "size 32 index 31 folds to 15baa44e..",
+          "dir": "v1/valid-tree32-index31",
+          "expected": "VALID",
+          "id": "valid-tree32-index31",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "mismatch",
+          "detail": "size 8 index 2 folds to 99a2b196.., not the published cfdb1241..",
+          "dir": "v1/fail-tampered-path",
+          "expected": "INVALID_INCLUSION_PATH",
+          "id": "fail-tampered-path",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "mismatch",
+          "detail": "size 16 index 9 folds to 7d6c2d07.., not the published 7a3ba56e..",
+          "dir": "v1/fail-tampered-path-last",
+          "expected": "INVALID_INCLUSION_PATH",
+          "id": "fail-tampered-path-last",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "mismatch",
+          "detail": "size 4 index 1 folds to 96959419.., not the published 61fbcf75..",
+          "dir": "v1/fail-tampered-path-small-tree",
+          "expected": "INVALID_INCLUSION_PATH",
+          "id": "fail-tampered-path-small-tree",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "mismatch",
+          "detail": "path carries 0 hashes, size 5 at index 2 needs 3",
+          "dir": "v1/fail-empty-path",
+          "expected": "INVALID_INCLUSION_PATH",
+          "id": "fail-empty-path",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "mismatch",
+          "detail": "path carries 4 hashes, size 8 at index 2 needs 3",
+          "dir": "v1/fail-path-too-long",
+          "expected": "INVALID_INCLUSION_PATH",
+          "id": "fail-path-too-long",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "mismatch",
+          "detail": "size 4 index 1 folds to 49da7ce5.., not the published ecfaf225..",
+          "dir": "v1/fail-tampered-leaf",
+          "expected": "INVALID_LEAF_DIGEST",
+          "id": "fail-tampered-leaf",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "mismatch",
+          "detail": "path carries 2 hashes, size 7 at index 2 needs 3",
+          "dir": "v1/fail-wrong-tree-size",
+          "expected": "INVALID_TREE_SIZE",
+          "id": "fail-wrong-tree-size",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "mismatch",
+          "detail": "no leaf fits a tree of size 0, and the root is MTH({})",
+          "dir": "v1/fail-empty-tree",
+          "expected": "INVALID_TREE_SIZE",
+          "id": "fail-empty-tree",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": null,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "match",
+          "detail": "size 9 index 0 folds to e32e6d56..",
+          "dir": "v1/valid-tree9-index0",
+          "expected": "VALID",
+          "id": "valid-tree9-index0",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "mismatch",
+          "detail": "size 8 index 2 folds to 8c32e437.., not the published f9593ee6..",
+          "dir": "v1/fail-wrong-leaf-index",
+          "expected": "INVALID_LEAF_INDEX",
+          "id": "fail-wrong-leaf-index",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "mismatch",
+          "detail": "size 16 index 0 folds to edb1e971.., not the published b2d7cd42..",
+          "dir": "v1/fail-wrong-leaf-index-edge",
+          "expected": "INVALID_LEAF_INDEX",
+          "id": "fail-wrong-leaf-index-edge",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "mismatch",
+          "detail": "path carries 2 hashes, size 8 at index 2 needs 3",
+          "dir": "v1/fail-path-short",
+          "expected": "INVALID_INCLUSION_PATH",
+          "id": "fail-path-short",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "mismatch",
+          "detail": "path carries 1 hashes, size 3 at index 1 needs 2",
+          "dir": "v1/fail-path-short-tree3",
+          "expected": "INVALID_INCLUSION_PATH",
+          "id": "fail-path-short-tree3",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "mismatch",
+          "detail": "path carries 4 hashes, size 32 at index 31 needs 5",
+          "dir": "v1/fail-path-short-tree32",
+          "expected": "INVALID_INCLUSION_PATH",
+          "id": "fail-path-short-tree32",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "mismatch",
+          "detail": "size 8 index 5 folds to f20459bc.., not the published 738ff373..",
+          "dir": "v1/fail-path-swap",
+          "expected": "INVALID_INCLUSION_PATH",
+          "id": "fail-path-swap",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "mismatch",
+          "detail": "size 16 index 9 folds to 6a6981fc.., not the published 4b4c1e6f..",
+          "dir": "v1/fail-path-swap-tree16",
+          "expected": "INVALID_INCLUSION_PATH",
+          "id": "fail-path-swap-tree16",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "mismatch",
+          "detail": "size 5 index 0 folds to bed720d1.., not the published 01a6c5ff..",
+          "dir": "v1/fail-path-swap-tree5",
+          "expected": "INVALID_INCLUSION_PATH",
+          "id": "fail-path-swap-tree5",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "mismatch",
+          "detail": "path carries 1 hashes, size 7 at index 6 needs 2",
+          "dir": "v1/fail-path-short-tampered",
+          "expected": "INVALID_INCLUSION_PATH",
+          "id": "fail-path-short-tampered",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "match",
+          "detail": "size 33 index 0 folds to 9fc75935..",
+          "dir": "v1/valid-tree33-index0",
+          "expected": "VALID",
+          "id": "valid-tree33-index0",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "match",
+          "detail": "size 63 index 31 folds to 9fafdfa4..",
+          "dir": "v1/valid-tree63-index31",
+          "expected": "VALID",
+          "id": "valid-tree63-index31",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "match",
+          "detail": "size 64 index 63 folds to e91ddf36..",
+          "dir": "v1/valid-tree64-index63",
+          "expected": "VALID",
+          "id": "valid-tree64-index63",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "match",
+          "detail": "size 65 index 64 folds to 378f2585..",
+          "dir": "v1/valid-tree65-index64",
+          "expected": "VALID",
+          "id": "valid-tree65-index64",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "match",
+          "detail": "size 3 index 1 folds to 9aa31a6f..",
+          "dir": "v1/valid-tree3-index1",
+          "expected": "VALID",
+          "id": "valid-tree3-index1",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "match",
+          "detail": "size 4 index 1 folds to 51236481..",
+          "dir": "v1/valid-tree4-index1",
+          "expected": "VALID",
+          "id": "valid-tree4-index1",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "match",
+          "detail": "size 5 index 0 folds to 28402f12..",
+          "dir": "v1/valid-tree5-index0",
+          "expected": "VALID",
+          "id": "valid-tree5-index0",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "match",
+          "detail": "size 7 index 6 folds to 62384527..",
+          "dir": "v1/valid-tree7-index6",
+          "expected": "VALID",
+          "id": "valid-tree7-index6",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "match",
+          "detail": "size 8 index 5 folds to 50be6884..",
+          "dir": "v1/valid-tree8-index5",
+          "expected": "VALID",
+          "id": "valid-tree8-index5",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "match",
+          "detail": "size 16 index 9 folds to e3cabd0f..",
+          "dir": "v1/valid-tree16-index9",
+          "expected": "VALID",
+          "id": "valid-tree16-index9",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "match",
+          "detail": "size 1 index 0 folds to 6e340b9c..",
+          "dir": "v1/valid-empty-leaf",
+          "expected": "VALID",
+          "id": "valid-empty-leaf",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "match",
+          "detail": "size 2 index 1 folds to fac54203..",
+          "dir": "v1/valid-empty-leaf-tree2",
+          "expected": "VALID",
+          "id": "valid-empty-leaf-tree2",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": false
+        },
+        {
+          "arith": "match",
+          "detail": "size 7 index 5 folds to 6a1417d2..; the same path also folds at size 8, so the root does not authenticate the size",
+          "dir": "v1/ambiguous-tree-size",
+          "expected": "VALID_BUT_SIZE_UNAUTHENTICATED",
+          "id": "ambiguous-tree-size",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": true
+        },
+        {
+          "arith": "match",
+          "detail": "size 2 index 1 folds to 2d4f1b49..; the same path also folds at size 3, so the root does not authenticate the size",
+          "dir": "v1/ambiguous-tree-size-2",
+          "expected": "VALID_BUT_SIZE_UNAUTHENTICATED",
+          "id": "ambiguous-tree-size-2",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": true
+        },
+        {
+          "arith": "match",
+          "detail": "size 4 index 3 folds to b9f44742..; the same path also folds at size 5, so the root does not authenticate the size",
+          "dir": "v1/ambiguous-tree-size-4",
+          "expected": "VALID_BUT_SIZE_UNAUTHENTICATED",
+          "id": "ambiguous-tree-size-4",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": true
+        },
+        {
+          "arith": "match",
+          "detail": "size 8 index 2 folds to f88be0b7..; the same path also folds at size 9, so the root does not authenticate the size",
+          "dir": "v1/ambiguous-tree-size-8",
+          "expected": "VALID_BUT_SIZE_UNAUTHENTICATED",
+          "id": "ambiguous-tree-size-8",
+          "leaf_digest_rebuilt": true,
+          "own_reconstruction_agrees": true,
+          "replay": "consistent",
+          "size_unauthenticated": true
+        }
+      ]
+    }
+  },
+  "corpus": "docs/upstream-package/scitt-rfc9162",
+  "manifest": {
+    "count": 64,
+    "files": [
+      {
+        "bytes": 80681,
+        "path": "docs/upstream-package/scitt-rfc9162/manifest.json",
+        "sha256": "4c95df8d741fbcfd2d284c364bd45f614e4800e2e71abc4f4f3476fb1c9f9d5d"
+      },
+      {
+        "bytes": 1353,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/ambiguous-tree-size/expected.json",
+        "sha256": "88336aada10ffebcbe640924ad8004af91c03983e936cfdf85a44f9ae5f0c6c8"
+      },
+      {
+        "bytes": 1041,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/ambiguous-tree-size-2/expected.json",
+        "sha256": "a3fc2d1150e15a4e061c8d6a935bfc83351418213271b468b2b508463e4f4c65"
+      },
+      {
+        "bytes": 1118,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/ambiguous-tree-size-4/expected.json",
+        "sha256": "4a31b603b3a8c8aaaa233134751655990c18a28f94856e900fac938745abe57f"
+      },
+      {
+        "bytes": 1327,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/ambiguous-tree-size-8/expected.json",
+        "sha256": "1b03633b973b4b4c6a64bb37c42268250c6a8a1b05d434b138dc35431107a671"
+      },
+      {
+        "bytes": 823,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/cons-1-2/expected.json",
+        "sha256": "a3cb0e0f5ceec3e7f7b593e6e163255f15c05a04d313d70a119ea1df0cb78461"
+      },
+      {
+        "bytes": 755,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/cons-2-5/expected.json",
+        "sha256": "62b10c1375ca7f4bb5d77a183c57536d14c2d6dff59dd803a9db1d3bcaf73140"
+      },
+      {
+        "bytes": 1097,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/cons-3-7/expected.json",
+        "sha256": "01db996cf4c8b73a384bf7a06c251241e50f74f3c1ff1663c46769b1a0bc74cd"
+      },
+      {
+        "bytes": 678,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/cons-4-8/expected.json",
+        "sha256": "ac6ee533ed5a66b758b41521d39388aebb1ba20f993debe4006757f27eee43dc"
+      },
+      {
+        "bytes": 876,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/cons-6-9/expected.json",
+        "sha256": "76dd0221c119c60a9af7e3374552b0b0331f62aa67b117475ec7567dedcb30a3"
+      },
+      {
+        "bytes": 673,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/cons-9-9/expected.json",
+        "sha256": "da57679bb9ce75ad144eeb72322c769a23b24971448599caf5edb5e4691c7dd7"
+      },
+      {
+        "bytes": 911,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/cons-fail-new-root/expected.json",
+        "sha256": "a6a2c8278e3cf236243f340515f3b2cce1dad6a2b1a3766cce857c7a159279d6"
+      },
+      {
+        "bytes": 964,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/cons-fail-old-root/expected.json",
+        "sha256": "c82d1156b8704196f930930eccbff9b266ac0d95aa80f7922f84f8f72015f0f2"
+      },
+      {
+        "bytes": 679,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/cons-fail-proof-last/expected.json",
+        "sha256": "28b1a42501f924ffceaef34b7a0577955232e15c9c2677d4b19f6d2bb741ac7c"
+      },
+      {
+        "bytes": 761,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/cons-fail-proof-long/expected.json",
+        "sha256": "110ffb91a780f4f50047a9479aecfffb54cb056573c75b36d69eaaa64bfd8adc"
+      },
+      {
+        "bytes": 793,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/cons-fail-proof-short/expected.json",
+        "sha256": "3a5d8375fb614b27dee1505eec39aff481fab229b0b86e5cf967dc120d4cb174"
+      },
+      {
+        "bytes": 869,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/cons-fail-proof-swap/expected.json",
+        "sha256": "97732dd091216f9fd639d9bf1c9f1eff74751164a8b2b7d09ee67741af2dfe00"
+      },
+      {
+        "bytes": 556,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/cons-fail-size-order/expected.json",
+        "sha256": "c87ed6d7aae9cb0335e53bd488bf565a11e34d48993ee7385cde3ae69e6336e3"
+      },
+      {
+        "bytes": 780,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/fail-empty-path/expected.json",
+        "sha256": "a2f1d6954e3d86d8292a3ca4d20183c5b10ae9366e729ebeac34df1530f758a1"
+      },
+      {
+        "bytes": 950,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/fail-empty-tree/expected.json",
+        "sha256": "23fe30e328e5118b699238caffc0b4783aa8c3069261f81d372fea43b76d61c1"
+      },
+      {
+        "bytes": 989,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/fail-path-short/expected.json",
+        "sha256": "9b1a2868f57a71a7852c54ac09f01b324365e43aedfe3c8fc37998b1c999e061"
+      },
+      {
+        "bytes": 900,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/fail-path-short-tampered/expected.json",
+        "sha256": "d889a9d4a82504c50e0cc9540e01ffa8b9aa67ee2a78fa141e573ae24746164c"
+      },
+      {
+        "bytes": 872,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/fail-path-short-tree3/expected.json",
+        "sha256": "df1b516317f620e63aca7475759453fef207b93404f4a0cdad8dda7b1bf8cc5a"
+      },
+      {
+        "bytes": 1149,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/fail-path-short-tree32/expected.json",
+        "sha256": "ab1214ebb27495e2fe9a616e669cb2e4bcddf1eef19397c2e9c25593042e4f3e"
+      },
+      {
+        "bytes": 1072,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/fail-path-swap/expected.json",
+        "sha256": "75eced23f59a8a48cc4888b54498f6ffcf2679ccb669d848423d21b96022da5a"
+      },
+      {
+        "bytes": 1125,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/fail-path-swap-tree16/expected.json",
+        "sha256": "a942d43caa474001edc8f3bd80079ac940dad2ab003bc19f4d9dc5bddb7ad831"
+      },
+      {
+        "bytes": 1027,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/fail-path-swap-tree5/expected.json",
+        "sha256": "915d5558448474380ee321ec420dc03b557f25d2fa32653e5b9063737d3ef8ca"
+      },
+      {
+        "bytes": 1082,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/fail-path-too-long/expected.json",
+        "sha256": "f0ea79d75f1d3efb3572507c5d97219f526758ca871d06850e6fed075cd1b62d"
+      },
+      {
+        "bytes": 962,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/fail-tampered-leaf/expected.json",
+        "sha256": "4c09ca83f54012ced6a8fa191cc2493d29ae38e75fc81847a3279354168e3130"
+      },
+      {
+        "bytes": 1004,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/fail-tampered-path/expected.json",
+        "sha256": "7e2cea24732841d94f35e9c370e904c70f225c4c58717e12af4881c1a184cd67"
+      },
+      {
+        "bytes": 1092,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/fail-tampered-path-last/expected.json",
+        "sha256": "55653735d5ccbb4343d8acf3f8163eae4afd871cd53e9e7429ee5bef43481688"
+      },
+      {
+        "bytes": 971,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/fail-tampered-path-small-tree/expected.json",
+        "sha256": "abd020546e2f35da562857845d343846f7bb2d41972da6470dcf49b792156efb"
+      },
+      {
+        "bytes": 992,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/fail-wrong-leaf-index/expected.json",
+        "sha256": "ec4e908bbbf686f1c4c68dda809cb0ce79b2233daee16c5669a118450b28f2dd"
+      },
+      {
+        "bytes": 1091,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/fail-wrong-leaf-index-edge/expected.json",
+        "sha256": "1c40215de832da20806abc647e8013411b476a133bf4c50446b39d86785486df"
+      },
+      {
+        "bytes": 936,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/fail-wrong-tree-size/expected.json",
+        "sha256": "9edee83fbdec2ac4a4f96dc86d2471468a0eb6ad39cab930770944b08c414a83"
+      },
+      {
+        "bytes": 764,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/valid-empty-leaf/expected.json",
+        "sha256": "c059a733792f79ec9c2b20dc2c46e67e1d206c9e8931bdf7bdeca8de7cb29303"
+      },
+      {
+        "bytes": 801,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/valid-empty-leaf-tree2/expected.json",
+        "sha256": "a09cc95f1347a2c9b778f41f7486bb80384f93f2f6b907affd06532fecca4ff1"
+      },
+      {
+        "bytes": 762,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/valid-tree1-index0/expected.json",
+        "sha256": "f54385b57214a01dcb6b6c80bbbaf957cd43a2bc7ca9eb562943588c633e2b2a"
+      },
+      {
+        "bytes": 1072,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/valid-tree15-index7/expected.json",
+        "sha256": "a0c590d5107eba87754fc35b50567cef2423e042634e4421625370e44afa2b18"
+      },
+      {
+        "bytes": 1047,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/valid-tree16-index0/expected.json",
+        "sha256": "88b2be792d7e899d8da0d2c2e2489a229e485e5f9d0a0b2593a0b4693b1e38a1"
+      },
+      {
+        "bytes": 1068,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/valid-tree16-index9/expected.json",
+        "sha256": "1366e44de4294f21361977e4a9cb43b111f6983a9df0722929907f1172a167fb"
+      },
+      {
+        "bytes": 843,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/valid-tree17-index16/expected.json",
+        "sha256": "9c38d4382e8a780fcbefe15f64f0fcd184304a872bbc2b58e860dcc3d69d6450"
+      },
+      {
+        "bytes": 1124,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/valid-tree17-index8/expected.json",
+        "sha256": "370262d98324d2cb796eadaf9fb337e9e402e40fde6f231e20f38e80aaff790c"
+      },
+      {
+        "bytes": 826,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/valid-tree2-index0/expected.json",
+        "sha256": "44edcade0970c9dc0d72c71ee2c64a6728935a8ed9a6e061e7c1780d48b0c0d8"
+      },
+      {
+        "bytes": 841,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/valid-tree2-index1/expected.json",
+        "sha256": "1cc76e30e30266be7315ce02b2efc44af6be852747fd69572676eff805b980ac"
+      },
+      {
+        "bytes": 902,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/valid-tree3-index1/expected.json",
+        "sha256": "71bc4d89effeb55609721aea69e1799debe2a3e507918703b80ab4141050a166"
+      },
+      {
+        "bytes": 845,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/valid-tree3-index2/expected.json",
+        "sha256": "c5525ccb086fdfd06329706d5a63da6791d36a6f00e5527730b51c1496a9f066"
+      },
+      {
+        "bytes": 1133,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/valid-tree31-index15/expected.json",
+        "sha256": "2a3fb02604bee01442d20b4d278b07d0b35a01622d0c609101d9c1fba261aec0"
+      },
+      {
+        "bytes": 1128,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/valid-tree32-index31/expected.json",
+        "sha256": "0bf974148af1cc2ba8185a328917810dd935959045b4fec1831035533da2585e"
+      },
+      {
+        "bytes": 1234,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/valid-tree33-index0/expected.json",
+        "sha256": "7ebd00551b918b365e68aa176eb82afb87dcd70c8ccf4c8f7bde73d376b91042"
+      },
+      {
+        "bytes": 888,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/valid-tree4-index0/expected.json",
+        "sha256": "29d9b19ba568c300c9a4c80bea4e3df0a51d875272dd528f5bb390cb789d44a6"
+      },
+      {
+        "bytes": 922,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/valid-tree4-index1/expected.json",
+        "sha256": "1efc834c945f6e36f971f00e12ae7563c2549e83f75468dd9134f1fdf409de75"
+      },
+      {
+        "bytes": 991,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/valid-tree5-index0/expected.json",
+        "sha256": "990d6837fc19525b117d7b48f704c596ddf1a01ba79dda766f71b5c36477e856"
+      },
+      {
+        "bytes": 971,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/valid-tree5-index2/expected.json",
+        "sha256": "25e1c894c3a6b70fcf186ccd8ddd1462ebf839c13f301b70fd806132d6f61a51"
+      },
+      {
+        "bytes": 903,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/valid-tree6-index4/expected.json",
+        "sha256": "b5fc83e730e0782e3a2172446e4910485f328eb9ac448a11b2f7164e384ef74e"
+      },
+      {
+        "bytes": 1220,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/valid-tree63-index31/expected.json",
+        "sha256": "2852f09f79114464d5876673e75c45ee09bea8f7249a8071c97151734c827a7e"
+      },
+      {
+        "bytes": 1226,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/valid-tree64-index63/expected.json",
+        "sha256": "5434b5bdefb9d0833854e921c0e51a921db0db1f9e2bc984502b70e6d1b981d6"
+      },
+      {
+        "bytes": 894,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/valid-tree65-index64/expected.json",
+        "sha256": "c9a78ea744bf6519dee5e9aa4df604b69d83fa6a6043fb7e183f74c5ffb6199c"
+      },
+      {
+        "bytes": 980,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/valid-tree7-index3/expected.json",
+        "sha256": "9e1db58554b384fdd070ea3e867a341be4449b9c847c257040539a3362c41fbb"
+      },
+      {
+        "bytes": 949,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/valid-tree7-index6/expected.json",
+        "sha256": "52bb2d59f54ffa5f3c8351b19c87c2541dcebde7e7f943d97f1b219c36e0fca0"
+      },
+      {
+        "bytes": 989,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/valid-tree8-index2/expected.json",
+        "sha256": "e8a2e0cb06e61a82edbc71f699ef4f054fd2246da5ddb874196d3c0f4e72e530"
+      },
+      {
+        "bytes": 972,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/valid-tree8-index5/expected.json",
+        "sha256": "8bd6912cdd5162817eb4f7ca6d995f74a9ae0d5712b1b576501386b054aed458"
+      },
+      {
+        "bytes": 1056,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/valid-tree9-index0/expected.json",
+        "sha256": "21e3f02e277778d6b434e3f5e9fbcc1c18ab27c6479a37d4db315faf75ab2fd4"
+      },
+      {
+        "bytes": 842,
+        "path": "docs/upstream-package/scitt-rfc9162/v1/valid-tree9-index8/expected.json",
+        "sha256": "9f38ec502844e6fc879180698d153e400f8a28638b871a6b9f1bd885fb434f43"
+      }
+    ]
+  },
+  "manifest_digest": "f9079358fda950e1b5e2994c7649a4b2c98149ea36046b2242824f884a539de4",
+  "rule": "tools/measure_own_corpus.py: same fold functions the competitor sweep imports from tools/verify_rekor_inclusion.py",
+  "totals": {
+    "consistent": 63,
+    "inconsistent": 0,
+    "leaf_digest_rebuilt": 50,
+    "leaf_digest_stated": 50,
+    "n_accept_published": 39,
+    "n_reject_published": 24,
+    "n_replayable": 63,
+    "none": 0,
+    "own_reconstruction_agrees": 57,
+    "own_reconstruction_stated": 57,
+    "size_unauthenticated": 4,
+    "vectors": 63
+  },
+  "version": "v1"
+}

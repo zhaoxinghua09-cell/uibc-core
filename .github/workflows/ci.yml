@@ -440,3 +440,31 @@ jobs:
       - name: The evidence index matches its sources
         run: python tools/build_evidence_index.py --check
 
+  # TC-4 says probe strings are handed to the platform shell, so quoting and path
+  # rules differ between POSIX sh and cmd.exe. `crosswalk-gate` above runs the
+  # probes under bash; until this job existed, nothing in CI had ever executed a
+  # probe string under cmd.exe - the Windows job only ran static tests
+  # (`evaluate(run=False)`), which is the opposite of what TC-4's reason claimed.
+  # Same command as a reader would run, so the workflow and the reader agree.
+  windows-probes:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v7.1.0
+        with:
+          python-version: "3.12"
+
+      - name: Install test deps
+        run: python -m pip install --upgrade pip && pip install pytest ".[verify]"
+
+      - name: Install the package
+        run: python -m pip install .
+
+      - name: Every crosswalk reproduces its committed result under cmd.exe
+        run: python tools/recheck.py
+
+      - name: The probe command is wired to more than one family
+        run: python tools/probe_platform_matrix.py
+

@@ -51,10 +51,13 @@
       "text": "Probes are strings handed to the platform shell, so quoting and path rules differ between POSIX sh and cmd.exe.",
       "url": "https://github.com/zhaoxinghua09-cell/uibc-core/blob/main/tools/crosswalk_probe.py",
       "applies": true,
-      "strength": "gap",
-      "carrier": [],
-      "probe": null,
-      "reason": "Only the Windows path has been exercised here. A probe written for POSIX quoting can pass locally and fail on the other platform; a containerised runner that runs both is not wired up yet."
+      "strength": "partial",
+      "carrier": ["ci.yml runs tools/recheck.py on ubuntu-latest and windows-latest", "the same six probe strings execute under bash and cmd.exe"],
+      "probe": {
+        "cmd": "python tools/probe_platform_matrix.py",
+        "expect": {"exit": 0}
+      },
+      "reason": "CI now runs the same command - tools/recheck.py - on ubuntu-latest and windows-latest, so all six probe strings are executed under POSIX sh and cmd.exe, and recheck exits 3 if either platform produces different bytes. Before this job existed, the Windows runner only ran static tests (evaluate(run=False)), so nothing in CI had ever executed a probe string under cmd.exe - which is the opposite of what this reason used to claim. What is still missing: macOS, and any shell that is neither posix-sh nor cmd.exe; quoting there is untested, and this probe reads the workflow rather than exercising those shells."
     }
   ]
 }

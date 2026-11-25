@@ -7,17 +7,17 @@
 - Standard: **uibc-crosswalk/1 (tool contract)**
 - Source: https://github.com/zhaoxinghua09-cell/uibc-core/blob/main/tools/crosswalk_probe.py
 - Clauses mapped: **4**
-- Manifest digest: `654d7fc64995d3b0e934c5d5f4d632b78b0b0db86bbb6d9c8d838926a5ee8658`
-- Verdict digest: `cf9ae9c5091f67211196e170fa0c209e50fca36cdead5305041c10b219ebd556` (identity of the verdict set, not of the clause text)
+- Manifest digest: `de5618e9a9760d0b6c5bd4b9953bd2cf206957654b312e1c52c6b8d8caa46134`
+- Verdict digest: `19fb29aaf69adc4bbddccbfc823b43e0ae10123ddfe69a9b245957e3e63d4f36` (identity of the verdict set, not of the clause text)
 - Determinism: re-running on the same input yields byte-identical output; `--check` exits 3 on any drift. Reproducible in the SLSA sense - not verified-reproducible, which would need a second independent host.
-- Counts: COVERED=3, GAP=1
+- Counts: COVERED=3, PARTIAL=1
 
 | Clause | Strength | State | Carrier | Probe | What is not covered |
 |---|---|---|---|---|---|
 | TC-1 three-state decision is a pure function | carried | **COVERED** | classify(), unit tests drive it directly | `python -m pytest tests/test_crosswalk_probe.py -q -k classify` → exit 0 | - |
 | TC-2 a declared gap stays green and is counted | carried | **COVERED** | classify(), exit code rule | `python -m pytest tests/test_crosswalk_probe.py -q -k declared_gap` → exit 0 | - |
 | TC-3 an unproven claim turns the run red | carried | **COVERED** | classify(), main() exit code | `python -m pytest tests/test_crosswalk_probe.py -q -k overclaim` → exit 0 | - |
-| TC-4 shell semantics across platforms | gap | **GAP** | - | - | Only the Windows path has been exercised here. A probe written for POSIX quoting can pass locally and fail on the other platform; a containerised runner that runs both is not wired up yet. |
+| TC-4 shell semantics across platforms | partial | **PARTIAL** | ci.yml runs tools/recheck.py on ubuntu-latest and windows-latest, the same six probe strings execute under bash and cmd.exe | `python tools/probe_platform_matrix.py` → exit 0 | CI now runs the same command - tools/recheck.py - on ubuntu-latest and windows-latest, so all six probe strings are executed under POSIX sh and cmd.exe, and recheck exits 3 if either platform produces different bytes. Before this job existed, the Windows runner only ran static tests (evaluate(run=False)), so nothing in CI had ever executed a probe string under cmd.exe - which is the opposite of what this reason used to claim. What is still missing: macOS, and any shell that is neither posix-sh nor cmd.exe; quoting there is untested, and this probe reads the workflow rather than exercising those shells. |
 
 ## How to re-run
 

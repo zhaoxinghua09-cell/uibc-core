@@ -1,9 +1,11 @@
 {
- "generated_at": "2026-11-25T22:03:05Z",
- "tree_sha256": "953e2eaeb7f05ad143863dcc6fe6d6f650958a5228339757744307d0921751d9",
- "files_hashed": 2448,
- "content_sha256": "6a68a23324e63c1fc0bdae65996be977fdb722dff3f746ce121cf719f6ef4196",
- "content_files": 2448,
+ "generated_at": "2026-11-25T22:39:15Z",
+ "tree_sha256": "f751318a9bdff521c1e6c19f9cf7fd21263ace0535bfec6d5d0b34ec29319981",
+ "files_hashed": 2450,
+ "content_sha256": "d7dbbbe409c4b6a68f736cb1cf2463fa7a3ea057ec2414a7aeb91c80c01ed96a",
+ "content_files": 2450,
+ "content_lf_sha256": "8378a55036266d16c2f09ab3f474617d731d16f137b170c15a202710d55acd8d",
+ "delivery": "archive",
  "digest_excludes": [
   "docs/OUTSIDER-RERUN.md",
   "docs/outsider-rerun-receipt.json"
@@ -46,7 +48,7 @@
    "rc": 0,
    "expect": "PARITY OK",
    "ok": true,
-   "seconds": 0.4,
+   "seconds": 0.5,
    "tail": "PARITY OK: 25 repositories pinned and re-scored, best competitor 3/10, this repository 10/10"
   },
   {
@@ -55,7 +57,7 @@
    "rc": 0,
    "expect": "ALL OK",
    "ok": true,
-   "seconds": 0.3,
+   "seconds": 0.2,
    "tail": "ALL OK"
   },
   {
@@ -64,8 +66,8 @@
    "rc": 0,
    "expect": "passed",
    "ok": true,
-   "seconds": 3.4,
-   "tail": "34 passed in 2.80s"
+   "seconds": 3.2,
+   "tail": "34 passed in 2.60s"
   }
  ],
  "ok": true

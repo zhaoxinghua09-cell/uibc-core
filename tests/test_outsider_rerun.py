@@ -148,3 +148,58 @@ def test_a_real_byte_move_is_not_excused_as_names(tool, tmp_path, monkeypatch, c
     assert "CONTENT" in out
     assert "NAMES-ONLY" not in out
     assert receipt["content_sha256"] != tool.content_digest(str(copy))[0]
+
+
+def test_line_endings_are_their_own_condition(tool, tmp_path):
+    """CRLF and LF of the same text: content digest moves, the folded one does not."""
+    t = tmp_path / "t"
+    (t / "a").mkdir(parents=True)
+    (t / "a" / "one.txt").write_bytes(b"one\r\ntwo\r\n")
+    content_crlf, _ = tool.content_digest(str(t))
+    lf_crlf, _ = tool.content_lf_digest(str(t))
+    (t / "a" / "one.txt").write_bytes(b"one\ntwo\n")
+    content_lf, _ = tool.content_digest(str(t))
+    lf_lf, _ = tool.content_lf_digest(str(t))
+    assert content_crlf != content_lf          # a byte moved
+    assert lf_crlf == lf_lf                     # but only line endings moved
+
+
+def test_a_delivery_difference_is_named_and_not_called_a_blood_edit(tool, tmp_path, monkeypatch, capsys):
+    """Archive bytes vs checkout bytes: same commit, two channels.
+
+    This repository stores some blobs with CRLF while `.gitattributes` says
+    `text=auto eol=lf`, so a tarball and a clone hand you different bytes for the
+    same commit. A tree that differs only that way must be reported as DELIVERY
+    MATCH, not as an edit - and the strict digest must still not match.
+    """
+    _require_full_tree()
+    receipt = json.load(open(tool.RECEIPT, encoding="utf-8"))
+    copy = tmp_path / "repo"
+    tool.copy_tree(str(copy))
+    victim = None
+    for rel in ("CHANGELOG.md", "README.md", "docs/README.md"):
+        p = copy / rel
+        if p.exists() and b"\r\n" in p.read_bytes()[:4096]:
+            victim = p
+            break
+    if victim is None:
+        pytest.skip("no CRLF text file in this extraction; nothing to fold")
+    victim.write_bytes(victim.read_bytes().replace(b"\r\n", b"\n"))
+    monkeypatch.setattr(tool, "HERE", str(copy))
+    rc = tool.check()
+    out = capsys.readouterr().out
+    assert rc == 0, out
+    assert "DELIVERY MATCH" in out
+    assert receipt["tree_sha256"] != tool.tree_digest(str(copy))[0]
+
+
+def test_without_git_the_commit_view_is_absent(tool, tmp_path):
+    """No `.git`: the tool must say so and fall back, not guess."""
+    t = tmp_path / "t"
+    (t / "a").mkdir(parents=True)
+    (t / "a" / "one.txt").write_text("one\n", encoding="utf-8")
+    assert tool.commit_blobs(str(t)) is None
+    views = tool.all_digests(str(t))
+    assert [v[0] for v in views] == ["disk"]
+    assert views[0][1][3] == 1
+

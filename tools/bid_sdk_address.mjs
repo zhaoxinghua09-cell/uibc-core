@@ -1,9 +1,15 @@
 // Derive a BID address with the OFFICIAL SDK (bid-sdk-nodejs, published by Caict),
-// so the address rule can be checked against the implementation that ships it
-// rather than only against our own reading of the protocol.
+// so the address the implementation ships can be recorded rather than only our
+// own reading of the protocol.
 //
 //   npm i bid-sdk-nodejs long sjcl bignumber.js co-wrap-all
 //   node tools/bid_sdk_address.mjs
+//
+// This records ONE address. Do not read it as "our rule reproduces the SDK":
+// over 50 seeds (tools/bid_sdk_address_batch.mjs) a Bitcoin-alphabet base58 of
+// sha256(pub)[10:] agrees with the SDK on only 7. The SDK's base58 codec is not
+// Bitcoin's, so its addresses are verifiable by us but not re-derivable.
+// tests/test_bid_address_rule.py states both halves.
 //
 // Requiring the package root pulls in its transaction layer (request-promise, a
 // deprecated stack, and on-chain calls we do not make here); the keypair module

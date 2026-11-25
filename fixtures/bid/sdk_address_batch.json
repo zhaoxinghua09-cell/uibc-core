@@ -1,0 +1,252 @@
+[
+ {
+  "seed_hex": "005a0e151c232a31383f464d545b626970777e858c939aa1a8afb6bdc4cbd2d9",
+  "encPublicKey": "b06566728c2678b206f66da11b663cc5295cfc291eefbfbadf7fb3e1d17c28a6139090",
+  "address": "did:bid:efW5ENhNHBq5mYxk13KKoQ9jRSkCfJE2"
+ },
+ {
+  "seed_hex": "015a0f161d242b323940474e555c636a71787f868d949ba2a9b0b7bec5ccd3da",
+  "encPublicKey": "b06566d60edf13ba660439ff3eb47d418fcb276fe13edaf08b027b7a36c3c12fe7a39d",
+  "address": "did:bid:efYXY97nTBX2JYUtLghMXYGRKVYzWKbz"
+ },
+ {
+  "seed_hex": "025a10171e252c333a41484f565d646b727980878e959ca3aab1b8bfc6cdd4db",
+  "encPublicKey": "b065666ca61927e85e4fa91ed23b9527ebd6916761a96abe0a06442e79b7b978048ecc",
+  "address": "did:bid:efKxKQ2PDpGYK23AeQgxQ1CWVz7M7Mc5"
+ },
+ {
+  "seed_hex": "035a11181f262d343b424950575e656c737a81888f969da4abb2b9c0c7ced5dc",
+  "encPublicKey": "b06566db7ffa50f25c8f65243e834d4d94f4699e6da46bd1016f40719388732cb6b38f",
+  "address": "did:bid:efvb8J31nNhUFM6oZZzEXH57mn2E1DHo"
+ },
+ {
+  "seed_hex": "045a121920272e353c434a51585f666d747b828990979ea5acb3bac1c8cfd6dd",
+  "encPublicKey": "b065667fb354bd439a2b19011da8934f4ab9611861696120d72902b8fef838e4c5a4bd",
+  "address": "did:bid:ef1FxiS3c6m5HD4GkopjXjHoWZ9vpX1r"
+ },
+ {
+  "seed_hex": "055a131a21282f363d444b525960676e757c838a91989fa6adb4bbc2c9d0d7de",
+  "encPublicKey": "b06566f26626872662dacfb7bcb069986723d744647e79567c36fc5c5aae59b82d7fb7",
+  "address": "did:bid:ef2bLQCpNp83usefoUKEc6J2H1ifcqaMo"
+ },
+ {
+  "seed_hex": "065a141b222930373e454c535a61686f767d848b9299a0a7aeb5bcc3cad1d8df",
+  "encPublicKey": "b0656691cdd5463f750d9a1feeda04358609cff5024307a2e21afe971f311abedae424",
+  "address": "did:bid:efu77Gw96CzV2nhxC5g8MAh2p9wuYo3a"
+ },
+ {
+  "seed_hex": "075a151c232a31383f464d545b626970777e858c939aa1a8afb6bdc4cbd2d9e0",
+  "encPublicKey": "b06566615a650a854248cc4dc6d07b56450abacea22a62f39be3fcb5ae3d3022ac8960",
+  "address": "did:bid:efqtAxK4kcNJYXrbVFHCWudBD6Yqx7Qk"
+ },
+ {
+  "seed_hex": "085a161d242b323940474e555c636a71787f868d949ba2a9b0b7bec5ccd3dae1",
+  "encPublicKey": "b0656674c6e9f00004f784c344f8e771e58d91897dea6638bd8105ae3c991d54f7dc1c",
+  "address": "did:bid:efgGGHb2FfcQ5qGWvAzpPsjvW4JZitTQ"
+ },
+ {
+  "seed_hex": "095a171e252c333a41484f565d646b727980878e959ca3aab1b8bfc6cdd4dbe2",
+  "encPublicKey": "b0656614c9c6c2ad1e2c3dbc983e8fca0db5c3c491294b7223cb6cb91674680338f219",
+  "address": "did:bid:ef21ZrXAbqezxgUkww7YTb3AQNyw8HAmz"
+ },
+ {
+  "seed_hex": "0a5a181f262d343b424950575e656c737a81888f969da4abb2b9c0c7ced5dce3",
+  "encPublicKey": "b06566c521e1a777302e69a571b96483816685f58d247f56ff3ace0ccab70969871920",
+  "address": "did:bid:efpJPesHddM79ug3pA4JZzUzxQgk9Xig"
+ },
+ {
+  "seed_hex": "0b5a1920272e353c434a51585f666d747b828990979ea5acb3bac1c8cfd6dde4",
+  "encPublicKey": "b0656647346b29acded96b78851c45002641bc8214e32c430bc54465a3ba2c5e03d39b",
+  "address": "did:bid:efVhsStaM54UHNpUWD4FShzRF6R2TFEm"
+ },
+ {
+  "seed_hex": "0c5a1a21282f363d444b525960676e757c838a91989fa6adb4bbc2c9d0d7dee5",
+  "encPublicKey": "b06566c799f96adb53fcde9c3ed2f525aac0896f5ac24a05d273bc45672aea182eaedf",
+  "address": "did:bid:efLVPfGGhYvgQYr4SDv2zhiUTjddXaWZ"
+ },
+ {
+  "seed_hex": "0d5a1b222930373e454c535a61686f767d848b9299a0a7aeb5bcc3cad1d8dfe6",
+  "encPublicKey": "b06566cbe0a61751fbcd77567e533a12e6ba13b83e42e0bc4414bee1a613e55f75c60b",
+  "address": "did:bid:ef9tHGrvyyJP2DiMe3tjSm9wRFDLb1Ua"
+ },
+ {
+  "seed_hex": "0e5a1c232a31383f464d545b626970777e858c939aa1a8afb6bdc4cbd2d9e0e7",
+  "encPublicKey": "b065669700aa15340f28f840301ef9a2fed76c27a06df86a995aa522d0d71f22e0f27e",
+  "address": "did:bid:efrLUoKckdEjh2J9rFr4MzW1ZT4FToR"
+ },
+ {
+  "seed_hex": "0f5a1d242b323940474e555c636a71787f868d949ba2a9b0b7bec5ccd3dae1e8",
+  "encPublicKey": "b06566e04adf188a066e04ae0da398a68e90d3679e441acf0c9de9739d0dea7f7e911d",
+  "address": "did:bid:efaKfR4JPeHeXiNA3idWEFNtYFNegfGL"
+ },
+ {
+  "seed_hex": "105a1e252c333a41484f565d646b727980878e959ca3aab1b8bfc6cdd4dbe2e9",
+  "encPublicKey": "b06566b3a50a71acae0f96da765a538aee616f86e075c931b25bda96761cf3c7a91252",
+  "address": "did:bid:efBAVv3UXwZWj5JWZEPYUAdnfhjaPnkb"
+ },
+ {
+  "seed_hex": "115a1f262d343b424950575e656c737a81888f969da4abb2b9c0c7ced5dce3ea",
+  "encPublicKey": "b065661b87f4d93570e6893b456e27cd8426fcc2cd9d3182213ff76943661bf2a74913",
+  "address": "did:bid:efv89J1cxZtatdz7SHxUcEejgZe8kXVn"
+ },
+ {
+  "seed_hex": "125a20272e353c434a51585f666d747b828990979ea5acb3bac1c8cfd6dde4eb",
+  "encPublicKey": "b065664f5f6881b910dc180fad4f5f75a4fa4fd792510417428a3fcf65e91f0888c161",
+  "address": "did:bid:ef58EWFBkuhUnVoz7Ak4CQqKc2HcVVqQ"
+ },
+ {
+  "seed_hex": "135a21282f363d444b525960676e757c838a91989fa6adb4bbc2c9d0d7dee5ec",
+  "encPublicKey": "b06566b19da1413eb4158931a641c8b6ee0901a9959c925766e08fdb6a4818875fc8c5",
+  "address": "did:bid:ef4cWwc8VEHLmN6oaLMyLQGp5FBzkAQ4"
+ },
+ {
+  "seed_hex": "145a222930373e454c535a61686f767d848b9299a0a7aeb5bcc3cad1d8dfe6ed",
+  "encPublicKey": "b06566310265433d4f9dd70cede2b13746cd0fb37c19068eeec35a503dbf0363cc5682",
+  "address": "did:bid:efsCsAa17HUxkoqtqvqEDggqew3TVPoi"
+ },
+ {
+  "seed_hex": "155a232a31383f464d545b626970777e858c939aa1a8afb6bdc4cbd2d9e0e7ee",
+  "encPublicKey": "b065661cf8c8e29042ee6f8fe8c1cb4aaf5d1e71d31c5f34d2fd373c712a72adb8636a",
+  "address": "did:bid:ef2ABT9WGhLY2USjfdg8aqRs4ZU52rVMz"
+ },
+ {
+  "seed_hex": "165a242b323940474e555c636a71787f868d949ba2a9b0b7bec5ccd3dae1e8ef",
+  "encPublicKey": "b065662dff8d72a26d8084f62a2a6a3b2c0088d9a1e3e10f9062f63ef716b64c73892b",
+  "address": "did:bid:efbuuF6otzRdYwALTnPTwNZXyJF79k2G"
+ },
+ {
+  "seed_hex": "175a252c333a41484f565d646b727980878e959ca3aab1b8bfc6cdd4dbe2e9f0",
+  "encPublicKey": "b065660315337b807258bc098b2c062dc37dada9eba0d216baa7cb59d4479e6125abd1",
+  "address": "did:bid:ef27BBt7AeHKrr2Dao77PgXVfzBjQmShF"
+ },
+ {
+  "seed_hex": "185a262d343b424950575e656c737a81888f969da4abb2b9c0c7ced5dce3eaf1",
+  "encPublicKey": "b065662545ac6ed7835718c2d59b880a62c926d7229cd1da857dd38418cf19c5c31ead",
+  "address": "did:bid:ef23KCDKHPjdCxxEBX1F7odcb11iAAbqe"
+ },
+ {
+  "seed_hex": "195a272e353c434a51585f666d747b828990979ea5acb3bac1c8cfd6dde4ebf2",
+  "encPublicKey": "b06566ca57d1454abe6b673f006ef476871e0316dc84cdb1ba2dd34d2bdf1e45c9156a",
+  "address": "did:bid:efZUTu9ETXeJi87GtT2avfNbxe4PLf1T"
+ },
+ {
+  "seed_hex": "1a5a282f363d444b525960676e757c838a91989fa6adb4bbc2c9d0d7dee5ecf3",
+  "encPublicKey": "b0656697c1803a06a49d243a1e9419f71a15501302edef76af73925c7a952455da9ecb",
+  "address": "did:bid:ef26UMgjDrYGtgwz28vUVv27QCdJ25Fmw"
+ },
+ {
+  "seed_hex": "1b5a2930373e454c535a61686f767d848b9299a0a7aeb5bcc3cad1d8dfe6edf4",
+  "encPublicKey": "b0656618b26c4e5587a4e3f4c4c58a0fcaacb2fd92f550fb35b4229be061df3fbf83f3",
+  "address": "did:bid:ef5m33nJ8VEQaZ7oiCTkTf2bsdFtuuNA"
+ },
+ {
+  "seed_hex": "1c5a2a31383f464d545b626970777e858c939aa1a8afb6bdc4cbd2d9e0e7eef5",
+  "encPublicKey": "b06566e4a92bdacdc044f536316fa089b89403cba71f269b8c12b11db0b6e8386e47e5",
+  "address": "did:bid:ef27fhjPERettdd8egqDCuab7jc4asxZU"
+ },
+ {
+  "seed_hex": "1d5a2b323940474e555c636a71787f868d949ba2a9b0b7bec5ccd3dae1e8eff6",
+  "encPublicKey": "b065668de2291941963d6ca4f89324b334271bb3439ef456443a0f42e3019967a01db0",
+  "address": "did:bid:efZuKVtPvrjfNAe5WxPm146oA83ZZsF9"
+ },
+ {
+  "seed_hex": "1e5a2c333a41484f565d646b727980878e959ca3aab1b8bfc6cdd4dbe2e9f0f7",
+  "encPublicKey": "b065669074e9c90ee5b815e3cf60164d4a687332ad21c6165f025e90b16c6f6a214a3b",
+  "address": "did:bid:efbG6s2fJeVFExyqYcsXgCiBy8gX6ZJb"
+ },
+ {
+  "seed_hex": "1f5a2d343b424950575e656c737a81888f969da4abb2b9c0c7ced5dce3eaf1f8",
+  "encPublicKey": "b0656687504182c1b48b3de3d26bb5d1700ab35d38ab5fbd9b2cde19b85e49667349c0",
+  "address": "did:bid:ef25mtJEBqiCZsnyoATnhmMKz8jHDMaVw"
+ },
+ {
+  "seed_hex": "205a2e353c434a51585f666d747b828990979ea5acb3bac1c8cfd6dde4ebf2f9",
+  "encPublicKey": "b065669c82e10722b3fb33280a375782a574c7f7ed2adc3dc9d4a3ed5d221bcefc26ef",
+  "address": "did:bid:ef2pqKPEiWAqS1WtFN9tRk6ENhwSiovF"
+ },
+ {
+  "seed_hex": "215a2f363d444b525960676e757c838a91989fa6adb4bbc2c9d0d7dee5ecf3fa",
+  "encPublicKey": "b06566e7b193b6b9fa0224129a44e29e28aa1aff9fe5dc5f4542557c21a914cf7b7ad3",
+  "address": "did:bid:ef28HagHnq1x88SxWkQ5jT3mKFNeKVJ18"
+ },
+ {
+  "seed_hex": "225a30373e454c535a61686f767d848b9299a0a7aeb5bcc3cad1d8dfe6edf4fb",
+  "encPublicKey": "b0656685883816ec2311514b5dbf3d3435abfc794af0f8818a540405291607db9f4455",
+  "address": "did:bid:efQaF1jamvmxnsFjgXYrSR75dxVDHec4"
+ },
+ {
+  "seed_hex": "235a31383f464d545b626970777e858c939aa1a8afb6bdc4cbd2d9e0e7eef5fc",
+  "encPublicKey": "b06566c3eed69fd86f3009bd51e02058037a14354f2c6dcdf8cd01170e6d5d7189a6dd",
+  "address": "did:bid:efFoejCAZ1ipcCfn9Dhs2cKs3bQqKWob"
+ },
+ {
+  "seed_hex": "245a323940474e555c636a71787f868d949ba2a9b0b7bec5ccd3dae1e8eff6fd",
+  "encPublicKey": "b06566005dd9f0467b943f36328ab31f60cb703d4eab7ef075493512ae1e78d2795fba",
+  "address": "did:bid:ef8iUzXUed1cgoUmjD8zSh3qKkmfSDMH"
+ },
+ {
+  "seed_hex": "255a333a41484f565d646b727980878e959ca3aab1b8bfc6cdd4dbe2e9f0f7fe",
+  "encPublicKey": "b0656609674d6a661165d4d0bfa809564ac56a221fb78ae88ef9f589cbcc03452d2fca",
+  "address": "did:bid:efxy4vFKCmz24Ry5dL9b7pHKqnRwHHvV"
+ },
+ {
+  "seed_hex": "265a343b424950575e656c737a81888f969da4abb2b9c0c7ced5dce3eaf1f8ff",
+  "encPublicKey": "b06566fe15066d7189f484c3b2a35f462d59c3a90fd2bf1d0401ff5683afce4f5b5314",
+  "address": "did:bid:efQWSCSnaAsBVPq84DB3VpoJtH7XT5Ag"
+ },
+ {
+  "seed_hex": "275a353c434a51585f666d747b828990979ea5acb3bac1c8cfd6dde4ebf2f900",
+  "encPublicKey": "b065668266b67dc906f93de2704346192fa8e2b9e568432b7c250ad214d5f67793113b",
+  "address": "did:bid:efRQ1m2PkQ6qRtkFNR4qFBPGaK6spTnA"
+ },
+ {
+  "seed_hex": "285a363d444b525960676e757c838a91989fa6adb4bbc2c9d0d7dee5ecf3fa01",
+  "encPublicKey": "b0656677b2570313a29a223c52cc9677242a67d22930f645cfd19329b406434f07b90d",
+  "address": "did:bid:ef21cz2Z2Fs8GshzVJwfRt8GzhxsbVAGH"
+ },
+ {
+  "seed_hex": "295a373e454c535a61686f767d848b9299a0a7aeb5bcc3cad1d8dfe6edf4fb02",
+  "encPublicKey": "b0656622432beea847ce76fd01ae9523aa89733c29d7dbd48a10614031bb054f3120cd",
+  "address": "did:bid:ef3pCVoYuCath2FdEtckb6QWQxSiLwnF"
+ },
+ {
+  "seed_hex": "2a5a383f464d545b626970777e858c939aa1a8afb6bdc4cbd2d9e0e7eef5fc03",
+  "encPublicKey": "b065664bad8fc52cec800f42baf12490997d95e4551467b5d7b1ea7226a7095f7426b6",
+  "address": "did:bid:efNuLFvHe1TV1EikCwn3KFMLHP8s5EXS"
+ },
+ {
+  "seed_hex": "2b5a3940474e555c636a71787f868d949ba2a9b0b7bec5ccd3dae1e8eff6fd04",
+  "encPublicKey": "b0656669d1d1f491c19cea9b076ac3a13649164e1e626ee254b42d506159109020dbe2",
+  "address": "did:bid:efqTPw7EzsihfoqXpDosqoHNETcDCNr6"
+ },
+ {
+  "seed_hex": "2c5a3a41484f565d646b727980878e959ca3aab1b8bfc6cdd4dbe2e9f0f7fe05",
+  "encPublicKey": "b0656634e1241ca7fe6d54b88fb739cb9f85fdb2888ea1f6e5cdd332f68725a2951d85",
+  "address": "did:bid:efjVxQCuqEuVtLXz82R8h2VaT3PRGe9X"
+ },
+ {
+  "seed_hex": "2d5a3b424950575e656c737a81888f969da4abb2b9c0c7ced5dce3eaf1f8ff06",
+  "encPublicKey": "b06566863ab62905e10ac079206eb1fb46f44b131ac29687f24298c8005a558e77dcb1",
+  "address": "did:bid:efTKuxdNohDdNeSC6VpR8rzP8ExtKvWc"
+ },
+ {
+  "seed_hex": "2e5a3c434a51585f666d747b828990979ea5acb3bac1c8cfd6dde4ebf2f90007",
+  "encPublicKey": "b06566123c36a7f8a7a58c346f0ad697d67984e3757d257258fafbf1d63277c6925a90",
+  "address": "did:bid:efZ6KzXJbnteutMACppiDSGD2F2mjwXb"
+ },
+ {
+  "seed_hex": "2f5a3d444b525960676e757c838a91989fa6adb4bbc2c9d0d7dee5ecf3fa0108",
+  "encPublicKey": "b065664f6616f4c8fbe967a1c5cc0d2dac2f0d2be8a58b30558cfb7f0f8fb4f002d876",
+  "address": "did:bid:efmouwC4KuM4VPuTmkR8K8h6Tri339KG"
+ },
+ {
+  "seed_hex": "305a3e454c535a61686f767d848b9299a0a7aeb5bcc3cad1d8dfe6edf4fb0209",
+  "encPublicKey": "b06566f95a65b1eec6da45e7aff7ac0c611ed6b7567f0d8316479725dcea24bac0d95e",
+  "address": "did:bid:efMDZZZAB8zQKqjP3X7MoARLLCKkyqyM"
+ },
+ {
+  "seed_hex": "315a3f464d545b626970777e858c939aa1a8afb6bdc4cbd2d9e0e7eef5fc030a",
+  "encPublicKey": "b065663d98b438b4045495dec077d918791809a432e97ff3dc715927d7161c9dd3e913",
+  "address": "did:bid:efxB13knzLXbib2QrsxSbK8uXcViKgoD"
+ }
+]

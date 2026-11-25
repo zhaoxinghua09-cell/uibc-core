@@ -58,7 +58,36 @@ def test_two_calendars_down_and_one_up_still_stamps_the_digest(tmp_path):
     assert info["calendar"] == "https://bob"
     assert [t["calendar"] for t in info["tried"]] == ["https://alice", "https://bob"]
     assert info["tried"][0]["error"].startswith("RuntimeError")
+    assert info["calendars_in_proof"] == ["https://bob"], (
+        "a stub that cannot merge must not be reported as extra witnesses")
     assert os.path.isfile(info["out"])
+
+
+def test_every_calendar_that_answered_ends_up_in_the_one_proof(tmp_path):
+    """Measured 2026-11-25: the proof used to stop at the first answer, so the
+    published anchor depended on one operator staying up."""
+    pytest.importorskip("opentimestamps", reason="needs the library to merge timestamps")
+    import hashlib
+
+    from opentimestamps.core.notary import PendingAttestation
+    from opentimestamps.core.timestamp import Timestamp
+
+    target = _write(tmp_path, "digests.txt", b"hello\n")
+    digest = hashlib.sha256(b"hello\n").digest()
+    seen = []
+
+    def submit(calendar, d):
+        seen.append(calendar)
+        ts = Timestamp(d)
+        ts.attestations.add(PendingAttestation(calendar))  # an empty tree cannot serialize
+        return ts
+
+    info = anchor_ots.stamp(target, calendars=("https://alice", "https://bob", "https://finney"),
+                            submit=submit)
+
+    assert seen == ["https://alice", "https://bob", "https://finney"]
+    assert info["calendars_in_proof"] == seen
+    assert len(info["tried"]) == 3
 
 
 def test_no_calendar_answering_names_every_attempt(tmp_path):

@@ -183,8 +183,8 @@ claim true:
 | OTS 2026-11-17 | `alice.btc.calendar.opentimestamps.org`, proof `tests/fixtures/anchor/ots_head.ots` (207 bytes) |
 | what that proof anchors | its own first message, `f0087497…b808f120` — **not** `4ad23d91…6fd6e98`, and not the hash of any committed `tools/out/release_status.json` |
 | its container | a bare serialized tree with no standard header, so the official `ots` client refuses it ("is not a timestamp file") |
-| OTS 2026-11-21 (re-stamp) | `tests/fixtures/anchor/anchored_head.json.ots` (237 bytes): taken on the TSA head digest itself, in the standard container, so it binds and the official client can read it |
-| what either proof says today | **pending calendar attestation(s), zero Bitcoin block attestations** |
+| OTS 2026-11-21 (re-stamp) | `tests/fixtures/anchor/anchored_head.json.ots`: taken on the TSA head digest itself, in the standard container, so it binds and the official client can read it. Re-stamped again on 2026-11-25 (740 bytes) so that **all three** public calendars that answered sit in one proof; the earlier 237-byte single-calendar version is in git history, not in the tree |
+| what either proof says today | **pending calendar attestations, zero Bitcoin block attestations** (the 2026-11-25 proof carries three, one per calendar) |
 
 That is the honest status: a calendar attestation says the calendar had this
 digest at submission time, which is weaker than a block attestation. The

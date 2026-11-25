@@ -51,10 +51,24 @@ def axis_of(checks):
 
 
 def first_fail(checks):
-    for cid, res in checks:
-        if res == "FAIL":
-            return cid
-    return None
+    """Lowest check number that fails, not the first FAIL line in the report.
+
+    The report is not printed in S order (S11, S1, S2, S3, S4, S12, S7, S8, S5, S6
+    on a duplicated package), so "first" is undefined until the ordering rule is
+    fixed. This tool fixes it the same way `tools/oracle_check.py:first_fail` does,
+    because otherwise the same package has two defensible answers and neither is
+    reproducible.
+    """
+    def num(cid):
+        digits = "".join(ch for ch in str(cid) if ch.isdigit())
+        return int(digits) if digits else 10 ** 6
+
+    failing = [cid for cid, res in checks if res == "FAIL"]
+    return min(failing, key=num) if failing else None
+
+
+def failing_set(checks):
+    return [cid for cid, res in checks if res == "FAIL"]
 
 
 def main():
@@ -80,7 +94,15 @@ def main():
     for case in expected:
         name = case["case"]
         path = os.path.join(oracle, "cases", name)
-        cmd = [sys.executable, "-m", "uibc_core.cli", "verify", path, "--key", keyfiles[name]]
+        cmd = [sys.executable, "-m", "uibc_core.cli", "verify", path]
+        # `mode` decides whether a key is supplied, exactly as the corpus README
+        # instructs: strict cases are verified against the owner key, open cases are
+        # verified with no key because they were sealed and then mutated on purpose. 
+        # Passing a key to an open case is not "stricter": it turns S6 into a FAIL
+        # that outranks the check the case was written for (measured: S6 became the
+        # first fail on six open cases when this tool did that).
+        if case.get("mode") == "strict":
+            cmd += ["--key", keyfiles[name]]
         # The corpus "mode" field records how the case was authored, not a CLI
         # switch: passing --strict here would trip S1 on the committed
         # evidence/.lock marker of the accept cases and misreport them as FAIL.
@@ -106,13 +128,17 @@ def main():
             "expected_first_fail": case.get("expected_first_fail"),
             "measured_first_fail": first_fail(checks),
             "first_fail_ok": first_fail(checks) == case.get("expected_first_fail"),
+            "expected_failed_checks": case.get("expected_failed_checks"),
+            "failed_set_ok": (set(failing_set(checks)) == set(case["expected_failed_checks"])
+                              if case.get("expected_failed_checks") else None),
             "axes": axis_of(checks),
             "checks": dict(checks),
         })
         if a.verbose:
             print(f"{name}: {doc.get('result')} (expected {case.get('expected_verdict')})")
 
-    ok = [r for r in rows if r.get("verdict_ok") and r.get("first_fail_ok", True) and "error" not in r]
+    ok = [r for r in rows if r.get("verdict_ok") and r.get("first_fail_ok", True)
+          and r.get("failed_set_ok") in (True, None) and "error" not in r]
     bad = [r for r in rows if r not in ok]
 
     os.makedirs(a.out, exist_ok=True)

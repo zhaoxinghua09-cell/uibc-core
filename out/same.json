@@ -1,0 +1,16 @@
+{
+  "v": "uibc-head-cosign/1",
+  "head": "sha256:90ab1b5dbe38e7b989835bc0adc5c67ca2b8c0e2bc9204fe3e285b7319a9370d",
+  "signatures": [
+    {
+      "role": "owner",
+      "key_id": "sha256:1019e64bb7db21fe23bbc38ebf3fa815a8ee7df05673f4e32496833c4f67933b",
+      "sig": "5d63385b3fc4d8b8580ef13892ac0463ea7693db8cbd4da3d8bd3548f73d8abcf1250e7db0c2b4873e06b1e7e9f40c6fbbb13bfddbdce479694db57284d61004"
+    },
+    {
+      "role": "witness",
+      "key_id": "sha256:1019e64bb7db21fe23bbc38ebf3fa815a8ee7df05673f4e32496833c4f67933b",
+      "sig": "847e8bf7f6cf77b30531648cfe1b588e1b0eeb6366c1524d366d0d9bbaeaa7b55ccc00b7fad6739ff12a97543663dd7e6570bc19fe6bb3e18024fe57b69be605"
+    }
+  ]
+}

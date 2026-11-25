@@ -1,0 +1,31 @@
+{
+  "verdict": "MISMATCH",
+  "witnesses": [
+    {
+      "service": "Zenodo",
+      "ok": false,
+      "detail": [
+        "unreachable or refused: <urlopen error [Errno 11004] getaddrinfo failed>"
+      ]
+    },
+    {
+      "service": "Software Heritage",
+      "ok": true,
+      "detail": [
+        "snapshot a901225b50ae resolves, HEAD -> refs/heads/main",
+        "origin url https://github.com/zhaoxinghua09-cell/uibc-core",
+        "origin SWHID swh:1:ori:819530c8be2adf6da901256ce9fd28063f8f1296 (repository claims swh:1:ori:819530c8be2adf6da901256ce9fd28063f8f1296)"
+      ]
+    },
+    {
+      "service": "Sigstore Rekor",
+      "ok": true,
+      "detail": [
+        "entry 108e9186e8c5677a… exists at logIndex 2883389783",
+        "integratedTime 1789710612",
+        "artifact sha256 59cc1c917ff766af8f6528ceadfea522b8627a2c591e57334aa4afd2a07959f4",
+        "local dist zip sha256 59cc1c917ff766af8f6528ceadfea522b8627a2c591e57334aa4afd2a07959f4"
+      ]
+    }
+  ]
+}

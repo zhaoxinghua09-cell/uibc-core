@@ -1,7 +1,7 @@
 {
   "meta": {
     "probe": "redteam",
-    "generated_at_utc": "2026-11-20T10:20:30Z"
+    "generated_at_utc": "2026-11-25T14:38:57Z"
   },
   "cases": [
     {
@@ -83,7 +83,7 @@
       "expect": "PASS 且耗时线性可接受",
       "result": "PASS",
       "failed_checks": [],
-      "note": "trust=unanchored elapsed=45.7ms"
+      "note": "trust=unanchored elapsed=64.8ms"
     },
     {
       "id": "RT09",

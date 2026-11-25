@@ -53,6 +53,22 @@ ORACLE = [
     ("oracle-s12-id-only", "dup_root", "FAIL", "S12"),
 ]
 
+# Rows that need more than a verdict: what else fails, and why the first fail is
+# not a ranking. Kept here rather than hand-edited into expected.json, because a
+# hand edit makes the corpus non-reproducible (and test_oracle_reproducible says so).
+CORPUS_NOTES = {
+    "oracle-duplicated": {
+        "expected_failed_checks": ["S5", "S7", "S8", "S12"],
+        "note": ("Four checks fail at once. `expected_first_fail` follows the rule in "
+                 "`first_fail()`: the lowest check number that fails, so S5 comes before "
+                 "S7, S8 and S12. The printed report orders checks differently "
+                 "(S11, S1, S2, S3, S4, S12, S7, S8, S5, S6 on this package), so a reader "
+                 "who takes the first FAIL line in the report would name S12. Both are "
+                 "true statements about different orderings; the set above is authoritative "
+                 "and neither ordering is a severity ranking."),
+    },
+}
+
 # Tranche two: the checks a CLI-built package cannot reach. Each row takes its
 # expectation from `docs/CHECK-MATRIX.md`, which is committed evidence about which
 # attack makes which check FAIL - written down before this tool ran.
@@ -285,9 +301,11 @@ def emit_corpus(dest, only=None):
         target = os.path.join(cases_dir, name)
         shutil.copytree(pkg, target, dirs_exist_ok=True)
         keys[name] = key.hex()
-        expected.append({"case": name, "kind": "reject-or-accept", "mode": "strict",
-                         "expected_verdict": want_verdict,
-                         "expected_first_fail": want_first})
+        row = {"case": name, "kind": "reject-or-accept", "mode": "strict",
+               "expected_verdict": want_verdict,
+               "expected_first_fail": want_first}
+        row.update(CORPUS_NOTES.get(name, {}))
+        expected.append(row)
     for name, prebuild, fn_name, want_verdict, want_first in ORACLE_EXT:
         if not keep(name):
             continue

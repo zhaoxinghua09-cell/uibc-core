@@ -1,0 +1,915 @@
+{
+  "spec": "uibc/conformance-axis-report/1",
+  "corpus": {
+    "cases": 30,
+    "source": "conformance/oracle/expected.json"
+  },
+  "verifier": {
+    "id": "uibc-core-verifier",
+    "version": "0.5.5"
+  },
+  "totals": {
+    "cases": 30,
+    "consistent": 30,
+    "divergent": 0
+  },
+  "rows": [
+    {
+      "case": "oracle-clean",
+      "expected": "PASS",
+      "measured": "PASS",
+      "verdict_ok": true,
+      "expected_first_fail": null,
+      "measured_first_fail": null,
+      "first_fail_ok": true,
+      "expected_failed_checks": null,
+      "failed_set_ok": null,
+      "axes": {
+        "structure": "PASS",
+        "seal": "PASS",
+        "anchor": "N/A",
+        "freshness": "N/A"
+      },
+      "checks": {
+        "S11": "PASS",
+        "S1": "PASS",
+        "S2": "PASS",
+        "S3": "PASS",
+        "S4": "PASS",
+        "S12": "PASS",
+        "S7": "PASS",
+        "S8": "PASS",
+        "S5": "PASS",
+        "S6": "PASS"
+      }
+    },
+    {
+      "case": "oracle-tampered",
+      "expected": "FAIL",
+      "measured": "FAIL",
+      "verdict_ok": true,
+      "expected_first_fail": "S4",
+      "measured_first_fail": "S4",
+      "first_fail_ok": true,
+      "expected_failed_checks": null,
+      "failed_set_ok": null,
+      "axes": {
+        "structure": "FAIL",
+        "seal": "PASS",
+        "anchor": "N/A",
+        "freshness": "N/A"
+      },
+      "checks": {
+        "S11": "PASS",
+        "S1": "PASS",
+        "S2": "PASS",
+        "S3": "PASS",
+        "S4": "FAIL",
+        "S12": "PASS",
+        "S7": "PASS",
+        "S8": "FAIL",
+        "S5": "INCONCLUSIVE",
+        "S6": "PASS"
+      }
+    },
+    {
+      "case": "oracle-deleted",
+      "expected": "FAIL",
+      "measured": "FAIL",
+      "verdict_ok": true,
+      "expected_first_fail": "S4",
+      "measured_first_fail": "S4",
+      "first_fail_ok": true,
+      "expected_failed_checks": null,
+      "failed_set_ok": null,
+      "axes": {
+        "structure": "FAIL",
+        "seal": "PASS",
+        "anchor": "N/A",
+        "freshness": "N/A"
+      },
+      "checks": {
+        "S11": "PASS",
+        "S1": "PASS",
+        "S2": "PASS",
+        "S3": "PASS",
+        "S4": "FAIL",
+        "S12": "PASS",
+        "S7": "PASS",
+        "S8": "FAIL",
+        "S5": "INCONCLUSIVE",
+        "S6": "PASS"
+      }
+    },
+    {
+      "case": "oracle-duplicated",
+      "expected": "FAIL",
+      "measured": "FAIL",
+      "verdict_ok": true,
+      "expected_first_fail": "S5",
+      "measured_first_fail": "S5",
+      "first_fail_ok": true,
+      "expected_failed_checks": [
+        "S5",
+        "S7",
+        "S8",
+        "S12"
+      ],
+      "failed_set_ok": true,
+      "axes": {
+        "structure": "FAIL",
+        "seal": "PASS",
+        "anchor": "N/A",
+        "freshness": "N/A"
+      },
+      "checks": {
+        "S11": "PASS",
+        "S1": "PASS",
+        "S2": "PASS",
+        "S3": "PASS",
+        "S4": "PASS",
+        "S12": "FAIL",
+        "S7": "FAIL",
+        "S8": "FAIL",
+        "S5": "FAIL",
+        "S6": "PASS"
+      }
+    },
+    {
+      "case": "oracle-unsealed",
+      "expected": "FAIL",
+      "measured": "FAIL",
+      "verdict_ok": true,
+      "expected_first_fail": "S6",
+      "measured_first_fail": "S6",
+      "first_fail_ok": true,
+      "expected_failed_checks": null,
+      "failed_set_ok": null,
+      "axes": {
+        "structure": "PASS",
+        "seal": "FAIL",
+        "anchor": "N/A",
+        "freshness": "N/A"
+      },
+      "checks": {
+        "S11": "PASS",
+        "S1": "PASS",
+        "S2": "PASS",
+        "S3": "PASS",
+        "S4": "PASS",
+        "S12": "PASS",
+        "S7": "PASS",
+        "S8": "PASS",
+        "S5": "PASS",
+        "S6": "FAIL"
+      }
+    },
+    {
+      "case": "oracle-s12-id-only",
+      "expected": "FAIL",
+      "measured": "FAIL",
+      "verdict_ok": true,
+      "expected_first_fail": "S12",
+      "measured_first_fail": "S12",
+      "first_fail_ok": true,
+      "expected_failed_checks": null,
+      "failed_set_ok": null,
+      "axes": {
+        "structure": "FAIL",
+        "seal": "PASS",
+        "anchor": "N/A",
+        "freshness": "N/A"
+      },
+      "checks": {
+        "S11": "PASS",
+        "S1": "PASS",
+        "S2": "PASS",
+        "S3": "PASS",
+        "S4": "PASS",
+        "S12": "FAIL",
+        "S7": "PASS",
+        "S8": "PASS",
+        "S5": "PASS",
+        "S6": "PASS"
+      }
+    },
+    {
+      "case": "oracle-s01-undeclared-file",
+      "expected": "FAIL",
+      "measured": "FAIL",
+      "verdict_ok": true,
+      "expected_first_fail": "S1",
+      "measured_first_fail": "S1",
+      "first_fail_ok": true,
+      "expected_failed_checks": null,
+      "failed_set_ok": null,
+      "axes": {
+        "structure": "FAIL",
+        "seal": "INCONCLUSIVE",
+        "anchor": "N/A",
+        "freshness": "N/A"
+      },
+      "checks": {
+        "S11": "PASS",
+        "S1": "FAIL",
+        "S2": "PASS",
+        "S3": "PASS",
+        "S4": "PASS",
+        "S12": "PASS",
+        "S7": "PASS",
+        "S8": "PASS",
+        "S5": "PASS",
+        "S6": "INCONCLUSIVE"
+      }
+    },
+    {
+      "case": "oracle-s02-identity",
+      "expected": "FAIL",
+      "measured": "FAIL",
+      "verdict_ok": true,
+      "expected_first_fail": "S2",
+      "measured_first_fail": "S2",
+      "first_fail_ok": true,
+      "expected_failed_checks": null,
+      "failed_set_ok": null,
+      "axes": {
+        "structure": "FAIL",
+        "seal": "INCONCLUSIVE",
+        "anchor": "N/A",
+        "freshness": "N/A"
+      },
+      "checks": {
+        "S11": "PASS",
+        "S1": "PASS",
+        "S2": "FAIL",
+        "S3": "PASS",
+        "S4": "PASS",
+        "S12": "PASS",
+        "S7": "PASS",
+        "S8": "PASS",
+        "S5": "PASS",
+        "S6": "INCONCLUSIVE"
+      }
+    },
+    {
+      "case": "oracle-s03-calendar",
+      "expected": "FAIL",
+      "measured": "FAIL",
+      "verdict_ok": true,
+      "expected_first_fail": "S3",
+      "measured_first_fail": "S3",
+      "first_fail_ok": true,
+      "expected_failed_checks": null,
+      "failed_set_ok": null,
+      "axes": {
+        "structure": "FAIL",
+        "seal": "INCONCLUSIVE",
+        "anchor": "N/A",
+        "freshness": "N/A"
+      },
+      "checks": {
+        "S11": "PASS",
+        "S1": "PASS",
+        "S2": "PASS",
+        "S3": "FAIL",
+        "S4": "PASS",
+        "S12": "FAIL",
+        "S7": "PASS",
+        "S8": "FAIL",
+        "S5": "PASS",
+        "S6": "INCONCLUSIVE"
+      }
+    },
+    {
+      "case": "oracle-s08-log-truncated",
+      "expected": "FAIL",
+      "measured": "FAIL",
+      "verdict_ok": true,
+      "expected_first_fail": "S8",
+      "measured_first_fail": "S8",
+      "first_fail_ok": true,
+      "expected_failed_checks": null,
+      "failed_set_ok": null,
+      "axes": {
+        "structure": "FAIL",
+        "seal": "INCONCLUSIVE",
+        "anchor": "N/A",
+        "freshness": "N/A"
+      },
+      "checks": {
+        "S11": "PASS",
+        "S1": "PASS",
+        "S2": "PASS",
+        "S3": "PASS",
+        "S4": "PASS",
+        "S12": "PASS",
+        "S7": "PASS",
+        "S10": "PASS",
+        "S8": "FAIL",
+        "S5": "PASS",
+        "S6": "INCONCLUSIVE"
+      }
+    },
+    {
+      "case": "oracle-s10-closure",
+      "expected": "FAIL",
+      "measured": "FAIL",
+      "verdict_ok": true,
+      "expected_first_fail": "S10",
+      "measured_first_fail": "S10",
+      "first_fail_ok": true,
+      "expected_failed_checks": null,
+      "failed_set_ok": null,
+      "axes": {
+        "structure": "PASS",
+        "seal": "INCONCLUSIVE",
+        "anchor": "N/A",
+        "freshness": "N/A"
+      },
+      "checks": {
+        "S11": "PASS",
+        "S1": "PASS",
+        "S2": "PASS",
+        "S3": "PASS",
+        "S4": "PASS",
+        "S12": "PASS",
+        "S7": "PASS",
+        "S10": "FAIL",
+        "S8": "PASS",
+        "S5": "PASS",
+        "S6": "INCONCLUSIVE"
+      }
+    },
+    {
+      "case": "oracle-s11-duplicate-member",
+      "expected": "FAIL",
+      "measured": "FAIL",
+      "verdict_ok": true,
+      "expected_first_fail": "S11",
+      "measured_first_fail": "S11",
+      "first_fail_ok": true,
+      "expected_failed_checks": null,
+      "failed_set_ok": null,
+      "axes": {
+        "structure": "FAIL",
+        "seal": "INCONCLUSIVE",
+        "anchor": "N/A",
+        "freshness": "N/A"
+      },
+      "checks": {
+        "S11": "FAIL",
+        "S1": "PASS",
+        "S2": "PASS",
+        "S3": "PASS",
+        "S4": "PASS",
+        "S12": "PASS",
+        "S7": "PASS",
+        "S8": "PASS",
+        "S5": "PASS",
+        "S6": "INCONCLUSIVE"
+      }
+    },
+    {
+      "case": "oracle-s13-merkle-root",
+      "expected": "FAIL",
+      "measured": "FAIL",
+      "verdict_ok": true,
+      "expected_first_fail": "S13",
+      "measured_first_fail": "S13",
+      "first_fail_ok": true,
+      "expected_failed_checks": null,
+      "failed_set_ok": null,
+      "axes": {
+        "structure": "PASS",
+        "seal": "INCONCLUSIVE",
+        "anchor": "N/A",
+        "freshness": "N/A"
+      },
+      "checks": {
+        "S11": "PASS",
+        "S1": "PASS",
+        "S2": "PASS",
+        "S3": "PASS",
+        "S4": "PASS",
+        "S12": "PASS",
+        "S13": "FAIL",
+        "S17": "PASS",
+        "S7": "PASS",
+        "S8": "PASS",
+        "S5": "PASS",
+        "S6": "INCONCLUSIVE"
+      }
+    },
+    {
+      "case": "oracle-s14-base64-padding",
+      "expected": "FAIL",
+      "measured": "FAIL",
+      "verdict_ok": true,
+      "expected_first_fail": "S14",
+      "measured_first_fail": "S14",
+      "first_fail_ok": true,
+      "expected_failed_checks": null,
+      "failed_set_ok": null,
+      "axes": {
+        "structure": "FAIL",
+        "seal": "INCONCLUSIVE",
+        "anchor": "PASS",
+        "freshness": "N/A"
+      },
+      "checks": {
+        "S11": "PASS",
+        "S1": "PASS",
+        "S2": "PASS",
+        "S3": "PASS",
+        "S4": "PASS",
+        "S12": "PASS",
+        "S14": "FAIL",
+        "S15": "PASS",
+        "S18": "PASS",
+        "S7": "PASS",
+        "S8": "PASS",
+        "S5": "PASS",
+        "S6": "INCONCLUSIVE"
+      }
+    },
+    {
+      "case": "oracle-s15-anchor-time",
+      "expected": "FAIL",
+      "measured": "FAIL",
+      "verdict_ok": true,
+      "expected_first_fail": "S15",
+      "measured_first_fail": "S15",
+      "first_fail_ok": true,
+      "expected_failed_checks": null,
+      "failed_set_ok": null,
+      "axes": {
+        "structure": "PASS",
+        "seal": "INCONCLUSIVE",
+        "anchor": "FAIL",
+        "freshness": "N/A"
+      },
+      "checks": {
+        "S11": "PASS",
+        "S1": "PASS",
+        "S2": "PASS",
+        "S3": "PASS",
+        "S4": "PASS",
+        "S12": "PASS",
+        "S14": "PASS",
+        "S15": "FAIL",
+        "S18": "PASS",
+        "S7": "PASS",
+        "S8": "PASS",
+        "S5": "PASS",
+        "S6": "INCONCLUSIVE"
+      }
+    },
+    {
+      "case": "oracle-s16-token-byte",
+      "expected": "FAIL",
+      "measured": "FAIL",
+      "verdict_ok": true,
+      "expected_first_fail": "S16",
+      "measured_first_fail": "S16",
+      "first_fail_ok": true,
+      "expected_failed_checks": null,
+      "failed_set_ok": null,
+      "axes": {
+        "structure": "PASS",
+        "seal": "INCONCLUSIVE",
+        "anchor": "FAIL",
+        "freshness": "N/A"
+      },
+      "checks": {
+        "S11": "PASS",
+        "S1": "PASS",
+        "S2": "PASS",
+        "S3": "PASS",
+        "S4": "PASS",
+        "S12": "PASS",
+        "S16": "FAIL",
+        "S7": "PASS",
+        "S8": "PASS",
+        "S5": "PASS",
+        "S6": "INCONCLUSIVE"
+      }
+    },
+    {
+      "case": "oracle-s17-receipt-body",
+      "expected": "FAIL",
+      "measured": "FAIL",
+      "verdict_ok": true,
+      "expected_first_fail": "S17",
+      "measured_first_fail": "S17",
+      "first_fail_ok": true,
+      "expected_failed_checks": null,
+      "failed_set_ok": null,
+      "axes": {
+        "structure": "PASS",
+        "seal": "INCONCLUSIVE",
+        "anchor": "N/A",
+        "freshness": "N/A"
+      },
+      "checks": {
+        "S11": "PASS",
+        "S1": "PASS",
+        "S2": "PASS",
+        "S3": "PASS",
+        "S4": "PASS",
+        "S12": "PASS",
+        "S13": "PASS",
+        "S17": "FAIL",
+        "S7": "PASS",
+        "S8": "PASS",
+        "S5": "PASS",
+        "S6": "INCONCLUSIVE"
+      }
+    },
+    {
+      "case": "oracle-s18-policy-artefact",
+      "expected": "FAIL",
+      "measured": "FAIL",
+      "verdict_ok": true,
+      "expected_first_fail": "S18",
+      "measured_first_fail": "S18",
+      "first_fail_ok": true,
+      "expected_failed_checks": null,
+      "failed_set_ok": null,
+      "axes": {
+        "structure": "PASS",
+        "seal": "INCONCLUSIVE",
+        "anchor": "PASS",
+        "freshness": "N/A"
+      },
+      "checks": {
+        "S11": "PASS",
+        "S1": "PASS",
+        "S2": "PASS",
+        "S3": "PASS",
+        "S4": "PASS",
+        "S12": "PASS",
+        "S14": "PASS",
+        "S15": "PASS",
+        "S18": "FAIL",
+        "S7": "PASS",
+        "S8": "PASS",
+        "S5": "PASS",
+        "S6": "INCONCLUSIVE"
+      }
+    },
+    {
+      "case": "oracle-s07-index-metadata",
+      "expected": "FAIL",
+      "measured": "FAIL",
+      "verdict_ok": true,
+      "expected_first_fail": "S7",
+      "measured_first_fail": "S7",
+      "first_fail_ok": true,
+      "expected_failed_checks": null,
+      "failed_set_ok": null,
+      "axes": {
+        "structure": "FAIL",
+        "seal": "INCONCLUSIVE",
+        "anchor": "N/A",
+        "freshness": "N/A"
+      },
+      "checks": {
+        "S11": "PASS",
+        "S1": "PASS",
+        "S2": "PASS",
+        "S3": "PASS",
+        "S4": "PASS",
+        "S12": "PASS",
+        "S7": "FAIL",
+        "S10": "PASS",
+        "S8": "FAIL",
+        "S5": "PASS",
+        "S6": "INCONCLUSIVE"
+      }
+    },
+    {
+      "case": "accept-one-file",
+      "expected": "PASS",
+      "measured": "PASS",
+      "verdict_ok": true,
+      "expected_first_fail": null,
+      "measured_first_fail": null,
+      "first_fail_ok": true,
+      "expected_failed_checks": null,
+      "failed_set_ok": null,
+      "axes": {
+        "structure": "PASS",
+        "seal": "PASS",
+        "anchor": "N/A",
+        "freshness": "N/A"
+      },
+      "checks": {
+        "S11": "PASS",
+        "S1": "PASS",
+        "S2": "PASS",
+        "S3": "PASS",
+        "S4": "PASS",
+        "S12": "PASS",
+        "S7": "PASS",
+        "S8": "PASS",
+        "S5": "PASS",
+        "S6": "PASS"
+      }
+    },
+    {
+      "case": "accept-many-files",
+      "expected": "PASS",
+      "measured": "PASS",
+      "verdict_ok": true,
+      "expected_first_fail": null,
+      "measured_first_fail": null,
+      "first_fail_ok": true,
+      "expected_failed_checks": null,
+      "failed_set_ok": null,
+      "axes": {
+        "structure": "PASS",
+        "seal": "PASS",
+        "anchor": "N/A",
+        "freshness": "N/A"
+      },
+      "checks": {
+        "S11": "PASS",
+        "S1": "PASS",
+        "S2": "PASS",
+        "S3": "PASS",
+        "S4": "PASS",
+        "S12": "PASS",
+        "S7": "PASS",
+        "S8": "PASS",
+        "S5": "PASS",
+        "S6": "PASS"
+      }
+    },
+    {
+      "case": "accept-unicode-names",
+      "expected": "PASS",
+      "measured": "PASS",
+      "verdict_ok": true,
+      "expected_first_fail": null,
+      "measured_first_fail": null,
+      "first_fail_ok": true,
+      "expected_failed_checks": null,
+      "failed_set_ok": null,
+      "axes": {
+        "structure": "PASS",
+        "seal": "PASS",
+        "anchor": "N/A",
+        "freshness": "N/A"
+      },
+      "checks": {
+        "S11": "PASS",
+        "S1": "PASS",
+        "S2": "PASS",
+        "S3": "PASS",
+        "S4": "PASS",
+        "S12": "PASS",
+        "S7": "PASS",
+        "S8": "PASS",
+        "S5": "PASS",
+        "S6": "PASS"
+      }
+    },
+    {
+      "case": "accept-binary",
+      "expected": "PASS",
+      "measured": "PASS",
+      "verdict_ok": true,
+      "expected_first_fail": null,
+      "measured_first_fail": null,
+      "first_fail_ok": true,
+      "expected_failed_checks": null,
+      "failed_set_ok": null,
+      "axes": {
+        "structure": "PASS",
+        "seal": "PASS",
+        "anchor": "N/A",
+        "freshness": "N/A"
+      },
+      "checks": {
+        "S11": "PASS",
+        "S1": "PASS",
+        "S2": "PASS",
+        "S3": "PASS",
+        "S4": "PASS",
+        "S12": "PASS",
+        "S7": "PASS",
+        "S8": "PASS",
+        "S5": "PASS",
+        "S6": "PASS"
+      }
+    },
+    {
+      "case": "accept-large-text",
+      "expected": "PASS",
+      "measured": "PASS",
+      "verdict_ok": true,
+      "expected_first_fail": null,
+      "measured_first_fail": null,
+      "first_fail_ok": true,
+      "expected_failed_checks": null,
+      "failed_set_ok": null,
+      "axes": {
+        "structure": "PASS",
+        "seal": "PASS",
+        "anchor": "N/A",
+        "freshness": "N/A"
+      },
+      "checks": {
+        "S11": "PASS",
+        "S1": "PASS",
+        "S2": "PASS",
+        "S3": "PASS",
+        "S4": "PASS",
+        "S12": "PASS",
+        "S7": "PASS",
+        "S8": "PASS",
+        "S5": "PASS",
+        "S6": "PASS"
+      }
+    },
+    {
+      "case": "accept-resubmitted",
+      "expected": "PASS",
+      "measured": "PASS",
+      "verdict_ok": true,
+      "expected_first_fail": null,
+      "measured_first_fail": null,
+      "first_fail_ok": true,
+      "expected_failed_checks": null,
+      "failed_set_ok": null,
+      "axes": {
+        "structure": "PASS",
+        "seal": "PASS",
+        "anchor": "N/A",
+        "freshness": "N/A"
+      },
+      "checks": {
+        "S11": "PASS",
+        "S1": "PASS",
+        "S2": "PASS",
+        "S3": "PASS",
+        "S4": "PASS",
+        "S12": "PASS",
+        "S7": "PASS",
+        "S8": "PASS",
+        "S5": "PASS",
+        "S6": "PASS"
+      }
+    },
+    {
+      "case": "accept-typed-evidence",
+      "expected": "PASS",
+      "measured": "PASS",
+      "verdict_ok": true,
+      "expected_first_fail": null,
+      "measured_first_fail": null,
+      "first_fail_ok": true,
+      "expected_failed_checks": null,
+      "failed_set_ok": null,
+      "axes": {
+        "structure": "PASS",
+        "seal": "PASS",
+        "anchor": "N/A",
+        "freshness": "N/A"
+      },
+      "checks": {
+        "S11": "PASS",
+        "S1": "PASS",
+        "S2": "PASS",
+        "S3": "PASS",
+        "S4": "PASS",
+        "S12": "PASS",
+        "S7": "PASS",
+        "S8": "PASS",
+        "S5": "PASS",
+        "S6": "PASS"
+      }
+    },
+    {
+      "case": "accept-lifecycle-events",
+      "expected": "PASS",
+      "measured": "PASS",
+      "verdict_ok": true,
+      "expected_first_fail": null,
+      "measured_first_fail": null,
+      "first_fail_ok": true,
+      "expected_failed_checks": null,
+      "failed_set_ok": null,
+      "axes": {
+        "structure": "PASS",
+        "seal": "PASS",
+        "anchor": "N/A",
+        "freshness": "N/A"
+      },
+      "checks": {
+        "S11": "PASS",
+        "S1": "PASS",
+        "S2": "PASS",
+        "S3": "PASS",
+        "S4": "PASS",
+        "S12": "PASS",
+        "S7": "PASS",
+        "S8": "PASS",
+        "S5": "PASS",
+        "S6": "PASS"
+      }
+    },
+    {
+      "case": "accept-anchored-policy",
+      "expected": "PASS",
+      "measured": "PASS",
+      "verdict_ok": true,
+      "expected_first_fail": null,
+      "measured_first_fail": null,
+      "first_fail_ok": true,
+      "expected_failed_checks": null,
+      "failed_set_ok": null,
+      "axes": {
+        "structure": "PASS",
+        "seal": "PASS",
+        "anchor": "PASS",
+        "freshness": "N/A"
+      },
+      "checks": {
+        "S11": "PASS",
+        "S1": "PASS",
+        "S2": "PASS",
+        "S3": "PASS",
+        "S4": "PASS",
+        "S12": "PASS",
+        "S14": "PASS",
+        "S15": "PASS",
+        "S18": "PASS",
+        "S7": "PASS",
+        "S8": "PASS",
+        "S5": "PASS",
+        "S6": "PASS"
+      }
+    },
+    {
+      "case": "oracle-s09-rollback-pin",
+      "expected": "FAIL",
+      "measured": "FAIL",
+      "verdict_ok": true,
+      "expected_first_fail": "S9",
+      "measured_first_fail": "S9",
+      "first_fail_ok": true,
+      "expected_failed_checks": null,
+      "failed_set_ok": null,
+      "axes": {
+        "structure": "PASS",
+        "seal": "PASS",
+        "anchor": "N/A",
+        "freshness": "FAIL"
+      },
+      "checks": {
+        "S11": "PASS",
+        "S1": "PASS",
+        "S2": "PASS",
+        "S3": "PASS",
+        "S4": "PASS",
+        "S12": "PASS",
+        "S7": "PASS",
+        "S8": "PASS",
+        "S9": "FAIL",
+        "S5": "PASS",
+        "S6": "PASS"
+      }
+    },
+    {
+      "case": "oracle-s19-stale-state",
+      "expected": "FAIL",
+      "measured": "FAIL",
+      "verdict_ok": true,
+      "expected_first_fail": "S19",
+      "measured_first_fail": "S19",
+      "first_fail_ok": true,
+      "expected_failed_checks": null,
+      "failed_set_ok": null,
+      "axes": {
+        "structure": "PASS",
+        "seal": "PASS",
+        "anchor": "N/A",
+        "freshness": "FAIL"
+      },
+      "checks": {
+        "S11": "PASS",
+        "S1": "PASS",
+        "S2": "PASS",
+        "S3": "PASS",
+        "S4": "PASS",
+        "S12": "PASS",
+        "S7": "PASS",
+        "S8": "PASS",
+        "S19": "FAIL",
+        "S5": "PASS",
+        "S6": "PASS"
+      }
+    }
+  ]
+}

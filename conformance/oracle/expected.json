@@ -27,9 +27,14 @@
       "kind": "reject-or-accept",
       "mode": "strict",
       "expected_verdict": "FAIL",
-      "expected_first_fail": "S12",
-      "expected_failed_checks": ["S12", "S7", "S8", "S5"],
-      "note": "first_fail is the first check in procedure order that fails, so it follows the verifier's order, not a severity ranking. This case fails four checks at once; the set is recorded above so a reader does not lose the other three."
+      "expected_first_fail": "S5",
+      "expected_failed_checks": [
+        "S5",
+        "S7",
+        "S8",
+        "S12"
+      ],
+      "note": "Four checks fail at once. `expected_first_fail` follows the rule in `first_fail()`: the lowest check number that fails, so S5 comes before S7, S8 and S12. The printed report orders checks differently (S11, S1, S2, S3, S4, S12, S7, S8, S5, S6 on this package), so a reader who takes the first FAIL line in the report would name S12. Both are true statements about different orderings; the set above is authoritative and neither ordering is a severity ranking."
     },
     {
       "case": "oracle-unsealed",

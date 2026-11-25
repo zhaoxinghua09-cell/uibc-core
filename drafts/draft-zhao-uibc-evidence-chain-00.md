@@ -340,13 +340,15 @@ _As of 2026-11-25, repository `232deb4`, reference verifier 0.5.5._
 
 - Implemented and re-runnable: the 19-check procedure, the 58-case corpus with a
   validator, anchor handling (OpenTimestamps + Nostr, `pending` vs `anchored`),
-  the differential report with two denominators.
-- Prototyped outside the published CLI: the per-axis report, the verification
-  bundle and the trust ladder described above. They are `tools/` prototypes and
-  are **not** part of the shipped interface; no conformance claim is made for
-  them until they carry their own vectors.
-- Not implemented: witness co-signing of the head; a `--bundle` mode in the CLI;
-  a trust-list flag in the CLI.
+  the differential report with two denominators, the per-axis report
+  (`tools/axis_report.py`), the verification bundle (`--bundle-out`), the reader
+  trust ladder (`--trustlist`), and head co-signature by two distinct keys
+  (`tools/cosign_head.py`).
+- Prototyped outside the published CLI: nothing above; all of it is behind a flag
+  or a tool that leaves the default verdict unchanged. None of it carries its own
+  vectors yet, so no conformance claim is made for the new flags.
+- Not implemented: a witness seat that is not the owner (the co-signature demo
+  uses two synthetic keys), and registration of the trust-list format.
 - This document remains a local draft: it is not in the IETF archive, carries no
   IETF copyright notice, and claims no standards status.
 

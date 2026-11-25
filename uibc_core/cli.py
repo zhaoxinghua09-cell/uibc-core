@@ -692,6 +692,20 @@ def cmd_verify(args):
                     expect_head=getattr(args, "expect_head", None),
                     strict=getattr(args, "strict", False),
                     state_file=getattr(args, "state_file", None))
+    seed_hex = None
+    if args.key:
+        with open(args.key, encoding="utf-8") as f:
+            seed_hex = f.read().strip()
+    if getattr(args, "bundle_out", None):
+        from .bundle import build_bundle
+        bundle = build_bundle(report, pkg, seed_hex,
+                              getattr(args, "expect_head", None),
+                              bool(getattr(args, "state_file", None)))
+        with open(args.bundle_out, "w", encoding="utf-8") as f:
+            json.dump(bundle, f, ensure_ascii=False, indent=2)
+    if getattr(args, "trustlist", None):
+        from .bundle import trust_ladder
+        report["trust"] = trust_ladder(report, seed_hex, args.trustlist)
     print(json.dumps(report, ensure_ascii=False, indent=2))
     sys.exit(0 if report["result"] == "PASS" else 1)
 
@@ -856,6 +870,14 @@ def main():
                         "next run, so a rollback is refused without the caller "
                         "supplying --expect-head every time. First observation is "
                         "INCONCLUSIVE, not PASS")
+    p.add_argument("--bundle-out", dest="bundle_out", default=None, metavar="JSON",
+                   help="write a verification bundle next to the verdict: the artifact "
+                        "digest, verifier identity, the inputs used (by fingerprint) and "
+                        "the per-axis outcome. The owner key is never written into it")
+    p.add_argument("--trustlist", default=None, metavar="JSON",
+                   help="reader policy: a list of key fingerprints. Adds a trust object "
+                        "(well-formed / valid / trusted) to the report; a key on the "
+                        "list never makes an invalid package trusted")
     p.set_defaults(func=cmd_verify)
 
     p = sub.add_parser("explain", help="verify and print why, one check per line")

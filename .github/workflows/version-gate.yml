@@ -1,8 +1,16 @@
 name: version gate
 
+# Two questions, one file:
+#   1. do the version strings agree with each other (pyproject / server.json / runtime)?
+#   2. does the tag carry the bytes it names (its own conformance archive)?
+# The second question was missing until 2026-11-25. Its absence is why the lab
+# bundle failed three releases in a row at "Build the bundle and measure the
+# controls": the tag named 0.5.3 while the archive on that commit was 0.5.2.
+
 on:
   push:
     branches: ["main"]
+    tags: ["v*"]
   pull_request:
     branches: ["main"]
   workflow_dispatch:
@@ -29,3 +37,26 @@ jobs:
           python -m pip install .
       - name: Versions must agree across pyproject, manifest and runtime
         run: python tools/version_gate.py
+
+  readiness:
+    # Runs only when a version tag is pushed: a release must be one set of bytes,
+    # and this is the first step that can say so before anything is published.
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.4.0 # v4
+      - uses: actions/setup-python@v7.1.0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - name: The tag must carry its own archive and agree with the code
+        run: |
+          python tools/check_release_readiness.py \
+            --version "${GITHUB_REF_NAME#v}" --tag "${GITHUB_REF_NAME}"
+      - name: Say so on the run page when it passes
+        run: |
+          {
+            echo "### Release readiness"
+            echo ""
+            echo "- tag: \`${GITHUB_REF_NAME}\`"
+            echo "- version strings, archive and tag agree — the publish jobs can build one set of bytes."
+          } >> "$GITHUB_STEP_SUMMARY"

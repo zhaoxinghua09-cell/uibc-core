@@ -323,6 +323,12 @@ jobs:
         # Not the weaker "names an expected check": the same set, on all 36.
         run: python tools/cross_impl_check.py --json | python3 -c "import json,sys; d=json.load(sys.stdin); assert d['agree_with_python']==d['cases'], d; print('agree', d['agree_with_python'], 'of', d['cases'])"
 
+      - name: The tree digest has a second implementation too
+        # Node's standard library recomputes tree_sha256 and content_sha256 from
+        # the same membership; this fails if the two ever disagree, i.e. if the
+        # number the receipt leans on becomes one program's private convention.
+        run: python tools/tree_digest_second_impl.py --check
+
       - name: A competitor's "reject" must come from the numbers
         # Three vectors from probityai/agent-evidence-vectors v0.38.0 declare an
         # empty tree and carry a non-empty-tree root, so their published reject is

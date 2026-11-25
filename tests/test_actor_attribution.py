@@ -48,6 +48,13 @@ def _build(tmp_path, name, actor=None):
 
 def _s3(pkg, key):
     r = _cli("verify", str(pkg), "--key", str(key))
+    if not r.stdout.strip():
+        # On a Windows runner this came back empty and json.loads said only
+        # "Expecting value: line 1 column 1". Without the streams there is
+        # nothing to diagnose, so the failure states them.
+        raise AssertionError(
+            "verify printed no JSON (rc=%r)\nstdout=%r\nstderr(tail)=%r"
+            % (r.returncode, r.stdout[:300], r.stderr[-800:]))
     data = json.loads(r.stdout)
     for c in data.get("checks", []):
         if c.get("id") == "S3":

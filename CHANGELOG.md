@@ -1,3 +1,11 @@
+## 未发布 — 2026-11-26（收据的两个数有了第二种算法：Node 标准库，同一份名单）
+
+- **问题**：上一版给收据加了两根轴（`tree_sha256` / `content_sha256`），但两个数只有一种程序算得出来。一个只有一种程序能算的数，是那个程序的意见。
+- **做法**：`tools/verify-js/tree-digest.mjs` 用 Node 标准库把两个数重算一遍——不 import `uibc_core`、不跑 Python、不装 npm 包；`tools/tree_digest_second_impl.py` 把 Python 侧的**文件清单**（NUL 分隔）递过去，两边算的必须是同一批文件，所以它们不可能靠“对同一批别的文件得出同一个数”而通过。
+- **三个可能被怀疑的口径**：排序（Node 用 UTF-8 字节序，不是 JS 默认的 UTF-16 码元序，后者会把星形字符排错）、拼接（两边都是 `\n` 连接 + UTF-8 字节）、两个轴的含义（改名只动严摘要、翻字节两个都动）。
+- **强制**：CI `second-implementation` job 多一步 `python tools/tree_digest_second_impl.py --check`，两个实现任何一处单边改动都红。
+- **`tests/test_tree_digest_second_impl.py` 四条**：本树一致、名单递过去（子集就得出子集）、改名只动严摘要、翻一个字节两个都动。详见 `docs/TREE-DIGEST-SECOND-IMPL.md`，断言 A31。
+
 ## 未发布 — 2026-11-26（引用逐条实测：25 条 0 死，6 条被上游改名后 301）
 
 - **问题**：表里每条引用都写成 `github.com/<repo>/tree/<sha>`，但"看起来能点"和"现在真能打开"是两件事。九门 S5 一直卡在"缺逐条 HTTP 三态"。

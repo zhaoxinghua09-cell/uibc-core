@@ -96,10 +96,15 @@ def tracked_files(root):
     return found
 
 
-def tree_digest(root):
-    """sha256 over every file path and its content digest, in path order."""
+def tree_digest(root, files=None):
+    """sha256 over every file path and its content digest, in path order.
+
+    `files` lets a caller hand over a membership it already has (the second
+    implementation in tools/tree_digest_second_impl.py does exactly that, so the
+    two cannot pass by agreeing on a different set of files).
+    """
     entries = []
-    for rel in sorted(tracked_files(root)):
+    for rel in sorted(files if files is not None else tracked_files(root)):
         if rel in GENERATED:
             continue
         p = os.path.join(root, rel.replace("/", os.sep))
@@ -111,7 +116,7 @@ def tree_digest(root):
     return hashlib.sha256("\n".join(entries).encode()).hexdigest(), len(entries)
 
 
-def content_digest(root):
+def content_digest(root, files=None):
     """sha256 over every file's content digest, paths deliberately left out.
 
     Used as the second axis: it answers "did any byte move" without caring how
@@ -119,7 +124,7 @@ def content_digest(root):
     keeps it independent of the path strings entirely.
     """
     hashes = []
-    for rel in tracked_files(root):
+    for rel in (files if files is not None else tracked_files(root)):
         if rel in GENERATED:
             continue
         p = os.path.join(root, rel.replace("/", os.sep))

@@ -7,7 +7,7 @@
     "scope_note": "Five controls from the AU family. This is not a FISMA assessment and not an 800-53B baseline: a baseline is a selection made by an authorising official, and most AU controls assume a running system that logs, stores and reviews events. Rows were chosen because they name something a record layer can demonstrate or plainly cannot. Included partly to show the same judgement engine crossing an industry boundary - this is a federal information system control set, not a medical device one.",
     "source": "crosswalk/nist-sp800-53r5-au.json"
   },
-  "manifest_sha256": "24037c9fa15b8d7a80bfeb23cac2929f2cbd35183a342025717c9727813f6da2",
+  "manifest_sha256": "aded4e1d0776ffcab414e49a4ae96d861ed249864ffe134cf8fffddb24c48ab5",
   "verdict_sha256": "f7d94456436606261c40cc8ffd3965669a24a50847c5af44da8cfa6ebc055c93",
   "clause_count": 5,
   "counts": {
@@ -101,14 +101,16 @@
       "verbatim": true,
       "state": "PARTIAL",
       "note": "",
-      "reason": "Records survive as a readable package with no expiry or deletion path in the format, so after-the-fact investigation does not depend on the producing system still running. The time period itself is the assignment: a retention policy is the organisation's decision, and a record format cannot retain something 'for at least as long as required' without being told what is required.",
+      "reason": "The probe settles four things a retention requirement needs and one it cannot: the earliest instant is carried in the records and timestamps never run backwards (so 'retained since' is a property of the package); no expiry, retention or deletion field exists in manifest, identity or lifecycle (the format does not set the period); the package parses from files alone, with no key material, no service and no network (what an investigator a year later has); and every evidence digest recomputes while a tampered package does not match (so having the files is not the same as having the records). The period itself is the assignment: 'for [a period] consistent with records retention policy' is the organisation's decision, and a format cannot retain something 'for at least as long as required' without being told what is required.",
       "carrier": [
         "self-contained package: records readable without the producing system",
-        "no automatic expiry or deletion path"
+        "earliest instant and monotonic timestamps are data, not memory",
+        "no automatic expiry or deletion path in the format",
+        "evidence digests recomputable, and a tampered package does not match"
       ],
       "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-53r5.pdf",
       "probe": {
-        "declared": "python -m uibc_core.cli inspect fixtures/clean.uibc",
+        "declared": "python tools/probe_retention.py",
         "exit": 0,
         "ok": true
       }

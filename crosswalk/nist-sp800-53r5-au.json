@@ -65,12 +65,12 @@
       "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-53r5.pdf",
       "applies": true, "verbatim": true,
       "strength": "partial",
-      "carrier": ["self-contained package: records readable without the producing system", "no automatic expiry or deletion path"],
+      "carrier": ["self-contained package: records readable without the producing system", "earliest instant and monotonic timestamps are data, not memory", "no automatic expiry or deletion path in the format", "evidence digests recomputable, and a tampered package does not match"],
       "probe": {
-        "cmd": "python -m uibc_core.cli inspect fixtures/clean.uibc",
-        "expect": {"exit": 0, "stdout_contains": "events:"}
+        "cmd": "python tools/probe_retention.py",
+        "expect": {"exit": 0}
       },
-      "reason": "Records survive as a readable package with no expiry or deletion path in the format, so after-the-fact investigation does not depend on the producing system still running. The time period itself is the assignment: a retention policy is the organisation's decision, and a record format cannot retain something 'for at least as long as required' without being told what is required."
+      "reason": "The probe settles four things a retention requirement needs and one it cannot: the earliest instant is carried in the records and timestamps never run backwards (so 'retained since' is a property of the package); no expiry, retention or deletion field exists in manifest, identity or lifecycle (the format does not set the period); the package parses from files alone, with no key material, no service and no network (what an investigator a year later has); and every evidence digest recomputes while a tampered package does not match (so having the files is not the same as having the records). The period itself is the assignment: 'for [a period] consistent with records retention policy' is the organisation's decision, and a format cannot retain something 'for at least as long as required' without being told what is required."
     }
   ]
 }

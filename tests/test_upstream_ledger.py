@@ -53,6 +53,8 @@ def test_no_family_claims_a_count_it_does_not_have():
     r = _receipt()
     sweep_receipt = os.path.join(REPO, "docs", "upstream-package",
                                  "competitor-defects", "corpus-sweep-39daf704.json")
+    if not os.path.exists(sweep_receipt):
+        pytest.skip("an sdist carries no docs/ receipts")
     sr = json.load(open(sweep_receipt, encoding="utf-8"))
     assert r["totals"]["verdict"] == sr["totals"]["n_replayable"]
     assert r["manifest"]["count"] == sr["manifest"]["count"]

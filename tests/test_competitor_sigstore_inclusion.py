@@ -43,6 +43,8 @@ def test_the_receipt_describes_the_same_bytes_as_the_sweep():
     r = _receipt()
     sweep_receipt = os.path.join(REPO, "docs", "upstream-package",
                                  "competitor-defects", "corpus-sweep-39daf704.json")
+    if not os.path.exists(sweep_receipt):
+        pytest.skip("an sdist carries no docs/ receipts")
     with open(sweep_receipt, encoding="utf-8") as f:
         sr = json.load(f)
     assert r["manifest_digest"] == x._digest(sr)

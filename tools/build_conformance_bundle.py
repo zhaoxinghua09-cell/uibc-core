@@ -138,6 +138,27 @@ def add(z, name, data):
     z.writestr(info, data)
 
 
+def write_kit_manifest(out, version):
+    """Record the digests of the files this builder injects at the archive top level.
+
+    Why: `conformance/MANIFEST.sha256` covers `cases/` and the repository files, but
+    not the five kit files written here (manifest.json, expected.json, run.py,
+    README.md, uibc_core.pyz). A reader following the manifest therefore reaches
+    bytes with no recorded digest and cannot check them -- measured 2026-11-25 on
+    0.5.5, where all five were unrecorded. Written next to the archive, so the
+    published digest and the kit digests travel together.
+    """
+    kit_path = os.path.join(CONF, "uibc-conformance-%s.ARCHIVE.sha256" % version)
+    with zipfile.ZipFile(out) as z:
+        names = [n for n in z.namelist() if not n.endswith("/") and not n.startswith("cases/")]
+        lines = ["%s  %s" % (hashlib.sha256(z.read(n)).hexdigest(), n) for n in sorted(names)]
+    lines.append("# %d kit file(s); case files are covered by MANIFEST.sha256" % len(names))
+    with open(kit_path, "w", encoding="utf-8", newline="\n") as f:
+        f.write("\n".join(lines) + "\n")
+    print("wrote %s (%d entries)" % (kit_path, len(names)))
+    return kit_path
+
+
 def main():
     version, replace = parse_args(sys.argv[1:])
     if version is None:
@@ -201,6 +222,7 @@ def main():
         if old == digest:
             os.unlink(tmp_out)
             print("identical: rebuilding %s produced the same bytes (%s)" % (version, digest))
+            write_kit_manifest(out, version)
             return 0
         if not pinned and not replace:
             os.unlink(tmp_out)
@@ -208,6 +230,7 @@ def main():
             return 3
     os.replace(tmp_out, out)
     print("wrote %s" % out)
+    write_kit_manifest(out, version)
     print("cases: %d  size: %d  sha256: %s"
           % (len(cases), os.path.getsize(out), digest))
     return 0

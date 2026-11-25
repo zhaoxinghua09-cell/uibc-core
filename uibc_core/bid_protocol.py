@@ -26,11 +26,19 @@ is the resolver's address, which the protocol never fixes).
 
 Deliberate limits (stated so nobody mistakes absence for oversight):
 
-  * SM2/SM3 is **not** implemented. Ed25519 is, because it can be verified
-    from this repository alone. An SM2 document is parsed and reported as
-    "algorithm not verifiable here" rather than silently accepted.
+  * SM2 is verified too (``uibc_core/sm2.py``), against GM/T 0003.5 Annex A's
+    own worked example. Two things the protocol leaves open - the distinguisher
+    ID and the key encoding - are named in the success reason instead of being
+    assumed silently; an SM2 document signed under a different distinguisher ID
+    will report "does not verify", not "verified".
+  * Address derivation lives in ``uibc_core/bid_address.py`` (50/50 against the
+    official SDK's samples). It is a consistency check only: this module still
+    accepts any address its ABNF accepts, because the protocol does not make
+    derivation an admission rule.
   * §4.3 (binary resolution) is not implemented. A binary payload is refused
-    with code 5 (operation not supported) instead of being guessed at.
+    with code 5 (operation not supported) instead of being guessed at. The
+    normative text it points at (RFC-011) is available and is being worked
+    separately; nothing here reinterprets its units.
 """
 
 from __future__ import annotations

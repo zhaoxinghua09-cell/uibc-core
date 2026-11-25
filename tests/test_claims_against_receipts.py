@@ -11,6 +11,8 @@ import audit_claims_receipts as audit  # noqa: E402
 
 
 def _text():
+    if not os.path.exists(audit.CLAIMS):
+        pytest.skip("an sdist carries no docs/claims-register.md")
     with open(audit.CLAIMS, encoding="utf-8") as f:
         return f.read()
 
@@ -44,6 +46,8 @@ def test_a_receipt_that_moved_fails(tmp_path, monkeypatch):
 
     real = os.path.join(REPO, "docs", "upstream-package", "competitor-defects",
                         "corpus-ledger-39daf704.json")
+    if not os.path.exists(real):
+        pytest.skip("an sdist carries no docs/ receipts")
     fake_root = tmp_path / "root"
     target = fake_root / "docs" / "upstream-package" / "competitor-defects"
     target.mkdir(parents=True)

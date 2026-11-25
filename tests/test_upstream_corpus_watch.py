@@ -15,11 +15,26 @@ import os
 import subprocess
 import sys
 
+import pytest
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TOOL = os.path.join(ROOT, "tools", "watch_upstream_corpus.py")
 WORKFLOW = os.path.join(ROOT, ".github", "workflows", "upstream-corpus-watch.yml")
 DOC = os.path.join(ROOT, "docs", "COMPETITOR-CORPUS-SWEEP.md")
 REGISTER = os.path.join(ROOT, "docs", "claims-register.md")
+
+
+def _read(path):
+    """An sdist carries tools and tests but not .github or docs; skip, not fail.
+
+    The point of the skip is that a wheel-only consumer is not asked to prove
+    something the sdist never shipped - and CI still runs this with everything
+    present, which is where the assertion counts.
+    """
+    if not os.path.isfile(path):
+        pytest.skip("%s is not in this distribution" % os.path.relpath(path, ROOT))
+    with open(path, encoding="utf-8") as f:
+        return f.read()
 
 
 def test_the_tool_passes_its_own_selftest():
@@ -40,8 +55,7 @@ def test_it_compares_and_does_not_rewrite():
 
 
 def test_the_workflow_runs_the_same_command_and_on_a_schedule():
-    with open(WORKFLOW, encoding="utf-8") as f:
-        wf = f.read()
+    wf = _read(WORKFLOW)
     assert "schedule:" in wf and "cron:" in wf
     assert "python tools/watch_upstream_corpus.py" in wf
     assert "workflow_dispatch:" in wf
@@ -51,21 +65,20 @@ def test_the_workflow_runs_the_same_command_and_on_a_schedule():
 
 
 def test_the_receipt_it_watches_is_the_one_the_sweep_uses():
-    with open(os.path.join(ROOT, "docs", "upstream-package", "competitor-defects",
-                           "corpus-sweep-39daf704.json"), encoding="utf-8") as f:
-        receipt = json.load(f)
+    path = os.path.join(ROOT, "docs", "upstream-package", "competitor-defects",
+                        "corpus-sweep-39daf704.json")
+    receipt = json.loads(_read(path))
     assert receipt["head"] == "39daf704"
     assert receipt["manifest"]["count"] == 171
     assert receipt["totals"]["n_replayable"] == 69
 
 
 def test_the_doc_and_the_register_both_say_where_drift_shows_up():
-    with open(DOC, encoding="utf-8") as f:
-        doc = f.read()
+    doc = _read(DOC)
     assert "tools/watch_upstream_corpus.py" in doc
     assert "upstream-corpus-watch.yml" in doc
     assert "NO DRIFT" in doc
-    with open(REGISTER, encoding="utf-8") as f:
-        reg = f.read()
+    reg = _read(REGISTER)
     assert "watch_upstream_corpus.py" in reg
     assert "NO DRIFT" in reg
+

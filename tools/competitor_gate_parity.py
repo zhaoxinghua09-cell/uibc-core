@@ -228,6 +228,8 @@ def render_doc(snap):
 D1 门槛＝测试文件内拒绝类断言 ≥10 次；D2＝位级关键词 ≥1；D3＝base58/地址派生关键词 ≥1；
 D4＝非测试代码里出现失败退出码 ≥1；D5 对 {n} 家一律记 0——"注入假断言要求门失败"这种用例，检索不到就当没有。
 **最好的一家 {best}/10，本仓库 {ours}/10。**
+本仓库那一行**不是手写**：`score_ours()` 用同一套证据算出来——文档/二进制/地址三个探针是否在、门跑出来的覆盖数与 `[]` 静默集、退出码是否覆盖三层、自证测试是否真的要求门失败。
+删一个探针、或把门拿走，对应的分数就掉，`--check` 会发现快照与现算不一致并点名（`tests/test_ours_score.py` 四条反证）。
 
 ## 三、结论（每条都带可数的分母，可被上表打掉）
 
@@ -418,16 +420,80 @@ def calibrate():
         shutil.rmtree(base, ignore_errors=True)
 
 
+PROBES = {
+    "D1": os.path.join("tools", "mutate_document_shapes.py"),
+    "D2": os.path.join("tools", "mutate_bid_binary.py"),
+    "D3": os.path.join("tools", "probe_address_binding.py"),
+    "D4": os.path.join("tools", "mutation_gate.py"),
+    "D5": os.path.join("tests", "test_mutation_gate.py"),
+}
+
+
+def score_ours(root=None, gate_json=None):
+    """Score this repository from artefacts, not from a typed-in 10/10.
+
+    A comparison table where the author writes his own row is a self-portrait.
+    So the five twos have to be produced by the same kind of evidence the
+    competitors are read for:
+
+      D1  the document probe exists and the gate shows every forbidden shape
+          refused, with the "n/n" coverage count and an empty silent set
+      D2  the binary probe exists and the gate shows every bit classified,
+          with the total the probe reports
+      D3  the address probe exists and the gate's address layer passes
+      D4  one exit code covers all three layers
+      D5  the self-falsification test file exists and really asserts the gate
+          can fail
+
+    Remove a probe, and the corresponding score drops. That is what makes the
+    row falsifiable rather than declarative.
+    """
+    root = root or HERE
+    gate = gate_json or run_gate()
+    layers = {}
+    for c in (gate or {}).get("checks", []):
+        layers.setdefault(c["layer"], []).append(c)
+
+    def all_ok(layer):
+        checks = layers.get(layer) or []
+        return bool(checks) and all(c["ok"] for c in checks)
+
+    def detail_matches(layer, rx):
+        return any(re.search(rx, c.get("detail") or "") for c in (layers.get(layer) or []))
+
+    has_probe = {k: os.path.exists(os.path.join(root, v)) for k, v in PROBES.items()}
+    d1 = 2 if has_probe["D1"] and all_ok("document") and detail_matches("document", r"\b(\d+)/\1\b") \
+        and detail_matches("document", r"\[\]") else 0
+    d2 = 2 if has_probe["D2"] and all_ok("binary") and detail_matches("binary", r"total=\d+") else 0
+    d3 = 2 if has_probe["D3"] and all_ok("address") else 0
+    d4 = 2 if has_probe["D4"] and (gate or {}).get("ok") and set(layers) == {"document", "binary", "address"} else 0
+    falsifiers = 0
+    p = os.path.join(root, PROBES["D5"])
+    if os.path.exists(p):
+        txt = open(p, encoding="utf-8", errors="ignore").read()
+        # a self-falsification test is one whose name says the gate can fail, or
+        # one that asserts a failing ledger does not report success.
+        falsifiers = len(re.findall(r"def test_[^\n]*\b(can_fail|fails|failure|falsif)\w*", txt))
+        falsifiers = max(falsifiers, len(re.findall(r"\.failed\(\)", txt)))
+    d5 = 2 if has_probe["D5"] and falsifiers >= 2 else 0
+    return {"D1": d1, "D2": d2, "D3": d3, "D4": d4, "D5": d5}
+
+
+def run_gate():
+    if not os.path.exists(GATE):
+        return None
+    p = subprocess.run([sys.executable, GATE, "--json"], cwd=HERE, capture_output=True, text=True)
+    try:
+        return json.loads(p.stdout)
+    except json.JSONDecodeError:
+        return None
+
+
 def build_ours():
     """Survey this repository the same way the competitors were surveyed."""
-
     root = HERE
     raw = survey_tree(root)
-    # the competitor pattern set does not know our gate names, so count them the
-    # way the document does: three probes, one gate, two self-falsifying tests.
-    raw["gate_present"] = os.path.exists(GATE)
-    raw["gate_self_falsification_tests"] = 2 if os.path.exists(
-        os.path.join(root, "tests", "test_mutation_gate.py")) else 0
+    dims = score_ours(root)
     return {
         "repo": OURS,
         "commit": _git_head(),
@@ -436,14 +502,8 @@ def build_ours():
         "test_text_kb": raw["test_text_kb"],
         "test_hits": raw["test_hits"],
         "nontest_hits": raw["nontest_hits"],
-        "dims": {"D1": 2, "D2": 2, "D3": 2, "D4": 2, "D5": 2},
-        "evidence": {
-            "D1": "tools/mutate_document_shapes.py",
-            "D2": "tools/mutate_bid_binary.py",
-            "D3": "tools/probe_address_binding.py",
-            "D4": "tools/mutation_gate.py",
-            "D5": "tests/test_mutation_gate.py",
-        },
+        "dims": dims,
+        "evidence": {k: v.replace("\\", "/") for k, v in PROBES.items()},
     }
 
 
@@ -490,6 +550,11 @@ def check(snap):
                 fails.append(f"gate no longer covers three layers: {sorted(layers)}")
             if not gate["ok"]:
                 fails.append("gate reports not ok on a clean tree")
+        # the author's own row must be produced by the artefacts, not typed in
+        computed = score_ours(HERE, gate)
+        if computed != {k: ours["dims"][k] for k in ("D1", "D2", "D3", "D4", "D5")}:
+            fails.append(f"this repository's row is not what its artefacts produce: "
+                         f"snapshot {ours['dims']} vs computed {computed}")
     if os.path.exists(DOC):
         table = render_table(snap)
         doc_text = open(DOC, encoding="utf-8").read()

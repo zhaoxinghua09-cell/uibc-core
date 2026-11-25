@@ -1,3 +1,10 @@
+## 未发布 — 2026-11-26（把"超越在哪"搬上看板：同一把尺子，25 个仓，我们 10/10，最好竞品 3/10）
+
+- **问题**：`parity` 那一步的尾行已经写着 `25 repositories … best competitor 3/10, this repository 10/10`，但那一行只活在收据的 `tail` 里。读者要回答"凭什么说超越"，还得去开 `docs/competitor-parity.json`。
+- **做法**：看板从 `docs/competitor-parity.json` 现读五个维度（D1–D5，各 0–2 分）算总分，页面多一张表：被钉住的仓库数、维度数、最好竞品及其分数、本仓分数、零分仓库数；`--check` 要求页面上的 parity 数字与那份 JSON 现在算出来的完全一致。
+- **页面自检加两条**：本仓必须在自己这把尺子上拿满分；任何竞品不得高于本仓——这两条任一被改坏，打开页面就 `SELF-CHECK FAIL`。
+- **实测**：`repos 25 / dimensions 5 / best sphereon-opensource/ssi-sdk 3 / ours 10 / zero 15`；`BOARD OK`；断言 A34 增补。
+
 ## 未发布 — 2026-11-26（外人打开一屏就够，而且这一屏会自己算一遍）
 
 - **问题**：十道门都在仓库里，但一个陌生人拿到仓之后，第一眼看到的是 README 和一堆 Markdown。数字散在收据、页面、测试里，他无法在一屏里看到"我拿到的是什么、能用什么核"。

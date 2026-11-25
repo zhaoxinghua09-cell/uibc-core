@@ -63,3 +63,34 @@ def test_the_page_links_nowhere(tool):
     assert len(names) == 10
     for n in names:
         assert n in text
+
+
+def test_the_page_carries_the_parity_row(tool):
+    """One page should answer "超越在哪" without opening a second file."""
+    _require_board()
+    snap = tool.snapshot()
+    assert snap["parity"], "docs/competitor-parity.json is missing or empty"
+    par = snap["parity"]
+    assert par["repos"] >= 20
+    assert par["dimensions"] == 5
+    assert par["ours"] == par["dimensions"] * 2, "we must score full marks on our own ruler"
+    assert par["best_score"] <= par["ours"], "a competitor must not outscore us on this ruler"
+    text = open(os.path.join(HERE, "docs", "OUTSIDER-BOARD.html"), encoding="utf-8").read()
+    assert str(par["best_score"]) in text and par["best_repo"] in text
+
+
+def test_a_flipped_parity_number_is_caught(tool, tmp_path, monkeypatch):
+    """If the page says a competitor scored better than the file does, --check must fail."""
+    _require_board()
+    text = open(os.path.join(HERE, "docs", "OUTSIDER-BOARD.html"), encoding="utf-8").read()
+    snap = tool.snapshot()
+    wrong = dict(snap["parity"])
+    wrong["best_score"] = wrong["ours"] + 1
+    edited = text.replace('"best_score": %d' % snap["parity"]["best_score"],
+                          '"best_score": %d' % wrong["best_score"], 1)
+    assert edited != text, "the JSON snapshot no longer spells best_score the way the page test expects"
+    path = tmp_path / "board.html"
+    path.write_text(edited, encoding="utf-8")
+    monkeypatch.setattr(tool, "BOARD", str(path))
+    assert tool.check() == 1
+

@@ -31,12 +31,12 @@ Fetch it anonymously, without cloning (no login, no token — measured 2026-11-2
 
 ```bash
 curl -fL -o corpus.zip \
-  https://github.com/zhaoxinghua09-cell/uibc-core/raw/main/conformance/uibc-conformance-0.5.4.zip
-sha256sum corpus.zip   # f0cb92932f1e10394343d55f530d534c1efe60860a4975ca49df7d0d4bba6a25, 359,697 bytes
+  https://github.com/zhaoxinghua09-cell/uibc-core/raw/main/conformance/uibc-conformance-0.5.5.zip
+sha256sum corpus.zip   # 9cab24943117801ed4f02c8400a899916f237a1e2e668116eaac4accfb17932e, 359,696 bytes
 unzip -q corpus.zip -d corpus && cd corpus && python run.py
 ```
 
-The release page carries the same bytes, attached on 2026-11-25: `https://github.com/zhaoxinghua09-cell/uibc-core/releases/download/v0.5.4/uibc-conformance-0.5.4.zip`. Either URL serves this hash; the older `v0.5.0` asset is a different corpus (36 cases) and the `v0.4.0` one a third (30 cases). Neither is this one.. The build is deterministic for a given tree, but "rebuilding gives the same bytes" is true only from the tree the archive was built from: `0.4.1` came out of commit `d72c4f9`, and the runner template was fixed for the unstartable-verifier case afterwards, so rebuilding `0.4.1` from today's tree yields a different archive (`083c0dbc…`). The builder now refuses to overwrite a pinned archive and prints both hashes instead (measured 2026-11-20, exit 3).
+The release page carries the same bytes, attached on 2026-11-25: `https://github.com/zhaoxinghua09-cell/uibc-core/releases/download/v0.5.5/uibc-conformance-0.5.5.zip`. Either URL serves this hash; the older `v0.5.0` asset is a different corpus (36 cases) and the `v0.4.0` one a third (30 cases). Neither is this one.. The build is deterministic for a given tree, but "rebuilding gives the same bytes" is true only from the tree the archive was built from: `0.4.1` came out of commit `d72c4f9`, and the runner template was fixed for the unstartable-verifier case afterwards, so rebuilding `0.4.1` from today's tree yields a different archive (`083c0dbc…`). The builder now refuses to overwrite a pinned archive and prints both hashes instead (measured 2026-11-20, exit 3).
 
 No repository, no network, no `pip install`: the archive carries its own verifier as a single file (`uibc_core.pyz`), and `run.py` uses it. Expected tail `strict 58/58` in about six seconds, and a `receipt.json` you can publish. A verifier that answers PASS to everything scores **6/58**, so refusing nothing does not pass.
 

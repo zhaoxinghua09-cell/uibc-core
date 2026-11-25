@@ -17,6 +17,11 @@
 - 证据（地址性质）：`tests/test_bid_address_rule.py`（55 条）、`tools/bid_sdk_address_batch.mjs`、`fixtures/bid/sdk_address_batch.json`；单样本记录 `fixtures/bid/sdk_address.json` 保留，只作"官方输出原样快照"，不再当作可复算的证据。
 - **§4.2.2 五个字段接口落地**（`resolve_public_keys` / `resolve_attributes` / `resolve_acsns` / `resolve_credentials` / `resolve_service`）：协议给了五个字段端点，其中 `public-keys` 返回数组而 `public-keys/{id}` 返回单个对象——这个**形状不对称是协议自己的**，调用方若假定"永远是列表"就会错。都按 §4.2.5 的码处理（3/7 重试、6 不重试），都校验 `data.id` 必须等于请求的 BID、`data.version` 必须是字符串，单键查询必须真的是一把键、服务查询必须真的问什么答什么。键 id 要百分号编码（`#` → `%23`），服务查询用半角 `?id=`（协议里印的是全角"？"）。测试 `tests/test_bid_fields.py` 15 条。
 - 证据：`uibc_core/bid_protocol.py`、`tests/test_bid_fields.py`
+- **§4.2.4 可信解析（`resolve_bid_trusted`）**：协议说可信解析要"对BID文档的公钥和签名内容进行可信验证"，"确保递归解析过程中每个经过的解析服务都是可信的"。最容易犯的错是把 `data.verify` 当结论——那等于把核查交给了被核查方。所以返回的是一个把三件事分开的对象：`server_verify`（解析服务自述，必须是 Bool 字面 `true`，字符串 `"true"` 直接拒）、`signature_ok`（我们自己按 §5 重验文档签名）、`delegate_state`（`extension.delegateSign` 第三方背书：`absent`/`verified`/`invalid`/`unchecked`）。`trusted` = 服务自述 **且** 我们自己验过；`fully_trusted` 还要求背书被核。**签名者公钥取不到时是 `unchecked` 而不是默认通过**——"没有证据"和"证据成立"必须能被区分。
+- **`extension.delegateSign` 真的能验**（`verify_delegate_sign`）：`signer` 必须是 BID 键 id，`signatureValue` 是 Base58 的 Ed25519 签名，待签字节是 `publicKey` 字段的 JCS 形式（§5.2 已把排序规则写死，所以这里不另立一套编码）。三方背书没写怎么规范化，这一层是**我们选的**，写进文档而不是留给读者猜。
+- **可运行 demo**（`tools/demo_bid_trusted.py`）：起一个真的 `http.server` 当解析服务，四种答法（诚实 / 说验过但文档被动过 / 说没验过 / 带背书），打印五条裁决。第 2 条是全部意义所在：只读 `data.verify` 的客户端在那里会打印 OK。
+- 测试 `tests/test_bid_trusted.py` 15 条（请求形如 `{url}/{bid}?verify=true`、服务撒谎必被抓、`"true"` 字符串必拒、`verify=false` 是答案不是异常、背书四态各一条）。
+- 证据：`uibc_core/bid_protocol.py::resolve_bid_trusted`、`tests/test_bid_trusted.py`、`tools/demo_bid_trusted.py`
 
 ## 0.5.3 — 2026-11-25（一致性语料 36→58，第二实现对齐）
 

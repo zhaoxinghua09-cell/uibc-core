@@ -1,3 +1,11 @@
+## 未发布 — 2026-11-26（竞品对照扩到 17 家：结论的分母不再是 9）
+
+- **第二批 8 家入库**：`decentralized-identity/veramo`、`spruceid/ssi`、`spruceid/didkit`、`digitalbazaar/did-io`、`uport-project/ethr-did`、`hyperledger/indy-vdr`、`w3c-ccg/did-test-suite`、`sphereon-opensource/ssi-sdk`，全部按固定 commit 取 tarball、记 sha256，与第一批用同一组正则与同一套打分。
+- **结论随分母收紧**：17 家里，**逐位变异 0 家**、**门自证 0 家**；跨层单一退出码 5 家（记 1 的依据是仓内有 CLI 失败码，不是把多层证据收进一个码）；文档层拒绝断言 6 家。最好的一家仍是 **3/10**，本仓库 **10/10**。
+- **覆盖只许变大不许变小**：`check()` 加 `MIN_REPOS = 15`，快照被删回 9 家会直接失败并说明"覆盖缩水"；测试同步断言 ≥15。想删一家，必须在文档里说清楚。
+- **文档生成反过来算分母**：三条结论、D5 的口径、量不到的清单里的家数都从快照现算（`render_doc`），不再手写"九家/八家"，避免改表不改文。
+- 复跑：`--check` 离线重算 17 家分数与表格一致性；`--refresh` 按固定 sha 重新下载重算。
+
 ## 未发布 — 2026-11-25（外人重跑：换目录、换环境、不带凭据，还成不成立）
 
 - **收据此前都是作者机器开的**，这是最弱的证人。`tools/outsider_rerun.py` 把证人做成机械的：整棵拷到临时目录（不含 `.git`、不含缓存）、用白名单变量的干净环境（不含任何 token）、在该目录下跑四个公开入口（`mutation_gate.py` / `competitor_gate_parity.py` / `demo_bid_binary.py` / 两个测试文件），逐步记退出码与输出末行，并把整棵树的 sha256 写进 `docs/outsider-rerun-receipt.json`。

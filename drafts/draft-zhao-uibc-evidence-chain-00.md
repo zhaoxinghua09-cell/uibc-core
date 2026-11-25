@@ -418,7 +418,6 @@ alongside `state: pending`, the record is rejected rather than reconciled.
    rejection" does not apply to it.
 
 ### 17.3 Time is not implied
-
 `anchored_at` records what the producer says. It is not a time bound: only an
 RFC 3161 token from an authority the reader trusts gives one, an OTS proof shows
 only that the bytes existed before a block was mined, and a receipt of
@@ -432,6 +431,26 @@ registration states no time at all.
 3. pin the current verdict for an unresolvable anchor with a vector;
 4. build AC2 / AC4 / AC5 on top of a real fixture;
 5. only then name the tier in Section 16.
+
+### 17.5 How this maps onto HALT and REJECT
+
+Two words from the formal literature are worth borrowing, because they name a
+distinction this document has so far made by habit:
+
+- **HALT** — a required input is unavailable, so **no epistemic verdict is
+  produced**. Our INCONCLUSIVE is the informal counterpart.
+- **REJECT** — the check was performed and the record went against it. Our FAIL
+  is the informal counterpart.
+
+The distinction this forces into the open: a verifier that does not implement a
+named scheme is **not** producing contrary evidence. Whether that is HALT or
+REJECT is a **policy choice**, and this document chooses REJECT, matching the
+MMR receipts profile's requirement to reject a receipt whose VDS is unsupported.
+That choice is defensible but it hides a difference that other drafts keep
+(`draft-gruszka-scitt-statement-identification-04` reports UNSUPPORTED as its
+own class; `draft-nestorov-scitt-p10-underdetermination-03` HALTs). Until the
+verifier reports UNSUPPORTED separately, no claim here should be read as
+"cannot check" — it currently reads as "rejected".
 
 ## Implementation Status
 

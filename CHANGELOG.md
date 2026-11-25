@@ -20,6 +20,27 @@
 - **发布资产**：`uibc-conformance-0.5.4.zip`，359,697 字节，456 例，sha256 `f0cb92932f1e10394343d55f530d534c1efe60860a4975ca49df7d0d4bba6a25`；pin 在 `anchors/pins/uibc-conformance-0.5.4.sha256`。
 - **本版是发布就绪门禁第一次真的拦人**（#445 引入的 `readiness` job）：`tools/check_release_readiness.py` 在 tag 上说四件事——三处版本串一致、tag 树里含自己版本的归档、归档内记录的版本一致、tag 名等于 `v<版本>`。它的由来是三连红：`v0.5.1/0.5.2/0.5.3` 各自切在自己的归档之前，于是 lab bundle 每次都在 tag 树上找不到自己那一版。负控制实测：把归档移开 → `NOT READY TO TAG`，rc=1，报的正是生产环境那句话。
 
+## 未发布 — 2026-11-25（§4.3 二进制解析：指针指空了，正文在隔壁）
+
+主题：此前把 §4.3 记成"正文未取到、只能明确拒绝"。这一轮把正文找到了，也把"缺什么"写成了清单。
+
+- **主协议 §4.3 的链接是空的**：它指向 `bif-rfcs` 的 `RFCs/3-ACCEPTED`，该目录只有一个 0 字节 `.gitkeep`。正文在 `RFCs/4-ADOPTED/星火链网RFC-011…md`（31,156 字节，commit `5d471fc1…`）。"协议没写"是误判，**是主文档的指针坏了**。
+- **能读的部分**（`uibc_core/bid_binary.py`）：16 字节消息头、单元树（ID 2B + 长度 2B + payload 可递归）、文档应答与错误应答的字符串字段；未知 unit 进 `unknown` 带原始字节；越界/长度不匹配/尾部残字节三类拒绝。
+- **不读的部分逐条给理由**：`Int`/`Long` 无字节宽度（整数进 `_deferred` 附原始字节）；消息签名三个 unit 的 ID 正文从未给出（`signature_units_detectable=False`）；分片重组无末片判据；flag 位序无编号（`FLAG_BIT_ORDER_IS_AN_ASSUMPTION`）。
+- **正文自身两处冲突**：`0x2100` 同时是 `bidDocument` 与 `authentication`（按 payload 形状判别，启发式写在 `KNOWN_ID_COLLISIONS`）；AC 号子字段 `0x3601/0x3602` 与 `0x3610/0x3620` 两套编号都收。
+- **两张返回码表不合并**：§4.2.5 `0=success` vs RFC-011 `1=success`（另有 11、255），合并会把 0 与 1 混成"成功"。
+- 测试 `tests/test_bid_binary.py` 16 条；`docs/BINARY-PROTOCOL.md` 记 commit/blob/字节数。
+
+## 未发布 — 2026-11-25（地址可复算：把 4 个大小写字母钉成规则）
+
+主题：上一版把 `did:bid` 地址判成"不透明、只能校验"。这一版把它算清楚，并记下标准与参考实现在同一处步骤上的分叉。
+
+- **根因是字母表**：`brdc-sjcl` 的 Base58 与比特币表只差 4 个字母（`b/B`、`u/U` 各自对调；前 9 位共享），见 `docs/ADDRESS-DERIVATION.md`。这解释了 7/50 的巧合，也让 50/50 成立。
+- **版本字节是开关不是默认**：RFC-003 §5.1 第三步要求前置 `0x01`，官方 SDK 注释掉了（`keypair/index.js` 60–62 行）。返回字典带 `version_byte`/`hash_hex`/`key_bytes`。
+- **RFC 示例瑕疵也钉住**：打印的 `did:bid:38VPR…` 省略算法与编码字母（应为 `did:bid:ef38VPR…`）；正文给的后缀 22–31 与实测 30–32 不符。
+- **语义边界**：地址推导只做自洽性检查，**不做准入**（解析仍按 ABNF 接受）。
+- 测试 `tests/test_bid_address.py` 13 条。
+
 ## 未发布 — 2026-11-25（DID 对接：BID 协议层，按《星火·链网BID协议》正文实现）
 
 主题：上一版把 `did:bid` 的通路做通了（GET + errorCode + id 校验），但没有读懂回来的文档。读完协议正文后发现三处真缺口，这一版补齐，且每一处都对着条款写测试。
@@ -34,9 +55,10 @@
 - 测试 `tests/test_bid_protocol.py` 37 条，每条在名字里写明它钉的是哪一条款（§4.2.1 / §4.2.5 / §5 / 附录一 / §4.2.3）。
 - **跨实现核验（这是本轮最该被外人复查的一条）**：签名不是我们自己验自己。`tools/verify-js/bid.mjs` 用**另一套 RFC 8785 实现**（JS 里按 RFC 原文重写，未复用 Python 代码）规范化、用 **node/OpenSSL** 验 Ed25519，对 `fixtures/bid/signed_document.json` 给出 `signature-verified true`，并打印规范化字节的 sha256 与 Python 逐字符比对。两次实现算出同一个 sha256，才叫"第三方能重算"。夹具由 `tools/make_bid_fixture.py` 以固定种子生成（随机种子会让已提交的夹具无法复现，等于把可证伪性换成了一次性快照）。测试 `tests/test_bid_crossjs.py` 4 条：夹具仍能自验、node 能验、两侧 sha256 相同、改一个字段 node 必须拒。
 - **用官方 SDK 反查，抓到一个会让真实文档全部被拒的缺陷**：`bid-sdk-nodejs` 1.0.1（Caict 发布）对固定种子给出的 `encPublicKey` 是 `b0 65 66 || 32 字节`——**35 字节**，而协议 §5.4.1 的样例 `b06566f76733ae…` 正是这个形状。此前我们只认 `b0 || key`（33 字节），于是真实 BID 文档的 `publicKeyHex` 一律被当成 35 字节的非法长度，验签直接失败。现在前缀按 `b06566` → `b0` → 裸键三档剥离（`strip_key_prefix`），边长集合 64/70/66；夹具也改用真实编码，JS 侧同步。
-- **地址：撤回一条被放大成"定律"的巧合**。上一稿写过"地址规则三方对齐：`base58(sha256(pub)[10:])` 能复算出官方 SDK 打的同一个地址"。那句话只在一个样本上成立过。改成让官方 SDK 对 **50** 个固定种子批量出地址（`tools/bid_sdk_address_batch.mjs` → `fixtures/bid/sdk_address_batch.json`）后，**43/50 复算不一致**；把 SDK 的地址用 Bitcoin 字母表解码，得到的字节与 `sha256(pub)[10:]` 并不相同。SDK 源码 `lib/keypair/index.js::_createAddress` 确实是 `sjcl.codec.base58.encode(sha256(rawPublicKey).slice(10))`、按字节切片，但**它的 base58 编解码不是 Bitcoin 字母表那一套**（22 字节这类非 4 字节整块长度上就会分道扬镳），所以地址对我们是不透明的：**能校验、不能反推**。
-- 现在钉住的是 50 个样本上真正成立的性质：官方实现产出的每一个地址都被我们的 ABNF 校验器接受并判成主链/Ed25519/base58；suffix 长度 30–32 落在协议 `(22,42)(ALPHA/DIGIT)` 区间；50 条键与地址互不重复；`encPublicKey` 一律 70 hex、前缀 `b06566`。复算不一致这件事写成了 `test_bitcoin_base58_re_derivation_does_not_reproduce_the_sdk`（断言恰好 7/50），谁改坏了它会红，谁修好了它会提示恢复更强表述——**沉默不等于一致**。
-- 证据（地址性质）：`tests/test_bid_address_rule.py`（55 条）、`tools/bid_sdk_address_batch.mjs`、`fixtures/bid/sdk_address_batch.json`；单样本记录 `fixtures/bid/sdk_address.json` 保留，只作"官方输出原样快照"，不再当作可复算的证据。
+- **地址：先撤回一条被放大成"定律"的巧合，再把它算到底**。上一稿写过"`base58(sha256(pub)[10:])` 能复算出官方 SDK 打的同一个地址"，只在一个样本上成立；拿 50 个固定种子批量复算只有 **7/50** 一致，于是又写成"能校验、不能反推"。两句话错在同一处：**字母表用错了**。官方 SDK 走的是 `brdc-sjcl` 的 Base58，字母表与比特币表**只差 4 处**（位置 10 `b/B`、27 `u/U`、34 `B/b`、52 `U/u`，全是大小写对调）；前 9 位 `1`–`9` 相同，所以 7 个不含这 4 个字母的地址偶然相等。换表后 **50/50** 逐字节复现——地址是完全可推导的。
+- **新模块 `uibc_core/bid_address.py`**：`derive_did` / `address_matches` / `bitcoin_to_bid_suffix`。版本字节（RFC-003 §5.1 第三步 `0x01`）做成显式开关：RFC 的唯一示例用"带版本字节"精确复现出 `38VPR182Y4uTkq32fykXjbKBPdQZutH`，50 条现行地址用"不带"精确复现——标准文本与参考实现在这一步分叉了，不替任何一方选默认。
+- 现在钉住的四条性质（`tests/test_bid_address.py`）：50/50 精确复现；带版本字节时 0/50；用比特币字母表时恰好 7/50；SM2 走 SM3 且落在 ABNF 区间。
+- 证据（地址性质）：`tests/test_bid_address.py`（13 条）、`docs/ADDRESS-DERIVATION.md`、`tests/test_bid_address_rule.py`（55 条）、`tools/bid_sdk_address_batch.mjs`、`fixtures/bid/sdk_address_batch.json`；单样本记录 `fixtures/bid/sdk_address.json` 保留，只作"官方输出原样快照"，不再当作可复算的证据。
 - **§4.2.2 五个字段接口落地**（`resolve_public_keys` / `resolve_attributes` / `resolve_acsns` / `resolve_credentials` / `resolve_service`）：协议给了五个字段端点，其中 `public-keys` 返回数组而 `public-keys/{id}` 返回单个对象——这个**形状不对称是协议自己的**，调用方若假定"永远是列表"就会错。都按 §4.2.5 的码处理（3/7 重试、6 不重试），都校验 `data.id` 必须等于请求的 BID、`data.version` 必须是字符串，单键查询必须真的是一把键、服务查询必须真的问什么答什么。键 id 要百分号编码（`#` → `%23`），服务查询用半角 `?id=`（协议里印的是全角"？"）。测试 `tests/test_bid_fields.py` 15 条。
 - 证据：`uibc_core/bid_protocol.py`、`tests/test_bid_fields.py`
 - **§4.2.4 可信解析（`resolve_bid_trusted`）**：协议说可信解析要"对BID文档的公钥和签名内容进行可信验证"，"确保递归解析过程中每个经过的解析服务都是可信的"。最容易犯的错是把 `data.verify` 当结论——那等于把核查交给了被核查方。所以返回的是一个把三件事分开的对象：`server_verify`（解析服务自述，必须是 Bool 字面 `true`，字符串 `"true"` 直接拒）、`signature_ok`（我们自己按 §5 重验文档签名）、`delegate_state`（`extension.delegateSign` 第三方背书：`absent`/`verified`/`invalid`/`unchecked`）。`trusted` = 服务自述 **且** 我们自己验过；`fully_trusted` 还要求背书被核。**签名者公钥取不到时是 `unchecked` 而不是默认通过**——"没有证据"和"证据成立"必须能被区分。

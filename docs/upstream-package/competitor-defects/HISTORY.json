@@ -1,8 +1,12 @@
 {
   "note": "Every time these three vectors are re-judged, add a row. `rejudged` is the day the tool was run; `evidence` says how the bytes were tied to the row. A row that only matches sizes is weak evidence and says so.",
-  "rule": "a vector that says size 0 must carry e3b0c442…b855; any other root makes its published reject come from the contradiction, not from proof arithmetic",
+  "rule": "a vector that says size 0 must carry e3b0c442\u2026b855; any other root makes its published reject come from the contradiction, not from proof arithmetic",
   "empty_tree_root": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-  "ids": ["INC-N-size-zero", "CON-N-old-size-zero", "TOK-N-tree-size-zero"],
+  "ids": [
+    "INC-N-size-zero",
+    "CON-N-old-size-zero",
+    "TOK-N-tree-size-zero"
+  ],
   "rows": [
     {
       "upstream_ref": "release v0.37.1",
@@ -15,6 +19,13 @@
       "upstream_ref": "commit 22764551 (release v0.38.0)",
       "rejudged": "2026-11-25",
       "evidence": "vendored bytes, sha256 per file in ../SHA256SUMS.json",
+      "agrees": 0,
+      "of": 3
+    },
+    {
+      "upstream_ref": "commit 39daf704",
+      "rejudged": "2026-11-25",
+      "evidence": "corpus swept: all 171 files digested in corpus-sweep-39daf704.json; the three are byte-identical to the vendored copies",
       "agrees": 0,
       "of": 3
     }

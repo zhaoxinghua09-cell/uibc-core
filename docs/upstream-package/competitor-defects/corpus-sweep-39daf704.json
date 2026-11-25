@@ -1,0 +1,2042 @@
+{
+ "corpus": "vectors-poc-evidence/package/poc_evidence_vectors/corpus",
+ "categories": {
+  "canonical": {
+   "counts": {
+    "vectors": 9,
+    "replayable": 0,
+    "accept_published": 9,
+    "reject_published": 0,
+    "consistent": 0,
+    "inconsistent": 0,
+    "none": 9
+   },
+   "vectors": [
+    {
+     "id": "CAN-P-astral-values",
+     "expects": "accept",
+     "replay": "none"
+    },
+    {
+     "id": "CAN-P-combining-vs-precomposed",
+     "expects": "accept",
+     "replay": "none"
+    },
+    {
+     "id": "CAN-P-empty-containers",
+     "expects": "accept",
+     "replay": "none"
+    },
+    {
+     "id": "CAN-P-escapes-and-controls",
+     "expects": "accept",
+     "replay": "none"
+    },
+    {
+     "id": "CAN-P-key-order-bmp-above-surrogates",
+     "expects": "accept",
+     "replay": "none"
+    },
+    {
+     "id": "CAN-P-key-order-digits-upper-lower",
+     "expects": "accept",
+     "replay": "none"
+    },
+    {
+     "id": "CAN-P-nested-key-order",
+     "expects": "accept",
+     "replay": "none"
+    },
+    {
+     "id": "CAN-P-numbers-integers",
+     "expects": "accept",
+     "replay": "none"
+    },
+    {
+     "id": "CAN-P-unicode-line-separators",
+     "expects": "accept",
+     "replay": "none"
+    }
+   ],
+   "why_not_numeric": "a canonicalisation digest: a canonicaliser decides"
+  },
+  "chain": {
+   "counts": {
+    "vectors": 15,
+    "replayable": 0,
+    "accept_published": 5,
+    "reject_published": 10,
+    "consistent": 0,
+    "inconsistent": 0,
+    "none": 15
+   },
+   "vectors": [
+    {
+     "id": "CHN-N-altered-snapshot-resigned",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "CHN-N-altered-verdict-resigned",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "CHN-N-bad-signature-mid-chain",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "CHN-N-first-record-missing",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "CHN-N-history-rewritten-no-anchor",
+     "expects": "accept",
+     "replay": "none"
+    },
+    {
+     "id": "CHN-N-history-rewritten-resigned",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "CHN-N-measurement-changed",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "CHN-N-record-deleted",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "CHN-N-record-inserted",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "CHN-N-records-reordered",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "CHN-N-tail-truncated-no-anchor",
+     "expects": "accept",
+     "replay": "none"
+    },
+    {
+     "id": "CHN-N-tail-truncated-with-anchor",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "CHN-P-prefix-of-anchored",
+     "expects": "accept",
+     "replay": "none"
+    },
+    {
+     "id": "CHN-P-six-steps-anchored",
+     "expects": "accept",
+     "replay": "none"
+    },
+    {
+     "id": "CHN-P-six-steps",
+     "expects": "accept",
+     "replay": "none"
+    }
+   ],
+   "why_not_numeric": "a record chain: signatures over records decide"
+  },
+  "consistency": {
+   "counts": {
+    "vectors": 23,
+    "replayable": 23,
+    "accept_published": 10,
+    "reject_published": 13,
+    "consistent": 23,
+    "inconsistent": 0,
+    "none": 0
+   },
+   "vectors": [
+    {
+     "id": "CON-N-forked-history",
+     "file": "CON-N-forked-history.json",
+     "class": "negative",
+     "expects": "reject",
+     "arith": "mismatch",
+     "replay": "consistent",
+     "detail": "the proof does not chain: the proof does not chain to the earlier root"
+    },
+    {
+     "id": "CON-N-history-reordered",
+     "file": "CON-N-history-reordered.json",
+     "class": "adversarial",
+     "expects": "reject",
+     "arith": "mismatch",
+     "replay": "consistent",
+     "detail": "the proof does not chain: the proof does not chain to the earlier root"
+    },
+    {
+     "id": "CON-N-new-root-altered",
+     "file": "CON-N-new-root-altered.json",
+     "class": "negative",
+     "expects": "reject",
+     "arith": "mismatch",
+     "replay": "consistent",
+     "detail": "recomputed 5488b5f1.. != published 5588b5f1.."
+    },
+    {
+     "id": "CON-N-old-root-altered",
+     "file": "CON-N-old-root-altered.json",
+     "class": "negative",
+     "expects": "reject",
+     "arith": "mismatch",
+     "replay": "consistent",
+     "detail": "the proof does not chain: the proof does not chain to the earlier root"
+    },
+    {
+     "id": "CON-N-old-size-zero",
+     "file": "CON-N-old-size-zero.json",
+     "class": "negative",
+     "expects": "reject",
+     "arith": "mismatch",
+     "replay": "consistent",
+     "detail": "old_size 0 carries a root that is not the empty-tree root"
+    },
+    {
+     "id": "CON-N-proof-empty",
+     "file": "CON-N-proof-empty.json",
+     "class": "negative",
+     "expects": "reject",
+     "arith": "mismatch",
+     "replay": "consistent",
+     "detail": "the proof does not chain: empty proof"
+    },
+    {
+     "id": "CON-N-proof-extra-hash",
+     "file": "CON-N-proof-extra-hash.json",
+     "class": "negative",
+     "expects": "reject",
+     "arith": "mismatch",
+     "replay": "consistent",
+     "detail": "the proof does not chain: wrong proof size 5, want 4"
+    },
+    {
+     "id": "CON-N-proof-missing-hash",
+     "file": "CON-N-proof-missing-hash.json",
+     "class": "negative",
+     "expects": "reject",
+     "arith": "mismatch",
+     "replay": "consistent",
+     "detail": "the proof does not chain: wrong proof size 3, want 4"
+    },
+    {
+     "id": "CON-N-proof-of-other-pair",
+     "file": "CON-N-proof-of-other-pair.json",
+     "class": "negative",
+     "expects": "reject",
+     "arith": "mismatch",
+     "replay": "consistent",
+     "detail": "the proof does not chain: wrong proof size 2, want 4"
+    },
+    {
+     "id": "CON-N-roots-swapped",
+     "file": "CON-N-roots-swapped.json",
+     "class": "negative",
+     "expects": "reject",
+     "arith": "mismatch",
+     "replay": "consistent",
+     "detail": "the proof does not chain: the proof does not chain to the earlier root"
+    },
+    {
+     "id": "CON-N-same-size-different-root",
+     "file": "CON-N-same-size-different-root.json",
+     "class": "negative",
+     "expects": "reject",
+     "arith": "mismatch",
+     "replay": "consistent",
+     "detail": "recomputed 5488b5f1.. != published 3a184829.."
+    },
+    {
+     "id": "CON-N-same-size-with-proof",
+     "file": "CON-N-same-size-with-proof.json",
+     "class": "negative",
+     "expects": "reject",
+     "arith": "mismatch",
+     "replay": "consistent",
+     "detail": "the proof does not chain: size1=size2, but the proof is not empty"
+    },
+    {
+     "id": "CON-N-shrinking",
+     "file": "CON-N-shrinking.json",
+     "class": "negative",
+     "expects": "reject",
+     "arith": "mismatch",
+     "replay": "consistent",
+     "detail": "new_size 3 < old_size 7: the numbers say reject"
+    },
+    {
+     "id": "CON-P-1-2",
+     "file": "CON-P-1-2.json",
+     "class": "positive",
+     "expects": "accept",
+     "arith": "match",
+     "replay": "consistent",
+     "detail": "second root recomputed from the first matches"
+    },
+    {
+     "id": "CON-P-1-9",
+     "file": "CON-P-1-9.json",
+     "class": "positive",
+     "expects": "accept",
+     "arith": "match",
+     "replay": "consistent",
+     "detail": "second root recomputed from the first matches"
+    },
+    {
+     "id": "CON-P-2-4",
+     "file": "CON-P-2-4.json",
+     "class": "positive",
+     "expects": "accept",
+     "arith": "match",
+     "replay": "consistent",
+     "detail": "second root recomputed from the first matches"
+    },
+    {
+     "id": "CON-P-2-5",
+     "file": "CON-P-2-5.json",
+     "class": "positive",
+     "expects": "accept",
+     "arith": "match",
+     "replay": "consistent",
+     "detail": "second root recomputed from the first matches"
+    },
+    {
+     "id": "CON-P-3-7",
+     "file": "CON-P-3-7.json",
+     "class": "positive",
+     "expects": "accept",
+     "arith": "match",
+     "replay": "consistent",
+     "detail": "second root recomputed from the first matches"
+    },
+    {
+     "id": "CON-P-4-8",
+     "file": "CON-P-4-8.json",
+     "class": "positive",
+     "expects": "accept",
+     "arith": "match",
+     "replay": "consistent",
+     "detail": "second root recomputed from the first matches"
+    },
+    {
+     "id": "CON-P-5-5",
+     "file": "CON-P-5-5.json",
+     "class": "positive",
+     "expects": "accept",
+     "arith": "match",
+     "replay": "consistent",
+     "detail": "second root recomputed from the first matches"
+    },
+    {
+     "id": "CON-P-6-9",
+     "file": "CON-P-6-9.json",
+     "class": "positive",
+     "expects": "accept",
+     "arith": "match",
+     "replay": "consistent",
+     "detail": "second root recomputed from the first matches"
+    },
+    {
+     "id": "CON-P-7-8",
+     "file": "CON-P-7-8.json",
+     "class": "positive",
+     "expects": "accept",
+     "arith": "match",
+     "replay": "consistent",
+     "detail": "second root recomputed from the first matches"
+    },
+    {
+     "id": "CON-P-8-9",
+     "file": "CON-P-8-9.json",
+     "class": "positive",
+     "expects": "accept",
+     "arith": "match",
+     "replay": "consistent",
+     "detail": "second root recomputed from the first matches"
+    }
+   ],
+   "why_not_numeric": ""
+  },
+  "inclusion": {
+   "counts": {
+    "vectors": 37,
+    "replayable": 37,
+    "accept_published": 22,
+    "reject_published": 15,
+    "consistent": 37,
+    "inconsistent": 0,
+    "none": 0
+   },
+   "vectors": [
+    {
+     "id": "INC-N-index-equals-size",
+     "file": "INC-N-index-equals-size.json",
+     "class": "negative",
+     "expects": "reject",
+     "arith": "mismatch",
+     "replay": "consistent",
+     "detail": "index 7 outside 0..7-1: the numbers say reject"
+    },
+    {
+     "id": "INC-N-index-negative",
+     "file": "INC-N-index-negative.json",
+     "class": "negative",
+     "expects": "reject",
+     "arith": "mismatch",
+     "replay": "consistent",
+     "detail": "index -1 outside 0..7-1: the numbers say reject"
+    },
+    {
+     "id": "INC-N-interior-node-as-leaf",
+     "file": "INC-N-interior-node-as-leaf.json",
+     "class": "adversarial",
+     "expects": "reject",
+     "arith": "mismatch",
+     "replay": "consistent",
+     "detail": "folded e9f25bcd.. != published 799f8fd2.."
+    },
+    {
+     "id": "INC-N-leaf-hash-as-record",
+     "file": "INC-N-leaf-hash-as-record.json",
+     "class": "adversarial",
+     "expects": "reject",
+     "arith": "mismatch",
+     "replay": "consistent",
+     "detail": "folded 7cd30784.. != published 5488b5f1.."
+    },
+    {
+     "id": "INC-N-odd-leaf-duplication",
+     "file": "INC-N-odd-leaf-duplication.json",
+     "class": "adversarial",
+     "expects": "reject",
+     "arith": "mismatch",
+     "replay": "consistent",
+     "detail": "folded b3d9166b.. != published f66ea9b7.."
+    },
+    {
+     "id": "INC-N-proof-empty",
+     "file": "INC-N-proof-empty.json",
+     "class": "negative",
+     "expects": "reject",
+     "arith": "mismatch",
+     "replay": "consistent",
+     "detail": "proof carries 0 hashes, size 7 at index 4 needs 3"
+    },
+    {
+     "id": "INC-N-proof-extra-hash",
+     "file": "INC-N-proof-extra-hash.json",
+     "class": "negative",
+     "expects": "reject",
+     "arith": "mismatch",
+     "replay": "consistent",
+     "detail": "proof carries 4 hashes, size 7 at index 4 needs 3"
+    },
+    {
+     "id": "INC-N-proof-missing-hash",
+     "file": "INC-N-proof-missing-hash.json",
+     "class": "negative",
+     "expects": "reject",
+     "arith": "mismatch",
+     "replay": "consistent",
+     "detail": "proof carries 2 hashes, size 7 at index 4 needs 3"
+    },
+    {
+     "id": "INC-N-proof-order-swapped",
+     "file": "INC-N-proof-order-swapped.json",
+     "class": "negative",
+     "expects": "reject",
+     "arith": "mismatch",
+     "replay": "consistent",
+     "detail": "folded c2094905.. != published 5488b5f1.."
+    },
+    {
+     "id": "INC-N-record-altered",
+     "file": "INC-N-record-altered.json",
+     "class": "negative",
+     "expects": "reject",
+     "arith": "mismatch",
+     "replay": "consistent",
+     "detail": "folded 369b8842.. != published 5488b5f1.."
+    },
+    {
+     "id": "INC-N-record-from-other-tree",
+     "file": "INC-N-record-from-other-tree.json",
+     "class": "negative",
+     "expects": "reject",
+     "arith": "mismatch",
+     "replay": "consistent",
+     "detail": "folded 2e3e4b5f.. != published 5488b5f1.."
+    },
+    {
+     "id": "INC-N-root-altered",
+     "file": "INC-N-root-altered.json",
+     "class": "negative",
+     "expects": "reject",
+     "arith": "mismatch",
+     "replay": "consistent",
+     "detail": "folded 5488b5f1.. != published 5588b5f1.."
+    },
+    {
+     "id": "INC-N-size-zero",
+     "file": "INC-N-size-zero.json",
+     "class": "negative",
+     "expects": "reject",
+     "arith": "mismatch",
+     "replay": "consistent",
+     "detail": "size 0 carries a root that is not the empty-tree root"
+    },
+    {
+     "id": "INC-N-wrong-index",
+     "file": "INC-N-wrong-index.json",
+     "class": "negative",
+     "expects": "reject",
+     "arith": "mismatch",
+     "replay": "consistent",
+     "detail": "folded fbaa9e2e.. != published 5488b5f1.."
+    },
+    {
+     "id": "INC-N-wrong-tree-size",
+     "file": "INC-N-wrong-tree-size.json",
+     "class": "negative",
+     "expects": "reject",
+     "arith": "mismatch",
+     "replay": "consistent",
+     "detail": "proof carries 3 hashes, size 16 at index 4 needs 4"
+    },
+    {
+     "id": "INC-O-size-not-bound-by-root",
+     "file": "INC-O-size-not-bound-by-root.json",
+     "class": "observation",
+     "expects": "accept",
+     "arith": "match",
+     "replay": "consistent",
+     "detail": "folded root matches the published root"
+    },
+    {
+     "id": "INC-P-n1-i0",
+     "file": "INC-P-n1-i0.json",
+     "class": "positive",
+     "expects": "accept",
+     "arith": "match",
+     "replay": "consistent",
+     "detail": "folded root matches the published root"
+    },
+    {
+     "id": "INC-P-n2-i0",
+     "file": "INC-P-n2-i0.json",
+     "class": "positive",
+     "expects": "accept",
+     "arith": "match",
+     "replay": "consistent",
+     "detail": "folded root matches the published root"
+    },
+    {
+     "id": "INC-P-n2-i1",
+     "file": "INC-P-n2-i1.json",
+     "class": "positive",
+     "expects": "accept",
+     "arith": "match",
+     "replay": "consistent",
+     "detail": "folded root matches the published root"
+    },
+    {
+     "id": "INC-P-n3-i0",
+     "file": "INC-P-n3-i0.json",
+     "class": "positive",
+     "expects": "accept",
+     "arith": "match",
+     "replay": "consistent",
+     "detail": "folded root matches the published root"
+    },
+    {
+     "id": "INC-P-n3-i1",
+     "file": "INC-P-n3-i1.json",
+     "class": "positive",
+     "expects": "accept",
+     "arith": "match",
+     "replay": "consistent",
+     "detail": "folded root matches the published root"
+    },
+    {
+     "id": "INC-P-n3-i2",
+     "file": "INC-P-n3-i2.json",
+     "class": "positive",
+     "expects": "accept",
+     "arith": "match",
+     "replay": "consistent",
+     "detail": "folded root matches the published root"
+    },
+    {
+     "id": "INC-P-n4-i0",
+     "file": "INC-P-n4-i0.json",
+     "class": "positive",
+     "expects": "accept",
+     "arith": "match",
+     "replay": "consistent",
+     "detail": "folded root matches the published root"
+    },
+    {
+     "id": "INC-P-n4-i2",
+     "file": "INC-P-n4-i2.json",
+     "class": "positive",
+     "expects": "accept",
+     "arith": "match",
+     "replay": "consistent",
+     "detail": "folded root matches the published root"
+    },
+    {
+     "id": "INC-P-n4-i3",
+     "file": "INC-P-n4-i3.json",
+     "class": "positive",
+     "expects": "accept",
+     "arith": "match",
+     "replay": "consistent",
+     "detail": "folded root matches the published root"
+    },
+    {
+     "id": "INC-P-n5-i0",
+     "file": "INC-P-n5-i0.json",
+     "class": "positive",
+     "expects": "accept",
+     "arith": "match",
+     "replay": "consistent",
+     "detail": "folded root matches the published root"
+    },
+    {
+     "id": "INC-P-n5-i2",
+     "file": "INC-P-n5-i2.json",
+     "class": "positive",
+     "expects": "accept",
+     "arith": "match",
+     "replay": "consistent",
+     "detail": "folded root matches the published root"
+    },
+    {
+     "id": "INC-P-n5-i4",
+     "file": "INC-P-n5-i4.json",
+     "class": "positive",
+     "expects": "accept",
+     "arith": "match",
+     "replay": "consistent",
+     "detail": "folded root matches the published root"
+    },
+    {
+     "id": "INC-P-n7-i0",
+     "file": "INC-P-n7-i0.json",
+     "class": "positive",
+     "expects": "accept",
+     "arith": "match",
+     "replay": "consistent",
+     "detail": "folded root matches the published root"
+    },
+    {
+     "id": "INC-P-n7-i3",
+     "file": "INC-P-n7-i3.json",
+     "class": "positive",
+     "expects": "accept",
+     "arith": "match",
+     "replay": "consistent",
+     "detail": "folded root matches the published root"
+    },
+    {
+     "id": "INC-P-n7-i6",
+     "file": "INC-P-n7-i6.json",
+     "class": "positive",
+     "expects": "accept",
+     "arith": "match",
+     "replay": "consistent",
+     "detail": "folded root matches the published root"
+    },
+    {
+     "id": "INC-P-n8-i0",
+     "file": "INC-P-n8-i0.json",
+     "class": "positive",
+     "expects": "accept",
+     "arith": "match",
+     "replay": "consistent",
+     "detail": "folded root matches the published root"
+    },
+    {
+     "id": "INC-P-n8-i4",
+     "file": "INC-P-n8-i4.json",
+     "class": "positive",
+     "expects": "accept",
+     "arith": "match",
+     "replay": "consistent",
+     "detail": "folded root matches the published root"
+    },
+    {
+     "id": "INC-P-n8-i7",
+     "file": "INC-P-n8-i7.json",
+     "class": "positive",
+     "expects": "accept",
+     "arith": "match",
+     "replay": "consistent",
+     "detail": "folded root matches the published root"
+    },
+    {
+     "id": "INC-P-n9-i0",
+     "file": "INC-P-n9-i0.json",
+     "class": "positive",
+     "expects": "accept",
+     "arith": "match",
+     "replay": "consistent",
+     "detail": "folded root matches the published root"
+    },
+    {
+     "id": "INC-P-n9-i4",
+     "file": "INC-P-n9-i4.json",
+     "class": "positive",
+     "expects": "accept",
+     "arith": "match",
+     "replay": "consistent",
+     "detail": "folded root matches the published root"
+    },
+    {
+     "id": "INC-P-n9-i8",
+     "file": "INC-P-n9-i8.json",
+     "class": "positive",
+     "expects": "accept",
+     "arith": "match",
+     "replay": "consistent",
+     "detail": "folded root matches the published root"
+    }
+   ],
+   "why_not_numeric": ""
+  },
+  "token": {
+   "counts": {
+    "vectors": 87,
+    "replayable": 0,
+    "accept_published": 17,
+    "reject_published": 70,
+    "consistent": 0,
+    "inconsistent": 0,
+    "none": 87
+   },
+   "vectors": [
+    {
+     "id": "TOK-A-allow-with-dispatch-hash",
+     "expects": "accept",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-A-nonbmp-extension-key-codepoint-order",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-A-nonbmp-extension-key-utf16-order",
+     "expects": "accept",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-F-amd-sev-snp-measurement-sha256",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-F-integer-beyond-2-53",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-F-intel-tdx-measurement-sha256",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-F-modify-same-as-proposed",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-F-reason-empty-string",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-F-reference-values-uri-empty",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-F-trailing-garbage",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-agent-id-empty",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-alg-hmac",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-alg-none",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-claim-altered-after-signing",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-digest-short",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-digest-unknown-alg",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-digest-uppercase-hex-core-claim",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-digest-uppercase-hex-extension",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-digest-uppercase-hex-submod",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-digest-uppercase-tag",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-digest-width-sha256-as-sha512",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-dup-escaped-equivalent",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-dup-nested-submods",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-dup-top-level",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-initiating-user-empty",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-missing-claim-agbom-digest",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-missing-claim-agent-id",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-missing-claim-alg",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-missing-claim-canonical-snapshot-hash",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-missing-claim-chain-head",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-missing-claim-initiating-user",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-missing-claim-interception-point",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-missing-claim-merkle-root",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-missing-claim-path-summary-hash",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-missing-claim-policy-bundle-hash",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-missing-claim-step-index",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-missing-claim-target-resource",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-missing-claim-tree-size",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-missing-claim-verdict",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-missing-eat-profile",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-missing-iat",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-missing-iss",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-missing-nonce",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-missing-submods",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-modify-without-dispatch-hash",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-nonce-short",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-null-for-optional",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-parse-bom",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-parse-lone-surrogate",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-parse-trailing-comma",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-profile-trailing-slash",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-reference-time-float",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-signature-absent-with-key",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-signature-flipped-bit",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-signature-s-not-reduced",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-signature-truncated",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-signature-uppercase",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-signed-with-other-key",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-step-index-bool",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-step-index-float-integral",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-step-index-negative",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-step-index-string",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-tree-size-equals-step-index",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-tree-size-zero",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-untagged-agbom-digest",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-untagged-canonical-snapshot-hash",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-untagged-chain-head",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-untagged-merkle-root",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-untagged-path-summary-hash",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-untagged-policy-bundle-hash",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-verdict-lowercase",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-N-verdict-unknown",
+     "expects": "reject",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-P-base",
+     "expects": "accept",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-P-crlf-whitespace",
+     "expects": "accept",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-P-deny",
+     "expects": "accept",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-P-escalate",
+     "expects": "accept",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-P-extension-ascii",
+     "expects": "accept",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-P-hook-context-assembly",
+     "expects": "accept",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-P-hook-memory-write",
+     "expects": "accept",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-P-hook-plan-generation",
+     "expects": "accept",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-P-hook-post-call-tool-result",
+     "expects": "accept",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-P-hook-subagent-delegation",
+     "expects": "accept",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-P-hook-task-completion",
+     "expects": "accept",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-P-hook-task-initialization",
+     "expects": "accept",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-P-modify-dispatch-differs",
+     "expects": "accept",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-P-pretty-vs-compact",
+     "expects": "accept",
+     "replay": "none"
+    },
+    {
+     "id": "TOK-P-sha3-digest",
+     "expects": "accept",
+     "replay": "none"
+    }
+   ],
+   "why_not_numeric": "a signed token: a signature and schema semantics decide"
+  }
+ },
+ "totals": {
+  "vectors": 171,
+  "n_replayable": 60,
+  "n_accept_published": 63,
+  "n_reject_published": 108,
+  "consistent": 60,
+  "inconsistent": 0,
+  "none": 111
+ },
+ "manifest": {
+  "files": [
+   {
+    "path": "corpus/canonical/CAN-P-astral-values.json",
+    "bytes": 402,
+    "sha256": "8854e463c223757bd983fe3438b2961ba48c282a43b8c5bfdc7968d8c3e7caad"
+   },
+   {
+    "path": "corpus/canonical/CAN-P-combining-vs-precomposed.json",
+    "bytes": 446,
+    "sha256": "c5cc76cc2dc044d7542cd835f99673c57929c39c4d9a621c8c90c5f24b7e1ace"
+   },
+   {
+    "path": "corpus/canonical/CAN-P-empty-containers.json",
+    "bytes": 409,
+    "sha256": "e898b6ca87ce61e8a89bdddadb70813dd0dadd2b5149ab237295507b4ff89269"
+   },
+   {
+    "path": "corpus/canonical/CAN-P-escapes-and-controls.json",
+    "bytes": 537,
+    "sha256": "06b993d4452b9ce62e83cf9fe1e097f8925f2f0bc8305c5a1fd966b0207fa706"
+   },
+   {
+    "path": "corpus/canonical/CAN-P-key-order-bmp-above-surrogates.json",
+    "bytes": 448,
+    "sha256": "d4f796e8e6f42d726d420b8081c1b7dcdbac860a60c36b0cad1f18fc2a4f3b05"
+   },
+   {
+    "path": "corpus/canonical/CAN-P-key-order-digits-upper-lower.json",
+    "bytes": 477,
+    "sha256": "286719efc27788a9225ba67417e52ce2152dae8f9c3fe7531f6b9a9c5a0a53ec"
+   },
+   {
+    "path": "corpus/canonical/CAN-P-nested-key-order.json",
+    "bytes": 468,
+    "sha256": "0fcbb2a80289e3efd56d7bb71d23bd0ddb1a03ebfdd8c078c7be6562caeb3ec3"
+   },
+   {
+    "path": "corpus/canonical/CAN-P-numbers-integers.json",
+    "bytes": 445,
+    "sha256": "886f79336b495f8150ba4a74488696910e450d342f5002954267f888e4234c36"
+   },
+   {
+    "path": "corpus/canonical/CAN-P-unicode-line-separators.json",
+    "bytes": 449,
+    "sha256": "7c05e4a5cd4939457d2000565e4deed2876fd292187bae326946c247ff7ebf54"
+   },
+   {
+    "path": "corpus/chain/CHN-N-altered-snapshot-resigned.json",
+    "bytes": 9642,
+    "sha256": "1db6e516f72e7a4021ae6eb693a3407610d935e1086137d3078d85c58e58ac18"
+   },
+   {
+    "path": "corpus/chain/CHN-N-altered-verdict-resigned.json",
+    "bytes": 9631,
+    "sha256": "5c7cb722c528161a3526361e816113cc597e387ec910e58822ed065bd0773957"
+   },
+   {
+    "path": "corpus/chain/CHN-N-bad-signature-mid-chain.json",
+    "bytes": 9616,
+    "sha256": "61655e507814486b58da52f1317060d1db173bf25bf77a559d31122c5b5f264b"
+   },
+   {
+    "path": "corpus/chain/CHN-N-first-record-missing.json",
+    "bytes": 8133,
+    "sha256": "cf536a56ddf9a589952f194d81600dfcbf9e3f1440d785912bf67615a1bbe913"
+   },
+   {
+    "path": "corpus/chain/CHN-N-history-rewritten-no-anchor.json",
+    "bytes": 9608,
+    "sha256": "537d7277b3e293fc6fda3c51627b48a6600146c27510ae762d9f9778c943f885"
+   },
+   {
+    "path": "corpus/chain/CHN-N-history-rewritten-resigned.json",
+    "bytes": 9860,
+    "sha256": "d434ae4e46f8e92c4aadeeea4f495d89330a0b94e226e69e42ddac01f13abeca"
+   },
+   {
+    "path": "corpus/chain/CHN-N-measurement-changed.json",
+    "bytes": 9638,
+    "sha256": "a71b8af737f4e4c29079b789ca1caa6b43641216a06f70e6495a527a2a1a10ac"
+   },
+   {
+    "path": "corpus/chain/CHN-N-record-deleted.json",
+    "bytes": 8117,
+    "sha256": "afd162889470f405c77778cdbd5128eb31722f403eb60ad9e1515844bb9bc660"
+   },
+   {
+    "path": "corpus/chain/CHN-N-record-inserted.json",
+    "bytes": 11202,
+    "sha256": "2019524114df989eda520559c60588a5a983728d46debb23c5ca401791ae8007"
+   },
+   {
+    "path": "corpus/chain/CHN-N-records-reordered.json",
+    "bytes": 9621,
+    "sha256": "ca3d67c9ddb0dcd9ed92f463243aac066819806d291308e1bf6daf2dca7ae49e"
+   },
+   {
+    "path": "corpus/chain/CHN-N-tail-truncated-no-anchor.json",
+    "bytes": 6594,
+    "sha256": "5a7ce25828105de73368b386f4d5a95708efa869083251e72b7eda8dabb86a1f"
+   },
+   {
+    "path": "corpus/chain/CHN-N-tail-truncated-with-anchor.json",
+    "bytes": 6676,
+    "sha256": "9be13a8c0293f351f114bae11cc874fb8c7b1980a98f14479b66b2c5fc39a75f"
+   },
+   {
+    "path": "corpus/chain/CHN-P-prefix-of-anchored.json",
+    "bytes": 5124,
+    "sha256": "64c591b100dd1501f5545cf5067ea6bbb56f1e98e3c2eb2fe52b21932d695f1e"
+   },
+   {
+    "path": "corpus/chain/CHN-P-six-steps-anchored.json",
+    "bytes": 9680,
+    "sha256": "f27b7825b616e414db2af0d4bbc8908194121b70f0be7cd05f3a53aceba9ecb2"
+   },
+   {
+    "path": "corpus/chain/CHN-P-six-steps.json",
+    "bytes": 9558,
+    "sha256": "6c215b5c318c7b3d7966a7e898aa34fa295e4cc4ba6aeee5a161a117d3f7acb3"
+   },
+   {
+    "path": "corpus/consistency/CON-N-forked-history.json",
+    "bytes": 822,
+    "sha256": "b0d9e34878a94b5c926c070e78dac3d7ae87d55e383437595d8ca9655e60c8d0"
+   },
+   {
+    "path": "corpus/consistency/CON-N-history-reordered.json",
+    "bytes": 975,
+    "sha256": "dc547933b6bc47168dc61b7bae25a166731205a2f485c09f1165062e05bc1c75"
+   },
+   {
+    "path": "corpus/consistency/CON-N-new-root-altered.json",
+    "bytes": 758,
+    "sha256": "122b34604dcea597b81a5ab3702c3c0914e9649fb2d62153538b48b860caa454"
+   },
+   {
+    "path": "corpus/consistency/CON-N-old-root-altered.json",
+    "bytes": 775,
+    "sha256": "ea824dcbed46e815894593c3ce528870c130e9e6ba5935b38f92e3ac945c651a"
+   },
+   {
+    "path": "corpus/consistency/CON-N-old-size-zero.json",
+    "bytes": 735,
+    "sha256": "e836b8d5df4d41a7d4bf8a4dbf8950306fc0a8dcc9ae1690d17e3213c0337136"
+   },
+   {
+    "path": "corpus/consistency/CON-N-proof-empty.json",
+    "bytes": 472,
+    "sha256": "5c317544cb20602ea54661263c3904c4958f2fe8d991d52c5a941b79a6ea95e7"
+   },
+   {
+    "path": "corpus/consistency/CON-N-proof-extra-hash.json",
+    "bytes": 824,
+    "sha256": "9e4e5ec5d8a31e640cae8f892e2d831e772ae9eba74a987a7944c71e0ebf36f9"
+   },
+   {
+    "path": "corpus/consistency/CON-N-proof-missing-hash.json",
+    "bytes": 689,
+    "sha256": "861242c0ce652934b8f8ce07903fae42ba16d7972fb59c7862a380c365fd3f84"
+   },
+   {
+    "path": "corpus/consistency/CON-N-proof-of-other-pair.json",
+    "bytes": 623,
+    "sha256": "0c26febd797b532194425b080fea5c39b767db9153543da0351ca557a0a8d52f"
+   },
+   {
+    "path": "corpus/consistency/CON-N-roots-swapped.json",
+    "bytes": 749,
+    "sha256": "b5cbb3f9d26bb964793d0e2a22fc69a0376d460b3fe95d69772af37d036d7552"
+   },
+   {
+    "path": "corpus/consistency/CON-N-same-size-different-root.json",
+    "bytes": 475,
+    "sha256": "fc3bdec99ae1f72a2860ab21300fb13326bf295d8051faea3e3baf7b2763520e"
+   },
+   {
+    "path": "corpus/consistency/CON-N-same-size-with-proof.json",
+    "bytes": 763,
+    "sha256": "053e890fb830c37f9669d71bd868838910e3ecfc8e1451d0f2f86a7d66f009f7"
+   },
+   {
+    "path": "corpus/consistency/CON-N-shrinking.json",
+    "bytes": 471,
+    "sha256": "b42af5d6f4e0f50fe11c1b337ddc43b6a0d637d89e6357deb3d25afe7f740b73"
+   },
+   {
+    "path": "corpus/consistency/CON-P-1-2.json",
+    "bytes": 473,
+    "sha256": "afcc16539ef5b7578ff3a68ec9e7b0227243f7cf0e89c1a161c7cad4849be823"
+   },
+   {
+    "path": "corpus/consistency/CON-P-1-9.json",
+    "bytes": 689,
+    "sha256": "f5cc58965bb3f9d91f3d11848f176abda1bc1db93d5230995287a3c4dec1b886"
+   },
+   {
+    "path": "corpus/consistency/CON-P-2-4.json",
+    "bytes": 473,
+    "sha256": "9e72ac905a4ecc7eecf275964a7d057f3b3f22914c035fa76bae1d3f417246a4"
+   },
+   {
+    "path": "corpus/consistency/CON-P-2-5.json",
+    "bytes": 545,
+    "sha256": "b5fe5e560a70a1482fa008b82f2e910bbaf713565c8c296f30848c2a8cbdc802"
+   },
+   {
+    "path": "corpus/consistency/CON-P-3-7.json",
+    "bytes": 689,
+    "sha256": "19407fc4c5ee18652f1844dc15d44fe73413885a9ea2e78221d9040ef316f823"
+   },
+   {
+    "path": "corpus/consistency/CON-P-4-8.json",
+    "bytes": 473,
+    "sha256": "c3f85a44bbc06c7e26e8e91021060ec0cc065b75cc7460a2a75d8a903b257d79"
+   },
+   {
+    "path": "corpus/consistency/CON-P-5-5.json",
+    "bytes": 399,
+    "sha256": "5c698d925e2605c2a90790998cff8d2d1ee04fab0a13362a2724139e910573e3"
+   },
+   {
+    "path": "corpus/consistency/CON-P-6-9.json",
+    "bytes": 689,
+    "sha256": "50754a00a5fce8111aa73d40f1d91c9b067b5174c5bf7414d0a4e00e5b6d40d3"
+   },
+   {
+    "path": "corpus/consistency/CON-P-7-8.json",
+    "bytes": 689,
+    "sha256": "ad95933c15aad7479c77f3b854b956654ce31db9aa318818f6dd3da0d960fd87"
+   },
+   {
+    "path": "corpus/consistency/CON-P-8-9.json",
+    "bytes": 473,
+    "sha256": "f3d745c4a01d91528ab537cbbd88a3a3f1c9b962a26dc783a2578db286b1e116"
+   },
+   {
+    "path": "corpus/inclusion/INC-N-index-equals-size.json",
+    "bytes": 800,
+    "sha256": "85cfc261f3d364e5cbeeec0669f4986e284df955752d55623468c87689d3f82e"
+   },
+   {
+    "path": "corpus/inclusion/INC-N-index-negative.json",
+    "bytes": 788,
+    "sha256": "4040ecd51f83102b2c21d0fcacdfe30c126c40b7e5ae64be8cadbb7122d0ce2f"
+   },
+   {
+    "path": "corpus/inclusion/INC-N-interior-node-as-leaf.json",
+    "bytes": 725,
+    "sha256": "15df4eb1919d95a9685119446e159d1e2dea62698e01f1049867909fe2bfc72a"
+   },
+   {
+    "path": "corpus/inclusion/INC-N-leaf-hash-as-record.json",
+    "bytes": 777,
+    "sha256": "13b2c9a0b83c311d0a5f205d418ef96ec56144581cbfcb9b1b763a367aec37ca"
+   },
+   {
+    "path": "corpus/inclusion/INC-N-odd-leaf-duplication.json",
+    "bytes": 816,
+    "sha256": "59391d5062019ce266601f89f6c9c154333d47a19daeb7586e03254bdcc36e90"
+   },
+   {
+    "path": "corpus/inclusion/INC-N-proof-empty.json",
+    "bytes": 596,
+    "sha256": "476487cda20f8eba13b2c011ffc39792edb25352eb29dfddb1abac94bc63f7d7"
+   },
+   {
+    "path": "corpus/inclusion/INC-N-proof-extra-hash.json",
+    "bytes": 877,
+    "sha256": "246aabf321e6980d5e0f93d57eb879c8b830d9b9fafcce74d234b67173f784c0"
+   },
+   {
+    "path": "corpus/inclusion/INC-N-proof-missing-hash.json",
+    "bytes": 739,
+    "sha256": "49aeb4b1c4ead7491f864e10bfb44b7f62529bbc67ee9b22a7b38c6fc6822bdf"
+   },
+   {
+    "path": "corpus/inclusion/INC-N-proof-order-swapped.json",
+    "bytes": 814,
+    "sha256": "81eba70cd709ae841f82522358020acf452e356c50c6713efd7e694296bfefaa"
+   },
+   {
+    "path": "corpus/inclusion/INC-N-record-altered.json",
+    "bytes": 803,
+    "sha256": "007565cb3b80d6e3912aebc594d056f9e51bb7eb12e473c4c1da1c29a5655733"
+   },
+   {
+    "path": "corpus/inclusion/INC-N-record-from-other-tree.json",
+    "bytes": 846,
+    "sha256": "b612a37ae032099d0901ab9f2cd1b6c252fb73b4c8da54e26b82afc95c514d3c"
+   },
+   {
+    "path": "corpus/inclusion/INC-N-root-altered.json",
+    "bytes": 810,
+    "sha256": "bc49fdb2bc6d01c7f2f0f88e6bb78a339c52e005a9621fe642270a603506dd53"
+   },
+   {
+    "path": "corpus/inclusion/INC-N-size-zero.json",
+    "bytes": 564,
+    "sha256": "44bf96eb5ea8ab987b53cddf686fd0b908620db77eef088b1b0cc35315171905"
+   },
+   {
+    "path": "corpus/inclusion/INC-N-wrong-index.json",
+    "bytes": 812,
+    "sha256": "b5025599ce4acd5ea35e74b164c49ff2b7473033b46c7a263b292555e54381b2"
+   },
+   {
+    "path": "corpus/inclusion/INC-N-wrong-tree-size.json",
+    "bytes": 815,
+    "sha256": "2686da1671799380d36518b66a18b321596ab8c99afad937bbcf0f720806f64b"
+   },
+   {
+    "path": "corpus/inclusion/INC-O-size-not-bound-by-root.json",
+    "bytes": 951,
+    "sha256": "258b4309e23769350463571fda6ffb9195f5fca93ef9d027c6a5373b95268596"
+   },
+   {
+    "path": "corpus/inclusion/INC-P-n1-i0.json",
+    "bytes": 529,
+    "sha256": "e644c595889d6f609ccfc16ba32630bf0e4d7195f51e7d50b80efdcb5e70485c"
+   },
+   {
+    "path": "corpus/inclusion/INC-P-n2-i0.json",
+    "bytes": 603,
+    "sha256": "b3b9444e2c2769b3c230179c7ce5fb842c2cd887c9c31be91716e021d5c275fa"
+   },
+   {
+    "path": "corpus/inclusion/INC-P-n2-i1.json",
+    "bytes": 603,
+    "sha256": "f6e7c4c4434e0708ab0a9159ffde74a6454175bc679e5f7eb2e0836f9fb708b9"
+   },
+   {
+    "path": "corpus/inclusion/INC-P-n3-i0.json",
+    "bytes": 675,
+    "sha256": "bde1beffa11be0da5f4f9eb0a215eb575ee66ae5232c17fe3142430c9ed7da23"
+   },
+   {
+    "path": "corpus/inclusion/INC-P-n3-i1.json",
+    "bytes": 675,
+    "sha256": "94f0d08d5fadeeadb36d0c1e57287242be1c836c3f000710ff82683178842980"
+   },
+   {
+    "path": "corpus/inclusion/INC-P-n3-i2.json",
+    "bytes": 603,
+    "sha256": "caf315c1fec8357027b6919a14363829e6e757f752bb8dc72186bd93c6a25d63"
+   },
+   {
+    "path": "corpus/inclusion/INC-P-n4-i0.json",
+    "bytes": 675,
+    "sha256": "e5366c75aad8b6dbc997026903890d428e0b66b5e3ae810e5a53820cc00d7125"
+   },
+   {
+    "path": "corpus/inclusion/INC-P-n4-i2.json",
+    "bytes": 675,
+    "sha256": "30958bc76758c0bbfb0664de8fc55c8ca700f9c63bbe0ab6aa5e1bde74366093"
+   },
+   {
+    "path": "corpus/inclusion/INC-P-n4-i3.json",
+    "bytes": 675,
+    "sha256": "c4991d29c74d9a304ea657a512516578fd024d65c6846b73a1de3a780e829b31"
+   },
+   {
+    "path": "corpus/inclusion/INC-P-n5-i0.json",
+    "bytes": 747,
+    "sha256": "0647d788f691459eda5587fa4f9a39efe56daf31c560ac6ddc4b30b18c910d83"
+   },
+   {
+    "path": "corpus/inclusion/INC-P-n5-i2.json",
+    "bytes": 747,
+    "sha256": "1a4c35452fbfa68a35b027cab999ec2632e4b18a264be0f5270973916cd22de2"
+   },
+   {
+    "path": "corpus/inclusion/INC-P-n5-i4.json",
+    "bytes": 603,
+    "sha256": "e21a8a48d31995ed2589e4b21a1d43e82dc48e9ced682c6782dd1c5047897d95"
+   },
+   {
+    "path": "corpus/inclusion/INC-P-n7-i0.json",
+    "bytes": 747,
+    "sha256": "42ae8a27e84726e8c380a1439886cef8551cba6a6ca9c6e645dd0661c037bdbd"
+   },
+   {
+    "path": "corpus/inclusion/INC-P-n7-i3.json",
+    "bytes": 747,
+    "sha256": "bcd53566302190b8982e5661529e1b9d3bb347e613044eda44aa419e1295e412"
+   },
+   {
+    "path": "corpus/inclusion/INC-P-n7-i6.json",
+    "bytes": 675,
+    "sha256": "c71569da24e124af0c47e46e0e40db66fa5b0aed335e7c90f76ce6ecca575afb"
+   },
+   {
+    "path": "corpus/inclusion/INC-P-n8-i0.json",
+    "bytes": 747,
+    "sha256": "ad80f68270aad541125907971a0d1714f77f84599bc5cc8090dfcb688af38be8"
+   },
+   {
+    "path": "corpus/inclusion/INC-P-n8-i4.json",
+    "bytes": 747,
+    "sha256": "27f89294cd68586a0b67e4ff16d28ec4d81f078a37805a9af4389b3ba8e9d649"
+   },
+   {
+    "path": "corpus/inclusion/INC-P-n8-i7.json",
+    "bytes": 747,
+    "sha256": "02bcaafccfd511fd8a9d98b39128511ed3aeef457a60bee66e874048dc07c2b3"
+   },
+   {
+    "path": "corpus/inclusion/INC-P-n9-i0.json",
+    "bytes": 819,
+    "sha256": "345807765f367c1fd5de6626495a2b466b1fe57a68fb95e91f606ada735402e4"
+   },
+   {
+    "path": "corpus/inclusion/INC-P-n9-i4.json",
+    "bytes": 819,
+    "sha256": "31348061a084b63d15bba48f0d68c6b8b27458ddeb27241587ca331dcf9ebe94"
+   },
+   {
+    "path": "corpus/inclusion/INC-P-n9-i8.json",
+    "bytes": 603,
+    "sha256": "70ce558e002c6b7af68a804f7a554739f852b4096e49c8f2cd84b8de2eca3c30"
+   },
+   {
+    "path": "corpus/token/TOK-A-allow-with-dispatch-hash.json",
+    "bytes": 2090,
+    "sha256": "4723c43c9ac8259cf598c9d1c8554cd3bd8cecf4b6fe3e25b3a39a264b423ee2"
+   },
+   {
+    "path": "corpus/token/TOK-A-nonbmp-extension-key-codepoint-order.json",
+    "bytes": 2057,
+    "sha256": "433a98f335eba17e41225656a7ddc4eae0f784ffed4ba790fcab18747ba63430"
+   },
+   {
+    "path": "corpus/token/TOK-A-nonbmp-extension-key-utf16-order.json",
+    "bytes": 1989,
+    "sha256": "566fc8637de6c3e6018b5a047c9b499c18323d7a08f6c093dff15760f3771a70"
+   },
+   {
+    "path": "corpus/token/TOK-F-amd-sev-snp-measurement-sha256.json",
+    "bytes": 2056,
+    "sha256": "cbfbbbcb0816e7cfc1649c760ba5d881760097062bf0556876f73ed4e57e26f0"
+   },
+   {
+    "path": "corpus/token/TOK-F-integer-beyond-2-53.json",
+    "bytes": 1997,
+    "sha256": "b6a10a5f01fe2ee05f0e245cd5da29e17ddd4b2a02d9097ae6bae992191153ad"
+   },
+   {
+    "path": "corpus/token/TOK-F-intel-tdx-measurement-sha256.json",
+    "bytes": 2050,
+    "sha256": "cca6f716975a79988e42ce2dc415255dda3c6d2c34bdc16b5bb5aef257e4c45f"
+   },
+   {
+    "path": "corpus/token/TOK-F-modify-same-as-proposed.json",
+    "bytes": 2253,
+    "sha256": "addca99dbe8a8fee8920d633b78764de03cdde6473284ba9c54cf9ca6f150981"
+   },
+   {
+    "path": "corpus/token/TOK-F-reason-empty-string.json",
+    "bytes": 2090,
+    "sha256": "7eb26b7528b51675b3da6bee992e6a213fdf697e2a3646b73e93cf8096243c0a"
+   },
+   {
+    "path": "corpus/token/TOK-F-reference-values-uri-empty.json",
+    "bytes": 2062,
+    "sha256": "7b0b72a82b4dabb9e757cd3d71f93400a18062ad5d5e5e5449a52fb9d2720520"
+   },
+   {
+    "path": "corpus/token/TOK-F-trailing-garbage.json",
+    "bytes": 1799,
+    "sha256": "1bf7688a379cea7b5a2df89aa482cb7cdf608c3244f551ff8dd53809f8bed5a9"
+   },
+   {
+    "path": "corpus/token/TOK-N-agent-id-empty.json",
+    "bytes": 1796,
+    "sha256": "97a14605e8934390da9243ac4dfc142ee41e85526a15b48fb5873e86346630fa"
+   },
+   {
+    "path": "corpus/token/TOK-N-alg-hmac.json",
+    "bytes": 1821,
+    "sha256": "7d6ea190b86965db50ad25d28ba31c82d3760fee23213d9b49bfb857e25e39df"
+   },
+   {
+    "path": "corpus/token/TOK-N-alg-none.json",
+    "bytes": 1817,
+    "sha256": "72a711b30d3191aa2c8e14ac0ae6a577bee286139c730590ac427bd7d4cd729c"
+   },
+   {
+    "path": "corpus/token/TOK-N-claim-altered-after-signing.json",
+    "bytes": 1869,
+    "sha256": "cacff2c9473bba54e6c0df6ea4ce1a12c61b75725fb68813c56c67a538790531"
+   },
+   {
+    "path": "corpus/token/TOK-N-digest-short.json",
+    "bytes": 1840,
+    "sha256": "63d9f0c41a25d99a25ff483868d1bd6213f2377050d5cae118da7f547e52456a"
+   },
+   {
+    "path": "corpus/token/TOK-N-digest-unknown-alg.json",
+    "bytes": 1791,
+    "sha256": "eed41eabe6dda4f4fc2467b3aa99e753ce3e7fe84e3f094882380118ec19ad59"
+   },
+   {
+    "path": "corpus/token/TOK-N-digest-uppercase-hex-core-claim.json",
+    "bytes": 1874,
+    "sha256": "aa8f13ade789ee645f5aa9b543df584c7133d5a558265e2c82af80fafdb74f35"
+   },
+   {
+    "path": "corpus/token/TOK-N-digest-uppercase-hex-extension.json",
+    "bytes": 1986,
+    "sha256": "9e114833c346e4153be7d218d239a796b18b7ac82032480accbf8d1720d8df9b"
+   },
+   {
+    "path": "corpus/token/TOK-N-digest-uppercase-hex-submod.json",
+    "bytes": 1884,
+    "sha256": "2332e6bc72e7e58158320edefe520f5da602de2d17583a3eb2ca8bbe80080596"
+   },
+   {
+    "path": "corpus/token/TOK-N-digest-uppercase-tag.json",
+    "bytes": 1852,
+    "sha256": "253e7f85fbc682f0dee8e699604d3afbbe91120fb401371d9c55f26142ac7da9"
+   },
+   {
+    "path": "corpus/token/TOK-N-digest-width-sha256-as-sha512.json",
+    "bytes": 1851,
+    "sha256": "8f324d9b9c4867b4444ce4fbfed97f76698c7be42af1dc4985c07bdc8c4fa056"
+   },
+   {
+    "path": "corpus/token/TOK-N-dup-escaped-equivalent.json",
+    "bytes": 1966,
+    "sha256": "a35985ddba70b292f39bc342aba55f01acb6f9bafc355e67714b506b5492448a"
+   },
+   {
+    "path": "corpus/token/TOK-N-dup-nested-submods.json",
+    "bytes": 1896,
+    "sha256": "cc54fb7390583bb09f51b6d6ab9120bc83a0c34b6de3ba6e6c554cdfe10e5fb7"
+   },
+   {
+    "path": "corpus/token/TOK-N-dup-top-level.json",
+    "bytes": 1878,
+    "sha256": "65909e2d4f25f8369fe4c85d601be8fb8754b5cd5af40b62a826af9f2581efea"
+   },
+   {
+    "path": "corpus/token/TOK-N-initiating-user-empty.json",
+    "bytes": 1818,
+    "sha256": "8dc21b295d167883e75ba3f7c2a0f0f933425593865e5d71a6c88830f29200b5"
+   },
+   {
+    "path": "corpus/token/TOK-N-missing-claim-agbom-digest.json",
+    "bytes": 1751,
+    "sha256": "2a450dcb4d1be0e1ae0487faf78231f87932e745a8886fa43edc966add8665f4"
+   },
+   {
+    "path": "corpus/token/TOK-N-missing-claim-agent-id.json",
+    "bytes": 1787,
+    "sha256": "8813dc2a06aeb409d772a8bd67cd536e906710e38dde4cbcea89c08da8eddf15"
+   },
+   {
+    "path": "corpus/token/TOK-N-missing-claim-alg.json",
+    "bytes": 1809,
+    "sha256": "237ced69dcfdd6d72ce65536043c74fcd162d8ef926ca477310da9c78ac2aeec"
+   },
+   {
+    "path": "corpus/token/TOK-N-missing-claim-canonical-snapshot-hash.json",
+    "bytes": 1762,
+    "sha256": "58011a3d0ff16b57b5b08cd6ea4f26498740e351f8a2d67e21e789997d1b7d94"
+   },
+   {
+    "path": "corpus/token/TOK-N-missing-claim-chain-head.json",
+    "bytes": 1749,
+    "sha256": "27381f95331efc084f62dcc152f0bb9567e0596a0ed969748da93e7a64e6288e"
+   },
+   {
+    "path": "corpus/token/TOK-N-missing-claim-initiating-user.json",
+    "bytes": 1816,
+    "sha256": "98ecdf64fb8176df368edd8e130a32862aef48ce31f11ad86f7b31fcd60a430e"
+   },
+   {
+    "path": "corpus/token/TOK-N-missing-claim-interception-point.json",
+    "bytes": 1805,
+    "sha256": "3031db3d0d437bb08f6d616ff11294904781054c0f5d76337e1dd84e44dda036"
+   },
+   {
+    "path": "corpus/token/TOK-N-missing-claim-merkle-root.json",
+    "bytes": 1750,
+    "sha256": "ffa2d248778703ddaea2391a99c629582aa02902de1a6cfb14f62f63b89da7b1"
+   },
+   {
+    "path": "corpus/token/TOK-N-missing-claim-path-summary-hash.json",
+    "bytes": 1756,
+    "sha256": "26c693acd3909685f60c8c841d3646649b5fbc124659ee2974a350562855591d"
+   },
+   {
+    "path": "corpus/token/TOK-N-missing-claim-policy-bundle-hash.json",
+    "bytes": 1757,
+    "sha256": "fad76dac09df2e9b89e162a22c1a243b36daa250a570680c1755f9ac430f0b01"
+   },
+   {
+    "path": "corpus/token/TOK-N-missing-claim-step-index.json",
+    "bytes": 1824,
+    "sha256": "b4cd28a724d4c9f5c7726099afd29949e0833fc61ba28d409562936ef8b91f5d"
+   },
+   {
+    "path": "corpus/token/TOK-N-missing-claim-target-resource.json",
+    "bytes": 1817,
+    "sha256": "6abac6728f70d3ba8d20c903997fc1bcb994876d642ecb434b63e4f56cf1305e"
+   },
+   {
+    "path": "corpus/token/TOK-N-missing-claim-tree-size.json",
+    "bytes": 1823,
+    "sha256": "52a1b0c7089ea4f7197efdf93035250f145da4ed755588161993918dfa078edc"
+   },
+   {
+    "path": "corpus/token/TOK-N-missing-claim-verdict.json",
+    "bytes": 1813,
+    "sha256": "ae124340db4c5da01408c0e4d66a5163456f93d05b4262d1eb0fc0fa3b421216"
+   },
+   {
+    "path": "corpus/token/TOK-N-missing-eat-profile.json",
+    "bytes": 1781,
+    "sha256": "92c2d4449efc790dc00a2972c47f9c717bea26375831a0e4ca89fe28a48ca66b"
+   },
+   {
+    "path": "corpus/token/TOK-N-missing-iat.json",
+    "bytes": 1805,
+    "sha256": "6bfbe2ec2e971dd01713396170e3d7d942aaad711c7b168d88583b1ec9b3bd89"
+   },
+   {
+    "path": "corpus/token/TOK-N-missing-iss.json",
+    "bytes": 1783,
+    "sha256": "1718ef34f0d3299389de02263074d54218d54b2a440eef69c1ad1bde385113ad"
+   },
+   {
+    "path": "corpus/token/TOK-N-missing-nonce.json",
+    "bytes": 1799,
+    "sha256": "957c2de8011f038f613839a069e9f7fee6bc9a6a878c5ab96385144c9bb23348"
+   },
+   {
+    "path": "corpus/token/TOK-N-missing-submods.json",
+    "bytes": 1646,
+    "sha256": "66eac1ffd466e2189d0f800946bf6575de336670c0598a5b7e3996b917397344"
+   },
+   {
+    "path": "corpus/token/TOK-N-modify-without-dispatch-hash.json",
+    "bytes": 1869,
+    "sha256": "56dc1c762e88ad9bcf3ba229ead80a86d9d2671b613606b455061b7b35e1d28f"
+   },
+   {
+    "path": "corpus/token/TOK-N-nonce-short.json",
+    "bytes": 1818,
+    "sha256": "48138a5cc63b7561bd858cf1aec151c06471033112ffb5f19dfa65bb12882ab3"
+   },
+   {
+    "path": "corpus/token/TOK-N-null-for-optional.json",
+    "bytes": 1904,
+    "sha256": "33086a1dddc94c4a967937266463bbd0cdc6be4f02152be7a6d3e05491852e00"
+   },
+   {
+    "path": "corpus/token/TOK-N-parse-bom.json",
+    "bytes": 1795,
+    "sha256": "21111e228795a4ff8d77d3d80e5c6377c23433dc2df6f3eea6b2c384bac5811f"
+   },
+   {
+    "path": "corpus/token/TOK-N-parse-lone-surrogate.json",
+    "bytes": 1876,
+    "sha256": "5b9974fd459abfacd270129736a8cf1bcf83c6163ea588970055e1e428670673"
+   },
+   {
+    "path": "corpus/token/TOK-N-parse-trailing-comma.json",
+    "bytes": 1768,
+    "sha256": "33a40654d62591d0ad0eea4ab9cc05c59ec3d9231e71276ea6ebee38ab783ba2"
+   },
+   {
+    "path": "corpus/token/TOK-N-profile-trailing-slash.json",
+    "bytes": 1848,
+    "sha256": "de7b64c39ddf00b6ddf2cc4da62757031556ff9e94c2ddbedd71e2814e2108c3"
+   },
+   {
+    "path": "corpus/token/TOK-N-reference-time-float.json",
+    "bytes": 1787,
+    "sha256": "70406f3ad07cf7e6b3c6071102479d55e3eeac7e296cb7dedb6e099fc7907d74"
+   },
+   {
+    "path": "corpus/token/TOK-N-signature-absent-with-key.json",
+    "bytes": 1729,
+    "sha256": "67a5e864164c4213da2a746bd4a1ac514950d89de4252cc8d977a97654ca4382"
+   },
+   {
+    "path": "corpus/token/TOK-N-signature-flipped-bit.json",
+    "bytes": 1848,
+    "sha256": "df85d7154cd7bb5db619400a80cdf00ed6e3b408fe19993474d72fda1a64f7b5"
+   },
+   {
+    "path": "corpus/token/TOK-N-signature-s-not-reduced.json",
+    "bytes": 1895,
+    "sha256": "d4d6e5f64abe625ce8ef63d63f0e04f4a9cadf0656bc3ed0fae2b241896f3533"
+   },
+   {
+    "path": "corpus/token/TOK-N-signature-truncated.json",
+    "bytes": 1837,
+    "sha256": "0b85b0bf18728e15f3e5ce7e6f6f70b697bbd4762349794be72b21815e442712"
+   },
+   {
+    "path": "corpus/token/TOK-N-signature-uppercase.json",
+    "bytes": 1854,
+    "sha256": "4e47a7c9e33ad27a0c9ef1bc4e41489993965fbadc27b0aaf86396cbe21fcac2"
+   },
+   {
+    "path": "corpus/token/TOK-N-signed-with-other-key.json",
+    "bytes": 1867,
+    "sha256": "329ac59ab635405e17b9d0a2feee48e52d5b6c68ad107e2a54cb8cfefd3ad9e1"
+   },
+   {
+    "path": "corpus/token/TOK-N-step-index-bool.json",
+    "bytes": 1834,
+    "sha256": "61730d714a1d53e6dbce6112cb0a8c8af67340a1eee80bb871c4fcd72f5194e1"
+   },
+   {
+    "path": "corpus/token/TOK-N-step-index-float-integral.json",
+    "bytes": 1859,
+    "sha256": "e5ecd164f2d12f4dfa48229d97edaf8ab558fdb75b252ceb5e3fc9df040f92a5"
+   },
+   {
+    "path": "corpus/token/TOK-N-step-index-negative.json",
+    "bytes": 1831,
+    "sha256": "9b677125760474a4cd4ecd04c65ec4397157910436a17e16e9bff70691ca554a"
+   },
+   {
+    "path": "corpus/token/TOK-N-step-index-string.json",
+    "bytes": 1835,
+    "sha256": "b821625b42c2cd778c54b48f433f50e2e5f90562a9401159bed155e0e645d041"
+   },
+   {
+    "path": "corpus/token/TOK-N-tree-size-equals-step-index.json",
+    "bytes": 1886,
+    "sha256": "8d5544cbac9c174d30443c37ff6b321b406ec87e60c3f77c112b3495f28b3a98"
+   },
+   {
+    "path": "corpus/token/TOK-N-tree-size-zero.json",
+    "bytes": 1816,
+    "sha256": "e43368a09423bfc13dbdaf96cb066b5eaea31a486a0303b8aca15ae89d91d282"
+   },
+   {
+    "path": "corpus/token/TOK-N-untagged-agbom-digest.json",
+    "bytes": 1872,
+    "sha256": "b32e72e76d451c4a2f21d187091faf1e876102c4373105db958bb4e88e5df2df"
+   },
+   {
+    "path": "corpus/token/TOK-N-untagged-canonical-snapshot-hash.json",
+    "bytes": 1894,
+    "sha256": "03a7aab8a5a06adb6fd2137c2521846983da1108f1f731d18f8a1b4f89347334"
+   },
+   {
+    "path": "corpus/token/TOK-N-untagged-chain-head.json",
+    "bytes": 1868,
+    "sha256": "3c41d5cae9b9392ef101f4e408390b694a211111ac0489458f6ac1bc3a34f936"
+   },
+   {
+    "path": "corpus/token/TOK-N-untagged-merkle-root.json",
+    "bytes": 1870,
+    "sha256": "b847f750c74c92c2836b5e85a28083754e43713322ad0698557927bf8c8e6bc7"
+   },
+   {
+    "path": "corpus/token/TOK-N-untagged-path-summary-hash.json",
+    "bytes": 1882,
+    "sha256": "f95768c8f3ca88b8807a76a2b03084b0887e2c6409545aa40c6e6f18a4e2cf4c"
+   },
+   {
+    "path": "corpus/token/TOK-N-untagged-policy-bundle-hash.json",
+    "bytes": 1884,
+    "sha256": "b1718d61425aba1a360ac1a869763c38c319d448d1595e5880b5bb6a8bd96367"
+   },
+   {
+    "path": "corpus/token/TOK-N-verdict-lowercase.json",
+    "bytes": 1830,
+    "sha256": "54c5817edaca85c0640580a77a794dd5f3c278a04ae085bf73fbfee064836818"
+   },
+   {
+    "path": "corpus/token/TOK-N-verdict-unknown.json",
+    "bytes": 1839,
+    "sha256": "3d22a178301bf035938f46823770e8528fb1c206c931ede6b4c8162343a2cc5c"
+   },
+   {
+    "path": "corpus/token/TOK-P-base.json",
+    "bytes": 1784,
+    "sha256": "ea99c0c4e2a6f51d70c83f76bb6c9c439c04a20d53bc2066d3aed8cee0a08566"
+   },
+   {
+    "path": "corpus/token/TOK-P-crlf-whitespace.json",
+    "bytes": 1990,
+    "sha256": "1c1e09f34bb2045cd35216e9d516dff0b2d108b24c60edb34fda73c1d996f2fd"
+   },
+   {
+    "path": "corpus/token/TOK-P-deny.json",
+    "bytes": 1851,
+    "sha256": "b9399ea1fc6abd6e5efeed3edfc1279f670a09642a04fcf60ed477479df18493"
+   },
+   {
+    "path": "corpus/token/TOK-P-escalate.json",
+    "bytes": 1783,
+    "sha256": "2af2334b33e04c31baec2955b3e120a8cc3ad1ab7000cbf07d34ed009b1bf05b"
+   },
+   {
+    "path": "corpus/token/TOK-P-extension-ascii.json",
+    "bytes": 1930,
+    "sha256": "7d53c57bb74742d4f3aeb543f954ac91d4d1312dac957bd79001996a767672f8"
+   },
+   {
+    "path": "corpus/token/TOK-P-hook-context-assembly.json",
+    "bytes": 1804,
+    "sha256": "6f830ed38a92624311dcfc5a27c9b96b18f1a630bb707c2ac047d98eb705aa20"
+   },
+   {
+    "path": "corpus/token/TOK-P-hook-memory-write.json",
+    "bytes": 1792,
+    "sha256": "f8e558fc5810ffa655309684a13ce0d1440a7d288ce86c14ab0150e915d18554"
+   },
+   {
+    "path": "corpus/token/TOK-P-hook-plan-generation.json",
+    "bytes": 1801,
+    "sha256": "7345689b5938ff148e25b4e9fb8d055139e2a9f79de65502bfdcb34275422ca5"
+   },
+   {
+    "path": "corpus/token/TOK-P-hook-post-call-tool-result.json",
+    "bytes": 1819,
+    "sha256": "0a1ce054de5c5db980a0e0778eab8faf3ef8abdaceac417ff69e9214afb98e3c"
+   },
+   {
+    "path": "corpus/token/TOK-P-hook-subagent-delegation.json",
+    "bytes": 1813,
+    "sha256": "830511bd18606bcc414ccedb08f105c8b0cc654f64882d94769d9b5f6a3d91fc"
+   },
+   {
+    "path": "corpus/token/TOK-P-hook-task-completion.json",
+    "bytes": 1801,
+    "sha256": "8a00c738933a918929198b76e42f1480d97f705169c36f9cec67a6bfdd6e473f"
+   },
+   {
+    "path": "corpus/token/TOK-P-hook-task-initialization.json",
+    "bytes": 1813,
+    "sha256": "7cd28c96616734fb85c671c9a1f4429201e4dff5218bf99bf024651070732fe1"
+   },
+   {
+    "path": "corpus/token/TOK-P-modify-dispatch-differs.json",
+    "bytes": 1949,
+    "sha256": "471701b0dad928cc6335e4af9c22ba3c69be8239daa6fa947eade6f19e08d79c"
+   },
+   {
+    "path": "corpus/token/TOK-P-pretty-vs-compact.json",
+    "bytes": 1710,
+    "sha256": "cf452827692f54941bb086488aa2ffd385125f67a05baaddfb5ac62d17595b08"
+   },
+   {
+    "path": "corpus/token/TOK-P-sha3-digest.json",
+    "bytes": 1830,
+    "sha256": "1c53f837844050a6ba0793e771862becc84c40a20d2ff7b8551ad24dbe2bb3bc"
+   }
+  ],
+  "count": 171
+ },
+ "head": "39daf704",
+ "upstream": "probityai/agent-evidence-vectors",
+ "method": "tools/sweep_competitor_corpus.py --dir <unpacked corpus> --manifest 39daf704 --json"
+}

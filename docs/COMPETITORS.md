@@ -1,8 +1,10 @@
 # Two projects in the same neighbourhood, measured on the same day
 
-**Date of measurement: 2026-11-18.** Every number below can be re-run with the
-command beside it. Nothing here is a claim about quality — the table lists what
-each project ships, and the section after it says plainly where this project is
+**This project re-measured 2026-11-25; the other project's column is unchanged
+since 2026-11-18.** Where the two columns come from different dates the row says
+so in its note. Every number for this project can be re-run with the command
+beside it; nothing here is a claim about quality — the table lists what each
+project ships, and the section after it says plainly where this project is
 behind.
 
 The other project is **`agent-action-capsule`** (AAC), the reference verifier for
@@ -15,13 +17,13 @@ verifier that refuses malformed input).
 
 | | `uibc-core` | `agent-action-capsule` |
 |---|---|---|
-| Version measured | 0.4.0-dev on `main` (`1f7c957`); 0.3.3 on PyPI | 0.17.0 on PyPI |
-| First published | 4 releases, latest 2026-11-15 | 23 releases, latest 2026-11-18 |
+| Version measured | 0.5.5 on PyPI; `main` at `5f9c603` (2026-11-25) | 0.17.0 on PyPI (2026-11-18) |
+| First published | 12 releases, latest 2026-11-25 | 23 releases, latest 2026-11-18 |
 | Specification | In this repo: `drafts/draft-zhao-uibc-evidence-chain-00.md`, **not submitted** | IETF Internet-Draft `draft-mih-scitt-agent-action-capsule`, referenced from the package itself |
 | Licence | Apache-2.0 | BSD-3-Clause |
 | Language of the verifier | Python (first) **and JavaScript (second, independent)** | Python, TypeScript, Go and Rust, all driven by the same vector corpus |
-| Verifier modules | 27 | 40 |
-| Test files / test functions | 131 / 816 | 95 / 1189 |
+| Verifier modules | 40 | 40 |
+| Test files / test functions | 221 / 1765 (1919 collected, parametrised cases counted once each) | 95 / 1189 |
 | Conformance material | 30 packages (20 must-reject, 1 control, 9 must-accept), shipped with per-case `expected.json`, two of them carrying the outside input S9 and S19 need, rebuildable byte for byte, and every must-reject case naming its basis in `docs/GROUNDS.md` | 1,952 cases in 55 sets under `vectors/`, referenced by tests, in neither the sdist nor the wheel |
 | Second implementation is a **CI gate** | Yes — `second-implementation` job, 18 of 20 checks, 36/36 identical FAIL sets | No second implementation to gate |
 | Hostile-input suite | `tools/redteam_robustness.py`, 10 cases, table in `docs/ROBUSTNESS.md` | `tests/test_json_nesting_vectors.py`, `tests/test_verify_bounds.py`, `tests/test_parse.py` |
@@ -92,12 +94,12 @@ measured by hand on the date at the top of this page, and the picture says so.
    working group's repository, a third-party product shipping their verifier, an
    independent draft building on theirs, and a public log with 15134 entries. We
    have none of these; see the table above.
-3. **Release cadence.** 23 releases against 4. AAC ships weekly; this project
+3. **Release cadence.** 23 releases against 12 (their figure 2026-11-18, ours 2026-11-25). AAC ships weekly; this project
    tags when a chapter of work closes.
-4. **Surface area.** 40 modules against 25. AAC covers COSE/CBOR carriers,
+4. **Surface area.** 40 modules against 40 - same size now, but the shape differs. AAC covers COSE/CBOR carriers,
    bilateral flows, ERC-8183 and x402 adapters, an anchor client, witness
    records. This project covers one format and one verifier, and says so.
-5. **Test count.** 1189 against 527.
+5. **Test count.** 1189 against 1765 (their figure 2026-11-18, ours 2026-11-25).
 
 ## Adoption, measured the peer's own way
 

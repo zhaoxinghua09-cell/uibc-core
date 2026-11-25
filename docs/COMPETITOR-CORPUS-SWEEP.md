@@ -56,6 +56,38 @@ python <this repo>/tools/sweep_competitor_corpus.py \
 
 `python tools/sweep_competitor_corpus.py --selftest` 是一组断言：常量、折叠、证明条数规则、下标规则、倒序尺寸规则、JCS 的键序与转义，以及最容易自我美化的那条——分类函数（accept+match 才算一致、reject+mismatch 才算一致）。
 
+## 这个"0 矛盾"是能自己站住的：196 处改动，183 处被认出来
+
+报"零"的工具，必须让人看见它会失手。"69 条自洽、0 条矛盾"是个否定结论；一个从没失败过的检测器，和一个永远输出零的检测器，在读数上分不出来。
+
+所以再加一道自证（`tools/sweep_mutation_control.py`，收据 `docs/upstream-package/competitor-defects/sweep-mutation-control.json`）：拿**真语料**里那 69 条被判为一致的向量，逐条按"向量坏掉时的样子"改一处——根翻一个十六进制位、record 翻一位、proof 里某个哈希翻一位、proof 少一条、下标越界、声称的树尺寸变一格——再看扫描器还认不认它是"数字与 verdict 自相矛盾"。
+
+| 类别 | 家族 | 施加 | 认出 | 尺寸歧义 | 无法解释 |
+|---|---|---|---|---|---|
+| inclusion | root / record / proof 位 / proof 丢 / index | 108 | 108 | — | 0 |
+| inclusion | tree_size +1 | 22 | 14 | 8 | 0 |
+| consistency | old_root / new_root / proof 位 / proof 丢 | 38 | 38 | — | 0 |
+| consistency | new_size +1 | 10 | 5 | 5 | 0 |
+| canonical | digest / len | 18 | 18 | — | 0 |
+| **合计** | | **196** | **183** | **13** | **0** |
+
+两点必须写清，否则这张表就会被读成 100%：
+
+1. **183/183 是"改了算术的"，全部被认出。** 翻根、翻 record、翻 proof、丢 proof、挪下标——这些改动必然让折叠出的根或摘要变样，扫描器一次都没放过。
+2. **13 处没认出来的是"只改了声称的树尺寸"**，而且这不是漏，是**算术看不见**：RFC 6962 的根不承诺自己的树尺寸，7 叶的证明在声称 8 叶时照样折回 7 叶的根。所以这类改动正确结论就是"数字仍然自洽"，单独计为 ambiguous，不计入成功也不计入失败。这条边界有正反两个断言钉住（`--selftest`）：2 叶改称 3 叶**必须**被认出（证明条数要求变了），3 叶改称 4 叶且证明仍是两条哈希**必须**认不出（这正是歧义）。
+
+第 2 点不是我们独有的难题：对方语料里就有一条 `INC-O-size-not-bound-by-root`，写明"RFC 6962 的根不绑树尺寸，树尺寸必须由签名 token 认证"。收据顺带查出：171 条里有 **1 组**（`INC-N-root-altered`、`INC-N-wrong-tree-size`、`INC-O-size-not-bound-by-root`）三条共用一个 record、一个下标、一份 proof，只靠 `tree_size` 区分——歧义在他们的语料里是写下来的，我们的控制也把它照原样量了出来。
+
+复跑：
+
+```bash
+python tools/sweep_mutation_control.py --selftest     # 13 个家族，11 个算术必认、2 个尺寸歧义
+python tools/sweep_mutation_control.py --dir <unpacked corpus>
+# TOTAL applied 196, detected 183, ambiguous 13, unexplained 0
+```
+
+改动是**确定性**的：翻哪一位由 `sha256(向量 id ‖ 家族名)` 决定，没有随机数，任何人跑同一份语料得到同一组改动、同一组数字，所以收据能被核对而不是被相信。
+
 ## 与我们自己的语料摆在一起
 
 我们 63 条 RFC 9162 语料（inclusion 50 + consistency 13）没有一条要求读者信任我们的代码：每条都带正孪生、拒绝词表，并被 pymerkle、Sigstore `merkle.py`、Go `transparency-dev/merkle` 三份实现各自独立判过（`docs/THIRD-PARTY-CROSSCHECK.md`）。对方 171 条里 69 条能这样被判，102 条不能。

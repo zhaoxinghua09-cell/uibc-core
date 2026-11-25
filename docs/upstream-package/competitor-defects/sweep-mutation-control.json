@@ -1,0 +1,226 @@
+{
+  "ambiguity": {
+    "groups_with_two_sizes": 1,
+    "ids": [
+      "INC-N-root-altered",
+      "INC-N-wrong-tree-size",
+      "INC-O-size-not-bound-by-root"
+    ]
+  },
+  "ambiguous": [
+    {
+      "detail": "second root recomputed from the first matches",
+      "id": "CON-P-1-9",
+      "kind": "consistency",
+      "mutation": "new_size+1"
+    },
+    {
+      "detail": "second root recomputed from the first matches",
+      "id": "CON-P-2-5",
+      "kind": "consistency",
+      "mutation": "new_size+1"
+    },
+    {
+      "detail": "second root recomputed from the first matches",
+      "id": "CON-P-3-7",
+      "kind": "consistency",
+      "mutation": "new_size+1"
+    },
+    {
+      "detail": "second root recomputed from the first matches",
+      "id": "CON-P-6-9",
+      "kind": "consistency",
+      "mutation": "new_size+1"
+    },
+    {
+      "detail": "second root recomputed from the first matches",
+      "id": "CON-P-8-9",
+      "kind": "consistency",
+      "mutation": "new_size+1"
+    },
+    {
+      "detail": "folded root matches the published root",
+      "id": "INC-P-n3-i0",
+      "kind": "inclusion",
+      "mutation": "tree_size+1"
+    },
+    {
+      "detail": "folded root matches the published root",
+      "id": "INC-P-n3-i1",
+      "kind": "inclusion",
+      "mutation": "tree_size+1"
+    },
+    {
+      "detail": "folded root matches the published root",
+      "id": "INC-P-n5-i0",
+      "kind": "inclusion",
+      "mutation": "tree_size+1"
+    },
+    {
+      "detail": "folded root matches the published root",
+      "id": "INC-P-n5-i2",
+      "kind": "inclusion",
+      "mutation": "tree_size+1"
+    },
+    {
+      "detail": "folded root matches the published root",
+      "id": "INC-P-n7-i0",
+      "kind": "inclusion",
+      "mutation": "tree_size+1"
+    },
+    {
+      "detail": "folded root matches the published root",
+      "id": "INC-P-n7-i3",
+      "kind": "inclusion",
+      "mutation": "tree_size+1"
+    },
+    {
+      "detail": "folded root matches the published root",
+      "id": "INC-P-n9-i0",
+      "kind": "inclusion",
+      "mutation": "tree_size+1"
+    },
+    {
+      "detail": "folded root matches the published root",
+      "id": "INC-P-n9-i4",
+      "kind": "inclusion",
+      "mutation": "tree_size+1"
+    }
+  ],
+  "before": {
+    "consistent": 69,
+    "inconsistent": 0,
+    "replayable": 69,
+    "vectors": 171
+  },
+  "corpus": "unpacked corpus at upstream HEAD 39daf704",
+  "families": [
+    {
+      "families": [
+        {
+          "ambiguous": 0,
+          "applied": 9,
+          "detected": 9,
+          "expected_to_detect": true,
+          "family": "digest_byte",
+          "unexplained": 0
+        },
+        {
+          "ambiguous": 0,
+          "applied": 9,
+          "detected": 9,
+          "expected_to_detect": true,
+          "family": "len_bump",
+          "unexplained": 0
+        }
+      ],
+      "kind": "canonical"
+    },
+    {
+      "families": [
+        {
+          "ambiguous": 0,
+          "applied": 10,
+          "detected": 10,
+          "expected_to_detect": true,
+          "family": "old_root_byte",
+          "unexplained": 0
+        },
+        {
+          "ambiguous": 0,
+          "applied": 10,
+          "detected": 10,
+          "expected_to_detect": true,
+          "family": "new_root_byte",
+          "unexplained": 0
+        },
+        {
+          "ambiguous": 0,
+          "applied": 9,
+          "detected": 9,
+          "expected_to_detect": true,
+          "family": "proof_byte",
+          "unexplained": 0
+        },
+        {
+          "ambiguous": 0,
+          "applied": 9,
+          "detected": 9,
+          "expected_to_detect": true,
+          "family": "proof_drop",
+          "unexplained": 0
+        },
+        {
+          "ambiguous": 5,
+          "applied": 10,
+          "detected": 5,
+          "expected_to_detect": false,
+          "family": "size_bump",
+          "unexplained": 0
+        }
+      ],
+      "kind": "consistency"
+    },
+    {
+      "families": [
+        {
+          "ambiguous": 0,
+          "applied": 22,
+          "detected": 22,
+          "expected_to_detect": true,
+          "family": "root_byte",
+          "unexplained": 0
+        },
+        {
+          "ambiguous": 0,
+          "applied": 22,
+          "detected": 22,
+          "expected_to_detect": true,
+          "family": "record_byte",
+          "unexplained": 0
+        },
+        {
+          "ambiguous": 0,
+          "applied": 21,
+          "detected": 21,
+          "expected_to_detect": true,
+          "family": "proof_byte",
+          "unexplained": 0
+        },
+        {
+          "ambiguous": 0,
+          "applied": 21,
+          "detected": 21,
+          "expected_to_detect": true,
+          "family": "proof_drop",
+          "unexplained": 0
+        },
+        {
+          "ambiguous": 0,
+          "applied": 22,
+          "detected": 22,
+          "expected_to_detect": true,
+          "family": "index_bump",
+          "unexplained": 0
+        },
+        {
+          "ambiguous": 8,
+          "applied": 22,
+          "detected": 14,
+          "expected_to_detect": false,
+          "family": "size_bump",
+          "unexplained": 0
+        }
+      ],
+      "kind": "inclusion"
+    }
+  ],
+  "head": "39daf704",
+  "totals": {
+    "ambiguous": 13,
+    "applied": 196,
+    "detected": 183,
+    "unexplained": 0
+  },
+  "unexplained": []
+}

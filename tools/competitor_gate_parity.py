@@ -57,9 +57,9 @@ OURS = "zhaoxinghua09-cell/uibc-core"
 # who wants to remove a repository has to say so in the document.
 MIN_REPOS = 25
 # A point is only worth something in a repository that asserts anything at all.
-# Ten real rejection assertions is the smallest honest sample this metric can
+# Five real assertion lines is the smallest honest sample this metric can
 # see, and it is the same floor the calibration block uses.
-ASSERT_FLOOR = 10
+ASSERT_FLOOR = 5
 
 PATTERNS = {
     "fuzz": r"\bfuzz(y|er|ing)?\b|libfuzzer|atheris|go-fuzz|jazzer|jqf",

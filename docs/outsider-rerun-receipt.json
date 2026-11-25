@@ -1,6 +1,6 @@
 {
- "generated_at": "2026-11-25T18:11:10Z",
- "tree_sha256": "e86895c26d211b9983579abde06ce4b577a18b7e7c1e8a661f595770aa6b7ed0",
+ "generated_at": "2026-11-25T18:30:10Z",
+ "tree_sha256": "529faecff809cbc096d6e75d67e3856a34f55d262db2336dc9ff56e926fea388",
  "files_hashed": 2425,
  "digest_excludes": [
   "docs/OUTSIDER-RERUN.md",
@@ -44,7 +44,7 @@
    "rc": 0,
    "expect": "PARITY OK",
    "ok": true,
-   "seconds": 0.6,
+   "seconds": 0.5,
    "tail": "PARITY OK: 25 repositories pinned and re-scored, best competitor 3/10, this repository 10/10"
   },
   {
@@ -53,7 +53,7 @@
    "rc": 0,
    "expect": "ALL OK",
    "ok": true,
-   "seconds": 0.3,
+   "seconds": 0.2,
    "tail": "ALL OK"
   },
   {
@@ -63,7 +63,7 @@
    "expect": "passed",
    "ok": true,
    "seconds": 2.7,
-   "tail": "12 passed in 1.99s"
+   "tail": "12 passed in 1.94s"
   }
  ],
  "ok": true

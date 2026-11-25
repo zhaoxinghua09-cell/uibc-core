@@ -34,6 +34,7 @@
 | A17 | 突变基准报告 α 也报告 β，并给 Wilson 上界；第二套算子族单列 | `python tools/mutation_controls.py` | 保持型 10 例假拒绝 **0/10**（两模式，上界 ≤27.8%）；第二套算子 11 例假接受 **0/11**（三模式，上界 ≤25.9%）；3 个变异在 `ambiguous_excluded` 里写明裁决理由 | 若只报 α 或把 0 写成“0%”，即违反本法：0/10 的上界仍是 27.8%，不能当日结论 |
 | A18 | 竞品 171 条语料里 69 条（40%）能被外人按公开标准复算，69 自洽、0 矛盾、102 不可复算（HEAD `39daf704`） | 抓 `probityai/agent-evidence-vectors` 到 `39daf704`，`python tools/sweep_competitor_corpus.py --dir <…/corpus> --json` | 末行 `TOTAL 171 vectors, replayable without their code 69 (40%), consistent 69, inconsistent 0, not replayable 102`；逐文件 sha256 见收据 `docs/upstream-package/competitor-defects/corpus-sweep-39daf704.json` | 任一数字变动＝语料被改过，或我们的判据被放宽；必须先解释再改文档 |
 | A19 | 那个“0 矛盾”是检测器真的会失手才有的：196 处注入改动，183 处被认出，13 处属尺寸歧义，0 处无法解释 | 同一份语料上 `python tools/sweep_mutation_control.py --dir <…/corpus>` | `TOTAL applied 196, detected 183, ambiguous 13, unexplained 0`；收据 `…/sweep-mutation-control.json` | 若 `unexplained` 出现非零，说明漏检而不只是歧义——“0 矛盾”立刻失去支撑，须撤回该句 |
+| A20 | 上面 A18、A19 两句，外人**一条命令**就能自己复得，不需要 clone 上游、不需要装任何包 | `python tools/stranger_competitor_check.py`（本机无网则 `--dir <已解包 corpus>`） | `bytes: 171 checked, 171 match` → `sweep: … 69 replayable … 0 inconsistent, 102 not replayable` → `control: 196 applied, 183 detected, 13 ambiguous, 0 unexplained` → `VERDICT: REPRODUCED`；`--json` 输出单个对象 | 任一步 `DIFFERS`／`DIFF`／退出码非 0，说明字节或数字有一处对不上——此时 A18/A19 只能引用“当时那次”的收据，不能对外说“可复得” |
 
 ## 二、未建（**这些句子现在不许对外说**）
 

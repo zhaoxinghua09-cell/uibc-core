@@ -46,6 +46,24 @@
 
 ## 怎么自己跑
 
+一条命令，无需安装、无需 clone 上游：
+
+```bash
+python tools/stranger_competitor_check.py
+# bytes: 171 checked, 171 match
+# sweep: 171 vectors, 69 replayable, 69 consistent, 0 inconsistent, 102 not replayable
+# control: 196 applied, 183 detected, 13 ambiguous, 0 unexplained
+# VERDICT: REPRODUCED
+```
+
+它按顺序做三件事，任一步不一致就停在那一步并说清哪一条不对：
+
+1. **下载**上游 `39daf704` 的 tarball（标准库，不装包），或 `--dir` 指向你手上已解包的副本；
+2. **核对字节**：171 个文件的 sha256 逐个对收据 `corpus-sweep-39daf704.json`。字节不一致时后面什么都不算——"字节不是我们扫的那份"本身就是结论；
+3. **重跑两个工具**并逐字段对收据，`--json` 输出一个对象供脚本消费，`--selftest` 不需要网络和语料。
+
+用 git 手动复现也仍然可以（下面这套），但**一条命令**这条路才是外人真的会走的那条：
+
 ```bash
 git clone https://github.com/probityai/agent-evidence-vectors && cd agent-evidence-vectors
 git checkout 39daf704

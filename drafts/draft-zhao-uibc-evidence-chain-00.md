@@ -334,6 +334,35 @@ follow a `Specification Required` policy. A verifier **MUST NOT** reject a recor
 for carrying an unregistered value: registration governs shared meaning, never
 acceptance. Every vocabulary check is performable from the record's own bytes.
 
+## 16. Conformance tiers (proposal, not a claim)
+
+_Three levels, so a deployment can say what it has rather than "we do UIBC". The
+names are `uibc/core`, `uibc/witnessed`, `uibc/anchored`; a claim names the tier
+and the commit. Nothing here is conformance-tested yet: the tiers describe
+requirements, and no vectors exist for them._
+
+| Tier | Adds on top of the previous | Runnable check |
+|---|---|---|
+| `uibc/core` | the 19 checks pass on the package; verdict is one of PASS / FAIL / INCONCLUSIVE; no dimension merged | `uibc verify` |
+| `uibc/witnessed` | a verification bundle is emitted; the reader's trust list is separate from the artifact; the head is co-signed by two distinct keys | `--bundle-out`, `--trustlist`, `tools/cosign_head.py verify` |
+| `uibc/anchored` | the anchor is `anchored`, not `pending`; the head carries the tree size inside the signature; successive heads only grow and a new size means a new root | `tools/cosign_head.py chain` |
+
+Three rules bind the tiers, and each closes a gap someone else left open:
+
+1. **The size is signed, not asserted.** A head that states a tree size without
+   covering it with a signature lets the size be swapped after signing; the
+   signature then still verifies. The tree size sits inside the signed
+   statement, and a swap fails verification.
+2. **Only-grew is checked, not assumed.** An inclusion proof shows one leaf; it
+   says nothing about what the log used to be. A chain of heads must show
+   non-decreasing size, a different root whenever the size grows, and never two
+   different roots at one size. The decision-provenance draft states that its
+   anchoring extension does not yet check this; a tier that claims `anchored`
+   must.
+3. **A tier is never a trust claim.** `uibc/anchored` says the evidence chain
+   holds, not that the record is true or that the issuer is trusted; that stays
+   the reader's trust policy (Section 13).
+
 ## Implementation Status
 
 _As of 2026-11-25, repository `232deb4`, reference verifier 0.5.5._

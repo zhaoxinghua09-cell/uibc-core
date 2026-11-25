@@ -1,0 +1,220 @@
+{
+ "audited_at": "2026-11-26",
+ "strict_rule": "deriveAddress|derive_address|addressFrom(PublicKey|Key)?|publicKeyToAddress|toChecksumAddress",
+ "broad_rule": "base58|bs58|deriveAddress|derive_address",
+ "rows": [
+  {
+   "repo": "WeBankBlockchain/WeIdentity",
+   "D3_broad": 0,
+   "D3_strict": 0,
+   "strict_hits": 3,
+   "score_broad": 0,
+   "score_strict": 0
+  },
+  {
+   "repo": "caict-4iot-dev/uni-registrar-driver-did-bid",
+   "D3_broad": 0,
+   "D3_strict": 0,
+   "strict_hits": 0,
+   "score_broad": 0,
+   "score_strict": 0
+  },
+  {
+   "repo": "caict-4iot-dev/uni-resolver-driver-did-bid",
+   "D3_broad": 0,
+   "D3_strict": 0,
+   "strict_hits": 0,
+   "score_broad": 0,
+   "score_strict": 0
+  },
+  {
+   "repo": "ceramicnetwork/js-did",
+   "D3_broad": 1,
+   "D3_strict": 0,
+   "strict_hits": 0,
+   "score_broad": 2,
+   "score_strict": 1
+  },
+  {
+   "repo": "decentralized-identity/did-jwt",
+   "D3_broad": 1,
+   "D3_strict": 1,
+   "strict_hits": 2,
+   "score_broad": 3,
+   "score_strict": 3
+  },
+  {
+   "repo": "decentralized-identity/did-resolver",
+   "D3_broad": 0,
+   "D3_strict": 0,
+   "strict_hits": 0,
+   "score_broad": 0,
+   "score_strict": 0
+  },
+  {
+   "repo": "decentralized-identity/ethr-did-resolver",
+   "D3_broad": 1,
+   "D3_strict": 0,
+   "strict_hits": 0,
+   "score_broad": 3,
+   "score_strict": 2
+  },
+  {
+   "repo": "decentralized-identity/ion",
+   "D3_broad": 0,
+   "D3_strict": 0,
+   "strict_hits": 0,
+   "score_broad": 0,
+   "score_strict": 0
+  },
+  {
+   "repo": "decentralized-identity/sidetree-core",
+   "D3_broad": 0,
+   "D3_strict": 0,
+   "strict_hits": 0,
+   "score_broad": 0,
+   "score_strict": 0
+  },
+  {
+   "repo": "decentralized-identity/universal-resolver",
+   "D3_broad": 0,
+   "D3_strict": 0,
+   "strict_hits": 0,
+   "score_broad": 0,
+   "score_strict": 0
+  },
+  {
+   "repo": "decentralized-identity/veramo",
+   "D3_broad": 1,
+   "D3_strict": 0,
+   "strict_hits": 0,
+   "score_broad": 3,
+   "score_strict": 2
+  },
+  {
+   "repo": "digitalbazaar/did-io",
+   "D3_broad": 0,
+   "D3_strict": 0,
+   "strict_hits": 0,
+   "score_broad": 0,
+   "score_strict": 0
+  },
+  {
+   "repo": "docknetwork/sdk",
+   "D3_broad": 1,
+   "D3_strict": 0,
+   "strict_hits": 0,
+   "score_broad": 3,
+   "score_strict": 2
+  },
+  {
+   "repo": "hyperledger/aries-cloudagent-python",
+   "D3_broad": 1,
+   "D3_strict": 0,
+   "strict_hits": 0,
+   "score_broad": 3,
+   "score_strict": 2
+  },
+  {
+   "repo": "hyperledger/aries-framework-go",
+   "D3_broad": 1,
+   "D3_strict": 0,
+   "strict_hits": 0,
+   "score_broad": 3,
+   "score_strict": 2
+  },
+  {
+   "repo": "hyperledger/indy-sdk",
+   "D3_broad": 1,
+   "D3_strict": 0,
+   "strict_hits": 0,
+   "score_broad": 3,
+   "score_strict": 2
+  },
+  {
+   "repo": "hyperledger/indy-vdr",
+   "D3_broad": 1,
+   "D3_strict": 0,
+   "strict_hits": 0,
+   "score_broad": 3,
+   "score_strict": 2
+  },
+  {
+   "repo": "ontio/ontology-did",
+   "D3_broad": 0,
+   "D3_strict": 0,
+   "strict_hits": 0,
+   "score_broad": 0,
+   "score_strict": 0
+  },
+  {
+   "repo": "sphereon-opensource/ssi-sdk",
+   "D3_broad": 1,
+   "D3_strict": 0,
+   "strict_hits": 0,
+   "score_broad": 3,
+   "score_strict": 2
+  },
+  {
+   "repo": "spruceid/didkit",
+   "D3_broad": 0,
+   "D3_strict": 0,
+   "strict_hits": 0,
+   "score_broad": 0,
+   "score_strict": 0
+  },
+  {
+   "repo": "spruceid/ssi",
+   "D3_broad": 0,
+   "D3_strict": 0,
+   "strict_hits": 0,
+   "score_broad": 0,
+   "score_strict": 0
+  },
+  {
+   "repo": "transmute-industries/sidetree.js",
+   "D3_broad": 0,
+   "D3_strict": 0,
+   "strict_hits": 0,
+   "score_broad": 0,
+   "score_strict": 0
+  },
+  {
+   "repo": "uport-project/ethr-did",
+   "D3_broad": 0,
+   "D3_strict": 0,
+   "strict_hits": 0,
+   "score_broad": 0,
+   "score_strict": 0
+  },
+  {
+   "repo": "w3c-ccg/did-method-key",
+   "D3_broad": 0,
+   "D3_strict": 0,
+   "strict_hits": 0,
+   "score_broad": 0,
+   "score_strict": 0
+  },
+  {
+   "repo": "w3c-ccg/did-test-suite",
+   "D3_broad": 0,
+   "D3_strict": 0,
+   "strict_hits": 0,
+   "score_broad": 0,
+   "score_strict": 0
+  }
+ ],
+ "changed": [
+  "ceramicnetwork/js-did",
+  "decentralized-identity/ethr-did-resolver",
+  "decentralized-identity/veramo",
+  "docknetwork/sdk",
+  "hyperledger/aries-cloudagent-python",
+  "hyperledger/aries-framework-go",
+  "hyperledger/indy-sdk",
+  "hyperledger/indy-vdr",
+  "sphereon-opensource/ssi-sdk"
+ ],
+ "best_broad": 3,
+ "best_strict": 3
+}

@@ -3,6 +3,6 @@
   "algorithm": "HMAC-SHA256",
   "key_id": "9dacafbe82fd09c5c7163c776079cbf198240c2d783a6fbb0f785181c728bbc7",
   "signed": "identity+manifest+lifecycle",
-  "signature": "3/LJaR/dINKlmrnXulBb91CUYXdp8RFpyAjWR1oJftM=",
+  "signature": "dChtjiFgiJthq3h63e2TtPnAiN9L3OuXJ2MSpVI5B1k=",
   "created_at": "2026-11-15T00:00:00Z"
 }

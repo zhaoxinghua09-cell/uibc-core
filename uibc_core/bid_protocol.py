@@ -759,6 +759,172 @@ def resolve_service(endpoint: str, did: str, service_id: str,
     return service
 
 
+# ------------------------------------------------------- §4.2.4 trusted resolution
+@dataclass
+class TrustedResolution:
+    """§4.2.4 answer, with the server's claim kept separate from what we checked.
+
+    The protocol says trusted resolution verifies "the public key and signature
+    content" of the document so that every resolver in the chain is trustworthy.
+    A resolver that only forwards `data.verify` would be trusting the very party
+    it is supposed to check - so this object carries three independent bits:
+
+      server_verify   what the resolver asserted (a Bool literal, not "true")
+      signature_ok    our own re-verification of the document's §5 proof
+      delegate_state  "absent" / "verified" / "invalid" / "unchecked"
+
+    `trusted` needs the server's assertion AND our own signature check.
+    `fully_trusted` additionally needs the delegateSign attestation resolved -
+    and when the caller supplies no way to fetch the signer's key, the state is
+    "unchecked" rather than a guessed yes.
+    """
+
+    did: str
+    document: BIDDocument
+    server_verify: bool
+    signature_ok: Optional[bool]
+    delegate_state: str
+    delegate_signer: Optional[str] = None
+    reason: str = ""
+
+    @property
+    def trusted(self) -> bool:
+        return bool(self.server_verify) and self.signature_ok is True and self.delegate_state != "invalid"
+
+    @property
+    def fully_trusted(self) -> bool:
+        return self.trusted and self.delegate_state in ("absent", "verified")
+
+
+def delegate_signing_bytes(doc: Any) -> bytes:
+    """The bytes `extension.delegateSign.signatureValue` signs: the `publicKey` field.
+
+    §4.2.1 says the attestation is "第三方对publicKey的签名" and nothing about
+    ordering; §5.2 already fixes ordering for everything signed in this protocol,
+    so the array is canonicalized the same way. A signer that used another encoding
+    will simply fail to verify here - which is the honest outcome, not a fallback.
+    """
+    if not isinstance(doc, dict) or "publicKey" not in doc:
+        raise BIDDocumentError("delegateSign needs a document with a publicKey field")
+    return canonicalize(doc["publicKey"])
+
+
+def verify_delegate_sign(doc: Any, signer_public_key_hex: str) -> Tuple[bool, str]:
+    """Check `extension.delegateSign` against the signer's key. Never raises on a bad sig."""
+    if not isinstance(doc, dict):
+        raise BIDDocumentError("document is not an object")
+    ext = doc.get("extension")
+    ds = ext.get("delegateSign") if isinstance(ext, dict) else None
+    if not isinstance(ds, dict):
+        raise BIDDocumentError("no extension.delegateSign to verify")
+    signer = ds.get("signer")
+    if not isinstance(signer, str) or "#" not in signer or not signer.startswith("did:bid:"):
+        raise BIDDocumentError("delegateSign.signer must be a BID key id, got %r" % (signer,))
+    material, prefix = strip_key_prefix(signer_public_key_hex)
+    if len(material) != 32:
+        return False, "delegate signer key is %d bytes after a %r prefix; only Ed25519 is verifiable here" % (
+            len(material), prefix)
+    try:
+        sig = base58_decode(ds.get("signatureValue") or "")
+    except BIDDocumentError as exc:
+        return False, str(exc)
+    if len(sig) != 64:
+        return False, "delegateSign.signatureValue decodes to %d bytes, expected 64" % (len(sig),)
+    if ed_verify(material, delegate_signing_bytes(doc), sig):
+        return True, "ok"
+    return False, "delegateSign does not verify over the JCS form of publicKey"
+
+
+def resolve_bid_trusted(endpoint: str, did: str, fetcher: Optional[Callable[..., Any]] = None,
+                        delegate_key_resolver: Optional[Callable[[str], str]] = None,
+                        timeout: int = 10, retries: int = 2) -> TrustedResolution:
+    """One §4.2.4 read: `GET {url}/{bid}?verify=true`, then check the answer ourselves.
+
+    `delegate_key_resolver(signer_id) -> publicKeyHex` is how a caller supplies the
+    attestation signer's key (typically by resolving the signer's own BID). Without
+    it the delegate attestation is reported "unchecked" - visibly, not silently.
+    """
+    fetcher = fetcher or default_fetcher
+    url = "%s/%s?verify=true" % (endpoint.rstrip("/"), did)
+
+    attempt = 0
+    while True:
+        try:
+            payload = fetcher(url, timeout=timeout)
+        except Exception as exc:
+            if attempt >= retries:
+                raise BIDResponseError(7, str(exc), did) from None
+            attempt += 1
+            continue
+        try:
+            server_verify, doc = _trusted_envelope(payload, did)
+            break
+        except BIDResponseError as exc:
+            if exc.retryable and attempt < retries:
+                attempt += 1
+                continue
+            raise
+
+    parsed = parse_bid_document(doc, did)
+    try:
+        signature_ok, sig_reason = verify_bid_document(doc, did)
+    except BIDDocumentError as exc:  # no proof at all is an answer, not a crash
+        signature_ok, sig_reason = False, str(exc)
+
+    state, signer, delegate_reason = "absent", None, ""
+    ds = parsed.extension.get("delegateSign") if isinstance(parsed.extension, dict) else None
+    if ds is not None:
+        if not isinstance(ds, dict):
+            state, delegate_reason = "invalid", "extension.delegateSign is not an object"
+        else:
+            signer = ds.get("signer")
+            if delegate_key_resolver is None:
+                state = "unchecked"
+                delegate_reason = ("delegateSign present but no delegate_key_resolver was supplied; "
+                                   "the attestation is NOT verified")
+            else:
+                if not isinstance(signer, str) or "#" not in signer:
+                    state, delegate_reason = "invalid", "delegateSign.signer must be a BID key id"
+                elif not isinstance(ds.get("signatureValue"), str) or not ds.get("signatureValue"):
+                    state, delegate_reason = "invalid", "delegateSign.signatureValue missing"
+                else:
+                    try:
+                        key_hex = delegate_key_resolver(signer)
+                        ok, delegate_reason = verify_delegate_sign(doc, key_hex)
+                        state = "verified" if ok else "invalid"
+                    except Exception as exc:  # signer unresolvable is not a forged signature
+                        state = "unchecked"
+                        delegate_reason = "delegate signer %r could not be resolved: %s" % (signer, exc)
+
+    reason = sig_reason
+    if signature_ok and delegate_reason:
+        reason = delegate_reason
+    if not server_verify:
+        reason = "resolver returned verify=%r; §4.2.4 requires the literal true" % (server_verify,)
+    return TrustedResolution(did=did, document=parsed, server_verify=server_verify,
+                             signature_ok=signature_ok, delegate_state=state,
+                             delegate_signer=signer if isinstance(signer, str) else None,
+                             reason=reason)
+
+
+def _trusted_envelope(payload: Any, did: str) -> Tuple[bool, Dict[str, Any]]:
+    """`data.verify` must be the Bool true; the document is the rest of §4.2.1."""
+    doc = parse_bid_envelope(payload, did)
+    data = payload.get("data") if isinstance(payload, dict) else None
+    if isinstance(data, dict) and "verify" in data:
+        raw = data["verify"]
+    elif "verify" in doc:
+        raw = doc["verify"]
+        doc = {k: v for k, v in doc.items() if k != "verify"}
+    else:
+        raise BIDDocumentError("%s: trusted answer carries no data.verify field" % (did,))
+    if raw is True:
+        return True, doc
+    if isinstance(raw, bool):
+        return False, doc
+    raise BIDDocumentError("%s: data.verify must be a Bool, got %r" % (did, raw))
+
+
 def refuse_binary_resolution(did: str) -> None:
     """§4.3 is not implemented here; say so with the protocol's own code 5."""
     raise BIDResponseError(5, "binary resolution (§4.3) is not implemented in uibc-core", did)

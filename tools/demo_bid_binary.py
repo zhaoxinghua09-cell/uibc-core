@@ -125,10 +125,23 @@ def main():
     print("\n6) 宽度是硬校验：长度不符就 raise，不读成错数")
     raised = None
     try:
-        BB.decode_document([BB.Unit(0x3200, b"\x00\x00\x00\x05")], integer_widths={"long": 8})
+        BB.decode_document([BB.Unit(0x3000, BB.build_unit(0x3200, b"\x00\x00\x00\x05"))],
+                           integer_widths={"long": 8})
     except ValueError as exc:
         raised = str(exc)
     check("wrong width raises", bool(raised), (raised or "no raise")[:70])
+
+    print("\n6b) 字段必须坐在它该在的容器里：把 publicKey 改名成文档包装层会被拒")
+    try:
+        BB.decode_document([BB.Unit(0x2100, BB.build_unit(0x2111, b"did:bid:efX#key-1"))])
+        moved = None
+    except ValueError as exc:
+        moved = str(exc)
+    check("a leaf in the wrong container raises", bool(moved), (moved or "no raise")[:70])
+    lenient = BB.decode_document([BB.Unit(0x2100, BB.build_unit(0x2111, b"did:bid:efX#key-1"))],
+                                 strict_placement=False)
+    check("lenient mode records it instead of raising", "publicKey.id" in lenient.misplaced,
+          lenient.misplaced.get("publicKey.id", "")[:70])
 
     print("\n7) 敌意输入：500 组随机字节，只允许 ValueError")
     rng = random.Random(2026)
@@ -142,6 +155,20 @@ def main():
         except Exception as exc:          # noqa: BLE001 - the point is the type
             other.append(type(exc).__name__)
     check("random bytes only fail as ValueError", not other, "other=%r" % (sorted(set(other))[:4],))
+
+    print("\n6c) 逐位翻转：每翻一位，结构的反应只有三种")
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import mutate_bid_binary as MUT
+    res = MUT.probe(MUT.sample_message())
+    check("every bit is classified once",
+          res["rejected"] + res["changed"] + len(res["blind"]) == res["total"],
+          "%d bits" % res["total"])
+    check("the dead bits are only the reserved ones",
+          set(res["blind_fields"]) <= {"flag", "unUsed"},
+          "blind=%d in bytes 2/3" % len(res["blind"]))
+    print("   rejected=%d changed=%d blind=%d (%.1f%%)"
+          % (res["rejected"], res["changed"], len(res["blind"]),
+             100.0 * len(res["blind"]) / res["total"]))
 
     print("\n8) 假设登记表（每条都有缺口与处置，不是散文）")
     for name, item in BB.ASSUMPTIONS.items():

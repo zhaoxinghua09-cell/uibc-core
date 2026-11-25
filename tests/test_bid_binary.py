@@ -100,7 +100,7 @@ def _doc_units():
             BB.build_unit(0x2130, BB.build_unit(0x2131, b"#svc") +
                                   BB.build_unit(0x2132, b"DIDSubResolver") +
                                   BB.build_unit(0x2136, b"https://sub.example")) +
-            BB.build_unit(0x3200, struct.pack(">I", 86400)))
+            BB.build_unit(0x3000, BB.build_unit(0x3200, struct.pack(">I", 86400))))
 
 
 def test_document_answer_decodes_into_the_json_shape():
@@ -118,7 +118,7 @@ def test_document_answer_decodes_into_the_json_shape():
 
 
 def test_int_fields_are_deferred_with_their_raw_bytes_not_silently_decoded():
-    units = BB.parse_units(BB.build_unit(0x3400, b"\x00\x00\x00\x69"))
+    units = BB.parse_units(BB.build_unit(0x3000, BB.build_unit(0x3400, b"\x00\x00\x00\x69")))
     doc = BB.decode_document(units)
     assert "extension.type" in doc.deferred
     assert "00000069" in doc.deferred["extension.type"]

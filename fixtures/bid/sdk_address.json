@@ -1,0 +1,11 @@
+{
+  "_note": "Output of the official SDK, recorded verbatim. Not hand-written: tools/bid_sdk_address.mjs prints exactly these two fields.",
+  "sdk": "bid-sdk-nodejs",
+  "sdk_version": "1.0.1",
+  "sdk_publisher": "Caict (星火·链网)",
+  "recorded_on": "2026-11-25",
+  "derivation_script": "tools/bid_sdk_address.mjs",
+  "seed_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+  "encPublicKey": "b0656603a107bff3ce10be1d70dd18e74bc09967e4d6309ba50d5f1ddc8664125531b8",
+  "address": "did:bid:ef23dCHgV7h6RiXN2QrPcPMXmFgZtSG3d"
+}

@@ -122,7 +122,14 @@ function main(argv) {
   }
 
   let raw = Buffer.from(key.publicKeyHex || "", "hex");
-  if (raw.length === 33 && raw[0] === 0xb0) raw = raw.subarray(1); // BIF algorithm prefix
+  // BIF key prefixes, widest first: the official SDK emits b0 65 66 || key (the
+  // protocol's own §5.4.1 example shows the same), and 0xb0 alone is the short form.
+  for (const prefix of [Buffer.from("b06566", "hex"), Buffer.from("b0", "hex")]) {
+    if (raw.length >= 32 + prefix.length && raw.subarray(0, prefix.length).equals(prefix)) {
+      raw = raw.subarray(prefix.length);
+      break;
+    }
+  }
   if (raw.length !== 32) {
     console.error(`only 32-byte Ed25519 keys are checkable here, got ${raw.length}`);
     return 1;

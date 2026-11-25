@@ -18,7 +18,10 @@ sys.path.insert(0, str(REPO))
 from uibc_core import bid_protocol as B
 
 SEED = bytes(range(32))                      # 00 01 02 ... 1f
-KEY_HEX = "b0" + B.ed_public_key(SEED).hex()  # BIF-style 0xb0 prefix
+# The official SDK's own encoding (bid-sdk-nodejs 1.0.1): b0 65 66 then 32 bytes.
+# That is what real documents carry, so the fixture uses it rather than a
+# convenient shorter prefix - see fixtures/bid/sdk_address.json.
+KEY_HEX = "b06566" + B.ed_public_key(SEED).hex()
 DID = "did:bid:ef18F9AVK4SQLZPRrPkrVWwp9kbpdXHx"
 KEY_ID = DID + "#key-1"
 

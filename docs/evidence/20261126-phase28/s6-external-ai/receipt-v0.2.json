@@ -1,0 +1,331 @@
+{
+  "schema": "uibc-external-ai-review-receipt/0.2",
+  "subject": "UIBC Phase 28 — 隐私保护验证与选择性披露（C1–C15 断言集）",
+  "reviewed_at": "2026-11-26",
+  "channel": {
+    "vendor": "SiliconFlow（硅基流动）",
+    "endpoint": "https://api.siliconflow.cn/v1/chat/completions",
+    "model": "deepseek-ai/DeepSeek-V3",
+    "temperature": 0.1,
+    "operator_same_as_subject": true,
+    "independent_of_operator": false,
+    "note": "调用方与被评审方同为一人（Steven/Zhao Xinghua）；该模型不具备联网、不具备 GitHub 读取能力，全部输入由被评审方提供，故不构成独立评审。"
+  },
+  "claim_set": {
+    "count": 15,
+    "ids": [
+      "C1",
+      "C2",
+      "C3",
+      "C4",
+      "C5",
+      "C6",
+      "C7",
+      "C8",
+      "C9",
+      "C10",
+      "C11",
+      "C12",
+      "C13",
+      "C14",
+      "C15"
+    ]
+  },
+  "runs": [
+    {
+      "run": 1,
+      "input_form": "断言 + 一手源 URL（不含原文）",
+      "verdict_counts": {
+        "可核": 5,
+        "部分": 1,
+        "不可核": 9
+      },
+      "overall": "DEFECTS(10)",
+      "top_defect": "C2",
+      "resp_sha256": "2815198f6d862984f5a35a61e14f674d25134fb6404e8435579e019e3a69f96a",
+      "prompt_sha256": "806f04aaf7a36ffcadc90cf600bbeae87cfb45a6654844d4b741859b55d0d01b",
+      "tokens": {
+        "in": 1342,
+        "out": 951
+      },
+      "elapsed_ms": 31700,
+      "quote_check": {
+        "method": "none",
+        "quote_in_material": null
+      },
+      "failure_mode": "F1 给-URL-即判-可核（把「有链接」当成「核过了」）",
+      "usable_as_evidence": false
+    },
+    {
+      "run": 2,
+      "input_form": "断言 + 一手源 URL（不含原文，system 已明示「无原文不得判可核」）",
+      "verdict_counts": {
+        "可核": 5,
+        "部分": 1,
+        "不可核": 9
+      },
+      "overall": "DEFECTS(9)",
+      "top_defect": "C2",
+      "resp_sha256": "7b59e3855e3def69a2483c50ac2e8ce215b9515d209bb8e34603a1129b375ed8",
+      "tokens": {
+        "in": 1393,
+        "out": 1019
+      },
+      "elapsed_ms": 28700,
+      "note": "C1 note 写「模块文件存在」、C11 写「PR 已合入主线，CI 无失败」，而当时未提供任何文件内容或 CI 数据 → 幻觉。",
+      "failure_mode": "F1（同 run1，提示明示后仍复发）",
+      "usable_as_evidence": false
+    },
+    {
+      "run": 3,
+      "run_id": "S6b",
+      "input_form": "断言 + 公开仓 11 个文件全文 + report §29.4 节选嵌入 prompt（42,769 字符）",
+      "prompt_sha256": "04b4a731050aafa955b407995dd677280afa5169e293f1b8f72c40143b00ea16",
+      "prompt_sha256_with_system": "e8c90aa92daee96b6c81d5a0cf3901bfca6429b7aeb3c9957d7ac70a509b6e71",
+      "resp_sha256": "d6d0cc6f8fd409998eca22de19fcd015e69e1adfb21c406d7f003b612c626c4a",
+      "verdict_counts": {
+        "可核": 13,
+        "不可核": 2
+      },
+      "overall": "DEFECTS(2)",
+      "top_defect": "C2",
+      "uncovered": [
+        "C2",
+        "C10"
+      ],
+      "tokens": {
+        "in": 17041,
+        "out": 868
+      },
+      "elapsed_ms": 28826,
+      "quote_check": {
+        "method": "substring over whole prompt",
+        "quote_in_prompt": 13,
+        "quote_not_in_prompt": 0,
+        "method_v2": "substring restricted to 【材料】 segment",
+        "quote_in_material": 1,
+        "quote_not_in_material": 12,
+        "conclusion": "所谓 13 条「可核」中 12 条引用的是 prompt 中的断言原句，不是材料原文 → 复述即判定"
+      },
+      "failure_mode": "F2 复述断言当引用（quote 落在断言区而非材料区）",
+      "usable_as_evidence": false
+    },
+    {
+      "run": 4,
+      "run_id": "S6c",
+      "input_form": "同上 + 硬规则（quote 必须逐字来自【材料】、≥20 字符、不得雷同断言、会被脚本核对）",
+      "resp_sha256": "1d21cbdc6dc815fba36dd058134ddd3d97ca77110ac6ea85ba70750ac1893016",
+      "tokens": {
+        "in": 17135,
+        "out": 4096
+      },
+      "elapsed_ms": 126577,
+      "outcome": "输出被 max_tokens 截断（JSON 未闭合）",
+      "partial_observation": "截断前的 C1/C3 条目为 dual_operator_witness.json / verify_all.json 的真实原文 → 硬规则生效，模型开始逐字引用",
+      "usable_as_evidence": false
+    },
+    {
+      "run": 5,
+      "run_id": "S6d",
+      "input_form": "同 run4，但 quote 限 20–60 字符片段，防整文件倾倒",
+      "prompt_sha256_note": "prompt 42,980 字符",
+      "resp_sha256": "8f02c14c77b8e4d8252b02da6dcffffba821ce7723a294a98431c4914cc19257",
+      "verdict_counts": {
+        "可核": 14,
+        "不可核": 1
+      },
+      "overall": "DEFECTS(1)",
+      "top_defect": "C2",
+      "uncovered": [
+        "C2"
+      ],
+      "tokens": {
+        "in": 17135,
+        "out": 972
+      },
+      "elapsed_ms": 32672,
+      "quote_check": {
+        "method": "归一化（去引号/反引号、全半角统一、空白折叠）后 substring over 【材料】",
+        "quote_in_material": 12,
+        "quote_not_in_material": 2,
+        "not_in_material_ids": [
+          "C5",
+          "C15"
+        ],
+        "weak_support_ids": [
+          "C10"
+        ],
+        "no_quote_ids": [
+          "C2"
+        ],
+        "conclusion": "14 条「可核」中 12 条 quote 真落在材料段；C5/C15 仍为复述断言（材料段未命中）；C10 quote 为真但材料并不支持「外部评审独立」这一断言；C2 判不可核且未给 quote"
+      },
+      "failure_mode": "F2 残留（2 条）+ F3 引用真但支撑不足（1 条）+ F4 判定漂移（不可核由 2 降到 1）",
+      "usable_as_evidence": "conditional"
+    }
+  ],
+  "verdict": {
+    "e1_judgement_quality": "部分过（PARTIAL）",
+    "channel_usable": true,
+    "independent_review": false,
+    "why": [
+      "通道、时延、结构化回包均合格（5 轮全部 200，28.8–126.6 s）；",
+      "判定质量在无原文形态下不合格（F1，两次同错）；给原文后先出现 F2（抄断言），加硬规则 + 机检后提升到 12/14 真引用，仍留 2 条复述、1 条支撑不足、1 条漏判；",
+      "调用方与被评审方同一人、模型无联网、输入由被评审方提供 → 结构上不可能独立，不能替代 S11 独立评审。"
+    ],
+    "position_in_gates": {
+      "S6": "部分过（外部辅助复核可用，需人工筛引用）",
+      "E1/独立评审": "REFUSE（vendor 不满足独立性，判定质量未达「无人复核即可采」）",
+      "S11": "仍待 Muse / 真人签字"
+    }
+  },
+  "reproducible_cmd": [
+    "pwsh build_prompt2.ps1   # 重建 s6b_prompt.md（42,769 chars，sha256 04b4a731…）",
+    "POST https://api.siliconflow.cn/v1/chat/completions  model=deepseek-ai/DeepSeek-V3 temperature=0.1 max_tokens=4096",
+    "quote 机检：把 quote 归一化后限定在 prompt 的【材料】段做 substring，命中率即判定质量指标"
+  ],
+  "artifacts": {
+    "prompts": [
+      "s6b_prompt.md",
+      "s6c_prompt.md",
+      "s6d_prompt.md"
+    ],
+    "responses": [
+      "s6b_response.txt",
+      "s6c_response.txt",
+      "s6d_response.txt"
+    ],
+    "earlier_runs": "new-chat-67/（s6_user_prompt.md, s6_response_raw.txt, s6_response_run2.txt）"
+  },
+  "claim_verdicts": [
+    {
+      "id": "C1",
+      "verdict": "可核",
+      "quote": "\"tlog.py (v0.8 draft) - RFC 6962 Merkle tree with consistency proofs.\"",
+      "quote_in_material": true,
+      "note": "",
+      "run": 5
+    },
+    {
+      "id": "C2",
+      "verdict": "不可核",
+      "quote": "",
+      "quote_in_material": false,
+      "note": "材料未覆盖",
+      "run": 5
+    },
+    {
+      "id": "C3",
+      "verdict": "可核",
+      "quote": "\"quorum_2of3_with_two_signers\": true",
+      "quote_in_material": true,
+      "note": "",
+      "run": 5
+    },
+    {
+      "id": "C4",
+      "verdict": "可核",
+      "quote": "\"scope\": \"隐私保护验证与选择性披露：主流格式/基础设施与 Agent 生态（28 项）\"",
+      "quote_in_material": true,
+      "note": "",
+      "run": 5
+    },
+    {
+      "id": "C5",
+      "verdict": "可核",
+      "quote": "\"score\": 96, \"max\": 100, \"why_not_full\": [\"无外部独立评审（唯一实质缺口）\"]",
+      "quote_in_material": false,
+      "note": "",
+      "run": 5
+    },
+    {
+      "id": "C6",
+      "verdict": "可核",
+      "quote": "\"### 29.4 外部 AI 实跑（S6/E1）：通道通了，回执判 REFUSE（2026-11-26）\"",
+      "quote_in_material": true,
+      "note": "",
+      "run": 5
+    },
+    {
+      "id": "C7",
+      "verdict": "可核",
+      "quote": "\"外人复跑包（23 条目 / 52,574 B，含 README 9 步与 checksums）\"",
+      "quote_in_material": true,
+      "note": "",
+      "run": 5
+    },
+    {
+      "id": "C8",
+      "verdict": "可核",
+      "quote": "\"与 SD-JWT VC / ISO mDL / SCITT 的关系是**语义对齐**：对上 5 处，**字节可互认 0 处**\"",
+      "quote_in_material": true,
+      "note": "",
+      "run": 5
+    },
+    {
+      "id": "C9",
+      "verdict": "可核",
+      "quote": "\"两个运营方跑在本机同一台机器上，是模拟，不是接入第三方\"",
+      "quote_in_material": true,
+      "note": "",
+      "run": 5
+    },
+    {
+      "id": "C10",
+      "verdict": "可核",
+      "quote": "\"公司机 `D:\\标准\\新建文本文档.txt` 有硅基流动 key\"",
+      "quote_in_material": true,
+      "note": "",
+      "run": 5
+    },
+    {
+      "id": "C11",
+      "verdict": "可核",
+      "quote": "\"PR #503 已于 2026-11-26 合入 `main`\"",
+      "quote_in_material": true,
+      "note": "",
+      "run": 5
+    },
+    {
+      "id": "C12",
+      "verdict": "可核",
+      "quote": "\"bytes\": 50239",
+      "quote_in_material": true,
+      "note": "",
+      "run": 5
+    },
+    {
+      "id": "C13",
+      "verdict": "可核",
+      "quote": "\"size: int = 1024\"",
+      "quote_in_material": true,
+      "note": "",
+      "run": 5
+    },
+    {
+      "id": "C14",
+      "verdict": "可核",
+      "quote": "\"a witness may not be the signer itself\"",
+      "quote_in_material": true,
+      "note": "",
+      "run": 5
+    },
+    {
+      "id": "C15",
+      "verdict": "可核",
+      "quote": "\"全文不主张'标准采纳 / 合规 / 兼容 / 全面领先'\"",
+      "quote_in_material": false,
+      "note": "",
+      "run": 5
+    }
+  ],
+  "claim_verdicts_note": "第 5 轮（S6d）逐条判定；quote_in_material 为归一化后限定【材料】段的机检结果",
+  "adversary": {
+    "q1": "C2+台子 15 PASS / 基线 158 无公开可核源",
+    "q2": "C5+自评 96/100 无外部独立评审",
+    "q3": "C3+六类伪造全拒只在私有 PoC"
+  },
+  "public_note": [
+    "引用片段按原文保留（含作者本机的目录名，与 report.md 已公开内容同源）；完整回包原文与 sha256 见各轮记录。"
+  ]
+}

@@ -64,15 +64,20 @@ described in [RFC2119] and [RFC8174].
   verification procedure; it is a local working name, not a registered
   vocabulary term, and it expands to nothing.
 - **Outcome**: `PASS`, `FAIL`, or `INCONCLUSIVE`, per check.
-- **Head**: the signed pair (root, tree size) of Section 16. A head is not a
-  package and does not carry evidence.
+- **Head**: the signed statement of Section 16 over the root, the tree size, the
+  signer's `role` (`owner` or `witness`, and the two roles must use distinct
+  keys), and optionally the verifier identity `vds`. A head is not a package
+  and does not carry evidence; the root is one of its members, not the whole.
 - **Tree size**: the number of leaves a head commits to; monotone non-decreasing
   across successive heads (Section 16).
 - **Witness**: an independent key holder that co-signs a head; a witness is
   trusted only as far as the reader's policy says, and the co-signature demo
   uses synthetic keys.
-- **Vds**: the verifier's own identity (a hash of its key), carried inside a
-  signed head so a reader can tell which verifier saw which size.
+- **Vds**: a verifier identity — the key-id hash of the verifier's key — carried
+  inside a signed statement so a reader can tell which verifier saw which size.
+  It names a verifier, never an algorithm; "a `vds` the reader does not
+  recognise" (Section 17.2) means "a verifier outside the reader's policy set",
+  and scheme support is a separate question, decided by `resolver`.
 - **Checkpoint**: the stored head inside a package (`S8`), recomputed and
   compared; it is not an external anchor.
 - **Owner**: the holder of the seal key named in `identity.json`.
@@ -81,6 +86,15 @@ described in [RFC2119] and [RFC8174].
 - **Receipt**: an object from an external log or authority that a verifier can
   check against that system's own rules; a receipt that verifies but covers
   another head is evidence to the contrary (Section 17.2).
+- **Generation**: one sealed, headed state of a package. A pending package that
+  later gains a receipt produces a second generation; the two are separate
+  packages with separate roots (Section 8.2).
+- **Per-axis outcome**: the verdict of one axis (structure, integrity, attribution,
+  lifecycle) over the whole corpus, as opposed to one check's outcome.
+- **Actor allow-list**: the optional list of principal identifiers a verifier
+  supplies to S3; a string array, compared exactly, no wildcards or patterns.
+- **AC2 / AC4 / AC5**: the anchor-conformance fixtures named in Section 17.4 —
+  receipt covers this head; receipt covers another head; no receipt at all.
 - **Actor**: the identifier recorded in a lifecycle event's `actor` field. It is
   a name the producer asserts. S3 checks that the field is populated and well
   formed, and checks membership only when the verifier was supplied an actor
@@ -105,9 +119,15 @@ files MUST be reachable through an index entry; an unreferenced file is not
 evidence.
 
 `evidence/anchors.json` is optional and sits inside `evidence/`, not at the
-package root: it is the producer's declared anchor claim, and it is part of the
-bytes the seal and the head cover. Sections 8.4 and 17.1 state the one thing an
-implementation must never do with it.
+package root: it is the producer's declared anchor claim. It is one of the
+structural members of `evidence/` (with `merkle.json`, `chain.json`,
+`policies.json`), which are exempt from the index rule immediately above, so
+**its bytes are not committed by the root**. That is stated here because two
+later sections depend on it: Section 8.4 forbids editing it after sealing,
+Section 17.1 reads it, and Section 10 lists what follows from it not being
+committed. Calling it "covered by the seal" would be false: the seal covers
+`identity.json`, `manifest.json` and `lifecycle.json`, and none of them holds a
+digest of this file.
 
 ## 4. Evidence Root
 
@@ -179,6 +199,17 @@ implementation bug.
 A verifier performs the checks below and reports one outcome per check. A
 single `FAIL` makes the verdict `FAIL`; otherwise any `INCONCLUSIVE` makes it
 `INCONCLUSIVE`; only all-`PASS` yields `PASS`.
+
+Two invocation modes differ only in what the reader supplies out of band:
+
+- **open** (default): no key, no head. A seal that is absent or unverifiable
+  leaves S6 `INCONCLUSIVE`; the package can still be judged on its own bytes, and
+  nothing in it is attributable to a named key.
+- **strict**: the reader supplies the owner key (and a head where one is
+  expected). A missing or non-verifying seal is `FAIL`, because in this mode the
+  question asked is "is this the package that key signed", and an absent seal
+  answers it in the negative. Strict also fails uncommitted files under
+  `evidence/` (S1), which open mode reports as a note.
 
 | ID | Check | Notes |
 |---|---|---|
@@ -296,7 +327,10 @@ current root — otherwise a stale revocation silently applies to new content.
 ### 8.1 What crosses the wire
 
 Only the root. No evidence, no inputs, no outputs, no tool names. A root is a
-commitment, not a leak.
+commitment, not a content leak: it reveals nothing about bytes nobody can guess.
+It does make guesses checkable — anyone holding a candidate package can confirm
+whether it is the one anchored — which is why Section 10 lists correlation as
+a security consideration rather than claiming the anchor hides anything.
 
 This sentence is about the *anchor request*. The head of Section 16 is a
 different object: it carries the root plus the tree size, is signed, and travels
@@ -338,10 +372,13 @@ the package has been sealed. This failure is silent and total; it is the single
 most likely implementation error in this section.
 
 The rule is about *when*, not *where*: `evidence/anchors.json` has existed since
-before this section and is a producer declaration, covered by the seal and the
-head like every other byte. A verifier that writes a proof into it after sealing
-breaks S6 and S8 immediately — which is the behaviour the rule asks for, not an
-exception to it.
+before this section and is a producer declaration, and — as Section 3 states —
+its bytes are not committed by the root. A receipt added after sealing is
+therefore **not** caught by S6 or S8. The rule is a producer-side prohibition
+precisely because the format cannot enforce it; what a verifier can do is check
+the *claim* against the head and the receipt chain (Section 17), so an edited
+file either contradicts the head (FAIL) or says nothing the reader must believe.
+This is a limitation of the format, not a property of the seal.
 
 ## 9. Conformance and Interoperability
 
@@ -369,14 +406,10 @@ Interoperability with AER-1 receipts is defined by an explicit mapping
 (Appendix A), not by similarity of intent. The reference implementation
 demonstrates both directions: emitting AER-1 receipts that the AER-1
 publisher's own runner accepts, and judging external AER-1 receipts
-(21 valid accepted, 36 invalid rejected). It also rejected 28 documents from
-two unrelated protocols without exception.
-
-That last number is a rejection rate, and by Section 5.1 a rejection rate alone
-is not evidence of correctness: an implementation that rejects everything scores
-perfectly on it. It is reported here because the denominator is known and the
-accept side (21 valid receipts) is the control, not because it proves anything
-about the documents' quality.
+with 21 valid accepted and 36 invalid rejected. The accept side is the control: by
+Section 5.1 a rejection count alone proves nothing, and the 28 documents from two
+unrelated protocols that were all rejected are therefore not quoted as interop
+evidence — they appear only in the corpus report, where the denominator is stated.
 
 ## 10. Security Considerations
 
@@ -392,6 +425,12 @@ about the documents' quality.
   Confusing the two is the usual overclaim.
 - **Threat model boundary**: an adversary who controls the package *and* the
   backend *and* the key has won; nothing here applies.
+- **The anchor claim is not committed.** `evidence/anchors.json` is a structural
+  member outside the root (Section 3), so a receipt written into it after sealing
+  is invisible to S6 and S8, and two readers can hold packages that differ only
+  in that file and verify both. The verifier's defence is to check the claim
+  against the head (Section 17); a reader who needs the claim itself committed
+  must ask for the receipt out of band.
 - **Metadata relabelling.** The root covers content hashes, so a package holder
   can change paths, `media_type` or `action_type` and re-derive the index digest
   while the anchored root stays valid (Section 4.1). The seal and the head are
@@ -414,9 +453,13 @@ about the documents' quality.
 - **Hash and signature agility.** SHA-256 and Ed25519 appear as *the* primitives.
   A transition needs versioned algorithm identifiers, which this document does
   not define.
+- **Witness independence.** Two distinct keys are not two distinct parties; a
+  reader who counts signatures instead of checking who holds them is trusting
+  one operator twice. The co-signature demo uses synthetic keys, and
+  Implementation Status says so.
 - **Seal stripping.** Removing the seal turns PASS into INCONCLUSIVE rather than
   FAIL; a reader who treats "not FAIL" as "acceptable" has inverted the outcome
-  set. `strict` mode exists (Section 6) for readers who want the seal required.
+  set. `strict` mode (Section 5) exists for readers who require the seal.
 
 ## 11. IANA Considerations
 
@@ -615,10 +658,10 @@ MMR receipts profile's requirement to reject a receipt whose VDS is unsupported.
 To keep that choice from erasing the distinction, the verifier now carries a
 report-level `unsupported` list naming the checks that failed this way: the
 verdict stays FAIL, but a reader can separate "could not check" from "checked and
-refused". This is the minimum other drafts already require of themselves
+refused". The two cited drafts answer the same question differently
 (`draft-gruszka-scitt-statement-identification-04` reports UNSUPPORTED as its own
-class; `draft-nestorov-scitt-p10-underdetermination-03` HALTs), and until this
-field existed no claim here could honestly be read as "cannot check".
+class, `draft-nestorov-scitt-p10-underdetermination-03` HALTs); this document
+reports both, which is what lets the sentence mean "cannot check" at all.
 
 ## Implementation Status
 

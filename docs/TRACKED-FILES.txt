@@ -1183,6 +1183,8 @@ docs/PUBLISHED-BASELINE.json
 docs/PUBLISHER-IDENTITY.md
 docs/RECEIPT-FORMAT.md
 docs/REFS-DIRECT.md
+docs/REGISTRY-CENSUS.json
+docs/REGISTRY-CENSUS.md
 docs/REKOR-INCLUSION-2026-11-21.md
 docs/RELEASE-0.4.0.md
 docs/RELEASE-DRY-RUN.md
@@ -2064,6 +2066,7 @@ tests/test_recheck.py
 tests/test_records_surface.py
 tests/test_refs_check.py
 tests/test_register_row.py
+tests/test_registry_census.py
 tests/test_registry_server.py
 tests/test_release_bytes_are_per_tag.py
 tests/test_release_chain_is_wired.py
@@ -2383,6 +2386,7 @@ tools/redteam_robustness.py
 tools/redteam_scale.py
 tools/redteam_suite.py
 tools/refs_check.py
+tools/registry_census.py
 tools/release_lab_bundle.py
 tools/release_status.py
 tools/render_bid_binary_layout.py

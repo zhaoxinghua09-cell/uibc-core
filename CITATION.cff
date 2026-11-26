@@ -28,6 +28,9 @@ version: "0.5.5"
 date-released: "2026-11-26"
 doi: "10.5281/zenodo.22821834"
 identifiers:
+  - type: doi
+    value: "10.5281/zenodo.24551514"
+    description: "This version, 0.5.5 (2026-11-26). The archive that a fresh download of the 0.5.5 release resolves to: source tree at commit 84efa39, the pinned conformance corpus, README and SHA256SUMS."
   - type: other
     value: "10.5281/zenodo.24375013"
     description: "Previous version 0.4.2 (2026-11-20). Predates the 40-repository competitor parity table and the same-scale recomputation; do not cite 0.5.5 material against it."

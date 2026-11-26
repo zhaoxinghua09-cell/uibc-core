@@ -59,10 +59,11 @@ class TestArchiveScope(unittest.TestCase):
 
     def test_the_cff_still_pins_the_archived_version(self):
         """Bumping the version here without a new archive would claim the DOI
-        covers checks it does not contain. It is bumped here, to 0.4.2, because
-        a new archive was actually published and measured."""
+        covers checks it does not contain. It is bumped here, to 0.5.5, because
+        a new archive was actually published and measured (2026-11-26)."""
         self.assertRegex(text_of(os.path.join(_REPO, "CITATION.cff")),
-                         r'version:\s*"0\.4\.2"')
+                         r'version:\s*"0\.5\.5"')
+        self.assertIn("10.5281/zenodo.24551514", text_of(os.path.join(_REPO, "CITATION.cff")))
         self.assertIn("10.5281/zenodo.24375013", text_of(os.path.join(_REPO, "CITATION.cff")))
         self.assertIn("10.5281/zenodo.22821835", text_of(os.path.join(_REPO, "CITATION.cff")))
 

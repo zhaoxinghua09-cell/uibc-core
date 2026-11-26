@@ -46,10 +46,11 @@ Where that leaves the trust question, honestly:
   proofs. Bitcoin has no witness quorum, but a node is the equivalent: its active
   chain is the most-work chain it knows. We expose that hook and refuse to
   pretend it ran.
-- **Better**: the reference client does the whole replay including ops from the
-  digest; our tool starts at the attestation's message and relies on
-  `tool/anchor_ots.py` to have replayed the ops. Those two steps are not yet
-  joined in one command.
+- **Joined now**: the reference client replays ops from the digest by itself;
+  our path used to start at the attestation's message in a second tool.
+  `tools/ots_full_verify.py` closes that seam - file -> proof -> header ->
+  segment, four byte comparisons, one verdict, and the unchecked list printed
+  with it.
 - **Left**: no competing-branch enumeration, no reorg risk model, no witness set.
   Each needs either a node or a social layer, and inventing a number for them
   would be exactly the dishonesty this whole anchor effort exists to avoid.

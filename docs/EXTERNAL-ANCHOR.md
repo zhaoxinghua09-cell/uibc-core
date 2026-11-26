@@ -205,6 +205,25 @@ receipt `docs/anchor-ots-block-977449.json`:
 What this buys and what it does not: the header bytes hash to the block hash, and
 the root inside those bytes is the attestation's message, so "the proof names a
 block that exists with that root" is now arithmetic rather than a sentence.
+
+**2026-11-26, one command for the whole chain.** Three tools were three stops
+on the same road, and a reader had to take on faith that their outputs joined.
+`python tools/ots_full_verify.py --file <head> --proof <proof>` now runs them and
+compares the seams byte by byte:
+
+| seam | comparison |
+|---|---|
+| file -> proof | the digest the proof commits to equals the file's sha256 (`bound`) |
+| proof -> header | the attestation's message equals the Merkle root inside the 80 header bytes |
+| header -> block | `sha256d(header)` equals the block hash two operators agreed on |
+| block -> segment | the segment starts one block above the attested height and links back to it |
+
+Verdict `FULL_CHAIN_OF_EVIDENCE_VERIFIED` only when all four hold; otherwise it
+stops at the seam that broke (`STOPPED_AT_PROOF` / `_HEADER` / `_CHAIN`). It runs
+offline against the two committed receipts unless `--refresh` is asked for, and
+it always prints what it did **not** check - starting with the global most-work
+question, which stays unanswered until a node is supplied.
+
 **2026-11-26, the segment above the block is walked, not assumed.** Depth alone
 is a number two servers told us. `--chain` walks *prev-hashes* from the tip they
 reported down to the attested block and checks every header it passes

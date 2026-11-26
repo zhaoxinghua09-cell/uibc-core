@@ -50,8 +50,11 @@ import time
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RECEIPT = os.path.join(HERE, "docs", "outsider-rerun-receipt.json")
 PAGE = os.path.join(HERE, "docs", "OUTSIDER-RERUN.md")
+MANIFEST = "docs/OUTSIDER-FILES.txt"
+# All four are written by this tool, so all four stay out of the digests: each of
+# them would otherwise hash a value that contains its own hash.
 GENERATED = {"docs/outsider-rerun-receipt.json", "docs/OUTSIDER-RERUN.md",
-             "docs/OUTSIDER-BOARD.html"}
+             "docs/OUTSIDER-BOARD.html", MANIFEST}
 
 IGNORE = (".git", "__pycache__", ".pytest_cache", ".mypy_cache", ".ruff_cache",
           "build", "*.egg-info",
@@ -371,8 +374,37 @@ def manifest_from_blobs(blobs):
     return {p: hashlib.sha256(b).hexdigest() for p, b in blobs.items() if p not in GENERATED}
 
 
+def serialise_manifest(manifest):
+    """One line per file, `sha256  path`, sorted. A moved file is one changed line."""
+    return "".join(f"{manifest[k]}  {k}\n" for k in sorted(manifest))
+
+
+def write_manifest(manifest):
+    """Write the manifest file and return the sha256 of its own bytes."""
+    data = serialise_manifest(manifest)
+    with open(os.path.join(HERE, MANIFEST.replace("/", os.sep)), "w",
+              encoding="utf-8", newline="\n") as f:
+        f.write(data)
+    return hashlib.sha256(data.encode("utf-8")).hexdigest()
+
+
+def read_manifest(root):
+    """(dict, sha256-of-the-file). A tampered manifest is caught by its own hash."""
+    path = os.path.join(root, MANIFEST.replace("/", os.sep))
+    if not os.path.exists(path):
+        return None, None
+    data = open(path, encoding="utf-8").read()
+    entries = {}
+    for line in data.splitlines():
+        if not line.strip():
+            continue
+        sha, rel = line.split("  ", 1)
+        entries[rel] = sha
+    return entries, hashlib.sha256(data.encode("utf-8")).hexdigest()
+
+
 def write_receipt(digest, files, results, content=None, content_files=None,
-                  content_lf=None, delivery=None, files_sha256=None):
+                  content_lf=None, delivery=None, files_manifest=None):
     receipt = {
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "tree_sha256": digest,
@@ -381,7 +413,11 @@ def write_receipt(digest, files, results, content=None, content_files=None,
         "content_files": content_files,
         "content_lf_sha256": content_lf,
         "delivery": delivery,
-        "files_sha256": files_sha256 or {},
+        "files_manifest": {
+            "path": MANIFEST,
+            "sha256": write_manifest(files_manifest) if files_manifest else None,
+            "entries": len(files_manifest or {}),
+        },
         "digest_excludes": sorted(GENERATED),
         "runner": {"python": platform.python_version(), "machine": platform.machine(),
                    "system": platform.system()},
@@ -492,8 +528,17 @@ def check():
             fails.append(f"step {s.get('step')} tail does not carry its marker {s['expect']!r}")
     if sorted(receipt.get("digest_excludes", [])) != sorted(GENERATED):
         fails.append("receipt excludes a different set of files than the checker")
-    manifest = receipt.get("files_sha256") or {}
+    mf = receipt.get("files_manifest") or {}
+    manifest, manifest_sha = read_manifest(HERE)
     drift = []
+    if mf and manifest is None:
+        fails.append(f"MANIFEST FILE: {MANIFEST} is missing; run --run")
+    elif mf and manifest_sha != mf.get("sha256"):
+        fails.append(f"MANIFEST FILE: {MANIFEST} was edited (sha {str(mf.get('sha256'))[:12]} "
+                     f"in the receipt, {str(manifest_sha)[:12]} on disk)")
+    elif mf and mf.get("entries") != len(manifest or {}):
+        fails.append(f"MANIFEST FILE: {MANIFEST} holds {len(manifest or {})} entries, "
+                     f"the receipt says {mf.get('entries')}")
     # Only when the strict answer is being judged: on a line-ending difference or
     # a mangled-name difference the digests already explain themselves, and listing
     # 83 "drifted" files there would be a true list answering the wrong question.
@@ -609,7 +654,7 @@ def main():
         rc = write_receipt(out["digest"], out["files"], out["results"],
                            content=out["content_digest"], content_files=out["content_files"],
                            content_lf=out["content_lf_digest"], delivery=out["delivery"],
-                           files_sha256=out.get("files_manifest") or file_manifest(HERE))
+                           files_manifest=out.get("files_manifest") or file_manifest(HERE))
     else:
         rc = check()
     if args.json:

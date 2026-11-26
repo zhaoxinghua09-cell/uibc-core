@@ -1,3 +1,10 @@
+## 未发布 — 2026-11-26（清单从收据里请出来：8 KB 的收据 + 一行一文件的账本）
+
+- **问题（自己上一轮留下的）**：上一轮把逐文件 sha256 塞进了 `docs/outsider-rerun-receipt.json`，收据从 8 KB 涨到 305 KB。功能对，但两件事变糟：一是只有机器愿意打开它，人翻不动；二是一个文件动了，diff 里显示的是一整行 300 KB 的 JSON 变红，看不出是哪一条。
+- **做法**：清单独立成 `docs/OUTSIDER-FILES.txt`，一行 `sha256  path`，按路径排序；收据里只留一个引用 `files_manifest: {path, sha256, entries}`。`--run` 两份一起写；`--check` 先验清单自身的 sha256 与条数（**清单被手改也会被抓**，`MANIFEST FILE: … was edited`），再逐文件比对点名 `DRIFT`。清单与收据、看板、生成页一起进摘要排除集（四件，测试里的断言跟着改）。
+- **实测**：收据 **2 097 B**、清单 **283 879 B**（2456 条）；`OUTSIDER OK: receipt matches this disk (2456 files, 30887a3b83bd, content f5e6e4af6dd1), 4 steps passed`；`INVENTORY OK (2460 paths, all present)`；`BOARD OK`；`tests/test_outsider_rerun.py + test_outsider_board.py` 22 passed / 1 skipped。
+- **边界**：拆开不改变任何一根轴（四件生成物照旧排在外面）；变化只在"人能读"和"git diff 认得出来"。断言 A37。
+
 ## 未发布 — 2026-11-26（收据能点名"是哪个文件动了"，不再只说"有字节动了"）
 
 - **问题**：三根摘要只能回答"动不动"，回答不了"哪个"。上一轮把成员的来源钉死之后，剩下的失败信息仍然是一句 `CONTENT: receipt describes tree … but this tree hashes to …`——对一个外人来说，这句话没有下一步；对我们自己也是：跑完整套 `pytest` 会重写 `tools/out/mutation_benchmark.json` 里的 `meta.generated_at_utc`，于是重封前后摘要一定变，可是报告里看不出是这个文件。

@@ -1,0 +1,70 @@
+name: AITB evaluation request
+description: "Ask for a read-only, re-runnable report card on one DID. You will get the card, the not-tested list, and the command to reproduce it."
+title: "[AITB] evaluate: "
+labels: ["aitb-evaluation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **What you get.** A report card with three gates: does the resolver answer and say which state
+        (`G1`), do the returned fields agree with each other and with the published ranges (`G2`), and did
+        the operator publicly acknowledge the identifier as theirs (`G3`). Every check names the exact
+        observation behind it, and the card carries a **Not tested** list.
+
+        **What you do not get.** No certification, no conformance verdict, no ranking, no VC verification
+        (the platform itself reports `vcVerificationStatus: SKIPPED`), and no opinion about whether the
+        agent is safe or good.
+
+        **Cost.** Free while it stays read-only and small. If your case needs a bespoke probe we will quote
+        first instead of half-doing it.
+
+        **Privacy.** The card only repeats what the platform already publishes publicly (agent name, company,
+        endpoints). We store no submitter personal data beyond what this issue shows.
+
+  - type: input
+    id: did
+    attributes:
+      label: "The identifier to evaluate"
+      description: "One DID. did:cn and did:bid are what we have run before; other methods will be answered 'we cannot resolve this method yet' rather than guessed."
+      placeholder: "did:cn:agent:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: relation
+    attributes:
+      label: "Your relation to the operator"
+      description: "This changes the reading of G3, not the numbers."
+      options:
+        - "I am the operator, or work for it"
+        - "I am a customer or partner of the operator"
+        - "I am independent of the operator"
+        - "I do not know who the operator is"
+    validations:
+      required: true
+
+  - type: input
+    id: operator_statement
+    attributes:
+      label: "Public operator statement (optional)"
+      description: "A URL or citation where the operator says this identifier is theirs. Without it G3 is recorded as MISSING, never as PASS."
+      placeholder: "https://example.com/news/2026/agent-identity"
+    validations:
+      required: false
+
+  - type: textarea
+    id: specific_question
+    attributes:
+      label: "Anything specific you want looked at"
+      description: "Optional. If it needs a probe we do not have, we will say so rather than improvise."
+      placeholder: "Does the declared serviceEndpoint actually answer A2A? (this needs a probe we do not have yet)"
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: ack
+    attributes:
+      label: "Acknowledgement"
+      options:
+        - label: "I understand this is a record of observations, not a certification."
+          required: true

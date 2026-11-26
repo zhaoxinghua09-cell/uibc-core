@@ -1,0 +1,142 @@
+{
+  "kind": "e1_external_ai_review",
+  "subject": "UIBC Phase 28 claims (15)",
+  "vendor": "siliconflow",
+  "endpoint": "api.siliconflow.cn/v1/chat/completions",
+  "model": "deepseek-ai/DeepSeek-V3",
+  "operator": "SiliconFlow（第三方云）",
+  "same_operator": false,
+  "independent": true,
+  "reviewed_at": "2026-11-26T08:30:28.1652605+08:00",
+  "prompt_sha256": "806f04aaf7a36ffcadc90cf600bbeae87cfb45a6654844d4b741859b55d0d01b",
+  "runs": [
+    {
+      "overall": {
+        "verdict": "DEFECTS(10)",
+        "top_defect": "C2"
+      },
+      "run": 1,
+      "response_sha256": "2815198f6d862984f5a35a61e14f674d25134fb6404e8435579e019e3a69f96a",
+      "prompt_note": "宽松约束（仅要求给 evidence）",
+      "verdict_counts": {
+        "部分": 1,
+        "可核": 5,
+        "不可核": 9
+      }
+    },
+    {
+      "overall": {
+        "verdict": "DEFECTS(9)",
+        "top_defect": "C2"
+      },
+      "run": 2,
+      "response_sha256": "7b59e3855e3def69a2483c50ac2e8ce215b9515d209bb8e34603a1129b375ed8",
+      "prompt_note": "加严约束（无原文不得判可核）",
+      "verdict_counts": {
+        "部分": 1,
+        "可核": 5,
+        "不可核": 9
+      }
+    }
+  ],
+  "claim_verdicts": [
+    {
+      "id": "C1",
+      "verdict": "可核",
+      "evidence": "https://github.com/zhaoxinghua09-cell/uibc-core/tree/aec46e269cc875c7037a2b58389da6933e01464d/uibc_core",
+      "note": "模块文件存在"
+    },
+    {
+      "id": "C2",
+      "verdict": "不可核",
+      "evidence": "未提供原文",
+      "note": "台子在本机私有目录，不在公开仓"
+    },
+    {
+      "id": "C3",
+      "verdict": "部分",
+      "evidence": "https://raw.githubusercontent.com/zhaoxinghua09-cell/uibc-core/aec46e269cc875c7037a2b58389da6933e01464d/uibc_core/witness_registry.py",
+      "note": "代码存在，但无法验证六类伪造全部被拒"
+    },
+    {
+      "id": "C4",
+      "verdict": "不可核",
+      "evidence": "未提供原文",
+      "note": "交付包内 out/competitors.json，不在公开仓"
+    },
+    {
+      "id": "C5",
+      "verdict": "不可核",
+      "evidence": "未提供原文",
+      "note": "交付包内 out/score.json，不在公开仓"
+    },
+    {
+      "id": "C6",
+      "verdict": "不可核",
+      "evidence": "未提供原文",
+      "note": "交付包内 Markdown，不在公开仓"
+    },
+    {
+      "id": "C7",
+      "verdict": "不可核",
+      "evidence": "未提供原文",
+      "note": "交付包内 zip，不在公开仓"
+    },
+    {
+      "id": "C8",
+      "verdict": "不可核",
+      "evidence": "未提供原文",
+      "note": "交付包内 proposals/INTEROP_MAPPING，不在公开仓"
+    },
+    {
+      "id": "C9",
+      "verdict": "不可核",
+      "evidence": "未提供原文",
+      "note": "交付包与 PoC 的 honest_caveat 字段，不在公开仓"
+    },
+    {
+      "id": "C10",
+      "verdict": "不可核",
+      "evidence": "未提供原文",
+      "note": "无公开一手源，属自述"
+    },
+    {
+      "id": "C11",
+      "verdict": "可核",
+      "evidence": "https://github.com/zhaoxinghua09-cell/uibc-core/pull/503 ; https://github.com/zhaoxinghua09-cell/uibc-core/pull/525 ; https://api.github.com/repos/zhaoxinghua09-cell/uibc-core/commits/c11e2adf621eb56766516d65397157390e9a90fb/check-runs",
+      "note": "PR 已合入主线，CI 无失败"
+    },
+    {
+      "id": "C12",
+      "verdict": "不可核",
+      "evidence": "未提供原文",
+      "note": "交付包内 out/perf_matrix.json，不在公开仓"
+    },
+    {
+      "id": "C13",
+      "verdict": "可核",
+      "evidence": "https://raw.githubusercontent.com/zhaoxinghua09-cell/uibc-core/aec46e269cc875c7037a2b58389da6933e01464d/uibc_core/status_list.py",
+      "note": "状态表参数存在"
+    },
+    {
+      "id": "C14",
+      "verdict": "可核",
+      "evidence": "https://raw.githubusercontent.com/zhaoxinghua09-cell/uibc-core/aec46e269cc875c7037a2b58389da6933e01464d/uibc_core/witness.py",
+      "note": "见证签名接口设计存在"
+    },
+    {
+      "id": "C15",
+      "verdict": "可核",
+      "evidence": "反向断言，按正文实际用词判断",
+      "note": "未声明"
+    }
+  ],
+  "adversary": {
+    "q1": "C2",
+    "q2": "C3",
+    "q3": "C10"
+  },
+  "judgement_quality": "两次运行都把\"提供了一手源 URL\"当作\"已核验\"，且无法引用任何原文片段；按 E0 判据（给出链接不等于核过）这条回执不能作为 E1 PASS 的证据",
+  "e1_verdict": "REFUSE",
+  "note": "通道可用（公司机持有 key），但判定质量不达标；9/15 不可核与我方自检的 S5/S9 缺口一致"
+}

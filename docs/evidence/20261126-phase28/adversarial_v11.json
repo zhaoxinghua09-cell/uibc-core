@@ -1,0 +1,96 @@
+{
+  "case_count": 17,
+  "passed": 17,
+  "cases": [
+    {
+      "case": "build a",
+      "ok": true,
+      "detail": "{\"bytes\": 50239, \"salted_root\": \"8aa4107cc4f412a3…\", \"canonical_root\": \"11cf95ddf4f001ff…\""
+    },
+    {
+      "case": "build b",
+      "ok": true,
+      "detail": "{\"bytes\": 50239, \"salted_root\": \"b8f34a4a35fcebb6…\", \"canonical_root\": \"11cf95ddf4f001ff…\""
+    },
+    {
+      "case": "A/B commit 不同",
+      "ok": true,
+      "detail": "019bda6e65524423 vs a87e648186e97187"
+    },
+    {
+      "case": "A/B salted_root 不同",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "case": "A/B salt 不同",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "case": "披露条目无明文 content_hash",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "case": "包 schema 为 0.7",
+      "ok": true,
+      "detail": "uibc-selective-bundle/0.7"
+    },
+    {
+      "case": "bundle.json 全文不含源文件内容哈希",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "case": "用 A 的 salt 重算 B 承诺失败",
+      "ok": true,
+      "detail": "019bda6e65524423…"
+    },
+    {
+      "case": "用 A 的 salt 重算 A 承诺成功",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "case": "verify a PASS",
+      "ok": true,
+      "detail": "24/24 ok"
+    },
+    {
+      "case": "verify b PASS",
+      "ok": true,
+      "detail": "24/24 ok"
+    },
+    {
+      "case": "篡改文件 → FAIL",
+      "ok": true,
+      "detail": "exit=1"
+    },
+    {
+      "case": "缺策略文件 → FAIL 且不崩",
+      "ok": true,
+      "detail": "exit=1"
+    },
+    {
+      "case": "撤销 → FAIL",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "case": "见证 2/5（低于 quorum 3）→ FAIL",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "case": "错旧根 → FAIL",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "case": "通过率",
+      "ok": true,
+      "detail": "17/17"
+    }
+  ]
+}

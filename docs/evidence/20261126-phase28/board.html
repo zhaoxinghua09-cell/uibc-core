@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>UIBC Phase 28 — 隐私保护验证与选择性披露看板</title>
+<style>
+:root{--bg:#0b0f14;--card:#141a22;--line:#212b36;--txt:#c9d1d9;--dim:#8b949e;--ok:#3fb950;--warn:#d29922;--bad:#f85149;--acc:#4493f8}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.65 "Segoe UI","Microsoft YaHei",sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 20px 60px}
+h1{font-size:22px;margin:0 0 6px}
+.sub{color:var(--dim);font-size:13px;margin-bottom:22px}
+h2{font-size:16px;margin:34px 0 10px;padding-left:10px;border-left:3px solid var(--acc)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:14px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:14px}
+.kpi{font-size:26px;font-weight:600;letter-spacing:.5px}
+.kpi.ok{color:var(--ok)}.kpi.warn{color:var(--warn)}.kpi.bad{color:var(--bad)}
+.card .lab{color:var(--dim);font-size:12px;margin-top:4px}
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;font-size:13px}
+th{background:#0f151c;color:var(--dim);font-weight:600;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+.ok{color:var(--ok)}.bad{color:var(--bad)}.warn{color:var(--warn)}.dim{color:var(--dim)}
+.b{font-weight:600}
+.note{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--warn);border-radius:6px;padding:12px 14px;margin:12px 0;color:var(--dim)}
+.note b{color:var(--txt)}
+.foot{margin-top:36px;color:var(--dim);font-size:12px;border-top:1px solid var(--line);padding-top:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>UIBC Phase 28 — 隐私保护验证与选择性披露</h1>
+<div class="sub">基线 HEAD 7885af9 · 2026-11-25 · 七档原型（0.1 文件级 → 0.7 盲索引）· 台子 s11 15 PASS · 合成数据</div>
+
+<div class="grid">
+  <div class="card"><div class="kpi ok">17 / 17</div><div class="lab">0.7 披露层对抗（内容级跨身份关联已闭合）</div></div>
+  <div class="card"><div class="kpi ok">36 / 36</div><div class="lab">一致性套件零回归</div></div>
+  <div class="card"><div class="kpi">224 B</div><div class="lab">n=200 一致性证明（交前缀需 6.4 KB）</div></div>
+  <div class="card"><div class="kpi warn">96<span class="dim">/100</span></div><div class="lab">自评（无外部评审、无认证）</div></div>
+<div class="card"><div class="kpi ok">2-of-3</div><div class="lab">双运营方跨进程共签（两独立进程/密钥目录，6 反例全拒；仍非第三方）</div></div>
+</div>
+
+<div class="note"><b>一句话：</b>UIBC 现在能证明“这份证据确实由该包承诺、用途未被改、见证方看过、撤销状态已查”，只交出 1 份正文和 log₂N 个哈希——但仍不能阻止“同内容换身份被关联”。</div>
+
+<h2>一、既有隐私能力</h2>
+<table>
+<tr><th>能力</th><th>支持</th><th>位置</th><th>强度</th></tr>
+<tr><td>哈希承诺</td><td class="ok">是</td><td>content_hash / evidence_root / checkpoint_head</td><td>强</td></tr>
+<tr><td>数字签名</td><td class="ok">是</td><td>Ed25519 封条（identity+manifest+lifecycle）</td><td>强</td></tr>
+<tr><td>声明范围签名</td><td class="ok">是</td><td>ed_seal_verify_scoped</td><td>中</td></tr>
+<tr><td>merkle 包含证明</td><td class="warn">原库有，未接证据根</td><td>merkle.py</td><td>v0.6 已接入</td></tr>
+<tr><td>假名标识</td><td class="ok">是</td><td>agent_id 任意串，公钥即身份</td><td>强</td></tr>
+<tr><td>选择性披露</td><td class="ok">是（原型）</td><td>0.1 / 0.2 / 0.3 披露包</td><td>文件级</td></tr>
+<tr><td>打码后仍可验</td><td class="bad">否</td><td>—</td><td>无 redaction</td></tr>
+<tr><td>零知识证明</td><td class="bad">否</td><td>—</td><td>不建议引入</td></tr>
+<tr><td>见证共签</td><td class="ok">是（原型）</td><td>witness.py</td><td>单见证</td></tr>
+<tr><td>撤销 herd privacy</td><td class="ok">是（原型）</td><td>status_list.py（1024 位）</td><td>单运营方</td></tr>
+</table>
+
+<h2>二、四模式实测（v0.1）</h2>
+<table>
+<tr><th>模式</th><th>verify</th><th>披露正文</th><th>结论</th></tr>
+<tr><td>整包给</td><td class="ok">PASS</td><td>2 / 2</td><td>基线</td></tr>
+<tr><td>删正文留索引</td><td class="bad">FAIL</td><td>0</td><td>无脱敏语义</td></tr>
+<tr><td>仅哈希</td><td class="bad">FAIL</td><td>0</td><td>空包不成立</td></tr>
+<tr><td>选择性披露包</td><td class="ok">PASS</td><td>1 / 2 + 全哈希</td><td>成立</td></tr>
+</table>
+
+<h2>三、六档升级的实测差异</h2>
+<table>
+<tr><th>能力</th><th>0.1</th><th>0.2</th><th>0.3</th><th>0.4</th><th>0.5</th><th>0.6</th></tr>
+<tr><td>哈希暴露</td><td class="bad">全清单</td><td class="ok">log₂N</td><td class="ok">log₂N</td><td class="ok">log₂N</td><td class="ok">log₂N</td><td class="ok">log₂N</td></tr>
+<tr><td>用途绑定</td><td class="bad">无</td><td class="warn">核对</td><td class="ok">签名</td><td class="ok">签名</td><td class="ok">签名</td><td class="ok">签名</td></tr>
+<tr><td>重放 / 过期</td><td class="bad">PASS</td><td class="ok">FAIL</td><td class="ok">FAIL</td><td class="ok">FAIL</td><td class="ok">FAIL</td><td class="ok">FAIL</td></tr>
+<tr><td>撤销</td><td class="bad">看不到</td><td class="warn">字段</td><td class="ok">位数组</td><td class="ok">位数组</td><td class="ok">双运营方</td><td class="ok">双运营方</td></tr>
+<tr><td>见证</td><td class="bad">无</td><td class="bad">无</td><td class="ok">单密钥</td><td class="ok">quorum 3/5</td><td class="ok">quorum 3/5</td><td class="ok">quorum 3/5</td></tr>
+<tr><td>一致性证明</td><td class="bad">无</td><td class="bad">无</td><td class="bad">无</td><td class="warn">需条目</td><td class="ok">离线独立验证</td><td class="ok">离线独立验证</td></tr>
+<tr><td>根可关联</td><td class="bad">是</td><td class="bad">是</td><td class="bad">是</td><td class="bad">是</td><td class="bad">是</td><td class="ok">加盐，根不可关联</td></tr>
+<tr><td>状态表位宽</td><td class="bad">无</td><td class="bad">无</td><td class="warn">1,024 位</td><td class="warn">1,024 位</td><td class="ok">131,072 位（规范最低）</td><td class="ok">131,072 位</td></tr>
+<tr><td>披露包字节</td><td>3,615</td><td>3,315</td><td class="warn">4,223</td><td class="warn">6,039</td><td class="warn">49,937</td><td class="warn">50,204</td></tr>
+<tr><td>验证耗时</td><td>149 ms*</td><td>150 ms*</td><td>13.8 ms</td><td>23.2 ms</td><td>30.3 ms</td><td>29.6 ms</td></tr>
+</table>
+<div class="note">* 0.1/0.2 含子进程解释器启动，不可与同进程数字直接比。体积增长是隐私语义换来的字节：见证记录、context 签名、双表、加盐根。</div>
+
+<h2>四、v0.7 对抗（15 项）</h2>
+<table>
+<tr><th>场景</th><th>结果</th><th>场景</th><th>结果</th></tr>
+<tr><td>基线</td><td class="ok">PASS</td><td>改正文 / 改承诺</td><td class="bad">FAIL</td></tr>
+<tr><td>purpose 篡改</td><td class="bad">FAIL</td><td>nonce 篡改</td><td class="bad">FAIL</td></tr>
+<tr><td>见证密钥冒用封条</td><td class="bad">FAIL</td><td>见证签名伪造</td><td class="bad">FAIL</td></tr>
+<tr><td>状态置 REVOKED</td><td class="bad">FAIL</td><td>状态位改未重签</td><td class="bad">FAIL</td></tr>
+<tr><td>状态索引越界</td><td class="bad">FAIL</td><td>主体替换</td><td class="bad">FAIL</td></tr>
+<tr><td>重放（二次）</td><td class="bad">FAIL</td><td>过期 / 跨语境</td><td class="bad">FAIL</td></tr>
+<tr><td>跨身份关联</td><td class="bad">仍可关联</td><td colspan="2" class="dim">唯一未闭合项</td></tr>
+</table>
+
+<h2>五、v0.8 见证策略与一致性证明</h2>
+<table>
+<tr><th>项</th><th>0.3 单见证</th><th>0.4 策略 + 日志</th></tr>
+<tr><td>见证模型</td><td class="warn">1 个本地密钥</td><td class="ok">5 见证清单 + quorum 3</td></tr>
+<tr><td>策略位置</td><td class="bad">包内</td><td class="ok">包外，验证方自持 + 摘要核对</td></tr>
+<tr><td>重复/冒名见证</td><td class="bad">未检</td><td class="ok">去重、拒未列入、拒封条密钥</td></tr>
+<tr><td>append-only</td><td class="bad">无</td><td class="ok">5 条 head + 一致性证明 + 旧根</td></tr>
+<tr><td>对抗通过</td><td>14 / 15</td><td class="ok">17 / 18</td></tr>
+<tr><td>披露包</td><td>4,223 B</td><td class="warn">6,039 B</td></tr>
+<tr><td>验证耗时</td><td>13.8 ms</td><td class="warn">23.2 ms</td></tr>
+</table>
+<div class="note"><b>如实标注：</b>一致性证明目前只能“与条目一起复核”，独立 RFC 6962 验证器未实现；见证方仍是演示密钥，没有第三方运营。这两条不能对外说成已完成。</div>
+
+<h2>五-b、v0.9 离线一致性 + 双运营方撤销</h2>
+<table>
+<tr><th>项</th><th>0.4</th><th>0.5</th></tr>
+<tr><td>一致性验证</td><td class="warn">必须拿到条目</td><td class="ok">只凭 proof 重建双根（49 对全过）</td></tr>
+<tr><td>历史 head 泄露</td><td class="bad">5 条全给</td><td class="ok">0 条，仅 1 个证明节点</td></tr>
+<tr><td>新根绑定</td><td class="bad">未签名</td><td class="ok">new_root 进 context 签名</td></tr>
+<tr><td>撤销运营方</td><td class="warn">单表</td><td class="ok">双表交叉，任一 REVOKED 即 FAIL</td></tr>
+<tr><td>状态表位宽</td><td class="warn">1,024 位</td><td class="ok">131,072 位（W3C 最低）</td></tr>
+<tr><td>畸形输入</td><td class="warn">可能抛异常</td><td class="ok">safe() 捕获记 FAIL</td></tr>
+<tr><td>对抗通过</td><td>17 / 18</td><td class="ok">18 / 19</td></tr>
+</table>
+
+<h2>五-c、v0.10 加盐证据根</h2>
+<table>
+<tr><th>项</th><th>结果</th></tr>
+<tr><td>叶哈希</td><td>H(content_hash ‖ bundle_salt)</td></tr>
+<tr><td>同文件两次展示</td><td class="ok">salted_root 不同（b9bfbcac… vs 另一值）</td></tr>
+<tr><td>canonical_root / content_hash</td><td class="warn">仍相同 —— 内容级关联未闭合</td></tr>
+<tr><td>跨包移植 inclusion 路径</td><td class="bad">FAIL</td></tr>
+<tr><td>改 salt / 改根 / 改正文 / 重放</td><td class="bad">全 FAIL</td></tr>
+<tr><td>对抗通过</td><td class="ok">10 / 10</td></tr>
+</table>
+<div class="note"><b>边界说清：</b>根级已不可关联，内容哈希仍确定 —— 同一观察者看到同一文件两次仍能凭内容关联。彻底不可关联要随机化内容承诺，会牺牲同内容同根的审计价值，本阶段不做。</div>
+
+<h2>六、竞品横向（28 项）</h2>
+<table>
+<tr><th>方案</th><th>粒度</th><th>机制</th><th>不可关联</th><th>证据级</th><th>成熟度</th></tr>
+<tr><td>SD-JWT（RFC 9901）</td><td>claim</td><td>加盐哈希 + JWS</td><td class="bad">无</td><td class="bad">否</td><td>RFC</td></tr>
+<tr><td>SD-JWT VC（-13）</td><td>claim</td><td>同上</td><td class="bad">无</td><td class="bad">否</td><td>草案</td></tr>
+<tr><td>W3C BBS（bbs-2023）</td><td>statement</td><td>BBS 派生证明</td><td class="ok">有</td><td class="bad">否</td><td>CRD</td></tr>
+<tr><td>ISO 18013-5 mDL</td><td>元素</td><td>逐元素哈希 + 双签</td><td class="warn">推荐</td><td class="bad">否</td><td>标准</td></tr>
+<tr><td>Token Status List</td><td>1 bit</td><td>位数组 + 签名</td><td class="warn">herd</td><td class="dim">—</td><td>草案</td></tr>
+<tr><td>Sigsum / RFC 6962</td><td>日志条目</td><td>Merkle + witness</td><td class="warn">日志方可见</td><td class="warn">间接</td><td>生产</td></tr>
+<tr><td>SCITT（RFC 9943/9942）</td><td>记录</td><td>COSE + 透明服务</td><td class="bad">无</td><td class="ok">记录级</td><td>RFC</td></tr>
+<tr><td>OpenID4VP + EUDI ARF</td><td>属性</td><td>VP token + 单次请求</td><td class="ok">有专章</td><td class="bad">否</td><td>草案</td></tr>
+<tr><td>AGNTCY Badge</td><td>整张</td><td>W3C VC + IdP</td><td class="dim">未声明</td><td class="bad">否</td><td>推进中</td></tr>
+<tr><td>A2A Card 签名</td><td>整张</td><td>JCS + JWS</td><td class="bad">无</td><td class="bad">否</td><td>落地</td></tr>
+<tr><td>SD Agent（-02）</td><td>卡片字段</td><td>SD-JWT</td><td class="bad">无</td><td class="bad">否</td><td>个人稿</td></tr>
+<tr><td>ANSv2</td><td>版本身份</td><td>DNS + 透明日志</td><td class="dim">未声明</td><td class="bad">否</td><td>个人稿</td></tr>
+<tr><td>OpenID4VC HAIP 1.0（Final）</td><td>属性</td><td>OID4VC 高保证 profile</td><td class="ok">有专章</td><td class="bad">否</td><td>Final + 14 家自证</td></tr>
+<tr><td>ISO/IEC TS 23220-4:2026</td><td>元素</td><td>mdoc 运营期协议</td><td class="warn">依 profile</td><td class="bad">否</td><td>TS</td></tr>
+<tr><td>W3C Bitstring Status List v1.0</td><td>1 bit</td><td>位串 + 签名（最低 131k 位）</td><td class="warn">herd</td><td class="dim">—</td><td>W3C 推荐</td></tr>
+<tr><td>W3C VC Data Integrity</td><td>整份凭证</td><td>JCS + 分离签名</td><td class="bad">无</td><td class="bad">否</td><td>W3C 推荐</td></tr>
+<tr><td>ISO/IEC TS 18013-7:2025（Ed 2）</td><td>元素（在线）</td><td>mdoc 在线呈现 + OID4VP</td><td class="warn">依 profile</td><td class="bad">否</td><td>TS（2025-05-29）；Ed 3 CD 在研</td></tr>
+<tr><td>Sigstore Bundle + Rekor v2</td><td>产物 / attestation</td><td>Fulcio + 透明日志 + bundle 离线验</td><td class="warn">日志方可见</td><td class="ok">产物级</td><td>生产（v2 2025-10 GA）</td></tr>
+<tr><td>in-toto + SLSA Provenance v1.2</td><td>subject + predicate</td><td>DSSE 信封 + 结构化声明</td><td class="bad">无</td><td class="ok">构建级</td><td>稳定，供应链广泛</td></tr>
+<tr><td>DIF Presentation Exchange 2.0</td><td>input_descriptor</td><td>JSONPath 约束 + 提交配对</td><td class="dim">未规定</td><td class="bad">否</td><td>稳定</td></tr>
+<tr><td>OpenID4VCI 1.0</td><td>凭证</td><td>OAuth 签发 API</td><td class="dim">依格式</td><td class="bad">否</td><td>Final（2025-09-16）</td></tr>
+<tr><td>Hyperledger AnonCreds</td><td>属性 + 谓词</td><td>CL-RSA + ZK（v2 转 BBS/PS）</td><td class="ok">有</td><td class="bad">否</td><td>v1 广泛使用</td></tr>
+<tr><td>W3C DID v1.1</td><td>标识符</td><td>DID 文档 + 解析</td><td class="warn">依 method</td><td class="bad">否</td><td>v1.0 Rec；v1.1 CR</td></tr>
+<tr><td>Microsoft Entra Verified ID</td><td>凭证</td><td>托管签发/验示 + Authenticator</td><td class="dim">未公开</td><td class="bad">否</td><td>商用 GA</td></tr>
+</table>
+<div class="note"><b>同类都在用“加盐哈希 + 签名”，不是 ZK。</b>RFC 9901 的设计原则就是“尽量简单、标准密码学”。SCITT 是最接近的架构对手：它靠外部透明服务给收据，我们靠包内自证 + 可选见证。</div>
+
+<h2>七、位置与评分</h2>
+<div class="grid">
+  <div class="card"><div class="kpi ok">6</div><div class="lab">强于同类：文件级披露 / 上下文签名 / 见证 / 位数组状态 / 零依赖离线 / 离线一致性验证 + 加盐根</div></div>
+  <div class="card"><div class="kpi bad">2</div><div class="lab">落后：第三方见证运营（本机双进程已验证机制，仍无外部主体）/ 生态规模</div></div>
+</div>
+<table>
+<tr><th>组成</th><th>满分</th><th>得分</th></tr>
+<tr><td>能力清单 + 分类</td><td>16</td><td class="ok">16</td></tr>
+<tr><td>选择性披露架构（0.1→0.6）</td><td>12</td><td class="ok">12</td></tr>
+<tr><td>机制比较 + 信任边界</td><td>14</td><td class="ok">14</td></tr>
+<tr><td>对抗矩阵（18+19+10 项）</td><td>18</td><td class="ok">18</td></tr>
+<tr><td>六档 PoC（0.1→0.6 均可运行）</td><td>12</td><td class="ok">12</td></tr>
+<tr><td>性能与隐私对比</td><td>6</td><td class="ok">6</td></tr>
+<tr><td>竞品对比（15 项）</td><td>8</td><td class="ok">8</td></tr>
+<tr><td>局限</td><td>2</td><td class="ok">2</td></tr>
+<tr><td>见证 + 状态列表 + 离线验证 + 加盐根</td><td>8</td><td class="ok">8</td></tr>
+<tr><td>外部独立评审</td><td>4</td><td class="bad">0</td></tr>
+<tr><td class="b">合计</td><td class="b">100</td><td class="b">96</td></tr>
+</table>
+<div class="note">扣分：见证方与状态列表运营方均为本地演示；无外部独立评审（唯一实质缺口）。0.7 盲索引已闭合内容级关联（opt-in 模式，默认仍保留可审计性）。</div>
+
+<div class="foot">已推送 PR #503（头 f759c5e，CI 22 项 21 过 1 跳过 0 失败，mergeable_state=clean） · 合成数据 · 台子 uibc-bench s11 已并入基线（158 条，含 P17） · 未合并 · 未部署 · 未外发<br>
+复现：<span class="dim">python p28_lab.py all → python apply_v06.py → python apply_v07.py → python v06_demo.py --proofs → python p28_v07_test.py → python apply_v08.py → python p28_v08_test.py → python poc\selective_v09.py --build … → python p28_v09_test.py → python poc\selective_v10.py --build … → python p28_v10_test.py</span></div>
+</div>
+<h2>八、跑在 uibc-bench 实测台上</h2>
+<table>
+<tr><th>项</th><th>结果</th></tr>
+<tr><td>场景组</td><td>harness/s11_privacy_disclosure.py（台子原生发现，不需改 run.py）</td></tr>
+<tr><td>一条命令</td><td class="dim">python run.py --only s11 --subject …\proto\src</td></tr>
+<tr><td>判定</td><td class="ok">PASS 15 / REFERENCE 2 / FAIL 0</td></tr>
+<tr><td>用时 / 退出码</td><td>4.7 s / 0</td></tr>
+<tr><td>相对基线</td><td class="ok">回归 0、新增 17 条</td></tr>
+<tr><td>性能判据</td><td class="ok">P15 预算 600 ms，实测 189.9 ms</td></tr>
+<tr><td>外人复跑包</td><td class="ok">23 条目 / 52,574 B · 隔离目录模拟 9/9 步 exit=0</td></tr>
+<tr><td>P16 盲索引（0.7）</td><td class="ok">PASS · 两包 commit 不同 / 无明文哈希 / 双 verify PASS</td></tr>
+<tr><td>SD-JWT 同构对照</td><td class="ok">10/10 · 语义同构、字节不兼容（不可互认）</td></tr>
+<tr><td>竞品事实复核</td><td class="ok">28 项 · 改正 ISO 23220-4 日期（2026-04-10）· 链接直达 24/28 脚本可开，3 条站点反爬已注明，1 条 DNS 死链已换官方页</td></tr>
+<tr><td>三档性能同条件</td><td class="ok">27–29 ms 同进程 / 191–199 ms 子进程 / 0.7 冷启动已优化 −35 ms</td></tr>
+<tr><td>互操作映射</td><td>语义对上 5 处 · 字节可互认 <b>0</b> 处（3 个硬缺口）</td></tr>
+<tr><td>A 级形态适配器</td><td class="ok">8/8 自检 · 故意无签名、列明不可被验（防误用）</td></tr>
+<tr><td>一键总验收</td><td class="ok">10/10 · python p28_verify_all.py（约 10 s）</td></tr>
+<tr><td>来源守卫</td><td>被测路径必须与披露脚本的 proto/src 同一路径，否则 ABORT</td></tr>
+<tr><td>刻意记 REFERENCE</td><td class="warn">内容哈希仍相同（不当“不可关联已闭合”）；子进程耗时含启动</td></tr>
+<tr><td>全量跑（11 组）</td><td>PASS 68 / FAIL 8 / BLOCKED 8 / REFERENCE 2；s11 ok</td></tr>
+<tr><td>唯一“回归”</td><td class="warn">D1 三条 live-server 用例：WinError 10013 端口绑定被环境拒绝，非代码回归</td></tr>
+<tr><td>基线</td><td>141 → 158 条（并入 s11 的 17 条，含 P17 双运营方；有备份）</td></tr>
+<tr><td>性能判据</td><td class="ok">P15 预算 600 ms，实测 189.9 ms</td></tr>
+<tr><td>仍然不是</td><td class="bad">外部独立评审 —— 台子是内部的</td></tr>
+</table>
+
+<h2>九、四个视角看同一份证据（2026-11-26 校准）</h2>
+<div class="note"><b>为什么放这四个视角：</b>同一份材料，换四种眼睛看，结论不一样。外部评审者看到的是一片红（9/15 不可核）；对手看到的是"最短那条横条"；流程看到的是"合并没 reviewer、外审回执还没到"；只有见证结构那张对我们有利，而它自己也写着"同机模拟"。<b>这四张图都是单文件内联 SVG，断网可开，零外链。</b></div>
+
+<svg viewBox="0 0 900 210" width="100%" role="img" aria-label="15 条主张的可核性" style="background:#141a22;border:1px solid #212b36;border-radius:8px;margin:10px 0">
+<text x="16" y="24" fill="#8b949e" font-size="12">视角一 · 外部评审者：15 条主张逐条判定的结果（数据 s6_receipt.json）</text>
+<rect x="40" y="60" width="36" height="36" rx="5" fill="#3fb950" fill-opacity="0.85"/>
+<text x="58.0" y="82.0" fill="#0b0f14" font-size="10" text-anchor="middle">C1</text>
+<rect x="86" y="60" width="36" height="36" rx="5" fill="#f85149" fill-opacity="0.85"/>
+<text x="104.0" y="82.0" fill="#0b0f14" font-size="10" text-anchor="middle">C2</text>
+<rect x="132" y="60" width="36" height="36" rx="5" fill="#d29922" fill-opacity="0.85"/>
+<text x="150.0" y="82.0" fill="#0b0f14" font-size="10" text-anchor="middle">C3</text>
+<rect x="178" y="60" width="36" height="36" rx="5" fill="#f85149" fill-opacity="0.85"/>
+<text x="196.0" y="82.0" fill="#0b0f14" font-size="10" text-anchor="middle">C4</text>
+<rect x="224" y="60" width="36" height="36" rx="5" fill="#f85149" fill-opacity="0.85"/>
+<text x="242.0" y="82.0" fill="#0b0f14" font-size="10" text-anchor="middle">C5</text>
+<rect x="270" y="60" width="36" height="36" rx="5" fill="#f85149" fill-opacity="0.85"/>
+<text x="288.0" y="82.0" fill="#0b0f14" font-size="10" text-anchor="middle">C6</text>
+<rect x="316" y="60" width="36" height="36" rx="5" fill="#f85149" fill-opacity="0.85"/>
+<text x="334.0" y="82.0" fill="#0b0f14" font-size="10" text-anchor="middle">C7</text>
+<rect x="362" y="60" width="36" height="36" rx="5" fill="#f85149" fill-opacity="0.85"/>
+<text x="380.0" y="82.0" fill="#0b0f14" font-size="10" text-anchor="middle">C8</text>
+<rect x="408" y="60" width="36" height="36" rx="5" fill="#f85149" fill-opacity="0.85"/>
+<text x="426.0" y="82.0" fill="#0b0f14" font-size="10" text-anchor="middle">C9</text>
+<rect x="454" y="60" width="36" height="36" rx="5" fill="#f85149" fill-opacity="0.85"/>
+<text x="472.0" y="82.0" fill="#0b0f14" font-size="10" text-anchor="middle">C10</text>
+<rect x="500" y="60" width="36" height="36" rx="5" fill="#3fb950" fill-opacity="0.85"/>
+<text x="518.0" y="82.0" fill="#0b0f14" font-size="10" text-anchor="middle">C11</text>
+<rect x="546" y="60" width="36" height="36" rx="5" fill="#f85149" fill-opacity="0.85"/>
+<text x="564.0" y="82.0" fill="#0b0f14" font-size="10" text-anchor="middle">C12</text>
+<rect x="592" y="60" width="36" height="36" rx="5" fill="#3fb950" fill-opacity="0.85"/>
+<text x="610.0" y="82.0" fill="#0b0f14" font-size="10" text-anchor="middle">C13</text>
+<rect x="638" y="60" width="36" height="36" rx="5" fill="#3fb950" fill-opacity="0.85"/>
+<text x="656.0" y="82.0" fill="#0b0f14" font-size="10" text-anchor="middle">C14</text>
+<rect x="684" y="60" width="36" height="36" rx="5" fill="#3fb950" fill-opacity="0.85"/>
+<text x="702.0" y="82.0" fill="#0b0f14" font-size="10" text-anchor="middle">C15</text>
+<text x="40" y="130" fill="#f85149" font-size="15" font-weight="600">不可核 9 / 15</text>
+<text x="230" y="130" fill="#d29922" font-size="15">部分 1</text>
+<text x="330" y="130" fill="#3fb950" font-size="15">可核 5</text>
+<text x="40" y="152" fill="#8b949e" font-size="12">9 条不可核全部落在同一处：产物不在公开仓（out/*.json、交付包、PoC 只在本地）。</text>
+<text x="40" y="172" fill="#8b949e" font-size="12">最容易被一击打穿的是 C2：台子 15 PASS / 基线 158，没有任何公开可核的一手源。</text>
+<text x="40" y="192" fill="#8b949e" font-size="12">这张图对我方不利，故意放在最前面。</text>
+</svg>
+<svg viewBox="0 0 900 260" width="100%" role="img" aria-label="攻击者视角的打穿成本" style="background:#141a22;border:1px solid #212b36;border-radius:8px;margin:10px 0">
+<text x="16" y="24" fill="#8b949e" font-size="12">视角二 · 对手：横条越短＝越容易打穿（左＝易，右＝难）</text>
+<text x="16" y="62" fill="#c9d1d9" font-size="12">C2 台子 15 PASS / 基线 158</text>
+<rect x="300" y="48" width="52" height="16" rx="3" fill="#f85149" fill-opacity="0.8"/>
+<text x="360" y="61" fill="#8b949e" font-size="11">转发一条 zhaoxinghua 私有目录的截图都没有，直接质疑</text>
+<text x="16" y="96" fill="#c9d1d9" font-size="12">C3 六类伪造全拒</text>
+<rect x="300" y="82" width="145" height="16" rx="3" fill="#f85149" fill-opacity="0.8"/>
+<text x="453" y="95" fill="#8b949e" font-size="11">只在私有 PoC 里，外人复跑不到</text>
+<text x="16" y="130" fill="#c9d1d9" font-size="12">C12 单条证明 512 B / 省 96.2%</text>
+<rect x="300" y="116" width="218" height="16" rx="3" fill="#d29922" fill-opacity="0.8"/>
+<text x="526" y="129" fill="#8b949e" font-size="11">out/perf_matrix.json 不在公开仓</text>
+<text x="16" y="164" fill="#c9d1d9" font-size="12">C6 / C7 报告与复跑包</text>
+<rect x="300" y="150" width="286" height="16" rx="3" fill="#d29922" fill-opacity="0.8"/>
+<text x="594" y="163" fill="#8b949e" font-size="11">交付包 zip 不在公开仓</text>
+<text x="16" y="198" fill="#c9d1d9" font-size="12">C1 / C11 / C13 / C14 模块与 PR</text>
+<rect x="300" y="184" width="478" height="16" rx="3" fill="#3fb950" fill-opacity="0.8"/>
+<text x="786" y="197" fill="#8b949e" font-size="11">公开仓可直接核对（raw + jsdelivr 双通道 200）</text>
+<text x="16" y="230" fill="#f85149" font-size="12">结论：只要一个对手问"C2 的 15 PASS 在哪能复跑"，我们的最强主张就变成不可核。</text>
+</svg>
+<svg viewBox="0 0 900 190" width="100%" role="img" aria-label="流程时间轴" style="background:#141a22;border:1px solid #212b36;border-radius:8px;margin:10px 0">
+<text x="16" y="24" fill="#8b949e" font-size="12">视角三 · 流程：同一件东西在各环节的真实状态（片段时间轴，非承诺）</text>
+<line x1="60" y1="110" x2="732" y2="110" stroke="#212b36" stroke-width="2"/>
+<circle cx="60" cy="110" r="7" fill="#f85149"/>
+<text x="60" y="76" fill="#8b949e" font-size="11" text-anchor="middle">11-25</text>
+<text x="60" y="138" fill="#c9d1d9" font-size="12" text-anchor="middle">PR #503 合入</text>
+<text x="60" y="156" fill="#8b949e" font-size="10" text-anchor="middle">939cc2e · 管理员 squash · reviewer=0</text>
+<circle cx="228" cy="110" r="7" fill="#3fb950"/>
+<text x="228" y="76" fill="#8b949e" font-size="11" text-anchor="middle">11-26</text>
+<text x="228" y="138" fill="#c9d1d9" font-size="12" text-anchor="middle">PR #525 合入</text>
+<text x="228" y="156" fill="#8b949e" font-size="10" text-anchor="middle">c11e2ad · release note</text>
+<circle cx="396" cy="110" r="7" fill="#3fb950"/>
+<text x="396" y="76" fill="#8b949e" font-size="11" text-anchor="middle">11-26</text>
+<text x="396" y="138" fill="#c9d1d9" font-size="12" text-anchor="middle">匿名实测</text>
+<text x="396" y="156" fill="#8b949e" font-size="10" text-anchor="middle">双通道 8/8 200 · clone rc=0 · CI 24/1/0</text>
+<circle cx="564" cy="110" r="7" fill="#f85149"/>
+<text x="564" y="76" fill="#8b949e" font-size="11" text-anchor="middle">11-26</text>
+<text x="564" y="138" fill="#c9d1d9" font-size="12" text-anchor="middle">外部 AI 两次</text>
+<text x="564" y="156" fill="#8b949e" font-size="10" text-anchor="middle">DeepSeek-V3 → REFUSE（判定质量）</text>
+<circle cx="732" cy="110" r="7" fill="#d29922"/>
+<text x="732" y="76" fill="#8b949e" font-size="11" text-anchor="middle">待定</text>
+<text x="732" y="138" fill="#c9d1d9" font-size="12" text-anchor="middle">Muse 回执</text>
+<text x="732" y="156" fill="#8b949e" font-size="10" text-anchor="middle">S5/S9/S11 · 未到</text>
+</svg>
+<svg viewBox="0 0 900 210" width="100%" role="img" aria-label="见证结构 2-of-3" style="background:#141a22;border:1px solid #212b36;border-radius:8px;margin:10px 0">
+<text x="16" y="24" fill="#8b949e" font-size="12">视角四 · 见证结构：5 个见证，阈值 3（机制成立；主体仍是同机模拟，不是第三方）</text>
+<text x="16" y="52" fill="#c9d1d9" font-size="13">checkpoint ⇄ 见证方 → 收满 3 份 cosignature 才可验证</text>
+<rect x="30" y="80" width="150" height="52" rx="8" fill="#4493f8" fill-opacity="0.2" stroke="#4493f8"/>
+<text x="105" y="112" fill="#c9d1d9" font-size="13" text-anchor="middle">checkpoint_head</text>
+<line x1="180" y1="106" x2="250" y2="106" stroke="#212b36"/>
+<rect x="250" y="82" width="52" height="48" rx="8" fill="#3fb950" fill-opacity="0.25" stroke="#3fb950"/>
+<text x="276" y="112" fill="#c9d1d9" font-size="12" text-anchor="middle">W1</text>
+<line x1="180" y1="106" x2="378" y2="106" stroke="#212b36"/>
+<rect x="378" y="82" width="52" height="48" rx="8" fill="#3fb950" fill-opacity="0.25" stroke="#3fb950"/>
+<text x="404" y="112" fill="#c9d1d9" font-size="12" text-anchor="middle">W2</text>
+<line x1="180" y1="106" x2="506" y2="106" stroke="#212b36"/>
+<rect x="506" y="82" width="52" height="48" rx="8" fill="#3fb950" fill-opacity="0.25" stroke="#3fb950"/>
+<text x="532" y="112" fill="#c9d1d9" font-size="12" text-anchor="middle">W3</text>
+<line x1="180" y1="106" x2="634" y2="106" stroke="#212b36"/>
+<rect x="634" y="82" width="52" height="48" rx="8" fill="#212b36" fill-opacity="0.25" stroke="#212b36"/>
+<text x="660" y="112" fill="#c9d1d9" font-size="12" text-anchor="middle">W4</text>
+<line x1="180" y1="106" x2="762" y2="106" stroke="#212b36"/>
+<rect x="762" y="82" width="52" height="48" rx="8" fill="#212b36" fill-opacity="0.25" stroke="#212b36"/>
+<text x="788" y="112" fill="#c9d1d9" font-size="12" text-anchor="middle">W5</text>
+<text x="250" y="160" fill="#3fb950" font-size="12">前 3 份已签（2-of-3 阈值达成）</text>
+<text x="470" y="160" fill="#8b949e" font-size="12">后 2 份未签（容错余量）</text>
+<text x="16" y="186" fill="#f85149" font-size="12">但：五个见证均在本地密钥目录，同一台机器 ⇒ 这一项只能算"机制成立"，不能算"第三方见证"。</text>
+</svg>
+
+<h2>十、外部视角现场复核（2026-11-26 匿名实测）</h2>
+<table>
+<tr><th>判据</th><th>结果</th></tr>
+<tr><td>匿名 `git ls-remote`（不带任何凭据）</td><td class="ok">成功 · main = <span class="dim">87bf268f</span> ⇒ 仓库对匿名可读</td></tr>
+<tr><td>双通道同 sha 命中（raw.githubusercontent.com/87bf268f4e42a536f34c99efcd7bc9ffffa4d8cf + cdn.jsdelivr.net/gh/87bf268f4e42a536f34c99efcd7bc9ffffa4d8cf，不用 @main）</td><td class="ok">8 / 8 物件均 200，两条通道字节一致</td></tr>
+<tr><td>干净 clone + 一条命令</td><td class="ok">匿名 clone 42 s（2,460 文件）· <span class="dim">python tools/outsider_rerun.py --check</span> rc=0 · <span class="dim">OUTSIDER OK: receipt matches this disk (2456 files, 033a0d0aee76, content f4ceea43f8bd), 4 steps passed</span></td></tr>
+<tr><td>CI 矩阵（匿名读 API）</td><td class="ok">25 项 · 24 success / 1 skipped / 0 failure；含 test (3.10)(3.11)(3.12)(3.13)、test-macos、test-with-extras、windows-clone-bytes、windows-probes</td></tr>
+<tr><td>匿名读回 PR</td><td class="ok">#503 merged=<span class="dim">939cc2e</span> · #525 merged=<span class="dim">c11e2ad</span></td></tr>
+<tr><td>PR reviewer</td><td class="bad">pulls/503 reviews = <b>0</b>（管理员 squash，无 reviewer 批准）</td></tr>
+<tr><td>release tag（Phase 28）</td><td class="bad">最新 release 是 v0.5.5，本轮<b>没有</b>发 release/tag</td></tr>
+<tr><td>raw 通道稳定性</td><td class="warn">首轮 8 物件里有 4 个 raw 连接被重置（curl 56/35），重试即 200；记作"通道可用但不稳"，不记不可达</td></tr>
+</table>
+
+</body>
+</html>

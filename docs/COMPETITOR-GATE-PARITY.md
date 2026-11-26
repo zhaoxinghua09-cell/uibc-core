@@ -1,6 +1,6 @@
 # 竞品门禁对照：外人能在仓库里复跑什么
 
-审计日期 2026-11-26。25 个 DID 解析/驱动/工具仓库，全部按 **固定 commit** 取 tarball，
+审计日期 2026-11-26。40 个 DID 解析/驱动/工具仓库，全部按 **固定 commit** 取 tarball，
 记录 tarball 的 sha256，用同一组正则计数，分数由原始计数机械重算（`tools/competitor_gate_parity.py --check`）。
 本表量的是**仓库内可被外人复跑的证据**，不是团队能力：计数为 0 只说明"在其源码文本里检索不到"，不说明"他们没做过"。
 
@@ -42,10 +42,25 @@
 | `uport-project/ethr-did` | 17 | 4 | 43 | 0 | 0 | 0 | 0 | 0 | 0 |
 | `w3c-ccg/did-method-key` | 4 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 | `w3c-ccg/did-test-suite` | 21 | 12 | 21 | 0 | 0 | 0 | 0 | 0 | 0 |
-| `zhaoxinghua09-cell/uibc-core` (this repository) | 2014 | 283 | 1100 | 2 | 2 | 2 | 2 | 2 | 10 |
+| `TBD54566975/ssi-sdk` | 257 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| `TBD54566975/dwn-sdk-js` | 244 | 100 | 1562 | 1 | 0 | 0 | 0 | 0 | 1 |
+| `cheqd/cheqd-node` | 605 | 240 | 542 | 1 | 0 | 1 | 1 | 0 | 3 |
+| `cheqd/sdk` | 72 | 24 | 540 | 0 | 0 | 0 | 0 | 0 | 0 |
+| `kiltprotocol/kilt-node` | 671 | 177 | 1107 | 0 | 0 | 0 | 0 | 0 | 0 |
+| `iotaledger/identity.rs` | 30 | 11 | 36 | 0 | 0 | 0 | 0 | 0 | 0 |
+| `digitalbazaar/jsonld-signatures` | 24 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| `digitalbazaar/vc` | 28 | 16 | 60 | 0 | 0 | 0 | 0 | 0 | 0 |
+| `transmute-industries/verifiable-data` | 1081 | 393 | 496 | 0 | 0 | 0 | 0 | 0 | 0 |
+| `alastria/alastria-identity` | 51 | 7 | 117 | 0 | 0 | 0 | 0 | 0 | 0 |
+| `energywebfoundation/iam-client-lib` | 280 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| `hyperledger/aries-framework-javascript` | 2543 | 624 | 5777 | 1 | 0 | 1 | 1 | 0 | 3 |
+| `openwallet-foundation/acapy-plugins` | 827 | 254 | 1429 | 0 | 0 | 0 | 0 | 0 | 0 |
+| `blockchain-lab-um/masca` | 428 | 101 | 335 | 0 | 0 | 0 | 0 | 0 | 0 |
+| `web3id/web3id` | 34 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| `zhaoxinghua09-cell/uibc-core` (this repository) | 2025 | 284 | 1108 | 2 | 2 | 2 | 2 | 2 | 10 |
 
 D1 门槛＝测试文件内拒绝类断言 ≥10 次；D2＝位级关键词 ≥1；D3＝地址派生的**宽/严区间**（宽＝`base58|bs58|deriveAddress` 出现在测试里，严＝只认 `deriveAddress|addressFrom|publicKeyToAddress|toChecksumAddress`）；
-D4＝非测试代码里出现失败退出码 ≥1；D5 对 25 家一律记 0——"注入假断言要求门失败"这种用例，检索不到就当没有。
+D4＝非测试代码里出现失败退出码 ≥1；D5 对 40 家一律记 0——"注入假断言要求门失败"这种用例，检索不到就当没有。
 **最好的一家 3/10，本仓库 10/10；D3 换成严规则后最好的一家仍是 3/10，本仓库 10/10。**
 D3 两端都写在这里，是因为单一数字在这一维一定是偏的：宽规则会把 `publicKeyBase58: '...'` 这种字面量当成派生证据，
 严规则又会漏掉"绑了地址但没写 derive 函数"的仓（逐家两列见 `docs/D3-BRACKET.md`）。
@@ -54,16 +69,16 @@ D3 两端都写在这里，是因为单一数字在这一维一定是偏的：�
 
 ## 三、结论（每条都带可数的分母，可被上表打掉）
 
-1. **逐位变异：25 家里有 0 家。** 这一维要的是"把一条报文的每一位翻一遍并归类"；
+1. **逐位变异：40 家里有 0 家。** 这一维要的是"把一条报文的每一位翻一遍并归类"；
    没有二进制报文层的实现，连可翻的对象都没有——RFC-011 在本轮之前没有公开实现（`docs/CODEC.md` 有取证）。
-2. **跨层单一退出码：25 家里有 9 家。** 那 9 家记 1 是因为仓内有失败退出码（CLI 行为），
+2. **跨层单一退出码：40 家里有 11 家。** 那 11 家记 1 是因为仓内有失败退出码（CLI 行为），
    不是把多层证据收进一个码。
-3. **门自证：25 家里有 0 家。** 一个没人证伪过的门，通过时说的话只是自我声明。
-4. **文档层拒绝断言：25 家里有 10 家**，其中达到 D1 门槛（≥10 次）的按点状证据记 1；
+3. **门自证：40 家里有 0 家。** 一个没人证伪过的门，通过时说的话只是自我声明。
+4. **文档层拒绝断言：40 家里有 13 家**，其中达到 D1 门槛（≥10 次）的按点状证据记 1；
    本仓库记 2 的依据是 31 个变异体、25 个必拒、silent 必须为空——同分不同质，见第四节。
 
 所以"全面超越"这句，能成立的范围只有一句：**在公开仓库里，把文档层、二进制层、地址层的变异证据收进
-一道可失败的门，并让门与自证一起随仓交付——25 家里只有本仓库具备完整闭环（10/10，最好的一家 3/10）。**
+一道可失败的门，并让门与自证一起随仓交付——40 家里只有本仓库具备完整闭环（10/10，最好的一家 3/10）。**
 其余任何"比竞品强"的说法都超出本表。
 
 ## 五、这个度量能被怎么骗（上限是量出来的，不是嘴上说"关键词会漏"）
@@ -86,7 +101,7 @@ D3 两端都写在这里，是因为单一数字在这一维一定是偏的：�
 - 关键词检索漏报：竞品可能用别的词（"negative cases"、把 fuzz 写进 CI 配置而非源码）。
 - 私有仓库与内部流水线：他们内部做没做，本表无从判断。
 - 质量差异：D1 记 1 的家，其拒绝用例是点状的；本仓库量的是另一件事。
-- 抽样：25 家是"能代表各条技术路线"的取样，不是 DID 生态的全集。
+- 抽样：40 家是"能代表各条技术路线"的取样，不是 DID 生态的全集。
 
 ## 七、复跑
 
@@ -132,4 +147,19 @@ python tools/competitor_gate_parity.py --json                    # 机读
 - `uport-project/ethr-did` @ `4bbd2ef539ba`：https://github.com/uport-project/ethr-did/tree/4bbd2ef539ba532731508198e5828657c169ff66
 - `w3c-ccg/did-method-key` @ `2cc490c38c5a`：https://github.com/w3c-ccg/did-method-key/tree/2cc490c38c5aacf58497a87fc0cf8794668bf716
 - `w3c-ccg/did-test-suite` @ `addafb08c84e`：https://github.com/w3c-ccg/did-test-suite/tree/addafb08c84ef3c4dd4a596ebe71f164daa4ceab
+- `TBD54566975/ssi-sdk` @ `5ff932dc6d35`：https://github.com/TBD54566975/ssi-sdk/tree/5ff932dc6d35564a2be8d05d23657895c6c0c5f4
+- `TBD54566975/dwn-sdk-js` @ `0e9030144643`：https://github.com/TBD54566975/dwn-sdk-js/tree/0e903014464388bcfcdcd42da74c40fdd902fd23
+- `cheqd/cheqd-node` @ `ae52af92966e`：https://github.com/cheqd/cheqd-node/tree/ae52af92966eed4082ccb3a0e26f18039c0419e3
+- `cheqd/sdk` @ `72e87f391829`：https://github.com/cheqd/sdk/tree/72e87f3918295b55e6eb1e7c36fbc20a1740d167
+- `kiltprotocol/kilt-node` @ `2a3bd554a54c`：https://github.com/kiltprotocol/kilt-node/tree/2a3bd554a54c62adc7ca8fc31521803aa4f46219
+- `iotaledger/identity.rs` @ `7dd527087b96`：https://github.com/iotaledger/identity.rs/tree/7dd527087b96bf26ea97d486225eff8278c9a89c
+- `digitalbazaar/jsonld-signatures` @ `4bbef4646d91`：https://github.com/digitalbazaar/jsonld-signatures/tree/4bbef4646d91ab17773594021652d237b3ab4a23
+- `digitalbazaar/vc` @ `7ddb985a67e4`：https://github.com/digitalbazaar/vc/tree/7ddb985a67e42afeb24ef833a5b45ecb72d7771d
+- `transmute-industries/verifiable-data` @ `6e77985eb585`：https://github.com/transmute-industries/verifiable-data/tree/6e77985eb585897d1b7abd352ee688e51fc66a06
+- `alastria/alastria-identity` @ `edffdfaaa0fb`：https://github.com/alastria/alastria-identity/tree/edffdfaaa0fbd70a52e23715849fa96d4508ee32
+- `energywebfoundation/iam-client-lib` @ `14156ae0b22f`：https://github.com/energywebfoundation/iam-client-lib/tree/14156ae0b22f3216e2069d43bdbb662889a886ef
+- `hyperledger/aries-framework-javascript` @ `06930296a96c`：https://github.com/hyperledger/aries-framework-javascript/tree/06930296a96c02519b8c01c0d1822f2a08bde646
+- `openwallet-foundation/acapy-plugins` @ `8acf77865188`：https://github.com/openwallet-foundation/acapy-plugins/tree/8acf77865188073c6dcca648913d37eff8666746
+- `blockchain-lab-um/masca` @ `fcfb07c9dd09`：https://github.com/blockchain-lab-um/masca/tree/fcfb07c9dd0995d4da0148f42051869cdbb16748
+- `web3id/web3id` @ `0f6f7bb0eb25`：https://github.com/web3id/web3id/tree/0f6f7bb0eb259bc2d64960a3e0a61ff1860bfac6
 

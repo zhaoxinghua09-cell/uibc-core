@@ -45,7 +45,7 @@ def test_clean_tree_passes(parity):
 
 def test_every_audit_is_pinned(snap):
     repos = [r for r in snap["repos"] if "error" not in r]
-    assert len(repos) >= 25, "the audited set may grow, not shrink"
+    assert len(repos) >= 40, "the audited set may grow, not shrink"
     for row in repos:
         assert len(row["sha"]) == 40, row["repo"]
         assert len(row["tarball_sha256"]) == 64, row["repo"]

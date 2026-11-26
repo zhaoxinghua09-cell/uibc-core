@@ -1,3 +1,9 @@
+## 未发布 — 2026-11-26（竞品样本 25 → 40 家：结论不变，但不再是"取样说大话"）
+
+- **为什么扩**：25 家是代表取样，评委最容易的攻击是"你挑了弱的"。这次按 org 分散补 15 家（`TBD54566975/ssi-sdk`、`TBD54566975/dwn-sdk-js`、`cheqd/cheqd-node`、`cheqd/sdk`、`kiltprotocol/kilt-node`、`iotaledger/identity.rs`、`digitalbazaar/jsonld-signatures`、`digitalbazaar/vc`、`transmute-industries/verifiable-data`、`alastria/alastria-identity`、`energywebfoundation/iam-client-lib`、`hyperledger/aries-framework-javascript`、`openwallet-foundation/acapy-plugins`、`blockchain-lab-um/masca`、`web3id/web3id`），同一组正则、同一 `score_one`、每家钉 commit。
+- **结果**：40 家，最好仍 **3/10**（现在 11 家并列 3 分），本仓 **10/10**；分布 0 分 **27** 家、1 分 1 家、2 分 1 家、3 分 11 家。**扩样没有把结论变小，也没有把差距变小**。
+- **门槛同步抬**：`MIN_REPOS` 25 → **40**、`tests/test_competitor_parity.py` 的仓数下限同步；样本只能变大，不能缩。
+- **两处真缺陷被扩样打出来**：① 解包器遇到上游 tar 的**绝对符号链接**（`iotaledger/identity.rs` 的 `bindings/wasm/.license_template`）整包失败 → 改为按成员逐个解（只写常规文件，链接跳过）；② 引用实测把**一次 TLS 抖动记成死链**（17 条 status=0）→ 加三次退避重试。重测：**40 条引用 0 死、9 条 301 且 9/9 在新名下仍 200**。
 ## 未发布 — 2026-11-26（清单从收据里请出来：8 KB 的收据 + 一行一文件的账本）
 
 - **问题（自己上一轮留下的）**：上一轮把逐文件 sha256 塞进了 `docs/outsider-rerun-receipt.json`，收据从 8 KB 涨到 305 KB。功能对，但两件事变糟：一是只有机器愿意打开它，人翻不动；二是一个文件动了，diff 里显示的是一整行 300 KB 的 JSON 变红，看不出是哪一条。

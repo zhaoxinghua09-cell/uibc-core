@@ -38,9 +38,9 @@
  "ours": {
   "repo": "zhaoxinghua09-cell/uibc-core",
   "commit": "unknown",
-  "code_files": 2014,
-  "test_files": 283,
-  "test_text_kb": 1100,
+  "code_files": 2025,
+  "test_files": 284,
+  "test_text_kb": 1108,
   "test_hits": {
    "fuzz": 0,
    "mutation_testing": 4,
@@ -51,13 +51,13 @@
    "reject_assertion": 167
   },
   "nontest_hits": {
-   "fuzz": 95,
+   "fuzz": 140,
    "mutation_testing": 32,
    "property_based": 13,
    "bit_level": 9,
    "address_derive": 204,
    "exit_code_gate": 62,
-   "reject_assertion": 2820
+   "reject_assertion": 2822
   },
   "dims": {
    "D1": 2,
@@ -1367,6 +1367,768 @@
     "D5": 0
    },
    "assertion_lines": 0
+  },
+  {
+   "repo": "TBD54566975/ssi-sdk",
+   "sha": "5ff932dc6d35564a2be8d05d23657895c6c0c5f4",
+   "code_files": 257,
+   "test_files": 0,
+   "test_lines": 0,
+   "code_lines": 30500,
+   "test_text_kb": 0,
+   "assertion_lines": 0,
+   "test_hits": {
+    "fuzz": 0,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 0,
+    "exit_code_gate": 0,
+    "reject_assertion": 0
+   },
+   "nontest_hits": {
+    "fuzz": 24,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 115,
+    "exit_code_gate": 15,
+    "reject_assertion": 123
+   },
+   "test_hit_examples": {
+    "fuzz": [],
+    "mutation_testing": [],
+    "property_based": [],
+    "bit_level": [],
+    "address_derive": [],
+    "exit_code_gate": [],
+    "reject_assertion": []
+   },
+   "tarball_sha256": "415ad57262300e186b52cdb4d29a9fcc61e12943b3ebd12879acdc8425b4fbd7",
+   "tarball_bytes": 1318336,
+   "dims": {
+    "D1": 0,
+    "D2": 0,
+    "D3": 0,
+    "D4": 0,
+    "D5": 0
+   }
+  },
+  {
+   "repo": "TBD54566975/dwn-sdk-js",
+   "sha": "0e903014464388bcfcdcd42da74c40fdd902fd23",
+   "code_files": 244,
+   "test_files": 100,
+   "test_lines": 31036,
+   "code_lines": 53872,
+   "test_text_kb": 1562,
+   "assertion_lines": 6,
+   "test_hits": {
+    "fuzz": 0,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 0,
+    "exit_code_gate": 0,
+    "reject_assertion": 183
+   },
+   "nontest_hits": {
+    "fuzz": 6,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 0,
+    "exit_code_gate": 0,
+    "reject_assertion": 32
+   },
+   "test_hit_examples": {
+    "fuzz": [],
+    "mutation_testing": [],
+    "property_based": [],
+    "bit_level": [],
+    "address_derive": [],
+    "exit_code_gate": [],
+    "reject_assertion": [
+     "tests/core/protocol-authorization.spec.ts",
+     "tests/event-log/event-log.spec.ts",
+     "tests/features/author-delegated-grant.spec.ts"
+    ]
+   },
+   "tarball_sha256": "ac2589b864e2bc88f94b31d92891854b2c53b5523418d5814ae73bf927ddc3b0",
+   "tarball_bytes": 1293279,
+   "dims": {
+    "D1": 1,
+    "D2": 0,
+    "D3": 0,
+    "D4": 0,
+    "D5": 0
+   }
+  },
+  {
+   "repo": "cheqd/cheqd-node",
+   "sha": "ae52af92966eed4082ccb3a0e26f18039c0419e3",
+   "code_files": 605,
+   "test_files": 240,
+   "test_lines": 16911,
+   "code_lines": 268623,
+   "test_text_kb": 542,
+   "assertion_lines": 16,
+   "test_hits": {
+    "fuzz": 0,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 46,
+    "exit_code_gate": 0,
+    "reject_assertion": 70
+   },
+   "nontest_hits": {
+    "fuzz": 21,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 72,
+    "exit_code_gate": 4,
+    "reject_assertion": 522
+   },
+   "test_hit_examples": {
+    "fuzz": [],
+    "mutation_testing": [],
+    "property_based": [],
+    "bit_level": [],
+    "address_derive": [
+     "tests/integration/cli_diddoc_test.go",
+     "tests/upgrade/integration/v2/generated/pre/create - diddoc/diddoc_indy_ed255192018.json",
+     "tests/upgrade/integration/v2/generated/pre/create - diddoc/diddoc_uuid_ed255192018.json"
+    ],
+    "exit_code_gate": [],
+    "reject_assertion": [
+     "tests/integration/cli_diddoc_negative_test.go",
+     "tests/integration/cli_diddoc_pricing_negative_test.go",
+     "tests/integration/cli_resource_negative_test.go"
+    ]
+   },
+   "tarball_sha256": "f3c6e29351b2cc564058a3f99b1b087d28751eac63bc1a029d9b9ce8e07ac83a",
+   "tarball_bytes": 5958622,
+   "dims": {
+    "D1": 1,
+    "D2": 0,
+    "D3": 1,
+    "D4": 1,
+    "D5": 0
+   }
+  },
+  {
+   "repo": "cheqd/sdk",
+   "sha": "72e87f3918295b55e6eb1e7c36fbc20a1740d167",
+   "code_files": 72,
+   "test_files": 24,
+   "test_lines": 13682,
+   "code_lines": 42972,
+   "test_text_kb": 540,
+   "assertion_lines": 2,
+   "test_hits": {
+    "fuzz": 0,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 128,
+    "exit_code_gate": 0,
+    "reject_assertion": 90
+   },
+   "nontest_hits": {
+    "fuzz": 3,
+    "mutation_testing": 0,
+    "property_based": 1,
+    "bit_level": 0,
+    "address_derive": 50,
+    "exit_code_gate": 0,
+    "reject_assertion": 44
+   },
+   "test_hit_examples": {
+    "fuzz": [],
+    "mutation_testing": [],
+    "property_based": [],
+    "bit_level": [],
+    "address_derive": [
+     "cjs/tests/signer.test.ts",
+     "cjs/tests/utils.test.ts",
+     "cjs/tests/modules/did.test.ts"
+    ],
+    "exit_code_gate": [],
+    "reject_assertion": [
+     "cjs/tests/signer.test.ts",
+     "cjs/tests/utils.test.ts",
+     "cjs/tests/modules/did.test.ts"
+    ]
+   },
+   "tarball_sha256": "6fb3dc4f7caa6b5e08d5095720bf40fbace1fda9d0339af5367219b8f8004785",
+   "tarball_bytes": 291845,
+   "dims": {
+    "D1": 0,
+    "D2": 0,
+    "D3": 0,
+    "D4": 0,
+    "D5": 0
+   }
+  },
+  {
+   "repo": "kiltprotocol/kilt-node",
+   "sha": "2a3bd554a54c62adc7ca8fc31521803aa4f46219",
+   "code_files": 671,
+   "test_files": 177,
+   "test_lines": 32647,
+   "code_lines": 133056,
+   "test_text_kb": 1107,
+   "assertion_lines": 0,
+   "test_hits": {
+    "fuzz": 0,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 0,
+    "exit_code_gate": 0,
+    "reject_assertion": 1
+   },
+   "nontest_hits": {
+    "fuzz": 12,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 27,
+    "exit_code_gate": 7,
+    "reject_assertion": 242
+   },
+   "test_hit_examples": {
+    "fuzz": [],
+    "mutation_testing": [],
+    "property_based": [],
+    "bit_level": [],
+    "address_derive": [],
+    "exit_code_gate": [],
+    "reject_assertion": [
+     "pallets/pallet-bonded-coins/src/tests/transactions/mint_into.rs"
+    ]
+   },
+   "tarball_sha256": "3fd65577ca7b009824dc1818c0683e290c6720cb19700393f0f4dff4c08d051e",
+   "tarball_bytes": 18775436,
+   "dims": {
+    "D1": 0,
+    "D2": 0,
+    "D3": 0,
+    "D4": 0,
+    "D5": 0
+   }
+  },
+  {
+   "repo": "iotaledger/identity.rs",
+   "sha": "7dd527087b96bf26ea97d486225eff8278c9a89c",
+   "code_files": 30,
+   "test_files": 11,
+   "test_lines": 1086,
+   "code_lines": 2960,
+   "test_text_kb": 36,
+   "assertion_lines": 0,
+   "test_hits": {
+    "fuzz": 0,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 0,
+    "exit_code_gate": 0,
+    "reject_assertion": 3
+   },
+   "nontest_hits": {
+    "fuzz": 0,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 0,
+    "exit_code_gate": 0,
+    "reject_assertion": 13
+   },
+   "test_hit_examples": {
+    "fuzz": [],
+    "mutation_testing": [],
+    "property_based": [],
+    "bit_level": [],
+    "address_derive": [],
+    "exit_code_gate": [],
+    "reject_assertion": [
+     "bindings/grpc/tests/api/domain_linkage.rs",
+     "bindings/grpc/tests/api/helpers.rs"
+    ]
+   },
+   "tarball_sha256": "dcb1bd428d89213e9fe01ce136567dd3dfb4cdf76be764fd6a70c62e6f2a608e",
+   "tarball_bytes": 832692,
+   "dims": {
+    "D1": 0,
+    "D2": 0,
+    "D3": 0,
+    "D4": 0,
+    "D5": 0
+   }
+  },
+  {
+   "repo": "digitalbazaar/jsonld-signatures",
+   "sha": "4bbef4646d91ab17773594021652d237b3ab4a23",
+   "code_files": 24,
+   "test_files": 1,
+   "test_lines": 19,
+   "code_lines": 2238,
+   "test_text_kb": 0,
+   "assertion_lines": 0,
+   "test_hits": {
+    "fuzz": 0,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 0,
+    "exit_code_gate": 0,
+    "reject_assertion": 0
+   },
+   "nontest_hits": {
+    "fuzz": 0,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 0,
+    "exit_code_gate": 0,
+    "reject_assertion": 2
+   },
+   "test_hit_examples": {
+    "fuzz": [],
+    "mutation_testing": [],
+    "property_based": [],
+    "bit_level": [],
+    "address_derive": [],
+    "exit_code_gate": [],
+    "reject_assertion": []
+   },
+   "tarball_sha256": "d4bf62121fbf18a9a3950f3f74afba43e6e92fb556a5aa9b3672239ee7d36e71",
+   "tarball_bytes": 24618,
+   "dims": {
+    "D1": 0,
+    "D2": 0,
+    "D3": 0,
+    "D4": 0,
+    "D5": 0
+   }
+  },
+  {
+   "repo": "digitalbazaar/vc",
+   "sha": "7ddb985a67e42afeb24ef833a5b45ecb72d7771d",
+   "code_files": 28,
+   "test_files": 16,
+   "test_lines": 1790,
+   "code_lines": 4020,
+   "test_text_kb": 60,
+   "assertion_lines": 0,
+   "test_hits": {
+    "fuzz": 0,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 5,
+    "exit_code_gate": 0,
+    "reject_assertion": 17
+   },
+   "nontest_hits": {
+    "fuzz": 0,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 0,
+    "exit_code_gate": 0,
+    "reject_assertion": 2
+   },
+   "test_hit_examples": {
+    "fuzz": [],
+    "mutation_testing": [],
+    "property_based": [],
+    "bit_level": [],
+    "address_derive": [
+     "test/10-verify.spec.js",
+     "test/mocks/mock.data.js"
+    ],
+    "exit_code_gate": [],
+    "reject_assertion": [
+     "test/10-verify.spec.js",
+     "test/testDocumentLoader.js",
+     "test/contexts/index.js"
+    ]
+   },
+   "tarball_sha256": "46935a0d3a473e26c2a4254e528f73f5db8d2d4de0e06e43f8fefc2b3fd7fdaf",
+   "tarball_bytes": 33082,
+   "dims": {
+    "D1": 0,
+    "D2": 0,
+    "D3": 0,
+    "D4": 0,
+    "D5": 0
+   }
+  },
+  {
+   "repo": "transmute-industries/verifiable-data",
+   "sha": "6e77985eb585897d1b7abd352ee688e51fc66a06",
+   "code_files": 1081,
+   "test_files": 393,
+   "test_lines": 18844,
+   "code_lines": 673062,
+   "test_text_kb": 496,
+   "assertion_lines": 2,
+   "test_hits": {
+    "fuzz": 0,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 94,
+    "exit_code_gate": 0,
+    "reject_assertion": 12
+   },
+   "nontest_hits": {
+    "fuzz": 210,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 272,
+    "exit_code_gate": 0,
+    "reject_assertion": 51
+   },
+   "test_hit_examples": {
+    "fuzz": [],
+    "mutation_testing": [],
+    "property_based": [],
+    "bit_level": [],
+    "address_derive": [
+     "packages/ed25519-key-pair/src/__tests__/Ed25519VerificationKey2018.test.ts",
+     "packages/ed25519-key-pair/src/__tests__/jose.interop.test.ts",
+     "packages/ed25519-key-pair/src/__tests__/ld-key-pair.conformance.test.ts"
+    ],
+    "exit_code_gate": [],
+    "reject_assertion": [
+     "packages/ed25519-signature-2018/src/__tests__/dates/suiteConstructor.test.ts",
+     "packages/linked-data-proof/src/__tests__/1-comparison.test.ts",
+     "packages/vc-status-rl-2020/src/__tests__/integration.test.ts"
+    ]
+   },
+   "tarball_sha256": "b310526a391510186d2ce672da8fb7eb47ba1b8dd979bd949ffc2c4dc941547b",
+   "tarball_bytes": 5152933,
+   "dims": {
+    "D1": 0,
+    "D2": 0,
+    "D3": 0,
+    "D4": 0,
+    "D5": 0
+   }
+  },
+  {
+   "repo": "alastria/alastria-identity",
+   "sha": "edffdfaaa0fbd70a52e23715849fa96d4508ee32",
+   "code_files": 51,
+   "test_files": 7,
+   "test_lines": 1980,
+   "code_lines": 24365,
+   "test_text_kb": 117,
+   "assertion_lines": 0,
+   "test_hits": {
+    "fuzz": 0,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 0,
+    "exit_code_gate": 0,
+    "reject_assertion": 5
+   },
+   "nontest_hits": {
+    "fuzz": 0,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 18,
+    "exit_code_gate": 0,
+    "reject_assertion": 8
+   },
+   "test_hit_examples": {
+    "fuzz": [],
+    "mutation_testing": [],
+    "property_based": [],
+    "bit_level": [],
+    "address_derive": [],
+    "exit_code_gate": [],
+    "reject_assertion": [
+     "test/registry/AlastriaCredentialRegistry.js",
+     "test/registry/AlastriaPresentationRegistry.js"
+    ]
+   },
+   "tarball_sha256": "808b4cd38d91ced4e3ebeaa92fac4fd7970076f931e565dc17473e1a3fab6bb2",
+   "tarball_bytes": 4586259,
+   "dims": {
+    "D1": 0,
+    "D2": 0,
+    "D3": 0,
+    "D4": 0,
+    "D5": 0
+   }
+  },
+  {
+   "repo": "energywebfoundation/iam-client-lib",
+   "sha": "14156ae0b22f3216e2069d43bdbb662889a886ef",
+   "code_files": 280,
+   "test_files": 0,
+   "test_lines": 0,
+   "code_lines": 78291,
+   "test_text_kb": 0,
+   "assertion_lines": 0,
+   "test_hits": {
+    "fuzz": 0,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 0,
+    "exit_code_gate": 0,
+    "reject_assertion": 0
+   },
+   "nontest_hits": {
+    "fuzz": 6,
+    "mutation_testing": 0,
+    "property_based": 1,
+    "bit_level": 0,
+    "address_derive": 8,
+    "exit_code_gate": 1,
+    "reject_assertion": 78
+   },
+   "test_hit_examples": {
+    "fuzz": [],
+    "mutation_testing": [],
+    "property_based": [],
+    "bit_level": [],
+    "address_derive": [],
+    "exit_code_gate": [],
+    "reject_assertion": []
+   },
+   "tarball_sha256": "33aad2336d8420c3df1fe0558e723afae2e2f037a98785f5c8d76a45a5e9bacb",
+   "tarball_bytes": 1384333,
+   "dims": {
+    "D1": 0,
+    "D2": 0,
+    "D3": 0,
+    "D4": 0,
+    "D5": 0
+   }
+  },
+  {
+   "repo": "hyperledger/aries-framework-javascript",
+   "sha": "06930296a96c02519b8c01c0d1822f2a08bde646",
+   "code_files": 2543,
+   "test_files": 624,
+   "test_lines": 133985,
+   "code_lines": 323393,
+   "test_text_kb": 5777,
+   "assertion_lines": 335,
+   "test_hits": {
+    "fuzz": 1,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 303,
+    "exit_code_gate": 1,
+    "reject_assertion": 1564
+   },
+   "nontest_hits": {
+    "fuzz": 28,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 7,
+    "address_derive": 128,
+    "exit_code_gate": 4,
+    "reject_assertion": 415
+   },
+   "test_hit_examples": {
+    "fuzz": [
+     "packages/core/src/modules/x509/__tests__/X509Service.test.ts"
+    ],
+    "mutation_testing": [],
+    "property_based": [],
+    "bit_level": [],
+    "address_derive": [
+     "packages/anoncreds/src/formats/__tests__/anoncreds-format-services.test.ts",
+     "packages/askar/src/kms/__tests__/AskarKeyManagementService.test.ts",
+     "packages/core/src/crypto/__tests__/__fixtures__/didJwsz6Mkf.ts"
+    ],
+    "exit_code_gate": [
+     "tests/setup.ts"
+    ],
+    "reject_assertion": [
+     "packages/anoncreds/src/anoncreds-rs/__tests__/AnonCredsRsHolderService.test.ts",
+     "packages/anoncreds/src/formats/__tests__/AnonCredsDidCommRevocationNotificationFormatService.test.ts",
+     "packages/anoncreds/src/updates/0.4-0.5/__tests__/w3cCredentialRecordMigration.test.ts"
+    ]
+   },
+   "tarball_sha256": "01d8f8da163176e7be33b57683972d26ca73d380397022ecc8cdf11c4891e7a5",
+   "tarball_bytes": 3390924,
+   "dims": {
+    "D1": 1,
+    "D2": 0,
+    "D3": 1,
+    "D4": 1,
+    "D5": 0
+   }
+  },
+  {
+   "repo": "openwallet-foundation/acapy-plugins",
+   "sha": "8acf77865188073c6dcca648913d37eff8666746",
+   "code_files": 827,
+   "test_files": 254,
+   "test_lines": 36977,
+   "code_lines": 102285,
+   "test_text_kb": 1429,
+   "assertion_lines": 2,
+   "test_hits": {
+    "fuzz": 0,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 3,
+    "exit_code_gate": 3,
+    "reject_assertion": 42
+   },
+   "nontest_hits": {
+    "fuzz": 2,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 39,
+    "exit_code_gate": 0,
+    "reject_assertion": 213
+   },
+   "test_hit_examples": {
+    "fuzz": [],
+    "mutation_testing": [],
+    "property_based": [],
+    "bit_level": [],
+    "address_derive": [
+     "cheqd/integration/tests/test_example.py",
+     "hedera/hedera/tests/did/test_resolver.py",
+     "hedera/integration/tests/test_hedera_did.py"
+    ],
+    "exit_code_gate": [
+     "test_acapy_version.py",
+     "oid4vc/keycloak/e2e/test_wallet.py"
+    ],
+    "reject_assertion": [
+     "cheqd/cheqd/did/tests/test_registrar.py",
+     "cheqd/cheqd/resolver/tests/test_resolver.py",
+     "cheqd/cheqd/tests/test_routes.py"
+    ]
+   },
+   "tarball_sha256": "2a29677cfc70cda8ca0b66a479045b6bf948a33c6b93345ee8d03020fc1300c7",
+   "tarball_bytes": 4455769,
+   "dims": {
+    "D1": 0,
+    "D2": 0,
+    "D3": 0,
+    "D4": 0,
+    "D5": 0
+   }
+  },
+  {
+   "repo": "blockchain-lab-um/masca",
+   "sha": "fcfb07c9dd0995d4da0148f42051869cdbb16748",
+   "code_files": 428,
+   "test_files": 101,
+   "test_lines": 10362,
+   "code_lines": 67254,
+   "test_text_kb": 335,
+   "assertion_lines": 1,
+   "test_hits": {
+    "fuzz": 0,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 2,
+    "exit_code_gate": 0,
+    "reject_assertion": 31
+   },
+   "nontest_hits": {
+    "fuzz": 16,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 22,
+    "exit_code_gate": 1,
+    "reject_assertion": 114
+   },
+   "test_hit_examples": {
+    "fuzz": [],
+    "mutation_testing": [],
+    "property_based": [],
+    "bit_level": [],
+    "address_derive": [
+     "packages/snap/tests/data/documentResolution/web.json"
+    ],
+    "exit_code_gate": [],
+    "reject_assertion": [
+     "libs/extended-verification/tests/Verification.service.spec.ts",
+     "packages/snap/tests/data/constants.ts",
+     "packages/snap/tests/e2e/createVerifiableCredential.spec.ts"
+    ]
+   },
+   "tarball_sha256": "87c2d9235ff7a5966e986eae63a48a8047a1bdfc39734cb66860e6091e9c01ca",
+   "tarball_bytes": 76734754,
+   "dims": {
+    "D1": 0,
+    "D2": 0,
+    "D3": 0,
+    "D4": 0,
+    "D5": 0
+   }
+  },
+  {
+   "repo": "web3id/web3id",
+   "sha": "0f6f7bb0eb259bc2d64960a3e0a61ff1860bfac6",
+   "code_files": 34,
+   "test_files": 0,
+   "test_lines": 0,
+   "code_lines": 5188,
+   "test_text_kb": 0,
+   "assertion_lines": 0,
+   "test_hits": {
+    "fuzz": 0,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 0,
+    "exit_code_gate": 0,
+    "reject_assertion": 0
+   },
+   "nontest_hits": {
+    "fuzz": 3,
+    "mutation_testing": 0,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 0,
+    "exit_code_gate": 0,
+    "reject_assertion": 4
+   },
+   "test_hit_examples": {
+    "fuzz": [],
+    "mutation_testing": [],
+    "property_based": [],
+    "bit_level": [],
+    "address_derive": [],
+    "exit_code_gate": [],
+    "reject_assertion": []
+   },
+   "tarball_sha256": "bfd377578998b383c55d2edc90329baf2497ff97baa65515a47634b35d8b2570",
+   "tarball_bytes": 5688751,
+   "dims": {
+    "D1": 0,
+    "D2": 0,
+    "D3": 0,
+    "D4": 0,
+    "D5": 0
+   }
   }
  ],
  "calibration": {

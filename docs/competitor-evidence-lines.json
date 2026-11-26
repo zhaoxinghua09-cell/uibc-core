@@ -1065,6 +1065,610 @@
     ],
     "D4": []
    }
+  },
+  {
+   "repo": "TBD54566975/ssi-sdk",
+   "sha": "5ff932dc6d35564a2be8d05d23657895c6c0c5f4",
+   "dims": {
+    "D1": 0,
+    "D2": 0,
+    "D3": 0,
+    "D4": 0,
+    "D5": 0
+   },
+   "evidence": {
+    "D1": [],
+    "D2": [],
+    "D3": [],
+    "D4": [
+     {
+      "file": "credential/exchange/schema_test.go",
+      "line": 15,
+      "text": "os.Exit(1)"
+     },
+     {
+      "file": "credential/exchange/schema_test.go",
+      "line": 19,
+      "text": "os.Exit(1)"
+     },
+     {
+      "file": "credential/manifest/schema_test.go",
+      "line": 18,
+      "text": "os.Exit(1)"
+     }
+    ]
+   }
+  },
+  {
+   "repo": "TBD54566975/dwn-sdk-js",
+   "sha": "0e903014464388bcfcdcd42da74c40fdd902fd23",
+   "dims": {
+    "D1": 1,
+    "D2": 0,
+    "D3": 0,
+    "D4": 0,
+    "D5": 0
+   },
+   "evidence": {
+    "D1": [
+     {
+      "file": "tests/core/protocol-authorization.spec.ts",
+      "line": 40,
+      "text": "method: 'invalid-method'"
+     },
+     {
+      "file": "tests/event-log/event-log.spec.ts",
+      "line": 164,
+      "text": "it('skips if cid is invalid', async () => {"
+     },
+     {
+      "file": "tests/features/author-delegated-grant.spec.ts",
+      "line": 873,
+      "text": "// 4. Bob's DWN should reject Device X's message"
+     }
+    ],
+    "D2": [],
+    "D3": [],
+    "D4": []
+   }
+  },
+  {
+   "repo": "cheqd/cheqd-node",
+   "sha": "ae52af92966eed4082ccb3a0e26f18039c0419e3",
+   "dims": {
+    "D1": 1,
+    "D2": 0,
+    "D3": 1,
+    "D4": 1,
+    "D5": 0
+   },
+   "evidence": {
+    "D1": [
+     {
+      "file": "tests/integration/cli_diddoc_negative_test.go",
+      "line": 280,
+      "text": "//\t   ii. fuzzed private key, invalid and non-matching"
+     },
+     {
+      "file": "tests/integration/cli_diddoc_negative_test.go",
+      "line": 290,
+      "text": "//\t   ii. fuzzed private key, invalid and non-matching"
+     },
+     {
+      "file": "tests/integration/cli_diddoc_negative_test.go",
+      "line": 359,
+      "text": "//   b. sign inputs invalid length"
+     }
+    ],
+    "D2": [],
+    "D3": [
+     {
+      "file": "tests/integration/cli_diddoc_test.go",
+      "line": 325,
+      "text": "publicKeyBase58 := testsetup.GenerateEd25519VerificationKey2018VerificationMaterial(publicKey)"
+     },
+     {
+      "file": "tests/integration/cli_diddoc_test.go",
+      "line": 334,
+      "text": "\"publicKeyBase58\": publicKeyBase58,"
+     },
+     {
+      "file": "tests/integration/cli_diddoc_test.go",
+      "line": 361,
+      "text": "newPublicKeyBase58 := testsetup.GenerateEd25519VerificationKey2018VerificationMaterial(newPublicKey)"
+     }
+    ],
+    "D4": [
+     {
+      "file": "cmd/cheqd-noded/main.go",
+      "line": 16,
+      "text": "os.Exit(1)"
+     },
+     {
+      "file": "installer/installer.py",
+      "line": 2814,
+      "text": "sys.exit(1)"
+     },
+     {
+      "file": "installer/installer.py",
+      "line": 2831,
+      "text": "sys.exit(1)"
+     }
+    ]
+   }
+  },
+  {
+   "repo": "cheqd/sdk",
+   "sha": "72e87f3918295b55e6eb1e7c36fbc20a1740d167",
+   "dims": {
+    "D1": 0,
+    "D2": 0,
+    "D3": 0,
+    "D4": 0,
+    "D5": 0
+   },
+   "evidence": {
+    "D1": [
+     {
+      "file": "cjs/tests/signer.test.ts",
+      "line": 88,
+      "text": ").rejects.toThrow();"
+     },
+     {
+      "file": "cjs/tests/signer.test.ts",
+      "line": 103,
+      "text": "await expect(signer.getDidSigner(nonExistingKeyId, protobufVerificationMethod!)).rejects.toThrow();"
+     },
+     {
+      "file": "cjs/tests/signer.test.ts",
+      "line": 166,
+      "text": ").rejects.toThrow();"
+     }
+    ],
+    "D2": [],
+    "D3": [
+     {
+      "file": "cjs/tests/signer.test.ts",
+      "line": 63,
+      "text": "const verificationKeys = createVerificationKeys(keyPair.publicKey, MethodSpecificIdAlgo.Base58, 'key-1');"
+     },
+     {
+      "file": "cjs/tests/signer.test.ts",
+      "line": 95,
+      "text": "const verificationKeys = createVerificationKeys(keyPair.publicKey, MethodSpecificIdAlgo.Base58, 'key-1');"
+     },
+     {
+      "file": "cjs/tests/signer.test.ts",
+      "line": 112,
+      "text": "const verificationKeys = createVerificationKeys(keyPair.publicKey, MethodSpecificIdAlgo.Base58, 'key-1');"
+     }
+    ],
+    "D4": []
+   }
+  },
+  {
+   "repo": "kiltprotocol/kilt-node",
+   "sha": "2a3bd554a54c62adc7ca8fc31521803aa4f46219",
+   "dims": {
+    "D1": 0,
+    "D2": 0,
+    "D3": 0,
+    "D4": 0,
+    "D5": 0
+   },
+   "evidence": {
+    "D1": [
+     {
+      "file": "pallets/pallet-bonded-coins/src/tests/transactions/mint_into.rs",
+      "line": 590,
+      "text": "let invalid_pool_id = calculate_pool_id(&[999]); // Assume 999 is an invalid currency ID"
+     }
+    ],
+    "D2": [],
+    "D3": [],
+    "D4": [
+     {
+      "file": "chopsticks/.yarn/releases/yarn-4.5.0.cjs",
+      "line": 218,
+      "text": "`+r,width:a=80}=e,n=(o+r).match(/[^\\S\\n]/g)||[];a-=n.length;let u=`.{1,${a}}([\\\\s\\\\u200B]+|$)|[^\\\\s\\\\u200B]+?([\\\\s\\\\u200B]+|$)`,A=t.trim(),p=new RegExp(u,\"g\"),h"
+     },
+     {
+      "file": "chopsticks/.yarn/releases/yarn-4.5.0.cjs",
+      "line": 393,
+      "text": "Try running the command again with the package name prefixed: ${pe.pretty(r,\"yarn add\",pe.Type.CODE)} ${pe.pretty(r,G.makeDescriptor(G.makeIdent(null,\"my-packag"
+     },
+     {
+      "file": "chopsticks/.yarn/releases/yarn-4.5.0.cjs",
+      "line": 515,
+      "text": "${ce}`)}else ae.length>1&&!A&&L.reportError(27,`${G.prettyDescriptor(r,U)} has multiple possible upgrade strategies; use -i to disambiguate manually`)}});if(x.h"
+     }
+    ]
+   }
+  },
+  {
+   "repo": "iotaledger/identity.rs",
+   "sha": "7dd527087b96bf26ea97d486225eff8278c9a89c",
+   "dims": {
+    "D1": 0,
+    "D2": 0,
+    "D3": 0,
+    "D4": 0,
+    "D5": 0
+   },
+   "evidence": {
+    "D1": [
+     {
+      "file": "bindings/grpc/tests/api/domain_linkage.rs",
+      "line": 143,
+      "text": "invalid: vec![],"
+     },
+     {
+      "file": "bindings/grpc/tests/api/domain_linkage.rs",
+      "line": 196,
+      "text": "invalid: vec![invalid_domain],"
+     },
+     {
+      "file": "bindings/grpc/tests/api/helpers.rs",
+      "line": 355,
+      "text": "let (cached_id, cached_network_id) = cache.split_once(';').ok_or(anyhow!(\"Invalid or empty cached data\"))?;"
+     }
+    ],
+    "D2": [],
+    "D3": [],
+    "D4": []
+   }
+  },
+  {
+   "repo": "digitalbazaar/jsonld-signatures",
+   "sha": "4bbef4646d91ab17773594021652d237b3ab4a23",
+   "dims": {
+    "D1": 0,
+    "D2": 0,
+    "D3": 0,
+    "D4": 0,
+    "D5": 0
+   },
+   "evidence": {
+    "D1": [],
+    "D2": [],
+    "D3": [],
+    "D4": []
+   }
+  },
+  {
+   "repo": "digitalbazaar/vc",
+   "sha": "7ddb985a67e42afeb24ef833a5b45ecb72d7771d",
+   "dims": {
+    "D1": 0,
+    "D2": 0,
+    "D3": 0,
+    "D4": 0,
+    "D5": 0
+   },
+   "evidence": {
+    "D1": [
+     {
+      "file": "test/10-verify.spec.js",
+      "line": 564,
+      "text": "it('fails to verify if a context contains an invalid id', async () => {"
+     },
+     {
+      "file": "test/10-verify.spec.js",
+      "line": 619,
+      "text": "it('fails to verify if a context has an invalid url', async () => {"
+     },
+     {
+      "file": "test/10-verify.spec.js",
+      "line": 936,
+      "text": "firstErrorMsg.should.contain('Invalid signature.');"
+     }
+    ],
+    "D2": [],
+    "D3": [
+     {
+      "file": "test/10-verify.spec.js",
+      "line": 156,
+      "text": "publicKeyBase58: keyPair.publicKeyBase58"
+     },
+     {
+      "file": "test/mocks/mock.data.js",
+      "line": 69,
+      "text": "\"publicKeyBase58\": \"2vXXVcAkogFwWGBHsyU1KCJrsFJLtuE8xnzyVNwmhhdq\""
+     },
+     {
+      "file": "test/mocks/mock.data.js",
+      "line": 77,
+      "text": "\"publicKeyBase58\": \"6uKsWVfFUShCv9qiCgHisBNeJpW3UhsVinEUHjzRuTrK\""
+     }
+    ],
+    "D4": []
+   }
+  },
+  {
+   "repo": "transmute-industries/verifiable-data",
+   "sha": "6e77985eb585897d1b7abd352ee688e51fc66a06",
+   "dims": {
+    "D1": 0,
+    "D2": 0,
+    "D3": 0,
+    "D4": 0,
+    "D5": 0
+   },
+   "evidence": {
+    "D1": [
+     {
+      "file": "packages/ed25519-signature-2018/src/__tests__/dates/suiteConstructor.test.ts",
+      "line": 299,
+      "text": "describe(\"Handling errors for invalid provided into suite\", () => {"
+     },
+     {
+      "file": "packages/ed25519-signature-2018/src/__tests__/dates/suiteConstructor.test.ts",
+      "line": 300,
+      "text": "// Pattern 3, invalid date value causes error to be thrown"
+     },
+     {
+      "file": "packages/linked-data-proof/src/__tests__/1-comparison.test.ts",
+      "line": 20,
+      "text": "files = await new Promise((resolve, reject) => {"
+     }
+    ],
+    "D2": [],
+    "D3": [
+     {
+      "file": "packages/ed25519-key-pair/src/__tests__/Ed25519VerificationKey2018.test.ts",
+      "line": 28,
+      "text": "publicKeyBase58: '6fioC1zcDPyPEL19pXRS2E4iJ46zH7xP6uSgAaPdwDrx',"
+     },
+     {
+      "file": "packages/ed25519-key-pair/src/__tests__/Ed25519VerificationKey2018.test.ts",
+      "line": 29,
+      "text": "privateKeyBase58:"
+     },
+     {
+      "file": "packages/ed25519-key-pair/src/__tests__/Ed25519VerificationKey2018.test.ts",
+      "line": 40,
+      "text": "publicKeyBase58: '6fioC1zcDPyPEL19pXRS2E4iJ46zH7xP6uSgAaPdwDrx',"
+     }
+    ],
+    "D4": []
+   }
+  },
+  {
+   "repo": "alastria/alastria-identity",
+   "sha": "edffdfaaa0fbd70a52e23715849fa96d4508ee32",
+   "dims": {
+    "D1": 0,
+    "D2": 0,
+    "D3": 0,
+    "D4": 0,
+    "D5": 0
+   },
+   "evidence": {
+    "D1": [
+     {
+      "file": "test/registry/AlastriaCredentialRegistry.js",
+      "line": 166,
+      "text": "it('Change to invalid Status by issuer1, will fail & revert', done => {"
+     },
+     {
+      "file": "test/registry/AlastriaPresentationRegistry.js",
+      "line": 147,
+      "text": "it('Change to invalid Status by subject1, will fail & revert', async() => {"
+     },
+     {
+      "file": "test/registry/AlastriaPresentationRegistry.js",
+      "line": 175,
+      "text": "it('Change to invalid Status by Receiver1, will fail & revert', async() => {"
+     }
+    ],
+    "D2": [],
+    "D3": [],
+    "D4": []
+   }
+  },
+  {
+   "repo": "energywebfoundation/iam-client-lib",
+   "sha": "14156ae0b22f3216e2069d43bdbb662889a886ef",
+   "dims": {
+    "D1": 0,
+    "D2": 0,
+    "D3": 0,
+    "D4": 0,
+    "D5": 0
+   },
+   "evidence": {
+    "D1": [],
+    "D2": [],
+    "D3": [],
+    "D4": [
+     {
+      "file": "scripts/run-with-local-chain.js",
+      "line": 85,
+      "text": "process.exit(1);"
+     }
+    ]
+   }
+  },
+  {
+   "repo": "hyperledger/aries-framework-javascript",
+   "sha": "06930296a96c02519b8c01c0d1822f2a08bde646",
+   "dims": {
+    "D1": 1,
+    "D2": 0,
+    "D3": 1,
+    "D4": 1,
+    "D5": 0
+   },
+   "evidence": {
+    "D1": [
+     {
+      "file": "packages/anoncreds/src/anoncreds-rs/__tests__/AnonCredsRsHolderService.test.ts",
+      "line": 370,
+      "text": "test('invalid referent', async () => {"
+     },
+     {
+      "file": "packages/anoncreds/src/anoncreds-rs/__tests__/AnonCredsRsHolderService.test.ts",
+      "line": 376,
+      "text": ").rejects.toThrow()"
+     },
+     {
+      "file": "packages/anoncreds/src/anoncreds-rs/__tests__/AnonCredsRsHolderService.test.ts",
+      "line": 485,
+      "text": "await expect(anonCredsHolderService.deleteCredential(agentContext, 'credentialId')).rejects.toThrow()"
+     }
+    ],
+    "D2": [],
+    "D3": [
+     {
+      "file": "packages/anoncreds/src/formats/__tests__/anoncreds-format-services.test.ts",
+      "line": 27,
+      "text": "import { indyDidFromPublicKeyBase58 } from '../../../../core/src/utils/did'"
+     },
+     {
+      "file": "packages/anoncreds/src/formats/__tests__/anoncreds-format-services.test.ts",
+      "line": 121,
+      "text": "const namespaceIdentifier = indyDidFromPublicKeyBase58("
+     },
+     {
+      "file": "packages/anoncreds/src/formats/__tests__/anoncreds-format-services.test.ts",
+      "line": 122,
+      "text": "TypedArrayEncoder.toBase58(Kms.PublicJwk.fromPublicJwk(key.publicJwk).publicKey.publicKey)"
+     }
+    ],
+    "D4": [
+     {
+      "file": "packages/drizzle-storage/cli/cli-definition.ts",
+      "line": 61,
+      "text": "process.exit(1)"
+     },
+     {
+      "file": "packages/drizzle-storage/cli/cli-definition.ts",
+      "line": 107,
+      "text": "process.exit(1)"
+     },
+     {
+      "file": "packages/drizzle-storage/cli/cli-definition.ts",
+      "line": 152,
+      "text": "process.exit(1)"
+     }
+    ]
+   }
+  },
+  {
+   "repo": "openwallet-foundation/acapy-plugins",
+   "sha": "8acf77865188073c6dcca648913d37eff8666746",
+   "dims": {
+    "D1": 0,
+    "D2": 0,
+    "D3": 0,
+    "D4": 0,
+    "D5": 0
+   },
+   "evidence": {
+    "D1": [
+     {
+      "file": "cheqd/cheqd/did/tests/test_registrar.py",
+      "line": 43,
+      "text": "# invalid type"
+     },
+     {
+      "file": "cheqd/cheqd/did/tests/test_registrar.py",
+      "line": 93,
+      "text": "# invalid type"
+     },
+     {
+      "file": "cheqd/cheqd/did/tests/test_registrar.py",
+      "line": 144,
+      "text": "# invalid type"
+     }
+    ],
+    "D2": [],
+    "D3": [
+     {
+      "file": "cheqd/integration/tests/test_example.py",
+      "line": 254,
+      "text": "\"publicKeyBase58\": test_verkey,"
+     },
+     {
+      "file": "hedera/hedera/tests/did/test_resolver.py",
+      "line": 30,
+      "text": "\"publicKeyBase58\": \"HNJ37tiLbGxD7XPvnTkaZCAV3PCe5P4HJFGMGUkVVZAJ\","
+     },
+     {
+      "file": "hedera/integration/tests/test_hedera_did.py",
+      "line": 70,
+      "text": "\"publicKeyBase58\": ver_key_no_multibase,"
+     }
+    ],
+    "D4": []
+   }
+  },
+  {
+   "repo": "blockchain-lab-um/masca",
+   "sha": "fcfb07c9dd0995d4da0148f42051869cdbb16748",
+   "dims": {
+    "D1": 0,
+    "D2": 0,
+    "D3": 0,
+    "D4": 0,
+    "D5": 0
+   },
+   "evidence": {
+    "D1": [
+     {
+      "file": "libs/extended-verification/tests/Verification.service.spec.ts",
+      "line": 478,
+      "text": "describe('invalid cases', () => {"
+     },
+     {
+      "file": "libs/extended-verification/tests/Verification.service.spec.ts",
+      "line": 480,
+      "text": "it('invalid JWT credential with expired date', async () => {"
+     },
+     {
+      "file": "libs/extended-verification/tests/Verification.service.spec.ts",
+      "line": 513,
+      "text": "it('invalid JWT credential with nbf date', async () => {"
+     }
+    ],
+    "D2": [],
+    "D3": [
+     {
+      "file": "packages/snap/tests/data/documentResolution/web.json",
+      "line": 26,
+      "text": "\"publicKeyBase58\": \"DK7uJiq9PnPnj7AmNZqVBFoLuwTjT1hFPrk6LSjZ2JRz\""
+     },
+     {
+      "file": "packages/snap/tests/data/documentResolution/web.json",
+      "line": 46,
+      "text": "\"publicKeyBase58\": \"CaSHXEvLKS6SfN9aBfkVGBpp15jSnaHazqHgLHp8KZ3Y\""
+     }
+    ],
+    "D4": [
+     {
+      "file": "scripts/changesets/version-stable.mjs",
+      "line": 112,
+      "text": "process.exit(1);"
+     }
+    ]
+   }
+  },
+  {
+   "repo": "web3id/web3id",
+   "sha": "0f6f7bb0eb259bc2d64960a3e0a61ff1860bfac6",
+   "dims": {
+    "D1": 0,
+    "D2": 0,
+    "D3": 0,
+    "D4": 0,
+    "D5": 0
+   },
+   "evidence": {
+    "D1": [],
+    "D2": [],
+    "D3": [],
+    "D4": []
+   }
   }
  ]
 }

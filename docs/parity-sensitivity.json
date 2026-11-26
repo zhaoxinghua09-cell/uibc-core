@@ -228,10 +228,148 @@
    "D1_window": 0,
    "score_strict": 0,
    "score_window": 0
+  },
+  {
+   "repo": "TBD54566975/ssi-sdk",
+   "assert_lines_strict": 0,
+   "assert_lines_window": 0,
+   "D1_strict": 0,
+   "D1_window": 0,
+   "score_strict": 0,
+   "score_window": 0
+  },
+  {
+   "repo": "TBD54566975/dwn-sdk-js",
+   "assert_lines_strict": 6,
+   "assert_lines_window": 27,
+   "D1_strict": 1,
+   "D1_window": 1,
+   "score_strict": 1,
+   "score_window": 1
+  },
+  {
+   "repo": "cheqd/cheqd-node",
+   "assert_lines_strict": 16,
+   "assert_lines_window": 45,
+   "D1_strict": 1,
+   "D1_window": 1,
+   "score_strict": 3,
+   "score_window": 3
+  },
+  {
+   "repo": "cheqd/sdk",
+   "assert_lines_strict": 2,
+   "assert_lines_window": 42,
+   "D1_strict": 0,
+   "D1_window": 1,
+   "score_strict": 0,
+   "score_window": 1
+  },
+  {
+   "repo": "kiltprotocol/kilt-node",
+   "assert_lines_strict": 0,
+   "assert_lines_window": 0,
+   "D1_strict": 0,
+   "D1_window": 0,
+   "score_strict": 0,
+   "score_window": 0
+  },
+  {
+   "repo": "iotaledger/identity.rs",
+   "assert_lines_strict": 0,
+   "assert_lines_window": 0,
+   "D1_strict": 0,
+   "D1_window": 0,
+   "score_strict": 0,
+   "score_window": 0
+  },
+  {
+   "repo": "digitalbazaar/jsonld-signatures",
+   "assert_lines_strict": 0,
+   "assert_lines_window": 0,
+   "D1_strict": 0,
+   "D1_window": 0,
+   "score_strict": 0,
+   "score_window": 0
+  },
+  {
+   "repo": "digitalbazaar/vc",
+   "assert_lines_strict": 0,
+   "assert_lines_window": 0,
+   "D1_strict": 0,
+   "D1_window": 0,
+   "score_strict": 0,
+   "score_window": 0
+  },
+  {
+   "repo": "transmute-industries/verifiable-data",
+   "assert_lines_strict": 2,
+   "assert_lines_window": 7,
+   "D1_strict": 0,
+   "D1_window": 1,
+   "score_strict": 0,
+   "score_window": 1
+  },
+  {
+   "repo": "alastria/alastria-identity",
+   "assert_lines_strict": 0,
+   "assert_lines_window": 0,
+   "D1_strict": 0,
+   "D1_window": 0,
+   "score_strict": 0,
+   "score_window": 0
+  },
+  {
+   "repo": "energywebfoundation/iam-client-lib",
+   "assert_lines_strict": 0,
+   "assert_lines_window": 0,
+   "D1_strict": 0,
+   "D1_window": 0,
+   "score_strict": 0,
+   "score_window": 0
+  },
+  {
+   "repo": "hyperledger/aries-framework-javascript",
+   "assert_lines_strict": 335,
+   "assert_lines_window": 682,
+   "D1_strict": 1,
+   "D1_window": 1,
+   "score_strict": 3,
+   "score_window": 3
+  },
+  {
+   "repo": "openwallet-foundation/acapy-plugins",
+   "assert_lines_strict": 2,
+   "assert_lines_window": 11,
+   "D1_strict": 0,
+   "D1_window": 1,
+   "score_strict": 0,
+   "score_window": 1
+  },
+  {
+   "repo": "blockchain-lab-um/masca",
+   "assert_lines_strict": 1,
+   "assert_lines_window": 3,
+   "D1_strict": 0,
+   "D1_window": 0,
+   "score_strict": 0,
+   "score_window": 0
+  },
+  {
+   "repo": "web3id/web3id",
+   "assert_lines_strict": 0,
+   "assert_lines_window": 0,
+   "D1_strict": 0,
+   "D1_window": 0,
+   "score_strict": 0,
+   "score_window": 0
   }
  ],
  "changed": [
-  "decentralized-identity/universal-resolver"
+  "decentralized-identity/universal-resolver",
+  "cheqd/sdk",
+  "transmute-industries/verifiable-data",
+  "openwallet-foundation/acapy-plugins"
  ],
  "best_strict": 3,
  "best_window": 3,

@@ -48,6 +48,32 @@ class TestStrictMode(unittest.TestCase):
         self.assertIn("extra.txt", s1(r)["detail"])
         self.assertFalse(r["strict"])
 
+    def test_lenient_pass_names_what_it_ignored(self):
+        """A PASS that let a file through must say which file.
+
+        ERM family M06 (measured 2026-11-27): an undeclared file under
+        evidence/ passed all three tiers because the default is lenient. With
+        no field naming it, a caller had to parse a detail string to find out
+        that the verdict was narrower than it looked.
+        """
+        pkg = self._extra()
+        r = verify(pkg)
+        # The top-level verdict may still be INCONCLUSIVE for unrelated reasons
+        # (an unanchored run cannot claim a witness); what matters here is S1.
+        self.assertEqual(s1(r)["result"], "PASS")
+        self.assertEqual(len(r["warnings"]), 1)
+        self.assertEqual(r["warnings"][0]["code"], "S1_UNCOMMITTED_EVIDENCE")
+        self.assertIn("extra.txt", r["warnings"][0]["detail"])
+
+    def test_strict_mode_reports_no_uncommitted_warning(self):
+        pkg = self._extra()
+        r = verify(pkg, strict=True)
+        self.assertEqual(r["warnings"], [], "strict already failed them; no warning to raise")
+
+    def test_a_clean_package_carries_no_warnings(self):
+        r = verify(CLEAN)
+        self.assertEqual(r["warnings"], [])
+
     def test_strict_mode_fails_the_uncommitted_file(self):
         pkg = self._extra()
         r = verify(pkg, strict=True)

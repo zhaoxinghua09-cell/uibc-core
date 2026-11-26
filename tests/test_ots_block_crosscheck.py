@@ -1,0 +1,115 @@
+# -*- coding: utf-8 -*-
+"""The block-header cross-check: arithmetic a stranger can repeat, offline.
+
+The receipt under `docs/` records the bytes that were fetched on 2026-11-26 (80
+header bytes for block 977449). Everything asserted here is derived from those
+bytes with the standard library, so this test needs no network and no trust in
+the servers that produced them:
+
+  * sha256(sha256(header)) is the block hash;
+  * the Merkle root lives at bytes 36..68, little-endian;
+  * the digest that was fetched equals the OpenTimestamps attestation's message.
+
+A byte flipped anywhere in the header has to break at least one of those, and
+this test proves the checker notices instead of printing a green line.
+"""
+import copy
+import json
+import os
+import sys
+import unittest
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, ROOT)
+
+try:
+    import opentimestamps  # noqa: F401
+    HAVE_OTS = True
+except ImportError:
+    HAVE_OTS = False
+
+from tools import ots_block_crosscheck as cc  # noqa: E402
+
+RECEIPT = os.path.join(ROOT, "docs", "anchor-ots-block-977449.json")
+PROOF = os.path.join(ROOT, "tests", "fixtures", "anchor", "ots_head.ots")
+
+
+def _receipt():
+    with open(RECEIPT, encoding="utf-8") as f:
+        return json.load(f)
+
+
+class HeaderArithmeticTests(unittest.TestCase):
+    def test_receipt_recomputes_from_its_own_bytes(self):
+        doc, problems = cc.check_receipt(RECEIPT)
+        self.assertEqual(problems, [], "the committed receipt must recompute cleanly")
+        self.assertEqual(doc["verdict"], "HEADER_MATCHES_ATTESTATION")
+
+    def test_header_hashes_to_the_block_hash(self):
+        doc = _receipt()
+        header = bytes.fromhex(doc["header_hex"])
+        self.assertEqual(len(header), cc.HEADER_LEN)
+        self.assertEqual(cc.display(cc.sha256d(header)), doc["header_sha256d"])
+        self.assertEqual(doc["header_sha256d"], doc["sources"]["blockstream.info"]["block_hash"])
+
+    def test_merkle_root_is_the_attestation_message(self):
+        doc = _receipt()
+        header = bytes.fromhex(doc["header_hex"])
+        root_le = cc.merkle_root_of_header(header)
+        self.assertEqual(root_le.hex(), doc["attestation_msgs_le"][0],
+                         "attestation and header store the root in the same byte order")
+        self.assertEqual(cc.display(root_le), doc["attestation_msgs"][0])
+
+    def test_two_sources_agree(self):
+        doc = _receipt()
+        self.assertTrue(doc["sources_agree_on_hash"])
+        self.assertTrue(doc["sources_agree_on_merkle_root"])
+        self.assertEqual(sorted(doc["sources_answering"]),
+                         ["blockchain.info", "blockstream.info"],
+                         "one operator is one point of failure")
+
+    def test_confirmation_depth_is_measured_not_assumed(self):
+        doc = _receipt()
+        tips = [v for v in doc["tip_heights"].values() if isinstance(v, int)]
+        self.assertEqual(len(tips), 2, "both operators must answer with a tip height")
+        self.assertEqual(doc["confirmations"], min(tips) - doc["height"])
+        self.assertGreaterEqual(doc["confirmations"], 6,
+                                "CTS recommends anchoring at depth >= 6; below that, "
+                                "the claim would have to say so")
+
+    def test_a_flipped_header_byte_is_caught(self):
+        doc = _receipt()
+        tampered = copy.deepcopy(doc)
+        header = bytearray(bytes.fromhex(doc["header_hex"]))
+        header[37] ^= 0x01  # inside the Merkle root
+        tampered["header_hex"] = bytes(header).hex()
+        tmp = os.path.join(os.path.dirname(RECEIPT), "_tampered.json")
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(tampered, f)
+        try:
+            _doc, problems = cc.check_receipt(tmp)
+        finally:
+            os.remove(tmp)
+        self.assertTrue(problems, "a tampered header must not recompute cleanly")
+        self.assertIn("merkle root recomputed from header differs from the recorded one",
+                      problems)
+
+    def test_a_header_that_is_not_80_bytes_is_refused(self):
+        with self.assertRaises(ValueError):
+            cc.merkle_root_of_header(b"\x00" * 79)
+
+    def test_receipt_and_proof_are_about_the_same_digest(self):
+        if not HAVE_OTS:
+            self.skipTest("opentimestamps not installed")
+        doc = _receipt()
+        atts = cc.block_attestations(PROOF)
+        self.assertTrue(atts, "the fixture proof must carry block attestations")
+        heights = sorted({h for h, _m in atts})
+        self.assertEqual(heights, [doc["height"]])
+        self.assertIn(doc["merkle_root_from_header"],
+                      [cc.display(m) for _h, m in atts],
+                      "the recorded header must be the block the proof names")
+
+
+if __name__ == "__main__":
+    unittest.main()

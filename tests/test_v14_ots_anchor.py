@@ -106,8 +106,9 @@ class OpenTimestampsTests(unittest.TestCase):
         doc = anchor_ots.verify(HEAD, PROOF)
         self.assertTrue(doc["bound"])
         self.assertTrue(doc["readable"])
-        self.assertGreaterEqual(len(doc["bitcoin_block"]), 1,
-                                "verify() must list the block attestations the proof carries")
+        self.assertEqual(doc["bitcoin_block"], ["977449"] * 3,
+                         "verify() must report the height of each block attestation, "
+                         "not a blank string")
         self.assertGreaterEqual(doc["pending_calendar"], 1,
                                 "calendars stay listed beside the block attestation")
 

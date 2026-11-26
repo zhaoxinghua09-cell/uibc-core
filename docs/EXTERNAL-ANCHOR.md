@@ -178,7 +178,7 @@ than two unrelated claims:
 | file | `tests/fixtures/anchor/anchored_head.json`, sha256 `4ad23d9153c3…7fd6e98` |
 | RFC 3161 | Free TSA token, `genTime=2026-11-17T08:11:35Z`, signature verified offline |
 | OpenTimestamps | three public calendars (`alice.btc`, `bob.btc`, `finney.calendar.eternitywall`), proof `tests/fixtures/anchor/ots_head.ots`, 3536 bytes (635 before the 2026-11-26 upgrade), stamped 2026-11-25 |
-| what the OTS proof says today | **three Bitcoin block attestations, one per calendar, all naming block 977449**, with the three pending calendar attestations still listed beside them. The block *header* is not fetched or checked against a chain source here, so what the proof says is `bitcoin_attested`; that its header matches Bitcoin is not asserted |
+| what the OTS proof says today | **three Bitcoin block attestations, one per calendar, all naming block 977449**, with the three pending calendar attestations still listed beside them. The block header is now cross-checked against two chain sources (below), but chain work, confirmation depth and sequence are still not checked, so what is asserted is `bitcoin_attested` plus "this header hashes to this block and carries this root" - not "this block is the most-work chain" |
 
 That is the honest status: a calendar attestation says the calendar had this
 digest at submission time, which is weaker than a block attestation. The
@@ -186,7 +186,30 @@ upgrade path (`tools/anchor_ots.py --upgrade`) asks each calendar the proof
 names; it needs hours to days, and the Bitcoin block header is not
 cross-checked here because that requires a chain source. A block attestation had to *appear in the proof* before this row could change, and on 2026-11-26 it did: both proofs were upgraded and now carry `BitcoinBlockHeaderAttestation` at height 977449 from each of the three calendars.
 
-**2026-11-26, the upgrade landed.** `tools/anchor_ots.py --upgrade` was run against both proofs (`tests/fixtures/anchor/ots_head.ots`, 635 B before the upgrade, and `tools/out/release_status.json.ots`); re-verifying both now lists three `BitcoinBlockHeaderAttestation` entries at **height 977449** and still lists the three pending calendar attestations. Read straight from the proof with the official library (the CLI's `--verify` reports the attestation but prints a blank height -- a gap in the reporter, not in the proof). Nothing here claims the header was checked against Bitcoin: that needs a chain source, and this repository still does not fetch one.
+**2026-11-26, the upgrade landed.** `tools/anchor_ots.py --upgrade` was run against both proofs (`tests/fixtures/anchor/ots_head.ots`, 635 B before the upgrade, and `tools/out/release_status.json.ots`); re-verifying both now lists three `BitcoinBlockHeaderAttestation` entries at **height 977449** and still lists the three pending calendar attestations. Read straight from the proof with the official library (the CLI's `--verify` reports the attestation but prints a blank height -- a gap in the reporter, not in the proof). Nothing in that step claims the header was checked against Bitcoin: that needs a chain source, and this repository fetched none until 2026-11-26 - the cross-check is the block just below.
+
+**2026-11-26, the block header is checked, not just named.** Carrying a block
+attestation only says the calendars returned one; `tools/ots_block_crosscheck.py`
+now finishes the step with arithmetic anyone can repeat from the committed
+receipt `docs/anchor-ots-block-977449.json`:
+
+| item | value |
+|---|---|
+| block | height 977449, hash `00000000000000000001b9b568f25bb0dbb631c3084632a22135c3bfcb0f11a7` |
+| header | 80 bytes, `sha256d` recomputed from the receipt's own `header_hex` equals that hash |
+| Merkle root | `4729e14ae4fdbc63766eab797e18be2da2150c24f8421c25cccb0485eba01bde`, byte-for-byte equal to the digest the attestation commits to |
+| sources asked | blockstream.info and blockchain.info; **both agree** on hash and root, disagreement would be reported, never averaged |
+| depth | tip heights read from both operators; **158 confirmations** at fetch time, well past the 6 the CTS draft recommends as a floor |
+| verdict | `HEADER_MATCHES_ATTESTATION`; `--check` re-derives header hash, root and depth arithmetic offline with no network |
+
+What this buys and what it does not: the header bytes hash to the block hash, and
+the root inside those bytes is the attestation's message, so "the proof names a
+block that exists with that root" is now arithmetic rather than a sentence.
+It still does **not** prove this block sits on the chain with the most work: depth
+is measured (158 confirmations, above the CTS floor of 6) but the receipt records
+no proof-of-work comparison and no reorganisation risk, and the two servers are
+trusted for *delivering bytes* only - never for deciding anything, because a wrong
+byte fails a hash. That last gap is the next step, not a footnote.
 
 Two corrections this section has to keep telling, both found on 2026-11-25:
 

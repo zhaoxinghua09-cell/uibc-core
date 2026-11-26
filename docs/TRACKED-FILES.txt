@@ -1187,6 +1187,7 @@ docs/RELEASE-PARITY.md
 docs/RELEASE-PINS.md
 docs/REPRODUCE.md
 docs/REPRODUCTION.md
+docs/REVERIFY.md
 docs/REVIEW-LOG.md
 docs/ROBUSTNESS.md
 docs/RUN-RECORD-linux-20261119.md
@@ -2376,6 +2377,7 @@ tools/render_bid_binary_layout.py
 tools/render_outsider_board.py
 tools/reproduce_gate.py
 tools/resolve_generated.py
+tools/reverify.ps1
 tools/run_all_evidence.py
 tools/run_authority_age_vectors.py
 tools/run_conformance.py

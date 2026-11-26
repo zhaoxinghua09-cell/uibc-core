@@ -177,7 +177,7 @@ than two unrelated claims:
 |---|---|
 | file | `tests/fixtures/anchor/anchored_head.json`, sha256 `4ad23d9153c3…7fd6e98` |
 | RFC 3161 | Free TSA token, `genTime=2026-11-17T08:11:35Z`, signature verified offline |
-| OpenTimestamps | three public calendars (`alice.btc`, `bob.btc`, `finney.calendar.eternitywall`), proof `tests/fixtures/anchor/ots_head.ots`, 635 bytes, stamped 2026-11-25 |
+| OpenTimestamps | three public calendars (`alice.btc`, `bob.btc`, `finney.calendar.eternitywall`), proof `tests/fixtures/anchor/ots_head.ots`, 3536 bytes (635 before the 2026-11-26 upgrade), stamped 2026-11-25 |
 | what the OTS proof says today | **three Bitcoin block attestations, one per calendar, all naming block 977449**, with the three pending calendar attestations still listed beside them. The block *header* is not fetched or checked against a chain source here, so what the proof says is `bitcoin_attested`; that its header matches Bitcoin is not asserted |
 
 That is the honest status: a calendar attestation says the calendar had this
@@ -204,7 +204,7 @@ Two corrections this section has to keep telling, both found on 2026-11-25:
 
 The rebuilt proof is a standard detached timestamp file: `ots info` prints
 `File sha256 hash: 4ad23d91…` and `ots --no-bitcoin verify -f <head> <proof>`
-reports pending confirmation for each calendar. `tools/anchor_ots.py --verify`
+reports pending confirmation for each calendar (`--no-bitcoin` deliberately hides the block attestation that the upgrade added). `tools/anchor_ots.py --verify`
 now compares the digest the proof commits to with the digest of the file
 (`bound`), and `tests/test_v14_ots_anchor.py` asserts: standard container,
 digest equals `4ad23d91…`, at least two distinct calendars, and **no** block

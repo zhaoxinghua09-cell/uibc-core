@@ -1117,6 +1117,7 @@ docs/DASHBOARD.svg
 docs/DELEGATION.md
 docs/DIAGNOSTICS.md
 docs/DID-LANDSCAPE.md
+docs/DIDCN-PROBE.md
 docs/DISPOSITIONS.md
 docs/ECOSYSTEM-MAP.md
 docs/EQMS-SAMPLE.md
@@ -1259,6 +1260,7 @@ docs/conformance/pixit.json
 docs/conformance/reports/aee-288-20261124.json
 docs/conformance/vectors.json
 docs/coverage-ledger.json
+docs/didcn-probe.json
 docs/ecosystem-map.html
 docs/evidence/20261126-phase28/README.md
 docs/evidence/20261126-phase28/adversarial_v11.json
@@ -2037,6 +2039,7 @@ tests/test_parity_realrun.py
 tests/test_parity_sensitivity.py
 tests/test_pin_resolvability.py
 tests/test_platform_matrix.py
+tests/test_probe_didcn.py
 tests/test_probe_retention.py
 tests/test_published_anchor.py
 tests/test_published_bytes_are_never_rewritten.py
@@ -2352,6 +2355,7 @@ tools/pin_release.py
 tools/pre_push_gate.py
 tools/preflight_release.py
 tools/probe_address_binding.py
+tools/probe_didcn_platform.py
 tools/probe_evidence_identity.py
 tools/probe_platform_matrix.py
 tools/probe_record_binding.py

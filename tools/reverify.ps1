@@ -30,7 +30,8 @@ $steps = @(
     @{ Name = "board vs the receipt";               Cmd = "python tools/render_outsider_board.py --check" },
     @{ Name = "evidence index";                     Cmd = "python tools/build_evidence_index.py --check" },
     @{ Name = "doc numbers vs the records";         Cmd = "python tools/check_doc_facts.py" },
-    @{ Name = "AITB card is honest";                Cmd = "python tools/aitb_evaluate.py --check --report docs/aitb-example-report.json" }
+    @{ Name = "AITB card is honest";                Cmd = "python tools/aitb_evaluate.py --check --report docs/aitb-example-report.json" },
+    @{ Name = "AITB no-endpoint card is honest";    Cmd = "python tools/aitb_evaluate.py --check --report docs/aitb-example-no-endpoint.json" }
 )
 
 if ($Network) {

@@ -1,0 +1,14 @@
+<!doctype html><html lang="en"><meta charset="utf-8">
+<title>AITB report card</title>
+<style>body{font:14px/1.6 -apple-system,Segoe UI,sans-serif;max-width:860px;margin:32px auto;padding:0 16px}
+table{border-collapse:collapse;width:100%}td,th{border:1px solid #ddd;padding:6px 8px;vertical-align:top}
+th{background:#f6f6f6;text-align:left}code{background:#f4f4f4;padding:1px 4px}</style>
+<h1>AITB report card</h1>
+<p><code>did:ctid:anicert</code><br>method <code>did:ctid</code> · evaluated at 2026-11-26T13:33:11Z · verdict <b>NO_PUBLIC_ENDPOINT</b></p>
+<p><b>no public endpoint: nothing was called, so nothing is claimed</b></p>
+<table><tr><th>check</th><th>verdict</th><th>what was observed</th></tr><tr><td>G0.public_endpoint</td><td>MISSING</td><td>none published: specification publishes relative paths only (/didservice/v1/did/get); access is through a vendor SDK plus an institution certificate (github.com/617640999/ctid-did-register); its platform was declared offline 2026-06-30</td></tr></table>
+<h2>Not tested</h2><ul><li>everything: no endpoint was called</li><li>verifiable credential verification (the platform reports vcVerificationStatus=SKIPPED)</li><li>whether the operator really controls the private key</li><li>whether the code maps to a GB/Z 185.2 OID path (no public mapping rule exists)</li><li>liveness of the declared serviceEndpoint (no request is sent to it)</li><li>anything about agents not published in the platform's own list</li></ul>
+<p>This card is not a certification. It records what an outsider could observe at the
+timestamp above, and names what it did not test. Re-run:
+<code>python tools/aitb_evaluate.py --run --did did:ctid:anicert</code></p>
+</html>

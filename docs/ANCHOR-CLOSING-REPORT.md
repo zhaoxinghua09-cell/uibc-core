@@ -76,6 +76,12 @@ each failure path.
 | competing-branch enumeration | a node that follows every branch; no explorer API does | not started - and not fakeable |
 | reorg risk model | node data + a stated attacker model | not started |
 
+All three machines we control were probed on 2026-11-26 (no `bitcoind`, no 8332
+listener, the cloud VM has 9.7 GB free and nothing installed), so the first row
+is blocked by the fleet, not by the code. `docs/ANCHOR-NODE-RUNBOOK.md` records
+the probe, what a node would add, what it costs, and the exact commands to run
+when one exists.
+
 ## Defects this layer found in itself (kept, because they were real)
 
 1. A "proof" that was a bare timestamp tree - unreadable by the official client, its digest invented by our own reader. Fixed by rebuilding on standard containers and keeping the defect bytes as a fixture.

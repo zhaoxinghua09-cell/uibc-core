@@ -57,7 +57,7 @@
 | `openwallet-foundation/acapy-plugins` | 827 | 254 | 1429 | 0 | 0 | 0 | 0 | 0 | 0 |
 | `blockchain-lab-um/masca` | 428 | 101 | 335 | 0 | 0 | 0 | 0 | 0 | 0 |
 | `web3id/web3id` | 34 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| `zhaoxinghua09-cell/uibc-core` (this repository) | 2025 | 284 | 1108 | 2 | 2 | 2 | 2 | 2 | 10 |
+| `zhaoxinghua09-cell/uibc-core` (this repository) | 2030 | 284 | 1108 | 2 | 2 | 2 | 2 | 2 | 10 |
 
 D1 门槛＝测试文件内拒绝类断言 ≥10 次；D2＝位级关键词 ≥1；D3＝地址派生的**宽/严区间**（宽＝`base58|bs58|deriveAddress` 出现在测试里，严＝只认 `deriveAddress|addressFrom|publicKeyToAddress|toChecksumAddress`）；
 D4＝非测试代码里出现失败退出码 ≥1；D5 对 40 家一律记 0——"注入假断言要求门失败"这种用例，检索不到就当没有。

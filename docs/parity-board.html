@@ -22,11 +22,55 @@ td.sc b{color:var(--fg)}
 #selfcheck{margin-top:26px;border:1px solid var(--line);border-radius:10px;padding:14px 16px}
 #selfcheck h2{font-size:15px;margin:0 0 8px}
 #sc{font-family:ui-monospace,Consolas,monospace;font-size:12.5px;white-space:pre-wrap;color:var(--dim)}
+.figs{margin:0 0 22px}
+.figcap{color:var(--dim);font-size:12px;margin-bottom:6px}
+.figrow{display:flex;gap:18px;flex-wrap:wrap}
+figure{margin:0;border:1px solid var(--line);border-radius:10px;padding:8px 10px 4px;background:#0d1116}
 .note{color:var(--dim);font-size:12px;margin-top:14px}
 </style></head><body><div class="wrap">
 <h1>竞品门禁对照看板</h1>
 <div class="sub">审计日 <span id="audited"></span> · 数据在本文件内嵌（Archived JSON），<b>零外链</b>，打开即自检</div>
 <div class="chips" id="chips"></div>
+<section class="figs">
+<div class="figcap">五维里最能区分「有门 vs 没门」的三维，按得分分布</div>
+<div class="figrow">
+<figure><svg width="242" height="126" viewBox="0 0 242 126" role="img">
+<text x="26" y="18" font-family="Helvetica,Arial,sans-serif" font-size="12" fill="#8fa3b5">D1 拒绝断言</text>
+<rect x="26" y="106" width="46" height="1" fill="#3fd48a" rx="2"/>
+<text x="49" y="101" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="11" fill="#e8edf2">0</text>
+<text x="49" y="122" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="10" fill="#8fa3b5">2 分</text>
+<rect x="98" y="72" width="46" height="34" fill="#8fa3b5" rx="2"/>
+<text x="121" y="67" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="11" fill="#e8edf2">13</text>
+<text x="121" y="122" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="10" fill="#8fa3b5">1 分</text>
+<rect x="170" y="34" width="46" height="72" fill="#3a4650" rx="2"/>
+<text x="193" y="29" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="11" fill="#e8edf2">27</text>
+<text x="193" y="122" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="10" fill="#8fa3b5">0 分</text>
+</svg></figure>
+<figure><svg width="242" height="126" viewBox="0 0 242 126" role="img">
+<text x="26" y="18" font-family="Helvetica,Arial,sans-serif" font-size="12" fill="#8fa3b5">D3 门自证</text>
+<rect x="26" y="106" width="46" height="1" fill="#3fd48a" rx="2"/>
+<text x="49" y="101" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="11" fill="#e8edf2">0</text>
+<text x="49" y="122" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="10" fill="#8fa3b5">2 分</text>
+<rect x="98" y="76" width="46" height="30" fill="#8fa3b5" rx="2"/>
+<text x="121" y="71" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="11" fill="#e8edf2">12</text>
+<text x="121" y="122" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="10" fill="#8fa3b5">1 分</text>
+<rect x="170" y="34" width="46" height="72" fill="#3a4650" rx="2"/>
+<text x="193" y="29" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="11" fill="#e8edf2">28</text>
+<text x="193" y="122" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="10" fill="#8fa3b5">0 分</text>
+</svg></figure>
+<figure><svg width="242" height="126" viewBox="0 0 242 126" role="img">
+<text x="26" y="18" font-family="Helvetica,Arial,sans-serif" font-size="12" fill="#8fa3b5">D4 跨层退出码</text>
+<rect x="26" y="106" width="46" height="1" fill="#3fd48a" rx="2"/>
+<text x="49" y="101" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="11" fill="#e8edf2">0</text>
+<text x="49" y="122" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="10" fill="#8fa3b5">2 分</text>
+<rect x="98" y="79" width="46" height="27" fill="#8fa3b5" rx="2"/>
+<text x="121" y="74" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="11" fill="#e8edf2">11</text>
+<text x="121" y="122" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="10" fill="#8fa3b5">1 分</text>
+<rect x="170" y="34" width="46" height="72" fill="#3a4650" rx="2"/>
+<text x="193" y="29" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="11" fill="#e8edf2">29</text>
+<text x="193" y="122" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="10" fill="#8fa3b5">0 分</text>
+</svg></figure>
+</div></section>
 <table><thead><tr><th>仓库</th><th>D1 拒绝断言</th><th>D2 逐位变异</th><th>D3 门自证</th><th>D4 跨层单一退出码</th><th>D5 二进制层</th><th>得分</th></tr></thead>
 <tbody id="rows"></tbody></table>
 <div id="selfcheck"><h2>打开自检（本页 JS 现场重算，不看预生成数字）</h2><div id="sc">running…</div></div>

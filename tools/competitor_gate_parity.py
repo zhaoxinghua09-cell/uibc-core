@@ -390,11 +390,16 @@ td.sc b{color:var(--fg)}
 #selfcheck{margin-top:26px;border:1px solid var(--line);border-radius:10px;padding:14px 16px}
 #selfcheck h2{font-size:15px;margin:0 0 8px}
 #sc{font-family:ui-monospace,Consolas,monospace;font-size:12.5px;white-space:pre-wrap;color:var(--dim)}
+.figs{margin:0 0 22px}
+.figcap{color:var(--dim);font-size:12px;margin-bottom:6px}
+.figrow{display:flex;gap:18px;flex-wrap:wrap}
+figure{margin:0;border:1px solid var(--line);border-radius:10px;padding:8px 10px 4px;background:#0d1116}
 .note{color:var(--dim);font-size:12px;margin-top:14px}
 </style></head><body><div class="wrap">
 <h1>竞品门禁对照看板</h1>
 <div class="sub">审计日 <span id="audited"></span> · 数据在本文件内嵌（Archived JSON），<b>零外链</b>，打开即自检</div>
 <div class="chips" id="chips"></div>
+__FIGS__
 <table><thead><tr><th>仓库</th><th>D1 拒绝断言</th><th>D2 逐位变异</th><th>D3 门自证</th><th>D4 跨层单一退出码</th><th>D5 二进制层</th><th>得分</th></tr></thead>
 <tbody id="rows"></tbody></table>
 <div id="selfcheck"><h2>打开自检（本页 JS 现场重算，不看预生成数字）</h2><div id="sc">running…</div></div>
@@ -450,6 +455,44 @@ window.__last = render(); selfcheck();
 """
 
 
+def render_figs(snap):
+    """三张内联 SVG 分布图：别人拿这份文件断网打开，图形也必须在。
+
+    每条只画一个维度：横轴 = 该维度得分 0/1/2 的仓库家数。
+    不用 JS 生成——判据 G8 要求内联 SVG >=3 且零外链，JSON 换不出来。
+    注意：不写 xmlns，本仓 tools/board_check.js 对任何字面 http:// 都判红。
+    """
+    repos = [r for r in snap["repos"] if "error" not in r]
+    dims = [("D1", "拒绝断言"), ("D3", "门自证"), ("D4", "跨层退出码")]
+    bw, gap, top = 46, 26, 34
+    width, height = 3 * bw + 4 * gap, top + 92
+    out = ['<section class="figs">',
+           '<div class="figcap">五维里最能区分「有门 vs 没门」的三维，按得分分布</div>',
+           '<div class="figrow">']
+    for d, label in dims:
+        counts = {2: 0, 1: 0, 0: 0}
+        for r in repos:
+            counts[int((r.get("dims") or {}).get(d, 0))] += 1
+        mx = max(counts.values()) or 1
+        out.append('<figure><svg width="%d" height="%d" viewBox="0 0 %d %d" role="img">'
+                   % (width, height, width, height))
+        out.append('<text x="%d" y="18" font-family="Helvetica,Arial,sans-serif" font-size="12" fill="#8fa3b5">%s %s</text>'
+                   % (gap, d, label))
+        for i, v in enumerate((2, 1, 0)):
+            h = int(72 * counts[v] / mx)
+            x = gap + i * (bw + gap)
+            y = top + 72 - h
+            out.append('<rect x="%d" y="%d" width="%d" height="%d" fill="%s" rx="2"/>'
+                       % (x, y, bw, max(h, 1), "#3fd48a" if v == 2 else ("#8fa3b5" if v == 1 else "#3a4650")))
+            out.append('<text x="%d" y="%d" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" '
+                       'font-size="11" fill="#e8edf2">%d</text>' % (x + bw // 2, y - 5, counts[v]))
+            out.append('<text x="%d" y="%d" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" '
+                       'font-size="10" fill="#8fa3b5">%d 分</text>' % (x + bw // 2, top + 88, v))
+        out.append("</svg></figure>")
+    out.append("</div></section>")
+    return "\n".join(out)
+
+
 def render_html(snap, path):
     """Single file, no external references, numbers recomputed in the browser."""
     repos = [r for r in snap["repos"] if "error" not in r]
@@ -465,6 +508,7 @@ def render_html(snap, path):
     }
     blob = json.dumps(embedded, ensure_ascii=False).replace("<", "\\u003c")
     html_text = BOARD_HTML % len(repos)
+    html_text = html_text.replace("__FIGS__", render_figs(snap))
     html_text = html_text.replace("__SNAP__", blob)
     with open(path, "w", encoding="utf-8") as f:
         f.write(html_text)

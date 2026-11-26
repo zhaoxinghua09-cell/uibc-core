@@ -38,7 +38,7 @@
  "ours": {
   "repo": "zhaoxinghua09-cell/uibc-core",
   "commit": "unknown",
-  "code_files": 2025,
+  "code_files": 2030,
   "test_files": 284,
   "test_text_kb": 1108,
   "test_hits": {
@@ -55,9 +55,9 @@
    "mutation_testing": 32,
    "property_based": 13,
    "bit_level": 9,
-   "address_derive": 204,
-   "exit_code_gate": 62,
-   "reject_assertion": 2822
+   "address_derive": 233,
+   "exit_code_gate": 79,
+   "reject_assertion": 2862
   },
   "dims": {
    "D1": 2,

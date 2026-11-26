@@ -241,6 +241,14 @@ single flipped byte in a `.tsr` does **not** necessarily invalidate it - most of
 the file is certificate and unsigned attribute material. The test therefore
 breaks the seam that cannot pass by luck: the trust anchor.
 
+**And a third witness, with its limits printed in the same verdict.** `--rekor-entry`
+judges the Sigstore entry offline: the body hashes this file, the embedded
+signature verifies against the key in the entry, and the log's own
+`signedEntryTimestamp` verifies against the published log key (log index
+`3944456508`). It also carries forward the two things that entry does **not**
+prove - the checkpoint signature and the inclusion proof - so a green verdict
+never reads as more than it is.
+
 **2026-11-26, the segment above the block is walked, not assumed.** Depth alone
 is a number two servers told us. `--chain` walks *prev-hashes* from the tip they
 reported down to the attested block and checks every header it passes

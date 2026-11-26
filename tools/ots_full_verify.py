@@ -34,12 +34,15 @@ sys.path.insert(0, ROOT)
 from tools import anchor_ots  # noqa: E402
 from tools import ots_block_crosscheck as cc  # noqa: E402
 from uibc_core import tsa  # noqa: E402
+from tools import anchor_rekor  # noqa: E402
 
 DEFAULT_BLOCK_RECEIPT = os.path.join(ROOT, "docs", "anchor-ots-block-977449.json")
 DEFAULT_CHAIN_RECEIPT = os.path.join(ROOT, "docs", "anchor-ots-chain-977449.json")
 FIXTURES = os.path.join(ROOT, "tests", "fixtures", "anchor")
 DEFAULT_TSA = os.path.join(FIXTURES, "freetsa.tsr")
 DEFAULT_TSA_CA = os.path.join(FIXTURES, "freetsa_ca.pem")
+DEFAULT_REKOR_ENTRY = os.path.join(FIXTURES, "rekor_entry.json")
+DEFAULT_REKOR_PUB = os.path.join(FIXTURES, "rekor_log_pub.pem")
 
 UNCHECKED = [
     "global most-work chain: needs a Bitcoin Core node (--node), none configured here",
@@ -54,7 +57,8 @@ def _same(left, right):
 
 def full_verify(file_path, proof_path, block_receipt=DEFAULT_BLOCK_RECEIPT,
                 chain_receipt=DEFAULT_CHAIN_RECEIPT, refresh=False, node=None,
-                timeout=30, tsa_token=None, tsa_cabundle=DEFAULT_TSA_CA):
+                timeout=30, tsa_token=None, tsa_cabundle=DEFAULT_TSA_CA,
+                rekor_entry=None, rekor_pub=DEFAULT_REKOR_PUB):
     steps, problems = {}, []
 
     # 1. the proof must be about this file
@@ -145,6 +149,50 @@ def full_verify(file_path, proof_path, block_receipt=DEFAULT_BLOCK_RECEIPT,
         steps["rfc3161"] = {"ok": False, "provided": False,
                             "reason": "no token supplied; only the OTS anchor was judged"}
 
+
+    # 5. the third witness, if a transparency-log entry is supplied
+    if rekor_entry:
+        with open(file_path, "rb") as f:
+            data = f.read()
+        with open(rekor_entry, encoding="utf-8") as f:
+            entry_doc = json.load(f)
+        with open(rekor_pub, "rb") as f:
+            log_pub_pem = f.read()
+        try:
+            # verify_entry wants a loaded key, not PEM bytes; passing bytes made
+            # every entry look forged ('bytes' object has no attribute 'verify')
+            from cryptography.hazmat.primitives import serialization
+            log_key = serialization.load_pem_public_key(log_pub_pem)
+        except Exception as e:  # noqa: BLE001
+            steps["rekor"] = {"ok": False, "provided": True, "entry": rekor_entry,
+                              "reason": "cannot load the log public key (%s)" % type(e).__name__}
+            problems.append("the transparency-log key could not be loaded")
+            return {"verdict": "STOPPED_AT_REKOR", "steps": steps,
+                    "problems": problems, "unchecked": UNCHECKED}
+        ok, info, rekor_problems = anchor_rekor.verify_entry(entry_doc, data, log_key)
+        steps["rekor"] = {
+            "ok": bool(ok),
+            "provided": True,
+            "entry": rekor_entry,
+            "log_index": (info or {}).get("log_index"),
+            "log_id": (info or {}).get("log_id"),
+            "integrated_time": (info or {}).get("integrated_time"),
+            "tree_size": (info or {}).get("tree_size"),
+            "set_verified": (info or {}).get("set_verified"),
+            "problems": rekor_problems,
+            # these are the limits the tool already documents; they must travel
+            # with the verdict, not stay in a README nobody opens
+            "limits": ["log checkpoint signature: not verified (key mismatch with the published one)",
+                       "digest inside the log tree (inclusion proof): not verified (Trillian partial proof)"],
+        }
+        if not steps["rekor"]["ok"]:
+            problems.append("the transparency-log entry does not verify for this file")
+            return {"verdict": "STOPPED_AT_REKOR", "steps": steps,
+                    "problems": problems, "unchecked": UNCHECKED}
+    else:
+        steps["rekor"] = {"ok": False, "provided": False,
+                          "reason": "no transparency-log entry supplied"}
+
     node_doc = ch.get("node") or {}
     doc = {"file": file_path, "proof": proof_path,
            "verdict": "FULL_CHAIN_OF_EVIDENCE_VERIFIED",
@@ -158,7 +206,8 @@ def full_verify(file_path, proof_path, block_receipt=DEFAULT_BLOCK_RECEIPT,
            "problems": [],
            "anchors": {"open_timestamps": True,
                        "rfc3161": bool(steps.get("rfc3161", {}).get("ok")),
-                       "both_anchors_verified": bool(steps.get("rfc3161", {}).get("ok"))},
+                       "both_anchors_verified": bool(steps.get("rfc3161", {}).get("ok")),
+                       "transparency_log": bool(steps.get("rekor", {}).get("ok"))},
            "most_work_established": bool(node_doc.get("checked")),
            "unchecked": UNCHECKED}
     return doc
@@ -174,6 +223,9 @@ def main(argv=None):
     ap.add_argument("--tsa-token", metavar="TSR",
                     help="RFC 3161 token over the same file; judged offline against the CA bundle")
     ap.add_argument("--tsa-cabundle", default=DEFAULT_TSA_CA)
+    ap.add_argument("--rekor-entry", metavar="JSON",
+                    help="Sigstore Rekor entry over the same file (digest + signature + log signature)")
+    ap.add_argument("--rekor-pub", default=DEFAULT_REKOR_PUB)
     ap.add_argument("--refresh", action="store_true",
                     help="re-fetch the receipts from the network before verifying")
     ap.add_argument("--timeout", type=int, default=30)
@@ -189,7 +241,8 @@ def main(argv=None):
 
     doc = full_verify(a.file, a.proof, a.block_receipt, a.chain_receipt,
                       node=a.node, timeout=a.timeout,
-                      tsa_token=a.tsa_token, tsa_cabundle=a.tsa_cabundle)
+                      tsa_token=a.tsa_token, tsa_cabundle=a.tsa_cabundle,
+                      rekor_entry=a.rekor_entry, rekor_pub=a.rekor_pub)
     print(json.dumps(doc, indent=2, sort_keys=True))
     print("verdict=%s" % doc["verdict"])
     if doc["problems"]:

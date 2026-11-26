@@ -5,6 +5,7 @@ The joins are the point. Each receipt can be internally perfect and still be
 about a different digest; these tests break one seam at a time and require the
 command to stop at the right place instead of printing a green verdict.
 """
+import base64
 import json
 import os
 import shutil
@@ -101,5 +102,39 @@ class FullVerifyTests(unittest.TestCase):
         doc = fv.full_verify(HEAD, PROOF, tsa_token=token, tsa_cabundle=wrong_ca)
         self.assertEqual(doc["verdict"], "STOPPED_AT_TSA")
         self.assertFalse(doc["steps"]["rfc3161"]["signature_verified"])
+
+    def test_three_witnesses_and_each_ones_limits(self):
+        token = os.path.join(ROOT, "tests", "fixtures", "anchor", "freetsa.tsr")
+        entry = os.path.join(ROOT, "tests", "fixtures", "anchor", "rekor_entry.json")
+        doc = fv.full_verify(HEAD, PROOF, tsa_token=token, rekor_entry=entry)
+        self.assertEqual(doc["verdict"], "FULL_CHAIN_OF_EVIDENCE_VERIFIED", doc.get("problems"))
+        self.assertTrue(doc["anchors"]["transparency_log"])
+        self.assertEqual(doc["steps"]["rekor"]["log_index"], 3944456508)
+        self.assertTrue(doc["steps"]["rekor"]["set_verified"])
+        limits = " ".join(doc["steps"]["rekor"]["limits"])
+        self.assertIn("checkpoint", limits)
+        self.assertIn("inclusion", limits,
+                      "the two things the log entry does not prove must travel with the verdict")
+
+    def test_a_log_entry_for_another_digest_stops_at_the_log(self):
+        entry = os.path.join(ROOT, "tests", "fixtures", "anchor", "rekor_entry.json")
+        tmp = os.path.join(ROOT, "docs", "_wrong_rekor.json")
+        with open(entry, encoding="utf-8") as f:
+            doc = json.load(f)
+        _uuid, payload = list(doc.items())[0]
+        body = json.loads(base64.b64decode(payload["body"]).decode())
+        body["spec"]["data"]["hash"]["value"] = "00" * 32
+        payload["body"] = base64.b64encode(json.dumps(body).encode()).decode()
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(doc, f)
+        try:
+            out = fv.full_verify(HEAD, PROOF, rekor_entry=tmp)
+        finally:
+            os.remove(tmp)
+        self.assertEqual(out["verdict"], "STOPPED_AT_REKOR")
+
+
+if __name__ == "__main__":
+    unittest.main()
 
 

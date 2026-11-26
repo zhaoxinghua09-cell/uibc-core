@@ -46,7 +46,10 @@ Where that leaves the trust question, honestly:
   proofs. Bitcoin has no witness quorum, but a node is the equivalent: its active
   chain is the most-work chain it knows. We expose that hook and refuse to
   pretend it ran.
-- **Joined now, and beyond**: the reference client replays ops from the digest
+- **Joined now, and beyond**: three witnesses (RFC 3161, OpenTimestamps, Rekor)
+  answer into one verdict, and the two things Rekor's entry does not prove are
+  printed inside that verdict rather than left in a README. The reference client,
+  by contrast, replays ops from the digest
   itself but stops at one anchor type. `tools/ots_full_verify.py` gives one
   verdict for **both** witnesses the ASQAV profile asks about - RFC 3161 and
   OpenTimestamps - over the same digest; the older note below is kept because

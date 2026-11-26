@@ -102,6 +102,50 @@
    },
    "affects_score": false,
    "verdict": "26 条全过，绿得干净。但这是个 DID 文档缓存/驱动层，测的是缓存与 driver 派发，不含任何逐位变异或跨实现比对——绿与本表 D2 无关。"
+  },
+  {
+   "repo": "digitalbazaar/jsonld-signatures",
+   "sha": "4bbef4646d91ab17773594021652d237b3ab4a23",
+   "package_manager": "npm",
+   "install": "`npm install --ignore-scripts --no-audit --no-fund` 461 packages, 19s。",
+   "suite": "`mocha --preserve-symlinks -t 10000 test/*.spec.js`（官方 test-node 的 glob，去掉 cross-env）",
+   "files": 1,
+   "tests": 1,
+   "passed": 1,
+   "failed": 0,
+   "skipped": 0,
+   "seconds": 3.0,
+   "exit_code": 0,
+   "extra_probe": {
+    "name": "套件本身的体量",
+    "exit_code": 0,
+    "cause": "test/jsonld-signatures.spec.js 共 525 字节，只有一条 `it('should exist')`；文件头注释自认：\"The existing test suite has been extracted to each individual signature suite's repository. Test coverage of this package currently depends on indirect testing through other test suites.\"",
+    "read_as": "这是全表里最干净的反例：**exit 0、100% 通过、但一条断言都没测行为**。它证明'绿的套件'与'可复算的证据'是两件事，也证明我们不许用跑通来改分是对的。"
+   },
+   "affects_score": false,
+   "verdict": "1/1 通过，但那条用例只断言模块能被 require。仓库自己声明覆盖率依赖别的仓，因此这个绿什么也不说明。"
+  },
+  {
+   "repo": "digitalbazaar/vc",
+   "sha": "7ddb985a67e42afeb24ef833a5b45ecb72d7771d",
+   "package_manager": "npm",
+   "install": "`npm install --ignore-scripts --no-audit --no-fund` 505 packages, 20s。",
+   "suite": "`mocha --preserve-symlinks -t 10000 test/*.spec.js`（官方 test-node 的 glob，去掉 cross-env）",
+   "files": 1,
+   "tests": 119,
+   "passed": 119,
+   "failed": 0,
+   "skipped": 0,
+   "seconds": 17.0,
+   "exit_code": 0,
+   "extra_probe": {
+    "name": "签发/验签往返是否真在测",
+    "exit_code": 0,
+    "cause": "119 条里含 Ed25519 签发→验签、篡改后拒绝、过期凭证拒绝等用例，是真在跑密码学往返，不只是 smoke。",
+    "read_as": "这是本表目前最扎实的一家：它测的是凭证签发与校验的行为。但仍不等于 D2——它没有'把一条报文每一位翻一遍并断言形状'。"
+   },
+   "affects_score": false,
+   "verdict": "119/119 全过，含真实签发/验签与篡改拒绝，是本表里最接近'行为级证据'的一家；但它仍不含逐位变异，所以门禁表不动。"
   }
  ],
  "score_impact": {

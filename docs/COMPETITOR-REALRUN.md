@@ -11,6 +11,8 @@
 | `decentralized-identity/did-resolver` | `005411b26ac3` | 25 | 25 | 0 | 0 | 3.25 | 0 |
 | `uport-project/ethr-did` | `4bbd2ef539ba` | 38 | 37 | 1 | 0 | 92.10 | 1 |
 | `digitalbazaar/did-io` | `940555f002fb` | 26 | 26 | 0 | 0 | 3.00 | 0 |
+| `digitalbazaar/jsonld-signatures` | `4bbef4646d91` | 1 | 1 | 0 | 0 | 3.00 | 0 |
+| `digitalbazaar/vc` | `7ddb985a67e4` | 119 | 119 | 0 | 0 | 17.00 | 0 |
 
 ## `decentralized-identity/did-jwt`
 
@@ -45,6 +47,20 @@
 - 套件：``mocha --preserve-symlinks -t 30000 test/**/*.spec.js`（package.json 的 test-node 脚本，去掉 cross-env 与 reporter 变量）` → 1 文件 / 26 用例 / 0 红 / 0 跳过 / 3.00 s / exit 0
 - 额外探针：它自己的 `test` 脚本（经 cross-env 与 ${REPORTER:-spec} 展开） → exit 0。在 POSIX shell 下可用；本机 PowerShell 里 `${REPORTER:-spec}` 不会被展开，所以直接调 mocha 跑同一批 spec。 读法：同一批用例，换入口跑出来的数一样（26/26）。
 - 结论：26 条全过，绿得干净。但这是个 DID 文档缓存/驱动层，测的是缓存与 driver 派发，不含任何逐位变异或跨实现比对——绿与本表 D2 无关。
+
+## `digitalbazaar/jsonld-signatures`
+
+- 安装：`npm install --ignore-scripts --no-audit --no-fund` 461 packages, 19s。
+- 套件：``mocha --preserve-symlinks -t 10000 test/*.spec.js`（官方 test-node 的 glob，去掉 cross-env）` → 1 文件 / 1 用例 / 0 红 / 0 跳过 / 3.00 s / exit 0
+- 额外探针：套件本身的体量 → exit 0。test/jsonld-signatures.spec.js 共 525 字节，只有一条 `it('should exist')`；文件头注释自认："The existing test suite has been extracted to each individual signature suite's repository. Test coverage of this package currently depends on indirect testing through other test suites." 读法：这是全表里最干净的反例：**exit 0、100% 通过、但一条断言都没测行为**。它证明'绿的套件'与'可复算的证据'是两件事，也证明我们不许用跑通来改分是对的。
+- 结论：1/1 通过，但那条用例只断言模块能被 require。仓库自己声明覆盖率依赖别的仓，因此这个绿什么也不说明。
+
+## `digitalbazaar/vc`
+
+- 安装：`npm install --ignore-scripts --no-audit --no-fund` 505 packages, 20s。
+- 套件：``mocha --preserve-symlinks -t 10000 test/*.spec.js`（官方 test-node 的 glob，去掉 cross-env）` → 1 文件 / 119 用例 / 0 红 / 0 跳过 / 17.00 s / exit 0
+- 额外探针：签发/验签往返是否真在测 → exit 0。119 条里含 Ed25519 签发→验签、篡改后拒绝、过期凭证拒绝等用例，是真在跑密码学往返，不只是 smoke。 读法：这是本表目前最扎实的一家：它测的是凭证签发与校验的行为。但仍不等于 D2——它没有'把一条报文每一位翻一遍并断言形状'。
+- 结论：119/119 全过，含真实签发/验签与篡改拒绝，是本表里最接近'行为级证据'的一家；但它仍不含逐位变异，所以门禁表不动。
 
 ## 为什么这些数字不进表
 

@@ -1,0 +1,87 @@
+{
+ "did": "did:cn:agent:sf72CmurU1pnWun9FjNWZ3dMTUXBpTy6",
+ "evaluated_at": "2026-11-26T13:05:01Z",
+ "gates": [
+  {
+   "id": "G1.http",
+   "ok": true,
+   "detail": "HTTP 200"
+  },
+  {
+   "id": "G1.envelope",
+   "ok": true,
+   "detail": "success=True code=0"
+  },
+  {
+   "id": "G1.status",
+   "ok": true,
+   "detail": "resolutionStatus='SUCCESS' (in data.summary)"
+  },
+  {
+   "id": "G2.id_echo",
+   "ok": true,
+   "detail": "identity.id 'did:cn:agent:sf72CmurU1pnWun9FjNWZ3dMTUXBpTy6' vs queried 'did:cn:agent:sf72CmurU1pnWun9FjNWZ3dMTUXBpTy6'"
+  },
+  {
+   "id": "G2.controller",
+   "ok": true,
+   "detail": "controller='did:cn:agent:sf72CmurU1pnWun9FjNWZ3dMTUXBpTy6'"
+  },
+  {
+   "id": "G2.key_type_known",
+   "ok": true,
+   "detail": "publicKeyType='EcdsaSecp256k1VerificationKey2019'"
+  },
+  {
+   "id": "G2.key_hex_len",
+   "ok": true,
+   "detail": "EcdsaSecp256k1VerificationKey2019 needs 66 hex chars, got 66"
+  },
+  {
+   "id": "G2.key_hex_chars",
+   "ok": true,
+   "detail": "lowercase hex only"
+  },
+  {
+   "id": "G2.agent_status",
+   "ok": true,
+   "detail": "agentStatus='RUNNING'"
+  },
+  {
+   "id": "G2.endpoints",
+   "ok": true,
+   "detail": "serviceEndpoint=['https://ai.teleinfo.cn/api/v1/a2a']"
+  },
+  {
+   "id": "G2.registration_node",
+   "ok": true,
+   "detail": "registrationNodeDid='did:bid:agentnode:sf7eU3xzqiCT1itU1xfGr9EYfq4vyt16'"
+  },
+  {
+   "id": "G2.trust_matches_status",
+   "ok": true,
+   "detail": "isTrustEstablished=True with resolutionStatus='SUCCESS'"
+  },
+  {
+   "id": "G3.operator_statement",
+   "ok": null,
+   "detail": "MISSING: submitter supplied no public operator statement"
+  }
+ ],
+ "counts": {
+  "ran": 12,
+  "passed": 12,
+  "failed": 0,
+  "missing": 1
+ },
+ "resolution": "SUCCESS",
+ "operator_statement": null,
+ "not_tested": [
+  "verifiable credential verification (the platform reports vcVerificationStatus=SKIPPED)",
+  "whether the operator really controls the private key",
+  "whether the code maps to a GB/Z 185.2 OID path (no public mapping rule exists)",
+  "liveness of the declared serviceEndpoint (no request is sent to it)",
+  "anything about agents not published in the platform's own list"
+ ],
+ "reading": "holds as far as an outsider can see: 12 of 12 checks passed"
+}

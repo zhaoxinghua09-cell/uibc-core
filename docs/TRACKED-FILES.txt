@@ -2,6 +2,7 @@
 .gitattributes
 .githooks/pre-push
 .github/CODEOWNERS
+.github/ISSUE_TEMPLATE/aitb-evaluation.yml
 .github/ISSUE_TEMPLATE/config.yml
 .github/ISSUE_TEMPLATE/conformance-receipt.yml
 .github/ISSUE_TEMPLATE/content-issue.md
@@ -1057,6 +1058,7 @@ docs/AER1-REPLAY-RESULT.md
 docs/AER1-SPEC-AUDIT.md
 docs/AER1-VERIFY-EXTERNAL.md
 docs/AGENT-IDENTITY-CODE.md
+docs/AITB-OPEN.md
 docs/ANCHOR-CHAIN.md
 docs/ANCHOR-CHANNEL.md
 docs/ANCHOR-SECOND-IMPL.md
@@ -1239,6 +1241,8 @@ docs/adoption-guide.md
 docs/adoption/2026-11-20-authenticated.json
 docs/adoption/2026-11-20.json
 docs/adr/ADR-001-three-valued-verdict.md
+docs/aitb-example-report.html
+docs/aitb-example-report.json
 docs/anchors/ROOT-28a23ff.txt
 docs/anchors/ROOT-28a23ff.txt.ots
 docs/api-scope.md
@@ -1886,6 +1890,7 @@ tests/test_aer1_spec_audit.py
 tests/test_aer1_verify_external.py
 tests/test_agent_id_policy.py
 tests/test_agent_identity_code.py
+tests/test_aitb_evaluate.py
 tests/test_anchor_chain.py
 tests/test_anchor_chain_head.py
 tests/test_anchor_check.py
@@ -2150,6 +2155,7 @@ tools/aer1_receipt_verifier.py
 tools/aer1_spec_audit.py
 tools/aer1_vector_replay.py
 tools/aer1_verify_external.py
+tools/aitb_evaluate.py
 tools/anchor_chain.py
 tools/anchor_chain_head.py
 tools/anchor_check.py

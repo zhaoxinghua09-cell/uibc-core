@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-26T08:33:04Z",
+ "generated_at": "2026-11-26T09:35:23Z",
  "tree_sha256": "81ff3d26bd55c1aa3fb6cc1fe1fa849d53e43c77ff93a35a8b5c418f248a77ba",
  "files_hashed": 2475,
  "content_sha256": "43e286c00461338e427b9ae4fe81a4e73071bd375eae952bdff39c2bc9e6ba1b",
@@ -46,7 +46,7 @@
    "rc": 0,
    "expect": "GATE OK",
    "ok": true,
-   "seconds": 0.7,
+   "seconds": 0.5,
    "tail": "GATE OK"
   },
   {
@@ -73,8 +73,8 @@
    "rc": 0,
    "expect": "passed",
    "ok": true,
-   "seconds": 6.3,
-   "tail": "41 passed in 4.40s"
+   "seconds": 4.7,
+   "tail": "41 passed in 3.87s"
   }
  ],
  "ok": true

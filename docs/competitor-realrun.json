@@ -48,6 +48,22 @@
    ],
    "affects_score": false,
    "verdict": "182 条里 178 绿、1 红（网络/链状态相关）、3 跳过；exit 1 来自那条实时链断言。"
+  },
+  {
+   "repo": "decentralized-identity/did-resolver",
+   "sha": "005411b26ac3002aa4f501673ee4e2ecc96b2a71",
+   "package_manager": "pnpm",
+   "install": "pnpm install --ignore-scripts --no-frozen-lockfile 22.5s 完成；唯一告警是 unmet peer @typescript/native（仓库钉的是 typescript 7.0.2，peer 要 >=7.1.0-dev），不影响测试。npm 路线在这类 pnpm 仓上会先撞 Cannot read properties of null (reading edgesOut)，没用。",
+   "suite": "pnpm test → vitest run",
+   "files": 1,
+   "tests": 25,
+   "passed": 25,
+   "failed": 0,
+   "skipped": 0,
+   "seconds": 3.25,
+   "exit_code": 0,
+   "affects_score": false,
+   "verdict": "25 条全过、1 个测试文件、644 行测试、57 处 expect、2 处 rejects。命中本表六个变异维度全是 0（bit_level / fuzz / mutation_testing / property_based / address_derive / exit_code_gate），只有 3 处 reject_assertion —— 断言集中在解析结果的结构和拒绝路径上，没有一条把报文的位或地址从头推一遍。绿不等于本表任何一维。"
   }
  ],
  "score_impact": {

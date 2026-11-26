@@ -8,6 +8,7 @@
 |---|---|---|---|---|---|---|---|
 | `decentralized-identity/did-jwt` | `63663c1f40b4` | 506 | 506 | 0 | 0 | 4.22 | 0 |
 | `decentralized-identity/ethr-did-resolver` | `6e0bd4770249` | 182 | 178 | 1 | 3 | 19.51 | 1 |
+| `decentralized-identity/did-resolver` | `005411b26ac3` | 25 | 25 | 0 | 0 | 3.25 | 0 |
 
 ## `decentralized-identity/did-jwt`
 
@@ -23,6 +24,12 @@
 - 按原样跑不动的部分：仓库里的 `test` 脚本写成 `HARDHAT_CONFIG=hardhat.config.mts vitest run`（POSIX 环境变量前缀），Windows 直接报 `'HARDHAT_CONFIG' is not recognized`——这是 shell 语法问题，不是测试失败。设 `$env:HARDHAT_CONFIG` 后重跑，才是下面这份结果。
 - 红的那条：`src/__tests__/networks.integration.test.ts > ethrResolver (alt-chains) > eth-networks > resolves on mainnet with versionId` —— AssertionError: 与主网实时链状态深比较不一致 读法：该用例断言的是实时 mainnet 上的解析结果；链上状态随时间变化，所以它现在红。不是代码缺陷，也不是本表任何一维的证据。
 - 结论：182 条里 178 绿、1 红（网络/链状态相关）、3 跳过；exit 1 来自那条实时链断言。
+
+## `decentralized-identity/did-resolver`
+
+- 安装：pnpm install --ignore-scripts --no-frozen-lockfile 22.5s 完成；唯一告警是 unmet peer @typescript/native（仓库钉的是 typescript 7.0.2，peer 要 >=7.1.0-dev），不影响测试。npm 路线在这类 pnpm 仓上会先撞 Cannot read properties of null (reading edgesOut)，没用。
+- 套件：`pnpm test → vitest run` → 1 文件 / 25 用例 / 0 红 / 0 跳过 / 3.25 s / exit 0
+- 结论：25 条全过、1 个测试文件、644 行测试、57 处 expect、2 处 rejects。命中本表六个变异维度全是 0（bit_level / fuzz / mutation_testing / property_based / address_derive / exit_code_gate），只有 3 处 reject_assertion —— 断言集中在解析结果的结构和拒绝路径上，没有一条把报文的位或地址从头推一遍。绿不等于本表任何一维。
 
 ## 为什么这些数字不进表
 

@@ -1,0 +1,148 @@
+{
+ "base": "https://iaisp.teleinfo.cn",
+ "endpoint": "/api/public/ioa/did/resolve-verify",
+ "probed_at": "2026-11-26T09:21:37Z",
+ "read_only": "two GETs (agents list, both casings) and one POST per string; no writes anywhere",
+ "rows": [
+  {
+   "case": "not a did",
+   "did": "not-a-did",
+   "http": 200,
+   "success": true,
+   "code": 0,
+   "resolution": "FAILED",
+   "vc": "SKIPPED",
+   "trust": false,
+   "ms": 398
+  },
+  {
+   "case": "pure digits",
+   "did": "1234567890",
+   "http": 200,
+   "success": true,
+   "code": 0,
+   "resolution": "FAILED",
+   "vc": "SKIPPED",
+   "trust": false,
+   "ms": 61
+  },
+  {
+   "case": "4096 chars",
+   "did": "(4096 chars)",
+   "http": 200,
+   "success": true,
+   "code": 0,
+   "resolution": "FAILED",
+   "vc": "SKIPPED",
+   "trust": false,
+   "ms": 51
+  },
+  {
+   "case": "did:web",
+   "did": "did:web:example.com",
+   "http": 200,
+   "success": true,
+   "code": 0,
+   "resolution": "FAILED",
+   "vc": "SKIPPED",
+   "trust": false,
+   "ms": 47
+  },
+  {
+   "case": "did:key",
+   "did": "did:key:z6MkpTHR8VNsBxYAAWHut2Geadd9jSwuBV8xRoAnwWsdvktH",
+   "http": 200,
+   "success": true,
+   "code": 0,
+   "resolution": "FAILED",
+   "vc": "SKIPPED",
+   "trust": false,
+   "ms": 81
+  },
+  {
+   "case": "did:example",
+   "did": "did:example:123",
+   "http": 200,
+   "success": true,
+   "code": 0,
+   "resolution": "FAILED",
+   "vc": "SKIPPED",
+   "trust": false,
+   "ms": 59
+  },
+  {
+   "case": "quote",
+   "did": "did:bid:ef' OR 1=1--",
+   "http": 200,
+   "success": true,
+   "code": 0,
+   "resolution": "FAILED",
+   "vc": "SKIPPED",
+   "trust": false,
+   "ms": 46
+  },
+  {
+   "case": "angle",
+   "did": "did:bid:ef<script>alert(1)</script>",
+   "http": 200,
+   "success": true,
+   "code": 0,
+   "resolution": "FAILED",
+   "vc": "SKIPPED",
+   "trust": false,
+   "ms": 54
+  },
+  {
+   "case": "traversal",
+   "did": "../../etc/passwd",
+   "http": 200,
+   "success": true,
+   "code": 0,
+   "resolution": "FAILED",
+   "vc": "SKIPPED",
+   "trust": false,
+   "ms": 131
+  },
+  {
+   "case": "well-formed but absent",
+   "did": "did:bid:efAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+   "http": 200,
+   "success": true,
+   "code": 0,
+   "resolution": "FAILED",
+   "vc": "SKIPPED",
+   "trust": false,
+   "ms": 52
+  },
+  {
+   "case": "empty string",
+   "did": "(empty)",
+   "http": 400,
+   "success": false,
+   "code": 400,
+   "resolution": null,
+   "vc": null,
+   "trust": null,
+   "ms": 55
+  }
+ ],
+ "agents_lower": {
+  "http": 200,
+  "content_type": "application/json",
+  "bytes": 6935,
+  "items": 78,
+  "keys": [
+   "did",
+   "name"
+  ],
+  "ms": 48
+ },
+ "agents_upper": {
+  "http": 200,
+  "content_type": "text/html",
+  "bytes": 880,
+  "items": null,
+  "keys": null,
+  "ms": 46
+ }
+}

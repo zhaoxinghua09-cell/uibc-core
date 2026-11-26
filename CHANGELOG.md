@@ -1,3 +1,12 @@
+## 未发布 — 2026-11-27（282 条登记册，逐条去找它自己写的地址，打一遍）
+
+- **问题（上一轮留下的）**：上一轮证明的是"282 条里有 3 条没公开地址"，那还是挑出来的。这一轮把**每一条**都按它自己的规范去找地址、去打，目录里有多少就测多少。
+- **做法**：`tools/endpoint_census.py` 读登记册里每条的 method、规范链接与地址字段，并发 8、单请求 6 s、每条最多 3 个候选、首个 2xx 即止；四档结论 `ENDPOINT_OK / ENDPOINT_NOT_OK / NO_PUBLIC_ENDPOINT_IN_SPEC / SPEC_UNAVAILABLE`，`--check` 断言分母 282、档位合法、OK 项状态码均为 2xx。
+- **第一次是错的，且错得方向一致**：初版给主机设了黑名单（两次超时即整片跳过），一次抖动会把整批打成 `SPEC_UNAVAILABLE`，跑出 146 条假结论、OK 只 3 条。删掉黑名单、改两次尝试、并发 16→8 后重跑，读数才站得住。原因写进脚本文件头，没有悄悄覆盖。
+- **实测（918.7 s）**：`OK 4 / NOT_OK 14 / NO_PUBLIC_ENDPOINT_IN_SPEC 154 / SPEC_UNAVAILABLE 110`（98 超时、11 404、1 403），分母 282 校验通过。
+- **三条结论**：①在册不等于可解析——规范自给地址且实测 2xx 的只有 4 条；②**规范里没写地址，不等于平台没端点**（`did:cn` 规范只给相对路径 `/didservice/v1/did/get`，落 154 档，但平台接口实测 200）；③110 条规范取不到，多数指向已消失的个人仓，这些方法只能引用"登记条目存在"，不能引用"规范可读"。
+- **产物**：`docs/ENDPOINT-CENSUS.json`（逐条候选/状态码/字节）、`docs/ENDPOINT-CENSUS.md`、`docs/ENDPOINT-CENSUS-BOARD.html`（3 图 / 0 外链）；`tools/reverify.ps1` 增第 12 项，**All 12 checks passed**。
+
 ## 0.5.6 — 2026-11-27 发布（格式 v2：未声明证据从「点名告警」升为「默认 FAIL」）
 
 - **发布事实（发版后补写，放在最前面，因为读者先要的是字节和哈希）**：PyPI `uibc-core 0.5.6` 于 2026-11-27 01:46 UTC 上传 —— `uibc_core-0.5.6-py3-none-any.whl` 226,327 B / `sha256:34eda43c…5699`，`uibc_core-0.5.6.tar.gz` 3,940,189 B / `sha256:2b31e7af…0b80`。一致性语料归档 `conformance/uibc-conformance-0.5.6.zip` 388,388 B / `sha256:31bbeff40e67…9d14`，pin 见 `anchors/pins/uibc-conformance-0.5.6.sha256`；同一棵树上重跑 `tools/build_conformance_bundle.py 0.5.6` 得到同字节（该工具有 `identical:` 分支）。

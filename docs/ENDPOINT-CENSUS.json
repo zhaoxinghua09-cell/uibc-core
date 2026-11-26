@@ -1,0 +1,2602 @@
+{
+ "registry": "W3C DID Methods registry (w3c/did-extensions, methods/)",
+ "universe": 282,
+ "denominator": 282,
+ "total": {
+  "ENDPOINT_OK": 4,
+  "ENDPOINT_NOT_OK": 14,
+  "NO_PUBLIC_ENDPOINT_IN_SPEC": 154,
+  "SPEC_UNAVAILABLE": 110
+ },
+ "rule": "只读 GET；并发 8；单请求 6s，取规范两次尝试；每条最多 3 个候选，首个 2xx 即止",
+ "elapsed_s": 918.7,
+ "methods": [
+  {
+   "method": "3",
+   "spec": "https://cips.ceramic.network/CIPs/cip-79",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "abt",
+   "spec": "https://arcblock.github.io/abt-did-spec/",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "aergo",
+   "spec": "https://github.com/aergoio/aergo-identity/blob/master/doc/did-method-spec.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "agent",
+   "spec": "https://github.com/m31527/AgentDID/blob/main/docs/did-spec.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "agentid",
+   "spec": "https://getagentid.dev/specs/did-method-agentid-v1.0",
+   "candidates": [
+    "https://getagentid.dev/1.0/identifiers/did%3Aagentid%3A&lt;agent_id&gt",
+    "https://getagentid.dev/1.0/identifiers/{did}",
+    "https://getagentid.dev/1.0/identifiers/did%3Aagentid%3Aagent_d1b7ef01f9af191f"
+   ],
+   "verdict": "ENDPOINT_OK",
+   "status": 200,
+   "bytes": 2048,
+   "note": "探测 https://getagentid.dev/1.0/identifiers/did%3Aagentid%3Aagent_d1b7ef01f9af191f"
+  },
+  {
+   "method": "aip",
+   "spec": "https://github.com/dr-wilson-empty/aip-beta/blob/main/standards/did-aip-method-spec.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "ala",
+   "spec": "https://github.com/alastria/alastria-identity/wiki/Alastria-DID-Method-Specification-(Quorum-version)",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "amo",
+   "spec": "https://github.com/amolabs/docs/blob/master/amo-did.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "andorra",
+   "spec": "https://github.com/davidgarciavargroupiberia/did-andorra-method-spec/blob/main/spec.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "ans",
+   "spec": "https://github.com/wolfbrother/did-ans/tree/main/doc/en/ANS%20Protocol%20Specification.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "antelope",
+   "spec": "https://github.com/Tonomy-Foundation/antelope-did-spec",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "aroha",
+   "spec": "https://www.aroha-labs.com/spec/did-aroha-method-1.0.html",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "art",
+   "spec": "https://github.com/ArtracID/ArtracID-DID-ART-Method",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "artifact",
+   "spec": "https://oma3dao.github.io/omatrust-docs/specification/did-artifact-method-spec.html",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "asset",
+   "spec": "https://github.com/KILTprotocol/specifications/blob/main/docs/did/asset-did-spec.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "avtr",
+   "spec": "https://docs.avatar.me/specs/did-method-avtr/v1.2/",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "bba",
+   "spec": "https://github.com/blobaa/bba-did-method-specification/blob/master/docs/markdown/spec.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "bee",
+   "spec": "https://github.com/mesur-io/did-method-bee",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "bid",
+   "spec": "https://github.com/teleinfo-bif/bid/tree/master/doc/en",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "bit",
+   "spec": "https://github.com/dotbitHQ/did-bit-spec",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "bluchain",
+   "spec": "https://bitbucket.org/blucloudsrl/did-driver-bluchain/src/master/spec.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "bluetoqueagent",
+   "spec": "https://github.com/mwherman2000/TrustedDigitalWeb/blob/master/specifications/did-methods/did-bluetoqueagent-1-0-0.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "bluetoquedeed",
+   "spec": "https://github.com/mwherman2000/TrustedDigitalWeb/blob/master/specifications/did-methods/did-bluetoquedeed-1-0-0.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "bluetoquenfe",
+   "spec": "https://github.com/mwherman2000/TrustedDigitalWeb/blob/master/specifications/did-methods/did-bluetoquenfe-1-0-0.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "bluetoqueprocess",
+   "spec": "https://github.com/mwherman2000/TrustedDigitalWeb/blob/master/specifications/did-methods/did-bluetoqueprocess-1-0-0.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "bnb",
+   "spec": "https://github.com/ontology-tech/DID-method-specs/blob/master/did-bnb/DID-Method-bnb.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "bryk",
+   "spec": "https://github.com/bryk-io/did-method/blob/master/README.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "bsv",
+   "spec": "https://docs.teranode.group/tng-identity-documentation/did/bsv-did-method-specifications/method-specification.-a-utxo-friendly-method",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "btco",
+   "spec": "https://github.com/ordinalsreserve/did-btco/blob/main/spec.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "btcr",
+   "spec": "https://w3c-ccg.github.io/didm-btcr",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "candid",
+   "spec": "https://github.com/ericlin716/did-spec/blob/main/candid-did-method-spec.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 404"
+  },
+  {
+   "method": "cari",
+   "spec": "https://github.com/CariHQ/did-cari-method-spec",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "ccd",
+   "spec": "https://proposals.concordium.software/ID/concordium-did.html",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "ccf",
+   "spec": "https://github.com/microsoft/did-ccf/blob/main/DID_CCF.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "ccp",
+   "spec": "https://did.baidu.com/did-spec/",
+   "candidates": [
+    "https://did.baidu.com/v1/did/resolve/did:ccp:ceNobbK6Me9F5zwyE3MKY88QZLw"
+   ],
+   "verdict": "ENDPOINT_OK",
+   "status": 200,
+   "bytes": 1522,
+   "note": "探测 https://did.baidu.com/v1/did/resolve/did:ccp:ceNobbK6Me9F5zwyE3MKY88QZLw"
+  },
+  {
+   "method": "cde",
+   "spec": "https://resources.clouddataengine.io/docs/did-cde-spec-v1.0.1.html",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "celo",
+   "spec": "https://github.com/ontology-tech/DID-method-specs/blob/master/did-celo/DID-Method-celo.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "cha2a",
+   "spec": "https://github.com/wwumit/did-method-cha2a/blob/v1.1.0/did-method-cha2a.md",
+   "candidates": [
+    "https://registry.example.com/api/v1/did/did:cha2a:registry:example.org",
+    "https://registry.example.com/api/v1/trust/proof?did=did%3Acha2a%3Askill%3Askill-example"
+   ],
+   "verdict": "ENDPOINT_NOT_OK",
+   "status": 0,
+   "bytes": 0,
+   "note": "探测 https://registry.example.com/api/v1/did/did:cha2a:registry:example.org"
+  },
+  {
+   "method": "cheqd",
+   "spec": "https://docs.cheqd.io/identity/architecture/adr-list/adr-001-cheqd-did-method",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "cid",
+   "spec": "https://archon.technology/specs",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "cimd",
+   "spec": "https://github.com/shlee1223/did-method-cimd/blob/main/did-method-cimd.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "ciphora",
+   "spec": "https://ciphora.org/did/v1",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "ckb",
+   "spec": "https://github.com/web5fans/web5-wips/blob/master/01.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "cn",
+   "spec": "https://github.com/caict-4iot-dev/CN-DID-Method-Specification",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "cndid",
+   "spec": "https://github.com/teleinfo-bif/cndid/blob/main/doc/en/CNDID%20Protocol%20Specification.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "cndomain",
+   "spec": "https://cndomain-dev.github.io/did-method-cndomain/did-cndomain-method-specification-draft.html",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "com",
+   "spec": "https://github.com/commercionetwork/Commercio.network-DID-Method-Specification/",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "content",
+   "spec": "https://github.com/KataruInc/did-content-spec",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "corda",
+   "spec": "https://htmlpreview.github.io/?https://github.com/persistentsystems/corda-did-method/blob/master/corda_did_method.html",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "cosmos",
+   "spec": "https://github.com/EarthProgram/did-cosmos",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "cot",
+   "spec": "https://github.com/ComputingOfThings/dids#readme",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "cr",
+   "spec": "https://github.com/SelfSovereignDrm/core/blob/main/README.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "ct",
+   "spec": "https://github.com/blueroominnovation/did-ct-spec",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "ctid",
+   "spec": "https://github.com/617640999/ctid-did-register/blob/main/anicert-ctid-did-en.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "definitiveid",
+   "spec": "https://github.com/davidgarciavargroupiberia/did-definitiveid-method-spec/blob/main/spec.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "dfos",
+   "spec": "https://protocol.dfos.com/did-method",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "dht",
+   "spec": "https://did-dht.com/",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "did",
+   "spec": "https://did-did.spruceid.com",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "did-aria",
+   "spec": "https://aria.bar/spec#did-method",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "dime",
+   "spec": "https://github.com/dime-coin/dimedid-method",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "dns",
+   "spec": "https://danubetech.github.io/did-method-dns/",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "dock",
+   "spec": "https://github.com/docknetwork/dock-did-driver/blob/master/Dock%20DID%20method%20specification.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "dom",
+   "spec": "",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "登记项没有规范地址"
+  },
+  {
+   "method": "dotbit",
+   "spec": "https://github.com/dotbithq/dotbit-did-spec",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "drop",
+   "spec": "https://tenman1739-alt.github.io/did-drop-spec/",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "dsrv",
+   "spec": "https://github.com/dsrvlabs/did_method/blob/main/DID-Method-DSRV.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "dual",
+   "spec": "https://github.com/Smart-ID-Card/Dual-DID/blob/main/docs/dual-did-method.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "dweb",
+   "spec": "https://github.com/Aisino-Blockchain/dweb-Method-Specification",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "dxd",
+   "spec": "https://github.com/Data-Alliance/did-dxd/blob/master/README.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "dyne",
+   "spec": "https://dyne.github.io/W3C-DID",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "echo",
+   "spec": "https://github.com/echoprotocol/uni-resolver-driver-did-echo/blob/master/echo_did_specifications.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "educreds",
+   "spec": "https://did.educreds.xyz",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "elastos",
+   "spec": "https://github.com/elastos/Elastos.DID.Method/blob/master/DID/Elastos-DID-Method-Specification_en.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "elem",
+   "spec": "https://github.com/decentralized-identity/element/blob/master/docs/did-method-spec/spec.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "emtrust",
+   "spec": "https://github.com/Halialabs/did-spec/blob/gh-pages/readme.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "ens",
+   "spec": "https://github.com/veramolabs/did-ens-spec",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "eosio",
+   "spec": "https://github.com/Gimly-Blockchain/eosio-did-spec",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "epn",
+   "spec": "https://gitlab.com/european-public-network/did-method-specification/-/blob/main/epn_did_method_spec.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "erat",
+   "spec": "https://gitlab.com/eratosthenes-h2020/erat-did-spec",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "erc725",
+   "spec": "https://github.com/WebOfTrustInfo/rebooting-the-web-of-trust-spring2018/blob/master/topics-and-advance-readings/DID-Method-erc725.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "etho",
+   "spec": "https://github.com/ontology-tech/DID-method-specs/blob/master/did-etho/DID-Method-etho.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "ethr",
+   "spec": "https://github.com/decentralized-identity/ethr-did-resolver/blob/master/doc/did-method-spec.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "ev",
+   "spec": "https://github.com/KayTrust/did-method-ev",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "evan",
+   "spec": "https://github.com/evannetwork/evan.network-DID-method-specification/blob/master/evan_did_method_spec.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "everscale",
+   "spec": "https://git.defispace.com/ssi-4/everscale-did-registry/-/blob/master/docs/documentation.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "example",
+   "spec": "https://www.w3.org/TR/did-core/",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "factom",
+   "spec": "https://github.com/factom-protocol/FIS/blob/master/FIS/DID.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "fairx",
+   "spec": "https://github.com/fairxio/protocol/tree/main/did",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "finger",
+   "spec": "https://github.com/finger-did/did_method/blob/main/did_method_en.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "fox",
+   "spec": "https://github.com/qikfox/fox-did-method/blob/main/README.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "foxbook",
+   "spec": "https://github.com/cloakmaster/foxbook/blob/main/docs/specs/did-foxbook-method.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "future",
+   "spec": "https://github.com/netease-chain/Future-DID-Method-Specification/blob/main/README.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "gatc",
+   "spec": "https://github.com/gatacaid/gataca-did-method",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "gns",
+   "spec": "https://lsd.gnunet.org/lsd0005/",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "grg",
+   "spec": "https://github.com/GrgChain/DID-method-specs/blob/master/README.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "grn",
+   "spec": "https://github.com/EG-easy/grano-did/blob/main/did-method-specification.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "gwm",
+   "spec": "https://github.com/GreatWall-Blockchain/GWDID-Method-Specification/blob/main/README.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "health",
+   "spec": "https://github.com/didhealth/health-did-resolver/blob/main/doc/did-method-spec.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "hedera",
+   "spec": "https://github.com/hashgraph/did-method/blob/master/hedera-did-method-specification.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "hid",
+   "spec": "https://github.com/hypersign-protocol/HIPs/blob/main/HIPs/hip-10.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "hive",
+   "spec": "https://thehiveryiq.com/specs/did-hive/v1/",
+   "candidates": [
+    "https://receipts.thehiveryiq.com/v1/did/resolve/{did}"
+   ],
+   "verdict": "ENDPOINT_NOT_OK",
+   "status": 502,
+   "bytes": 0,
+   "note": "探测 https://receipts.thehiveryiq.com/v1/did/resolve/{did}"
+  },
+  {
+   "method": "holo",
+   "spec": "https://github.com/WebOfTrustInfo/rwot9-prague/blob/master/draft-documents/did:hc-method.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 404"
+  },
+  {
+   "method": "hpass",
+   "spec": "https://github.com/IBM/hpass/blob/main/doc/did-spec.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 404"
+  },
+  {
+   "method": "hpo",
+   "spec": "https://github.com/hippocrat-protocol/hpo-did-method-spec/blob/main/HPO-DID-method-spec.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "hsk",
+   "spec": "https://github.com/hashkeydid/hashkeydid-w3c-specification/blob/master/did-specfication/hsk-method.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "huuid",
+   "spec": "https://7evenbillion.github.io/huuid-did-method",
+   "candidates": [
+    "https://resolver.huuid.health/1.0/identifiers/{did}"
+   ],
+   "verdict": "ENDPOINT_NOT_OK",
+   "status": 0,
+   "bytes": 0,
+   "note": "探测 https://resolver.huuid.health/1.0/identifiers/{did}"
+  },
+  {
+   "method": "iamx",
+   "spec": "https://github.com/IAMXID/did-method-iamx/blob/main/IAMX_DID_method.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "ibmdc",
+   "spec": "https://wiki.digitalcredentials.ibm.com/#/spec/v1/did-method",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "icon",
+   "spec": "https://github.com/icon-project/icon-DID/blob/master/docs/ICON-DID-method.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "id",
+   "spec": "https://github.com/Mastercard/did-methods/blob/master/id.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "iden3",
+   "spec": "https://github.com/iden3/did-iden3/",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "iid",
+   "spec": "https://github.com/InspurIndustrialInternet/iid/blob/main/doc/en/InspurChain_DID_protocol_Specification.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "indy",
+   "spec": "https://hyperledger.github.io/indy-did-method/",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "infra",
+   "spec": "https://github.com/InfraBlockchain/infra-did-method-specs/blob/main/docs/Infra-DID-method-spec.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "io",
+   "spec": "https://github.com/iotexproject/iotex-did/blob/master/README.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "ioa",
+   "spec": "https://github.com/ReciterKim/ioa/blob/main/doc/en/IOA%20Protocol%20Specification.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "ion",
+   "spec": "https://github.com/decentralized-identity/ion-did-method",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "iota",
+   "spec": "https://docs.iota.org/references/iota-identity/iota-did-method-spec",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "ipid",
+   "spec": "https://did-ipid.github.io/ipid-did-method/",
+   "candidates": [
+    "https://ipfs.io/api/v0/name/resolve?arg=12D3KooWMHdrzcwpjbdrZs5GGqERAvcgqX3b5dpuPtPa9ot69yew"
+   ],
+   "verdict": "ENDPOINT_NOT_OK",
+   "status": 0,
+   "bytes": 0,
+   "note": "探测 https://ipfs.io/api/v0/name/resolve?arg=12D3KooWMHdrzcwpjbdrZs5GGqERAvcgqX3b5dpuPtPa9ot69yew"
+  },
+  {
+   "method": "is",
+   "spec": "https://github.com/block-core/blockcore-did-method",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "iscc",
+   "spec": "https://ieps.iscc.codes/iep-0015/",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "ishare",
+   "spec": "https://did.ishare.eu/",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "itn",
+   "spec": "https://github.com/itn-trust/itn-did-spec",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "iwt",
+   "spec": "https://github.com/infowallet/did_method/blob/master/did_method.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "ixo",
+   "spec": "https://github.com/ixofoundation/ixo-did-method/blob/main/README.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "jlinc",
+   "spec": "https://did-spec.jlinc.org/",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "jlinx",
+   "spec": "https://didspec.jlinx.io",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "jnctn",
+   "spec": "https://github.com/jnctn/did-method-spec/",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "jolo",
+   "spec": "https://github.com/jolocom/jolo-did-method/blob/master/jolocom-did-method-specification.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "julia",
+   "spec": "https://github.com/julia-social/did-julia/blob/v1.0.0/spec/did-julia.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "jwk",
+   "spec": "https://github.com/quartzjer/did-jwk",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "jwks",
+   "spec": "https://github.com/catena-labs/did-jwks/blob/main/SPEC.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "kaname",
+   "spec": "https://github.com/KanameProtocol/did-kaname-spec/blob/main/README.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "kdid",
+   "spec": "https://github.com/KingdomFintechBJ-BC/kdid/blob/main/doc/en/kdid.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "keri",
+   "spec": "https://weboftrust.github.io/did-keri/",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "key",
+   "spec": "https://w3c-ccg.github.io/did-key-spec/",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "kilt",
+   "spec": "https://github.com/KILTprotocol/specifications/blob/main/docs/did/did-spec.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "klay",
+   "spec": "https://github.com/ontology-tech/DID-method-specs/blob/master/did-klay/DID-Method-klay.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "klayr",
+   "spec": "https://github.com/aldhosutra/klayr-did/blob/main/packages/klayr-did-module/docs/did-method-spec.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "knox",
+   "spec": "https://github.com/knox-networks/knox-did-specification",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "kr",
+   "spec": "https://github.com/identify202020/did-method/blob/main/did_kr_method.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "kscirc",
+   "spec": "https://tangy-gallium-b9b.notion.site/DID-Method-Specification-KSChain-7a77664f1eae47769692f4ff2d029fe0",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "kxtid",
+   "spec": "https://github.com/DTFN/kxtid/blob/main/en/KXTID%20Specification.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "lac",
+   "spec": "https://github.com/lacchain/lacchain-did-registry/blob/master/DID_SPEC.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "ldid",
+   "spec": "https://github.com/LONGEVITY-DIGITAL/LDID-Method-Specification/blob/main/README.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "life",
+   "spec": "https://lifeid.github.io/did-method-spec/",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 404"
+  },
+  {
+   "method": "ling",
+   "spec": "https://www.notion.so/LING-DID-Method-Specification-7b9d25a62a1849a496890b9ef24e0890",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "lit",
+   "spec": "https://github.com/ibct-dev/lit-DID/blob/main/docs/did:lit-method-spec_eng_v0.1.0.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "m2m",
+   "spec": "https://github.com/m2mblockchain/DID-Method-m2m/blob/main/README.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "ma",
+   "spec": "https://github.com/bahner/ma-spec/blob/v1.0.0.rc.1/did-ma-spec-v1.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "me",
+   "spec": "https://did-me.org/spec/v1/",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "meme",
+   "spec": "https://or13.github.io/didme.me/did-method-spec",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "mesh",
+   "spec": "https://github.com/mwherman2000/TrustedDigitalWeb/blob/master/specifications/did-methods/did-mesh-1-0-1.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "meta",
+   "spec": "https://github.com/METADIUM/meta-DID/blob/master/doc/DID-method-metadium.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "midnight",
+   "spec": "https://github.com/IAMXID/did-midnight/blob/main/Midnight_DID_method.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "moac",
+   "spec": "https://github.com/DavidRicardoWilde/moac-did/blob/master/did-moac-method.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 404"
+  },
+  {
+   "method": "moltrust",
+   "spec": "https://moltrust.ch/did-method-spec.html",
+   "candidates": [
+    "https://api.moltrust.ch/identity/resolve/did:moltrust:d34ed796a4dc4698&quot",
+    "https://api.moltrust.ch/identity/resolve/{did}"
+   ],
+   "verdict": "ENDPOINT_NOT_OK",
+   "status": 400,
+   "bytes": 0,
+   "note": "探测 https://api.moltrust.ch/identity/resolve/{did}"
+  },
+  {
+   "method": "monid",
+   "spec": "https://lianxi-tech.github.io/monid/",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "morpheus",
+   "spec": "https://developer.iop.global/w3c",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "myDiD",
+   "spec": "https://github.com/MyDidCom/myDiD_Method",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "mydata",
+   "spec": "https://github.com/decentralised-dataexchange/automated-data-agreements/blob/main/docs/did-spec.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "nda",
+   "spec": "https://did-specs.ndachain.vn",
+   "candidates": [
+    "https://resolver.ndadid.vn/1.0/identifiers/{did}",
+    "https://resolver.ndadid.vn/1.0/identifiers/did:nda:0xdfc8044a202f08b9c8df2e42f746355575816828"
+   ],
+   "verdict": "ENDPOINT_NOT_OK",
+   "status": 0,
+   "bytes": 0,
+   "note": "探测 https://resolver.ndadid.vn/1.0/identifiers/{did}"
+  },
+  {
+   "method": "ndc",
+   "spec": "https://did-specs.ndachain.vn/ndc",
+   "candidates": [
+    "https://resolver.ndcdid.vn/1.0/identifiers/{did}",
+    "https://resolver.ndcdid.vn/1.0/identifiers/did:ndc:0xdfc8044a202f08b9c8df2e42f746355575816828"
+   ],
+   "verdict": "ENDPOINT_NOT_OK",
+   "status": 0,
+   "bytes": 0,
+   "note": "探测 https://resolver.ndcdid.vn/1.0/identifiers/{did}"
+  },
+  {
+   "method": "near",
+   "spec": "https://github.com/ontology-tech/DID-spec-near/blob/master/NEAR/DID-Method-NEAR.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "neuralkey",
+   "spec": "https://neuralkey.neuralsh.com/neuralkey-spec-page",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "next",
+   "spec": "https://docs.nextme.one/#/DID/NextDID",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "nft",
+   "spec": "https://cips.ceramic.network/CIPs/cip-94",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "ni",
+   "spec": "https://storage.bengo.is/space/07ce89c1-f836-4d1e-94d8-b5a87f825fb8/",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "nostr",
+   "spec": "https://nostrcg.github.io/did-nostr/",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "ns",
+   "spec": "https://github.com/Web7Foundation/Specifications/blob/main/methods/did-ns-1-0-1.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "nuggets",
+   "spec": "https://github.com/NuggetsLtd/nuggets-did-resolver/blob/master/doc/did-methods/did:nuggets.md",
+   "candidates": [
+    "https://api-dev.internal-nuggets.life/api/v1/nugget/{ethereum_address}/did",
+    "https://api-dev.internal-nuggets.life/api/v1/nugget/0xd2339bA4AfBF83C1A4a7F682AE962446b7DA8292/did"
+   ],
+   "verdict": "ENDPOINT_NOT_OK",
+   "status": 503,
+   "bytes": 0,
+   "note": "探测 https://api-dev.internal-nuggets.life/api/v1/nugget/{ethereum_address}/did"
+  },
+  {
+   "method": "nuts",
+   "spec": "https://nuts-foundation.gitbook.io/drafts/rfc/rfc006-distributed-registry",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "oan",
+   "spec": "https://github.com/OpenAgenet/oan-public-docs/blob/main/did-oan-specs/doc/OAN%20DID%20Method%20Specification.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "object",
+   "spec": "https://github.com/mwherman2000/TrustedDigitalWeb/blob/master/specifications/did-methods/did-object-1-5-0.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "ockam",
+   "spec": "https://github.com/ockam-network/did-method-spec/blob/master/README.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "omn",
+   "spec": "https://github.com/OmniOneID/did_method/blob/master/did_method.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "onion",
+   "spec": "https://blockchaincommons.github.io/did-method-onion/",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "ont",
+   "spec": "https://github.com/ontio/ontology-DID/blob/master/docs/en/DID-ONT-method.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "op",
+   "spec": "https://github.com/oceanprotocol/OEPs/blob/master/7/v0.2/README.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 404"
+  },
+  {
+   "method": "opena2a",
+   "spec": "https://github.com/opena2a-standards/did-method-opena2a/blob/main/did-method-opena2a.md",
+   "candidates": [
+    "https://api.oa2a.org/api/v1/did/did:opena2a",
+    "https://api.oa2a.org/api/v1/did/did:opena2a:agent:a2a-server",
+    "https://api.oa2a.org/api/v1/did/did:opena2a:registry:opena2a.org"
+   ],
+   "verdict": "ENDPOINT_OK",
+   "status": 200,
+   "bytes": 1050,
+   "note": "探测 https://api.oa2a.org/api/v1/did/did:opena2a:agent:a2a-server"
+  },
+  {
+   "method": "operon",
+   "spec": "https://operon.cloud/did-method/operon",
+   "candidates": [
+    "https://did.operon.cloud/1.0/identifiers/{did}"
+   ],
+   "verdict": "ENDPOINT_NOT_OK",
+   "status": 400,
+   "bytes": 0,
+   "note": "探测 https://did.operon.cloud/1.0/identifiers/{did}"
+  },
+  {
+   "method": "orb",
+   "spec": "https://trustbloc.github.io/did-method-orb/",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "os",
+   "spec": "https://github.com/OpenSig/opensig-protocol/blob/main/did/did-os-method-spec.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "oyd",
+   "spec": "https://ownyourdata.github.io/oydid/",
+   "candidates": [
+    "https://resolver.ownyourdata.eu/1.0/resolve/did:oyd:zQmaBZTghndXTgxNwfbdpVLWdFf6faYE4oeuN2zzXdQt1kh"
+   ],
+   "verdict": "ENDPOINT_OK",
+   "status": 200,
+   "bytes": 2048,
+   "note": "探测 https://resolver.ownyourdata.eu/1.0/resolve/did:oyd:zQmaBZTghndXTgxNwfbdpVLWdFf6faYE4oeuN2zzXdQt1kh"
+  },
+  {
+   "method": "panacea",
+   "spec": "https://github.com/medibloc/panacea-core/blob/master/docs/did.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "peaq",
+   "spec": "https://github.com/peaqnetwork/peaq-did-specifications",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "peer",
+   "spec": "https://identity.foundation/peer-did-method-spec/index.html",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "phoenix",
+   "spec": "https://phoenixkey.me/did-method/v1",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "pid",
+   "spec": "https://github.com/proof-id/pid-did-driver/blob/main/did-method-specification.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "pistis",
+   "spec": "https://github.com/uino95/ssi/blob/consensys/dashboard/server/pistis/pistis-did-resolver/README.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "pkh",
+   "spec": "https://github.com/w3c-ccg/did-pkh/blob/90b28ad3c18d63822a8aab3c752302aa64fc9382/did-pkh-method-draft.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "pki",
+   "spec": "https://github.com/Attestto-com/did-pki-spec",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "plc",
+   "spec": "https://github.com/bluesky-social/did-method-plc",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "pml",
+   "spec": "https://github.com/PML-ID/pml-did-specs/blob/main/did-method.md",
+   "candidates": [
+    "https://did.pmlabs.com/v1/did/resolve/did:pml:[method-specific-id"
+   ],
+   "verdict": "ENDPOINT_NOT_OK",
+   "status": 0,
+   "bytes": 0,
+   "note": "探测 https://did.pmlabs.com/v1/did/resolve/did:pml:[method-specific-id"
+  },
+  {
+   "method": "polygon",
+   "spec": "https://github.com/ayanworks/polygon-did-method-spec",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "polygonid",
+   "spec": "https://github.com/iden3/did-iden3/",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "pqie",
+   "spec": "https://dixadholakiya.github.io/pqie-did-spec/",
+   "candidates": [
+    "https://pqie-resolver-production.up.railway.app/1.0/identifiers/{did}",
+    "https://pqie-resolver-production.up.railway.app/1.0/identifiers/did:pqie:5135e697:8b7ecf94:a3f21bc0"
+   ],
+   "verdict": "ENDPOINT_NOT_OK",
+   "status": 404,
+   "bytes": 0,
+   "note": "探测 https://pqie-resolver-production.up.railway.app/1.0/identifiers/{did}"
+  },
+  {
+   "method": "prism",
+   "spec": "https://github.com/input-output-hk/prism-did-method-spec/blob/main/w3c-spec/PRISM-method.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "proof",
+   "spec": "https://github.com/PaperProofLabs/proof/blob/main/doc/en/Proof%20Protocol%20Specification.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "psi",
+   "spec": "https://github.com/didpsi/psi-DID/blob/main/docs/did:psi-method-spec_eng.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "psqr",
+   "spec": "https://vpsqr.com/did-method-psqr/v1/",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "ptn",
+   "spec": "https://github.com/palletone/palletone-DID/blob/master/docs/did-method/README.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "qes",
+   "spec": "https://github.com/idnow/de.idnow.qes.did.method.specification",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "qsb",
+   "spec": "https://github.com/Quantum-Blockchains/qsb-did-specifications",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "qui",
+   "spec": "https://github.com/mwherman2000/TrustedDigitalWeb/blob/master/specifications/did-methods/did-qui-1-0-0.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 404"
+  },
+  {
+   "method": "ray",
+   "spec": "https://github.com/pcrui/did-spec/blob/main/README.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "real",
+   "spec": "https://github.com/realitems/did-real/blob/main/did-real-method-specification.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "resume",
+   "spec": "https://github.com/realmatterio/Resume-DID-Method/",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "rm",
+   "spec": "https://github.com/realmatterio/RealMatter-DID-Method",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "safe",
+   "spec": "https://cips.ceramic.network/CIPs/cip-101",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "salt",
+   "spec": "https://github.com/stage-tech/did-methods/blob/main/salt.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "san",
+   "spec": "https://github.com/Baasze/DID-method-specification",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "schema",
+   "spec": "https://github.com/51nodes/schema-registry-did-method/blob/master/README.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "scid",
+   "spec": "https://github.com/StraitsChain/SCID/blob/main/README.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "self",
+   "spec": "https://github.com/excid-io/did-self",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "selfkey",
+   "spec": "https://github.com/SelfKeyFoundation/selfkey-identity/blob/develop/DIDMethodSpecs.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "sideos",
+   "spec": "https://github.com/sideos/sideos-did-method",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "sigelo",
+   "spec": "https://sigelo.io/spec.html#12-did-method-didsigelo",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "signor",
+   "spec": "https://github.com/cryptonicsconsulting/signor-did-contracts/blob/master/did-method-spec.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "sirius",
+   "spec": "https://gitlab.com/proximax-enterprise/siriusid/sirius-id-specs/-/blob/master/docs/did-method-spec.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "snail",
+   "spec": "https://🐌.amy.gy/",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "snplab",
+   "spec": "https://github.com/snplab-io/snplab-did-method/blob/main/snplab-did-method-spec.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "sns",
+   "spec": "https://spec.attestto.com/did-sns/",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "sol",
+   "spec": "https://g.identity.com/sol-did/",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "solidus",
+   "spec": "https://github.com/solidusnetwork/did-solidus-spec/blob/v0.2.0/SPEC.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "sov",
+   "spec": "https://sovrin-foundation.github.io/sovrin/spec/did-method-spec-template.html",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "sovrn",
+   "spec": "https://schema.sovrn.place/specs/did-sovrn/v0.1/",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "ssb",
+   "spec": "https://viewer.scuttlebot.io/&amp;5Bne/slGKH/i1361qemVlNBElWInSUfntlWvMXaD4M4=.sha256?hl=zQmdh4Ya6WasmjnS4UMn5ot6k5tbCypy1oyhhdJ6yB6MjfT",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "ssw",
+   "spec": "https://sktston.github.io/ssw-did/did-method-spec.html",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 404"
+  },
+  {
+   "method": "stack",
+   "spec": "https://github.com/blockstack/blockstack-core/blob/stacks-1.0/docs/blockstack-did-spec.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 404"
+  },
+  {
+   "method": "stellar",
+   "spec": "https://github.com/ACTA-Team/contracts-acta/blob/dev/docs/did-spec/did-stellar-v0.1.md",
+   "candidates": [
+    "https://did.acta.build/1.0/identifiers/{did}",
+    "https://did.acta.build/1.0/identifiers/did:stellar:testnet:znfxngsh46vkyqu6inrx4omphi"
+   ],
+   "verdict": "ENDPOINT_NOT_OK",
+   "status": 0,
+   "bytes": 0,
+   "note": "探测 https://did.acta.build/1.0/identifiers/{did}"
+  },
+  {
+   "method": "swtc",
+   "spec": "https://github.com/JCCDex/SWTC-DID/blob/main/docs/did-method-spec-en.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "tangle",
+   "spec": "https://github.com/TangleID/TangleID/blob/develop/did-method-spec.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "tdid",
+   "spec": "https://github.com/TencentCloud-Blockchain/TDID-Method-Specification/blob/main/README.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "tenzro",
+   "spec": "https://github.com/tenzro/tenzro-network/blob/main/docs/did-method-tenzro.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "theseries",
+   "spec": "https://github.com/theseriesteam/tsid-method/blob/main/ts-did-method-specification.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "ti",
+   "spec": "https://github.com/HTiBRI/TiDID-Method-Specification/blob/main/README.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "tls",
+   "spec": "",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "登记项没有规范地址"
+  },
+  {
+   "method": "tr",
+   "spec": "https://github.com/bzlab/ssi-turkiye-spec/blob/main/DID%20Method%20Registration/TR%20SSI%20DID%20Spec%20ReadMe.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "trail",
+   "spec": "https://github.com/trailprotocol/trail-did-method/blob/main/spec/did-method-trail-v1.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "trust",
+   "spec": "https://github.com/trustcerts/did-trust-method/blob/main/README.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "trustbloc",
+   "spec": "https://github.com/trustbloc/trustbloc-did-method/blob/master/docs/spec/trustbloc-did-method.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "trx",
+   "spec": "https://github.com/ontology-tech/DID-method-specs/blob/master/did-trx/DID-Method-trx.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "ttm",
+   "spec": "https://github.com/TokenTM/TM-DID/blob/master/docs/en/DID_spec.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "twit",
+   "spec": "https://did-twit.github.io/did-twit/",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 404"
+  },
+  {
+   "method": "tyron",
+   "spec": "https://www.tyronzil.com",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "tys",
+   "spec": "https://github.com/chainyard-tys/tys/blob/master/README.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "tz",
+   "spec": "https://did-tezos.spruceid.com",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "unik",
+   "spec": "https://github.com/unik-name/did-method-spec/blob/main/did-unik/UNIK-DID-Specification.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "unisot",
+   "spec": "https://gitlab.com/unisot-did/unisot-did-method-specification",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "unitrust",
+   "spec": "https://github.com/sheca-bc/did-unitrust-specification/blob/main/README.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "uns",
+   "spec": "https://github.com/unik-name/did-method-spec/blob/main/did-uns/UNS-DID-Specification.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "uport",
+   "spec": "",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "登记项没有规范地址"
+  },
+  {
+   "method": "uuaid",
+   "spec": "https://github.com/uuaid/spec/blob/main/did-method-uuaid.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "uuid",
+   "spec": "https://worldresolvable.github.io/ruuid-draft/did-uuid-method/",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "v1",
+   "spec": "https://w3c-ccg.github.io/did-method-v1/",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "vaa",
+   "spec": "https://github.com/caict-develop-zhangbo/vaa-method/blob/master/README.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "valyu",
+   "spec": "https://github.com/valyu-network/valyu-did/blob/main/Valyu-DID-Method.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "vaultie",
+   "spec": "https://github.com/vaultie/vaultie-did-method/blob/master/vaultie-did-method-specification.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "vbsn",
+   "spec": "https://github.com/OneMatrixL1/did-method-specs/blob/main/vbsn-did-specs.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "vector",
+   "spec": "https://github.com/Apex-Fusion/agents-marketplace/blob/main/docs/did-vector-method.md",
+   "candidates": [
+    "https://id.vector.apexfusion.org/1.0/identifiers/{did}"
+   ],
+   "verdict": "ENDPOINT_NOT_OK",
+   "status": 400,
+   "bytes": 0,
+   "note": "探测 https://id.vector.apexfusion.org/1.0/identifiers/{did}"
+  },
+  {
+   "method": "vertu",
+   "spec": "http://did.vertu.com/spec/",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "vh",
+   "spec": "https://identity.foundation/didvh/next/",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "vid",
+   "spec": "https://github.com/vpayment/did-method-spec/blob/master/vid.md",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "vireo",
+   "spec": "https://github.com/serhohro/vireo-ai-communicator-api/blob/main/specification/DID_METHOD.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "vivid",
+   "spec": "https://github.com/Moonlight-io/specs/blob/master/did-method-spec.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "vtid",
+   "spec": "http://my-did.vertu.com/spec/",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 403"
+  },
+  {
+   "method": "vvo",
+   "spec": "https://vivvo.github.io/vivvo-did-scheme/spec/did-method-spec-template.html",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "wba",
+   "spec": "https://github.com/chgaowei/AgentNetworkProtocol/blob/main/03-did%3Awba%20Method%20Design%20Specification.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "web",
+   "spec": "https://github.com/w3c-ccg/did-method-web",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "web7",
+   "spec": "https://github.com/Web7Foundation/Specifications/blob/main/methods/did-web7-1-0-1.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "webplus",
+   "spec": "https://ledgerdomain.github.io/did-webplus-spec/",
+   "candidates": [
+    "https://witness.org/webplus/v1/resolve/did%3Awebplus%3Aexample.com%3AuHiA...C8A",
+    "https://witness.org/witness/v1/resolve/did%3Awebplus%3Aexample.com%3AuHiA...C8A"
+   ],
+   "verdict": "ENDPOINT_NOT_OK",
+   "status": 404,
+   "bytes": 0,
+   "note": "探测 https://witness.org/webplus/v1/resolve/did%3Awebplus%3Aexample.com%3AuHiA...C8A"
+  },
+  {
+   "method": "webs",
+   "spec": "https://trustoverip.github.io/kswg-did-method-webs-specification/",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "webvh",
+   "spec": "https://identity.foundation/didwebvh/",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "wlk",
+   "spec": "https://weelink-team.github.io/weelink/DIDDesignEn",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "work",
+   "spec": "https://workday.github.io/work-did-method-spec/",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 404"
+  },
+  {
+   "method": "x509",
+   "spec": "https://github.com/microsoft/did-x509/blob/main/specification.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "xny",
+   "spec": "https://github.com/humanbased-ai/xny-did/blob/v1.0.1/docs/xny-did-method.md",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "yadacoin",
+   "spec": "https://pdxwebdev.github.io/yadacoin-agent-auth-spec/did-yadacoin-method-spec.html",
+   "candidates": [],
+   "verdict": "NO_PUBLIC_ENDPOINT_IN_SPEC",
+   "status": null,
+   "bytes": null,
+   "note": "规范里没有可打地址（相对路径 / SDK / 私有网关）"
+  },
+  {
+   "method": "yourd",
+   "spec": "https://github.com/DataSovereignty-YourD/YourD-did-sepcification",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "zk",
+   "spec": "https://github.com/zCloak-Network/zk-did-method-specs",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  },
+  {
+   "method": "zkme",
+   "spec": "https://github.com/zkMeLabs/zkme-did-method-spec",
+   "candidates": [],
+   "verdict": "SPEC_UNAVAILABLE",
+   "status": null,
+   "bytes": null,
+   "note": "规范取不到 HTTP 0（该主机两次超时后跳过）"
+  }
+ ],
+ "reading": "分母=登记册全量；NO_PUBLIC_ENDPOINT_IN_SPEC 单列，不与 NOT_OK 混计"
+}

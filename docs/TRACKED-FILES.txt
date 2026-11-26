@@ -1126,6 +1126,9 @@ docs/DID-LANDSCAPE.md
 docs/DIDCN-PROBE.md
 docs/DISPOSITIONS.md
 docs/ECOSYSTEM-MAP.md
+docs/ENDPOINT-CENSUS-BOARD.html
+docs/ENDPOINT-CENSUS.json
+docs/ENDPOINT-CENSUS.md
 docs/EQMS-SAMPLE.md
 docs/EVIDENCE-DASHBOARD.svg
 docs/EVIDENCE-INDEX.md
@@ -2278,6 +2281,7 @@ tools/embed_verifier.py
 tools/emit_aac_capsule.py
 tools/emit_aer1_receipts.py
 tools/emit_receipts.py
+tools/endpoint_census.py
 tools/eqms_contract.py
 tools/eqms_sample.py
 tools/export_conformance.py

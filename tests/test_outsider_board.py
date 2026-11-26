@@ -94,3 +94,13 @@ def test_a_flipped_parity_number_is_caught(tool, tmp_path, monkeypatch):
     monkeypatch.setattr(tool, "BOARD", str(path))
     assert tool.check() == 1
 
+def test_a_stale_receipt_is_named_not_crashed(tool, tmp_path, monkeypatch, capsys):
+    """A legacy receipt must produce a verdict, not a KeyError."""
+    legacy = {"tree_sha256": "0" * 64, "files_hashed": 1, "generated_at": "x",
+              "steps": [], "ok": True}
+    path = tmp_path / "receipt.json"
+    path.write_text(json.dumps(legacy), encoding="utf-8")
+    monkeypatch.setattr(tool, "RECEIPT", str(path))
+    assert tool.check() == 1
+    out = capsys.readouterr().out
+    assert "STALE RECEIPT" in out

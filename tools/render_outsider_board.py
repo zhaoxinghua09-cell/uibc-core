@@ -78,8 +78,18 @@ def gate_names():
     return out
 
 
-def snapshot():
+def receipt_axes():
     receipt = json.load(open(RECEIPT, encoding="utf-8"))
+    missing = [k for k in ("tree_sha256", "content_sha256", "content_lf_sha256", "delivery")
+               if k not in receipt]
+    return receipt, missing
+
+
+def snapshot():
+    receipt, missing = receipt_axes()
+    if missing:
+        raise SystemExit("FAIL STALE RECEIPT: docs/outsider-rerun-receipt.json lacks "
+                         + ", ".join(missing) + "; run tools/outsider_rerun.py --run first")
     return {
         "generated_at": receipt["generated_at"],
         "tree_sha256": receipt["tree_sha256"],
@@ -210,6 +220,12 @@ ships in the repository.</p>
 def check():
     if not os.path.exists(BOARD):
         print("FAIL no board; run --write first")
+        return 1
+    _receipt, missing = receipt_axes()
+    if missing:
+        print("FAIL STALE RECEIPT: docs/outsider-rerun-receipt.json lacks " + ", ".join(missing))
+        print("HOW TO FIX: tools/outsider_rerun.py --run, then tools/render_outsider_board.py --write")
+        print(f"\nBOARD FAIL: the receipt it must agree with is stale ({len(missing)} field(s) missing)")
         return 1
     text = open(BOARD, encoding="utf-8").read()
     m = re.search(r'<script id="snap" type="application/json">\s*(.*?)\s*</script>', text, re.S)

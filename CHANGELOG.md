@@ -1,3 +1,13 @@
+## 未发布 — 2026-11-26（收据的"成员"不再取决于这台机器上恰好有什么）
+
+- **起因（实测缺陷）**：同一棵树上先跑一遍测试、再 `--run`，收据写下了 **2819 个文件**；而陌生人从这里克隆或解包得到的是 **2453**。差的那 366 个是测试跑出来的草稿（`benchmark/corpus/cases/M01/evidence/.lock`、`files/action.log` 等），仓里从未提交。也就是说，收据把"作者机器上的残留"记成了"仓库的样子"——正是我们一直在找的那类问题：同一句话，两个人打开看到不同的数。
+- **为什么不能靠 `.gitignore`**：第一版按 `.gitignore` 排除，把 `dist/` 也排掉了——那是仓里**故意 force-add** 的发布件，`.gitignore` 写着忽略、git 却照样跟踪。猜不出"忽略"与"已跟踪"的差别，就会在另一头错。
+- **做法**：把成员**发布**出去。`docs/TRACKED-FILES.txt` 一行一个路径；`tracked_files()` 有 `.git` 时问 `git ls-files`、没有时读这份清单，不再"看见什么算什么"。写这份清单只有两条路：克隆里问 git，或一棵**新鲜归档**上显式 `--inventory-write --from-archive`（这是工具唯一无法自证、必须由调用者声明的一句）；跑过测试的树一律拒写。新增 `--inventory-check`：有 `.git` 时与 `git ls-files` 求对称差，差一条即 FAIL。
+- **实测**：故意塞入 `benchmark/corpus/cases/M99/evidence/scratch.log` 后 `--check` 仍是 `OUTSIDER OK: receipt matches this disk (2455 files, fdec7f0c32e7, content …), 4 steps passed`；`INVENTORY OK (2458 paths, all present)`。
+- **顺带修掉**：旧格式收据（只有 `tree_sha256`，无 `content/lf/delivery`）现在被按名字拒收，`VERDICT: STALE RECEIPT (4 field(s) missing)` 并附修法；看板 `--check` 同样给判决而不是 `KeyError`。
+- **已知副作用（不改代码，写在这里）**：跑完整的 `pytest` 会重写 `tools/out/mutation_benchmark.json`，差在一个 `meta.generated_at_utc` 时钟戳。它在成员清单里（克隆者也有这份文件），所以重封之后摘要会动；`--check` 现在在纯 `CONTENT` 失败时直接点名这件事和修法（从提交里还原，或重新 `--run`）。
+- 断言 A35；`tests/test_outsider_rerun.py` 增 3 条（草稿不动摘要、清单缺口点名、旧收据拒收），`tests/test_outsider_board.py` 增 1 条。
+
 ## 未发布 — 2026-11-26（真装真跑 + 301 落到新名 + D3 区间进正表）
 
 - **真装真跑（`tools/parity_realrun.py`）**：把 `did-jwt`@`63663c1f` 和 `ethr-did-resolver`@`6e0bd477` 装到 `D:\realrun` 跑它们自己的套件。

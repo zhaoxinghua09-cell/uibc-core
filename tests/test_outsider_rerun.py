@@ -203,3 +203,50 @@ def test_without_git_the_commit_view_is_absent(tool, tmp_path):
     assert [v[0] for v in views] == ["disk"]
     assert views[0][1][3] == 1
 
+def test_a_stale_receipt_is_named_not_compared(tool, tmp_path, monkeypatch, capsys):
+    """A receipt from an older release carries the strict digest only.
+
+    It cannot answer for line endings or for the channel it came from, so it
+    must be refused by name instead of being compared and quietly accepted.
+    """
+    legacy = {"tree_sha256": "0" * 64, "files_hashed": 1, "generated_at": "2026-01-01T00:00:00Z",
+              "steps": [], "ok": True}
+    path = tmp_path / "receipt.json"
+    path.write_text(json.dumps(legacy), encoding="utf-8")
+    monkeypatch.setattr(tool, "RECEIPT", str(path))
+    assert tool.check() == 1
+    out = capsys.readouterr().out
+    assert "STALE RECEIPT" in out
+    assert "content_lf_sha256" in out and "delivery" in out
+
+
+def test_scratch_outside_the_inventory_does_not_move_the_digest(tool, tmp_path):
+    """A test run materialises `benchmark/corpus/`; the receipt must not notice.
+
+    The membership comes from the published inventory, not from whatever happens
+    to be on this disk, so a scratch directory a clone would never hold cannot
+    change the number a stranger computes.
+    """
+    root = tmp_path / "tree"
+    (root / "docs").mkdir(parents=True)
+    (root / "docs" / "TRACKED-FILES.txt").write_text("a.txt\ndocs/TRACKED-FILES.txt\n",
+                                                    encoding="utf-8")
+    (root / "a.txt").write_text("one\n", encoding="utf-8")
+    before = tool.tree_digest(str(root))
+    (root / "benchmark" / "corpus" / "cases" / "M01").mkdir(parents=True)
+    (root / "benchmark" / "corpus" / "cases" / "M01" / "manifest.json").write_text(
+        "{}", encoding="utf-8")
+    after = tool.tree_digest(str(root))
+    assert before == after
+    assert before[1] == 2                     # a.txt plus the inventory itself, nothing else
+
+
+def test_a_listed_path_that_is_gone_is_named(tool, tmp_path, monkeypatch, capsys):
+    """The inventory is a claim about a tree; a gap must be reported, not ignored."""
+    root = tmp_path / "tree"
+    (root / "docs").mkdir(parents=True)
+    (root / "docs" / "TRACKED-FILES.txt").write_text("gone.txt\n", encoding="utf-8")
+    monkeypatch.setattr(tool, "HERE", str(root))
+    assert tool.check_inventory() == 1
+    out = capsys.readouterr().out
+    assert "listed but absent: gone.txt" in out

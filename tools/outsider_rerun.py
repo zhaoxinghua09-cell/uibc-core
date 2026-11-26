@@ -73,6 +73,59 @@ ENV_KEEP = ("PATH", "SYSTEMROOT", "SYSTEMDRIVE", "WINDIR", "TEMP", "TMP", "HOME"
             "USERPROFILE", "LANG", "LC_ALL", "PYTHONUTF8", "PYTHONIOENCODING")
 
 
+INVENTORY = "docs/TRACKED-FILES.txt"
+
+
+def inventory_files(root):
+    """The published membership: one path per line, exactly what a clone holds.
+
+    A clone can ask git. An extracted tarball cannot, and it cannot tell a scratch
+    directory a test run materialised (`benchmark/corpus/`, `tools/out/_mb/`) from
+    a directory the repository commits but ignores (`dist/`, force-added on
+    purpose). Guessing from `.gitignore` gets `dist/` wrong, so the membership is
+    published instead: CI writes it with `git ls-files`, and the two channels then
+    agree by construction rather than by coincidence.
+    """
+    path = os.path.join(root, INVENTORY)
+    if not os.path.exists(path):
+        return None
+    rel = [l.strip().replace("\\", "/") for l in open(path, encoding="utf-8")
+           if l.strip() and not l.startswith("#")]
+    return rel
+
+
+def write_inventory(root, from_archive=False):
+    """Publish the membership.
+
+    Three cases, no guessing:
+
+    * a clone asks git (`git ls-files`) - authoritative, and CI does exactly this;
+    * a fresh archive has nothing but committed files, so the walk is the answer -
+      the caller must say so (`--from-archive`), because that is the one claim the
+      tool cannot verify for itself;
+    * anything else is refused. A tree that has run its tests carries scratch
+      (`benchmark/corpus/`, `tools/out/_mb/`) that a clone would never hold, and
+      writing it into the membership would make the receipt describe the author's
+      disk instead of the repository. `.gitignore` cannot settle this either: it
+      lists `dist/`, which this repository force-adds on purpose.
+    """
+    if os.path.isdir(os.path.join(root, ".git")):
+        out = subprocess.run(["git", "ls-files", "-z"], cwd=root, capture_output=True,
+                             text=True, encoding="utf-8", errors="replace")
+        if out.returncode != 0 or not out.stdout:
+            raise SystemExit("FAIL git could not list this tree; refusing to publish a membership")
+        files = sorted(set(p for p in out.stdout.split("\0") if p) | {INVENTORY})
+    elif from_archive:
+        files = sorted(set(_walk(root)) | {INVENTORY})
+    else:
+        raise SystemExit("FAIL no .git here. Publish the membership from a fresh archive "
+                         "(--inventory-write --from-archive) or from a clone.")
+    os.makedirs(os.path.dirname(os.path.join(root, INVENTORY)), exist_ok=True)
+    with open(os.path.join(root, INVENTORY), "w", encoding="utf-8", newline="\n") as f:
+        f.write("\n".join(files) + "\n")
+    return len(files)
+
+
 def tracked_files(root):
     """The files a clone would contain.
 
@@ -89,6 +142,13 @@ def tracked_files(root):
                 return [p for p in out.stdout.split("\0") if p]
         except Exception:                                          # noqa: BLE001
             pass
+    listed = inventory_files(root)
+    if listed is not None:
+        return [p for p in listed if p not in GENERATED]
+    return _walk(root)
+
+
+def _walk(root):
     found = []
     for dirpath, dirnames, filenames in os.walk(root):
         dirnames[:] = sorted(d for d in dirnames if d not in
@@ -330,6 +390,17 @@ def check():
         print("FAIL no receipt; run --run first")
         return 1
     receipt = json.load(open(RECEIPT, encoding="utf-8"))
+    missing = [k for k in ("tree_sha256", "content_sha256", "content_lf_sha256", "delivery")
+               if k not in receipt]
+    if missing:
+        # A receipt written by an older release of this tool only carries the
+        # strict digest. It cannot answer for line endings or for the channel it
+        # came from, and comparing it would silently pass a tree it never saw.
+        print("FAIL STALE RECEIPT: this file lacks " + ", ".join(missing))
+        print("\nHOW TO FIX: tools/outsider_rerun.py --run regenerates all three axes and the")
+        print("delivery tag on the tree in front of you; then tools/render_outsider_board.py --write")
+        print(f"\nVERDICT: STALE RECEIPT ({len(missing)} field(s) missing)")
+        return 1
     fails = []
     receipt_content = receipt.get("content_sha256")
     receipt_lf = receipt.get("content_lf_sha256")
@@ -402,6 +473,10 @@ def check():
               f"{'worktree' if os.path.isdir(os.path.join(HERE, '.git')) else 'archive'} tree)")
         return 0
     if fails:
+        print("\nHOW TO FIX: rerun --run on this tree to seal the bytes you have. If you only")
+        print("ran the test suite, one tracked file is expected to have moved:")
+        print("tools/out/mutation_benchmark.json carries meta.generated_at_utc, which the")
+        print("benchmark rewrites with the clock. Restore it from the commit, or reseal.")
         print(f"\nOUTSIDER FAIL ({len(fails)} problem(s))")
         return 1
     print(f"OUTSIDER OK: receipt matches this {view_name} ({count} files, {digest[:12]}, "
@@ -414,13 +489,65 @@ def check():
     return 0
 
 
+def check_inventory():
+    """Does the published membership still describe this tree?"""
+    listed = inventory_files(HERE)
+    if listed is None:
+        print(f"FAIL {INVENTORY} is missing; run --inventory-write on a clone or a fresh archive")
+        return 1
+    actual = _walk(HERE)
+    git_view = None
+    if os.path.isdir(os.path.join(HERE, ".git")):
+        try:
+            out = subprocess.run(["git", "ls-files", "-z"], cwd=HERE, capture_output=True,
+                                 text=True, encoding="utf-8", errors="replace")
+            if out.returncode == 0 and out.stdout:
+                git_view = [p for p in out.stdout.split("\0") if p]
+        except Exception:                                          # noqa: BLE001
+            git_view = None
+    if git_view is not None:
+        drift = sorted(set(git_view) ^ set(listed))
+        if drift:
+            for p in drift[:10]:
+                print("FAIL git tracks and the inventory does not:", p)
+            print(f"\nINVENTORY FAIL ({len(drift)} path(s) differ from git ls-files); "
+                  f"rerun --inventory-write")
+            return 1
+    missing = sorted(set(listed) - set(actual))
+    extra = sorted(set(actual) - set(listed))
+    for p in missing[:10]:
+        print("FAIL listed but absent:", p)
+    for p in extra[:10]:
+        print("NOTE present but not published:", p)
+    if missing:
+        print(f"\nINVENTORY FAIL ({len(missing)} path(s) listed and gone)")
+        return 1
+    if extra:
+        print(f"\nNOTE: {len(extra)} path(s) exist here and are not published "
+              f"(scratch a clone would never hold); the receipt ignores them")
+    print(f"INVENTORY OK ({len(listed)} paths, all present)")
+    return 0
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--run", action="store_true", help="copy the tree and rerun every entry point")
     ap.add_argument("--check", action="store_true", help="verify the receipt against this tree (default)")
+    ap.add_argument("--inventory-write", action="store_true",
+                    help="rewrite docs/TRACKED-FILES.txt from a clone (git ls-files)")
+    ap.add_argument("--from-archive", action="store_true",
+                    help="with --inventory-write on a tree with no .git: this is a fresh archive")
+    ap.add_argument("--inventory-check", action="store_true",
+                    help="verify docs/TRACKED-FILES.txt against the tree and against git ls-files")
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
-    if args.run:
+    if args.inventory_write:
+        n = write_inventory(HERE, from_archive=args.from_archive)
+        print(f"written: {INVENTORY} ({n} paths)")
+        rc = 0
+    elif args.inventory_check:
+        rc = check_inventory()
+    elif args.run:
         out = run()
         rc = write_receipt(out["digest"], out["files"], out["results"],
                            content=out["content_digest"], content_files=out["content_files"],

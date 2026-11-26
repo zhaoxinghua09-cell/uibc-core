@@ -373,6 +373,7 @@ jobs:
           # And the one-screen page a stranger opens offline must still say
           # the numbers the receipt says, and must not link out to anyone.
           python tools/render_outsider_board.py --check
+          python tools/outsider_rerun.py --inventory-check
           python tools/check_competitor_vectors.py \
             --dir docs/upstream-package/competitor-defects/v0.38.0 \
             --dir docs/upstream-package/competitor-defects/v0.38.0-counter --json \

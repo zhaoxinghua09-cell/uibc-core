@@ -25,7 +25,7 @@ produced, stored and verified by the same party it is supposed to convince.
 This document specifies a portable package for an agent's identity, lifecycle
 events, and action evidence; a nineteen-check verification procedure with
 three-valued outcomes; a seal over the committed state; and a way to commit one
-root to backends the operator cannot rewrite. The commitments are not
+root to external backends the operator does not control. The commitments are not
 interchangeable: the anchored root covers evidence content hashes only, while
 identity and lifecycle are bound by the seal and the head (Section 4.1 states
 exactly what commits what, and what commits nothing). The specification is
@@ -46,7 +46,8 @@ Three problems recur when an agent's behaviour must be shown to a third party:
    judges it, so a passing verdict carries no information.
 
 This document answers each: a byte-level package (Section 3, 4), an
-out-of-band head commitment (Section 8), and a verification procedure whose
+an out-of-band head (Section 16) and an anchor commitment (Section 8), and a
+verification procedure whose
 outcomes include *inconclusive* rather than only pass/fail (Section 5).
 
 Design rule throughout: **a verifier must never invent a fact.** Anything not
@@ -300,9 +301,11 @@ SHOULD state the corpus revision. The report has four requirements:
 
 The reference implementation reports this in `uibc-aer1-corpus/1`
 (`tools/aer1_corpus_matrix.py`). Measured 2026-11-19 against AER-1's
-`base/test-vectors` at kit 1.5.7: 64 receipts across four directories, four
-of four directories in agreement, with the single `invalid-profile` receipt
-declared as the granularity difference described above.
+`base/test-vectors` at kit 1.5.7: 64 receipts across four directories — 21 valid,
+36 invalid, 6 anchored and 1 profile case — with four of four directories in
+agreement. Our verdicts: 27 accepted (21 valid + 6 anchored), 36 rejected, and
+the single `invalid-profile` receipt accepted with the difference recorded as
+granularity, not disagreement.
 
 This is a bounded claim on purpose. Judging another organisation's corpus
 does not make that organisation a witness to ours; Section 8 covers external
@@ -372,9 +375,11 @@ differs by jurisdiction.
 
 ### 8.4 The proof must not go inside the package
 
-Recording a **new** anchor proof as package evidence changes the package, hence
-changes the root — and the root that was anchored is then no longer the root the
-package has. Implementations MUST refuse to add or modify anchor records after
+Recording a **new** anchor proof as package evidence changes an input the
+producer declared, and the root that was anchored stops matching the claim that
+generated it: the root was computed over the index as it stood, and a receipt
+added afterwards is a statement about a root the package can no longer
+demonstrate. Implementations MUST refuse to add or modify anchor records after
 the package has been sealed. This failure is silent and total; it is the single
 most likely implementation error in this section.
 
@@ -413,7 +418,7 @@ Interoperability with AER-1 receipts is defined by an explicit mapping
 (Appendix A), not by similarity of intent. The reference implementation
 demonstrates both directions: emitting AER-1 receipts that the AER-1
 publisher's own runner accepts, and judging external AER-1 receipts
-with 21 valid accepted and 36 invalid rejected. The accept side is the control: by
+with 27 accepted (21 valid and 6 anchored) and 36 rejected, out of 64. The accept side is the control: by
 Section 5.1 a rejection count alone proves nothing, and the 28 documents from two
 unrelated protocols that were all rejected are therefore not quoted as interop
 evidence — they appear only in the corpus report, where the denominator is stated.
@@ -618,7 +623,8 @@ alongside `state: pending`, the record is rejected rather than reconciled.
    2026-11-25: changing a package's `resolver` from `evidence-merkle` to
    `sigstore` makes the verdict FAIL, because we cannot resolve it. That is the
    right answer for an algorithm we do not support — the MMR receipts profile
-   requires rejecting a receipt whose `vds` the verifier does not support, and
+   requires rejecting a receipt whose `vds` names a verifier outside the reader's
+policy set, and
    "I do not implement this" is not "this is false". What must reach
    INCONCLUSIVE is a different case: an anchor that **claims** to be anchored
    but carries no receipt the reader can check (`state: pending`) — missing
@@ -661,7 +667,8 @@ distinction this document has so far made by habit:
 The distinction this forces into the open: a verifier that does not implement a
 named scheme is **not** producing contrary evidence. Whether that is HALT or
 REJECT is a **policy choice**, and this document chooses REJECT, matching the
-MMR receipts profile's requirement to reject a receipt whose VDS is unsupported.
+MMR receipts profile's requirement to reject a receipt whose VDS the reader
+does not recognise.
 To keep that choice from erasing the distinction, the verifier now carries a
 report-level `unsupported` list naming the checks that failed this way: the
 verdict stays FAIL, but a reader can separate "could not check" from "checked and

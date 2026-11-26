@@ -1,0 +1,74 @@
+{
+  "schema": "uibc-dual-operator-witness/0.1",
+  "at": "2026-11-25T16:47:38Z",
+  "checkpoint_head": "sha256:2935c3f497b00949bffc84b0b6f8c5db6a41ce192864b11b089a3aa4607323ef",
+  "src": "D:\\lgd-work\\phase28-20261125\\proto\\src",
+  "package": "D:\\lgd-work\\phase28-20261125\\src-snapshot\\conformance\\cases\\06-a-package-sealed-with-ed25519",
+  "policy": {
+    "schema": "uibc-witness-policy/0.1",
+    "name": "dual-operator-2of3",
+    "quorum": 2,
+    "witnesses": [
+      {
+        "id": "wt-a",
+        "public_key": "7GmzPVoa2F3HxyGqY3ec7mGJ5NLH3qbLU5SlOBDIzs8=",
+        "operator": "operator-A"
+      },
+      {
+        "id": "wt-b",
+        "public_key": "bAlaX8h4bPSR/yRTcZwS29sAsDIoDO7+DmYZKopnkg4=",
+        "operator": "operator-B"
+      },
+      {
+        "id": "wt-c",
+        "public_key": "wINy4h2b0PPMpVdX/c1vfTvfKNcLcfDRDTo2qYBsjcA=",
+        "operator": "operator-C (listed, not signing)"
+      }
+    ]
+  },
+  "positive": {
+    "quorum_2of3_with_two_signers": true,
+    "detail": {
+      "quorum": 2,
+      "valid": [
+        "wt-a",
+        "wt-b"
+      ],
+      "rejected": [],
+      "satisfied": true
+    }
+  },
+  "independence": {
+    "separate_processes": true,
+    "separate_key_dirs": true,
+    "separate_public_keys": true,
+    "all_three": true,
+    "operators": {
+      "a": {
+        "pid": 13320,
+        "keydir": "D:\\lgd-work\\phase28-20261125\\out\\operators\\wt-a",
+        "pub_fp": "7GmzPVoa2F3HxyGq"
+      },
+      "b": {
+        "pid": 20000,
+        "keydir": "D:\\lgd-work\\phase28-20261125\\out\\operators\\wt-b",
+        "pub_fp": "bAlaX8h4bPSR/yRT"
+      }
+    }
+  },
+  "negative": {
+    "only_one_cosignature": false,
+    "duplicate_same_witness": false,
+    "tampered_cosignature": false,
+    "key_not_in_policy": false,
+    "cosignature_for_other_checkpoint": false,
+    "witness_is_the_seal_key": false
+  },
+  "negative_all_refused": true,
+  "honest_caveat": [
+    "两个运营方跑在本机同一台机器上，是模拟，不是接入第三方",
+    "第三家 wt-c 只列入策略、不出签，用于证明 k-of-n 不必全签",
+    "封条私钥在本机不以明文存在，'见证=封条'一条只验证公钥相等即拒的规则分支"
+  ],
+  "verdict": "PASS"
+}

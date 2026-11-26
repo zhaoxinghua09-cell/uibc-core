@@ -1,0 +1,57 @@
+{
+  "as_of": "2026-11-26T00:47:47",
+  "passed": 10,
+  "total": 10,
+  "checks": [
+    {
+      "check": "0.5 对抗 18/19",
+      "ok": true,
+      "detail": "18 通过"
+    },
+    {
+      "check": "0.6 对抗 10/10",
+      "ok": true,
+      "detail": "10 通过"
+    },
+    {
+      "check": "0.7 对抗 17/17",
+      "ok": true,
+      "detail": "17 通过"
+    },
+    {
+      "check": "评分与缺口自述一致（96，4 分为外部评审）",
+      "ok": true,
+      "detail": "out/score.json"
+    },
+    {
+      "check": "三档性能矩阵存在且预算内",
+      "ok": true,
+      "detail": "max 子进程 198.4 ms"
+    },
+    {
+      "check": "复跑包 checksums 全对",
+      "ok": true,
+      "detail": "22 个文件"
+    },
+    {
+      "check": "A 级形态适配器 8/8",
+      "ok": true,
+      "detail": "157 ms"
+    },
+    {
+      "check": "双运营方见证 2-of-3 跨进程 + 6 反例全拒",
+      "ok": true,
+      "detail": "0.7 s"
+    },
+    {
+      "check": "0.7 对抗重跑（实体执行）",
+      "ok": true,
+      "detail": "2.6 s"
+    },
+    {
+      "check": "台子 s11 = 15 PASS / 回归 0",
+      "ok": true,
+      "detail": "6.7 s"
+    }
+  ]
+}

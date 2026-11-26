@@ -1,0 +1,39 @@
+{
+  "as_of": "2026-11-25",
+  "method": "同进程 15 次 / 子进程 7 次，预热 1 次，同一台机同一 Python",
+  "rows": [
+    {
+      "tier": "0.5",
+      "bundle": "v09-bundle",
+      "schema": "uibc-selective-bundle/0.5",
+      "bytes": 49937,
+      "same_proc_mean_ms": 28.01,
+      "same_proc_p50_ms": 27.66,
+      "subproc_mean_ms": 198.45,
+      "subproc_max_ms": 216.03,
+      "rc": 0
+    },
+    {
+      "tier": "0.6",
+      "bundle": "v10-bundle",
+      "schema": "uibc-selective-bundle/0.6",
+      "bytes": 50204,
+      "same_proc_mean_ms": 28.62,
+      "same_proc_p50_ms": 27.15,
+      "subproc_mean_ms": 191.63,
+      "subproc_max_ms": 220.82,
+      "rc": 0
+    },
+    {
+      "tier": "0.7",
+      "bundle": "v07-bundle-a",
+      "schema": "uibc-selective-bundle/0.7",
+      "bytes": 50239,
+      "same_proc_mean_ms": 27.88,
+      "same_proc_p50_ms": 27.32,
+      "subproc_mean_ms": 194.77,
+      "subproc_max_ms": 218.31,
+      "rc": 0
+    }
+  ]
+}

@@ -2,10 +2,10 @@
   "spdxVersion": "SPDX-2.3",
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
-  "name": "uibc-core-0.3.0",
-  "documentNamespace": "https://github.com/zhaoxinghua09-cell/uibc-core/spdx/0.3.0",
+  "name": "uibc-core-0.5.5",
+  "documentNamespace": "https://github.com/zhaoxinghua09-cell/uibc-core/spdx/0.5.5",
   "creationInfo": {
-    "created": "2026-11-12T05:04:11Z",
+    "created": "2026-11-26T15:09:23Z",
     "creators": [
       "Person: Xinghua Zhao (Steven Zhao)",
       "Tool: gen-sbom.py (Python standard library)"
@@ -17,7 +17,7 @@
     {
       "name": "uibc-core",
       "SPDXID": "SPDXRef-Package-uibc-core",
-      "versionInfo": "0.3.0",
+      "versionInfo": "0.5.5",
       "downloadLocation": "https://github.com/zhaoxinghua09-cell/uibc-core",
       "filesAnalyzed": true,
       "licenseConcluded": "Apache-2.0",
@@ -28,7 +28,7 @@
         {
           "referenceCategory": "PACKAGE-MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:pypi/uibc-core@0.3.0"
+          "referenceLocator": "pkg:pypi/uibc-core@0.5.5"
         }
       ]
     }
@@ -46,6 +46,56 @@
     },
     {
       "spdxElementId": "SPDXRef-Package-uibc-core",
+      "relatedSpdxElement": "SPDXRef-File-uibc-core-acps-identity-code.py",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-uibc-core",
+      "relatedSpdxElement": "SPDXRef-File-uibc-core-aee.py",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-uibc-core",
+      "relatedSpdxElement": "SPDXRef-File-uibc-core-agent-identity-code.py",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-uibc-core",
+      "relatedSpdxElement": "SPDXRef-File-uibc-core-anchor.py",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-uibc-core",
+      "relatedSpdxElement": "SPDXRef-File-uibc-core-authority-age.py",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-uibc-core",
+      "relatedSpdxElement": "SPDXRef-File-uibc-core-basis.py",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-uibc-core",
+      "relatedSpdxElement": "SPDXRef-File-uibc-core-bid-address.py",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-uibc-core",
+      "relatedSpdxElement": "SPDXRef-File-uibc-core-bid-binary.py",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-uibc-core",
+      "relatedSpdxElement": "SPDXRef-File-uibc-core-bid-protocol.py",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-uibc-core",
+      "relatedSpdxElement": "SPDXRef-File-uibc-core-bundle.py",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-uibc-core",
       "relatedSpdxElement": "SPDXRef-File-uibc-core-canonical.py",
       "relationshipType": "CONTAINS"
     },
@@ -56,7 +106,62 @@
     },
     {
       "spdxElementId": "SPDXRef-Package-uibc-core",
+      "relatedSpdxElement": "SPDXRef-File-uibc-core-chain.py",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-uibc-core",
       "relatedSpdxElement": "SPDXRef-File-uibc-core-cli.py",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-uibc-core",
+      "relatedSpdxElement": "SPDXRef-File-uibc-core-compliance.py",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-uibc-core",
+      "relatedSpdxElement": "SPDXRef-File-uibc-core-composition.py",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-uibc-core",
+      "relatedSpdxElement": "SPDXRef-File-uibc-core-cose-min.py",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-uibc-core",
+      "relatedSpdxElement": "SPDXRef-File-uibc-core-coverage-feed.py",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-uibc-core",
+      "relatedSpdxElement": "SPDXRef-File-uibc-core-did.py",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-uibc-core",
+      "relatedSpdxElement": "SPDXRef-File-uibc-core-did-cn.py",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-uibc-core",
+      "relatedSpdxElement": "SPDXRef-File-uibc-core-did-peer.py",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-uibc-core",
+      "relatedSpdxElement": "SPDXRef-File-uibc-core-ed25519.py",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-uibc-core",
+      "relatedSpdxElement": "SPDXRef-File-uibc-core-encoding.py",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-uibc-core",
+      "relatedSpdxElement": "SPDXRef-File-uibc-core-freshness.py",
       "relationshipType": "CONTAINS"
     },
     {
@@ -66,12 +171,57 @@
     },
     {
       "spdxElementId": "SPDXRef-Package-uibc-core",
+      "relatedSpdxElement": "SPDXRef-File-uibc-core-identity-adapter.py",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-uibc-core",
+      "relatedSpdxElement": "SPDXRef-File-uibc-core-interop-result.py",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-uibc-core",
       "relatedSpdxElement": "SPDXRef-File-uibc-core-lifecycle.py",
       "relationshipType": "CONTAINS"
     },
     {
       "spdxElementId": "SPDXRef-Package-uibc-core",
+      "relatedSpdxElement": "SPDXRef-File-uibc-core-locking.py",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-uibc-core",
+      "relatedSpdxElement": "SPDXRef-File-uibc-core-mcp-server.py",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-uibc-core",
       "relatedSpdxElement": "SPDXRef-File-uibc-core-memory.py",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-uibc-core",
+      "relatedSpdxElement": "SPDXRef-File-uibc-core-merkle.py",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-uibc-core",
+      "relatedSpdxElement": "SPDXRef-File-uibc-core-neutral-anchor.py",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-uibc-core",
+      "relatedSpdxElement": "SPDXRef-File-uibc-core-phantom.py",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-uibc-core",
+      "relatedSpdxElement": "SPDXRef-File-uibc-core-policy.py",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-uibc-core",
+      "relatedSpdxElement": "SPDXRef-File-uibc-core-records.py",
       "relationshipType": "CONTAINS"
     },
     {
@@ -86,17 +236,27 @@
     },
     {
       "spdxElementId": "SPDXRef-Package-uibc-core",
+      "relatedSpdxElement": "SPDXRef-File-uibc-core-sm2.py",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-uibc-core",
+      "relatedSpdxElement": "SPDXRef-File-uibc-core-translog.py",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-uibc-core",
+      "relatedSpdxElement": "SPDXRef-File-uibc-core-trust-state.py",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-uibc-core",
+      "relatedSpdxElement": "SPDXRef-File-uibc-core-tsa.py",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-uibc-core",
       "relatedSpdxElement": "SPDXRef-File-uibc-core-verify.py",
-      "relationshipType": "CONTAINS"
-    },
-    {
-      "spdxElementId": "SPDXRef-Package-uibc-core",
-      "relatedSpdxElement": "SPDXRef-File-uibc-core-ed25519.py",
-      "relationshipType": "CONTAINS"
-    },
-    {
-      "spdxElementId": "SPDXRef-Package-uibc-core",
-      "relatedSpdxElement": "SPDXRef-File-uibc-core-mcp-server.py",
       "relationshipType": "CONTAINS"
     }
   ],
@@ -107,7 +267,127 @@
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "2c2d4e0248c674b3e5683279fe87d4344dda8d40ad75c4f7e1bde801d127854b"
+          "checksumValue": "ceaaea6815bd2059657ead99a314ffe6a852de9fef6d4ab9cb39873c15b5fa5a"
+        }
+      ],
+      "licenseConcluded": "Apache-2.0",
+      "copyrightText": "Copyright 2026 Xinghua Zhao (Steven Zhao)"
+    },
+    {
+      "fileName": "uibc_core/acps_identity_code.py",
+      "SPDXID": "SPDXRef-File-uibc-core-acps-identity-code.py",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "a5259d2597a5200442a07bbe69b891044aba7feb25216c2c8ce235e0d576c596"
+        }
+      ],
+      "licenseConcluded": "Apache-2.0",
+      "copyrightText": "Copyright 2026 Xinghua Zhao (Steven Zhao)"
+    },
+    {
+      "fileName": "uibc_core/aee.py",
+      "SPDXID": "SPDXRef-File-uibc-core-aee.py",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "b908e43dabb29f6ba48c0eb55d0ab74f1942a57e393525ae8a6505d3c9c99328"
+        }
+      ],
+      "licenseConcluded": "Apache-2.0",
+      "copyrightText": "Copyright 2026 Xinghua Zhao (Steven Zhao)"
+    },
+    {
+      "fileName": "uibc_core/agent_identity_code.py",
+      "SPDXID": "SPDXRef-File-uibc-core-agent-identity-code.py",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "6e3a63807e385db43bb96d31c698b60b4048fa70f2ebce758085dee198409915"
+        }
+      ],
+      "licenseConcluded": "Apache-2.0",
+      "copyrightText": "Copyright 2026 Xinghua Zhao (Steven Zhao)"
+    },
+    {
+      "fileName": "uibc_core/anchor.py",
+      "SPDXID": "SPDXRef-File-uibc-core-anchor.py",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "94639fdbd9f9d99df9e0dfc70d7017fc56d92a0cd2d13e8ea3d0f96da9e8b263"
+        }
+      ],
+      "licenseConcluded": "Apache-2.0",
+      "copyrightText": "Copyright 2026 Xinghua Zhao (Steven Zhao)"
+    },
+    {
+      "fileName": "uibc_core/authority_age.py",
+      "SPDXID": "SPDXRef-File-uibc-core-authority-age.py",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "64d0c3e1429733b0041b70ca99d0aaff001d80cf9cb7fa5db993b0cdf7014d8c"
+        }
+      ],
+      "licenseConcluded": "Apache-2.0",
+      "copyrightText": "Copyright 2026 Xinghua Zhao (Steven Zhao)"
+    },
+    {
+      "fileName": "uibc_core/basis.py",
+      "SPDXID": "SPDXRef-File-uibc-core-basis.py",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "5dd254f67dd7ffae33042c22054692b343a31f439aa5295389979a8c65d7c157"
+        }
+      ],
+      "licenseConcluded": "Apache-2.0",
+      "copyrightText": "Copyright 2026 Xinghua Zhao (Steven Zhao)"
+    },
+    {
+      "fileName": "uibc_core/bid_address.py",
+      "SPDXID": "SPDXRef-File-uibc-core-bid-address.py",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "cceeb7f8ebe088fc637cef90bee664a1de71ffc8e5bd8e94265b93dfc172be08"
+        }
+      ],
+      "licenseConcluded": "Apache-2.0",
+      "copyrightText": "Copyright 2026 Xinghua Zhao (Steven Zhao)"
+    },
+    {
+      "fileName": "uibc_core/bid_binary.py",
+      "SPDXID": "SPDXRef-File-uibc-core-bid-binary.py",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "040990f53047e666cc166976d7bb09e1de4e1114c600dbe813917d76d134df93"
+        }
+      ],
+      "licenseConcluded": "Apache-2.0",
+      "copyrightText": "Copyright 2026 Xinghua Zhao (Steven Zhao)"
+    },
+    {
+      "fileName": "uibc_core/bid_protocol.py",
+      "SPDXID": "SPDXRef-File-uibc-core-bid-protocol.py",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "7922b378580de803402aaa57713091069c291525d85150314b75e27157c34724"
+        }
+      ],
+      "licenseConcluded": "Apache-2.0",
+      "copyrightText": "Copyright 2026 Xinghua Zhao (Steven Zhao)"
+    },
+    {
+      "fileName": "uibc_core/bundle.py",
+      "SPDXID": "SPDXRef-File-uibc-core-bundle.py",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "b15d8f6e3f46351dd66890dc74fc523c02ca152e032882512b55cacbbd68e9f6"
         }
       ],
       "licenseConcluded": "Apache-2.0",
@@ -119,7 +399,7 @@
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "5002cb2289abf1a7d622129e9df666114700e11b970d8bc269143f5271939490"
+          "checksumValue": "945d666e4948433f46583e42d31d7d1a1939b88bf4719b00888bbbf117ceb540"
         }
       ],
       "licenseConcluded": "Apache-2.0",
@@ -131,7 +411,19 @@
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "8e4cfff246f73e13b6de0380faa22a44de19964db6a5e7cbaa7cb65bdc0e2182"
+          "checksumValue": "266f46af65b4d11ff80df9b870c70094349ba93101a16f8e521d383c8d79d3fd"
+        }
+      ],
+      "licenseConcluded": "Apache-2.0",
+      "copyrightText": "Copyright 2026 Xinghua Zhao (Steven Zhao)"
+    },
+    {
+      "fileName": "uibc_core/chain.py",
+      "SPDXID": "SPDXRef-File-uibc-core-chain.py",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "3870f19bdc3eb360e83b6d8f85a4e3c630c5b0aa496b938e09b6ca9ec0862e78"
         }
       ],
       "licenseConcluded": "Apache-2.0",
@@ -143,7 +435,91 @@
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "1df4bd0063cdf4ec8cc0e9f0e839715b42a2bbf21ab12574158fcc235410b514"
+          "checksumValue": "879db25b35a469e266dcca5c93f515866bf36b1029791a2e544fc1603ea82134"
+        }
+      ],
+      "licenseConcluded": "Apache-2.0",
+      "copyrightText": "Copyright 2026 Xinghua Zhao (Steven Zhao)"
+    },
+    {
+      "fileName": "uibc_core/compliance.py",
+      "SPDXID": "SPDXRef-File-uibc-core-compliance.py",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "fef0059a82d918d5996ad6143387f802a15fb3a3a58d71d0d86c4288cf4b2cf4"
+        }
+      ],
+      "licenseConcluded": "Apache-2.0",
+      "copyrightText": "Copyright 2026 Xinghua Zhao (Steven Zhao)"
+    },
+    {
+      "fileName": "uibc_core/composition.py",
+      "SPDXID": "SPDXRef-File-uibc-core-composition.py",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "635e00f88b60f1586bc42bd4b2655392702065382a734547bdcb3e49a9dd641f"
+        }
+      ],
+      "licenseConcluded": "Apache-2.0",
+      "copyrightText": "Copyright 2026 Xinghua Zhao (Steven Zhao)"
+    },
+    {
+      "fileName": "uibc_core/cose_min.py",
+      "SPDXID": "SPDXRef-File-uibc-core-cose-min.py",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "85bc721699ed86c14e79ffbf68eaaa63b19b24b27d728a736cd762111c46bcd3"
+        }
+      ],
+      "licenseConcluded": "Apache-2.0",
+      "copyrightText": "Copyright 2026 Xinghua Zhao (Steven Zhao)"
+    },
+    {
+      "fileName": "uibc_core/coverage_feed.py",
+      "SPDXID": "SPDXRef-File-uibc-core-coverage-feed.py",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "d72808e0a6483a47f95f70d4dd9d3896f7ca9e15a50d4f9416bbf133d349462d"
+        }
+      ],
+      "licenseConcluded": "Apache-2.0",
+      "copyrightText": "Copyright 2026 Xinghua Zhao (Steven Zhao)"
+    },
+    {
+      "fileName": "uibc_core/did.py",
+      "SPDXID": "SPDXRef-File-uibc-core-did.py",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "34f6cede433c0ad54a48f089325eb9e4efc6a39a9cced28706098889ac2ec72f"
+        }
+      ],
+      "licenseConcluded": "Apache-2.0",
+      "copyrightText": "Copyright 2026 Xinghua Zhao (Steven Zhao)"
+    },
+    {
+      "fileName": "uibc_core/did_cn.py",
+      "SPDXID": "SPDXRef-File-uibc-core-did-cn.py",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "256f0c6aeae4a612b01c0fb233995c0c5844f46f8aea3222caece397e013ccea"
+        }
+      ],
+      "licenseConcluded": "Apache-2.0",
+      "copyrightText": "Copyright 2026 Xinghua Zhao (Steven Zhao)"
+    },
+    {
+      "fileName": "uibc_core/did_peer.py",
+      "SPDXID": "SPDXRef-File-uibc-core-did-peer.py",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "cef14730b16d850622622ec548899017f4f9ac9d8c647011a40c2a6dad82a5fd"
         }
       ],
       "licenseConcluded": "Apache-2.0",
@@ -162,12 +538,60 @@
       "copyrightText": "Copyright 2026 Xinghua Zhao (Steven Zhao)"
     },
     {
+      "fileName": "uibc_core/encoding.py",
+      "SPDXID": "SPDXRef-File-uibc-core-encoding.py",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "51e1635e790dc096204f36b483dafdaf2378cc567a03415a0040efdabc48463f"
+        }
+      ],
+      "licenseConcluded": "Apache-2.0",
+      "copyrightText": "Copyright 2026 Xinghua Zhao (Steven Zhao)"
+    },
+    {
+      "fileName": "uibc_core/freshness.py",
+      "SPDXID": "SPDXRef-File-uibc-core-freshness.py",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "f98a539ee8b142bb84cbc399e6af850dbce942e7895c134e9cb73112cfa7083a"
+        }
+      ],
+      "licenseConcluded": "Apache-2.0",
+      "copyrightText": "Copyright 2026 Xinghua Zhao (Steven Zhao)"
+    },
+    {
       "fileName": "uibc_core/gate.py",
       "SPDXID": "SPDXRef-File-uibc-core-gate.py",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "ef102f252875b657604e4817bb03cc08fa5048ff3de30b295a798405c270562b"
+          "checksumValue": "6e60366c9e26d898ec78c5291c3fe82b3c9a5a72b5f2c93fce976c6bcd34229b"
+        }
+      ],
+      "licenseConcluded": "Apache-2.0",
+      "copyrightText": "Copyright 2026 Xinghua Zhao (Steven Zhao)"
+    },
+    {
+      "fileName": "uibc_core/identity_adapter.py",
+      "SPDXID": "SPDXRef-File-uibc-core-identity-adapter.py",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "f188ea87fde15914bd44294f635fa7d06107b39b092d59f2706e62bbc51a69a7"
+        }
+      ],
+      "licenseConcluded": "Apache-2.0",
+      "copyrightText": "Copyright 2026 Xinghua Zhao (Steven Zhao)"
+    },
+    {
+      "fileName": "uibc_core/interop_result.py",
+      "SPDXID": "SPDXRef-File-uibc-core-interop-result.py",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "7f182a3b7876e10d10a314e3673282d7b5d90227a997a7bd4c5a5f30acfc6502"
         }
       ],
       "licenseConcluded": "Apache-2.0",
@@ -179,7 +603,19 @@
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "66e68018a3d28097dc03878e01989ab249bcaa94d4b977dac884be534e0ebc8b"
+          "checksumValue": "25d1e47ac59ea5c3fc78f06e355746e8679575fc593899ecd75ab7a2abcb25cb"
+        }
+      ],
+      "licenseConcluded": "Apache-2.0",
+      "copyrightText": "Copyright 2026 Xinghua Zhao (Steven Zhao)"
+    },
+    {
+      "fileName": "uibc_core/locking.py",
+      "SPDXID": "SPDXRef-File-uibc-core-locking.py",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "9da8ca0c755539e897b2de8a8b816c80d682a3e4920fb721935d7db749ddf23e"
         }
       ],
       "licenseConcluded": "Apache-2.0",
@@ -203,7 +639,67 @@
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "2eee786e750fb3056b43108aa43c1396a701574361cab5110d22dda2d4e6c184"
+          "checksumValue": "4b08b63d2031fc21787222f8cf6e624ff3bb2272f2a68682603381634ed2d28c"
+        }
+      ],
+      "licenseConcluded": "Apache-2.0",
+      "copyrightText": "Copyright 2026 Xinghua Zhao (Steven Zhao)"
+    },
+    {
+      "fileName": "uibc_core/merkle.py",
+      "SPDXID": "SPDXRef-File-uibc-core-merkle.py",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "aa60bd01f4b22465877d7a6606530b2456e920030764f00d5c9be1b2e0eccf08"
+        }
+      ],
+      "licenseConcluded": "Apache-2.0",
+      "copyrightText": "Copyright 2026 Xinghua Zhao (Steven Zhao)"
+    },
+    {
+      "fileName": "uibc_core/neutral_anchor.py",
+      "SPDXID": "SPDXRef-File-uibc-core-neutral-anchor.py",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "17518db2a5a736a4659ad0ff51fe15c1cf04fb769d388070353da67902d507ce"
+        }
+      ],
+      "licenseConcluded": "Apache-2.0",
+      "copyrightText": "Copyright 2026 Xinghua Zhao (Steven Zhao)"
+    },
+    {
+      "fileName": "uibc_core/phantom.py",
+      "SPDXID": "SPDXRef-File-uibc-core-phantom.py",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "7ce02227fae1ea07d37e914c6db6b0609499e12df58e29dfd7d763f0a1a48b76"
+        }
+      ],
+      "licenseConcluded": "Apache-2.0",
+      "copyrightText": "Copyright 2026 Xinghua Zhao (Steven Zhao)"
+    },
+    {
+      "fileName": "uibc_core/policy.py",
+      "SPDXID": "SPDXRef-File-uibc-core-policy.py",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "d0e021458ccc60185210062bce2adc7e350e8084de8baf3f4e2902379b63a98a"
+        }
+      ],
+      "licenseConcluded": "Apache-2.0",
+      "copyrightText": "Copyright 2026 Xinghua Zhao (Steven Zhao)"
+    },
+    {
+      "fileName": "uibc_core/records.py",
+      "SPDXID": "SPDXRef-File-uibc-core-records.py",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "5e4229b8827d674389318f0039fae0bf6de17482d5d1bcbe6d87cdc5ecab0163"
         }
       ],
       "licenseConcluded": "Apache-2.0",
@@ -215,7 +711,7 @@
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "eff5ffaddf70e78be51087d063ad7db20ef0c4e70a2c1964a04fadb7ac3d899c"
+          "checksumValue": "d214b92b741c22e6f823fad195c28e8df76c7d50a4a410686e77b65a0800829c"
         }
       ],
       "licenseConcluded": "Apache-2.0",
@@ -227,7 +723,55 @@
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "cad899dc926365ea70b822bc13c9c6fee6357d9af724d2ff674426b46309677c"
+          "checksumValue": "8f0ae3a9a83c1b173bc101fb2babe63080bc2a6da071a2dc097084551bfb72e6"
+        }
+      ],
+      "licenseConcluded": "Apache-2.0",
+      "copyrightText": "Copyright 2026 Xinghua Zhao (Steven Zhao)"
+    },
+    {
+      "fileName": "uibc_core/sm2.py",
+      "SPDXID": "SPDXRef-File-uibc-core-sm2.py",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "345d2f9c81b39694b12d611e58460c5146ad76aa75ae7ff443c55db2c117652a"
+        }
+      ],
+      "licenseConcluded": "Apache-2.0",
+      "copyrightText": "Copyright 2026 Xinghua Zhao (Steven Zhao)"
+    },
+    {
+      "fileName": "uibc_core/translog.py",
+      "SPDXID": "SPDXRef-File-uibc-core-translog.py",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "534331b169e19dec77fd853e46f3b54b939c87a1c7d97bb2c84fc17db748e02e"
+        }
+      ],
+      "licenseConcluded": "Apache-2.0",
+      "copyrightText": "Copyright 2026 Xinghua Zhao (Steven Zhao)"
+    },
+    {
+      "fileName": "uibc_core/trust_state.py",
+      "SPDXID": "SPDXRef-File-uibc-core-trust-state.py",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "42b08d50109e18091fdddd560edecac7c6adaae335af2a1bfd563d1e0c75e168"
+        }
+      ],
+      "licenseConcluded": "Apache-2.0",
+      "copyrightText": "Copyright 2026 Xinghua Zhao (Steven Zhao)"
+    },
+    {
+      "fileName": "uibc_core/tsa.py",
+      "SPDXID": "SPDXRef-File-uibc-core-tsa.py",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "bc4813bf698da0d98f2d1a13fb08168d10e6df69f7decedc6cb053a7448e344f"
         }
       ],
       "licenseConcluded": "Apache-2.0",
@@ -239,7 +783,7 @@
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "78cc6439333d08c0baf7db906f0556d4572d66e5ba15ef64303b8cf55fb2ded5"
+          "checksumValue": "9a50a7a5752db7fd07255c93852a031f41ef5155340b52ae47c61ba0ede65f75"
         }
       ],
       "licenseConcluded": "Apache-2.0",

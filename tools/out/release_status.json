@@ -1,9 +1,9 @@
 {
-  "when_utc": "2026-11-21T01:09:12Z",
+  "when_utc": "2026-11-26T15:08:58Z",
   "branch": "main",
-  "local_head": "90d4fa433855a400c69e87590a7823aacf9fef1e",
-  "public_head": "90d4fa433855a400c69e87590a7823aacf9fef1e",
+  "local_head": "26a266b1cf0d3a5a91b329b35f57b535b56da10c",
+  "public_head": "79811e131cc91160db1527602b8c631f1b19a797",
   "reachable": true,
-  "in_sync": true,
+  "in_sync": false,
   "unreachable_reason": null
 }

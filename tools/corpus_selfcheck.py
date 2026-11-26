@@ -28,6 +28,8 @@ import tempfile
 import time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import gitbin  # noqa: E402  (git may be a .cmd shim on Windows)
 SHIPPED = os.path.join(ROOT, "benchmarks", "corpus", "mutation-corpus-500.json")
 MODES = ("open", "pinned", "head-pinned")
 
@@ -64,8 +66,8 @@ def _git_head():
     Returns a 40-char hex sha, or "UNAVAILABLE" - never the ambiguous "unknown".
     """
     try:
-        out = subprocess.check_output(["git", "-C", ROOT, "rev-parse", "HEAD"],
-                                      stderr=subprocess.DEVNULL).decode().strip()
+        out = gitbin.check_output(["-C", ROOT, "rev-parse", "HEAD"],
+                                  stderr=subprocess.DEVNULL).decode().strip()
         if len(out) == 40:
             return out
     except Exception:

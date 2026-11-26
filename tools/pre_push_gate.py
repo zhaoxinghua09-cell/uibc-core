@@ -21,6 +21,9 @@ import subprocess
 import sys
 import urllib.request
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import gitbin  # noqa: E402  (git may be a .cmd shim on Windows)
+
 HOST = "github.com"
 
 
@@ -30,9 +33,9 @@ def remote_owner(url):
 
 
 def stored_secret():
-    p = subprocess.run(["git", "credential", "fill"],
-                       input="protocol=https\nhost=%s\n\n" % HOST,
-                       capture_output=True, text=True)
+    p = gitbin.run(["credential", "fill"],
+                   input="protocol=https\nhost=%s\n\n" % HOST,
+                   capture_output=True, text=True)
     for line in (p.stdout or "").splitlines():
         if line.startswith("password="):
             return line.split("=", 1)[1]
@@ -54,10 +57,10 @@ def main(argv=None):
     allowed = [s.strip().lower() for s in
                (os.environ.get("GIT_ALLOWED_OWNERS") or "").split(",") if s.strip()]
 
-    rc, url, _ = (subprocess.run(["git", "remote", "get-url", "origin"],
-                                 capture_output=True, text=True).returncode,
-                  subprocess.run(["git", "remote", "get-url", "origin"],
-                                 capture_output=True, text=True).stdout.strip(), "")
+    rc, url, _ = (gitbin.run(["remote", "get-url", "origin"],
+                             capture_output=True, text=True).returncode,
+                  gitbin.run(["remote", "get-url", "origin"],
+                             capture_output=True, text=True).stdout.strip(), "")
     owner = remote_owner(url)
     if not owner:
         print("GATE FAIL: cannot parse a GitHub owner from origin=%r" % url)

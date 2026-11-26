@@ -333,6 +333,24 @@ def emit_corpus(dest, only=None):
         expected.append({"case": name, "kind": "accept", "mode": "strict",
                          "expected_verdict": "PASS", "expected_first_fail": None})
 
+    # The third value, certified. Until this case existed the corpus expected
+    # only PASS or FAIL, so INCONCLUSIVE was defined in prose and never
+    # demonstrated - a reader could not tell "we have three values" from "we have
+    # two values and a paragraph". This package is valid and sealed with an HMAC
+    # key; verified WITHOUT that key, the seal cannot be checked, so the honest
+    # verdict is INCONCLUSIVE (S6), not PASS and not FAIL.
+    if keep("accept-unverifiable-seal"):
+        pkg, key = build_good(work, "accept-unverifiable-seal", "one")
+        target = os.path.join(cases_dir, "accept-unverifiable-seal")
+        shutil.copytree(pkg, target, dirs_exist_ok=True)
+        keys["accept-unverifiable-seal"] = key.hex()
+        expected.append({"case": "accept-unverifiable-seal", "kind": "accept-inconclusive",
+                         "mode": "open", "expected_verdict": "INCONCLUSIVE",
+                         "expected_first_fail": None,
+                         "note": ("No key is supplied on purpose: the HMAC seal is "
+                                  "unverifiable in open mode, which is missing evidence, "
+                                  "not contrary evidence.")})
+
     # Tranche five: the checks a package cannot carry on its own.
     #
     # Three of the twenty checks need something that is not inside the submission:
@@ -436,9 +454,12 @@ just cannot be rebuilt, which is the thing worth not doing.
 3. Compare the overall verdict, and the first failing check id for reject cases,
    with `expected.json`.
 
-`kind` is `accept` (must not be rejected) or `reject` (must be rejected at the
-named check). A verifier that rejects everything passes every reject case and
-fails every accept case, which is why both halves are here.
+`kind` is `accept` (must not be rejected), `reject` (must be rejected at the
+named check), or `accept-inconclusive` (valid bytes whose verdict must be
+INCONCLUSIVE - evidence that could not be checked, which is neither acceptance
+nor rejection). A verifier that rejects everything passes every reject case and
+fails every accept case, which is why both halves are here; a verifier with only
+two outcomes cannot represent the third kind at all, which is why it is here too.
 
 ## The three checks a package cannot carry
 

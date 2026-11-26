@@ -18,6 +18,9 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 
+sys.path.insert(0, HERE)
+import gitbin  # noqa: E402  (git may be a .cmd shim on Windows)
+
 
 def main(argv=None):
     argv = list(argv if argv is not None else sys.argv[1:])
@@ -29,9 +32,9 @@ def main(argv=None):
         print("PUSH ABORTED: account gate failed. Nothing was sent.")
         return gate.returncode
 
-    cmd = ["git", "push"] + (argv if argv else ["origin", "HEAD"])
-    print("gate passed -> %s" % " ".join(cmd))
-    rc = subprocess.call(cmd, cwd=ROOT)
+    cmd = ["push"] + (argv if argv else ["origin", "HEAD"])
+    print("gate passed -> git %s" % " ".join(cmd))
+    rc = gitbin.run(cmd, cwd=ROOT).returncode
     if rc != 0:
         print("push failed rc=%d (gate already passed; this is the network/remote, "
               "not the account)" % rc)

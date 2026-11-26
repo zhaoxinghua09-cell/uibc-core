@@ -4,12 +4,12 @@
 
 | 指标 | 值 |
 |---|---|
-| cases | 31 |
-| compared | 31 |
-| verdict_agree | 20 |
-| first_agree | 17 |
-| set_agree | 14 |
-| both_match_oracle | 18 |
+| cases | 32 |
+| compared | 32 |
+| verdict_agree | 21 |
+| first_agree | 18 |
+| set_agree | 15 |
+| both_match_oracle | 19 |
 | coverage_gap | 7 |
 | contradiction | 3 |
 
@@ -47,5 +47,6 @@
 | accept-typed-evidence | strict | PASS | PASS | PASS | ✓ | —/— | ✓ |
 | accept-lifecycle-events | strict | PASS | PASS | PASS | ✓ | —/— | ✓ |
 | accept-anchored-policy | strict | PASS | PASS | INCONCLUSIVE | ✗ | —/— | ✓ |
+| accept-unverifiable-seal | open | INCONCLUSIVE | INCONCLUSIVE | INCONCLUSIVE | ✓ | —/— | ✓ |
 | oracle-s09-rollback-pin | strict | FAIL | PASS | PASS | ✓ | —/— | ✓ |
 | oracle-s19-stale-state | strict | FAIL | PASS | PASS | ✓ | —/— | ✓ |

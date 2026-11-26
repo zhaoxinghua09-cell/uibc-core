@@ -23,13 +23,16 @@ import json
 import os
 import re
 import subprocess
+import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import gitbin  # noqa: E402  (git may be a .cmd shim on Windows)
 def _read_version():
     """版本号只从包自身读，避免像 0.2.1 那样在发版时漏改。"""
     init = os.path.join(ROOT, "uibc_core", "__init__.py")
     with open(init, encoding="utf-8") as fh:
-        m = re.search(r'__version__\\s*=\\s*"([^"]+)"', fh.read())
+        m = re.search(r'__version__\s*=\s*"([^"]+)"', fh.read())
     if not m:
         raise SystemExit("cannot find __version__ in uibc_core/__init__.py")
     return m.group(1)
@@ -40,8 +43,8 @@ SPDX_LICENSE_LIST_VERSION = "3.29.0"
 
 
 def git(*args):
-    return subprocess.run(
-        ["git", "-C", ROOT, *args], capture_output=True, text=True
+    return gitbin.run(
+        ["-C", ROOT, *args], capture_output=True, text=True
     ).stdout.strip()
 
 

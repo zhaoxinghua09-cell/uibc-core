@@ -33,6 +33,9 @@ import sys
 import tarfile
 import tempfile
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import gitbin  # noqa: E402  (git may be a .cmd shim on Windows)
+
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # The receipt's figures, verbatim from docs/external-review/EXTERNAL-NODE-001.md.
@@ -61,8 +64,8 @@ def export(ref, dest):
     """
     with tempfile.TemporaryDirectory() as td:
         arc = os.path.join(td, "snapshot.tar")
-        r = subprocess.run(["git", "archive", "--format=tar", "-o", arc, ref],
-                           cwd=REPO, capture_output=True, text=True)
+        r = gitbin.run(["archive", "--format=tar", "-o", arc, ref],
+                       cwd=REPO, capture_output=True, text=True)
         if r.returncode != 0:
             return r.returncode, 1, r.stderr or r.stdout
         try:

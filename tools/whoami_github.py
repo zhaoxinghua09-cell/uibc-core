@@ -5,17 +5,21 @@ wrong account is the kind of mistake that is invisible until a third party sees
 it, so the identity is checked rather than assumed from the remote URL.
 """
 import json
+import os
 import subprocess
 import sys
 import urllib.request
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import gitbin  # noqa: E402  (git may be a .cmd shim on Windows)
 
 HOST = "github.com"
 
 
 def credential():
-    p = subprocess.run(["git", "credential", "fill"],
-                       input="protocol=https\nhost=%s\n\n" % HOST,
-                       capture_output=True, text=True)
+    p = gitbin.run(["credential", "fill"],
+                   input="protocol=https\nhost=%s\n\n" % HOST,
+                   capture_output=True, text=True)
     kv = {}
     for line in (p.stdout or "").splitlines():
         if "=" in line:

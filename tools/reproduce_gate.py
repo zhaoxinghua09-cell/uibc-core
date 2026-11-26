@@ -32,6 +32,9 @@ import subprocess
 import sys
 import time
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import gitbin  # noqa: E402  (git may be a .cmd shim on Windows)
+
 MODES = (("open", []), ("pinned-owner", ["--pubkey"]), ("pinned-attacker", ["--pubkey"]))
 
 
@@ -55,11 +58,11 @@ def run(cmd, cwd=None, timeout=600):
 
 def git_head(repo):
     """Same three-level fallback the selfcheck uses; never invent a value."""
-    for cmd in (["git", "rev-parse", "HEAD"],):
+    for cmd in (["rev-parse", "HEAD"],):
         try:
-            rc, out, _ = run(cmd, cwd=repo, timeout=20)
-            if rc == 0 and out.strip():
-                return out.strip().splitlines()[0]
+            p = gitbin.run(cmd, cwd=repo, capture_output=True, text=True, timeout=20)
+            if p.returncode == 0 and (p.stdout or "").strip():
+                return p.stdout.strip().splitlines()[0]
         except Exception:
             pass
     try:

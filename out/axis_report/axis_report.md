@@ -29,6 +29,7 @@
 | accept-typed-evidence | PASS | PASS | PASS | PASS | N/A | N/A | —/— | ✓ |
 | accept-lifecycle-events | PASS | PASS | PASS | PASS | N/A | N/A | —/— | ✓ |
 | accept-anchored-policy | PASS | PASS | PASS | PASS | PASS | N/A | —/— | ✓ |
+| accept-unverifiable-seal | INCONCLUSIVE | INCONCLUSIVE | PASS | INCONCLUSIVE | N/A | N/A | —/— | ✓ |
 | oracle-s09-rollback-pin | FAIL | FAIL | PASS | PASS | N/A | FAIL | S9/S9 | ✓ |
 | oracle-s19-stale-state | FAIL | FAIL | PASS | PASS | N/A | FAIL | S19/S19 | ✓ |
-合计 31 例，一致 31，分歧 0。
+合计 32 例，一致 32，分歧 0。

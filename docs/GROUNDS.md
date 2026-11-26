@@ -4,8 +4,8 @@ Generated from `conformance/oracle/grounds.json`, which is derived from the
 basis table the verifier ships (`uibc_core/basis.py`). Do not edit this page;
 edit the data. `tools/build_grounds_page.py > docs/GROUNDS.md`.
 
-The corpus is **31 cases**: 21 must-reject, 9 must-accept, 1 control
-(`oracle-clean`). Every one of the 21 must-reject cases names what it rests on;
+The corpus is **32 cases**: 21 must-reject, 9 must-accept, 2 control
+(`oracle-clean, accept-unverifiable-seal`). Every one of the 21 must-reject cases names what it rests on;
 **5 of them quote the sentence** and `tools/check_grounds.py` re-finds that
 sentence in the vendored draft after collapsing whitespace. The rest say what
 the requirement is and which document owns it, without claiming a sentence.

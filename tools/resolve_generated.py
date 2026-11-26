@@ -25,6 +25,9 @@ import os
 import subprocess
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import gitbin  # noqa: E402  (git may be a .cmd shim on Windows)
+
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # path -> command whose stdout (or file output) is that path's content.
@@ -37,14 +40,14 @@ GENERATORS = {
 
 
 def conflicted_paths():
-    r = subprocess.run(["git", "diff", "--name-only", "--diff-filter=U"],
-                       cwd=REPO, capture_output=True, text=True)
+    r = gitbin.run(["diff", "--name-only", "--diff-filter=U"],
+                   cwd=REPO, capture_output=True, text=True)
     return [p.strip() for p in r.stdout.splitlines() if p.strip()]
 
 
 def in_rebase():
-    gitdir = subprocess.run(["git", "rev-parse", "--git-dir"], cwd=REPO,
-                            capture_output=True, text=True).stdout.strip()
+    gitdir = gitbin.run(["rev-parse", "--git-dir"], cwd=REPO,
+                        capture_output=True, text=True).stdout.strip()
     return any(os.path.isdir(os.path.join(REPO, gitdir, d))
                for d in ("rebase-merge", "rebase-apply"))
 
@@ -79,7 +82,7 @@ def main():
             print("  GENERATOR FAILED (rc=%d) for %s\n%s" % (rc, p, out))
             leftover.append(p)
             continue
-        subprocess.run(["git", "add", "--", p], cwd=REPO, check=False)
+        gitbin.run(["add", "--", p], cwd=REPO, check=False)
     if leftover:
         print("")
         print("VERDICT: INCOMPLETE - %d path(s) still need you: %s"

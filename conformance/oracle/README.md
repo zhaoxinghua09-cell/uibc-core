@@ -1,6 +1,6 @@
 # UIBC conformance corpus
 
-31 cases, each a complete submission package plus the verdict it must produce.
+32 cases, each a complete submission package plus the verdict it must produce.
 Written by `python tools/oracle_check.py --emit <dir>`; the answers were checked
 against the bytes on disk after writing, so what you read here is what the files
 do (mismatches at emit time: 0).
@@ -31,9 +31,12 @@ just cannot be rebuilt, which is the thing worth not doing.
 3. Compare the overall verdict, and the first failing check id for reject cases,
    with `expected.json`.
 
-`kind` is `accept` (must not be rejected) or `reject` (must be rejected at the
-named check). A verifier that rejects everything passes every reject case and
-fails every accept case, which is why both halves are here.
+`kind` is `accept` (must not be rejected), `reject` (must be rejected at the
+named check), or `accept-inconclusive` (valid bytes whose verdict must be
+INCONCLUSIVE - evidence that could not be checked, which is neither acceptance
+nor rejection). A verifier that rejects everything passes every reject case and
+fails every accept case, which is why both halves are here; a verifier with only
+two outcomes cannot represent the third kind at all, which is why it is here too.
 
 ## The three checks a package cannot carry
 

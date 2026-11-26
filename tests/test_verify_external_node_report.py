@@ -22,6 +22,7 @@ for p in (REPO, TOOLS):
         sys.path.insert(0, p)
 
 import verify_external_node_report as v  # noqa: E402
+import gitbin  # noqa: E402
 
 
 class TestTheReceiptIsPinned(unittest.TestCase):
@@ -44,8 +45,8 @@ class TestTheReceiptIsPinned(unittest.TestCase):
 
 
 def _has_ref(ref):
-    r = subprocess.run(["git", "cat-file", "-e", ref + "^{commit}"], cwd=REPO,
-                       capture_output=True, text=True)
+    r = gitbin.run(["cat-file", "-e", ref + "^{commit}"], cwd=REPO,
+                   capture_output=True, text=True)
     return r.returncode == 0
 
 

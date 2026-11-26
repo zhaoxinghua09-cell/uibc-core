@@ -15,14 +15,16 @@ import sys
 import time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import gitbin  # noqa: E402  (git may be a .cmd shim on Windows)
 OUT = os.path.join(ROOT, "tools", "out", "release_status.json")
 BRANCH = "main"
 
 
 def git(*args, timeout=25):
     try:
-        r = subprocess.run(["git"] + list(args), cwd=ROOT, capture_output=True,
-                           text=True, timeout=timeout)
+        r = gitbin.run(list(args), cwd=ROOT, capture_output=True,
+                       text=True, timeout=timeout)
         return r.returncode, (r.stdout or "").strip(), (r.stderr or "").strip()
     except subprocess.TimeoutExpired:
         return 124, "", "timeout"

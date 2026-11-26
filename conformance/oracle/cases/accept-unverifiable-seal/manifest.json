@@ -1,0 +1,13 @@
+{
+  "schema": "uibc-core/0.3.3-proposal",
+  "agent_id": "accept",
+  "agent_version": "1",
+  "created_at": "2026-11-15T00:00:00Z",
+  "evidence_count": 1,
+  "evidence_root": "8de99c2197fa233057f23ff89f0efbd246832f21a7767c6909bc3ca7078c1821",
+  "status": "SUBMITTED",
+  "evidence_index_digest": "sha256:679785f02ef17f34c98495ca30b8521866010f02ad6a1c62c3dd894bc50686ab",
+  "lifecycle_head": "sha256:3bcdb3f4e368f23e2190f18426e1bf931795d8395b503304574321eb03eaf667",
+  "checkpoint_head": "sha256:c89449917f5d3fc85c42b9022ffef20fd0276cf5121a3af3527ef23ae834637f",
+  "min_verifier_version": "0.5.5"
+}

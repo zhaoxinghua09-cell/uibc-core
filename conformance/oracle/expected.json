@@ -212,12 +212,20 @@
       "expected_first_fail": null
     },
     {
+      "case": "accept-unverifiable-seal",
+      "kind": "accept-inconclusive",
+      "mode": "open",
+      "expected_verdict": "INCONCLUSIVE",
+      "expected_first_fail": null,
+      "note": "No key is supplied on purpose: the HMAC seal is unverifiable in open mode, which is missing evidence, not contrary evidence."
+    },
+    {
       "case": "oracle-s09-rollback-pin",
       "kind": "reject",
       "mode": "strict",
       "expected_verdict": "FAIL",
       "expected_first_fail": "S9",
-      "expect_head": "sha256:80c2633f909770d7e2ecee5f6c31a40b6aa8c4585c211e7734bc11aeff82e3bb"
+      "expect_head": "sha256:85206342c860fff40f514e5ccf878c830e903b8c56a7d9925917bbe2b3b0b999"
     },
     {
       "case": "oracle-s19-stale-state",

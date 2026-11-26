@@ -1,12 +1,12 @@
 {
   "summary": {
-    "cases": 31,
-    "compared": 31,
+    "cases": 32,
+    "compared": 32,
     "errors": 0,
-    "verdict_agree": 20,
-    "first_agree": 17,
-    "set_agree": 14,
-    "both_match_oracle": 18,
+    "verdict_agree": 21,
+    "first_agree": 18,
+    "set_agree": 15,
+    "both_match_oracle": 19,
     "coverage_gap": 7,
     "contradiction": 3,
     "accept_divergence": 1,
@@ -599,6 +599,23 @@
       "both_match_oracle": false,
       "designed_uncovered": [],
       "kind": "accept-divergence"
+    },
+    {
+      "case": "accept-unverifiable-seal",
+      "mode": "open",
+      "expected": "INCONCLUSIVE",
+      "ref": "INCONCLUSIVE",
+      "ind": "INCONCLUSIVE",
+      "verdict_agree": true,
+      "ref_first": null,
+      "ind_first": null,
+      "first_agree": true,
+      "ref_set": [],
+      "ind_set": [],
+      "set_agree": true,
+      "both_match_oracle": true,
+      "designed_uncovered": [],
+      "kind": "agree"
     },
     {
       "case": "oracle-s09-rollback-pin",

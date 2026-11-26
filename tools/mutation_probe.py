@@ -160,7 +160,7 @@ CATALOGUE = [
     ("evidence-removed", "S4", "an indexed evidence file is gone",          m_delete_evidence),
     ("lifecycle-state", "S3",  "an event_type the state machine does not know", m_lifecycle_state),
     ("lifecycle-drop",  "S3",  "the closing lifecycle event is missing",    m_lifecycle_drop),
-    ("index-extra-field", "（无检查声明此约束）", "an undeclared member added to evidence/index.json", m_index_metadata),
+    ("index-extra-field", "S7", "an undeclared member added to evidence/index.json", m_index_metadata),
 ]
 
 

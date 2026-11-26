@@ -2,7 +2,7 @@
   "schema": "uibc-core/0.3.3-proposal",
   "events": [
     {
-      "event_id": "58e092ef-85c0-58fc-a598-64a2517cf310",
+      "event_id": "538248ed-f344-504c-981a-bf562e862b39",
       "sequence_number": 0,
       "event_type": "REGISTER",
       "agent_id": "accept",
@@ -13,20 +13,9 @@
       "signature": null
     },
     {
-      "event_id": "538248ed-f344-504c-981a-bf562e862b39",
+      "event_id": "37fc4f70-7d9a-5a0b-8e67-fef9574b089f",
       "sequence_number": 1,
       "event_type": "UPDATE",
-      "agent_id": "accept",
-      "timestamp": "2026-11-15T00:00:00Z",
-      "actor": "accept",
-      "payload_hash": null,
-      "previous_event": "58e092ef-85c0-58fc-a598-64a2517cf310",
-      "signature": null
-    },
-    {
-      "event_id": "045054ca-a351-5f66-b28b-64051d89f3b8",
-      "sequence_number": 2,
-      "event_type": "DELEGATE",
       "agent_id": "accept",
       "timestamp": "2026-11-15T00:00:00Z",
       "actor": "accept",
@@ -35,14 +24,25 @@
       "signature": null
     },
     {
-      "event_id": "37fc4f70-7d9a-5a0b-8e67-fef9574b089f",
+      "event_id": "fe91e0fe-6f83-5a58-8196-f7eec0cbb4c2",
+      "sequence_number": 2,
+      "event_type": "DELEGATE",
+      "agent_id": "accept",
+      "timestamp": "2026-11-15T00:00:00Z",
+      "actor": "accept",
+      "payload_hash": null,
+      "previous_event": "37fc4f70-7d9a-5a0b-8e67-fef9574b089f",
+      "signature": null
+    },
+    {
+      "event_id": "cfa8ce75-a2ba-523a-8da6-92d475a81acb",
       "sequence_number": 3,
       "event_type": "UPDATE",
       "agent_id": "accept",
       "timestamp": "2026-11-15T00:00:00Z",
       "actor": "accept",
       "payload_hash": null,
-      "previous_event": "045054ca-a351-5f66-b28b-64051d89f3b8",
+      "previous_event": "fe91e0fe-6f83-5a58-8196-f7eec0cbb4c2",
       "signature": null
     }
   ]

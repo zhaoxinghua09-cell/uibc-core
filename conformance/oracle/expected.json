@@ -51,6 +51,13 @@
       "expected_first_fail": "S12"
     },
     {
+      "case": "oracle-s07-index-extra-member",
+      "kind": "reject-or-accept",
+      "mode": "strict",
+      "expected_verdict": "FAIL",
+      "expected_first_fail": "S7"
+    },
+    {
       "case": "oracle-s01-undeclared-file",
       "kind": "reject",
       "mode": "open",
@@ -210,7 +217,7 @@
       "mode": "strict",
       "expected_verdict": "FAIL",
       "expected_first_fail": "S9",
-      "expect_head": "sha256:9122416c83c5d1c8bf2a99f169a18551bc9798dac6cd471adf262d69105075ae"
+      "expect_head": "sha256:80c2633f909770d7e2ecee5f6c31a40b6aa8c4585c211e7734bc11aeff82e3bb"
     },
     {
       "case": "oracle-s19-stale-state",

@@ -1,7 +1,7 @@
 {
   "entries": [
     {
-      "evidence_id": "14478220-1191-56c9-9d8d-65a0e5cdda1b",
+      "evidence_id": "81f28e9a-5849-5f52-9edf-eb19eb6808d8",
       "type": "ACTION",
       "path": "files/accept-typed-evidence-call.json",
       "content_hash": "0e5b57b5bfb943dca3b1b2085c51607aab049c14b5459da597b1fa7f7ac77ba1",
@@ -10,7 +10,7 @@
       "note": "call.json"
     },
     {
-      "evidence_id": "cee060e8-4771-5a88-b043-95f28a26418d",
+      "evidence_id": "58e092ef-85c0-58fc-a598-64a2517cf310",
       "type": "INPUT",
       "path": "files/accept-typed-evidence-in.txt",
       "content_hash": "6b660e28d7b9606a3d3737064d895646b9657890e3b3af0bf65d6e41a4d5656e",
@@ -19,7 +19,7 @@
       "note": "in.txt"
     },
     {
-      "evidence_id": "81f28e9a-5849-5f52-9edf-eb19eb6808d8",
+      "evidence_id": "43947116-16b4-5c94-8b60-af18ddc550b8",
       "type": "OUTPUT",
       "path": "files/accept-typed-evidence-out.txt",
       "content_hash": "54fa35ff3bb2c3064f20edc98071d3ba5f023bbf35fca329e2265f3c7cf8bb4c",

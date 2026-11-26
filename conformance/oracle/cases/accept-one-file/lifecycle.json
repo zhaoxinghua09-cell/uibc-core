@@ -2,7 +2,7 @@
   "schema": "uibc-core/0.3.3-proposal",
   "events": [
     {
-      "event_id": "5fb22982-8305-598d-8e8d-c854ba7861e1",
+      "event_id": "d13b752c-286e-5db7-b659-667725f15630",
       "sequence_number": 0,
       "event_type": "REGISTER",
       "agent_id": "accept",

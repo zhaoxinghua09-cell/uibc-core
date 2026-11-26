@@ -115,6 +115,11 @@
       "case": "oracle-s19-stale-state",
       "check": "S19",
       "basis": "borrowed_idea"
+    },
+    {
+      "case": "oracle-s07-index-extra-member",
+      "check": "S7",
+      "basis": "own_choice"
     }
   ]
 }

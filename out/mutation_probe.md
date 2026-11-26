@@ -1,6 +1,6 @@
 # 变异探针（参考验证器单字段变异）
 
-源包 `conformance/oracle/cases/oracle-clean`；变异 12 个，杀掉 11，归因正确 8。
+源包 `conformance/oracle/cases/oracle-clean`；变异 12 个，杀掉 12，归因正确 9。
 
 | 变异 | 目标检查 | verdict | 失败集 | killed | attributed |
 |---|---|---|---|---|---|
@@ -15,4 +15,4 @@
 | evidence-removed | S4 | FAIL | S4,S8 | 是 | 是 |
 | lifecycle-state | S3 | FAIL | S3,S8 | 是 | 是 |
 | lifecycle-drop | S3 | FAIL | S8 | 是 | **否** |
-| index-extra-field | （无检查声明此约束） | PASS | — | **否** | **否** |
+| index-extra-field | S7 | FAIL | S7 | 是 | 是 |

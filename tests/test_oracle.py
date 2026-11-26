@@ -74,7 +74,11 @@ class TestOracle(unittest.TestCase):
         self.assertIn("unmapped independent rules: V7, V8, V9", out)
         self.assertIn("measured: V7 fires alone -> reference FAIL S1", out)
         self.assertIn("reference says FAIL and the second says INCONCLUSIVE", out)
-        self.assertIn("says PASS on 0 and declines to judge 9", out)
+        # This number moved from 0 to 1 when oracle-s07-index-extra-member was
+        # added: the second implementation PASSes a package the reference rejects
+        # (an undeclared member in evidence/index.json). The sentence is computed
+        # from the run, so the test tracks the measured value rather than a wish.
+        self.assertIn("says PASS on 1 and declines to judge 9", out)
         self.assertIn("reaches 9 by rule (S1,S2,S3,S4,S5,S6,S7,S8,S12)", out)
         self.assertIn("can never reach 8 (S10,S11,S13,S14,S15,S16,S17,S18)", out)
         self.assertIn("the reference names 1 the second does not (lifecycle event signature)", out)

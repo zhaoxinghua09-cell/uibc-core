@@ -1,11 +1,9 @@
 {
   "summary": {
     "mutants": 12,
-    "killed": 11,
-    "attributed": 8,
-    "survivors": [
-      "index-extra-field"
-    ],
+    "killed": 12,
+    "attributed": 9,
+    "survivors": [],
     "misattributed": [
       "index-type",
       "manifest-count",
@@ -205,13 +203,17 @@
     },
     {
       "mutation": "index-extra-field",
-      "intended": "（无检查声明此约束）",
-      "verdict": "PASS",
-      "failing": [],
+      "intended": "S7",
+      "verdict": "FAIL",
+      "failing": [
+        "S7"
+      ],
       "inconclusive": [],
-      "killed": false,
-      "attributed": false,
-      "caught_by": [],
+      "killed": true,
+      "attributed": true,
+      "caught_by": [
+        "S7"
+      ],
       "unsupported": []
     }
   ]

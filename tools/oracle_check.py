@@ -51,6 +51,10 @@ ORACLE = [
     # S5 has nothing to complain about and the identifier rule is the only thing left
     # to fail. An S12 case that also breaks S5 never proves S12 is doing work.
     ("oracle-s12-id-only", "dup_root", "FAIL", "S12"),
+    # S7 schema closure: a member the index format does not define. This case
+    # exists because tools/mutation_probe.py found the gap first; the corpus had
+    # no case that could have found it.
+    ("oracle-s07-index-extra-member", "extra_member", "FAIL", "S7"),
 ]
 
 # Rows that need more than a verdict: what else fails, and why the first fail is
@@ -572,9 +576,9 @@ def build(tmp, name, mutation, nevid=1):
         f.write(key.hex())
     ucli.cmd_submit(type("A", (), {"path": pkg, "key": kf})())
     mutate(pkg, name, mutation)
-    if mutation == "dup_root":
+    if mutation in ("dup_root", "extra_member"):
         # re-seal after the edit: otherwise the seal (S6) fails and the case never
-        # reaches the identifier rule it was built to test.
+        # reaches the rule it was built to test.
         ucli.cmd_submit(type("A", (), {"path": pkg, "key": kf})())
     return pkg, key
 
@@ -602,6 +606,14 @@ def mutate(pkg, name, mutation):
         # duplicate the first entry; the re-seal that follows rewrites manifest and
         # signature from the index, so only the identifier rule (S12) can fail.
         idx["entries"].append(dict(idx["entries"][0]))
+        with open(idx_path, "w", encoding="utf-8", newline="\n") as f:
+            json.dump(idx, f, indent=2, sort_keys=True)
+        return
+    if mutation == "extra_member":
+        # An undeclared member at the top of evidence/index.json: outside the
+        # metadata digest, so before S7 gained a schema closure it rode along in a
+        # PASS package (found by tools/mutation_probe.py, not by this corpus).
+        idx["generated_at"] = "1970-01-01T00:00:00Z"
         with open(idx_path, "w", encoding="utf-8", newline="\n") as f:
             json.dump(idx, f, indent=2, sort_keys=True)
         return

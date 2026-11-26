@@ -7,8 +7,8 @@
   "evidence_root": "cce5d0abad0bcaafce676ed747bb29f58823928d8b327eded95cdfbf7fb495be",
   "status": "SUBMITTED",
   "evidence_index_digest": "sha256:4924a3c8bc53ee14f8d2d69613f823d8cc37f589950b8c1312e92728ed09fd51",
-  "lifecycle_head": "sha256:439359024e8eb281717d987c3dcd9dcf728709a6ba3c017898cc82a4697aea9e",
-  "checkpoint_head": "sha256:83d0f6e37114e7614ee70ef5e897d1726b4c27adb2c69ee029d5b582eb57ed64",
+  "lifecycle_head": "sha256:c4b8abdac1bcd15683a8fa610170200e3ec70dda9d7b00cc8662d810cfcc7847",
+  "checkpoint_head": "sha256:1d296c85082a403993adf9645db48f0b571dc430fe6278bcb781508b47e250c6",
   "min_verifier_version": "0.5.5",
   "closure": {
     "model_weights": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",

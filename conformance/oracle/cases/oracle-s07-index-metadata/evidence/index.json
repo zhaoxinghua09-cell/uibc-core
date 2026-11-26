@@ -1,7 +1,7 @@
 {
   "entries": [
     {
-      "evidence_id": "6347eca1-cd79-5586-8462-52f868020d7e",
+      "evidence_id": "5fb22982-8305-598d-8e8d-c854ba7861e1",
       "type": "ACTION",
       "path": "files/oracle-s07-index-metadata-0.txt",
       "content_hash": "376771108f0f5aa4633a2e5f087e3b69e92bef3e86796a370b54b4def4c0bd4d",
@@ -10,7 +10,7 @@
       "note": "reviewed and approved by nobody"
     },
     {
-      "evidence_id": "1a178a26-5e45-541a-9dda-50a1c6651065",
+      "evidence_id": "c347ff57-7096-5f34-af95-90c1fa0a0646",
       "type": "ACTION",
       "path": "files/oracle-s07-index-metadata-1.txt",
       "content_hash": "999034ea0024211a1e5fd16fe4c343ceb6affb4c68b9c77c33390ab361c0bfd0",

@@ -241,6 +241,22 @@ An implementation is conformant if it: (a) reproduces the committed test
 vectors, (b) reports `INCONCLUSIVE` rather than `PASS` when a check cannot be
 resolved, and (c) never accepts a foreign-format document as its own.
 
+Two definitions that were previously left implicit, and therefore became
+implementation choices rather than specification choices:
+
+- **"First failing check" means the lowest-numbered failing check.** The printed
+  report does not run in check order (measured on a duplicated package: S11, S1,
+  S2, S3, S4, S12, S7, S8, S5, S6), so "the first failure" is undefined until
+  this rule is fixed. Both the corpus generator and the per-axis report use this
+  rule; any other reading produces a different, equally defensible answer for
+  the same bytes.
+- **`evidence/index.json` admits exactly `entries` and `schema`.** The metadata
+  digest covers each entry's path, type, note and action digest, so a member
+  added at the top level of the index sits outside every check: measured, a
+  package with an extra `generated_at` member verified PASS before this rule
+  existed. An undeclared member is now refused (S7), because a reader that
+  trusts it would be trusting a value no check covers.
+
 Interoperability with AER-1 receipts is defined by an explicit mapping
 (Appendix A), not by similarity of intent. The reference implementation
 demonstrates both directions: emitting AER-1 receipts that the AER-1

@@ -981,8 +981,27 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
     # S4b: index METADATA must match its committed digest (v1.1). Content
     # hashes alone cannot see an entry's type/note/action_digest being
     # rewritten; the index digest is carried in the sealed manifest.
+    #
+    # Schema closure first: the digest above covers the entries' path/type/note/
+    # action_digest, so a member added at the top of evidence/index.json sits
+    # outside every check and rides along in a package that verifies PASS
+    # (measured: `generated_at` added, verdict stayed PASS). A reader that trusts
+    # such a member is trusting an unauthenticated value, so an undeclared member
+    # is refused rather than ignored. The catalogue of allowed members is
+    # deliberately one name plus the legacy schema marker: widening it is a
+    # decision, not an oversight.
+    INDEX_MEMBERS = {"entries", "schema"}
+    index_extras = sorted(set(index.keys()) - INDEX_MEMBERS) if isinstance(index, dict) else []
     index_digest_field = manifest.get("evidence_index_digest")
-    if index_digest_field:
+    if index_extras:
+        ok = False
+        checks.append({"id": "S7", "name": "evidence index metadata",
+                       "result": "FAIL",
+                       "detail": "evidence/index.json declares member(s) the format "
+                                 "does not define: %s (allowed: %s)"
+                                 % (", ".join(index_extras),
+                                    ", ".join(sorted(INDEX_MEMBERS)))})
+    elif index_digest_field:
         from .canonical import index_metadata_digest as _imd
         actual_index_digest = _imd(index)
         if actual_index_digest != index_digest_field:

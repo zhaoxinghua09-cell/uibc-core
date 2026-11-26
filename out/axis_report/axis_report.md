@@ -6,6 +6,7 @@
 | oracle-duplicated | FAIL | FAIL | FAIL | PASS | N/A | N/A | S5/S5 | ✓ |
 | oracle-unsealed | FAIL | FAIL | PASS | FAIL | N/A | N/A | S6/S6 | ✓ |
 | oracle-s12-id-only | FAIL | FAIL | FAIL | PASS | N/A | N/A | S12/S12 | ✓ |
+| oracle-s07-index-extra-member | FAIL | FAIL | FAIL | PASS | N/A | N/A | S7/S7 | ✓ |
 | oracle-s01-undeclared-file | FAIL | FAIL | FAIL | INCONCLUSIVE | N/A | N/A | S1/S1 | ✓ |
 | oracle-s02-identity | FAIL | FAIL | FAIL | INCONCLUSIVE | N/A | N/A | S2/S2 | ✓ |
 | oracle-s03-calendar | FAIL | FAIL | FAIL | INCONCLUSIVE | N/A | N/A | S3/S3 | ✓ |
@@ -30,4 +31,4 @@
 | accept-anchored-policy | PASS | PASS | PASS | PASS | PASS | N/A | —/— | ✓ |
 | oracle-s09-rollback-pin | FAIL | FAIL | PASS | PASS | N/A | FAIL | S9/S9 | ✓ |
 | oracle-s19-stale-state | FAIL | FAIL | PASS | PASS | N/A | FAIL | S19/S19 | ✓ |
-合计 30 例，一致 30，分歧 0。
+合计 31 例，一致 31，分歧 0。

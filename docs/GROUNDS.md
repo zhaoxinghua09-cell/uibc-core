@@ -4,8 +4,8 @@ Generated from `conformance/oracle/grounds.json`, which is derived from the
 basis table the verifier ships (`uibc_core/basis.py`). Do not edit this page;
 edit the data. `tools/build_grounds_page.py > docs/GROUNDS.md`.
 
-The corpus is **30 cases**: 20 must-reject, 9 must-accept, 1 control
-(`oracle-clean`). Every one of the 20 must-reject cases names what it rests on;
+The corpus is **31 cases**: 21 must-reject, 9 must-accept, 1 control
+(`oracle-clean`). Every one of the 21 must-reject cases names what it rests on;
 **5 of them quote the sentence** and `tools/check_grounds.py` re-finds that
 sentence in the vendored draft after collapsing whitespace. The rest say what
 the requirement is and which document owns it, without claiming a sentence.
@@ -16,7 +16,7 @@ Three kinds, and they are not interchangeable:
 |---|---|---|
 | `draft_mandated` | the draft states the requirement | 5 |
 | `borrowed_idea` | the mechanism is borrowed, the check is ours | 9 |
-| `own_choice` | nothing to point at: this project defines it | 6 |
+| `own_choice` | nothing to point at: this project defines it | 7 |
 
 ## The table
 
@@ -29,6 +29,7 @@ Three kinds, and they are not interchangeable:
 | `oracle-tampered` | S4 | `own_choice` | this project | — |
 | `oracle-duplicated` | S5 | `borrowed_idea` | `RFC 6962` | no sentence quoted |
 | `oracle-unsealed` | S6 | `borrowed_idea` | `RFC 8032` | no sentence quoted |
+| `oracle-s07-index-extra-member` | S7 | `own_choice` | this project | — |
 | `oracle-s07-index-metadata` | S7 | `own_choice` | this project | — |
 | `oracle-s08-log-truncated` | S8 | `borrowed_idea` | `draft-maintainer-1f916-agent-record-01` | no sentence quoted |
 | `oracle-s09-rollback-pin` | S9 | `borrowed_idea` | `draft-bailey-scitt-agent-session-receipt` | no sentence quoted |

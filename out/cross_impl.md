@@ -4,14 +4,14 @@
 
 | 指标 | 值 |
 |---|---|
-| cases | 30 |
-| compared | 30 |
+| cases | 31 |
+| compared | 31 |
 | verdict_agree | 20 |
 | first_agree | 17 |
 | set_agree | 14 |
 | both_match_oracle | 18 |
 | coverage_gap | 7 |
-| contradiction | 2 |
+| contradiction | 3 |
 
 独立读者覆盖 10/19 项检查；未覆盖：S9, S11, S13, S14, S15, S16, S17, S18, S19。
 
@@ -24,6 +24,7 @@
 | oracle-duplicated | strict | FAIL | FAIL | FAIL | ✓ | S5/S5 | ✗ |
 | oracle-unsealed | strict | FAIL | FAIL | FAIL | ✓ | S6/S6 | ✓ |
 | oracle-s12-id-only | strict | FAIL | FAIL | INCONCLUSIVE | ✗ | S12/— | ✗ |
+| oracle-s07-index-extra-member | strict | FAIL | FAIL | PASS | ✗ | S7/— | ✗ |
 | oracle-s01-undeclared-file | open | FAIL | FAIL | FAIL | ✓ | S1/V7 | ✗ |
 | oracle-s02-identity | open | FAIL | FAIL | FAIL | ✓ | S2/S2 | ✓ |
 | oracle-s03-calendar | open | FAIL | FAIL | FAIL | ✓ | S3/V9 | ✗ |

@@ -1,7 +1,7 @@
 {
   "spec": "uibc/conformance-axis-report/1",
   "corpus": {
-    "cases": 30,
+    "cases": 31,
     "source": "conformance/oracle/expected.json"
   },
   "verifier": {
@@ -9,8 +9,8 @@
     "version": "0.5.5"
   },
   "totals": {
-    "cases": 30,
-    "consistent": 30,
+    "cases": 31,
+    "consistent": 31,
     "divergent": 0
   },
   "rows": [
@@ -188,6 +188,35 @@
         "S4": "PASS",
         "S12": "FAIL",
         "S7": "PASS",
+        "S8": "PASS",
+        "S5": "PASS",
+        "S6": "PASS"
+      }
+    },
+    {
+      "case": "oracle-s07-index-extra-member",
+      "expected": "FAIL",
+      "measured": "FAIL",
+      "verdict_ok": true,
+      "expected_first_fail": "S7",
+      "measured_first_fail": "S7",
+      "first_fail_ok": true,
+      "expected_failed_checks": null,
+      "failed_set_ok": null,
+      "axes": {
+        "structure": "FAIL",
+        "seal": "PASS",
+        "anchor": "N/A",
+        "freshness": "N/A"
+      },
+      "checks": {
+        "S11": "PASS",
+        "S1": "PASS",
+        "S2": "PASS",
+        "S3": "PASS",
+        "S4": "PASS",
+        "S12": "PASS",
+        "S7": "FAIL",
         "S8": "PASS",
         "S5": "PASS",
         "S6": "PASS"

@@ -1,6 +1,6 @@
 # UIBC conformance corpus
 
-30 cases, each a complete submission package plus the verdict it must produce.
+31 cases, each a complete submission package plus the verdict it must produce.
 Written by `python tools/oracle_check.py --emit <dir>`; the answers were checked
 against the bytes on disk after writing, so what you read here is what the files
 do (mismatches at emit time: 0).

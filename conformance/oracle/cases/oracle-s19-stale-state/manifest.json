@@ -1,7 +1,7 @@
 {
   "agent_id": "oracle",
   "agent_version": "1",
-  "checkpoint_head": "sha256:b9f27af700d94276877ad603fe1a1fa651c3be3cf41c7adfd075e33ddbbdfc08",
+  "checkpoint_head": "sha256:9963752233ee02f96a3664a6f79a92dc82de58c4f89ba93701680ef2e4dd5ce0",
   "created_at": "2026-11-15T00:00:00Z",
   "evidence_count": 2,
   "evidence_index_digest": "sha256:35732501d03c763407461932134e39370f551ec731392a32e27e267b134e0740",
@@ -10,7 +10,7 @@
     "sequence": 3,
     "subject": "oracle"
   },
-  "lifecycle_head": "sha256:276cd07e5279158aedf9c458bbb34116cb4a54567dc9f2a89eca70d6948f025c",
+  "lifecycle_head": "sha256:1b0519b6730d6fcab971a4f331ea869a7e259ebc47b603b8f0a57bfecf43ced4",
   "min_verifier_version": "0.5.5",
   "schema": "uibc-core/0.3.3-proposal",
   "status": "SUBMITTED"

@@ -1,14 +1,14 @@
 {
   "summary": {
-    "cases": 30,
-    "compared": 30,
+    "cases": 31,
+    "compared": 31,
     "errors": 0,
     "verdict_agree": 20,
     "first_agree": 17,
     "set_agree": 14,
     "both_match_oracle": 18,
     "coverage_gap": 7,
-    "contradiction": 2,
+    "contradiction": 3,
     "accept_divergence": 1,
     "covered_checks": 10,
     "uncovered_checks": [
@@ -145,6 +145,25 @@
       "first_agree": false,
       "ref_set": [
         "S12"
+      ],
+      "ind_set": [],
+      "set_agree": false,
+      "both_match_oracle": false,
+      "designed_uncovered": [],
+      "kind": "contradiction"
+    },
+    {
+      "case": "oracle-s07-index-extra-member",
+      "mode": "strict",
+      "expected": "FAIL",
+      "ref": "FAIL",
+      "ind": "PASS",
+      "verdict_agree": false,
+      "ref_first": "S7",
+      "ind_first": null,
+      "first_agree": false,
+      "ref_set": [
+        "S7"
       ],
       "ind_set": [],
       "set_agree": false,

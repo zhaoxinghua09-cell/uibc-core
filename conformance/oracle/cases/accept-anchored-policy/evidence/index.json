@@ -1,7 +1,7 @@
 {
   "entries": [
     {
-      "evidence_id": "cfa8ce75-a2ba-523a-8da6-92d475a81acb",
+      "evidence_id": "87b44330-0761-50cc-a675-27cf3f664d25",
       "type": "ACTION",
       "path": "files/accept-anchored-policy-log.txt",
       "content_hash": "09c1e697582353c3862b25881312405229922a80f651f319d45adfbfa6a4299e",
@@ -10,7 +10,7 @@
       "note": "log.txt"
     },
     {
-      "evidence_id": "214722d5-3671-57f5-84bc-c2e8db85ad9f",
+      "evidence_id": "79fcd753-2ccd-571d-b3d9-796c8c652f48",
       "type": "ACTION",
       "path": "files/accept-anchored-policy-extra.txt",
       "content_hash": "5a2ab55df4b68c6947d48cbdaaded77a893ddeda84c17ac779be340b541c7e4c",

@@ -1,14 +1,17 @@
 cff-version: 1.2.0
 message: >-
   If you use uibc-core or UIBC in academic work, please cite the entry below.
-  SCOPE, stated because it is easy to get wrong: this entry pins the 0.4.2
-  archive (2026-11-20), whose verifier implements the same checks as the
-  repository -- S1-S19, plus S0 as a fallback branch. Two earlier versions
-  remain valid for their own snapshots and must not be attributed more than
-  they carry: 0.2.1 (10.5281/zenodo.22821835) holds only six checks, S1-S6,
-  so S7-S19 may never be cited against it. docs/ARCHIVE-GAP.md records both
-  measurements and how the gap was closed, and
-  tools/check_citation_scope.py recomputes them from the baseline files in
+  SCOPE, stated because it is easy to get wrong: this entry pins the 0.5.5
+  archive (2026-11-26), whose verifier implements the same checks as the
+  repository -- S1-S19, plus S0 as a fallback branch. The doi field points at
+  the CONCEPT DOI on purpose: it always resolves to the latest release, so it
+  cannot go stale the way a version DOI does. Two earlier versions remain
+  valid for their own snapshots and must not be attributed more than they
+  carry: 0.2.1 (10.5281/zenodo.22821835) holds only six checks, S1-S6, and
+  0.4.2 (10.5281/zenodo.24375013) predates the 40-repository parity table, so
+  neither may be cited for material added in 0.5.5. docs/ARCHIVE-GAP.md
+  records the 0.2.1 measurement and how the gap was closed, and
+  tools/check_citation_scope.py recomputes it from the baseline files in
   docs/.
 type: software
 title: "uibc-core: Verifiable Evidence Packages for Autonomous AI Agents"
@@ -21,10 +24,16 @@ abstract: >-
   Scope of this archived version: S1-S19 (S0 is a fallback branch, not a
   separate check); the bundled 28-case corpus exercises 15 of the 20 ids, and
   says so in its own README.
-version: "0.4.2"
-date-released: "2026-11-20"
-doi: "10.5281/zenodo.24375013"
+version: "0.5.5"
+date-released: "2026-11-26"
+doi: "10.5281/zenodo.22821834"
 identifiers:
+  - type: doi
+    value: "10.5281/zenodo.24551514"
+    description: "This version, 0.5.5 (2026-11-26). The archive that a fresh download of the 0.5.5 release resolves to: source tree at commit 84efa39, the pinned conformance corpus, README and SHA256SUMS."
+  - type: other
+    value: "10.5281/zenodo.24375013"
+    description: "Previous version 0.4.2 (2026-11-20). Predates the 40-repository competitor parity table and the same-scale recomputation; do not cite 0.5.5 material against it."
   - type: other
     value: "10.5281/zenodo.22821835"
     description: "Previous version 0.2.1 (2026-09-18). Its verifier implements six checks only (S1-S6); do not cite S7-S19 against it."

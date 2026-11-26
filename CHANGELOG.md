@@ -4,6 +4,7 @@
 - **做法**：收据多一栏 `files_sha256`——每个成员一条 sha256（排除三件生成物）。`--check` 先按文件逐个比对，对不上的直接打 `DRIFT <path>: receipt <前 12 位> now <前 12 位>`（最多 8 条，多的报总数），再给结论。原来那句写死"可能是 mutation_benchmark.json"的提示换成"上面点名了"。
 - **代价与边界**：收据从 8 KB 变成约 230 KB（2455 条）。它本来就在摘要排除集里，所以三根轴一个数都没动；换来的是一句话：**换一台机器、不联网、不装 git，也能说出是哪一个文件的哪一个字节变了**。
 - **实测**：跑完整套 `pytest`（2162 条）之后 `--check` 现打 `DRIFT tools/out/mutation_benchmark.json: receipt … now …`；把该文件从提交里还原、再 `--run` 重封，`OUTSIDER OK: receipt matches this disk (2455 files, 86c05b15a2e8, content 904ddf75ae20), 4 steps passed`。
+- **通道对齐（同一轮内自查发现）**：清单必须取自**收据声称的那一条通道**。克隆里 `git cat-file` 的 blob 是存储字节，检出按 `.gitattributes` 规整成 LF——若清单固定从磁盘取，CI 每次都会把 83 个文件误报成 `DRIFT`。所以 `run()` 用提交视图时清单也从 blob 生成，`check()` 按命中的视图取；换行差异（`DELIVERY MATCH`）与坏名（`NAMES-ONLY`）这两种已解释的情况下不再打印 `DRIFT`，免得用一份真清单去回答另一个问题。
 - 断言 A36；`tests/test_outsider_rerun.py` 增 2 条（收据带每文件清单；改一个字节要点名到那个文件）。
 
 ## 未发布 — 2026-11-26（收据的"成员"不再取决于这台机器上恰好有什么）

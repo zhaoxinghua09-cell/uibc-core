@@ -1,10 +1,10 @@
 {
- "generated_at": "2026-11-26T00:37:29Z",
- "tree_sha256": "be8a1b16dd76448340a032c29518d08d3ad035b506c0527ae6ee6f5dcdfbdda5",
+ "generated_at": "2026-11-26T00:41:03Z",
+ "tree_sha256": "c06096330d7a1b287b394be5d9d5634b2a360a80eff05a7def4bba62226c8fd1",
  "files_hashed": 2456,
- "content_sha256": "e8fd9d2298142de02a2aa2040ee4320fccddd90f2a91b19f2450a7e29d426048",
+ "content_sha256": "bd56ed10575b13d6fa1ed5f62c1d1f41f8307933ad9326cbb7d6c14f8f77bf80",
  "content_files": 2456,
- "content_lf_sha256": "6704474fbb145b9a804b86985084d847ae3c22b4b619f1677b1ac83cf36c5059",
+ "content_lf_sha256": "9ef0d55c434b19a63a3c2e2ba4b36f4a0447ba2dbe574eb59df0c41be9619574",
  "delivery": "archive",
  "files_sha256": {
   ".devcontainer/devcontainer.json": "2c7ad03a839816ce8d9167054216600a5e28d77793907b14fd1d7de9c6a74a34",
@@ -48,7 +48,7 @@
   "AGENTS.md": "4e2cc964b0f826937e96799c37f8e0427fe15912c86f4d9ec5bf2a8820f8c9f7",
   "ARCHITECTURE.md": "ad88c4e3694eb35e9f528d201a47601e69fee3c14af409baa76e766eeb239104",
   "ATTESTATION.md": "87289eed00cd801592b3d70d02e2f3d59eb8c10f7a26130084293312a5c7e0d9",
-  "CHANGELOG.md": "c150b041ff822f8ad2d6fe0954aecc5cd076cc2014bc5966c0bf6a6a1121e3c9",
+  "CHANGELOG.md": "ccf255a793508504d3e4c47a4f71cc92bb2e94f4ac3f606ebfada0ae6a95bc9c",
   "CITATION.bib": "54ef951d550f5d7bb77628613290966666a23697b371492855e33109196ee4c1",
   "CITATION.cff": "de45f135a1b405d1c71896560d6ab307ce63827046402c8a092f7682f7376620",
   "CODE_OF_CONDUCT.md": "8920687087c15eb10d48f39a58af986e97ce4fa844028e1b8f067d462e80d389",
@@ -1253,7 +1253,7 @@
   "docs/assurance/REVOCATION-DEMO.md": "06d222a2da9e8bde0341526ba88b1bbd2b4054cddf91b6374ec5958b33219fcc",
   "docs/assurance/far-profile.json": "52316bbfb9a7d31d86b02e0f630969ebefc3b1365e6387d08c56192ec2a5c0cb",
   "docs/citation-kit.md": "854ad1de7933af0e6e80915d5c9850ad86e98b85f0b09088c239065e27d100f4",
-  "docs/claims-register.md": "eccb1122ab2181df19793eac2080890c52b8d187d5dac65d1e5df864c1462d89",
+  "docs/claims-register.md": "8b9cad5fcdd6a59216c3efa3ae2718b13ff4496ddc4d2a396c0f4446fd001162",
   "docs/comparison.md": "f6e074c8fc1d7584aac264a45fc949f6056f836c630196448b6b8749ea0a306d",
   "docs/competitor-evidence-lines.json": "13c958227636976f4b370d26a5d37716714708ccbe710ba2d66d4a950335cd71",
   "docs/competitor-parity.json": "7ec667556389516d1af57943e91f45548c4bd59aaecc79fafadc0ada19e29e26",
@@ -2328,7 +2328,7 @@
   "tools/out/release_status.json.ots": "9c22be2489a0fd5b2f956a390e7f89a250aa9e0cd7b4fe38d8f50f1236ae3066",
   "tools/outsider_audit.py": "f811a3d7a93299ca4aafafcbf3cdf0c6117a878902e8e5941161b15da87af544",
   "tools/outsider_chain_audit.py": "c123b5fdaa0c4d596205c5daa3725910083176088c005a526331132c102bc342",
-  "tools/outsider_rerun.py": "5268912ed28327e8a51c16ec8d76a6e9b9f51cf77962625a58d12bb875c81054",
+  "tools/outsider_rerun.py": "23865cd16d569c011e53a8d20eb4481eae78ec197783540185ce0bcec74bb8fc",
   "tools/outsider_run.py": "46fbf8b38f06a6f234df521db1873951ee66bccee70e1a9a44d76398ae7a3044",
   "tools/parity_d3_bracket.py": "a57bbbc2a3a83d68fdd03ea6a69485203c4112722ac483290acb8ed016515908",
   "tools/parity_evidence_lines.py": "694f71ad9c4b42075c006c9c1bccbe72bf56081f8f6f38d2896ecb828d2441ae",
@@ -2526,7 +2526,7 @@
    "expect": "passed",
    "ok": true,
    "seconds": 3.6,
-   "tail": "41 passed in 2.98s"
+   "tail": "41 passed in 2.92s"
   }
  ],
  "ok": true

@@ -305,6 +305,8 @@ def copy_tree(dest):
 
 def run(steps_only=None):
     name, (digest, cdigest, lfdigest, count) = all_digests(HERE)[0]
+    blobs = commit_blobs(HERE) if name == "commit" else None
+    files_manifest = manifest_from_blobs(blobs) if blobs is not None else file_manifest(HERE)
     delivery = name if name == "commit" else ("worktree" if os.path.isdir(os.path.join(HERE, ".git")) else "archive")
     ccount = count
     tmp = tempfile.mkdtemp(prefix="uibc-outsider-")
@@ -332,6 +334,7 @@ def run(steps_only=None):
     return {"digest": digest, "files": count, "content_digest": cdigest,
             "content_files": ccount, "content_lf_digest": lfdigest,
             "delivery": delivery,
+            "files_manifest": files_manifest,
             "results": results}
 
 
@@ -355,6 +358,17 @@ def file_manifest(root, files=None):
         except OSError:
             out[rel] = "unreadable"
     return out
+
+
+def manifest_from_blobs(blobs):
+    """The manifest of a commit, not of a checkout.
+
+    A checkout normalises line endings (`.gitattributes`: text=auto eol=lf), the
+    blobs keep the stored bytes. The receipt names one of the two channels in
+    `delivery`, so its per-file manifest must come from the same one - otherwise
+    a correct receipt would report 83 files as drifted on every CI run.
+    """
+    return {p: hashlib.sha256(b).hexdigest() for p, b in blobs.items() if p not in GENERATED}
 
 
 def write_receipt(digest, files, results, content=None, content_files=None,
@@ -480,8 +494,16 @@ def check():
         fails.append("receipt excludes a different set of files than the checker")
     manifest = receipt.get("files_sha256") or {}
     drift = []
-    if manifest:
-        now = file_manifest(HERE)
+    # Only when the strict answer is being judged: on a line-ending difference or
+    # a mangled-name difference the digests already explain themselves, and listing
+    # 83 "drifted" files there would be a true list answering the wrong question.
+    if manifest and not (delivery_only or names_only):
+        now = None
+        if view_name == "commit":
+            blobs = commit_blobs(HERE)
+            if blobs is not None:
+                now = manifest_from_blobs(blobs)
+        now = now or file_manifest(HERE)
         for rel in sorted(set(manifest) | set(now)):
             if manifest.get(rel) != now.get(rel):
                 drift.append(rel)
@@ -587,7 +609,7 @@ def main():
         rc = write_receipt(out["digest"], out["files"], out["results"],
                            content=out["content_digest"], content_files=out["content_files"],
                            content_lf=out["content_lf_digest"], delivery=out["delivery"],
-                           files_sha256=file_manifest(HERE))
+                           files_sha256=out.get("files_manifest") or file_manifest(HERE))
     else:
         rc = check()
     if args.json:

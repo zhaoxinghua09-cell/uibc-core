@@ -705,6 +705,12 @@ def cmd_verify(args):
             json.dump(bundle, f, ensure_ascii=False, indent=2)
     if getattr(args, "trustlist", None):
         from .bundle import trust_ladder
+        if not os.path.isfile(args.trustlist):
+            # Fail closed with a sentence, not a traceback: an outsider following
+            # the reproduction record will hit this before they hit anything else.
+            print("trustlist file not found: %s (pass an existing trustlist, or omit "
+                  "--trustlist to skip the ladder)" % args.trustlist, file=sys.stderr)
+            sys.exit(2)
         report["trust"] = trust_ladder(report, seed_hex, args.trustlist)
     print(json.dumps(report, ensure_ascii=False, indent=2))
     sys.exit(0 if report["result"] == "PASS" else 1)

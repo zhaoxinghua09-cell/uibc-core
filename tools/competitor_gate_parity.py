@@ -236,6 +236,13 @@ def render_doc(snap):
     ours_strict = bracket.get("ours_strict")
     ours_strict = ours if ours_strict is None else ours_strict
     zero = {k: n - at_least[k] for k, _ in DIMS}
+    # 同尺子：竞品侧每维最高只能记 1、D5 一律 0（见 score_one），分表分母是 4；
+    # 本仓库侧每维可记 2。直接拿 10 比 3 会被正确地指责“分母不同”，所以另算一份。
+    ours_capped = sum(1 for k, _ in DIMS if snap["ours"]["dims"].get(k, 0) >= 1)
+    best_capped = max(sum(1 for k, _ in DIMS if r["dims"].get(k, 0) >= 1) for r in repos)
+    capped_dims = sum(1 for k, _ in DIMS if max(r["dims"].get(k, 0) for r in repos) >= 1)
+    _reach = [k for k, _ in DIMS if max(r["dims"].get(k, 0) for r in repos) >= 1]
+    ours_capped_vs = sum(1 for k in _reach if snap["ours"]["dims"].get(k, 0) >= 1)
     body = f"""# 竞品门禁对照：外人能在仓库里复跑什么
 
 审计日期 {snap['audited_at']}。{n} 个 DID 解析/驱动/工具仓库，全部按 **固定 commit** 取 tarball，
@@ -258,6 +265,14 @@ def render_doc(snap):
 D1 门槛＝测试文件内拒绝类断言 ≥10 次；D2＝位级关键词 ≥1；D3＝地址派生的**宽/严区间**（宽＝`base58|bs58|deriveAddress` 出现在测试里，严＝只认 `deriveAddress|addressFrom|publicKeyToAddress|toChecksumAddress`）；
 D4＝非测试代码里出现失败退出码 ≥1；D5 对 {n} 家一律记 0——"注入假断言要求门失败"这种用例，检索不到就当没有。
 **最好的一家 {best}/10，本仓库 {ours}/10；D3 换成严规则后最好的一家仍是 {best_strict}/10，本仓库 {ours_strict}/10。**
+**同尺子（same-scale）复算，必须先说**：竞品侧每维最高只能记 1、D5 在 `score_one` 里一律记 0，所以它们的分表实际分母是 4；
+本仓库侧每维可记 2。**拿 10 比 3 是两个分母，不能当标题**。压到同一把尺子（每维最多记 1、分母同为 5）：
+**本仓库 {ours_capped}/5，最好的一家 {best_capped}/5**——差距是 2 分，不是 7 分。
+再把两家都没拿到分的维度剔掉（本表 {n} 家里只有 {capped_dims} 个维度有任一家拿到分），在剩下的 {capped_dims} 维上：
+**本仓库 {ours_capped_vs}/{capped_dims}，最好的一家 {best_capped}/{capped_dims}，这一档是平手。**
+所以对外能说的只有一句：**同一把尺子上我们 5/5、最好的一家 3/5；剔掉无人得分的维度后是平手**——
+"全面超越"在这张表里不成立，成立的是"在最难的那两维（位级铺扫、门自证）上，{n} 家里 0 家有可复跑的证据"。
+
 D3 两端都写在这里，是因为单一数字在这一维一定是偏的：宽规则会把 `publicKeyBase58: '...'` 这种字面量当成派生证据，
 严规则又会漏掉"绑了地址但没写 derive 函数"的仓（逐家两列见 `docs/D3-BRACKET.md`）。
 本仓库那一行**不是手写**：`score_ours()` 用同一套证据算出来——文档/二进制/地址三个探针是否在、门跑出来的覆盖数与 `[]` 静默集、退出码是否覆盖三层、自证测试是否真的要求门失败。

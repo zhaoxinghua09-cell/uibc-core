@@ -1,14 +1,14 @@
 {
- "generated_at": "2026-11-26T17:49:38Z",
- "tree_sha256": "8b413d5dd6ff95d61f044c52b1bc15edcb589b7b152b1b87b431848a57cc2367",
+ "generated_at": "2026-11-26T18:56:40Z",
+ "tree_sha256": "63f217d07e5a4d1b33f7bbc3ba1beafbef94ff00777da906f0d73836bc0655c8",
  "files_hashed": 2498,
- "content_sha256": "9b39461c374d3f4dd52ec26474eea510d3dc122a6abd8a69247fac56f4ede47e",
+ "content_sha256": "2ba7dd9cad9a3e470587e4a02d4405fbd7cf2c7c2b15851c2651b7377cffbc1d",
  "content_files": 2498,
  "content_lf_sha256": "9e1ce35b68f85418fa9a582db41c28db9775cd11e1eeb8ea8e6e4878b51242b9",
- "delivery": "worktree",
+ "delivery": "commit",
  "files_manifest": {
   "path": "docs/OUTSIDER-FILES.txt",
-  "sha256": "fcfe2988384d552fd1338a0523ee22140071145fc33c28032253094666deb3f6",
+  "sha256": "f8427a976f6750d3103ef9deb5a664d5988cf79eeb674879b3e2b17737c94da9",
   "entries": 2498
  },
  "digest_excludes": [
@@ -18,9 +18,9 @@
   "docs/outsider-rerun-receipt.json"
  ],
  "runner": {
-  "python": "3.13.18",
-  "machine": "AMD64",
-  "system": "Windows"
+  "python": "3.12.11",
+  "machine": "x86_64",
+  "system": "Linux"
  },
  "environment": {
   "variables_kept": [
@@ -46,7 +46,7 @@
    "rc": 0,
    "expect": "GATE OK",
    "ok": true,
-   "seconds": 0.4,
+   "seconds": 0.2,
    "tail": "GATE OK"
   },
   {
@@ -55,7 +55,7 @@
    "rc": 0,
    "expect": "PARITY OK",
    "ok": true,
-   "seconds": 0.6,
+   "seconds": 0.2,
    "tail": "PARITY OK: 41 repositories pinned and re-scored, best competitor 3/10, this repository 10/10"
   },
   {
@@ -64,7 +64,7 @@
    "rc": 0,
    "expect": "ALL OK",
    "ok": true,
-   "seconds": 0.2,
+   "seconds": 0.1,
    "tail": "ALL OK"
   },
   {
@@ -73,8 +73,8 @@
    "rc": 0,
    "expect": "passed",
    "ok": true,
-   "seconds": 3.6,
-   "tail": "41 passed in 2.76s"
+   "seconds": 3.9,
+   "tail": "41 passed in 1.13s"
   }
  ],
  "ok": true

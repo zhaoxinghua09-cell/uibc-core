@@ -1268,6 +1268,10 @@ docs/evidence/20261126-phase28/outsider-pack.zip
 docs/evidence/20261126-phase28/perf_matrix.json
 docs/evidence/20261126-phase28/report.md
 docs/evidence/20261126-phase28/s6-external-ai-receipt.json
+docs/evidence/20261126-phase28/s6-external-ai/README.md
+docs/evidence/20261126-phase28/s6-external-ai/claims.md
+docs/evidence/20261126-phase28/s6-external-ai/prompt-template.md
+docs/evidence/20261126-phase28/s6-external-ai/receipt-v0.2.json
 docs/evidence/20261126-phase28/s9-anonymous-probe.md
 docs/evidence/20261126-phase28/score.json
 docs/evidence/20261126-phase28/sha256-list.txt
@@ -2354,6 +2358,7 @@ tools/probe_reference_repos.py
 tools/probe_retention.py
 tools/publish_gate.py
 tools/push_safe.py
+tools/quote_audit.py
 tools/recheck.py
 tools/redteam_robustness.py
 tools/redteam_scale.py

@@ -199,17 +199,37 @@ receipt `docs/anchor-ots-block-977449.json`:
 | header | 80 bytes, `sha256d` recomputed from the receipt's own `header_hex` equals that hash |
 | Merkle root | `4729e14ae4fdbc63766eab797e18be2da2150c24f8421c25cccb0485eba01bde`, byte-for-byte equal to the digest the attestation commits to |
 | sources asked | blockstream.info and blockchain.info; **both agree** on hash and root, disagreement would be reported, never averaged |
-| depth | tip heights read from both operators; **158 confirmations** at fetch time, well past the 6 the CTS draft recommends as a floor |
+| depth | tip heights read from both operators (both 977608); **159 confirmations** at fetch time, well past the 6 the CTS draft recommends as a floor - a dated snapshot, it grows every ten minutes |
 | verdict | `HEADER_MATCHES_ATTESTATION`; `--check` re-derives header hash, root and depth arithmetic offline with no network |
 
 What this buys and what it does not: the header bytes hash to the block hash, and
 the root inside those bytes is the attestation's message, so "the proof names a
 block that exists with that root" is now arithmetic rather than a sentence.
-It still does **not** prove this block sits on the chain with the most work: depth
-is measured (158 confirmations, above the CTS floor of 6) but the receipt records
-no proof-of-work comparison and no reorganisation risk, and the two servers are
-trusted for *delivering bytes* only - never for deciding anything, because a wrong
-byte fails a hash. That last gap is the next step, not a footnote.
+**2026-11-26, the segment above the block is walked, not assumed.** Depth alone
+is a number two servers told us. `--chain` walks *prev-hashes* from the tip they
+reported down to the attested block and checks every header it passes
+(`docs/anchor-ots-chain-977449.json`, 159 headers, 977450..977608):
+
+| check | result |
+|---|---|
+| linkage | every header's prev-hash equals the next header's `sha256d` id - no gap, no substituted block |
+| ids | each 80 bytes hashes to the id it was fetched as |
+| proof of work | each header's digest is at or below the target its own `bits` field demands (little-endian, 0x17021673 at this height) |
+| work above the block | `0x4c29205f241483bb5c7174` expected hashes - the floor a displacing chain must redo |
+| verdict | `CHAIN_SEGMENT_VERIFIED`; `--chain-check` re-derives linkage, ids, targets and the work sum offline |
+
+What is left, stated plainly: this proves the attested block is the ancestor of
+the tip **the two operators exposed**, with 159 valid headers on top. It does not
+enumerate competing branches, so "most work chain" in the global sense is still
+not established - that needs a node that follows every branch, and no explorer
+API does that. Anyone re-running later will get a longer segment; the receipt is
+a dated snapshot, not a standing guarantee.
+
+It still does **not** prove this block sits on the chain with the most work in the
+global sense: the segment above it is verified header by header (see below), but no
+competing branch is enumerated and no reorganisation risk is modelled. The servers
+are trusted for *delivering bytes* only - never for deciding, because a wrong byte
+fails a hash. That last gap needs a node, not another API.
 
 Two corrections this section has to keep telling, both found on 2026-11-25:
 

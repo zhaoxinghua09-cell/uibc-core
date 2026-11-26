@@ -111,5 +111,75 @@ class HeaderArithmeticTests(unittest.TestCase):
                       "the recorded header must be the block the proof names")
 
 
+CHAIN = os.path.join(ROOT, "docs", "anchor-ots-chain-977449.json")
+
+
+def _chain():
+    if not os.path.isfile(CHAIN):
+        return None
+    with open(CHAIN, encoding="utf-8") as f:
+        return json.load(f)
+
+
+class ChainSegmentTests(unittest.TestCase):
+    """Every header from the attested block up to the tip, re-derived offline."""
+
+    def test_chain_receipt_recomputes_cleanly(self):
+        if _chain() is None:
+            self.skipTest("chain receipt not present")
+        doc, problems = cc.check_chain_receipt(CHAIN)
+        self.assertEqual(problems, [])
+        self.assertEqual(doc["verdict"], "CHAIN_SEGMENT_VERIFIED")
+
+    def test_segment_is_the_tip_window(self):
+        doc = _chain()
+        if doc is None:
+            self.skipTest("chain receipt not present")
+        self.assertEqual(len(doc["headers"]), doc["expected_length"])
+        self.assertEqual(doc["headers"][-1]["height"], doc["height"] + 1,
+                         "the window must start one block above the attested height")
+        self.assertGreaterEqual(doc["expected_length"], 6,
+                                "below the CTS floor the claim would have to say so")
+
+    def test_every_header_meets_its_own_target(self):
+        doc = _chain()
+        if doc is None:
+            self.skipTest("chain receipt not present")
+        for item in doc["headers"]:
+            ok, _target = cc.meets_target(bytes.fromhex(item["header_hex"]))
+            self.assertTrue(ok, "block %s fails its own difficulty target" % item["height"])
+
+    def test_bits_are_read_little_endian(self):
+        doc = _chain()
+        if doc is None:
+            self.skipTest("chain receipt not present")
+        header = bytes.fromhex(doc["headers"][0]["header_hex"])
+        bits = cc.bits_of_header(header)
+        self.assertEqual(bits >> 24, 0x17,
+                         "mainnet difficulty bits start 0x17; a big-endian read gives "
+                         "0x73 and every block looks invalid")
+        self.assertGreater(cc.difficulty_target(bits).bit_length(), 160)
+
+    def test_a_flipped_header_breaks_the_segment_check(self):
+        doc = _chain()
+        if doc is None:
+            self.skipTest("chain receipt not present")
+        tampered = copy.deepcopy(doc)
+        header = bytearray(bytes.fromhex(tampered["headers"][-2]["header_hex"]))
+        header[5] ^= 0x01  # inside prev-hash: breaks linkage and the block id
+        tampered["headers"][-2]["header_hex"] = bytes(header).hex()
+        tmp = os.path.join(os.path.dirname(CHAIN), "_tampered_chain.json")
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(tampered, f)
+        try:
+            _doc, problems = cc.check_chain_receipt(tmp)
+        finally:
+            os.remove(tmp)
+        self.assertTrue(problems)
+        self.assertTrue(any("does not hash to its recorded id" in p or
+                            "prev-hash" in p for p in problems),
+                        "a byte flip must be named as a broken link or a broken id")
+
+
 if __name__ == "__main__":
     unittest.main()

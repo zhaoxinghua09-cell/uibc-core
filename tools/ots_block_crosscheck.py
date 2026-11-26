@@ -207,14 +207,202 @@ def check_receipt(path):
     return doc, problems
 
 
+
+PREV_OFFSET = 4
+BITS_OFFSET = 72  # version 0..3, prev 4..35, merkle 36..67, time 68..71, bits 72..75
+TIPS = {
+    "blockstream.info": ("https://blockstream.info/api/blocks/tip/hash",
+                         "https://blockstream.info/api/blocks/tip/height"),
+    "blockchain.info": ("https://blockchain.info/q/latesthash",
+                        "https://blockchain.info/q/getblockcount"),
+}
+
+
+def prev_hash_of_header(header):
+    """Stored bytes (little-endian) of the previous block hash."""
+    return header[PREV_OFFSET:PREV_OFFSET + 32]
+
+
+def bits_of_header(header):
+    # Bitcoin serialises header integers little-endian, so the difficulty bits
+    # read as bytes [72:76] must be interpreted the same way (0x73160217 on the
+    # wire is the familiar 0x17160273).
+    return int.from_bytes(header[BITS_OFFSET:BITS_OFFSET + 4], "little")
+
+
+def difficulty_target(bits):
+    """The `bits` field compressed form -> the 256-bit threshold the hash must beat."""
+    exponent = bits >> 24
+    mantissa = bits & 0xFFFFFF
+    if exponent <= 3:
+        return mantissa >> (8 * (3 - exponent))
+    return mantissa << (8 * (exponent - 3))
+
+
+def meets_target(header):
+    """Proof of work for one header: sha256d(hash) must be at or below its target.
+
+    The comparison is on the little-endian integer, because that is the number
+    Bitcoin's difficulty is defined against -- reading the digest big-endian
+    makes real blocks look like they failed (22 of 159 did, before this fix).
+    """
+    target = difficulty_target(bits_of_header(header))
+    value = int.from_bytes(sha256d(header), "little")
+    return value <= target, target
+
+
+def work_of(target):
+    """Expected hashes per block at this target, the usual 2**256/(target+1) unit."""
+    return (1 << 256) // (target + 1)
+
+
+def fetch_tip_pair(timeout=30):
+    tips = {}
+    for name, (hash_url, height_url) in TIPS.items():
+        try:
+            block_hash = _get(hash_url, timeout).decode().strip().lower()
+            tips[name] = {"block_hash": block_hash,
+                          "height": int(_get(height_url, timeout).decode().strip())}
+        except Exception as e:  # noqa: BLE001
+            tips[name] = {"error": "%s: %s" % (type(e).__name__, str(e)[:120])}
+    return tips
+
+
+def _fetch_header_once(block_hash, timeout, attempts=3):
+    """Retries belong here, not in the verdict: a flaky connection is not a bad block."""
+    last = None
+    for _ in range(attempts):
+        try:
+            return fetch_header(block_hash, timeout)
+        except Exception as e:  # noqa: BLE001
+            last = e
+    raise last
+
+
+def chain_check(proof_path, height=None, timeout=30, max_blocks=4000):
+    """Walk prev-hashes from the tip down to the attested block, checking every header.
+
+    What this establishes, and only this: every block from the attested one up to
+    the tip the operators reported is linked by prev-hash, hashes to its own id,
+    and meets the difficulty target its own `bits` field asks for - so displacing
+    it means redoing that work. It does **not** compare against competing chains:
+    that needs a node that follows every branch, and no explorer API does that.
+    """
+    atts = block_attestations(proof_path)
+    if not atts:
+        return {"proof": proof_path, "verdict": "NO_BLOCK_ATTESTATION", "ok": False}
+    heights = sorted({h for h, _m in atts})
+    if height is not None and height not in heights:
+        raise SystemExit("proof has no block attestation at height %s" % height)
+    height = heights[0] if height is None else height
+
+    views = fetch_views(height, timeout)
+    hashes = {v["block_hash"].lower() for v in views.values() if "block_hash" in v}
+    if len(hashes) != 1:
+        return {"proof": proof_path, "height": height, "verdict": "SOURCES_DISAGREE",
+                "sources": views, "ok": False}
+    block_hash = hashes.pop()
+
+    tips = fetch_tip_pair(timeout)
+    answered = [v for v in tips.values() if "block_hash" in v]
+    doc = {"proof": proof_path, "height": height, "block_hash": block_hash,
+           "tips": tips}
+    if not answered or len({v["block_hash"] for v in answered}) != 1:
+        doc["verdict"] = "TIPS_DISAGREE"
+        doc["ok"] = False
+        return doc
+    tip_hash = answered[0]["block_hash"]
+    tip_height = min(v["height"] for v in answered)
+
+    headers, problems = [], []
+    cursor = tip_hash
+    steps = 0
+    while cursor != block_hash and steps < max_blocks:
+        header = _fetch_header_once(cursor, timeout)
+        if display(sha256d(header)) != cursor:
+            problems.append("header fetch does not hash to the id asked for: %s" % cursor)
+            break
+        headers.append({"height": tip_height - steps, "block_hash": cursor,
+                        "header_hex": header.hex()})
+        cursor = display(prev_hash_of_header(header))
+        steps += 1
+
+    expected = tip_height - height
+    linkage, pow_failed, total_work = [], [], 0
+    for i, item in enumerate(headers):
+        header = bytes.fromhex(item["header_hex"])
+        ok_pow, target = meets_target(header)
+        if not ok_pow:
+            pow_failed.append(item["height"])
+        total_work += work_of(target)
+        nxt = display(prev_hash_of_header(header))
+        if i + 1 < len(headers):
+            linkage.append(nxt == headers[i + 1]["block_hash"])
+        elif nxt != block_hash:
+            problems.append("last header does not point at the attested block")
+
+    checks = {
+        "walk_reached_attested_block": cursor == block_hash,
+        "segment_length_matches_tip": len(headers) == expected,
+        "all_headers_linked_by_prev_hash": all(linkage) if linkage else True,
+        "all_headers_meet_their_target": not pow_failed,
+    }
+    doc.update({"checks": checks, "headers_from_attested_to_tip": len(headers),
+                "expected_length": expected,
+                "difficulty_failures": pow_failed,
+                "cumulative_work": str(total_work),
+                "cumulative_work_hex": "%x" % total_work,
+                "headers": headers, "problems": problems})
+    doc["ok"] = all(checks.values()) and not problems
+    doc["verdict"] = "CHAIN_SEGMENT_VERIFIED" if doc["ok"] else "CHAIN_SEGMENT_FAILED"
+    return doc
+
+
+def check_chain_receipt(path):
+    """Re-derive the whole segment offline: linkage, ids, targets, work sum."""
+    with open(path, encoding="utf-8") as f:
+        doc = json.load(f)
+    headers = doc["headers"]
+    problems, total_work = [], 0
+    for i, item in enumerate(headers):
+        header = bytes.fromhex(item["header_hex"])
+        if display(sha256d(header)) != item["block_hash"]:
+            problems.append("header at %s does not hash to its recorded id" % item["height"])
+        ok_pow, target = meets_target(header)
+        if not ok_pow:
+            problems.append("header at %s fails its own difficulty target" % item["height"])
+        total_work += work_of(target)
+        if i + 1 < len(headers) and display(prev_hash_of_header(header)) != headers[i + 1]["block_hash"]:
+            problems.append("prev-hash at %s does not match the next recorded block" % item["height"])
+    if headers and display(prev_hash_of_header(bytes.fromhex(headers[-1]["header_hex"]))) != doc["block_hash"]:
+        problems.append("segment does not end on the attested block")
+    if len(headers) != doc["expected_length"]:
+        problems.append("segment length differs from tip_height - height")
+    if str(total_work) != doc["cumulative_work"]:
+        problems.append("cumulative work recomputed from headers differs from the recorded sum")
+    return doc, problems
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--proof")
     ap.add_argument("--height", type=int)
     ap.add_argument("--out")
-    ap.add_argument("--check")
+    ap.add_argument("--check", help="offline check of a header cross-check receipt")
+    ap.add_argument("--chain", action="store_true",
+                    help="also walk prev-hash from the tip down to the attested block")
+    ap.add_argument("--chain-out", metavar="RECEIPT",
+                    help="where the chain-segment receipt goes (default: <out>.chain.json)")
+    ap.add_argument("--chain-check", metavar="RECEIPT",
+                    help="offline check of a chain-segment receipt")
     ap.add_argument("--timeout", type=int, default=30)
     a = ap.parse_args(argv)
+
+    if a.chain_check:
+        doc, problems = check_chain_receipt(a.chain_check)
+        print(json.dumps({"receipt": a.chain_check, "ok": not problems,
+                          "problems": problems, "verdict": doc.get("verdict")}, indent=2))
+        return 0 if not problems else 1
 
     if a.check:
         doc, problems = check_receipt(a.check)
@@ -232,6 +420,18 @@ def main(argv=None):
             f.write(text + "\n")
     print(text)
     print("verdict=%s" % doc["verdict"])
+    if a.chain:
+        chain = chain_check(a.proof, a.height, a.timeout)
+        chain_text = json.dumps(chain, indent=2, sort_keys=True)
+        path = a.chain_out or ((a.out or a.proof) + ".chain.json")
+        with open(path, "w", encoding="utf-8", newline="\n") as f:
+            f.write(chain_text + "\n")
+        print("chain_receipt=%s" % path)
+        print("verdict=%s (headers=%s, work=%s)" % (chain["verdict"],
+                                                    chain.get("headers_from_attested_to_tip"),
+                                                    chain.get("cumulative_work_hex")))
+        if not chain.get("ok"):
+            return 1
     return 0 if doc.get("ok") else 1
 
 

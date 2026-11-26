@@ -82,6 +82,14 @@ described in [RFC2119] and [RFC8174].
 - **Witness**: an independent key holder that co-signs a head; a witness is
   trusted only as far as the reader's policy says, and the co-signature demo
   uses synthetic keys.
+A head statement is one JSON object with four members: `head` (the member name;
+its **value** is the evidence root of Section 4, not a nested head), `role`
+(`owner` or `witness`), `tree_size`, and `vds`. It is signed over RFC 8785
+canonical bytes of that object, with `tree_size` and `vds` omitted only when the
+signer did not observe them. `tree_size` and `vds` sit inside the signed
+statement, so neither the size nor the verifier identity can be swapped after
+signing.
+
 - **Vds**: a verifier identity — the key-id hash of the verifier's key — carried
   inside a signed statement so a reader can tell which verifier saw which size.
   It names a verifier, never an algorithm; "a `vds` the reader does not
@@ -290,7 +298,7 @@ between witnesses, never to the anchor backend, which has no use for it.
   into a Bitcoin commitment).
 - **anchored**: the backend's confirmation has been verified.
 
-A report MUST NOT use the word "anchored" for the pending state.
+A report MUST NOT use the word "anchored" for the pending state, and a package that never submitted anything is `pending` with `absent_reason: not-submitted`. Reading absence as confirmation would be the one thing Section 1 forbids: inventing a fact.
 
 The pending-to-anchored transition is a **re-emission**, not an edit. The reason
 is not that the file is committed — Section 3 says it is not — but that a
@@ -342,7 +350,9 @@ resolved, and (c) never accepts a foreign-format document as its own.
 Two definitions that were previously left implicit, and therefore became
 implementation choices rather than specification choices:
 
-- **"First failing check" means the lowest-numbered failing check.** The printed
+- **"First failing check" means the lowest-numbered failing check.** This is a reporting
+  convention, not the verdict rule: any `FAIL` makes the verdict `FAIL` (Section 5),
+  and `first_fail` merely names which one a reader should look at first. The printed
   report does not run in check order (measured on a duplicated package: S11, S1,
   S2, S3, S4, S12, S7, S8, S5, S6), so "the first failure" is undefined until
   this rule is fixed. Both the corpus generator and the per-axis report use this
@@ -395,8 +405,9 @@ evidence — they appear only in the corpus report, where the denominator is sta
   revocation distribution and no key history are specified; a rotated key
   without history makes older packages look tampered.
 - **Resource exhaustion.** Nothing here bounds entry counts, policy nesting depth
-  or single-file size. A verifier MUST apply local limits and report a package
-  that exceeds them as `FAIL` (refused), never `PASS`.
+  or single-file size. A verifier SHOULD apply local limits. Refusing a package on
+  those grounds is reported as `FAIL` with `reason: resource-limit` in the failing
+  check's detail — a refusal by policy, not a twentieth check, and never `PASS`.
 - **Verification side channels.** Signature and MAC comparison SHOULD be
   constant-time; a timing-observable comparison undermines S6 whatever the
   algorithm.
@@ -621,6 +632,8 @@ anchoring, which is a different obligation.
 
 ## Appendix F. Conformance tiers (proposal, not a claim)
 
+The head statement these tiers range over is defined in Section 2, not here: the signature bytes are normative, the tier labels are not.
+
 _Three levels, so a deployment can say what it has rather than "we do UIBC". The
 names are `uibc/core`, `uibc/witnessed`, `uibc/anchored`; a claim names the tier
 and the commit. Nothing here is conformance-tested yet: the tiers describe
@@ -631,14 +644,6 @@ requirements, and no vectors exist for them._
 | `uibc/core` | the 19 checks pass on the package; verdict is one of PASS / FAIL / INCONCLUSIVE; no dimension merged | `uibc verify` |
 | `uibc/witnessed` | a verification bundle is emitted; the reader's trust list is separate from the artifact; the head is co-signed by two distinct keys | `--bundle-out`, `--trustlist`, `tools/cosign_head.py verify` |
 | `uibc/anchored` | the anchor is `anchored`, not `pending`; the head carries the tree size inside the signature; successive heads only grow and a new size means a new root | `tools/cosign_head.py chain` |
-
-A head statement is one JSON object with four members: `head` (the member name;
-its **value** is the evidence root of Section 4, not a nested head), `role`
-(`owner` or `witness`), `tree_size`, and `vds`. It is signed over RFC 8785
-canonical bytes of that object, with `tree_size` and `vds` omitted only when the
-signer did not observe them. `tree_size` and `vds` sit inside the signed
-statement, so neither the size nor the verifier identity can be swapped after
-signing.
 
 Three rules bind the tiers, and each answers a question the cited drafts leave open:
 
@@ -682,7 +687,7 @@ keep their meaning:
 
 | field | values | required when |
 |---|---|---|
-| `state` | `anchored` (default when absent) / `pending` | always readable |
+| `state` | `pending` / `anchored` — **absence reads as `pending`, never `anchored`** | always readable |
 | `submitted_to` | `ots` / `nostr` / `tsa` | `state` is `pending` |
 | `absent_reason` | `not-submitted` / `submitted-no-receipt` / `receipt-withheld` | `state` is `pending` |
 | `resolves_externally` | `true` only when a receipt verifies against a public log | `state` is `anchored` |

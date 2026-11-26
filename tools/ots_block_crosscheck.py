@@ -280,25 +280,17 @@ def _fetch_header_once(block_hash, timeout, attempts=3):
 
 
 
-def node_block_evidence(rpc_url, height, block_hash, timeout=30):
-    """Ask a Bitcoin Core node what it thinks: this is the only global-view witness.
-
-    An explorer shows one branch. A node that follows the network knows the chain
-    with the most work, and `getblockheader` returns that block's confirmations and
-    chainwork in it. When no node is configured the receipt says so - it does not
-    quietly downgrade to "explorer agrees, therefore fine".
-    """
-    if not rpc_url:
-        return {"checked": False,
-                "reason": "no node configured; global most-work is not established"}
+def _one_node(rpc_url, height, block_hash, timeout=30):
+    """One node's answer, with credentials stripped so the receipt stays publishable."""
+    import base64
     import re  # only this function parses a URL; the module has no other use for it
-    auth, host = "", rpc_url
+    import urllib.request as _ur
+    auth, host, endpoint = "", rpc_url, rpc_url
     m = re.match(r"https?://([^/@]+)@(.+)", rpc_url)
     if m:
-        import base64
         auth = "Basic " + base64.b64encode(m.group(1).encode()).decode()
         host = "http://" + m.group(2)
-    import urllib.request as _ur
+        endpoint = "http://" + m.group(2)  # never write user:pass into evidence
 
     def call(method, params):
         body = json.dumps({"jsonrpc": "1.0", "id": "uibc", "method": method,
@@ -316,18 +308,60 @@ def node_block_evidence(rpc_url, height, block_hash, timeout=30):
         node_hash = call("getblockhash", [height])
         header = call("getblockheader", [node_hash])
         tips = call("getblockchaininfo", [])
-        evidence = {"checked": True, "node_block_hash": node_hash,
-                    "confirmations": header.get("confirmations"),
-                    "chainwork": header.get("chainwork"),
-                    "node_height": tips.get("blocks"),
-                    "node_chain": tips.get("chain"),
-                    "hash_matches_explorers": node_hash == block_hash,
-                    "is_most_work_chain": True}  # a node's active chain is the most-work one it knows
+        return {"endpoint": endpoint, "checked": True, "node_block_hash": node_hash,
+                "confirmations": header.get("confirmations"),
+                "chainwork": header.get("chainwork"),
+                "node_height": tips.get("blocks"),
+                "node_chain": tips.get("chain"),
+                "hash_matches_explorers": node_hash == block_hash}
     except Exception as e:  # noqa: BLE001 - unreachable node is data, not a verdict
-        evidence = {"checked": False,
-                    "reason": "node did not answer (%s: %s); global most-work is not established"
-                              % (type(e).__name__, str(e)[:120])}
-    return evidence
+        return {"endpoint": endpoint, "checked": False,
+                "reason": "%s: %s" % (type(e).__name__, str(e)[:120])}
+
+
+def node_block_evidence(rpc_url, height, block_hash, timeout=30):
+    """Ask one or more Bitcoin Core nodes what the most-work chain is.
+
+    One node is a *single view* of the network - better than an explorer, still
+    one machine's opinion. Two nodes that answer independently and agree is the
+    version this layer accepts as `most_work_established`; if a second node was
+    configured and did not answer, the receipt says `single_view` rather than
+    quietly counting the one answer as agreement. With no node configured the
+    receipt says so - it never downgrades to "explorer agrees, therefore fine".
+    """
+    if isinstance(rpc_url, (list, tuple)):
+        urls = [u for u in rpc_url if u]
+    else:
+        urls = [rpc_url] if rpc_url else []
+    if not urls:
+        return {"checked": False, "most_work_established": False, "independent_views": 0,
+                "reason": "no node configured; global most-work is not established"}
+
+    nodes = [_one_node(u, height, block_hash, timeout) for u in urls]
+    answered = [n for n in nodes if n.get("checked")]
+    views = len(answered)
+    agree = len({n["node_block_hash"] for n in answered}) <= 1 if answered else False
+    matches = all(n.get("hash_matches_explorers") for n in answered) if answered else False
+    quorum_needed = min(2, len(urls))
+    established = bool(answered) and matches and agree and views >= quorum_needed
+
+    ev = {"checked": bool(answered), "nodes": nodes, "independent_views": views,
+          "quorum_needed": quorum_needed, "views_agree": agree,
+          "hash_matches_explorers": matches,
+          "most_work_established": established,
+          "single_view": bool(answered) and views < 2}
+    if answered:
+        first = answered[0]
+        for key in ("node_block_hash", "confirmations", "chainwork", "node_height", "node_chain"):
+            ev[key] = first.get(key)
+        ev["is_most_work_chain"] = True  # a node's active chain is the most-work one it knows
+    else:
+        ev["reason"] = ("node did not answer (%s); global most-work is not established"
+                        % "; ".join(n.get("reason", "?") for n in nodes)[:200])
+    if answered and not established:
+        ev["reason"] = ("%d of %d nodes answered; verdict needs %d agreeing view(s) and a block "
+                        "hash that matches the explorers" % (views, len(urls), quorum_needed))
+    return ev
 
 
 def chain_check(proof_path, height=None, timeout=30, max_blocks=4000, rpc_url=None):
@@ -401,6 +435,8 @@ def chain_check(proof_path, height=None, timeout=30, max_blocks=4000, rpc_url=No
     doc["node"] = node_block_evidence(rpc_url, height, block_hash, timeout)
     if doc["node"].get("checked") and not doc["node"].get("hash_matches_explorers"):
         checks["node_agrees_on_block"] = False
+    if doc["node"].get("independent_views", 0) > 1 and not doc["node"].get("views_agree"):
+        checks["nodes_agree_with_each_other"] = False
     doc.update({"checks": checks, "headers_from_attested_to_tip": len(headers),
                 "expected_length": expected,
                 "difficulty_failures": pow_failed,
@@ -434,6 +470,18 @@ def check_chain_receipt(path):
         problems.append("segment length differs from tip_height - height")
     if str(total_work) != doc["cumulative_work"]:
         problems.append("cumulative work recomputed from headers differs from the recorded sum")
+
+    node = doc.get("node") or {}
+    if node.get("checked"):
+        if node.get("node_block_hash") and node["node_block_hash"] != doc["block_hash"]:
+            problems.append("the recorded node names a different block at this height")
+        if node.get("independent_views", 0) > 1 and not node.get("views_agree"):
+            problems.append("the recorded nodes disagree with each other")
+        if node.get("most_work_established") and not node.get("hash_matches_explorers"):
+            problems.append("most_work_established is claimed while a node disagreed")
+    for n in node.get("nodes", []):
+        if "@" in (n.get("endpoint") or ""):
+            problems.append("a node endpoint carries credentials; receipts must be publishable")
     return doc, problems
 
 
@@ -450,8 +498,10 @@ def main(argv=None):
     ap.add_argument("--chain-check", metavar="RECEIPT",
                     help="offline check of a chain-segment receipt")
     ap.add_argument("--timeout", type=int, default=30)
-    ap.add_argument("--node", metavar="RPC_URL",
-                    help="Bitcoin Core RPC (http://user:pass@host:8332) for the global most-work check; omit and the receipt says it was not done")
+    ap.add_argument("--node", metavar="RPC_URL", action="append",
+                    help="Bitcoin Core RPC (http://user:pass@host:8332); repeat it for a second "
+                         "independent view - two that agree is what most_work_established needs. "
+                         "Omit and the receipt says the check was not done")
     a = ap.parse_args(argv)
 
     if a.chain_check:

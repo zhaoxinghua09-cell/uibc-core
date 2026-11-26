@@ -233,6 +233,25 @@ names, failure paths), not the node's honesty; the four lines a real Bitcoin Cor
 answers are still the missing witness, and saying they are not would be the exact
 dishonesty this anchor exists to prevent.
 
+**2026-11-26, a second node counts as a second opinion, and the code now says so.**
+`--node` may be repeated. One node is recorded as `single_view: true` - it is one
+machine's view of the network, and the verdict keeps a line saying a second view
+was not consulted. `most_work_established` now needs either two configured nodes
+that both answer with the same block hash, or the single node the caller actually
+configured; a second node that was configured and did not answer is a *shortfall*,
+not agreement, and the reason string says "1 of 2 nodes answered". Two nodes naming
+different blocks at one height is its own check (`views_agree: false`), which fails
+the chain receipt rather than averaging the answers. RPC credentials are stripped
+from `endpoint` before anything is written to a receipt, and `--chain-check`
+rejects a receipt whose endpoint still carries `user:pass`.
+
+There was a defect behind this change, found while testing it: `--node` on
+`ots_full_verify.py` was accepted and then ignored - the verdict read only the
+chain receipt's stale node section, so a fresh answer could not outrank a receipt
+that said "no node". It now queries the node itself when supplied, and a test
+(`test_a_live_node_answer_overrides_a_stale_receipt`) pins that a live answer
+beats the receipt.
+
 **And both anchor types answer in that same verdict.** `--tsa-token` judges the
 RFC 3161 token offline against the CA bundle shipped beside it, and the command
 then says whether the *two* witnesses - a TSA that signs time, a Bitcoin block

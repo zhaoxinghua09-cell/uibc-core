@@ -155,6 +155,39 @@ class FullVerifyTests(unittest.TestCase):
         self.assertTrue(any("competing branches" in item for item in out["unchecked"]),
                         "the questions a node does not answer must stay")
 
+    def test_a_single_view_keeps_a_second_view_caveat(self):
+        """One node answered: drop 'needs a node', keep 'no second view'."""
+        tmp = os.path.join(ROOT, "docs", "_single_view.json")
+        with open(CHAIN, encoding="utf-8") as f:
+            doc = json.load(f)
+        doc["node"] = {"checked": True, "node_block_hash": doc["block_hash"],
+                       "independent_views": 1, "single_view": True,
+                       "hash_matches_explorers": True, "most_work_established": True}
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(doc, f)
+        try:
+            out = fv.full_verify(HEAD, PROOF, chain_receipt=tmp)
+        finally:
+            os.remove(tmp)
+        self.assertTrue(out["most_work_established"])
+        self.assertTrue(any("second independent node" in item for item in out["unchecked"]),
+                        "a single view has to say so; two agreeing views is the standard")
+
+    def test_a_live_node_answer_overrides_a_stale_receipt(self):
+        """--node is not decoration: a fresh answer must beat the receipt's 'no node'."""
+        from tests.test_ots_node_evidence import _serve, BLOCK_HASH
+        server, url = _serve({"getblockhash": BLOCK_HASH,
+                              "getblockheader": {"confirmations": 160, "chainwork": "ab" * 8},
+                              "getblockchaininfo": {"blocks": 977609, "chain": "main"}})
+        try:
+            out = fv.full_verify(HEAD, PROOF, node=url)
+        finally:
+            server.shutdown()
+        self.assertEqual(out["verdict"], "FULL_CHAIN_OF_EVIDENCE_VERIFIED")
+        self.assertTrue(out["most_work_established"])
+        self.assertFalse(any("needs a Bitcoin Core node" in item for item in out["unchecked"]))
+        self.assertTrue(any("second independent node" in item for item in out["unchecked"]))
+
 
 if __name__ == "__main__":
     unittest.main()

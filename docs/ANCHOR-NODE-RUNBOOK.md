@@ -28,8 +28,27 @@ records: the node's block hash at that height, its `confirmations`, its
 - `most_work_established` flips to true, and the first `unchecked` line (the
   "needs a node" one) comes off the receipt by itself - a test pins that
   (`test_answer_from_a_node_removes_the_most_work_caveat`);
-- what does **not** change: competing branches are still not enumerated, reorg
-  risk is still not modelled.
+- one node is recorded as `single_view: true` and leaves behind the line "second
+  independent node: not consulted". That is deliberate: one machine's view is not
+  the network's judgement.
+
+**Two nodes are better than one, and `--node` takes it twice.** Repeat the flag
+for a second, separately administered node:
+
+```
+--node http://uibc:<secret>@127.0.0.1:8332 --node http://uibc:<secret>@10.0.0.7:8332
+```
+
+Then `most_work_established` needs **two answers with the same block hash**; a
+second node that was configured and stayed silent yields `single_view: true` and
+`most_work_established: false` with the reason "1 of 2 nodes answered"; two nodes
+that name different blocks at one height set `views_agree: false` and fail the
+receipt rather than averaging. Credentials are stripped from the recorded
+endpoint, and `--chain-check` refuses a receipt whose endpoint still carries
+`user:pass`.
+
+What does **not** change: competing branches are still not enumerated, reorg
+risk is still not modelled.
 
 ## What it costs, honestly
 
@@ -81,5 +100,5 @@ is days, not minutes. Plan it as an environment project, not a task.
 | question | after a node |
 |---|---|
 | most-work chain (this node's view) | answered, dated, recorded |
-| two independent nodes agreeing | not covered - the tool takes one node; a second would be a real improvement |
+| two independent nodes agreeing | **implemented** 2026-11-26 (`--node` twice, `views_agree`, `single_view`); exercised against two stubs, never against two real nodes |
 | competing branches / reorg risk | still open; needs a node plus a stated attacker model |

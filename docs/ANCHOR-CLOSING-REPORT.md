@@ -72,7 +72,7 @@ each failure path.
 
 | gap | needs | status of the hook |
 |---|---|---|
-| global most-work chain | a Bitcoin Core node (`--node http://user:pass@127.0.0.1:8332`) | wired, exercised against a JSON-RPC stub (agree / disagree / unreachable), never against a live node |
+| global most-work chain | a Bitcoin Core node (`--node http://user:pass@127.0.0.1:8332`, repeatable for two) | wired, exercised against JSON-RPC stubs (agreement, disagreement, shortfall, unreachable), never against a live node |
 | competing-branch enumeration | a node that follows every branch; no explorer API does | not started - and not fakeable |
 | reorg risk model | node data + a stated attacker model | not started |
 
@@ -89,5 +89,6 @@ when one exists.
 3. Header PoW compared big-endian: 22 real blocks looked invalid. Fixed; bits at offset 72, little-endian.
 4. `verify_entry` handed PEM bytes instead of a loaded key: every log entry looked forged. Fixed.
 5. The node branch used `re` without importing it - found only because the stub ran it. Fixed.
+6. `ots_full_verify.py` accepted `--node` and then ignored it: the verdict only read the chain receipt's stale node section, so a live answer could not outrank a receipt saying "no node". Fixed the same day a second node was wired in; `test_a_live_node_answer_overrides_a_stale_receipt` pins it.
 
-Each of the five now has a test that fails if it comes back.
+Each of the six now has a test that fails if it comes back.

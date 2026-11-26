@@ -194,10 +194,25 @@ def full_verify(file_path, proof_path, block_receipt=DEFAULT_BLOCK_RECEIPT,
                           "reason": "no transparency-log entry supplied"}
 
     node_doc = ch.get("node") or {}
-    # the unchecked list is not decoration: when a node did answer, the first
-    # line must come off, otherwise the receipt contradicts itself
+    if node:  # a live answer outranks a stale section in the receipt
+        node_doc = cc.node_block_evidence(node, blk["height"], blk["header_sha256d"], timeout)
+        steps["node"] = node_doc
+    # the unchecked list is not decoration: when the question was actually
+    # answered, the first line must come off, otherwise the verdict contradicts
+    # itself. A one-node answer still leaves the "second view" line behind.
+    established = bool(node_doc.get("most_work_established",
+                                   node_doc.get("checked") and node_doc.get("hash_matches_explorers")))
     unchecked = [u for u in UNCHECKED
-                 if not (node_doc.get("checked") and u.startswith("global most-work"))]
+                 if not (established and u.startswith("global most-work"))]
+    if node_doc.get("checked") and not established:
+        # a node answered but the answer is short of agreement: replace the static
+        # "none configured here" line with what actually happened
+        unchecked = [u for u in unchecked if not u.startswith("global most-work")]
+        unchecked.insert(0, "global most-work chain: not established - %s"
+                         % (node_doc.get("reason") or "the answer fell short of agreement"))
+    if node_doc.get("single_view"):
+        unchecked.append("second independent node: not consulted - one node is a single view "
+                         "of the network, not the network's judgement")
     doc = {"file": file_path, "proof": proof_path,
            "verdict": "FULL_CHAIN_OF_EVIDENCE_VERIFIED",
            "steps": steps,
@@ -212,7 +227,8 @@ def full_verify(file_path, proof_path, block_receipt=DEFAULT_BLOCK_RECEIPT,
                        "rfc3161": bool(steps.get("rfc3161", {}).get("ok")),
                        "both_anchors_verified": bool(steps.get("rfc3161", {}).get("ok")),
                        "transparency_log": bool(steps.get("rekor", {}).get("ok"))},
-           "most_work_established": bool(node_doc.get("checked")),
+           "most_work_established": established,
+           "most_work_views": node_doc.get("independent_views"),
            "unchecked": unchecked}
     return doc
 
@@ -223,7 +239,9 @@ def main(argv=None):
     ap.add_argument("--proof", required=True)
     ap.add_argument("--block-receipt", default=DEFAULT_BLOCK_RECEIPT)
     ap.add_argument("--chain-receipt", default=DEFAULT_CHAIN_RECEIPT)
-    ap.add_argument("--node", metavar="RPC_URL")
+    ap.add_argument("--node", metavar="RPC_URL", action="append",
+                    help="Bitcoin Core RPC (http://user:pass@host:8332); repeat for a second "
+                         "independent view. Answers here outrank the receipt's stale node section")
     ap.add_argument("--tsa-token", metavar="TSR",
                     help="RFC 3161 token over the same file; judged offline against the CA bundle")
     ap.add_argument("--tsa-cabundle", default=DEFAULT_TSA_CA)

@@ -30,8 +30,9 @@ class StubCore(BaseHTTPRequestHandler):
         length = int(self.headers.get("Content-Length", 0))
         req = json.loads(self.rfile.read(length).decode())
         method = req.get("method")
-        StubCore.calls.append(method)
-        value = StubCore.results.get(method)
+        kind = type(self)  # per-server answers: two stubs must be able to differ
+        kind.calls.append(method)
+        value = kind.results.get(method)
         if isinstance(value, Exception):
             payload = {"result": None, "error": {"code": -1, "message": str(value)}}
         else:
@@ -48,9 +49,11 @@ class StubCore(BaseHTTPRequestHandler):
 
 
 def _serve(results):
-    StubCore.results = results
-    StubCore.calls = []
-    server = HTTPServer(("127.0.0.1", 0), StubCore)
+    kind = type("Stub_%d" % len(StubCore.calls) + str(id(results)), (StubCore,), {})
+    kind.results = results
+    kind.calls = []
+    server = HTTPServer(("127.0.0.1", 0), kind)
+    server.stub_class = kind
     threading.Thread(target=server.serve_forever, daemon=True).start()
     return server, "http://127.0.0.1:%d" % server.server_port
 
@@ -70,7 +73,8 @@ class NodeEvidenceTests(unittest.TestCase):
         self.assertTrue(ev["hash_matches_explorers"])
         self.assertEqual(ev["confirmations"], 160)
         self.assertEqual(ev["node_height"], 977609)
-        self.assertEqual(StubCore.calls, ["getblockhash", "getblockheader", "getblockchaininfo"])
+        self.assertEqual(server.stub_class.calls,
+                         ["getblockhash", "getblockheader", "getblockchaininfo"])
 
     def test_a_disagreeing_node_is_named_not_smoothed_over(self):
         server, url = _serve({
@@ -100,6 +104,69 @@ class NodeEvidenceTests(unittest.TestCase):
         ev = cc.node_block_evidence(None, 977449, BLOCK_HASH)
         self.assertFalse(ev["checked"])
         self.assertIn("no node configured", ev["reason"])
+
+    def test_two_nodes_that_agree_establish_most_work(self):
+        s1, u1 = _serve({"getblockhash": BLOCK_HASH,
+                         "getblockheader": {"confirmations": 160, "chainwork": "ab" * 8},
+                         "getblockchaininfo": {"blocks": 977609, "chain": "main"}})
+        s2, u2 = _serve({"getblockhash": BLOCK_HASH,
+                         "getblockheader": {"confirmations": 160, "chainwork": "ab" * 8},
+                         "getblockchaininfo": {"blocks": 977609, "chain": "main"}})
+        try:
+            ev = cc.node_block_evidence([u1, u2], 977449, BLOCK_HASH)
+        finally:
+            s1.shutdown()
+            s2.shutdown()
+        self.assertEqual(ev["independent_views"], 2)
+        self.assertTrue(ev["views_agree"])
+        self.assertTrue(ev["most_work_established"],
+                        "two independent answers that agree is the point of taking two")
+        self.assertFalse(ev["single_view"])
+
+    def test_one_node_is_flagged_as_single_view_not_as_agreement(self):
+        s1, u1 = _serve({"getblockhash": BLOCK_HASH,
+                         "getblockheader": {"confirmations": 160, "chainwork": "ab" * 8},
+                         "getblockchaininfo": {"blocks": 977609, "chain": "main"}})
+        s2, u2 = _serve({"getblockhash": RuntimeError("down")})
+        try:
+            ev = cc.node_block_evidence([u1, u2], 977449, BLOCK_HASH)
+        finally:
+            s1.shutdown()
+            s2.shutdown()
+        self.assertEqual(ev["independent_views"], 1)
+        self.assertTrue(ev["single_view"])
+        self.assertFalse(ev["most_work_established"],
+                         "one answer out of two expected is not agreement with itself")
+
+    def test_two_nodes_that_disagree_are_named(self):
+        s1, u1 = _serve({"getblockhash": BLOCK_HASH,
+                         "getblockheader": {"confirmations": 160, "chainwork": "ab" * 8},
+                         "getblockchaininfo": {"blocks": 977609, "chain": "main"}})
+        s2, u2 = _serve({"getblockhash": "11" * 32,
+                         "getblockheader": {"confirmations": 3, "chainwork": "22"},
+                         "getblockchaininfo": {"blocks": 977612, "chain": "main"}})
+        try:
+            ev = cc.node_block_evidence([u1, u2], 977449, BLOCK_HASH)
+        finally:
+            s1.shutdown()
+            s2.shutdown()
+        self.assertEqual(ev["independent_views"], 2)
+        self.assertFalse(ev["views_agree"], "two nodes naming different blocks at one height is a finding")
+        self.assertFalse(ev["most_work_established"])
+        self.assertIn("agreeing", ev["reason"])
+
+    def test_credentials_never_reach_the_evidence(self):
+        server, url = _serve({"getblockhash": BLOCK_HASH,
+                              "getblockheader": {"confirmations": 160, "chainwork": "ab" * 8},
+                              "getblockchaininfo": {"blocks": 977609, "chain": "main"}})
+        try:
+            ev = cc.node_block_evidence(url.replace("http://", "http://uibc:hunter2@"),
+                                        977449, BLOCK_HASH)
+        finally:
+            server.shutdown()
+        self.assertTrue(ev["checked"])
+        self.assertNotIn("hunter2", json.dumps(ev), "a receipt that leaks the RPC password is unpublishable")
+        self.assertNotIn("@", ev["nodes"][0]["endpoint"])
 
 
 if __name__ == "__main__":

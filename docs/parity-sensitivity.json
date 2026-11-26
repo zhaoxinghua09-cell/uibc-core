@@ -277,7 +277,7 @@
   {
    "repo": "iotaledger/identity.rs",
    "assert_lines_strict": 0,
-   "assert_lines_window": 0,
+   "assert_lines_window": 21,
    "D1_strict": 0,
    "D1_window": 0,
    "score_strict": 0,
@@ -363,6 +363,15 @@
    "D1_window": 0,
    "score_strict": 0,
    "score_window": 0
+  },
+  {
+   "repo": "walt-id/waltid-identity",
+   "assert_lines_strict": 100,
+   "assert_lines_window": 274,
+   "D1_strict": 1,
+   "D1_window": 1,
+   "score_strict": 2,
+   "score_window": 2
   }
  ],
  "changed": [

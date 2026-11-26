@@ -101,6 +101,32 @@ def alive(entry):
     return entry["status"] == 200 and not entry.get("error")
 
 
+def commit_via_api(repo, sha, token=None, timeout=25):
+    """When the HTML tree page cannot be fetched at all from this network
+    (timeout / TLS reset — measured 2026-11-26: github.com pages cut at ~20 s,
+    api.github.com fine), the pinned commit is still checkable against an
+    authoritative source: the REST API returns the commit object or 404. This
+    proves the pinned sha exists and is public; it does NOT prove the clickable
+    page renders for a reader, so the row keeps html_status=0 and says so."""
+    url = "https://api.github.com/repos/%s/commits/%s" % (repo, sha)
+    req = urllib.request.Request(url, headers={"User-Agent": UA,
+                                              "Accept": "application/vnd.github+json"})
+    if token:
+        req.add_header("Authorization", "Bearer " + token)
+    started = time.time()
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            body = json.loads(r.read().decode("utf-8"))
+        return {"status": r.status, "sha": body.get("sha"),
+                "committed": ((body.get("commit") or {}).get("author") or {}).get("date"),
+                "elapsed_ms": int((time.time() - started) * 1000)}
+    except urllib.error.HTTPError as exc:
+        return {"status": exc.code, "sha": None, "elapsed_ms": int((time.time() - started) * 1000)}
+    except Exception as exc:
+        return {"status": 0, "sha": None, "error": type(exc).__name__,
+                "elapsed_ms": int((time.time() - started) * 1000)}
+
+
 def moved(entry):
     return entry["status"] in (301, 302) and not entry.get("error")
 
@@ -135,6 +161,17 @@ def run(cache_token=None):
     for c in citations(snap):
         r = probe_retry(c["url"])
         row = dict(c, **r)
+        if row.get("status") == 0:
+            # the page itself is unreachable from here; fall back to the commit
+            # object, and only accept the row if the API returns the same sha.
+            a = commit_via_api(c["repo"], c["sha"], token)
+            row["api"] = a
+            if a.get("status") == 200 and a.get("sha") == c["sha"]:
+                row["html_status"] = 0
+                row["html_error"] = row.get("error") or "unreachable"
+                row["status"] = 200
+                row["via"] = "api-commit"
+                row["error"] = ""
         if moved(row):
             f = followed_url(row)
             if f:
@@ -142,6 +179,8 @@ def run(cache_token=None):
                 row["followed"] = dict(f, **fr)
         rows.append(row)
         note = row.get("error") or r.get("final_url") or ""
+        if row.get("via") == "api-commit":
+            note = "page not fetched from this network (%s); commit object 200 via REST API" % row.get("html_error")
         if moved(row):
             note = "moved -> " + note
         if row.get("followed"):
@@ -159,6 +198,7 @@ def run(cache_token=None):
             "moved_verified": sum(1 for r in rows if moved(r) and alive(r.get("followed") or {})),
             "dead": sum(1 for r in rows if not alive(r) and not moved(r)),
             "dead_after_move": sum(1 for r in rows if moved(r) and not alive(r.get("followed") or {})),
+            "verified_via_api": sum(1 for r in rows if r.get("via") == "api-commit"),
         },
     }
     open(REPORT, "w", encoding="utf-8").write(json.dumps(report, indent=1, ensure_ascii=False) + "\n")
@@ -174,12 +214,14 @@ def render_page(report):
                  report["audited_at"], report["checked_at"], s["citations"], s["alive"], s.get("moved", 0),
                  s.get("moved_verified", 0)),
              "本表逐条打的是 `github.com/<repo>/tree/<sha>`：sha 固定只保证内容不变，不保证这条链接今天还能打开。被 301 的条目**不算死，也不算完成**——必须到 `Location` 给出的新名下、用同一个 sha 再打一次，拿 200 才算这条引用仍然可点。",
+             ("其中 %d 条在本机网络里页面打不开（约 20 s 被切断），改用 REST API 的 commit 对象复核：sha 命中才算过，并在表里标 `200 (api)` —— 这证明固定提交存在且公开，不证明页面在你那边能打开。" % s.get("verified_via_api", 0)) if s.get("verified_via_api") else "",
              "",
              "| 状态 | 耗时 ms | 仓库 | 引用 | 落点 | 新名下同 sha |", "|---|---|---|---|---|---|"]
     for r in report["entries"]:
         fw = r.get("followed") or {}
+        status_cell = ("200 (api)" if r.get("via") == "api-commit" else str(r["status"]))
         lines.append("| %s | %d | `%s` | `%s` | %s | %s |" % (
-            r["status"] or r.get("error") or "-", r["elapsed_ms"], r["repo"], r["sha"][:12],
+            status_cell or r.get("error") or "-", r["elapsed_ms"], r["repo"], r["sha"][:12],
             "—" if r["status"] == 200 else (r.get("final_url") or "—"),
             ("—" if not fw else "`%s` %s" % (fw.get("repo_now"), fw.get("status") or fw.get("error") or "-"))))
     lines += ["", "复跑：`python tools/refs_check.py --run`（联网）；`--check` 离线比对快照与报告。", ""]

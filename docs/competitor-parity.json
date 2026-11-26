@@ -37,8 +37,8 @@
  },
  "ours": {
   "repo": "zhaoxinghua09-cell/uibc-core",
-  "commit": "unknown",
-  "code_files": 2030,
+  "commit": "fb727c6929cacfb3e180a6baf63d0a6891b5c33c",
+  "code_files": 2031,
   "test_files": 284,
   "test_text_kb": 1108,
   "test_hits": {
@@ -51,8 +51,8 @@
    "reject_assertion": 167
   },
   "nontest_hits": {
-   "fuzz": 140,
-   "mutation_testing": 32,
+   "fuzz": 143,
+   "mutation_testing": 33,
    "property_based": 13,
    "bit_level": 9,
    "address_derive": 233,
@@ -2127,6 +2127,59 @@
     "D2": 0,
     "D3": 0,
     "D4": 0,
+    "D5": 0
+   }
+  },
+  {
+   "repo": "walt-id/waltid-identity",
+   "sha": "5bf2ca51be1f2e899b9276cf83aec514fcf371fc",
+   "code_files": 5230,
+   "test_files": 487,
+   "test_lines": 80149,
+   "code_lines": 656944,
+   "test_text_kb": 3754,
+   "assertion_lines": 100,
+   "test_hits": {
+    "fuzz": 0,
+    "mutation_testing": 14,
+    "property_based": 0,
+    "bit_level": 0,
+    "address_derive": 0,
+    "exit_code_gate": 0,
+    "reject_assertion": 445
+   },
+   "nontest_hits": {
+    "fuzz": 9,
+    "mutation_testing": 6,
+    "property_based": 0,
+    "bit_level": 2,
+    "address_derive": 96,
+    "exit_code_gate": 1,
+    "reject_assertion": 3174
+   },
+   "test_hit_examples": {
+    "fuzz": [],
+    "mutation_testing": [
+     "waltid-services/waltid-issuer-api/src/test/kotlin/id/walt/LocalIssuerApiTest.kt",
+     "waltid-services/waltid-issuer-api/src/test/kotlin/id/walt/OidcIssuanceTest.kt"
+    ],
+    "property_based": [],
+    "bit_level": [],
+    "address_derive": [],
+    "exit_code_gate": [],
+    "reject_assertion": [
+     "build-logic/src/test/kotlin/LicenseePoliciesTest.kt",
+     "build-logic/src/test/kotlin/WalletVisualVerificationTest.kt",
+     "build-logic/src/test/kotlin/X509CertificateGeneratorTest.kt"
+    ]
+   },
+   "tarball_sha256": "101d21d3ec8befe19742dd874029b3b3a420c37d3ee84f8247dc63e2abca0967",
+   "tarball_bytes": 59315841,
+   "dims": {
+    "D1": 1,
+    "D2": 0,
+    "D3": 0,
+    "D4": 1,
     "D5": 0
    }
   }

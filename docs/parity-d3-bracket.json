@@ -322,6 +322,14 @@
    "strict_hits": 0,
    "score_broad": 0,
    "score_strict": 0
+  },
+  {
+   "repo": "walt-id/waltid-identity",
+   "D3_broad": 0,
+   "D3_strict": 0,
+   "strict_hits": 0,
+   "score_broad": 2,
+   "score_strict": 2
   }
  ],
  "changed": [

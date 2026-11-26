@@ -55,8 +55,9 @@
       "evidence_level": "否（身份属性）",
       "deps": "CBOR/COSE",
       "maturity": "国际标准，Apple/Google 钱包落地",
-      "source": "https://www.iso.org/obp/ui/en/#!iso:std:69084:en",
-      "uibc_vs": "同为'逐元素哈希 + 签名 + 选择性披露'，但 UIBC 针对机器代理的证据包，且披露包带用途与撤销状态"
+      "source": "https://www.iso.org/standard/69084.html",
+      "uibc_vs": "同为'逐元素哈希 + 签名 + 选择性披露'，但 UIBC 针对机器代理的证据包，且披露包带用途与撤销状态",
+      "source_note": "ISO 直连页（含状态/阶段/编号）；对本机脚本仍 403，内容经抓取工具读到完整元数据后核实（2026-11-26）"
     },
     {
       "name": "Token Status List（draft-ietf-oauth-status-list-14，2025-12）",
@@ -254,9 +255,10 @@
       "evidence_level": "否（身份数据）",
       "deps": "ISO 18013-5 / 23220-1/-2",
       "maturity": "TS 已发布（2026-06-30）",
-      "source": "https://webstore.iec.ch/en/publication/113036",
+      "source": "https://www.iso.org/standard/86785.html",
       "uibc_vs": "同为“可被第三方机器读取并验完整性”的诉求，但对象是身份凭证；UIBC 的对象是运行证据包，且强调离线圈内自证",
-      "ours_gap": "无对应国际标准身份；只能作为交叉引用"
+      "ours_gap": "无对应国际标准身份；只能作为交叉引用",
+      "source_note": "ISO 直连页（含状态/阶段/编号）；对本机脚本仍 403，内容经抓取工具读到完整元数据后核实（2026-11-26）"
     },
     {
       "name": "W3C VC Data Integrity 1.1（2026-11-16 Draft Standard）",
@@ -297,9 +299,10 @@
       "evidence_level": "否（身份数据元素，不是运行证据）",
       "deps": "CBOR/COSE + 浏览器/钱包 API",
       "maturity": "TS 已发布（2025-05-29，stage 60.60）；2025-07-25 进入 90.92 修订，Ed 3 CD 在研",
-      "source": "https://www.iso.org/obp/ui#!iso:std:iso-iec:ts:18013:-7:ed-2:v1:en",
+      "source": "https://www.iso.org/standard/91154.html",
       "uibc_vs": "同为“逐元素披露 + 签发方签名”，对象是身份证件；UIBC 的对象是机器代理的运行证据包，且验证方不需要签发方在线",
-      "ours_gap": "无对应国际标准身份"
+      "ours_gap": "无对应国际标准身份",
+      "source_note": "ISO 直连页（含状态/阶段/编号）；对本机脚本仍 403，内容经抓取工具读到完整元数据后核实（2026-11-26）"
     },
     {
       "name": "Sigstore Bundle + Rekor v2（2025-10 GA）",
@@ -460,5 +463,21 @@
       ],
       "conclusion": "无死链留存；3 条属站点反爬策略，须在浏览器/评审端打开，已在表中注明"
     }
-  }
+  },
+  "link_audit_20261126": {
+    "method": "对 3 条曾被记为 BLOCKED 的 source 复测（HEAD/GET，20–30 s；裸请求与浏览器 UA 各一次）",
+    "result": "三条直连仍 403（ISO 站点反爬），但换用能渲染/抓取的读取方式可取得完整元数据：标题、参考编号、状态、阶段、页数、TC",
+    "verified_content": [
+      "ISO/IEC 18013-5:2021（69084）：Published，Edition 1，2021-09，152 页；stage 90.92（将修订），下一版为 ISO/IEC DIS 18013-5（91081）",
+      "ISO/IEC TS 18013-7:2025（91154）：Published，Edition 2，2025-05，42 页；stage 90.92；Ed 3 已立项为 ISO/IEC CD TS 18013-7（92626），2025-07-25 注册",
+      "ISO/IEC TS 23220-4:2026（86785）：Published，Edition 1，2026-04"
+    ],
+    "conclusion": "不再使用 OBP 的 #! 壳页：读者点开的直连页能看到完整状态与修订进度。仍如实记为 BLOCKED（脚本 403），不因内容可读就改判 200"
+  },
+  "fact_check_20261126": [
+    "18013-5 Ed1 现状为 stage 90.92（To be revised），DIS 18013-5（编号 91081）在开发中——旧表仅写『国际标准，钱包落地』，未反映修订在即",
+    "18013-7:2025（Ed 2）同样为 90.92；Ed 3 委员会草案（92626）于 2025-07-25 注册，将取代 2025 版",
+    "23220-4:2026 的 ISO 参考编号为 86785，发布 2026-04；旧表记的 2026-06-30 是 BSI 的 PD 采纳日",
+    "三条 ISO 引用源的落点由 OBP/IEC 商店换成 iso.org 标准直连页"
+  ]
 }

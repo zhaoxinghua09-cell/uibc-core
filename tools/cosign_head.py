@@ -30,6 +30,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from uibc_core import ed25519  # noqa: E402
+from uibc_core.canonical import canonicalize  # noqa: E402
 
 ROLES = ("owner", "witness")
 
@@ -53,7 +54,7 @@ def message(head, role, tree_size, vds=None):
         body["tree_size"] = tree_size
     if vds is not None:
         body["vds"] = vds
-    return json.dumps(body, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return canonicalize(body)
 
 
 def cmd_sign(a):

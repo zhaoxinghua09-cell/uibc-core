@@ -66,9 +66,25 @@ described in [RFC2119] and [RFC8174].
 - **Outcome**: `PASS`, `FAIL`, or `INCONCLUSIVE`, per check.
 - **Head**: the signed pair (root, tree size) of Section 16. A head is not a
   package and does not carry evidence.
+- **Tree size**: the number of leaves a head commits to; monotone non-decreasing
+  across successive heads (Section 16).
+- **Witness**: an independent key holder that co-signs a head; a witness is
+  trusted only as far as the reader's policy says, and the co-signature demo
+  uses synthetic keys.
+- **Vds**: the verifier's own identity (a hash of its key), carried inside a
+  signed head so a reader can tell which verifier saw which size.
+- **Checkpoint**: the stored head inside a package (`S8`), recomputed and
+  compared; it is not an external anchor.
+- **Owner**: the holder of the seal key named in `identity.json`.
+- **Policy artefact**: a referenced document whose digest is committed; S18
+  resolves it, and does not evaluate its contents.
+- **Receipt**: an object from an external log or authority that a verifier can
+  check against that system's own rules; a receipt that verifies but covers
+  another head is evidence to the contrary (Section 17.2).
 - **Actor**: the identifier recorded in a lifecycle event's `actor` field. It is
-  a name the producer asserts; the specification checks that the field is
-  populated and well formed, not that the actor was authorised to act.
+  a name the producer asserts. S3 checks that the field is populated and well
+  formed, and checks membership only when the verifier was supplied an actor
+  allow-list; without the list, authorisation is unknown rather than assumed.
 - **Anchored**: the root has been committed to an external backend and that
   commitment has been *confirmed* by that backend (see Section 8.2).
 
@@ -99,9 +115,15 @@ implementation must never do with it.
 root = SHA-256( canonical_json( sorted( entry.content_hash for entry in index ) ) )
 ```
 
-Canonical form: UTF-8, keys sorted, no insignificant whitespace, no
-normalization of string values. The root is stored in `manifest.json` and is
-the object that gets anchored, signed, and compared.
+Canonical form: RFC 8785 (JCS), i.e. UTF-8, member names sorted by UTF-16 code
+unit, no insignificant whitespace, and no Unicode normalization of string
+values. The seal (Section 6) uses the same serialization, so one tool can
+re-derive both byte strings. The root is stored in `manifest.json` and is the
+object that gets anchored, signed, and compared.
+
+The root is **not** a Merkle root: it is one SHA-256 over a sorted list of
+30-byte-to-64-byte hex strings. Where a package carries inclusion proofs, the
+tree is a different object with its own construction (Section 4.2).
 
 Because the root covers content hashes rather than paths, moving a file
 without changing its content does not change the root; changing one byte does.
@@ -134,6 +156,24 @@ Consequences, stated rather than implied:
   root. The seal and the head are what make that visible; the anchor alone does
   not. This is recorded as a limitation, not mitigated by assertion.
 
+### 4.2 Merkle profile (needed by S13)
+
+S13 verifies inclusion proofs only when a package carries them, and a proof is
+unverifiable without knowing how leaves and nodes were hashed. Two profiles are
+defined, selected by name; a proof whose profile is not named is
+`INCONCLUSIVE` (the verifier cannot know which construction produced it).
+
+| Profile | Leaf hash | Node hash | Odd tail | Empty tree |
+|---|---|---|---|---|
+| `rfc6962` (default) | `SHA-256(0x00 \|\| leaf_bytes)` | `SHA-256(0x01 \|\| left \|\| right)` | promoted, never duplicated | `SHA-256()` |
+| `aer1` | `SHA-256(UTF-8 receipt_id)`, no prefix | `SHA-256(left \|\| right)`, no prefix | duplicated level by level | `SHA-256()` |
+
+Duplicating an odd tail under `rfc6962` would let two differently sized trees
+share a root; promoting it cannot. A root computed under one profile MUST NOT
+be verified under the other — that is a construction difference, not an
+implementation bug.
+
+
 ## 5. Verification Procedure
 
 A verifier performs the checks below and reports one outcome per check. A
@@ -145,7 +185,7 @@ single `FAIL` makes the verdict `FAIL`; otherwise any `INCONCLUSIVE` makes it
 | S11 | strict serialization | runs **before** any parse: UTF-8, no duplicate member names, no raw control characters |
 | S1 | package structure | required files present, no undeclared root entries |
 | S2 | identity consistency | `agent_id` agrees across files; enum fields valid |
-| S3 | lifecycle state machine | chain valid, sequence contiguous, timestamps monotonic, actors authorised |
+| S3 | lifecycle state machine | chain valid, sequence contiguous, timestamps monotonic; actors authorised **only when an allow-list is supplied** |
 | S4 | evidence integrity | recompute each `content_hash` from the file bytes |
 | S12 | timestamp and identifier strictness | values, not hashes: real calendar dates, lowercase UUIDs |
 | S13 | merkle inclusion proofs | where the package carries them |
@@ -187,6 +227,13 @@ and not as a pass rate. The rules the second implementation emits that do not
 map one-to-one onto a check are reported as **un-mapped** and are **not**
 counted as coverage; a rule that pairs with *part* of a check is not a second
 opinion on the whole check.
+
+This rule is about a *second implementation's own* unmapped rule: it must
+answer `INCONCLUSIVE` for that dimension, never `PASS`. It is not the same case
+as a verifier that does not support a scheme the package names. That one is
+answered `FAIL` by policy (Section 17.5), and the two must not be read as
+contradicting each other: one is "I have no opinion here", the other is "I
+refuse this receipt, as the MMR profile also requires".
 
 The machine-readable form is `uibc-differential/1`, produced by the reference
 implementation's `tools/oracle_check.py --json-out <path>`. It carries the
@@ -264,6 +311,13 @@ between witnesses, never to the anchor backend, which has no use for it.
 
 A report MUST NOT use the word "anchored" for the pending state.
 
+The pending-to-anchored transition is a **re-emission**, not an edit. Because
+`evidence/anchors.json` is inside the sealed bytes (Section 4.1), a package
+cannot change its own `state` in place: the producer emits a new generation with
+the receipt, a new seal and a new head, and keeps both generations. A verifier
+presented with a package whose file was edited to say `anchored` after sealing
+sees S6 or S8 fail, which is the intended outcome.
+
 ### 8.3 Backends
 
 Two are specified because one is a single point of censorship:
@@ -315,8 +369,14 @@ Interoperability with AER-1 receipts is defined by an explicit mapping
 (Appendix A), not by similarity of intent. The reference implementation
 demonstrates both directions: emitting AER-1 receipts that the AER-1
 publisher's own runner accepts, and judging external AER-1 receipts
-(21 valid accepted, 36 invalid rejected), with 28 documents from two unrelated
-protocols rejected without exception.
+(21 valid accepted, 36 invalid rejected). It also rejected 28 documents from
+two unrelated protocols without exception.
+
+That last number is a rejection rate, and by Section 5.1 a rejection rate alone
+is not evidence of correctness: an implementation that rejects everything scores
+perfectly on it. It is reported here because the denominator is known and the
+accept side (21 valid receipts) is the control, not because it proves anything
+about the documents' quality.
 
 ## 10. Security Considerations
 
@@ -332,6 +392,31 @@ protocols rejected without exception.
   Confusing the two is the usual overclaim.
 - **Threat model boundary**: an adversary who controls the package *and* the
   backend *and* the key has won; nothing here applies.
+- **Metadata relabelling.** The root covers content hashes, so a package holder
+  can change paths, `media_type` or `action_type` and re-derive the index digest
+  while the anchored root stays valid (Section 4.1). The seal and the head are
+  the only things that expose this.
+- **Backend trust.** An OTS calendar or a Nostr relay can refuse, delay, or
+  equivocate; a single-backend `anchored` verdict inherits that backend's
+  availability and honesty, and block depth is the reader's policy.
+- **Key lifecycle.** `REVOKED` is an outcome (Section 7), but no rotation, no
+  revocation distribution and no key history are specified; a rotated key
+  without history makes older packages look tampered.
+- **Resource exhaustion.** Nothing here bounds entry counts, policy nesting depth
+  or single-file size. A verifier MUST apply local limits and report a package
+  that exceeds them as `FAIL` (refused), never `PASS`.
+- **Verification side channels.** Signature and MAC comparison SHOULD be
+  constant-time; a timing-observable comparison undermines S6 whatever the
+  algorithm.
+- **Privacy.** Evidence bytes go to whoever verifies the package, and the format
+  has no redaction mechanism; a producer that needs one must commit to a digest
+  of redacted content and say so.
+- **Hash and signature agility.** SHA-256 and Ed25519 appear as *the* primitives.
+  A transition needs versioned algorithm identifiers, which this document does
+  not define.
+- **Seal stripping.** Removing the seal turns PASS into INCONCLUSIVE rather than
+  FAIL; a reader who treats "not FAIL" as "acceptable" has inverted the outcome
+  set. `strict` mode exists (Section 6) for readers who want the seal required.
 
 ## 11. IANA Considerations
 
@@ -346,7 +431,7 @@ Informative: [RFC3161] (external timestamp tokens, S16), [AER1] (`draft-zambo-ae
 the receipt format this mapping targets), [BIP340] (Schnorr signatures used by
 the Nostr backend), [NIP01] (Nostr event serialization).
 
-## 9.1 Carriage in a verdict record
+## Appendix D. Carriage in a verdict record
 
 A package verdict can be carried by a `verdict-record/1` record without changing
 either format. Our three outcomes map to that record's **state** axis, not to its
@@ -401,8 +486,14 @@ The bundle carries claims and inputs, not secrets.
 
 Outcome, action and disposition vocabularies are published with this document and
 follow a `Specification Required` policy. A verifier **MUST NOT** reject a record
-for carrying an unregistered value: registration governs shared meaning, never
-acceptance. Every vocabulary check is performable from the record's own bytes.
+for carrying an unregistered value **in an extension member**: registration
+governs shared meaning, never acceptance. Every vocabulary check is performable
+from the record's own bytes.
+
+The rule does not reach enumerated fields this document defines, whose values
+decide what the verifier may conclude. An unknown `state` in an anchor record is
+such a field and is rejected (Section 17.2, rule 4); an unknown
+`disposition_code` on an evidence entry is an extension value and is not.
 
 ## 16. Conformance tiers (proposal, not a claim)
 
@@ -416,6 +507,11 @@ requirements, and no vectors exist for them._
 | `uibc/core` | the 19 checks pass on the package; verdict is one of PASS / FAIL / INCONCLUSIVE; no dimension merged | `uibc verify` |
 | `uibc/witnessed` | a verification bundle is emitted; the reader's trust list is separate from the artifact; the head is co-signed by two distinct keys | `--bundle-out`, `--trustlist`, `tools/cosign_head.py verify` |
 | `uibc/anchored` | the anchor is `anchored`, not `pending`; the head carries the tree size inside the signature; successive heads only grow and a new size means a new root | `tools/cosign_head.py chain` |
+
+Head statements are signed over RFC 8785 canonical bytes of
+`{"head", "role", "tree_size", "vds"}`, with `tree_size` and `vds` omitted only
+when the signer did not observe them. Both fields sit inside the signed statement,
+so neither the size nor the verifier identity can be swapped after signing.
 
 Three rules bind the tiers, and each answers a question the cited drafts leave open:
 
@@ -524,42 +620,6 @@ refused". This is the minimum other drafts already require of themselves
 class; `draft-nestorov-scitt-p10-underdetermination-03` HALTs), and until this
 field existed no claim here could honestly be read as "cannot check".
 
-## 18. Security Considerations
-
-This section names what the mechanism does not defend against. A reviewer
-should treat an absent item here as a defect in this document, not as a
-property that was proven elsewhere.
-
-- **Metadata relabelling.** The root covers content hashes, so a package holder
-  can change paths, `media_type` or `action_type` and re-derive the index digest
-  while the anchored root stays valid (Section 4.1). The seal and the head are
-  the only things that expose this; a reader who verifies the anchor alone is
-  reading a weaker statement than they think.
-- **Backend trust.** An OTS calendar or a Nostr relay can refuse, delay, or
-  equivocate. Submitting to more than one is a SHOULD (Section 8.3); a
-  single-backend `anchored` verdict inherits that backend's availability and
-  honesty. Whether the Bitcoin block depth is sufficient is the reader's policy,
-  not this document's.
-- **Key lifecycle.** `REVOKED` exists as an outcome (Section 7) but this
-  document specifies no rotation, no revocation distribution, and no key history.
-  A seal key that is rotated without history makes older packages unverifiable
-  in a way that looks like tampering.
-- **Resource exhaustion.** Nothing here bounds the number of evidence entries,
-  the nesting depth of referenced policies, or the size of a single evidence file.
-  A verifier MUST apply local limits and report a package that exceeds them as
-  `FAIL` (refused), never as `PASS`.
-- **Verification side channels.** Signature and MAC comparison SHOULD be
-  constant-time with respect to the signature bytes; this document does not
-  require a particular implementation, but a timing-observable comparison
-  undermines S6 regardless of algorithm.
-- **Privacy.** Evidence bytes are handed to whoever verifies the package. The
-  package format has no redaction mechanism: a producer who needs one must
-  commit to a digest of redacted content and keep the original elsewhere, and
-  should say so rather than assume the format hides anything.
-- **Hash agility.** SHA-256 appears as *the* hash throughout. A future
-  transition needs a versioned algorithm identifier, which this document does
-  not define; until it does, a package is verifiable only under SHA-256.
-
 ## Implementation Status
 
 _As of 2026-11-27, repository `bf91c81`, reference verifier 0.5.5._
@@ -588,7 +648,7 @@ _As of 2026-11-27, repository `bf91c81`, reference verifier 0.5.5._
 | Root | Merkle root over step receipt ids | SHA-256 over sorted evidence content hashes |
 | Outcome set | accept / reject | PASS / FAIL / INCONCLUSIVE |
 | Missing metadata binding | MUST fail (Section 6), not implemented by the publisher's runner | n/a |
-| Anchoring | section defined, SDK ships Nostr + OTS | two backends specified, both implemented |
+| Anchoring | section defined, SDK ships Nostr + OTS | two backends specified; both exist as tools, neither is on the verifier's default path |
 
 Three claimed spec-versus-corpus divergences were re-audited against the
 specification text; two hold (mandatory `metadata_hash` for 0.4 receipts;

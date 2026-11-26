@@ -45,7 +45,7 @@ No repository, no network, no `pip install`: the archive carries its own verifie
 This repository now ships a composite action, so a package can be verified inside someone else's CI without them installing anything:
 
 ```yaml
-- uses: zhaoxinghua09-cell/uibc-core@v0.5.3
+- uses: zhaoxinghua09-cell/uibc-core@v0.5.5
   with:
     path: path/to/package        # the package directory to verify
     strict: 'true'               # optional: fail on undeclared files under evidence/
@@ -80,14 +80,14 @@ The number above is **our own run**. It becomes an external node report only whe
 
 **Seven machine reviews do exist, and they are not this number.** `docs/external-review/` holds seven receipts written on 2026-11-17 by an external model (DeepSeek-V3 via SiliconFlow) in four lenses (expert / process / adversary / outsider). Under `INDEPENDENCE.md` those are stage **S3m/S4m** machine reviews: they must be labelled `reviewer_type: machine`, and they may not be described as a third party, because no human and no separate administration stands behind them. Counted by category: human independent reproduction **2** (EXTERNAL-NODE-001 — third-party execution, requested, and he is a correspondent in the same working group, so not a disinterested auditor; EXTERNAL-NODE-002 — requested by us as well, run on his own Mac, returned file + sha256, and he maintains a related specification, so again execution not interest); external machine review 7; external document citing this repository 0; adoption by any group 0. Quoting any one of those four as "external 0" without saying which line is meant is the kind of collapse this repository exists to catch.
 
-**Version numbers, updated 2026-11-25:** `main` is **0.5.3** and PyPI carries **0.5.3** (both `uibc_core-0.5.3-py3-none-any.whl` and the sdist). The archived citation snapshot is still **0.2.1** (2026-09-17), which is what a citation should point at.
+**Version numbers, updated 2026-11-26:** `main` is **0.5.5**, PyPI carries **0.5.5** (both `uibc_core-0.5.5-py3-none-any.whl`, 196,413 B, `sha256:1f920045…eb19`, and the sdist, 2,973,011 B, `sha256:33aee2ef…f2d5`, uploaded 2026-11-25), and the archived citation snapshot is **0.5.5** too — Zenodo record `24551514`, version DOI `10.5281/zenodo.24551514`, published 2026-11-26, concept DOI `10.5281/zenodo.22821834` resolving to it. `CITATION.cff` pins `version: "0.5.5"`, keeps `doi` on the concept DOI on purpose (it cannot go stale), and lists the version DOI under `identifiers`. Earlier snapshots stay valid for their own content and must not be cited for 0.5.5 material: 0.2.1 (six checks, S1-S6) and 0.4.2 (predates the competitor parity table).
 
-Two things this paragraph will not hide, because both were measured today:
+Two things this paragraph will not hide, both measured:
 
-- **0.5.3 on PyPI carries no attestation.** PyPI trusted publishing answered `invalid-publisher` (no publisher entry matched the workflow), the upload fell back to a long-lived API token, and `tools/check_pypi_provenance.py` reports `2 of 2 file(s) lack provenance` for 0.5.3 (run `45538833447`). 0.5.0 has the same defect. Until the publisher entry exists, "published" does not mean "attested".
-- **the `v0.5.3` tag does not name the 0.5.3 code.** The tag was cut before the version bump landed; the release is immutable, so the tag cannot be moved. The archive and the code are on `main`; the tag points at a commit where the version strings still say `0.5.2`. This is why `release-lab-bundle` failed on v0.5.1, v0.5.2 and v0.5.3 at the same step. `tools/check_release_readiness.py` now refuses a tag that does not carry its own archive, and it runs first on every `v*` tag.
+- **0.5.5 on PyPI carries no attestation either.** PyPI trusted publishing still answers `invalid-publisher` — the `pypi` environment exists on GitHub but no matching publisher entry exists on PyPI — so the upload goes through the long-lived token fallback and `tools/check_pypi_provenance.py` reports `2 of 2 file(s) lack provenance` for 0.5.5 (run `45564409627`). 0.5.0, 0.5.1, 0.5.3 and 0.5.4 share the defect. Until a publisher entry exists, "published" does not mean "attested"; a green publish job is not the signal, the provenance check is.
+- **the `v0.5.5` tag carries the 0.5.5 code but not the current citation.** Verified today by reading the tag through the API: `pyproject.toml` there says `version = "0.5.5"`, while `CITATION.cff` there still says `0.4.2`, because the 0.5.5 archive was published on 2026-11-26, after the tag was cut. Releases are immutable, so that file cannot be corrected retroactively; the current citation lives on `main`.
 
-So: `pip install uibc-core==0.5.3` gives you the verifier this README describes; `v0.5.3` as a *tag* does not. Cite the snapshot, install by version number, and do not treat a tag name as a proof of what it contains.
+So: `pip install uibc-core==0.5.5` gives you the verifier this README describes; the tags `v0.5.1`–`v0.5.3` do not name the code they shipped (that was fixed with `tools/check_release_readiness.py`, which now runs first on every `v*` tag). Cite the archived snapshot, install by version number, and do not treat a tag name as proof of what it contains.
 
 **External conformance, measured against someone else's corpus** — a different number from the one above, and a different kind of claim:
 
@@ -222,9 +222,9 @@ other exists.
 
 > **万物互联，数智共生** —— Everything Connected, Digital-Intelligence Symbiosis.
 
-UIBC Core 参考实现 v0.3.3 —— Agent 生命周期证据包与验证器：三值裁决（PASS / FAIL / INCONCLUSIVE，未决不洗成通过）＋ Ed25519 公开封签（任何人可验、可钉住公钥）。
+UIBC Core 参考实现 v0.5.5 —— Agent 生命周期证据包与验证器：三值裁决（PASS / FAIL / INCONCLUSIVE，未决不洗成通过）＋ Ed25519 公开封签（任何人可验、可钉住公钥）。
 
-> 版本口径：PyPI 上已发布到 `0.3.3`；本仓 `zenodo_deposit/` 备好的存缴包是 **0.3.0** 那一版快照（419 项），两者不是同一份字节。
+> 版本口径（2026-11-26）：PyPI、仓库与 Zenodo 归档三处同为 `0.5.5`。PyPI 上是 `uibc_core-0.5.5-py3-none-any.whl` 与同名 sdist；归档是 Zenodo record `24551514`（版本 DOI `10.5281/zenodo.24551514`，concept DOI `10.5281/zenodo.22821834`）。仓内 `zenodo_deposit/` 仍是 **0.3.0** 期的历史存缴包（419 项），是留存件、不是 0.5.5 的字节，两者不可互相冒充。
 
 理念（LGD）：**有籍 · 有证 · 有门禁** → Registry（身份注册）/ Evidence（内容哈希证据 + 封签）/ Gates（生命周期状态机 + 验证门禁）。
 

@@ -482,6 +482,8 @@ requested at this version.
 
 Normative: [RFC2119], [RFC8174], [RFC3339], [RFC8032], [RFC2104].
 
+Revisions read from the IETF datatracker API on 2026-11-27: `draft-gruszka-scitt-statement-identification` **05** (expires 2027-05-28), `draft-nestorov-scitt-p10-underdetermination` **03** (expires 2027-05-19), `draft-zambo-aer1` **26** (expires 2027-04-26), and `draft-birkholz-scitt-architecture` **02** (expired 2023-04-27 — cited as history, not as a live specification).
+
 Informative: [RFC3161] (external timestamp tokens, S16), [AER1] (`draft-zambo-aer1-26`,
 the receipt format this mapping targets), [BIP340] (Schnorr signatures used by
 the Nostr backend), [NIP01] (Nostr event serialization).
@@ -676,7 +678,7 @@ To keep that choice from erasing the distinction, the verifier now carries a
 report-level `unsupported` list naming the checks that failed this way: the
 verdict stays FAIL, but a reader can separate "could not check" from "checked and
 refused". The two cited drafts answer the same question differently
-(`draft-gruszka-scitt-statement-identification-04` reports UNSUPPORTED as its own
+(`draft-gruszka-scitt-statement-identification-05` reports UNSUPPORTED as its own
 class, `draft-nestorov-scitt-p10-underdetermination-03` HALTs); this document
 reports both, which is what lets the sentence mean "cannot check" at all.
 

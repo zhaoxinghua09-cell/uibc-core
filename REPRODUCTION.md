@@ -45,6 +45,14 @@ The corpus case `accept-unicode-names` then fails S4 and the run reports 31/32 i
 reports 32/32 on the same machine. If you are on Windows and see exactly one divergence,
 check the filenames before filing it as a verifier bug.
 
+If a tarball is the only thing you have, extract it with the shipped reader rather than
+with `bsdtar`. It refuses to write a member whose name would not survive as UTF-8, so the
+mangling is caught at extraction time instead of surfacing as a hash mismatch:
+
+```
+python tools/extract_tar.py uibc-core-<ref>.tar.gz --dest out
+```
+
 ## Cross-machine
 
 **Partially verified (2026-11-26).** A public clone of this branch

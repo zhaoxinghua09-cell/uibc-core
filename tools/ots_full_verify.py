@@ -194,6 +194,10 @@ def full_verify(file_path, proof_path, block_receipt=DEFAULT_BLOCK_RECEIPT,
                           "reason": "no transparency-log entry supplied"}
 
     node_doc = ch.get("node") or {}
+    # the unchecked list is not decoration: when a node did answer, the first
+    # line must come off, otherwise the receipt contradicts itself
+    unchecked = [u for u in UNCHECKED
+                 if not (node_doc.get("checked") and u.startswith("global most-work"))]
     doc = {"file": file_path, "proof": proof_path,
            "verdict": "FULL_CHAIN_OF_EVIDENCE_VERIFIED",
            "steps": steps,
@@ -209,7 +213,7 @@ def full_verify(file_path, proof_path, block_receipt=DEFAULT_BLOCK_RECEIPT,
                        "both_anchors_verified": bool(steps.get("rfc3161", {}).get("ok")),
                        "transparency_log": bool(steps.get("rekor", {}).get("ok"))},
            "most_work_established": bool(node_doc.get("checked")),
-           "unchecked": UNCHECKED}
+           "unchecked": unchecked}
     return doc
 
 

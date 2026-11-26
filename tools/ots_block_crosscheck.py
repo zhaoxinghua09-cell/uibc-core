@@ -291,6 +291,7 @@ def node_block_evidence(rpc_url, height, block_hash, timeout=30):
     if not rpc_url:
         return {"checked": False,
                 "reason": "no node configured; global most-work is not established"}
+    import re  # only this function parses a URL; the module has no other use for it
     auth, host = "", rpc_url
     m = re.match(r"https?://([^/@]+)@(.+)", rpc_url)
     if m:
@@ -323,7 +324,9 @@ def node_block_evidence(rpc_url, height, block_hash, timeout=30):
                     "hash_matches_explorers": node_hash == block_hash,
                     "is_most_work_chain": True}  # a node's active chain is the most-work one it knows
     except Exception as e:  # noqa: BLE001 - unreachable node is data, not a verdict
-        evidence = {"checked": False, "reason": "%s: %s" % (type(e).__name__, str(e)[:120])}
+        evidence = {"checked": False,
+                    "reason": "node did not answer (%s: %s); global most-work is not established"
+                              % (type(e).__name__, str(e)[:120])}
     return evidence
 
 

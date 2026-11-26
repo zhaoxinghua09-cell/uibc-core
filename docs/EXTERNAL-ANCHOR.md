@@ -222,7 +222,16 @@ Verdict `FULL_CHAIN_OF_EVIDENCE_VERIFIED` only when all four hold; otherwise it
 stops at the seam that broke (`STOPPED_AT_PROOF` / `_HEADER` / `_CHAIN`). It runs
 offline against the two committed receipts unless `--refresh` is asked for, and
 it always prints what it did **not** check - starting with the global most-work
-question, which stays unanswered until a node is supplied.
+question, which stays unanswered until a node is supplied, and which comes **off**
+that list the moment a receipt carries a node's answer instead of being left there
+as decoration.
+
+The node branch itself is not dead code: it is exercised against a JSON-RPC stub in
+`tests/test_ots_node_evidence.py` - agreeing, disagreeing, and unreachable nodes
+each get their own case. That proves the **wiring** (method names, auth shape, field
+names, failure paths), not the node's honesty; the four lines a real Bitcoin Core
+answers are still the missing witness, and saying they are not would be the exact
+dishonesty this anchor exists to prevent.
 
 **And both anchor types answer in that same verdict.** `--tsa-token` judges the
 RFC 3161 token offline against the CA bundle shipped beside it, and the command

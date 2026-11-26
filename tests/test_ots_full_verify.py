@@ -134,6 +134,28 @@ class FullVerifyTests(unittest.TestCase):
         self.assertEqual(out["verdict"], "STOPPED_AT_REKOR")
 
 
+    def test_answer_from_a_node_removes_the_most_work_caveat(self):
+        """A receipt that carries node evidence must not still say 'needs a node'."""
+        tmp = os.path.join(ROOT, "docs", "_with_node.json")
+        with open(CHAIN, encoding="utf-8") as f:
+            doc = json.load(f)
+        doc["node"] = {"checked": True, "node_block_hash": doc["block_hash"],
+                       "confirmations": 160, "chainwork": "ab" * 8,
+                       "hash_matches_explorers": True}
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(doc, f)
+        try:
+            out = fv.full_verify(HEAD, PROOF, chain_receipt=tmp)
+        finally:
+            os.remove(tmp)
+        self.assertEqual(out["verdict"], "FULL_CHAIN_OF_EVIDENCE_VERIFIED")
+        self.assertTrue(out["most_work_established"])
+        self.assertFalse(any("most-work" in item for item in out["unchecked"]),
+                         "the caveat has to come off when the question was answered")
+        self.assertTrue(any("competing branches" in item for item in out["unchecked"]),
+                        "the questions a node does not answer must stay")
+
+
 if __name__ == "__main__":
     unittest.main()
 

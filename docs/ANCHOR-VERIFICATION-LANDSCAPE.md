@@ -38,7 +38,7 @@ Where that leaves the trust question, honestly:
 | is the proof about this file? | arithmetic (digest binding) | no server needed |
 | is the block real, with that root? | arithmetic over bytes two operators agree on | wrong bytes fail a hash |
 | is this block on the chain we are shown? | arithmetic over 160 linked, PoW-valid headers | resists substitution, not reorgs |
-| is this block on the chain **with the most work**? | **still unanswered** - needs a node that follows every branch | `--node http://user:pass@127.0.0.1:8332` is the hook; no node is installed on this machine, so the receipts record `node.checked=false` |
+| is this block on the chain **with the most work**? | **still unanswered** - needs a node that follows every branch | `--node http://user:pass@127.0.0.1:8332` is the hook, exercised against a stub (agree / disagree / unreachable), not against a live node; receipts record `node.checked=false` |
 
 ## What the field does better, and what is left
 

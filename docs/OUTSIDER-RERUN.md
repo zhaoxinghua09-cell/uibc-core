@@ -1,6 +1,6 @@
 # 外人重跑：换一个目录、换一套环境，还成不成立
 
-生成时间 2026-11-26T13:34:53Z，运行环境 Python 3.13.18 / Windows。
+生成时间 2026-11-26T13:35:37Z，运行环境 Python 3.13.18 / Windows。
 
 做法：把仓库整棵拷到临时目录（不含 `.git`、不含任何缓存），用只保留白名单变量的干净环境，在该目录下跑四个公开入口；每一步记录退出码与输出末行；整棵树的 sha256 一并记下。
 
@@ -9,7 +9,7 @@
 | gate | `tools/mutation_gate.py` | 0 | PASS | 0.8s |
 | parity | `tools/competitor_gate_parity.py` | 0 | PASS | 0.5s |
 | demo | `tools/demo_bid_binary.py` | 0 | PASS | 0.2s |
-| tests | `-m pytest tests/test_mutation_gate.py tests/test_competitor_parity.py tests/test_parity_board.py tests/test_refs_check.py tests/test_parity_sensitivity.py tests/test_parity_audit.py tests/test_parity_realrun.py -q` | 0 | PASS | 3.8s |
+| tests | `-m pytest tests/test_mutation_gate.py tests/test_competitor_parity.py tests/test_parity_board.py tests/test_refs_check.py tests/test_parity_sensitivity.py tests/test_parity_audit.py tests/test_parity_realrun.py -q` | 0 | PASS | 3.7s |
 
 **树摘要 `64eb58cf9312b3fa…`（2490 个文件，排除本页与 receipt 自身）**。
 **内容摘要 `0ddaf05ca2136e31…`（只看每个文件的字节，不看文件名）**。

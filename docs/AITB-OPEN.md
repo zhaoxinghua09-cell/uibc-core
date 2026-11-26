@@ -34,8 +34,29 @@ Three gates, each check naming the exact observation behind it:
 
 Plus a **Not tested** list, which is part of the card, not a footnote.
 
+## Which methods we can actually call
+
+A submission for a method we cannot reach is answered with a named state, not a
+guess and not a silent failure. The table is the whole truth about our reach:
+
+| method | what an outsider can call | card verdict |
+|---|---|---|
+| `did:cn` | `POST https://iaisp.teleinfo.cn/api/public/ioa/did/resolve-verify` | `PASS` / `FAIL` |
+| `did:bid` | only a test chain (`test.bifcore.bitfactory.cn`), which answered 503 maintenance on 2026-11-26; no public production endpoint | `NO_PUBLIC_ENDPOINT` |
+| `did:ctid` | nothing: the registered specification publishes relative paths only (`/didservice/v1/did/get`), access is through a vendor SDK plus an institution certificate, and the operator declared its platform offline on 2026-06-30 | `NO_PUBLIC_ENDPOINT` |
+| anything else | nothing | `METHOD_NOT_SUPPORTED` |
+
+`NO_PUBLIC_ENDPOINT` is a finding about the ecosystem, recorded with its reason so
+that a reader can disagree with it. It never blames the submitter, and it runs
+zero checks — the card says so.
+
+Two example cards ship with the repository: `docs/aitb-example-report.{json,html}`
+(`did:cn`, 12 of 12 passed, G3 missing) and
+`docs/aitb-example-no-endpoint.{json,html}` (`did:ctid:anicert`, zero calls made).
+
 ```powershell
 python tools/aitb_evaluate.py --run --did did:cn:agent:xxxx --out reports
+python tools/aitb_evaluate.py --run --did did:ctid:anicert --out reports
 python tools/aitb_evaluate.py --check --report reports/did_cn_agent_xxxx.json
 ```
 

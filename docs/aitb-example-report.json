@@ -1,6 +1,8 @@
 {
  "did": "did:cn:agent:sf72CmurU1pnWun9FjNWZ3dMTUXBpTy6",
- "evaluated_at": "2026-11-26T13:05:01Z",
+ "method": "cn",
+ "evaluated_at": "2026-11-26T13:33:12Z",
+ "verdict": "PASS",
  "gates": [
   {
    "id": "G1.http",

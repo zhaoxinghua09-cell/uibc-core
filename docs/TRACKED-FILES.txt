@@ -1241,6 +1241,8 @@ docs/adoption-guide.md
 docs/adoption/2026-11-20-authenticated.json
 docs/adoption/2026-11-20.json
 docs/adr/ADR-001-three-valued-verdict.md
+docs/aitb-example-no-endpoint.html
+docs/aitb-example-no-endpoint.json
 docs/aitb-example-report.html
 docs/aitb-example-report.json
 docs/anchors/ROOT-28a23ff.txt

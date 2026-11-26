@@ -21,16 +21,57 @@ G2  self-consistent document the returned fields agree with each other and with
 G3  operator acknowledgement the submitter points at a public statement by the
                              operator; absent counts as MISSING, never as PASS
 
+Verdicts
+--------
+Not every submitted identifier can be scored. Saying "FAIL" for a method whose
+specification never publishes a host would blame the wrong party, and saying
+nothing would hide that the gap exists. So a card states one of:
+
+    PASS                   every check that ran passed
+    FAIL                   at least one check that ran failed
+    NO_PUBLIC_ENDPOINT     we know of no public endpoint to call, so no check ran
+    METHOD_NOT_SUPPORTED   this method is not in our table at all
+
+NO_PUBLIC_ENDPOINT is a finding about the ecosystem, not about the submitter,
+and it is recorded with the reason, so a reader can disagree with it.
+
 Usage
 -----
     python tools/aitb_evaluate.py --run --did did:cn:agent:xxxx --out reports
+    python tools/aitb_evaluate.py --run --did did:ctid:anicert --out reports
     python tools/aitb_evaluate.py --check --report reports/<slug>.json
 """
 import argparse, hashlib, json, os, re, sys, time, urllib.error, urllib.request
 
 BASE = "https://iaisp.teleinfo.cn"
 RESOLVE = "/api/public/ioa/did/resolve-verify"
-UA = "aitb-open-eval/1.0 (+read-only)"
+UA = "aitb-open-eval/1.1 (+read-only)"
+
+# What an outsider can actually call, per method. Written down so that a missing
+# endpoint is reported as missing instead of guessed, probed, or blamed on the
+# submitter. Every entry needs a citation in docs/AITB-OPEN.md.
+METHODS = {
+    "cn": {
+        "endpoint": BASE + RESOLVE,
+        "note": "public resolve-verify endpoint, POST JSON {\"did\": ...}",
+        "probe": True,
+    },
+    "bid": {
+        "endpoint": None,
+        "note": "only a documented test chain exists (test.bifcore.bitfactory.cn); "
+                "no public production endpoint, and the test chain answered 503 "
+                "maintenance on 2026-11-26",
+        "probe": False,
+    },
+    "ctid": {
+        "endpoint": None,
+        "note": "specification publishes relative paths only (/didservice/v1/did/get); "
+                "access is through a vendor SDK plus an institution certificate "
+                "(github.com/617640999/ctid-did-register); its platform was declared "
+                "offline 2026-06-30",
+        "probe": False,
+    },
+}
 
 # key types we have seen on this platform, with the hex length each must have
 KEY_HEX = {
@@ -126,7 +167,40 @@ NOT_TESTED = [
 ]
 
 
+def method_of(did):
+    parts = (did or "").split(":")
+    return parts[1].lower() if len(parts) > 2 and parts[0] == "did" else ""
+
+
+def not_applicable(method, note):
+    """A card for an identifier we cannot call: say so, run no check, blame nobody."""
+    return {
+        "did": None,
+        "method": method,
+        "evaluated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "verdict": "NO_PUBLIC_ENDPOINT",
+        "gates": [{"id": "G0.public_endpoint", "ok": None, "detail": "none published: " + note}],
+        "counts": {"ran": 0, "passed": 0, "failed": 0, "missing": 1},
+        "resolution": None,
+        "operator_statement": None,
+        "not_tested": ["everything: no endpoint was called"] + NOT_TESTED,
+        "reading": "no public endpoint: nothing was called, so nothing is claimed",
+    }
+
+
 def evaluate(did, operator_statement=None):
+    method = method_of(did)
+    if method not in METHODS:
+        rep = not_applicable(method, "method %r is not in our table" % method)
+        rep["did"] = did
+        rep["verdict"] = "METHOD_NOT_SUPPORTED"
+        rep["reading"] = "method not in our table: nothing was called, so nothing is claimed"
+        return rep
+    if not METHODS[method]["probe"]:
+        rep = not_applicable(method, METHODS[method]["note"])
+        rep["did"] = did
+        return rep
+
     resp = resolve(did)
     checks = gate1(resp) + gate2(resp, did) + gate3(operator_statement)
     ran = [c for c in checks if c["ok"] is not None]
@@ -136,7 +210,9 @@ def evaluate(did, operator_statement=None):
     data = (resp["doc"].get("data") or {}) if isinstance(resp["doc"].get("data"), dict) else {}
     return {
         "did": did,
+        "method": method,
         "evaluated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "verdict": "FAIL" if failed else "PASS",
         "gates": checks,
         "counts": {"ran": len(ran), "passed": len(passed), "failed": len(failed), "missing": len(missing)},
         "resolution": (data.get("summary") or {}).get("resolutionStatus"),
@@ -159,15 +235,16 @@ def render_html(report):
 table{border-collapse:collapse;width:100%%}td,th{border:1px solid #ddd;padding:6px 8px;vertical-align:top}
 th{background:#f6f6f6;text-align:left}code{background:#f4f4f4;padding:1px 4px}</style>
 <h1>AITB report card</h1>
-<p><code>%s</code><br>evaluated at %s</p>
+<p><code>%s</code><br>method <code>did:%s</code> · evaluated at %s · verdict <b>%s</b></p>
 <p><b>%s</b></p>
 <table><tr><th>check</th><th>verdict</th><th>what was observed</th></tr>%s</table>
 <h2>Not tested</h2><ul>%s</ul>
 <p>This card is not a certification. It records what an outsider could observe at the
 timestamp above, and names what it did not test. Re-run:
 <code>python tools/aitb_evaluate.py --run --did %s</code></p>
-</html>""" % (report["did"], report["evaluated_at"], report["reading"], rows,
-         "".join("<li>%s</li>" % x for x in report["not_tested"]), report["did"])
+</html>""" % (report["did"], report.get("method", ""), report["evaluated_at"],
+            report["verdict"], report["reading"], rows,
+            "".join("<li>%s</li>" % x for x in report["not_tested"]), report["did"])
 
 
 def check_report(path):
@@ -175,10 +252,16 @@ def check_report(path):
     problems = []
     if not rep.get("did"):
         problems.append("no did recorded")
+    if rep.get("verdict") not in ("PASS", "FAIL", "NO_PUBLIC_ENDPOINT", "METHOD_NOT_SUPPORTED"):
+        problems.append("verdict %r is not one of the four named states" % (rep.get("verdict"),))
     if rep["counts"]["ran"] + rep["counts"]["missing"] != len(rep["gates"]):
         problems.append("check counts do not add up")
     if rep["counts"]["passed"] + rep["counts"]["failed"] != rep["counts"]["ran"]:
         problems.append("pass/fail counts do not add up")
+    if rep.get("verdict") == "NO_PUBLIC_ENDPOINT" and rep["counts"]["ran"] != 0:
+        problems.append("claims no endpoint but ran %d checks" % rep["counts"]["ran"])
+    if rep.get("verdict") == "PASS" and rep["counts"]["failed"] != 0:
+        problems.append("verdict PASS with %d failed checks" % rep["counts"]["failed"])
     if not rep.get("not_tested"):
         problems.append("the card does not say what was not tested")
     if "certif" not in rep["reading"].lower() and "not a certification" not in open(
@@ -209,10 +292,11 @@ def main(argv=None):
         open(jp, "w", encoding="utf-8", newline="\n").write(
             json.dumps(rep, ensure_ascii=False, indent=1) + "\n")
         open(hp, "w", encoding="utf-8", newline="\n").write(render_html(rep))
-        print("%s  %d/%d passed, %d missing" % (rep["reading"], rep["counts"]["passed"],
-                                                rep["counts"]["ran"], rep["counts"]["missing"]))
+        print("verdict %s -- %s  (%d/%d passed, %d missing)" % (
+            rep["verdict"], rep["reading"], rep["counts"]["passed"],
+            rep["counts"]["ran"], rep["counts"]["missing"]))
         print("written:", jp, hp)
-        return 0 if rep["counts"]["failed"] == 0 else 1
+        return 0 if rep["verdict"] in ("PASS", "NO_PUBLIC_ENDPOINT", "METHOD_NOT_SUPPORTED") else 1
 
     if a.check:
         if not a.report:

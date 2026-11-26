@@ -1,0 +1,30 @@
+{
+ "did": "did:ctid:anicert",
+ "method": "ctid",
+ "evaluated_at": "2026-11-26T13:33:11Z",
+ "verdict": "NO_PUBLIC_ENDPOINT",
+ "gates": [
+  {
+   "id": "G0.public_endpoint",
+   "ok": null,
+   "detail": "none published: specification publishes relative paths only (/didservice/v1/did/get); access is through a vendor SDK plus an institution certificate (github.com/617640999/ctid-did-register); its platform was declared offline 2026-06-30"
+  }
+ ],
+ "counts": {
+  "ran": 0,
+  "passed": 0,
+  "failed": 0,
+  "missing": 1
+ },
+ "resolution": null,
+ "operator_statement": null,
+ "not_tested": [
+  "everything: no endpoint was called",
+  "verifiable credential verification (the platform reports vcVerificationStatus=SKIPPED)",
+  "whether the operator really controls the private key",
+  "whether the code maps to a GB/Z 185.2 OID path (no public mapping rule exists)",
+  "liveness of the declared serviceEndpoint (no request is sent to it)",
+  "anything about agents not published in the platform's own list"
+ ],
+ "reading": "no public endpoint: nothing was called, so nothing is claimed"
+}

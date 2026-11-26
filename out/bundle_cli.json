@@ -8,7 +8,7 @@
   "verifier": {
     "id": "uibc-core-verifier",
     "version": "0.5.5",
-    "spec_id": "uibc-core/0.3.3-proposal@d22ce6944818"
+    "spec_id": "uibc-core/0.3.3-proposal@0667b0218818"
   },
   "inputs": {
     "key_fingerprint": "sha256:2d16793fbf05a9c4b1238f88ea92f0a89ad05cacb2e71ed9aabdab81701b407e",

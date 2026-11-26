@@ -80,6 +80,28 @@
    "exit_code": 1,
    "affects_score": false,
    "verdict": "38 条里 37 绿、1 红：src/__tests__/index.test.ts:187 的 'expire automatically > resolves document' 先 sleep(5) 卡过期窗口，再对解析结果做深比较——这是对时间的断言，本机上窗口没卡准就红。属测试自身对时钟敏感，不是代码缺陷，也不作为本表任何一维的证据。整套 92 秒，主要花在一条真实 RPC 链路上。"
+  },
+  {
+   "repo": "digitalbazaar/did-io",
+   "sha": "940555f002fbf69e081e4db5b44b3cd9e0234404",
+   "package_manager": "npm",
+   "install": "`npm install --ignore-scripts --no-audit --no-fund` 403 packages, 19s。无 workspace，无 lockfile 冲突。",
+   "suite": "`mocha --preserve-symlinks -t 30000 test/**/*.spec.js`（package.json 的 test-node 脚本，去掉 cross-env 与 reporter 变量）",
+   "files": 1,
+   "tests": 26,
+   "passed": 26,
+   "failed": 0,
+   "skipped": 0,
+   "seconds": 3.0,
+   "exit_code": 0,
+   "extra_probe": {
+    "name": "它自己的 `test` 脚本（经 cross-env 与 ${REPORTER:-spec} 展开）",
+    "exit_code": 0,
+    "cause": "在 POSIX shell 下可用；本机 PowerShell 里 `${REPORTER:-spec}` 不会被展开，所以直接调 mocha 跑同一批 spec。",
+    "read_as": "同一批用例，换入口跑出来的数一样（26/26）。"
+   },
+   "affects_score": false,
+   "verdict": "26 条全过，绿得干净。但这是个 DID 文档缓存/驱动层，测的是缓存与 driver 派发，不含任何逐位变异或跨实现比对——绿与本表 D2 无关。"
   }
  ],
  "score_impact": {

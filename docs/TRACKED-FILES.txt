@@ -1157,6 +1157,8 @@ docs/MUTATION-CORPUS.md
 docs/MUTATION-PROBES.md
 docs/NAME-COLLISIONS.md
 docs/NATIONAL-CODE-VS-DID.md
+docs/NATIONAL-ID-METHODS.json
+docs/NATIONAL-ID-METHODS.md
 docs/NEGATIVE-CONTROL.md
 docs/NOSTR-ANCHOR.md
 docs/ONE-CLICK.md
@@ -2025,6 +2027,7 @@ tests/test_memory_fixtures.py
 tests/test_merkle_consistency.py
 tests/test_mutation_gate.py
 tests/test_mutation_probes.py
+tests/test_national_methods.py
 tests/test_neutral_anchor.py
 tests/test_newest_release_is_the_one_checked.py
 tests/test_nightly_covers_the_documents.py
@@ -2298,6 +2301,7 @@ tools/mutation_benchmark.py
 tools/mutation_controls.py
 tools/mutation_corpus.py
 tools/mutation_gate.py
+tools/national_methods_snapshot.py
 tools/nostr_anchor.py
 tools/open_pr.py
 tools/oracle_check.py

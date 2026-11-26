@@ -22,12 +22,15 @@ Reference impl: https://github.com/zhaoxinghua09-cell/uibc-core
 
 An autonomous agent leaves a trail of actions, but that trail is normally
 produced, stored and verified by the same party it is supposed to convince.
-This document specifies a portable package that binds an agent's identity,
-lifecycle, and action evidence into one hash-committed structure, gives an
-nineteen-check verification procedure with three-valued outcomes, and
-specifies how to commit the resulting root to backends the operator cannot
-rewrite. The specification is deliberately narrow: it defines what can be
-checked from bytes alone, and it names what it does **not** check.
+This document specifies a portable package for an agent's identity, lifecycle
+events, and action evidence; a nineteen-check verification procedure with
+three-valued outcomes; a seal over the committed state; and a way to commit one
+root to backends the operator cannot rewrite. The commitments are not
+interchangeable: the anchored root covers evidence content hashes only, while
+identity and lifecycle are bound by the seal and the head (Section 4.1 states
+exactly what commits what, and what commits nothing). The specification is
+deliberately narrow: it defines what can be checked from bytes alone, and it
+names what it does **not** check.
 
 ## 1. Introduction
 
@@ -57,13 +60,21 @@ described in [RFC2119] and [RFC8174].
 - **Package**: a directory of five required JSON files plus an evidence tree.
 - **Evidence Root**: SHA-256 over the sorted content hashes (Section 4).
 - **Seal**: a signature or MAC over the package's committed state.
+- **UIBC**: the name used in this document for the package format and its
+  verification procedure; it is a local working name, not a registered
+  vocabulary term, and it expands to nothing.
 - **Outcome**: `PASS`, `FAIL`, or `INCONCLUSIVE`, per check.
+- **Head**: the signed pair (root, tree size) of Section 16. A head is not a
+  package and does not carry evidence.
+- **Actor**: the identifier recorded in a lifecycle event's `actor` field. It is
+  a name the producer asserts; the specification checks that the field is
+  populated and well formed, not that the actor was authorised to act.
 - **Anchored**: the root has been committed to an external backend and that
   commitment has been *confirmed* by that backend (see Section 8.2).
 
 ## 3. Package Structure
 
-A package contains exactly:
+A package contains exactly these five required files:
 
 | File | Content |
 |---|---|
@@ -77,6 +88,11 @@ Undeclared files at the package root are a structural failure (S1). Evidence
 files MUST be reachable through an index entry; an unreferenced file is not
 evidence.
 
+`evidence/anchors.json` is optional and sits inside `evidence/`, not at the
+package root: it is the producer's declared anchor claim, and it is part of the
+bytes the seal and the head cover. Sections 8.4 and 17.1 state the one thing an
+implementation must never do with it.
+
 ## 4. Evidence Root
 
 ```
@@ -89,6 +105,34 @@ the object that gets anchored, signed, and compared.
 
 Because the root covers content hashes rather than paths, moving a file
 without changing its content does not change the root; changing one byte does.
+
+### 4.1 What commits what
+
+Four objects are easy to conflate in prose, so the scope of each is stated once,
+here, and no later section may widen it.
+
+| Object | Commits | Does not commit |
+|---|---|---|
+| Evidence root (this section) | each index entry's `content_hash`, sorted | paths, media types, index metadata, lifecycle, identity, or any manifest field other than `evidence_root` |
+| Seal (Section 6) | RFC 8785 canonical bytes of `identity.json` + `manifest.json` + `lifecycle.json` | the evidence bytes themselves (only their hashes, through `manifest.evidence_root`), paths, index metadata |
+| Head (Section 16) | the root, the tree size, and optionally the verifier identity `vds`, inside one signed statement | everything the root does not commit, for the same reasons |
+| Anchor (Section 8) | the evidence root alone, submitted to an external backend | identity, lifecycle, seal, paths, metadata |
+
+Consequences, stated rather than implied:
+
+- "The anchor commits the package" is false. An anchor proves that this root
+  existed before a point in time; it says nothing about who produced the package
+  or which lifecycle events accompanied it.
+- What ties identity and lifecycle to the anchored root is the **seal** (whose
+  key the reader must trust out of band, Section 6) plus the **head** (whose
+  only-grew property Section 16 constrains). A package whose seal is absent, or
+  whose key was swapped with the content, has an anchored root that says nothing
+  about its actor.
+- Because paths and index metadata are outside the root, an attacker holding a
+  package can relabel files (move a byte-identical file to another path, change
+  `action_type`) and re-derive the index digest without changing the anchored
+  root. The seal and the head are what make that visible; the anchor alone does
+  not. This is recorded as a limitation, not mitigated by assertion.
 
 ## 5. Verification Procedure
 
@@ -207,6 +251,10 @@ current root — otherwise a stale revocation silently applies to new content.
 Only the root. No evidence, no inputs, no outputs, no tool names. A root is a
 commitment, not a leak.
 
+This sentence is about the *anchor request*. The head of Section 16 is a
+different object: it carries the root plus the tree size, is signed, and travels
+between witnesses, never to the anchor backend, which has no use for it.
+
 ### 8.2 Two states, not one
 
 - **pending**: a backend accepted the commitment but it is not yet confirmed
@@ -229,11 +277,17 @@ differs by jurisdiction.
 
 ### 8.4 The proof must not go inside the package
 
-Recording an anchor proof as package evidence changes the package, hence
-changes the root — and the root that was anchored is then no longer the root
-the package has. Implementations MUST refuse to write proofs into the package
-directory. This failure is silent and total; it is the single most likely
-implementation error in this section.
+Recording a **new** anchor proof as package evidence changes the package, hence
+changes the root — and the root that was anchored is then no longer the root the
+package has. Implementations MUST refuse to add or modify anchor records after
+the package has been sealed. This failure is silent and total; it is the single
+most likely implementation error in this section.
+
+The rule is about *when*, not *where*: `evidence/anchors.json` has existed since
+before this section and is a producer declaration, covered by the seal and the
+head like every other byte. A verifier that writes a proof into it after sealing
+breaks S6 and S8 immediately — which is the behaviour the rule asks for, not an
+exception to it.
 
 ## 9. Conformance and Interoperability
 
@@ -302,7 +356,7 @@ either format. Our three outcomes map to that record's **state** axis, not to it
 |---|---|---|
 | `PASS` | released | all applicable checks held |
 | `INCONCLUSIVE` | held | an input is missing; the claim is neither supported nor refused |
-| `FAIL` | refused | a check contradicted the bytes |
+| `FAIL` | refused | a check refused the bytes — either a contradiction or a capability the verifier does not implement (fail-closed by policy; Section 17.5) |
 
 Folding `INCONCLUSIVE` into `refused` would state "the evidence contradicts" where
 the truth is "no evidence yet". Three rules keep the mapping honest: evidence is
@@ -363,7 +417,7 @@ requirements, and no vectors exist for them._
 | `uibc/witnessed` | a verification bundle is emitted; the reader's trust list is separate from the artifact; the head is co-signed by two distinct keys | `--bundle-out`, `--trustlist`, `tools/cosign_head.py verify` |
 | `uibc/anchored` | the anchor is `anchored`, not `pending`; the head carries the tree size inside the signature; successive heads only grow and a new size means a new root | `tools/cosign_head.py chain` |
 
-Three rules bind the tiers, and each closes a gap someone else left open:
+Three rules bind the tiers, and each answers a question the cited drafts leave open:
 
 1. **The size is signed, not asserted.** A head that states a tree size without
    covering it with a signature lets the size be swapped after signing; the
@@ -399,7 +453,7 @@ Existing form, unchanged and still the default:
    "proof": ["<64 hex>", "..."]}]}
 ```
 
-Proposed additions, all optional, so existing packages and the 30-case corpus
+Proposed additions, all optional, so existing packages and the 32-case corpus
 keep their meaning:
 
 | field | values | required when |
@@ -470,12 +524,50 @@ refused". This is the minimum other drafts already require of themselves
 class; `draft-nestorov-scitt-p10-underdetermination-03` HALTs), and until this
 field existed no claim here could honestly be read as "cannot check".
 
+## 18. Security Considerations
+
+This section names what the mechanism does not defend against. A reviewer
+should treat an absent item here as a defect in this document, not as a
+property that was proven elsewhere.
+
+- **Metadata relabelling.** The root covers content hashes, so a package holder
+  can change paths, `media_type` or `action_type` and re-derive the index digest
+  while the anchored root stays valid (Section 4.1). The seal and the head are
+  the only things that expose this; a reader who verifies the anchor alone is
+  reading a weaker statement than they think.
+- **Backend trust.** An OTS calendar or a Nostr relay can refuse, delay, or
+  equivocate. Submitting to more than one is a SHOULD (Section 8.3); a
+  single-backend `anchored` verdict inherits that backend's availability and
+  honesty. Whether the Bitcoin block depth is sufficient is the reader's policy,
+  not this document's.
+- **Key lifecycle.** `REVOKED` exists as an outcome (Section 7) but this
+  document specifies no rotation, no revocation distribution, and no key history.
+  A seal key that is rotated without history makes older packages unverifiable
+  in a way that looks like tampering.
+- **Resource exhaustion.** Nothing here bounds the number of evidence entries,
+  the nesting depth of referenced policies, or the size of a single evidence file.
+  A verifier MUST apply local limits and report a package that exceeds them as
+  `FAIL` (refused), never as `PASS`.
+- **Verification side channels.** Signature and MAC comparison SHOULD be
+  constant-time with respect to the signature bytes; this document does not
+  require a particular implementation, but a timing-observable comparison
+  undermines S6 regardless of algorithm.
+- **Privacy.** Evidence bytes are handed to whoever verifies the package. The
+  package format has no redaction mechanism: a producer who needs one must
+  commit to a digest of redacted content and keep the original elsewhere, and
+  should say so rather than assume the format hides anything.
+- **Hash agility.** SHA-256 appears as *the* hash throughout. A future
+  transition needs a versioned algorithm identifier, which this document does
+  not define; until it does, a package is verifiable only under SHA-256.
+
 ## Implementation Status
 
-_As of 2026-11-25, repository `232deb4`, reference verifier 0.5.5._
+_As of 2026-11-27, repository `bf91c81`, reference verifier 0.5.5._
 
-- Implemented and re-runnable: the 19-check procedure, the 58-case corpus with a
-  validator, anchor handling (OpenTimestamps + Nostr, `pending` vs `anchored`),
+- Implemented and re-runnable: the 19-check procedure, the 32-case corpus with a
+  validator, anchor handling (`evidence-merkle` today; OpenTimestamps + Nostr
+  exist as tools, and `pending` vs `anchored` is proposed in Section 17 but not
+  read by the verifier),
   the differential report with two denominators, the per-axis report
   (`tools/axis_report.py`), the verification bundle (`--bundle-out`), the reader
   trust ladder (`--trustlist`), and head co-signature by two distinct keys

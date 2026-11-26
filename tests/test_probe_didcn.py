@@ -52,3 +52,17 @@ def test_the_page_quotes_what_the_record_measured():
     assert "facts: current" in text
     assert "%d of %d" % (verdict["accepted_as_success"], verdict["invalid_cases"]) in text
     assert "vcVerificationStatus" in text or "vcVerificationStatus" in text.replace("`", "")
+
+
+def test_one_code_one_agent_is_actually_pressed():
+    """GB/Z 185.2 6 d). A check that never resolves anything proves nothing."""
+    uni = os.path.join(REPO, "docs", "didcn-uniqueness.json")
+    rec = json.load(open(uni, encoding="utf-8"))
+    problems, u = probe.check_uniqueness(rec)
+    assert problems == [], problems
+    assert len(u["repeat"]) >= 1, "no code was resolved twice"
+    assert u["holds"] is True
+
+    rec["duplicates"] = ["did:cn:dupe:x"]
+    problems, _ = probe.check_uniqueness(rec)
+    assert any("appear twice" in p for p in problems), problems

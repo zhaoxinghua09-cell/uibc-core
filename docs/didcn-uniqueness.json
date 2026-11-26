@@ -1,0 +1,76 @@
+{
+ "checked_list": 79,
+ "duplicates": [],
+ "repeat": [
+  {
+   "did": "did:cn:agent:sf72CmurU1pnWun9FjNWZ3dMTUXBpTy6",
+   "first": {
+    "http": 200,
+    "success": true,
+    "code": 0,
+    "resolution": "SUCCESS",
+    "vc": "SKIPPED",
+    "trust": true,
+    "ms": 85
+   },
+   "second": {
+    "http": 200,
+    "success": true,
+    "code": 0,
+    "resolution": "SUCCESS",
+    "vc": "SKIPPED",
+    "trust": true,
+    "ms": 51
+   },
+   "same": true
+  },
+  {
+   "did": "did:cn:agent:sf26TaP8ZCDw7jxLitjNGwaoq1qUzqTPX",
+   "first": {
+    "http": 200,
+    "success": true,
+    "code": 0,
+    "resolution": "SUCCESS",
+    "vc": "SKIPPED",
+    "trust": true,
+    "ms": 48
+   },
+   "second": {
+    "http": 200,
+    "success": true,
+    "code": 0,
+    "resolution": "SUCCESS",
+    "vc": "SKIPPED",
+    "trust": true,
+    "ms": 53
+   },
+   "same": true
+  },
+  {
+   "did": "did:cn:agent:sfKvhQocnYJJME4zGDdRqvWtes21Mi9c",
+   "first": {
+    "http": 200,
+    "success": true,
+    "code": 0,
+    "resolution": "SUCCESS",
+    "vc": "SKIPPED",
+    "trust": true,
+    "ms": 89
+   },
+   "second": {
+    "http": 200,
+    "success": true,
+    "code": 0,
+    "resolution": "SUCCESS",
+    "vc": "SKIPPED",
+    "trust": true,
+    "ms": 45
+   },
+   "same": true
+  }
+ ],
+ "holds": true,
+ "note": "GB/Z 185.2-2026 clause 6 d): one identity code may correspond to one agent only. Checked as far as an outsider can: list uniqueness + repeat resolution.",
+ "probed_at": "2026-11-26T10:49:30Z",
+ "listing_http": 200
+}

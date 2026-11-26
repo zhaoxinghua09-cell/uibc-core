@@ -1261,6 +1261,7 @@ docs/conformance/reports/aee-288-20261124.json
 docs/conformance/vectors.json
 docs/coverage-ledger.json
 docs/didcn-probe.json
+docs/didcn-uniqueness.json
 docs/ecosystem-map.html
 docs/evidence/20261126-phase28/README.md
 docs/evidence/20261126-phase28/adversarial_v11.json

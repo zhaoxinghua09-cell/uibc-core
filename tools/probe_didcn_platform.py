@@ -207,13 +207,91 @@ def page(rec, v):
     ])
 
 
+def uniqueness(rec, sample=3, timeout=30):
+    """GB/Z 185.2 clause 6 d): one identity code, one agent.
+
+    The standard requires a 1:1 mapping. That is the only clause in it an
+    outsider can check from outside, and only weakly:
+
+      1. the published list must not contain the same code twice;
+      2. resolving one code twice must return the same identifier.
+
+    Both are necessary, neither is sufficient: the platform could still hand
+    two agents the same code without publishing both. So the verdict says
+    "holds as far as an outsider can see", not "conforms".
+    """
+    dids = rec.get("agent_dids") or []
+    dupes = sorted({d for d in dids if dids.count(d) > 1})
+    picks = [d for d in dids if d not in dupes][:sample]
+    twice = []
+    for d in picks:
+        a, b = _post(d, timeout), _post(d, timeout)
+        same = (a.get("http") == b.get("http") and a.get("resolution") == b.get("resolution")
+                and a.get("vc") == b.get("vc"))
+        twice.append({"did": d, "first": a, "second": b, "same": same})
+    return {"checked_list": len(dids), "duplicates": dupes,
+            "repeat": twice,
+            "holds": not dupes and all(t["same"] for t in twice) and bool(picks)}
+
+
+def check_uniqueness(rec):
+    u = rec.get("uniqueness") or rec
+    problems = []
+    if not u.get("checked_list"):
+        problems.append("the agent list was never read: no evidence either way")
+    if u.get("duplicates"):
+        problems.append("%d code(s) appear twice in the published list: %s" % (
+            len(u["duplicates"]), ", ".join(u["duplicates"][:3])))
+    for t in u.get("repeat") or []:
+        if not t["same"]:
+            problems.append("resolving %s twice gave different answers" % t["did"])
+    if not (u.get("repeat") or []):
+        problems.append("no code was resolved twice, so 1:1 was never pressed")
+    if "clause" not in u.get("note", ""):
+        problems.append("the note does not name the clause it is checking (GB/Z 185.2 6 d)")
+    return problems, u
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--run", action="store_true", help="probe the live platform (network) and rewrite the record")
     ap.add_argument("--check", action="store_true", help="offline: check the recorded observations and the page")
+    ap.add_argument("--uniqueness", action="store_true",
+                    help="network: check GB/Z 185.2 6 d) -- one code, one agent -- as far as an outsider can")
+    ap.add_argument("--check-uniqueness", action="store_true", help="offline: check the uniqueness record")
     ap.add_argument("--json", default=os.path.join("docs", "didcn-probe.json"))
     ap.add_argument("--page", default=os.path.join("docs", "DIDCN-PROBE.md"))
+    ap.add_argument("--uniq-json", default=os.path.join("docs", "didcn-uniqueness.json"))
     args = ap.parse_args(argv)
+    if args.uniqueness:
+        rec = json.load(open(args.json, encoding="utf-8")) if os.path.exists(args.json) else {}
+        listing = _get(AGENTS)
+        req = urllib.request.Request(BASE + AGENTS, headers={"User-Agent": UA})
+        raw = urllib.request.urlopen(req, timeout=30).read()
+        data = (json.loads(raw.decode("utf-8", "replace")).get("data") or {})
+        dids = [x.get("did") for x in (data if isinstance(data, list) else data.get("list") or []) if x.get("did")]
+        u = uniqueness({"agent_dids": dids})
+        u["note"] = "GB/Z 185.2-2026 clause 6 d): one identity code may correspond to one agent only. " \
+                    "Checked as far as an outsider can: list uniqueness + repeat resolution."
+        u["probed_at"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+        u["listing_http"] = listing.get("http")
+        os.makedirs(os.path.dirname(args.uniq_json), exist_ok=True)
+        with open(args.uniq_json, "w", encoding="utf-8", newline="\n") as fh:
+            json.dump(u, fh, ensure_ascii=False, indent=1)
+            fh.write("\n")
+        print("list=%s duplicates=%d repeat=%d holds=%s" % (
+            u["checked_list"], len(u["duplicates"]), len(u["repeat"]), u["holds"]))
+        print("UNIQUENESS OK (as far as an outsider can see)" if u["holds"] else "UNIQUENESS FAILED")
+        return 0 if u["holds"] else 1
+    if args.check_uniqueness:
+        rec = json.load(open(args.uniq_json, encoding="utf-8"))
+        problems, u = check_uniqueness(rec)
+        for p in problems:
+            print("PROBLEM:", p)
+        print("list=%s duplicates=%d repeat=%d" % (u.get("checked_list"), len(u.get("duplicates") or []),
+                                                   len(u.get("repeat") or [])))
+        print("UNIQUENESS CHECK OK" if not problems else "UNIQUENESS CHECK FAILED")
+        return 0 if not problems else 1
     if args.run:
         rec = collect()
         os.makedirs(os.path.dirname(args.json), exist_ok=True)

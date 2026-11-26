@@ -20,7 +20,7 @@ git clone https://github.com/zhaoxinghua09-cell/uibc-core.git
 cd uibc-core && git checkout feat/standards-exceed-20261125
 python tools/outsider_chain_audit.py     # expect VERDICT: OK, 4 ok lines
 python tools/axis_report.py              # expect: 32 cases, 32 consistent, 0 divergent
-python -m pytest -q                      # expect: 2087 passed, 0 failed, 32 skipped
+python -m pytest -q                      # expect: ~2,100 tests, all pass, a few skipped
 ```
 
 If you have only a tarball: `python tools/extract_tar.py <file>.tar.gz --dest out`.

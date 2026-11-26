@@ -23,7 +23,7 @@
 | S13 | merkle inclusion proofs | 否 | 9 | 4 | 14 |
 | S14 | strict base64 | 否 | 5 | 2 | 9 |
 | S15 | anchor event resolution | 否 | 7 | 4 | 14 |
-| S16 | external timestamp (RFC 3161) | 否 | 9 | 0 | 26 |
+| S16 | external timestamp (RFC 3161) | 否 | 9 | 4 | 26 |
 | S17 | linear receipt chain | 否 | 7 | 2 | 19 |
 | S18 | policy artefact resolution | 否 | 9 | 2 | 18 |
 | S19 | freshness state | 否 | 5 | 1 | 18 |
@@ -32,7 +32,7 @@
 
 **每项检查都至少有一个测试文件提到**。
 
-**红队实测中从未被任何攻击抓到的检查**：S0, S16
+**红队实测中从未被任何攻击抓到的检查**：S0
 （S0 不是检查：它是验证器自身异常时的兜底条目，没有可构造的攻击，因此不计入缺口。）
 
 ## 这份索引不能证明什么

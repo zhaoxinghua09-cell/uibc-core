@@ -1,0 +1,96 @@
+{
+ "registry": "W3C DID Methods (w3c/did-extensions, methods/)",
+ "registry_url": "https://www.w3.org/TR/did-extensions-methods/",
+ "total_methods": 282,
+ "national_related": [
+  {
+   "method": "cn",
+   "status": "registered",
+   "contactName": "China Academy of Information and Communications Technology (CAICT)",
+   "contactEmail": "zhangbo3@caict.ac.cn",
+   "vdr": "Astron",
+   "specification": "https://github.com/caict-4iot-dev/CN-DID-Method-Specification",
+   "spec_owner": "caict-4iot-dev",
+   "spec_owner_kind": "org-account",
+   "in_registry": true
+  },
+  {
+   "method": "bid",
+   "status": "registered",
+   "contactName": "teleinfo caict",
+   "contactEmail": "",
+   "vdr": "bif",
+   "specification": "https://github.com/teleinfo-bif/bid/tree/master/doc/en",
+   "spec_owner": "teleinfo-bif",
+   "spec_owner_kind": "personal-account",
+   "in_registry": true
+  },
+  {
+   "method": "cndid",
+   "status": "registered",
+   "contactName": "teleinfo caict",
+   "contactEmail": "blockchain@teleinfo.cn",
+   "vdr": "TChain",
+   "specification": "https://github.com/teleinfo-bif/cndid/blob/main/doc/en/CNDID%20Protocol%20Specification.md",
+   "spec_owner": "teleinfo-bif",
+   "spec_owner_kind": "personal-account",
+   "in_registry": true
+  },
+  {
+   "method": "ioa",
+   "status": "registered",
+   "contactName": "teleinfo caict",
+   "contactEmail": "jinyashuo@teleinfo.cn",
+   "vdr": "TChain",
+   "specification": "https://github.com/ReciterKim/ioa/blob/main/doc/en/IOA%20Protocol%20Specification.md",
+   "spec_owner": "ReciterKim",
+   "spec_owner_kind": "personal-account",
+   "in_registry": true
+  },
+  {
+   "method": "ctid",
+   "status": "registered",
+   "contactName": "Beijing Zhongdun Anxin Science and Technology Development Co., Ltd",
+   "contactEmail": "liwending@anicert.cn",
+   "vdr": "",
+   "specification": "https://github.com/617640999/ctid-did-register/blob/main/anicert-ctid-did-en.md",
+   "spec_owner": "617640999",
+   "spec_owner_kind": "personal-account",
+   "in_registry": true
+  },
+  {
+   "method": "kr",
+   "status": "registered",
+   "contactName": "Ministry of the Interior and Safety, korea",
+   "contactEmail": "",
+   "vdr": "Korea Mobile Identity System",
+   "specification": "https://github.com/identify202020/did-method/blob/main/did_kr_method.md",
+   "spec_owner": "identify202020",
+   "spec_owner_kind": "personal-account",
+   "in_registry": true
+  },
+  {
+   "method": "andorra",
+   "status": "registered",
+   "contactName": "David García Beatove",
+   "contactEmail": "david.garciab@vargroupiberia.com",
+   "vdr": "Andorra National Registry (NRTAD)",
+   "specification": "https://github.com/davidgarciavargroupiberia/did-andorra-method-spec/blob/main/spec.md",
+   "spec_owner": "davidgarciavargroupiberia",
+   "spec_owner_kind": "personal-account",
+   "in_registry": true
+  },
+  {
+   "method": "pki",
+   "status": "registered",
+   "contactName": "Eduardo Chongkan",
+   "contactEmail": "open@attestto.com",
+   "vdr": "National PKI Trust Registries (X.509)",
+   "specification": "https://github.com/Attestto-com/did-pki-spec",
+   "spec_owner": "Attestto-com",
+   "spec_owner_kind": "org-account",
+   "in_registry": true
+  }
+ ],
+ "reading": "registry entries only; a national body named in a contact field is not proof that the method is operated, resolvable, or authorised"
+}

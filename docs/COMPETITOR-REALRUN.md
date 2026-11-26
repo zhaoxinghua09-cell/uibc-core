@@ -10,6 +10,7 @@
 | `decentralized-identity/ethr-did-resolver` | `6e0bd4770249` | 182 | 178 | 1 | 3 | 19.51 | 1 |
 | `decentralized-identity/did-resolver` | `005411b26ac3` | 25 | 25 | 0 | 0 | 3.25 | 0 |
 | `uport-project/ethr-did` | `4bbd2ef539ba` | 38 | 37 | 1 | 0 | 92.10 | 1 |
+| `digitalbazaar/did-io` | `940555f002fb` | 26 | 26 | 0 | 0 | 3.00 | 0 |
 
 ## `decentralized-identity/did-jwt`
 
@@ -37,6 +38,13 @@
 - 安装：pnpm 拒绝（仓内 packageManager 指向 yarn，报 'This project is configured to use yarn'）；改用 npm install --legacy-peer-deps --ignore-scripts，2 分 0 秒装完 1334 个包。
 - 套件：`jest --ci（仓内 test 脚本是 cross-env NODE_OPTIONS=--experimental-vm-modules jest）` → 3 文件 / 38 用例 / 1 红 / 0 跳过 / 92.10 s / exit 1
 - 结论：38 条里 37 绿、1 红：src/__tests__/index.test.ts:187 的 'expire automatically > resolves document' 先 sleep(5) 卡过期窗口，再对解析结果做深比较——这是对时间的断言，本机上窗口没卡准就红。属测试自身对时钟敏感，不是代码缺陷，也不作为本表任何一维的证据。整套 92 秒，主要花在一条真实 RPC 链路上。
+
+## `digitalbazaar/did-io`
+
+- 安装：`npm install --ignore-scripts --no-audit --no-fund` 403 packages, 19s。无 workspace，无 lockfile 冲突。
+- 套件：``mocha --preserve-symlinks -t 30000 test/**/*.spec.js`（package.json 的 test-node 脚本，去掉 cross-env 与 reporter 变量）` → 1 文件 / 26 用例 / 0 红 / 0 跳过 / 3.00 s / exit 0
+- 额外探针：它自己的 `test` 脚本（经 cross-env 与 ${REPORTER:-spec} 展开） → exit 0。在 POSIX shell 下可用；本机 PowerShell 里 `${REPORTER:-spec}` 不会被展开，所以直接调 mocha 跑同一批 spec。 读法：同一批用例，换入口跑出来的数一样（26/26）。
+- 结论：26 条全过，绿得干净。但这是个 DID 文档缓存/驱动层，测的是缓存与 driver 派发，不含任何逐位变异或跨实现比对——绿与本表 D2 无关。
 
 ## 为什么这些数字不进表
 

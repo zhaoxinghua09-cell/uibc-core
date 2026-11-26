@@ -9,6 +9,7 @@
 | `decentralized-identity/did-jwt` | `63663c1f40b4` | 506 | 506 | 0 | 0 | 4.22 | 0 |
 | `decentralized-identity/ethr-did-resolver` | `6e0bd4770249` | 182 | 178 | 1 | 3 | 19.51 | 1 |
 | `decentralized-identity/did-resolver` | `005411b26ac3` | 25 | 25 | 0 | 0 | 3.25 | 0 |
+| `uport-project/ethr-did` | `4bbd2ef539ba` | 38 | 37 | 1 | 0 | 92.10 | 1 |
 
 ## `decentralized-identity/did-jwt`
 
@@ -30,6 +31,12 @@
 - 安装：pnpm install --ignore-scripts --no-frozen-lockfile 22.5s 完成；唯一告警是 unmet peer @typescript/native（仓库钉的是 typescript 7.0.2，peer 要 >=7.1.0-dev），不影响测试。npm 路线在这类 pnpm 仓上会先撞 Cannot read properties of null (reading edgesOut)，没用。
 - 套件：`pnpm test → vitest run` → 1 文件 / 25 用例 / 0 红 / 0 跳过 / 3.25 s / exit 0
 - 结论：25 条全过、1 个测试文件、644 行测试、57 处 expect、2 处 rejects。命中本表六个变异维度全是 0（bit_level / fuzz / mutation_testing / property_based / address_derive / exit_code_gate），只有 3 处 reject_assertion —— 断言集中在解析结果的结构和拒绝路径上，没有一条把报文的位或地址从头推一遍。绿不等于本表任何一维。
+
+## `uport-project/ethr-did`
+
+- 安装：pnpm 拒绝（仓内 packageManager 指向 yarn，报 'This project is configured to use yarn'）；改用 npm install --legacy-peer-deps --ignore-scripts，2 分 0 秒装完 1334 个包。
+- 套件：`jest --ci（仓内 test 脚本是 cross-env NODE_OPTIONS=--experimental-vm-modules jest）` → 3 文件 / 38 用例 / 1 红 / 0 跳过 / 92.10 s / exit 1
+- 结论：38 条里 37 绿、1 红：src/__tests__/index.test.ts:187 的 'expire automatically > resolves document' 先 sleep(5) 卡过期窗口，再对解析结果做深比较——这是对时间的断言，本机上窗口没卡准就红。属测试自身对时钟敏感，不是代码缺陷，也不作为本表任何一维的证据。整套 92 秒，主要花在一条真实 RPC 链路上。
 
 ## 为什么这些数字不进表
 

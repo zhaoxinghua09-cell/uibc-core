@@ -1158,6 +1158,7 @@ docs/NEGATIVE-CONTROL.md
 docs/NOSTR-ANCHOR.md
 docs/ONE-CLICK.md
 docs/ONE-COMMAND-AUDIT.md
+docs/ONE-PAGER.html
 docs/ORACLE.md
 docs/OUTSIDE-KIT.md
 docs/OUTSIDER-AUDIT.md

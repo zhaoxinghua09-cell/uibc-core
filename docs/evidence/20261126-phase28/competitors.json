@@ -1,6 +1,6 @@
 {
-  "as_of": "2026-11-25",
-  "scope": "隐私保护验证与选择性披露：主流格式/基础设施与 Agent 生态（28 项）",
+  "as_of": "2026-11-26",
+  "scope": "隐私保护验证与选择性披露：主流格式/基础设施与 Agent 生态（28 项）；2026-11-26 扩至 31 行（新增 C2PA 2.x / VC Forgery Defense / SCITT ARP）",
   "rows": [
     {
       "name": "SD-JWT（RFC 9901，2025-11 发布）",
@@ -17,7 +17,7 @@
       "uibc_vs": "机制同类（哈希+签名）；UIBC 披露单元是证据文件，SD-JWT 是 claim。UIBC 已加 purpose/nonce/撤销绑定，SD-JWT 需 KB-JWT 等组合"
     },
     {
-      "name": "SD-JWT VC（draft-ietf-oauth-sd-jwt-vc-13，2025-11）",
+      "name": "SD-JWT VC（最新 draft-24，2026-11-05 进 IESG 评估，仍标 Revised I-D Needed；HAIP 仍 pin draft-13）",
       "org": "IETF OAuth WG",
       "granularity": "claim 级",
       "mechanism": "SD-JWT 的凭证 profile",
@@ -60,7 +60,7 @@
       "source_note": "ISO 直连页（含状态/阶段/编号）；对本机脚本仍 403，内容经抓取工具读到完整元数据后核实（2026-11-26）"
     },
     {
-      "name": "Token Status List（draft-ietf-oauth-status-list-14，2025-12）",
+      "name": "Token Status List（最新 draft-21，2026-06-21 已进 RFC Editor 队列；HAIP 仍 pin draft-14）",
       "org": "IETF OAuth WG",
       "granularity": "单 bit 状态",
       "mechanism": "位数组 + 签名的 Status List Token",
@@ -406,6 +406,48 @@
       "source": "https://learn.microsoft.com/en-us/entra/verified-id/whats-new",
       "uibc_vs": "企业级落地与运维是它的强项；UIBC 的差异是“验证方不依赖任何服务端、包内自证”，代价是没有托管 SLA 与合规背书",
       "ours_gap": "无托管服务、无合规资质"
+    },
+    {
+      "name": "C2PA 2.x（Content Credentials：断言级 hard redaction + 软脱敏研究）",
+      "org": "Coalition for Content Provenance and Authenticity（Adobe/Microsoft/Google/BBC 等）",
+      "granularity": "断言（assertion）级：签名 claim 引用 assertion store，可按断言标签删除或置零",
+      "mechanism": "X.509 签名的 claim + 硬绑定（字节/盒子哈希，或 BMFF v3）+ redacted_assertions 显式声明；被删断言的 URI（含标签）仍留在 claim 里，验证方能知道「删了哪一类、何时删的」，但拿不到值；c2pa.actions 与硬绑定禁止 redaction。软脱敏（arXiv 2608.07063，Collomosse）把敏感断言换成对隐藏值的零知识谓词证明，挂进 update manifest，秒级生成/毫秒验证",
+      "unlinkability": "无内建不可关联（同一 asset 的 manifest store 可持续追踪）",
+      "revocation_privacy": "不适用（无凭证撤销概念，靠 provenance 链与 trust list）",
+      "offline": "是（manifest 随资产走，验签不需联网）",
+      "evidence_level": "是（硬绑定即对资产字节的承诺）",
+      "deps": "JUMBF 容器 + X.509 证书链 + 各家 trust list",
+      "maturity": "规范 2.x 现行并已大规模嵌入相机/编辑软件；软脱敏仍为研究阶段",
+      "source": "https://spec.c2pa.org/specifications/specifications/2.3/specs/C2PA_Specification.html",
+      "uibc_vs": "**这一项它领先我们**：我们实测过「删掉证据正文保留索引 → verify=FAIL」，即改动等于换包、换封条即换身份；C2PA 把「删除」本身做成可验证的事件（删值留哈希+显式声明）。我们不缺哈希与签名，缺的是 redaction 语义。反向差距：C2PA 面向媒体资产，无 purpose/nonce 绑定，也无法证明「某文件属于某运行包」；两者不是替代关系"
+    },
+    {
+      "name": "W3C VC Forgery Defense v1.0（indexed hash witnesses，FPWD 2026-06-30）",
+      "org": "W3C Verifiable Credentials WG",
+      "granularity": "凭证级：issuer 发布见证列表，逐条证书一个短见证",
+      "mechanism": "witnessSeed + 位置派生短见证；见证列表本身是 VC，可用与受保护凭证不同的算法签名（含 PQC）；三种模式（implicit 挂 Bitstring Status List / explicit 加 credentialStatus / standalone）",
+      "unlinkability": "见证是索引型，验证方需拿到整张列表（同 Bitstring 的 herd privacy 问题）",
+      "revocation_privacy": "与状态列表同源，不额外改善",
+      "offline": "是（列表随凭证分发）",
+      "evidence_level": "否（证明「确由该 issuer 签发」，不是文件指纹）",
+      "deps": "VC 数据模型 2.0 + 状态列表",
+      "maturity": "First Public Working Draft（2026-06-30），尚无生产实现",
+      "source": "https://www.w3.org/TR/2026/WD-vc-forgery-defense-1.0-20260630/",
+      "uibc_vs": "与我们 witness 机制同族（都靠「独立第三方持有的索引见证」防仿冒），但层级不同：它见证凭证签发，我们见证运行证据包与状态列表。**我们落后在两处**：标准化（它进了 W3C 轨道，我们只有自测）、独立签发者（我们的见证方仍是演示密钥）。机制思路我们已具备，缺的是外部主体"
+    },
+    {
+      "name": "IETF SCITT ARP（Attestation Reconciliation Protocol，draft-hillier-scitt-arp-02，2026-08-08）",
+      "org": "IETF SCITT",
+      "granularity": "跨主权登记所的 claim 级对账；只回裁决与可选分歧轴",
+      "mechanism": "claim 规范化 → 按各登记所投影为「最近可允许祖先谓词」→ 传登记所专属密文 → 收部分断言（payload 只含裁决/分歧轴）→ 同态或哈希链接聚合 → 用策略版本哈希封存；含 requester 身份绑定与 agent 的 friend-or-foe 判定",
+      "unlinkability": "部分（登记所只见投影后的谓词，不见原值；聚合结果可被策略版本关联）",
+      "revocation_privacy": "不适用",
+      "offline": "否（对账需与登记所交互）",
+      "evidence_level": "部分（对的是 claim 谓词，不是文件字节）",
+      "deps": "SCITT 架构 + COSE Receipts + HTTP Message Signatures",
+      "maturity": "Internet-Draft -02（2026-08-08），Standards Track 意向",
+      "source": "https://www.ietf.org/archive/id/draft-hillier-scitt-arp-02.html",
+      "uibc_vs": "方向与我们最接近的一项「最小披露 + 不让运营方看见全文」，且已把我们没做的两件事做了：跨主体对账的确定性协议、agent principal 的敌我判定。差别在前提：它假设存在主权登记所，我们不假设任何登记所；它不承诺字节级证据，我们承诺。可作为 Phase 29 的互操作设计输入，但不能说成我们在它之上"
     }
   ],
   "summary": {
@@ -478,6 +520,10 @@
     "18013-5 Ed1 现状为 stage 90.92（To be revised），DIS 18013-5（编号 91081）在开发中——旧表仅写『国际标准，钱包落地』，未反映修订在即",
     "18013-7:2025（Ed 2）同样为 90.92；Ed 3 委员会草案（92626）于 2025-07-25 注册，将取代 2025 版",
     "23220-4:2026 的 ISO 参考编号为 86785，发布 2026-04；旧表记的 2026-06-30 是 BSI 的 PD 采纳日",
-    "三条 ISO 引用源的落点由 OBP/IEC 商店换成 iso.org 标准直连页"
+    "三条 ISO 引用源的落点由 OBP/IEC 商店换成 iso.org 标准直连页",
+    "C2PA 现行规范为 2.x（spec.c2pa.org 提供 2.0/2.1/2.3 版），redaction 语义为「删值留哈希 + redacted_assertions 显式声明」，c2pa.actions 与硬绑定禁止 redaction；软脱敏（ZKP 替换敏感断言）目前只有论文级实现（arXiv 2608.07063）",
+    "W3C VC Data Model 2.0 于 2025-05-15 成为 Recommendation（与本表第 15/16/19/20 行的套件/状态列表同批）；新增 VC Forgery Defense v1.0 为 2026-06-30 FPWD",
+    "Token Status List 最新为 draft-21（2026-06-21 进 RFC Editor 队列），SD-JWT VC 最新为 draft-24（2026-11-05 进 IESG 评估，仍标 Revised I-D Needed、1 个 DISCUSS 未清）——本表原记的 -14 / -13 是 HAIP pin 的版本，已改名注明",
+    "本表由 28 行扩到 31 行（2026-11-26）：新增 C2PA 2.x、W3C VC Forgery Defense v1.0、IETF SCITT ARP；S6 那五轮外部评审针对的是 28 行版本，不覆盖这三行"
   ]
 }

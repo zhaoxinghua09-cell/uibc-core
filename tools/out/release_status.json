@@ -1,9 +1,9 @@
 {
-  "when_utc": "2026-11-17T07:26:44Z",
+  "when_utc": "2026-11-19T11:07:53Z",
   "branch": "release/v1.1-precheck",
-  "local_head": "8c39416270351a0bf094a795e8c6db0fa87ac3ef",
-  "public_head": "8c39416270351a0bf094a795e8c6db0fa87ac3ef",
-  "reachable": true,
-  "in_sync": true,
-  "unreachable_reason": null
+  "local_head": "238fb37ec6e71e5df61e0802c4b62fcfd1121eee",
+  "public_head": null,
+  "reachable": false,
+  "in_sync": false,
+  "unreachable_reason": "fatal: unable to access 'https://github.com/zhaoxinghua09-cell/uibc-core.git/': Failed to connect to github.com port 443 after 21090 ms: Could not connect to server"
 }

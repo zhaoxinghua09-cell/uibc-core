@@ -167,27 +167,51 @@ a 3.8e9-leaf tree, leaf/step conventions not documented on the pages we found),
 not about one implementation's arithmetic. Independent inclusion verification
 therefore stays **blocked**, and no claim of it appears anywhere in the release.
 
-### OpenTimestamps: the second anchor type (2026-11-17)
+### OpenTimestamps: the second anchor type (2026-11-17, proof rebuilt 2026-11-25, block attestation 2026-11-26)
 
-The ASQAV compliance profile wants "RFC 3161, OpenTimestamps, or both". We
-submitted the same head digest to a public OTS calendar, so the two anchors
-cover one digest rather than two unrelated claims:
+The ASQAV compliance profile wants "RFC 3161, OpenTimestamps, or both". Both
+anchors cover **one digest**, `4ad23d91…` - the sha256 of the head file - rather
+than two unrelated claims:
 
 | item | value |
 |---|---|
-| file | `tools/out/release_status.json`, digest `4ad23d9153c3…7fd6e98` |
+| file | `tests/fixtures/anchor/anchored_head.json`, sha256 `4ad23d9153c3…7fd6e98` |
 | RFC 3161 | Free TSA token, `genTime=2026-11-17T08:11:35Z`, signature verified offline |
-| OpenTimestamps | `alice.btc.calendar.opentimestamps.org`, proof `tests/fixtures/anchor/ots_head.ots` (207 bytes) |
-| what the OTS proof says today | **one pending calendar attestation, zero Bitcoin block attestations** |
+| OpenTimestamps | three public calendars (`alice.btc`, `bob.btc`, `finney.calendar.eternitywall`), proof `tests/fixtures/anchor/ots_head.ots`, 635 bytes, stamped 2026-11-25 |
+| what the OTS proof says today | **three Bitcoin block attestations, one per calendar, all naming block 977449**, with the three pending calendar attestations still listed beside them. The block *header* is not fetched or checked against a chain source here, so what the proof says is `bitcoin_attested`; that its header matches Bitcoin is not asserted |
 
 That is the honest status: a calendar attestation says the calendar had this
 digest at submission time, which is weaker than a block attestation. The
-upgrade path (`tools/anchor_ots.py --upgrade`) needs hours to days, and the
-Bitcoin block header is not cross-checked here because that requires a chain
-source. `tests/test_v14_ots_anchor.py` asserts the proof contains **no**
-block attestation, so the claim cannot drift into "Bitcoin-anchored" by
-accident. The test is skipped when the `opentimestamps` library is absent: the
-verifier stays dependency-free.
+upgrade path (`tools/anchor_ots.py --upgrade`) asks each calendar the proof
+names; it needs hours to days, and the Bitcoin block header is not
+cross-checked here because that requires a chain source. A block attestation had to *appear in the proof* before this row could change, and on 2026-11-26 it did: both proofs were upgraded and now carry `BitcoinBlockHeaderAttestation` at height 977449 from each of the three calendars.
+
+**2026-11-26, the upgrade landed.** `tools/anchor_ots.py --upgrade` was run against both proofs (`tests/fixtures/anchor/ots_head.ots`, 635 B before the upgrade, and `tools/out/release_status.json.ots`); re-verifying both now lists three `BitcoinBlockHeaderAttestation` entries at **height 977449** and still lists the three pending calendar attestations. Read straight from the proof with the official library (the CLI's `--verify` reports the attestation but prints a blank height -- a gap in the reporter, not in the proof). Nothing here claims the header was checked against Bitcoin: that needs a chain source, and this repository still does not fetch one.
+
+Two corrections this section has to keep telling, both found on 2026-11-25:
+
+1. The original table paired `tools/out/release_status.json` with the digest
+   `4ad23d91…`. That digest belongs to `anchored_head.json`; the status file's
+   own sha256 is `d805faa9…`. The pairing said "one digest" while anchoring
+   two different files, so it is fixed above.
+2. The 2026-11-17 proof (207 bytes) was a **bare timestamp tree, no magic
+   header**. The official client answered "not a timestamp file", and our old
+   reader - which fed the proof's own first 32 bytes back in as the digest -
+   listed a pending attestation for `f0087497…`, a digest no committed file
+   has. A proof nobody else can read is not an anchor. The bytes are kept, as
+   a record of the defect, in `tests/fixtures/anchor/ots_head_20261117_invalid.ots`
+   (sha256 `9c22be24…`), and a test asserts it is reported unreadable.
+
+The rebuilt proof is a standard detached timestamp file: `ots info` prints
+`File sha256 hash: 4ad23d91…` and `ots --no-bitcoin verify -f <head> <proof>`
+reports pending confirmation for each calendar. `tools/anchor_ots.py --verify`
+now compares the digest the proof commits to with the digest of the file
+(`bound`), and `tests/test_v14_ots_anchor.py` asserts: standard container,
+digest equals `4ad23d91…`, at least two distinct calendars, and **no** block
+attestation - so the claim cannot drift into "Bitcoin-anchored" by accident.
+The test is skipped when the `opentimestamps` library is absent: the verifier
+stays dependency-free.
+
 ### Checkpoint key: what was tried (2026-11-17, all negative)
 
 | attempt | result |

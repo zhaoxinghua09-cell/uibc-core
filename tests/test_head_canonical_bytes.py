@@ -21,7 +21,7 @@ def test_message_is_jcs_of_the_same_object():
         "head": "ab" * 32,
         "role": "owner",
         "tree_size": 7,
-        "vds": "sha256:" + "cd" * 32,
+        "verifier_id": "sha256:" + "cd" * 32,
     })
     assert signed == expected
 
@@ -33,7 +33,7 @@ def test_member_order_does_not_change_the_bytes():
 
 
 def test_absent_optional_members_are_absent_not_null():
-    # tree_size/vds are omitted when unobserved, so a verifier cannot be told
+    # tree_size/verifier_id are omitted when unobserved, so a verifier cannot be told
     # "the signer saw null" and pass it off as "the signer saw nothing".
     signed = cosign_head.message("00" * 32, "owner", None, None)
     body = json.loads(signed.decode("utf-8"))

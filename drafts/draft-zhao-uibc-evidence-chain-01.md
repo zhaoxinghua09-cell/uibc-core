@@ -75,7 +75,8 @@ described in [RFC2119] and [RFC8174].
 - **Outcome**: `PASS`, `FAIL`, or `INCONCLUSIVE`, per check.
 - **Head**: the signed statement of Appendix F over the root, the tree size, the
   signer's `role` (`owner` or `witness`, and the two roles must use distinct
-  keys), and optionally the verifier identity `vds`. A head is not a package
+  keys), and optionally the verifier identity `verifier_id` (Section 2). A head
+  is not a package
   and does not carry evidence; the root is one of its members, not the whole.
 - **Tree size**: the number of leaves a head commits to; monotone non-decreasing
   across successive heads (Appendix F).
@@ -84,17 +85,23 @@ described in [RFC2119] and [RFC8174].
   uses synthetic keys.
 A head statement is one JSON object with four members: `head` (the member name;
 its **value** is the evidence root of Section 4, not a nested head), `role`
-(`owner` or `witness`), `tree_size`, and `vds`. It is signed over RFC 8785
-canonical bytes of that object, with `tree_size` and `vds` omitted only when the
-signer did not observe them. `tree_size` and `vds` sit inside the signed
-statement, so neither the size nor the verifier identity can be swapped after
-signing.
+(`owner` or `witness`), `tree_size`, and optionally `verifier_id`. It is signed
+over RFC 8785 canonical bytes of that object, with `tree_size` and
+`verifier_id` omitted only when the signer did not observe them. Both sit inside
+the signed statement, so neither the size nor the verifier identity can be
+swapped after signing.
 
-- **Vds**: a verifier identity — the key-id hash of the verifier's key — carried
-  inside a signed statement so a reader can tell which verifier saw which size.
-  It names a verifier, never an algorithm; "a `vds` the reader does not
-  recognise" (Appendix G.2) means "a verifier outside the reader's policy set",
-  and scheme support is a separate question, decided by `resolver`.
+- **Verifier id** (`verifier_id`): the key-id hash of the verifier's key, carried
+  inside a signed statement so a reader can tell which verifier observed which
+  size. It names a verifier, never a hash algorithm.
+- **Not `vds`**: RFC 9942 and the CCF and MMR receipt profiles use the header
+  parameter `vds` (label 395) for the verifiable-data-structure *algorithm*; that
+  value fixes the hash function and the node value size, and a verifier MUST
+  reject a receipt whose `vds` it does not support
+  (`draft-ietf-scitt-receipts-mmr-profile-00`, Section 3). This document uses
+  that name for nothing. Reusing a published name for a different object is how
+  a reader ends up unable to tell an algorithm identifier from a key identifier,
+  and the collision costs nothing to avoid.
 - **Checkpoint**: the stored head inside a package (`S8`), recomputed and
   compared; it is not an external anchor.
 - **Owner**: the holder of the seal key named in `identity.json`.
@@ -174,7 +181,7 @@ here, and no later section may widen it.
 |---|---|---|
 | Evidence root (this section) | each index entry's `content_hash`, sorted | paths, media types, index metadata, lifecycle, identity, or any manifest field other than `evidence_root` |
 | Seal (Section 6) | RFC 8785 canonical bytes of `identity.json` + `manifest.json` + `lifecycle.json` | the evidence bytes themselves (only their hashes, through `manifest.evidence_root`), paths, index metadata |
-| Head (Appendix F) | the root, the tree size, and optionally the verifier identity `vds`, inside one signed statement | everything the root does not commit, for the same reasons |
+| Head (Appendix F) | the root, the tree size, and optionally the verifier identity `verifier_id`, inside one signed statement | everything the root does not commit, for the same reasons |
 | Anchor (Section 8) | the evidence root alone, submitted to an external backend | identity, lifecycle, seal, paths, metadata |
 
 Consequences, stated rather than implied:
@@ -433,6 +440,20 @@ requested at this version.
 ## 12. References
 
 Normative: [RFC2119], [RFC8174], [RFC3339], [RFC8032], [RFC2104].
+
+Published standards this document builds on, read 2026-11-27: [RFC9943] (*An
+Architecture for Trustworthy and Transparent Digital Supply Chains*, Proposed
+Standard, 2026-06-30) and [RFC9942] (*CBOR Object Signing and Encryption (COSE)
+Receipts*, Proposed Standard, 2026-06-30). This document defines neither a
+transparency service nor a receipt format nor a verifiable-data-structure
+algorithm: it defines what a *package* commits and does not commit, and it reads
+receipts produced under those documents. Where a receipt is present, its meaning
+is theirs, not ours.
+
+The two receipt profiles the working group added in November 2026 are cited as
+live, at the revisions read on 2026-11-27:
+`draft-ietf-scitt-receipts-ccf-profile` **06** (2026-11-19) and
+`draft-ietf-scitt-receipts-mmr-profile` **00** (2026-11-21).
 
 Revisions read from the IETF datatracker API on 2026-11-27: `draft-gruszka-scitt-statement-identification` **05** (expires 2027-05-28), `draft-nestorov-scitt-p10-underdetermination` **03** (expires 2027-05-19), `draft-zambo-aer1` **26** (expires 2027-04-26), and `draft-birkholz-scitt-architecture` **02** (expired 2023-04-27 — cited as history, not as a live specification).
 
@@ -701,8 +722,8 @@ alongside `state: pending`, the record is rejected rather than reconciled.
    2026-11-25: changing a package's `resolver` from `evidence-merkle` to
    `sigstore` makes the verdict FAIL, because we cannot resolve it. That is the
    right answer for an algorithm we do not support — the MMR receipts profile
-   requires rejecting a receipt whose `vds` names a verifier outside the reader's
-policy set, and
+   requires rejecting a receipt whose `vds` (an algorithm identifier) the reader
+   does not support, and
    "I do not implement this" is not "this is false". What must reach
    INCONCLUSIVE is a different case: an anchor that **claims** to be anchored
    but carries no receipt the reader can check (`state: pending`) — missing
@@ -745,8 +766,9 @@ distinction this document has so far made by habit:
 The distinction this forces into the open: a verifier that does not implement a
 named scheme is **not** producing contrary evidence. Whether that is HALT or
 REJECT is a **policy choice**, and this document chooses REJECT, matching the
-MMR receipts profile's requirement to reject a receipt whose VDS the reader
-does not recognise.
+MMR receipts profile's requirement to reject a receipt whose `vds` the reader
+does not support. That `vds` is an algorithm identifier; this document's
+`verifier_id` is a key identifier, and the two are never compared.
 To keep that choice from erasing the distinction, the verifier now carries a
 report-level `unsupported` list naming the checks that failed this way: the
 verdict stays FAIL, but a reader can separate "could not check" from "checked and

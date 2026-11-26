@@ -189,9 +189,12 @@ defined, selected by name; a proof whose profile is not named is
 | `aer1` | `SHA-256(UTF-8 receipt_id)`, no prefix | `SHA-256(left \|\| right)`, no prefix | duplicated level by level | `SHA-256()` |
 
 Duplicating an odd tail under `rfc6962` would let two differently sized trees
-share a root; promoting it cannot. A root computed under one profile MUST NOT
-be verified under the other — that is a construction difference, not an
-implementation bug.
+share a root; promoting it cannot. `aer1` duplicates on purpose, because the
+vectors it serves were generated that way, and it inherits the ambiguity: two
+`aer1` trees of different sizes can share a root, so an `aer1` proof pins the
+leaf and the path but not the set size. A reader who needs size committed must
+read it from the head, not from a proof. A root computed under one profile MUST
+NOT be verified under the other — a construction difference, not a bug.
 
 
 ## 5. Verification Procedure
@@ -345,12 +348,16 @@ between witnesses, never to the anchor backend, which has no use for it.
 
 A report MUST NOT use the word "anchored" for the pending state.
 
-The pending-to-anchored transition is a **re-emission**, not an edit. Because
-`evidence/anchors.json` is inside the sealed bytes (Section 4.1), a package
-cannot change its own `state` in place: the producer emits a new generation with
-the receipt, a new seal and a new head, and keeps both generations. A verifier
-presented with a package whose file was edited to say `anchored` after sealing
-sees S6 or S8 fail, which is the intended outcome.
+The pending-to-anchored transition is a **re-emission**, not an edit. The reason
+is not that the file is committed — Section 3 says it is not — but that a
+generation is defined by the root and the head it carries: a package whose
+`state` changed while its root and head did not is a package whose claim exceeds
+its evidence. So the producer emits a new generation with the receipt, a new
+seal and a new head, and keeps both. A verifier presented with an edited file
+sees no integrity failure (nothing committed it) and answers from Section 17's
+rules instead: a claim that the receipt chain does not support is `FAIL`, and
+one the reader cannot check is `INCONCLUSIVE`. The edit is not *detected*; it is
+*tested*.
 
 ### 8.3 Backends
 

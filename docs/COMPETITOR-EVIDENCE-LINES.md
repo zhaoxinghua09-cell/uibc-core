@@ -29,6 +29,21 @@
 | `uport-project/ethr-did` | 0/10 | — |
 | `w3c-ccg/did-method-key` | 0/10 | — |
 | `w3c-ccg/did-test-suite` | 0/10 | — |
+| `TBD54566975/ssi-sdk` | 0/10 | — |
+| `TBD54566975/dwn-sdk-js` | 1/10 | D1 |
+| `cheqd/cheqd-node` | 3/10 | D1, D3, D4 |
+| `cheqd/sdk` | 0/10 | — |
+| `kiltprotocol/kilt-node` | 0/10 | — |
+| `iotaledger/identity.rs` | 0/10 | — |
+| `digitalbazaar/jsonld-signatures` | 0/10 | — |
+| `digitalbazaar/vc` | 0/10 | — |
+| `transmute-industries/verifiable-data` | 0/10 | — |
+| `alastria/alastria-identity` | 0/10 | — |
+| `energywebfoundation/iam-client-lib` | 0/10 | — |
+| `hyperledger/aries-framework-javascript` | 3/10 | D1, D3, D4 |
+| `openwallet-foundation/acapy-plugins` | 0/10 | — |
+| `blockchain-lab-um/masca` | 0/10 | — |
+| `web3id/web3id` | 0/10 | — |
 
 ## 逐家证据行
 
@@ -175,6 +190,43 @@
   - `packages/agent-config/src/agentCreator.ts:68` — `process.exit(1)`
   - `packages/agent-config/src/agentCreator.ts:77` — `process.exit(1)`
   - `packages/agent-config/src/agentCreator.ts:82` — `process.exit(1)`
+
+### `TBD54566975/dwn-sdk-js` — 1/10（commit `0e9030144643`）
+
+- **D1**（reject_assertion，测试 文件）
+  - `tests/core/protocol-authorization.spec.ts:40` — `method: 'invalid-method'`
+  - `tests/event-log/event-log.spec.ts:164` — `it('skips if cid is invalid', async () => {`
+  - `tests/features/author-delegated-grant.spec.ts:873` — `// 4. Bob's DWN should reject Device X's message`
+
+### `cheqd/cheqd-node` — 3/10（commit `ae52af92966e`）
+
+- **D1**（reject_assertion，测试 文件）
+  - `tests/integration/cli_diddoc_negative_test.go:280` — `//	   ii. fuzzed private key, invalid and non-matching`
+  - `tests/integration/cli_diddoc_negative_test.go:290` — `//	   ii. fuzzed private key, invalid and non-matching`
+  - `tests/integration/cli_diddoc_negative_test.go:359` — `//   b. sign inputs invalid length`
+- **D3**（address_derive，测试 文件）
+  - `tests/integration/cli_diddoc_test.go:325` — `publicKeyBase58 := testsetup.GenerateEd25519VerificationKey2018VerificationMaterial(publicKey)`
+  - `tests/integration/cli_diddoc_test.go:334` — `"publicKeyBase58": publicKeyBase58,`
+  - `tests/integration/cli_diddoc_test.go:361` — `newPublicKeyBase58 := testsetup.GenerateEd25519VerificationKey2018VerificationMaterial(newPublicKey)`
+- **D4**（exit_code_gate，源码 文件）
+  - `cmd/cheqd-noded/main.go:16` — `os.Exit(1)`
+  - `installer/installer.py:2814` — `sys.exit(1)`
+  - `installer/installer.py:2831` — `sys.exit(1)`
+
+### `hyperledger/aries-framework-javascript` — 3/10（commit `06930296a96c`）
+
+- **D1**（reject_assertion，测试 文件）
+  - `packages/anoncreds/src/anoncreds-rs/__tests__/AnonCredsRsHolderService.test.ts:370` — `test('invalid referent', async () => {`
+  - `packages/anoncreds/src/anoncreds-rs/__tests__/AnonCredsRsHolderService.test.ts:376` — `).rejects.toThrow()`
+  - `packages/anoncreds/src/anoncreds-rs/__tests__/AnonCredsRsHolderService.test.ts:485` — `await expect(anonCredsHolderService.deleteCredential(agentContext, 'credentialId')).rejects.toThrow()`
+- **D3**（address_derive，测试 文件）
+  - `packages/anoncreds/src/formats/__tests__/anoncreds-format-services.test.ts:27` — `import { indyDidFromPublicKeyBase58 } from '../../../../core/src/utils/did'`
+  - `packages/anoncreds/src/formats/__tests__/anoncreds-format-services.test.ts:121` — `const namespaceIdentifier = indyDidFromPublicKeyBase58(`
+  - `packages/anoncreds/src/formats/__tests__/anoncreds-format-services.test.ts:122` — `TypedArrayEncoder.toBase58(Kms.PublicJwk.fromPublicJwk(key.publicJwk).publicKey.publicKey)`
+- **D4**（exit_code_gate，源码 文件）
+  - `packages/drizzle-storage/cli/cli-definition.ts:61` — `process.exit(1)`
+  - `packages/drizzle-storage/cli/cli-definition.ts:107` — `process.exit(1)`
+  - `packages/drizzle-storage/cli/cli-definition.ts:152` — `process.exit(1)`
 
 ## 怎么读
 

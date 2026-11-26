@@ -56,7 +56,7 @@ GATE = os.path.join(HERE, "tools", "mutation_gate.py")
 OURS = "zhaoxinghua09-cell/uibc-core"
 # The audit may grow; it may not quietly shrink back to the first nine. Anybody
 # who wants to remove a repository has to say so in the document.
-MIN_REPOS = 25
+MIN_REPOS = 40
 # A point is only worth something in a repository that asserts anything at all.
 # Five real assertion lines is the smallest honest sample this metric can
 # see, and it is the same floor the calibration block uses.
@@ -172,6 +172,21 @@ def fetch_pinned(repo, sha, cache):
                 t.extractall(dest, filter="data")
             except TypeError:
                 t.extractall(dest)
+            except tarfile.TarError:
+                # 上游 tar 里可能带绝对符号链接（iotaledger/identity.rs 的
+                # bindings/wasm/.license_template 就是），data 过滤器会整包拒绝。
+                # 计分只读普通文件，所以按成员逐个解：目录建、常规文件写，链接跳过。
+                for m in t.getmembers():
+                    if m.isdir():
+                        os.makedirs(os.path.join(dest, m.name), exist_ok=True)
+                    elif m.isfile():
+                        f = t.extractfile(m)
+                        if f is None:
+                            continue
+                        out = os.path.join(dest, m.name)
+                        os.makedirs(os.path.dirname(out), exist_ok=True)
+                        with open(out, "wb") as w:
+                            w.write(f.read())
     tops = [e for e in os.listdir(dest) if os.path.isdir(os.path.join(dest, e))]
     root = os.path.join(dest, tops[0]) if len(tops) == 1 else dest
     return root, tsha, os.path.getsize(tar_path)

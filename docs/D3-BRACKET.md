@@ -20,7 +20,10 @@
 | `hyperledger/indy-sdk` | 1 | 0 | 3 → 2 **← 变了** |
 | `hyperledger/indy-vdr` | 1 | 0 | 3 → 2 **← 变了** |
 | `sphereon-opensource/ssi-sdk` | 1 | 0 | 3 → 2 **← 变了** |
+| `cheqd/cheqd-node` | 1 | 0 | 3 → 2 **← 变了** |
+| `hyperledger/aries-framework-javascript` | 1 | 0 | 3 → 2 **← 变了** |
 | `ceramicnetwork/js-did` | 1 | 0 | 2 → 1 **← 变了** |
+| `TBD54566975/dwn-sdk-js` | 0 | 0 | 1 → 1 |
 | `WeBankBlockchain/WeIdentity` | 0 | 0 | 0 → 0 |
 | `caict-4iot-dev/uni-registrar-driver-did-bid` | 0 | 0 | 0 → 0 |
 | `caict-4iot-dev/uni-resolver-driver-did-bid` | 0 | 0 | 0 → 0 |
@@ -36,7 +39,19 @@
 | `uport-project/ethr-did` | 0 | 0 | 0 → 0 |
 | `w3c-ccg/did-method-key` | 0 | 0 | 0 → 0 |
 | `w3c-ccg/did-test-suite` | 0 | 0 | 0 → 0 |
+| `TBD54566975/ssi-sdk` | 0 | 0 | 0 → 0 |
+| `cheqd/sdk` | 0 | 0 | 0 → 0 |
+| `kiltprotocol/kilt-node` | 0 | 0 | 0 → 0 |
+| `iotaledger/identity.rs` | 0 | 0 | 0 → 0 |
+| `digitalbazaar/jsonld-signatures` | 0 | 0 | 0 → 0 |
+| `digitalbazaar/vc` | 0 | 0 | 0 → 0 |
+| `transmute-industries/verifiable-data` | 0 | 0 | 0 → 0 |
+| `alastria/alastria-identity` | 0 | 0 | 0 → 0 |
+| `energywebfoundation/iam-client-lib` | 0 | 0 | 0 → 0 |
+| `openwallet-foundation/acapy-plugins` | 0 | 0 | 0 → 0 |
+| `blockchain-lab-um/masca` | 0 | 0 | 0 → 0 |
+| `web3id/web3id` | 0 | 0 | 0 → 0 |
 
-变了 9 家，全部是宽规则下多给的分（严规则不会加分）。
+变了 11 家，全部是宽规则下多给的分（严规则不会加分）。
 
 结论口径：对外只能说"**在宽规则下最好 3/10、严规则下 3/10**"，不能说"最好就是 2 或 3"。

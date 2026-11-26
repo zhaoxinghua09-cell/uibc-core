@@ -202,6 +202,126 @@
    "strict_hits": 0,
    "score_broad": 0,
    "score_strict": 0
+  },
+  {
+   "repo": "TBD54566975/ssi-sdk",
+   "D3_broad": 0,
+   "D3_strict": 0,
+   "strict_hits": 0,
+   "score_broad": 0,
+   "score_strict": 0
+  },
+  {
+   "repo": "TBD54566975/dwn-sdk-js",
+   "D3_broad": 0,
+   "D3_strict": 0,
+   "strict_hits": 0,
+   "score_broad": 1,
+   "score_strict": 1
+  },
+  {
+   "repo": "cheqd/cheqd-node",
+   "D3_broad": 1,
+   "D3_strict": 0,
+   "strict_hits": 0,
+   "score_broad": 3,
+   "score_strict": 2
+  },
+  {
+   "repo": "cheqd/sdk",
+   "D3_broad": 0,
+   "D3_strict": 0,
+   "strict_hits": 0,
+   "score_broad": 0,
+   "score_strict": 0
+  },
+  {
+   "repo": "kiltprotocol/kilt-node",
+   "D3_broad": 0,
+   "D3_strict": 0,
+   "strict_hits": 0,
+   "score_broad": 0,
+   "score_strict": 0
+  },
+  {
+   "repo": "iotaledger/identity.rs",
+   "D3_broad": 0,
+   "D3_strict": 0,
+   "strict_hits": 0,
+   "score_broad": 0,
+   "score_strict": 0
+  },
+  {
+   "repo": "digitalbazaar/jsonld-signatures",
+   "D3_broad": 0,
+   "D3_strict": 0,
+   "strict_hits": 0,
+   "score_broad": 0,
+   "score_strict": 0
+  },
+  {
+   "repo": "digitalbazaar/vc",
+   "D3_broad": 0,
+   "D3_strict": 0,
+   "strict_hits": 0,
+   "score_broad": 0,
+   "score_strict": 0
+  },
+  {
+   "repo": "transmute-industries/verifiable-data",
+   "D3_broad": 0,
+   "D3_strict": 0,
+   "strict_hits": 0,
+   "score_broad": 0,
+   "score_strict": 0
+  },
+  {
+   "repo": "alastria/alastria-identity",
+   "D3_broad": 0,
+   "D3_strict": 0,
+   "strict_hits": 0,
+   "score_broad": 0,
+   "score_strict": 0
+  },
+  {
+   "repo": "energywebfoundation/iam-client-lib",
+   "D3_broad": 0,
+   "D3_strict": 0,
+   "strict_hits": 0,
+   "score_broad": 0,
+   "score_strict": 0
+  },
+  {
+   "repo": "hyperledger/aries-framework-javascript",
+   "D3_broad": 1,
+   "D3_strict": 0,
+   "strict_hits": 0,
+   "score_broad": 3,
+   "score_strict": 2
+  },
+  {
+   "repo": "openwallet-foundation/acapy-plugins",
+   "D3_broad": 0,
+   "D3_strict": 0,
+   "strict_hits": 0,
+   "score_broad": 0,
+   "score_strict": 0
+  },
+  {
+   "repo": "blockchain-lab-um/masca",
+   "D3_broad": 0,
+   "D3_strict": 0,
+   "strict_hits": 0,
+   "score_broad": 0,
+   "score_strict": 0
+  },
+  {
+   "repo": "web3id/web3id",
+   "D3_broad": 0,
+   "D3_strict": 0,
+   "strict_hits": 0,
+   "score_broad": 0,
+   "score_strict": 0
   }
  ],
  "changed": [
@@ -213,7 +333,9 @@
   "hyperledger/aries-framework-go",
   "hyperledger/indy-sdk",
   "hyperledger/indy-vdr",
-  "sphereon-opensource/ssi-sdk"
+  "sphereon-opensource/ssi-sdk",
+  "cheqd/cheqd-node",
+  "hyperledger/aries-framework-javascript"
  ],
  "best_broad": 3,
  "best_strict": 3,

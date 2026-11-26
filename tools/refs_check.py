@@ -121,13 +121,24 @@ def run(cache_token=None):
     snap = json.load(open(SNAPSHOT, encoding="utf-8"))
     token = cache_token or os.environ.get("GPAT") or None
     rows = []
+    def probe_retry(url):
+        """一次 TLS/连接抖动不等于"死链"。网络错误（status 0）重试三次再定性，
+        否则一份 40 条的报表会因为本机网络抖一下就判自己 17 条死。"""
+        r = None
+        for attempt in range(3):
+            r = probe(url, token)
+            if r.get("status") != 0:
+                return r
+            time.sleep(2.0 + 2.0 * attempt)
+        return r
+
     for c in citations(snap):
-        r = probe(c["url"], token)
+        r = probe_retry(c["url"])
         row = dict(c, **r)
         if moved(row):
             f = followed_url(row)
             if f:
-                fr = probe(f["url"], token)
+                fr = probe_retry(f["url"])
                 row["followed"] = dict(f, **fr)
         rows.append(row)
         note = row.get("error") or r.get("final_url") or ""
@@ -136,7 +147,7 @@ def run(cache_token=None):
         if row.get("followed"):
             note += " (at new name: %s)" % row["followed"]["status"]
         print("%-4s %-58s %s" % (row["status"], row["url"], note), flush=True)
-        time.sleep(0.4)  # be polite; 25 requests, not a crawl
+        time.sleep(0.4)  # be polite; one request per citation, not a crawl
     report = {
         "audited_at": _dt.date.today().isoformat(),
         "checked_at": _dt.datetime.now().replace(microsecond=0).isoformat(),

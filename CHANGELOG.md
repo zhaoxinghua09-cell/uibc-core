@@ -1,3 +1,11 @@
+## 未发布 — 2026-11-26（收据能点名"是哪个文件动了"，不再只说"有字节动了"）
+
+- **问题**：三根摘要只能回答"动不动"，回答不了"哪个"。上一轮把成员的来源钉死之后，剩下的失败信息仍然是一句 `CONTENT: receipt describes tree … but this tree hashes to …`——对一个外人来说，这句话没有下一步；对我们自己也是：跑完整套 `pytest` 会重写 `tools/out/mutation_benchmark.json` 里的 `meta.generated_at_utc`，于是重封前后摘要一定变，可是报告里看不出是这个文件。
+- **做法**：收据多一栏 `files_sha256`——每个成员一条 sha256（排除三件生成物）。`--check` 先按文件逐个比对，对不上的直接打 `DRIFT <path>: receipt <前 12 位> now <前 12 位>`（最多 8 条，多的报总数），再给结论。原来那句写死"可能是 mutation_benchmark.json"的提示换成"上面点名了"。
+- **代价与边界**：收据从 8 KB 变成约 230 KB（2455 条）。它本来就在摘要排除集里，所以三根轴一个数都没动；换来的是一句话：**换一台机器、不联网、不装 git，也能说出是哪一个文件的哪一个字节变了**。
+- **实测**：跑完整套 `pytest`（2162 条）之后 `--check` 现打 `DRIFT tools/out/mutation_benchmark.json: receipt … now …`；把该文件从提交里还原、再 `--run` 重封，`OUTSIDER OK: receipt matches this disk (2455 files, 86c05b15a2e8, content 904ddf75ae20), 4 steps passed`。
+- 断言 A36；`tests/test_outsider_rerun.py` 增 2 条（收据带每文件清单；改一个字节要点名到那个文件）。
+
 ## 未发布 — 2026-11-26（收据的"成员"不再取决于这台机器上恰好有什么）
 
 - **起因（实测缺陷）**：同一棵树上先跑一遍测试、再 `--run`，收据写下了 **2819 个文件**；而陌生人从这里克隆或解包得到的是 **2453**。差的那 366 个是测试跑出来的草稿（`benchmark/corpus/cases/M01/evidence/.lock`、`files/action.log` 等），仓里从未提交。也就是说，收据把"作者机器上的残留"记成了"仓库的样子"——正是我们一直在找的那类问题：同一句话，两个人打开看到不同的数。

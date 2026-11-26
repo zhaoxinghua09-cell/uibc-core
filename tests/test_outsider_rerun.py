@@ -250,3 +250,41 @@ def test_a_listed_path_that_is_gone_is_named(tool, tmp_path, monkeypatch, capsys
     assert tool.check_inventory() == 1
     out = capsys.readouterr().out
     assert "listed but absent: gone.txt" in out
+
+def test_receipt_carries_a_per_file_manifest(tool):
+    """Each file's hash is in the receipt, so a mismatch can name the file."""
+    _require_full_tree()
+    receipt = json.load(open(tool.RECEIPT, encoding="utf-8"))
+    manifest = receipt.get("files_sha256") or {}
+    assert len(manifest) == receipt["files_hashed"]
+    bad = [k for k, v in manifest.items() if len(v) != 64 or v.lower() != v]
+    assert not bad, bad[:3]
+    for rel in tool.GENERATED:
+        assert rel not in manifest
+
+
+def test_one_moved_byte_is_named(tool, tmp_path, monkeypatch, capsys):
+    """The receipt says wwwich file, not just "something moved"."""
+    root = tmp_path / "tree"
+    (root / "docs").mkdir(parents=True)
+    (root / "docs" / "TRACKED-FILES.txt").write_text(
+        "a.txt\nb.txt\ndocs/TRACKED-FILES.txt\n", encoding="utf-8")
+    (root / "a.txt").write_text("one\n", encoding="utf-8")
+    (root / "b.txt").write_text("two\n", encoding="utf-8")
+    monkeypatch.setattr(tool, "HERE", str(root))
+    monkeypatch.setattr(tool, "RECEIPT", str(root / "receipt.json"))
+    monkeypatch.setattr(tool, "PAGE", str(root / "page.md"))
+    digest = tool.tree_digest(str(root))
+    content = tool.content_digest(str(root))
+    steps = [{"step": n, "cmd": " ".join(a), "rc": 0, "ok": True, "seconds": 0.0}
+             for n, a, _expect in tool.STEPS]
+    tool.write_receipt(digest[0], digest[1], steps, content=content[0],
+                       content_files=content[1],
+                       content_lf=tool.content_lf_digest(str(root))[0],
+                       delivery="archive", files_sha256=tool.file_manifest(str(root)))
+    capsys.readouterr()
+    (root / "a.txt").write_text("one!\n", encoding="utf-8")
+    assert tool.check() == 1
+    out = capsys.readouterr().out
+    assert "DRIFT a.txt" in out
+    assert "DRIFT b.txt" not in out

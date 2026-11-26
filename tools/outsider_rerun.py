@@ -335,8 +335,30 @@ def run(steps_only=None):
             "results": results}
 
 
+def file_manifest(root, files=None):
+    """Per-file sha256, so a mismatch can name the files that moved.
+
+    The three digests answer "did anything move". This answers "which one",
+    offline, with no reference to git: the receipt carries it, the checker
+    recomputes it and prints the difference. It is also how the one file that a
+    test run legitimately rewrites (`tools/out/mutation_benchmark.json`, whose
+    `meta.generated_at_utc` is the clock) gets named instead of guessed.
+    """
+    out = {}
+    for rel in sorted(files if files is not None else tracked_files(root)):
+        if rel in GENERATED:
+            continue
+        p = os.path.join(root, rel.replace("/", os.sep))
+        try:
+            with open(p, "rb") as f:
+                out[rel] = hashlib.sha256(f.read()).hexdigest()
+        except OSError:
+            out[rel] = "unreadable"
+    return out
+
+
 def write_receipt(digest, files, results, content=None, content_files=None,
-                  content_lf=None, delivery=None):
+                  content_lf=None, delivery=None, files_sha256=None):
     receipt = {
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "tree_sha256": digest,
@@ -345,6 +367,7 @@ def write_receipt(digest, files, results, content=None, content_files=None,
         "content_files": content_files,
         "content_lf_sha256": content_lf,
         "delivery": delivery,
+        "files_sha256": files_sha256 or {},
         "digest_excludes": sorted(GENERATED),
         "runner": {"python": platform.python_version(), "machine": platform.machine(),
                    "system": platform.system()},
@@ -455,6 +478,18 @@ def check():
             fails.append(f"step {s.get('step')} tail does not carry its marker {s['expect']!r}")
     if sorted(receipt.get("digest_excludes", [])) != sorted(GENERATED):
         fails.append("receipt excludes a different set of files than the checker")
+    manifest = receipt.get("files_sha256") or {}
+    drift = []
+    if manifest:
+        now = file_manifest(HERE)
+        for rel in sorted(set(manifest) | set(now)):
+            if manifest.get(rel) != now.get(rel):
+                drift.append(rel)
+        for rel in drift[:8]:
+            print(f"DRIFT {rel}: receipt {str(manifest.get(rel))[:12]} now "
+                  f"{str(now.get(rel))[:12]}")
+        if len(drift) > 8:
+            print(f"DRIFT ... and {len(drift) - 8} more")
     for f in fails:
         print("FAIL", f)
     if names_only:
@@ -473,10 +508,10 @@ def check():
               f"{'worktree' if os.path.isdir(os.path.join(HERE, '.git')) else 'archive'} tree)")
         return 0
     if fails:
-        print("\nHOW TO FIX: rerun --run on this tree to seal the bytes you have. If you only")
-        print("ran the test suite, one tracked file is expected to have moved:")
-        print("tools/out/mutation_benchmark.json carries meta.generated_at_utc, which the")
-        print("benchmark rewrites with the clock. Restore it from the commit, or reseal.")
+        print("\nHOW TO FIX: the files that moved are named above. If you only ran the test")
+        print("suite, tools/out/mutation_benchmark.json is expected in that list: its")
+        print("meta.generated_at_utc is the clock, so a suite run rewrites it. Restore it")
+        print("from the commit, or reseal this tree with --run.")
         print(f"\nOUTSIDER FAIL ({len(fails)} problem(s))")
         return 1
     print(f"OUTSIDER OK: receipt matches this {view_name} ({count} files, {digest[:12]}, "
@@ -551,7 +586,8 @@ def main():
         out = run()
         rc = write_receipt(out["digest"], out["files"], out["results"],
                            content=out["content_digest"], content_files=out["content_files"],
-                           content_lf=out["content_lf_digest"], delivery=out["delivery"])
+                           content_lf=out["content_lf_digest"], delivery=out["delivery"],
+                           files_sha256=file_manifest(HERE))
     else:
         rc = check()
     if args.json:

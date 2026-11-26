@@ -1829,6 +1829,7 @@ schemas/verification-result.schema.json
 server.json
 sitemap.xml
 tests/STRESS_REPORT.md
+tests/conftest.py
 tests/data/bip340-vectors.csv
 tests/data/ots-format-sample.ots
 tests/fixtures/aer1-merkle-vectors.json

@@ -26,6 +26,7 @@ import datetime as _dt
 import json
 import os
 import threading
+import time
 
 from adapters.a2a.registry import binding_report
 
@@ -33,6 +34,10 @@ REGISTERED = "registered"
 ENABLED = "enabled"
 SUSPENDED = "suspended"
 REVOKED = "revoked"
+
+# How many times a state write is retried before the failure goes into the audit
+# trail. Windows can refuse `os.replace` while a scanner holds the target open.
+PERSIST_ATTEMPTS = 3
 
 STATES = (REGISTERED, ENABLED, SUSPENDED, REVOKED)
 TRANSITIONS = {
@@ -113,14 +118,26 @@ class LifecycleStore:
                    "states": dict(self._states),
                    "audit": self._audit[-200:]}
         tmp = self.path + ".tmp"
-        try:
-            with open(tmp, "w", encoding="utf-8") as handle:
-                json.dump(payload, handle, ensure_ascii=False, indent=2)
-            os.replace(tmp, self.path)
-        except OSError:
-            # Persistence is a durability aid, not the security boundary: never
-            # let a disk error resurrect a suspended agent *in memory* either.
-            pass
+        # On Windows `os.replace` can be refused while a scanner or indexer holds
+        # the target open; the first attempt then leaves the previous generation
+        # on disk and a restart test reads it. Retry before giving up - but do not
+        # give up silently: a swallow here means "this machine restarts into a
+        # state the audit cannot explain".
+        for attempt in range(PERSIST_ATTEMPTS):
+            try:
+                with open(tmp, "w", encoding="utf-8") as handle:
+                    json.dump(payload, handle, ensure_ascii=False, indent=2)
+                os.replace(tmp, self.path)
+                return
+            except OSError as exc:
+                if attempt + 1 == PERSIST_ATTEMPTS:
+                    # Persistence is a durability aid, not the security boundary:
+                    # the in-memory state still blocks. The failure is recorded so
+                    # a restart that comes back enabled is explainable afterwards.
+                    self._audit.append({"ts": self._ts(), "agent": "", "action": "persist_failed",
+                                        "from": "", "to": "", "reason": str(exc), "actor": "system"})
+                    return
+                time.sleep(0.02 * (attempt + 1))
 
     # -- transitions -------------------------------------------------------
     def register(self, record, actor="operator"):

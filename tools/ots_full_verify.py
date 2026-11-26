@@ -22,6 +22,7 @@ two committed receipts, so it needs no network and no server.
 Exit codes: 0 = every joined seam matches; 1 = a seam broke or an input is missing.
 """
 import argparse
+import hashlib
 import json
 import os
 import sys
@@ -32,9 +33,13 @@ sys.path.insert(0, ROOT)
 
 from tools import anchor_ots  # noqa: E402
 from tools import ots_block_crosscheck as cc  # noqa: E402
+from uibc_core import tsa  # noqa: E402
 
 DEFAULT_BLOCK_RECEIPT = os.path.join(ROOT, "docs", "anchor-ots-block-977449.json")
 DEFAULT_CHAIN_RECEIPT = os.path.join(ROOT, "docs", "anchor-ots-chain-977449.json")
+FIXTURES = os.path.join(ROOT, "tests", "fixtures", "anchor")
+DEFAULT_TSA = os.path.join(FIXTURES, "freetsa.tsr")
+DEFAULT_TSA_CA = os.path.join(FIXTURES, "freetsa_ca.pem")
 
 UNCHECKED = [
     "global most-work chain: needs a Bitcoin Core node (--node), none configured here",
@@ -49,7 +54,7 @@ def _same(left, right):
 
 def full_verify(file_path, proof_path, block_receipt=DEFAULT_BLOCK_RECEIPT,
                 chain_receipt=DEFAULT_CHAIN_RECEIPT, refresh=False, node=None,
-                timeout=30):
+                timeout=30, tsa_token=None, tsa_cabundle=DEFAULT_TSA_CA):
     steps, problems = {}, []
 
     # 1. the proof must be about this file
@@ -110,6 +115,36 @@ def full_verify(file_path, proof_path, block_receipt=DEFAULT_BLOCK_RECEIPT,
         return {"verdict": "STOPPED_AT_CHAIN", "steps": steps,
                 "problems": problems, "unchecked": UNCHECKED}
 
+
+    # 4. the other anchor type, if a token is supplied: RFC 3161 over the same digest
+    if tsa_token:
+        with open(file_path, "rb") as f:
+            data = f.read()
+        with open(tsa_token, "rb") as f:
+            tsr = f.read()
+        with open(tsa_cabundle, "rb") as f:
+            ca = f.read()
+        ok, info, tsa_problems = tsa.verify_token(tsr, hashlib.sha256(data).digest(), ca)
+        digest_join = (info or {}).get("digest_hex") == steps["proof_binds_file"]["file_digest"]
+        steps["rfc3161"] = {
+            "ok": bool(ok) and digest_join and bool((info or {}).get("signature_verified")),
+            "provided": True,
+            "token": tsa_token,
+            "gen_time": (info or {}).get("gen_time"),
+            "digest_in_token": (info or {}).get("digest_hex"),
+            "digest_matches_file": digest_join,
+            "signature_verified": (info or {}).get("signature_verified"),
+            "tsa": ((info or {}).get("tsa") or {}).get("common_name"),
+            "problems": tsa_problems,
+        }
+        if not steps["rfc3161"]["ok"]:
+            problems.append("the RFC 3161 token does not cover this file")
+            return {"verdict": "STOPPED_AT_TSA", "steps": steps,
+                    "problems": problems, "unchecked": UNCHECKED}
+    else:
+        steps["rfc3161"] = {"ok": False, "provided": False,
+                            "reason": "no token supplied; only the OTS anchor was judged"}
+
     node_doc = ch.get("node") or {}
     doc = {"file": file_path, "proof": proof_path,
            "verdict": "FULL_CHAIN_OF_EVIDENCE_VERIFIED",
@@ -121,6 +156,9 @@ def full_verify(file_path, proof_path, block_receipt=DEFAULT_BLOCK_RECEIPT,
                        "headers_verified": ch.get("headers_from_attested_to_tip"),
                        "segment_work": ch.get("cumulative_work_hex")},
            "problems": [],
+           "anchors": {"open_timestamps": True,
+                       "rfc3161": bool(steps.get("rfc3161", {}).get("ok")),
+                       "both_anchors_verified": bool(steps.get("rfc3161", {}).get("ok"))},
            "most_work_established": bool(node_doc.get("checked")),
            "unchecked": UNCHECKED}
     return doc
@@ -133,6 +171,9 @@ def main(argv=None):
     ap.add_argument("--block-receipt", default=DEFAULT_BLOCK_RECEIPT)
     ap.add_argument("--chain-receipt", default=DEFAULT_CHAIN_RECEIPT)
     ap.add_argument("--node", metavar="RPC_URL")
+    ap.add_argument("--tsa-token", metavar="TSR",
+                    help="RFC 3161 token over the same file; judged offline against the CA bundle")
+    ap.add_argument("--tsa-cabundle", default=DEFAULT_TSA_CA)
     ap.add_argument("--refresh", action="store_true",
                     help="re-fetch the receipts from the network before verifying")
     ap.add_argument("--timeout", type=int, default=30)
@@ -147,7 +188,8 @@ def main(argv=None):
             f.write(json.dumps(ch, indent=2, sort_keys=True) + "\n")
 
     doc = full_verify(a.file, a.proof, a.block_receipt, a.chain_receipt,
-                      node=a.node, timeout=a.timeout)
+                      node=a.node, timeout=a.timeout,
+                      tsa_token=a.tsa_token, tsa_cabundle=a.tsa_cabundle)
     print(json.dumps(doc, indent=2, sort_keys=True))
     print("verdict=%s" % doc["verdict"])
     if doc["problems"]:

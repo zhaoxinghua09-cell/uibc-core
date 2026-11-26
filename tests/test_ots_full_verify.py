@@ -80,5 +80,26 @@ class FullVerifyTests(unittest.TestCase):
         self.assertEqual(out["verdict"], "STOPPED_AT_CHAIN")
 
 
-if __name__ == "__main__":
-    unittest.main()
+    def test_both_anchor_types_one_verdict(self):
+        token = os.path.join(ROOT, "tests", "fixtures", "anchor", "freetsa.tsr")
+        doc = fv.full_verify(HEAD, PROOF, tsa_token=token)
+        self.assertEqual(doc["verdict"], "FULL_CHAIN_OF_EVIDENCE_VERIFIED", doc.get("problems"))
+        self.assertTrue(doc["anchors"]["both_anchors_verified"],
+                        "RFC 3161 and OpenTimestamps cover the same digest; one command says so")
+        self.assertEqual(doc["steps"]["rfc3161"]["gen_time"], "2026-11-17T08:11:35+00:00")
+        self.assertTrue(doc["steps"]["rfc3161"]["digest_matches_file"])
+
+    def test_a_token_that_does_not_chain_stops_at_the_token(self):
+        """The token must chain to the CA we ship; a wrong bundle is refused, not tolerated.
+
+        Flipping one byte at random does *not* do it - most of a token is unsigned
+        certificate and attribute material, and a test built that way would pass by
+        luck. Swapping the trust anchor is a seam that cannot pass by luck.
+        """
+        token = os.path.join(ROOT, "tests", "fixtures", "anchor", "freetsa.tsr")
+        wrong_ca = os.path.join(ROOT, "tests", "fixtures", "anchor", "rekor_log_pub.pem")
+        doc = fv.full_verify(HEAD, PROOF, tsa_token=token, tsa_cabundle=wrong_ca)
+        self.assertEqual(doc["verdict"], "STOPPED_AT_TSA")
+        self.assertFalse(doc["steps"]["rfc3161"]["signature_verified"])
+
+

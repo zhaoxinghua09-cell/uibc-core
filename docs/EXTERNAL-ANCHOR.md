@@ -224,6 +224,23 @@ offline against the two committed receipts unless `--refresh` is asked for, and
 it always prints what it did **not** check - starting with the global most-work
 question, which stays unanswered until a node is supplied.
 
+**And both anchor types answer in that same verdict.** `--tsa-token` judges the
+RFC 3161 token offline against the CA bundle shipped beside it, and the command
+then says whether the *two* witnesses - a TSA that signs time, a Bitcoin block
+that signs existence - cover the *same* digest:
+
+| field | value |
+|---|---|
+| token | `tests/fixtures/anchor/freetsa.tsr`, Free TSA (`www.freetsa.org`) |
+| genTime | `2026-11-17T08:11:35+00:00` |
+| digest in token | `4ad23d91…7fd6e98` - byte-equal to the head, so it is the same digest OTS anchored |
+| signature | verified against `freetsa_ca.pem`; a token that does not chain to that bundle stops the run (`STOPPED_AT_TSA`) |
+
+A detail worth recording, because it changes how the test has to be written: a
+single flipped byte in a `.tsr` does **not** necessarily invalidate it - most of
+the file is certificate and unsigned attribute material. The test therefore
+breaks the seam that cannot pass by luck: the trust anchor.
+
 **2026-11-26, the segment above the block is walked, not assumed.** Depth alone
 is a number two servers told us. `--chain` walks *prev-hashes* from the tip they
 reported down to the attested block and checks every header it passes

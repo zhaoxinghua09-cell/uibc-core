@@ -563,10 +563,13 @@ requirements, and no vectors exist for them._
 | `uibc/witnessed` | a verification bundle is emitted; the reader's trust list is separate from the artifact; the head is co-signed by two distinct keys | `--bundle-out`, `--trustlist`, `tools/cosign_head.py verify` |
 | `uibc/anchored` | the anchor is `anchored`, not `pending`; the head carries the tree size inside the signature; successive heads only grow and a new size means a new root | `tools/cosign_head.py chain` |
 
-Head statements are signed over RFC 8785 canonical bytes of
-`{"head", "role", "tree_size", "vds"}`, with `tree_size` and `vds` omitted only
-when the signer did not observe them. Both fields sit inside the signed statement,
-so neither the size nor the verifier identity can be swapped after signing.
+A head statement is one JSON object with four members: `head` (the member name;
+its **value** is the evidence root of Section 4, not a nested head), `role`
+(`owner` or `witness`), `tree_size`, and `vds`. It is signed over RFC 8785
+canonical bytes of that object, with `tree_size` and `vds` omitted only when the
+signer did not observe them. `tree_size` and `vds` sit inside the signed
+statement, so neither the size nor the verifier identity can be swapped after
+signing.
 
 Three rules bind the tiers, and each answers a question the cited drafts leave open:
 

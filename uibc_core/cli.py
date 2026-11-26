@@ -693,6 +693,11 @@ def cmd_verify(args):
                     strict=getattr(args, "strict", False),
                     state_file=getattr(args, "state_file", None))
     print(json.dumps(report, ensure_ascii=False, indent=2))
+    # Warnings are not failures, so they must not go into stdout and confuse a
+    # parser -- but a PASS that ignored unjudged files must be visible to a
+    # human reading the console. A machine caller gates on report["warnings"].
+    for w in report.get("warnings", []):
+        print(f"warning [{w['code']}]: {w['detail']}", file=sys.stderr)
     sys.exit(0 if report["result"] == "PASS" else 1)
 
 

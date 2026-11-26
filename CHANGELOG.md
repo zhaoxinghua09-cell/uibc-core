@@ -1,4 +1,12 @@
-## 未发布 — 2026-11-26（竞品样本 25 → 40 家：结论不变，但不再是"取样说大话"）
+## 未发布 — 2026-11-27（PASS 不再沉默：放过的文件要点名，而不是只藏在 S1 的 detail 里）
+
+- **起因（外部实测，不是自查）**：ERM（Escape-Rate Matrix）用与 proofbundle/proofline 同一套 12 族变异器打本仓，`M06 注入未声明文件`（往 `evidence/` 放一个 index 从未声明过的文件）在 open / `--pubkey` / `--expect-head` **三档都返回 PASS、退出码 0**。同一族对两家第三方验证器都是 FAIL。
+- **为什么不直接改默认**：`tests/test_strict_mode.py` 开头那句理由是真的——格式自己就往 `evidence/` 放树、链、锚点、策略件，把所有未声明文件判死会让现存包全灭。这是**版本问题**，不是补丁问题，所以默认仍 PASS。
+- **改的是"沉默"这一半**：`verify()` 的报文新增顶层 `warnings`。宽松模式下若 `evidence/` 下有 index 未声明的文件，`warnings` 里出现 `{code: "S1_UNCOMMITTED_EVIDENCE", detail: ...}` 并点名到文件；`--strict` 已经判 FAIL，故不再重复告警；干净包恒为空数组。CLI 把同样一句打到 **stderr**（`warning [S1_UNCOMMITTED_EVIDENCE]: …`），stdout 的 JSON 契约与退出码一个字节不动。
+- **为什么放在顶层而不是只写 detail**：detail 是给人读的字符串，机器无法门控。现在调用方可以写 `if report["warnings"]: 升级为人工复核`，不必解析中文括号。这一条同时把"我们量别人、不量自己"的口子堵上——ERM 表里本仓那一行的逃逸项附了修复状态。
+- **实测**：`tests/test_strict_mode.py` 8 passed（新增 4 条：宽松模式点名、严格模式不重复告警、干净包无告警、CLI 保留 `"strict": true`）；全量 `pytest tests` 2156 passed / 31 failed / 31 skipped——31 failed 为**先于本次改动即存在**的环境性失败（RFC3161 真令牌、发布者时间戳、thesis 表、JS 验证器），已用 `git stash` 在改动前后同一子集对比确认（5 failed / 21 passed 两次一致）。
+- **留待版本化**：`M18 root extra file`（包根未声明文件）本来就判 FAIL，未受影响；把"未声明证据"从告警升为默认 FAIL 仍应走 format version bump。
+
 
 - **为什么扩**：25 家是代表取样，评委最容易的攻击是"你挑了弱的"。这次按 org 分散补 15 家（`TBD54566975/ssi-sdk`、`TBD54566975/dwn-sdk-js`、`cheqd/cheqd-node`、`cheqd/sdk`、`kiltprotocol/kilt-node`、`iotaledger/identity.rs`、`digitalbazaar/jsonld-signatures`、`digitalbazaar/vc`、`transmute-industries/verifiable-data`、`alastria/alastria-identity`、`energywebfoundation/iam-client-lib`、`hyperledger/aries-framework-javascript`、`openwallet-foundation/acapy-plugins`、`blockchain-lab-um/masca`、`web3id/web3id`），同一组正则、同一 `score_one`、每家钉 commit。
 - **结果**：40 家，最好仍 **3/10**（现在 11 家并列 3 分），本仓 **10/10**；分布 0 分 **27** 家、1 分 1 家、2 分 1 家、3 分 11 家。**扩样没有把结论变小，也没有把差距变小**。

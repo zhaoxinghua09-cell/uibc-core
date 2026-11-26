@@ -485,10 +485,14 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
     _EVIDENCE_STRUCTURAL = {"evidence/merkle.json", "evidence/chain.json",
                             "evidence/anchors.json", "evidence/policies.json"}
     uncommitted = []
+    # Computed in BOTH modes, so the lenient run can name what it is letting
+    # through. Proof discipline: a verifier that says PASS while ignoring files
+    # it could have judged must say which files those are (see warnings below).
+    _uncommitted_all = [u for u in evidence_extras
+                        if u not in _EVIDENCE_STRUCTURAL
+                        and not u.startswith("evidence/policies/")]
     if strict:
-        uncommitted = [u for u in evidence_extras
-                       if u not in _EVIDENCE_STRUCTURAL
-                       and not u.startswith("evidence/policies/")]
+        uncommitted = list(_uncommitted_all)
     aux_extras = [u for u in nested_extras if not u.startswith("evidence/")]
     s1_detail = []
     if embedded_problems:
@@ -1287,6 +1291,16 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
         "trust_level": trust_level,
         "key_custody": identity.get("key_custody"),
         "subject": manifest.get("agent_id"),
+        # A PASS that ignored files it could have judged must not be silent.
+        # Lenient mode keeps PASS for compatibility (tightening S1 broke every
+        # package carrying structural members), but it now names the files it
+        # let through, in a field a caller can gate on. --strict turns them
+        # into a FAIL (ERM family M06, measured 2026-11-27).
+        "warnings": ([] if strict or not _uncommitted_all else
+                     [{"code": "S1_UNCOMMITTED_EVIDENCE",
+                       "detail": "files under evidence/ are not declared by the "
+                                 f"index: {sorted(_uncommitted_all)}; pass --strict "
+                                 f"to fail them"}]),
         "checks": checks,
         "root_algorithm": "sha256(canonical-json(sorted(content_hashes))) v0.1-provisional",
         "assurance": assurance,

@@ -56,7 +56,9 @@ GATE = os.path.join(HERE, "tools", "mutation_gate.py")
 OURS = "zhaoxinghua09-cell/uibc-core"
 # The audit may grow; it may not quietly shrink back to the first nine. Anybody
 # who wants to remove a repository has to say so in the document.
-MIN_REPOS = 40
+MIN_REPOS = 41
+# 2026-11-26：40 → 41，补上取样里最后一个未评的仓库 walt-id/waltid-identity（330★）。
+# 覆盖至此为止：按 repository id 比对，前 40 家之外不存在未评对象。
 # A point is only worth something in a repository that asserts anything at all.
 # Five real assertion lines is the smallest honest sample this metric can
 # see, and it is the same floor the calibration block uses.

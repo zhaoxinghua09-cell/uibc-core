@@ -1669,6 +1669,45 @@
     "D3": [],
     "D4": []
    }
+  },
+  {
+   "repo": "walt-id/waltid-identity",
+   "sha": "5bf2ca51be1f2e899b9276cf83aec514fcf371fc",
+   "dims": {
+    "D1": 1,
+    "D2": 0,
+    "D3": 0,
+    "D4": 1,
+    "D5": 0
+   },
+   "evidence": {
+    "D1": [
+     {
+      "file": "build-logic/src/test/kotlin/LicenseePoliciesTest.kt",
+      "line": 9,
+      "text": "fun `only distributed binary and SaaS policies admit LGPL and all reject plain GPL and AGPL`() {"
+     },
+     {
+      "file": "build-logic/src/test/kotlin/WalletVisualVerificationTest.kt",
+      "line": 31,
+      "text": "fun `CI rejects explicitly disabled verification`() {"
+     },
+     {
+      "file": "build-logic/src/test/kotlin/WalletVisualVerificationTest.kt",
+      "line": 38,
+      "text": "fun `CI rejects recording and compare-only properties and tasks`() {"
+     }
+    ],
+    "D2": [],
+    "D3": [],
+    "D4": [
+     {
+      "file": "scripts/qualify-wallet-recovery.py",
+      "line": 220,
+      "text": "sys.exit(1)"
+     }
+    ]
+   }
   }
  ]
 }

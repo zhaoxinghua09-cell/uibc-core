@@ -1,6 +1,6 @@
 {
  "audited_at": "2026-11-26",
- "checked_at": "2026-11-26T09:39:11",
+ "checked_at": "2026-11-26T15:55:13",
  "entries": [
   {
    "repo": "WeBankBlockchain/WeIdentity",
@@ -8,8 +8,17 @@
    "url": "https://github.com/WeBankBlockchain/WeIdentity/tree/2f8e4b5a7e208790af7e2697b061550c91560e98",
    "status": 200,
    "final_url": "https://github.com/WeBankBlockchain/WeIdentity/tree/2f8e4b5a7e208790af7e2697b061550c91560e98",
-   "elapsed_ms": 1007,
-   "error": ""
+   "elapsed_ms": 20011,
+   "error": "",
+   "api": {
+    "status": 200,
+    "sha": "2f8e4b5a7e208790af7e2697b061550c91560e98",
+    "committed": "2024-03-13T08:26:35Z",
+    "elapsed_ms": 691
+   },
+   "html_status": 0,
+   "html_error": "URLError",
+   "via": "api-commit"
   },
   {
    "repo": "caict-4iot-dev/uni-registrar-driver-did-bid",
@@ -17,7 +26,7 @@
    "url": "https://github.com/caict-4iot-dev/uni-registrar-driver-did-bid/tree/68f69ec419c0f23c1a7faf95dd8d73aeb5ff30a4",
    "status": 200,
    "final_url": "https://github.com/caict-4iot-dev/uni-registrar-driver-did-bid/tree/68f69ec419c0f23c1a7faf95dd8d73aeb5ff30a4",
-   "elapsed_ms": 875,
+   "elapsed_ms": 897,
    "error": ""
   },
   {
@@ -26,7 +35,7 @@
    "url": "https://github.com/caict-4iot-dev/uni-resolver-driver-did-bid/tree/5a933656eb9631bc65ba535f4bb69aa893d79a79",
    "status": 200,
    "final_url": "https://github.com/caict-4iot-dev/uni-resolver-driver-did-bid/tree/5a933656eb9631bc65ba535f4bb69aa893d79a79",
-   "elapsed_ms": 966,
+   "elapsed_ms": 898,
    "error": ""
   },
   {
@@ -35,7 +44,7 @@
    "url": "https://github.com/ceramicnetwork/js-did/tree/def0a5fed152a42ffeef87bafb4619816f9954f6",
    "status": 200,
    "final_url": "https://github.com/ceramicnetwork/js-did/tree/def0a5fed152a42ffeef87bafb4619816f9954f6",
-   "elapsed_ms": 932,
+   "elapsed_ms": 1241,
    "error": ""
   },
   {
@@ -44,7 +53,7 @@
    "url": "https://github.com/decentralized-identity/did-jwt/tree/63663c1f40b4d6dd0d510847acfe5ae5ad230fd2",
    "status": 200,
    "final_url": "https://github.com/decentralized-identity/did-jwt/tree/63663c1f40b4d6dd0d510847acfe5ae5ad230fd2",
-   "elapsed_ms": 1096,
+   "elapsed_ms": 1060,
    "error": ""
   },
   {
@@ -53,7 +62,7 @@
    "url": "https://github.com/decentralized-identity/did-resolver/tree/005411b26ac3002aa4f501673ee4e2ecc96b2a71",
    "status": 200,
    "final_url": "https://github.com/decentralized-identity/did-resolver/tree/005411b26ac3002aa4f501673ee4e2ecc96b2a71",
-   "elapsed_ms": 895,
+   "elapsed_ms": 863,
    "error": ""
   },
   {
@@ -62,7 +71,7 @@
    "url": "https://github.com/decentralized-identity/ethr-did-resolver/tree/6e0bd47702495d259674c6a53e8be3037069dcc1",
    "status": 200,
    "final_url": "https://github.com/decentralized-identity/ethr-did-resolver/tree/6e0bd47702495d259674c6a53e8be3037069dcc1",
-   "elapsed_ms": 910,
+   "elapsed_ms": 919,
    "error": ""
   },
   {
@@ -71,7 +80,7 @@
    "url": "https://github.com/decentralized-identity/ion/tree/424ec87dda60c89c0b3c4e46c274eff3124fe484",
    "status": 200,
    "final_url": "https://github.com/decentralized-identity/ion/tree/424ec87dda60c89c0b3c4e46c274eff3124fe484",
-   "elapsed_ms": 914,
+   "elapsed_ms": 1121,
    "error": ""
   },
   {
@@ -80,14 +89,14 @@
    "url": "https://github.com/decentralized-identity/sidetree-core/tree/bb4bb16d23838cc02bbde0b4ac634e0491ae85fd",
    "status": 301,
    "final_url": "https://github.com/decentralized-identity/sidetree/tree/bb4bb16d23838cc02bbde0b4ac634e0491ae85fd",
-   "elapsed_ms": 618,
+   "elapsed_ms": 592,
    "error": "",
    "followed": {
     "repo_now": "decentralized-identity/sidetree",
     "url": "https://github.com/decentralized-identity/sidetree/tree/bb4bb16d23838cc02bbde0b4ac634e0491ae85fd",
     "status": 200,
     "final_url": "https://github.com/decentralized-identity/sidetree/tree/bb4bb16d23838cc02bbde0b4ac634e0491ae85fd",
-    "elapsed_ms": 894,
+    "elapsed_ms": 1015,
     "error": ""
    }
   },
@@ -97,7 +106,7 @@
    "url": "https://github.com/decentralized-identity/universal-resolver/tree/99838d52a7a6c7424bf8c895d03d317dcd8cdb3a",
    "status": 200,
    "final_url": "https://github.com/decentralized-identity/universal-resolver/tree/99838d52a7a6c7424bf8c895d03d317dcd8cdb3a",
-   "elapsed_ms": 941,
+   "elapsed_ms": 1140,
    "error": ""
   },
   {
@@ -106,7 +115,7 @@
    "url": "https://github.com/decentralized-identity/veramo/tree/ac953d9a28db1faa57266636de7c4ed891bf1b0b",
    "status": 200,
    "final_url": "https://github.com/decentralized-identity/veramo/tree/ac953d9a28db1faa57266636de7c4ed891bf1b0b",
-   "elapsed_ms": 898,
+   "elapsed_ms": 990,
    "error": ""
   },
   {
@@ -115,7 +124,7 @@
    "url": "https://github.com/digitalbazaar/did-io/tree/940555f002fbf69e081e4db5b44b3cd9e0234404",
    "status": 200,
    "final_url": "https://github.com/digitalbazaar/did-io/tree/940555f002fbf69e081e4db5b44b3cd9e0234404",
-   "elapsed_ms": 955,
+   "elapsed_ms": 1086,
    "error": ""
   },
   {
@@ -124,7 +133,7 @@
    "url": "https://github.com/docknetwork/sdk/tree/1eadcdc7a9c1dd7a28a2df5ff2b3b969a51427a6",
    "status": 200,
    "final_url": "https://github.com/docknetwork/sdk/tree/1eadcdc7a9c1dd7a28a2df5ff2b3b969a51427a6",
-   "elapsed_ms": 854,
+   "elapsed_ms": 1069,
    "error": ""
   },
   {
@@ -133,14 +142,14 @@
    "url": "https://github.com/hyperledger/aries-cloudagent-python/tree/daf7ff8d208a56bbfe5f66d879c638b2d2fb4a77",
    "status": 301,
    "final_url": "https://github.com/openwallet-foundation/acapy/tree/daf7ff8d208a56bbfe5f66d879c638b2d2fb4a77",
-   "elapsed_ms": 587,
+   "elapsed_ms": 594,
    "error": "",
    "followed": {
     "repo_now": "openwallet-foundation/acapy",
     "url": "https://github.com/openwallet-foundation/acapy/tree/daf7ff8d208a56bbfe5f66d879c638b2d2fb4a77",
     "status": 200,
     "final_url": "https://github.com/openwallet-foundation/acapy/tree/daf7ff8d208a56bbfe5f66d879c638b2d2fb4a77",
-    "elapsed_ms": 908,
+    "elapsed_ms": 1339,
     "error": ""
    }
   },
@@ -150,14 +159,14 @@
    "url": "https://github.com/hyperledger/aries-framework-go/tree/64dd8acc07506884f480719f7d9d960447d9a5ac",
    "status": 301,
    "final_url": "https://github.com/hyperledger-aries/aries-framework-go/tree/64dd8acc07506884f480719f7d9d960447d9a5ac",
-   "elapsed_ms": 621,
+   "elapsed_ms": 605,
    "error": "",
    "followed": {
     "repo_now": "hyperledger-aries/aries-framework-go",
     "url": "https://github.com/hyperledger-aries/aries-framework-go/tree/64dd8acc07506884f480719f7d9d960447d9a5ac",
     "status": 200,
     "final_url": "https://github.com/hyperledger-aries/aries-framework-go/tree/64dd8acc07506884f480719f7d9d960447d9a5ac",
-    "elapsed_ms": 1004,
+    "elapsed_ms": 916,
     "error": ""
    }
   },
@@ -167,14 +176,14 @@
    "url": "https://github.com/hyperledger/indy-sdk/tree/2d47f2ff1ca62563f0f85e52cc9378f133ad8a0d",
    "status": 301,
    "final_url": "https://github.com/hyperledger-indy/indy-sdk/tree/2d47f2ff1ca62563f0f85e52cc9378f133ad8a0d",
-   "elapsed_ms": 586,
+   "elapsed_ms": 636,
    "error": "",
    "followed": {
     "repo_now": "hyperledger-indy/indy-sdk",
     "url": "https://github.com/hyperledger-indy/indy-sdk/tree/2d47f2ff1ca62563f0f85e52cc9378f133ad8a0d",
     "status": 200,
     "final_url": "https://github.com/hyperledger-indy/indy-sdk/tree/2d47f2ff1ca62563f0f85e52cc9378f133ad8a0d",
-    "elapsed_ms": 1157,
+    "elapsed_ms": 1232,
     "error": ""
    }
   },
@@ -184,14 +193,14 @@
    "url": "https://github.com/hyperledger/indy-vdr/tree/e4902fcd5638efb0aaded3a854a56e077f8b32f3",
    "status": 301,
    "final_url": "https://github.com/hyperledger-indy/indy-vdr/tree/e4902fcd5638efb0aaded3a854a56e077f8b32f3",
-   "elapsed_ms": 608,
+   "elapsed_ms": 587,
    "error": "",
    "followed": {
     "repo_now": "hyperledger-indy/indy-vdr",
     "url": "https://github.com/hyperledger-indy/indy-vdr/tree/e4902fcd5638efb0aaded3a854a56e077f8b32f3",
     "status": 200,
     "final_url": "https://github.com/hyperledger-indy/indy-vdr/tree/e4902fcd5638efb0aaded3a854a56e077f8b32f3",
-    "elapsed_ms": 923,
+    "elapsed_ms": 1008,
     "error": ""
    }
   },
@@ -201,7 +210,7 @@
    "url": "https://github.com/ontio/ontology-did/tree/9902c8f80f0610080008ddf0eb151dabb6340f2a",
    "status": 200,
    "final_url": "https://github.com/ontio/ontology-did/tree/9902c8f80f0610080008ddf0eb151dabb6340f2a",
-   "elapsed_ms": 909,
+   "elapsed_ms": 817,
    "error": ""
   },
   {
@@ -210,7 +219,7 @@
    "url": "https://github.com/sphereon-opensource/ssi-sdk/tree/4f8b21c24659259843b4b802e4a68a635989a590",
    "status": 200,
    "final_url": "https://github.com/sphereon-opensource/ssi-sdk/tree/4f8b21c24659259843b4b802e4a68a635989a590",
-   "elapsed_ms": 866,
+   "elapsed_ms": 988,
    "error": ""
   },
   {
@@ -219,7 +228,7 @@
    "url": "https://github.com/spruceid/didkit/tree/57a3b45111f8b1003ef1a50cf7cf21c81cd59cb1",
    "status": 200,
    "final_url": "https://github.com/spruceid/didkit/tree/57a3b45111f8b1003ef1a50cf7cf21c81cd59cb1",
-   "elapsed_ms": 928,
+   "elapsed_ms": 988,
    "error": ""
   },
   {
@@ -228,7 +237,7 @@
    "url": "https://github.com/spruceid/ssi/tree/726f49e7fefbb726ff41deba331428088bfa782d",
    "status": 200,
    "final_url": "https://github.com/spruceid/ssi/tree/726f49e7fefbb726ff41deba331428088bfa782d",
-   "elapsed_ms": 870,
+   "elapsed_ms": 989,
    "error": ""
   },
   {
@@ -237,7 +246,7 @@
    "url": "https://github.com/transmute-industries/sidetree.js/tree/0b17eb9ed7aa787230bfdeaff92cc7eca05d0e7e",
    "status": 200,
    "final_url": "https://github.com/transmute-industries/sidetree.js/tree/0b17eb9ed7aa787230bfdeaff92cc7eca05d0e7e",
-   "elapsed_ms": 906,
+   "elapsed_ms": 981,
    "error": ""
   },
   {
@@ -246,7 +255,7 @@
    "url": "https://github.com/uport-project/ethr-did/tree/4bbd2ef539ba532731508198e5828657c169ff66",
    "status": 200,
    "final_url": "https://github.com/uport-project/ethr-did/tree/4bbd2ef539ba532731508198e5828657c169ff66",
-   "elapsed_ms": 936,
+   "elapsed_ms": 1475,
    "error": ""
   },
   {
@@ -255,14 +264,14 @@
    "url": "https://github.com/w3c-ccg/did-method-key/tree/2cc490c38c5aacf58497a87fc0cf8794668bf716",
    "status": 301,
    "final_url": "https://github.com/w3c-ccg/did-key-spec/tree/2cc490c38c5aacf58497a87fc0cf8794668bf716",
-   "elapsed_ms": 587,
+   "elapsed_ms": 618,
    "error": "",
    "followed": {
     "repo_now": "w3c-ccg/did-key-spec",
     "url": "https://github.com/w3c-ccg/did-key-spec/tree/2cc490c38c5aacf58497a87fc0cf8794668bf716",
     "status": 200,
     "final_url": "https://github.com/w3c-ccg/did-key-spec/tree/2cc490c38c5aacf58497a87fc0cf8794668bf716",
-    "elapsed_ms": 882,
+    "elapsed_ms": 885,
     "error": ""
    }
   },
@@ -272,7 +281,7 @@
    "url": "https://github.com/w3c-ccg/did-test-suite/tree/addafb08c84ef3c4dd4a596ebe71f164daa4ceab",
    "status": 200,
    "final_url": "https://github.com/w3c-ccg/did-test-suite/tree/addafb08c84ef3c4dd4a596ebe71f164daa4ceab",
-   "elapsed_ms": 899,
+   "elapsed_ms": 803,
    "error": ""
   },
   {
@@ -281,7 +290,7 @@
    "url": "https://github.com/TBD54566975/ssi-sdk/tree/5ff932dc6d35564a2be8d05d23657895c6c0c5f4",
    "status": 200,
    "final_url": "https://github.com/TBD54566975/ssi-sdk/tree/5ff932dc6d35564a2be8d05d23657895c6c0c5f4",
-   "elapsed_ms": 976,
+   "elapsed_ms": 1073,
    "error": ""
   },
   {
@@ -290,14 +299,14 @@
    "url": "https://github.com/TBD54566975/dwn-sdk-js/tree/0e903014464388bcfcdcd42da74c40fdd902fd23",
    "status": 301,
    "final_url": "https://github.com/decentralized-identity/dwn-sdk-js/tree/0e903014464388bcfcdcd42da74c40fdd902fd23",
-   "elapsed_ms": 593,
+   "elapsed_ms": 601,
    "error": "",
    "followed": {
     "repo_now": "decentralized-identity/dwn-sdk-js",
     "url": "https://github.com/decentralized-identity/dwn-sdk-js/tree/0e903014464388bcfcdcd42da74c40fdd902fd23",
     "status": 200,
     "final_url": "https://github.com/decentralized-identity/dwn-sdk-js/tree/0e903014464388bcfcdcd42da74c40fdd902fd23",
-    "elapsed_ms": 877,
+    "elapsed_ms": 972,
     "error": ""
    }
   },
@@ -307,7 +316,7 @@
    "url": "https://github.com/cheqd/cheqd-node/tree/ae52af92966eed4082ccb3a0e26f18039c0419e3",
    "status": 200,
    "final_url": "https://github.com/cheqd/cheqd-node/tree/ae52af92966eed4082ccb3a0e26f18039c0419e3",
-   "elapsed_ms": 904,
+   "elapsed_ms": 946,
    "error": ""
   },
   {
@@ -316,7 +325,7 @@
    "url": "https://github.com/cheqd/sdk/tree/72e87f3918295b55e6eb1e7c36fbc20a1740d167",
    "status": 200,
    "final_url": "https://github.com/cheqd/sdk/tree/72e87f3918295b55e6eb1e7c36fbc20a1740d167",
-   "elapsed_ms": 917,
+   "elapsed_ms": 931,
    "error": ""
   },
   {
@@ -325,7 +334,7 @@
    "url": "https://github.com/kiltprotocol/kilt-node/tree/2a3bd554a54c62adc7ca8fc31521803aa4f46219",
    "status": 200,
    "final_url": "https://github.com/kiltprotocol/kilt-node/tree/2a3bd554a54c62adc7ca8fc31521803aa4f46219",
-   "elapsed_ms": 1033,
+   "elapsed_ms": 893,
    "error": ""
   },
   {
@@ -334,14 +343,14 @@
    "url": "https://github.com/iotaledger/identity.rs/tree/7dd527087b96bf26ea97d486225eff8278c9a89c",
    "status": 301,
    "final_url": "https://github.com/iotaledger/identity/tree/7dd527087b96bf26ea97d486225eff8278c9a89c",
-   "elapsed_ms": 626,
+   "elapsed_ms": 594,
    "error": "",
    "followed": {
     "repo_now": "iotaledger/identity",
     "url": "https://github.com/iotaledger/identity/tree/7dd527087b96bf26ea97d486225eff8278c9a89c",
     "status": 200,
     "final_url": "https://github.com/iotaledger/identity/tree/7dd527087b96bf26ea97d486225eff8278c9a89c",
-    "elapsed_ms": 849,
+    "elapsed_ms": 917,
     "error": ""
    }
   },
@@ -351,7 +360,7 @@
    "url": "https://github.com/digitalbazaar/jsonld-signatures/tree/4bbef4646d91ab17773594021652d237b3ab4a23",
    "status": 200,
    "final_url": "https://github.com/digitalbazaar/jsonld-signatures/tree/4bbef4646d91ab17773594021652d237b3ab4a23",
-   "elapsed_ms": 873,
+   "elapsed_ms": 947,
    "error": ""
   },
   {
@@ -360,7 +369,7 @@
    "url": "https://github.com/digitalbazaar/vc/tree/7ddb985a67e42afeb24ef833a5b45ecb72d7771d",
    "status": 200,
    "final_url": "https://github.com/digitalbazaar/vc/tree/7ddb985a67e42afeb24ef833a5b45ecb72d7771d",
-   "elapsed_ms": 915,
+   "elapsed_ms": 890,
    "error": ""
   },
   {
@@ -369,7 +378,7 @@
    "url": "https://github.com/transmute-industries/verifiable-data/tree/6e77985eb585897d1b7abd352ee688e51fc66a06",
    "status": 200,
    "final_url": "https://github.com/transmute-industries/verifiable-data/tree/6e77985eb585897d1b7abd352ee688e51fc66a06",
-   "elapsed_ms": 926,
+   "elapsed_ms": 968,
    "error": ""
   },
   {
@@ -378,7 +387,7 @@
    "url": "https://github.com/alastria/alastria-identity/tree/edffdfaaa0fbd70a52e23715849fa96d4508ee32",
    "status": 200,
    "final_url": "https://github.com/alastria/alastria-identity/tree/edffdfaaa0fbd70a52e23715849fa96d4508ee32",
-   "elapsed_ms": 858,
+   "elapsed_ms": 1743,
    "error": ""
   },
   {
@@ -387,7 +396,7 @@
    "url": "https://github.com/energywebfoundation/iam-client-lib/tree/14156ae0b22f3216e2069d43bdbb662889a886ef",
    "status": 200,
    "final_url": "https://github.com/energywebfoundation/iam-client-lib/tree/14156ae0b22f3216e2069d43bdbb662889a886ef",
-   "elapsed_ms": 949,
+   "elapsed_ms": 1017,
    "error": ""
   },
   {
@@ -396,14 +405,14 @@
    "url": "https://github.com/hyperledger/aries-framework-javascript/tree/06930296a96c02519b8c01c0d1822f2a08bde646",
    "status": 301,
    "final_url": "https://github.com/openwallet-foundation/credo-ts/tree/06930296a96c02519b8c01c0d1822f2a08bde646",
-   "elapsed_ms": 660,
+   "elapsed_ms": 7822,
    "error": "",
    "followed": {
     "repo_now": "openwallet-foundation/credo-ts",
     "url": "https://github.com/openwallet-foundation/credo-ts/tree/06930296a96c02519b8c01c0d1822f2a08bde646",
     "status": 200,
     "final_url": "https://github.com/openwallet-foundation/credo-ts/tree/06930296a96c02519b8c01c0d1822f2a08bde646",
-    "elapsed_ms": 952,
+    "elapsed_ms": 950,
     "error": ""
    }
   },
@@ -413,7 +422,7 @@
    "url": "https://github.com/openwallet-foundation/acapy-plugins/tree/8acf77865188073c6dcca648913d37eff8666746",
    "status": 200,
    "final_url": "https://github.com/openwallet-foundation/acapy-plugins/tree/8acf77865188073c6dcca648913d37eff8666746",
-   "elapsed_ms": 1007,
+   "elapsed_ms": 930,
    "error": ""
   },
   {
@@ -422,7 +431,7 @@
    "url": "https://github.com/blockchain-lab-um/masca/tree/fcfb07c9dd0995d4da0148f42051869cdbb16748",
    "status": 200,
    "final_url": "https://github.com/blockchain-lab-um/masca/tree/fcfb07c9dd0995d4da0148f42051869cdbb16748",
-   "elapsed_ms": 936,
+   "elapsed_ms": 1009,
    "error": ""
   },
   {
@@ -431,16 +440,35 @@
    "url": "https://github.com/web3id/web3id/tree/0f6f7bb0eb259bc2d64960a3e0a61ff1860bfac6",
    "status": 200,
    "final_url": "https://github.com/web3id/web3id/tree/0f6f7bb0eb259bc2d64960a3e0a61ff1860bfac6",
-   "elapsed_ms": 943,
+   "elapsed_ms": 1044,
+   "error": ""
+  },
+  {
+   "repo": "walt-id/waltid-identity",
+   "sha": "5bf2ca51be1f2e899b9276cf83aec514fcf371fc",
+   "url": "https://github.com/walt-id/waltid-identity/tree/5bf2ca51be1f2e899b9276cf83aec514fcf371fc",
+   "status": 200,
+   "final_url": "https://github.com/walt-id/waltid-identity/tree/5bf2ca51be1f2e899b9276cf83aec514fcf371fc",
+   "elapsed_ms": 998,
+   "error": ""
+  },
+  {
+   "repo": "zhaoxinghua09-cell/uibc-core",
+   "sha": "fb727c6929cacfb3e180a6baf63d0a6891b5c33c",
+   "url": "https://github.com/zhaoxinghua09-cell/uibc-core/tree/fb727c6929cacfb3e180a6baf63d0a6891b5c33c",
+   "status": 200,
+   "final_url": "https://github.com/zhaoxinghua09-cell/uibc-core/tree/fb727c6929cacfb3e180a6baf63d0a6891b5c33c",
+   "elapsed_ms": 1249,
    "error": ""
   }
  ],
  "summary": {
-  "citations": 40,
-  "alive": 31,
+  "citations": 42,
+  "alive": 33,
   "moved": 9,
   "moved_verified": 9,
   "dead": 0,
-  "dead_after_move": 0
+  "dead_after_move": 0,
+  "verified_via_api": 1
  }
 }

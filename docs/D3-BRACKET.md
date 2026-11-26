@@ -23,6 +23,7 @@
 | `cheqd/cheqd-node` | 1 | 0 | 3 → 2 **← 变了** |
 | `hyperledger/aries-framework-javascript` | 1 | 0 | 3 → 2 **← 变了** |
 | `ceramicnetwork/js-did` | 1 | 0 | 2 → 1 **← 变了** |
+| `walt-id/waltid-identity` | 0 | 0 | 2 → 2 |
 | `TBD54566975/dwn-sdk-js` | 0 | 0 | 1 → 1 |
 | `WeBankBlockchain/WeIdentity` | 0 | 0 | 0 → 0 |
 | `caict-4iot-dev/uni-registrar-driver-did-bid` | 0 | 0 | 0 → 0 |

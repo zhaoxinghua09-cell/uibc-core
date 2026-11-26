@@ -44,6 +44,7 @@
 | `openwallet-foundation/acapy-plugins` | 0/10 | — |
 | `blockchain-lab-um/masca` | 0/10 | — |
 | `web3id/web3id` | 0/10 | — |
+| `walt-id/waltid-identity` | 2/10 | D1, D4 |
 
 ## 逐家证据行
 
@@ -227,6 +228,15 @@
   - `packages/drizzle-storage/cli/cli-definition.ts:61` — `process.exit(1)`
   - `packages/drizzle-storage/cli/cli-definition.ts:107` — `process.exit(1)`
   - `packages/drizzle-storage/cli/cli-definition.ts:152` — `process.exit(1)`
+
+### `walt-id/waltid-identity` — 2/10（commit `5bf2ca51be1f`）
+
+- **D1**（reject_assertion，测试 文件）
+  - `build-logic/src/test/kotlin/LicenseePoliciesTest.kt:9` — `fun `only distributed binary and SaaS policies admit LGPL and all reject plain GPL and AGPL`() {`
+  - `build-logic/src/test/kotlin/WalletVisualVerificationTest.kt:31` — `fun `CI rejects explicitly disabled verification`() {`
+  - `build-logic/src/test/kotlin/WalletVisualVerificationTest.kt:38` — `fun `CI rejects recording and compare-only properties and tasks`() {`
+- **D4**（exit_code_gate，源码 文件）
+  - `scripts/qualify-wallet-recovery.py:220` — `sys.exit(1)`
 
 ## 怎么读
 

@@ -17,7 +17,8 @@
 | `report.md` | C6、C8 | 完整审计报告（含 §29 变更记录、§32 外部通道实测） |
 | `outsider-pack.zip` | C7 | 外人复跑包（23 条目 / 52,574 B，含 README 9 步与 checksums） |
 | `board.html` | C6 的可视化侧 | 单文件看板，4 张内联 SVG，零外链，断网可开 |
-| `s6-external-ai-receipt.json` | C10 | 硅基流动 `DeepSeek-V3` 两次回包的结构化回执（判 `REFUSE`） |
+| `s6-external-ai-receipt.json` | C10 | v0.1：硅基流动 `DeepSeek-V3` 前两轮回包（只给 URL 的形态），判 `REFUSE` |
+| `s6-external-ai/` | C10、C5、C15 | **v0.2：五轮结构化回执 + `claims.md` + 输入模板 + 复跑审计命令**；含"13 可核实为 1/13"那次翻转的完整记录 |
 | `s9-anonymous-probe.md` | C13、C14、C11 的复核方法 | 匿名实测：双通道 8/8、clone rc=0、CI 25 项 |
 | `sha256-list.txt` | 全部 | 40 项交付物的 sha256 与字节数，可逐项核对 |
 
@@ -29,7 +30,7 @@
 
 ## 仍然不可核的部分（直说）
 
-- **C10（外部 AI 通道状况）**：属自述。OpenRouter 与 DashScope 两条不可用，硅基流动可用但两次回包被判 `REFUSE`——这件事只能看回执，不能看结论。
+- **C10（外部 AI 通道状况）**：通道是通的、五轮都跑了，但**调用方与被评审方是同一人**，供应商不独立，所以这条在任何"独立评审"意义上都不成立；判定质量经机检为 12/14 真引用，够当辅助复核，不够当背书。回执与被推翻过程见 `s6-external-ai/`。
 - **C2（台子 15 PASS / 基线 158）**：`uibc-bench` 是作者本机的测试台，不在本仓。`S9_匿名实测` 能在本仓复现的部分是 `tools/outsider_rerun.py --check` 的四步，不包含台子的 s11 场景组。
 
 ## 复跑
@@ -38,6 +39,11 @@
 git clone --depth 1 https://github.com/zhaoxinghua09-cell/uibc-core.git
 cd uibc-core
 python tools/outsider_rerun.py --check      # 期望：OUTSIDER OK ... 4 steps passed，rc=0
+python tools/quote_audit.py \
+    --receipt docs/evidence/20261126-phase28/s6-external-ai/receipt-v0.2.json \
+    --material docs/evidence/20261126-phase28 uibc_core \
+    --assertions docs/evidence/20261126-phase28/s6-external-ai/claims.md \
+    --check                                  # 期望：backed=12 / restated=1 / unbacked=1，rc=1（有缺陷，故意的）
 ```
 
 ## 本目录自身的哈希

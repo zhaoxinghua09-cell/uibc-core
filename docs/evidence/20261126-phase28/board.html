@@ -131,7 +131,7 @@ tr:last-child td{border-bottom:none}
 </table>
 <div class="note"><b>边界说清：</b>根级已不可关联，内容哈希仍确定 —— 同一观察者看到同一文件两次仍能凭内容关联。彻底不可关联要随机化内容承诺，会牺牲同内容同根的审计价值，本阶段不做。</div>
 
-<h2>六、竞品横向（28 项）</h2>
+<h2>六、竞品横向（31 项，2026-11-26 二次补充）</h2>
 <table>
 <tr><th>方案</th><th>粒度</th><th>机制</th><th>不可关联</th><th>证据级</th><th>成熟度</th></tr>
 <tr><td>SD-JWT（RFC 9901）</td><td>claim</td><td>加盐哈希 + JWS</td><td class="bad">无</td><td class="bad">否</td><td>RFC</td></tr>
@@ -197,7 +197,7 @@ tr:last-child td{border-bottom:none}
 <tr><td>外人复跑包</td><td class="ok">23 条目 / 52,574 B · 隔离目录模拟 9/9 步 exit=0</td></tr>
 <tr><td>P16 盲索引（0.7）</td><td class="ok">PASS · 两包 commit 不同 / 无明文哈希 / 双 verify PASS</td></tr>
 <tr><td>SD-JWT 同构对照</td><td class="ok">10/10 · 语义同构、字节不兼容（不可互认）</td></tr>
-<tr><td>竞品事实复核</td><td class="ok">28 项 · 改正 ISO 23220-4 日期（2026-04-10）· 链接直达 24/28 脚本可开，3 条站点反爬已注明，1 条 DNS 死链已换官方页</td></tr>
+<tr><td>竞品事实复核</td><td class="ok">31 项 · 改正 ISO 23220-4 日期（2026-04-10）· 补 C2PA 2.x / VC Forgery Defense v1.0 / SCITT ARP（其中两项对我方不利，已实写）· 链接直达 28/31 脚本可开，3 条 ISO 站点反爬已注明</td></tr>
 <tr><td>三档性能同条件</td><td class="ok">27–29 ms 同进程 / 191–199 ms 子进程 / 0.7 冷启动已优化 −35 ms</td></tr>
 <tr><td>互操作映射</td><td>语义对上 5 处 · 字节可互认 <b>0</b> 处（3 个硬缺口）</td></tr>
 <tr><td>A 级形态适配器</td><td class="ok">8/8 自检 · 故意无签名、列明不可被验（防误用）</td></tr>
@@ -211,34 +211,42 @@ tr:last-child td{border-bottom:none}
 <tr><td>仍然不是</td><td class="bad">外部独立评审 —— 台子是内部的</td></tr>
 </table>
 
+
+
+
+
+
+
+
+
 <h2>九、四个视角看同一份证据（2026-11-26 校准）</h2>
 <div class="note"><b>为什么放这四个视角：</b>同一份材料，换四种眼睛看，结论不一样。外部评审者看到的是一片红（9/15 不可核）；对手看到的是"最短那条横条"；流程看到的是"合并没 reviewer、外审回执还没到"；只有见证结构那张对我们有利，而它自己也写着"同机模拟"。<b>这四张图都是单文件内联 SVG，断网可开，零外链。</b></div>
 
-<svg viewBox="0 0 900 210" width="100%" role="img" aria-label="15 条主张的可核性" style="background:#141a22;border:1px solid #212b36;border-radius:8px;margin:10px 0">
-<text x="16" y="24" fill="#8b949e" font-size="12">视角一 · 外部评审者：15 条主张逐条判定的结果（数据 s6_receipt.json）</text>
+<svg viewBox="0 0 900 235" width="100%" role="img" aria-label="15 条主张的可核性" style="background:#141a22;border:1px solid #212b36;border-radius:8px;margin:10px 0">
+<text x="16" y="24" fill="#8b949e" font-size="12">视角一 · 外部评审者：15 条主张逐条判定（红片按第 1/2 轮「只给 URL」形态；后续补跑见末行）</text>
 <rect x="40" y="60" width="36" height="36" rx="5" fill="#3fb950" fill-opacity="0.85"/>
 <text x="58.0" y="82.0" fill="#0b0f14" font-size="10" text-anchor="middle">C1</text>
 <rect x="86" y="60" width="36" height="36" rx="5" fill="#f85149" fill-opacity="0.85"/>
 <text x="104.0" y="82.0" fill="#0b0f14" font-size="10" text-anchor="middle">C2</text>
-<rect x="132" y="60" width="36" height="36" rx="5" fill="#d29922" fill-opacity="0.85"/>
+<rect x="132" y="60" width="36" height="36" rx="5" fill="#3fb950" fill-opacity="0.85"/>
 <text x="150.0" y="82.0" fill="#0b0f14" font-size="10" text-anchor="middle">C3</text>
-<rect x="178" y="60" width="36" height="36" rx="5" fill="#f85149" fill-opacity="0.85"/>
+<rect x="178" y="60" width="36" height="36" rx="5" fill="#3fb950" fill-opacity="0.85"/>
 <text x="196.0" y="82.0" fill="#0b0f14" font-size="10" text-anchor="middle">C4</text>
-<rect x="224" y="60" width="36" height="36" rx="5" fill="#f85149" fill-opacity="0.85"/>
+<rect x="224" y="60" width="36" height="36" rx="5" fill="#3fb950" fill-opacity="0.85"/>
 <text x="242.0" y="82.0" fill="#0b0f14" font-size="10" text-anchor="middle">C5</text>
-<rect x="270" y="60" width="36" height="36" rx="5" fill="#f85149" fill-opacity="0.85"/>
+<rect x="270" y="60" width="36" height="36" rx="5" fill="#3fb950" fill-opacity="0.85"/>
 <text x="288.0" y="82.0" fill="#0b0f14" font-size="10" text-anchor="middle">C6</text>
-<rect x="316" y="60" width="36" height="36" rx="5" fill="#f85149" fill-opacity="0.85"/>
+<rect x="316" y="60" width="36" height="36" rx="5" fill="#3fb950" fill-opacity="0.85"/>
 <text x="334.0" y="82.0" fill="#0b0f14" font-size="10" text-anchor="middle">C7</text>
-<rect x="362" y="60" width="36" height="36" rx="5" fill="#f85149" fill-opacity="0.85"/>
+<rect x="362" y="60" width="36" height="36" rx="5" fill="#3fb950" fill-opacity="0.85"/>
 <text x="380.0" y="82.0" fill="#0b0f14" font-size="10" text-anchor="middle">C8</text>
-<rect x="408" y="60" width="36" height="36" rx="5" fill="#f85149" fill-opacity="0.85"/>
+<rect x="408" y="60" width="36" height="36" rx="5" fill="#3fb950" fill-opacity="0.85"/>
 <text x="426.0" y="82.0" fill="#0b0f14" font-size="10" text-anchor="middle">C9</text>
-<rect x="454" y="60" width="36" height="36" rx="5" fill="#f85149" fill-opacity="0.85"/>
+<rect x="454" y="60" width="36" height="36" rx="5" fill="#3fb950" fill-opacity="0.85"/>
 <text x="472.0" y="82.0" fill="#0b0f14" font-size="10" text-anchor="middle">C10</text>
 <rect x="500" y="60" width="36" height="36" rx="5" fill="#3fb950" fill-opacity="0.85"/>
 <text x="518.0" y="82.0" fill="#0b0f14" font-size="10" text-anchor="middle">C11</text>
-<rect x="546" y="60" width="36" height="36" rx="5" fill="#f85149" fill-opacity="0.85"/>
+<rect x="546" y="60" width="36" height="36" rx="5" fill="#3fb950" fill-opacity="0.85"/>
 <text x="564.0" y="82.0" fill="#0b0f14" font-size="10" text-anchor="middle">C12</text>
 <rect x="592" y="60" width="36" height="36" rx="5" fill="#3fb950" fill-opacity="0.85"/>
 <text x="610.0" y="82.0" fill="#0b0f14" font-size="10" text-anchor="middle">C13</text>
@@ -246,12 +254,13 @@ tr:last-child td{border-bottom:none}
 <text x="656.0" y="82.0" fill="#0b0f14" font-size="10" text-anchor="middle">C14</text>
 <rect x="684" y="60" width="36" height="36" rx="5" fill="#3fb950" fill-opacity="0.85"/>
 <text x="702.0" y="82.0" fill="#0b0f14" font-size="10" text-anchor="middle">C15</text>
-<text x="40" y="130" fill="#f85149" font-size="15" font-weight="600">不可核 9 / 15</text>
-<text x="230" y="130" fill="#d29922" font-size="15">部分 1</text>
-<text x="330" y="130" fill="#3fb950" font-size="15">可核 5</text>
+<text x="40" y="130" fill="#f85149" font-size="15" font-weight="600">不可核 1 / 15</text>
+<text x="230" y="130" fill="#d29922" font-size="15">部分 0</text>
+<text x="330" y="130" fill="#3fb950" font-size="15">可核 14</text>
 <text x="40" y="152" fill="#8b949e" font-size="12">9 条不可核全部落在同一处：产物不在公开仓（out/*.json、交付包、PoC 只在本地）。</text>
 <text x="40" y="172" fill="#8b949e" font-size="12">最容易被一击打穿的是 C2：台子 15 PASS / 基线 158，没有任何公开可核的一手源。</text>
-<text x="40" y="192" fill="#8b949e" font-size="12">这张图对我方不利，故意放在最前面。</text>
+<text x="40" y="192" fill="#8b949e" font-size="12">补跑（给足公开仓原文 + quote 材料段机检）：真引用 12/14，仍留 2 条复述断言、1 条弱支撑；C2 仍不可核。</text>
+<text x="40" y="212" fill="#8b949e" font-size="12">这张图对我方不利，故意放在最前面。</text>
 </svg>
 <svg viewBox="0 0 900 260" width="100%" role="img" aria-label="攻击者视角的打穿成本" style="background:#141a22;border:1px solid #212b36;border-radius:8px;margin:10px 0">
 <text x="16" y="24" fill="#8b949e" font-size="12">视角二 · 对手：横条越短＝越容易打穿（左＝易，右＝难）</text>
@@ -289,8 +298,8 @@ tr:last-child td{border-bottom:none}
 <text x="396" y="156" fill="#8b949e" font-size="10" text-anchor="middle">双通道 8/8 200 · clone rc=0 · CI 24/1/0</text>
 <circle cx="564" cy="110" r="7" fill="#f85149"/>
 <text x="564" y="76" fill="#8b949e" font-size="11" text-anchor="middle">11-26</text>
-<text x="564" y="138" fill="#c9d1d9" font-size="12" text-anchor="middle">外部 AI 两次</text>
-<text x="564" y="156" fill="#8b949e" font-size="10" text-anchor="middle">DeepSeek-V3 → REFUSE（判定质量）</text>
+<text x="564" y="138" fill="#c9d1d9" font-size="12" text-anchor="middle">外部 AI 五轮</text>
+<text x="564" y="156" fill="#8b949e" font-size="10" text-anchor="middle">第3轮13可核实为1/13 · 第5轮真引12/14 · E1 REFUSE</text>
 <circle cx="732" cy="110" r="7" fill="#d29922"/>
 <text x="732" y="76" fill="#8b949e" font-size="11" text-anchor="middle">待定</text>
 <text x="732" y="138" fill="#c9d1d9" font-size="12" text-anchor="middle">Muse 回执</text>

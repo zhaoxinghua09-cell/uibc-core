@@ -30,9 +30,9 @@ the verifier's fault (`REPRODUCTION.md` shows how to tell the two apart).
 
 ## 3. What is verified, and by whom
 
-- Verified here: the checks run, the corpus reproduces, the public clone matches
-  the pushed commit (`e5a42ad` at the time of writing), the anonymous tarball
-  extracts and passes.
+- Verified here: the checks run, the corpus reproduces, the public clone matches the pushed branch head (`git log -1`
+  when you clone is the authority; this file does not pin a commit, because a
+  document that names its own commit is wrong the moment it is committed).
 - **Not** verified: no third party has reviewed this and signed off. S0 (expert
   seat) is recorded as NOT RUN in the gate file. Linux and macOS have not been
   run: anything outside Windows is *not verified*.

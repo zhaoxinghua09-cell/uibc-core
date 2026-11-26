@@ -181,5 +181,15 @@ class ChainSegmentTests(unittest.TestCase):
                         "a byte flip must be named as a broken link or a broken id")
 
 
-if __name__ == "__main__":
-    unittest.main()
+    def test_the_global_work_question_is_recorded_as_unanswered(self):
+        """No node on this machine: the receipt must say so instead of implying it."""
+        doc = _chain()
+        if doc is None:
+            self.skipTest("chain receipt not present")
+        self.assertIn("node", doc)
+        self.assertFalse(doc["node"]["checked"],
+                         "no Bitcoin Core node was configured when this receipt was made")
+        self.assertIn("most-work", doc["node"]["reason"],
+                      "an unanswered question has to be named, not left blank")
+
+

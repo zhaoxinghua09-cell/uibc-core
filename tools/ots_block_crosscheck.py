@@ -279,7 +279,55 @@ def _fetch_header_once(block_hash, timeout, attempts=3):
     raise last
 
 
-def chain_check(proof_path, height=None, timeout=30, max_blocks=4000):
+
+def node_block_evidence(rpc_url, height, block_hash, timeout=30):
+    """Ask a Bitcoin Core node what it thinks: this is the only global-view witness.
+
+    An explorer shows one branch. A node that follows the network knows the chain
+    with the most work, and `getblockheader` returns that block's confirmations and
+    chainwork in it. When no node is configured the receipt says so - it does not
+    quietly downgrade to "explorer agrees, therefore fine".
+    """
+    if not rpc_url:
+        return {"checked": False,
+                "reason": "no node configured; global most-work is not established"}
+    auth, host = "", rpc_url
+    m = re.match(r"https?://([^/@]+)@(.+)", rpc_url)
+    if m:
+        import base64
+        auth = "Basic " + base64.b64encode(m.group(1).encode()).decode()
+        host = "http://" + m.group(2)
+    import urllib.request as _ur
+
+    def call(method, params):
+        body = json.dumps({"jsonrpc": "1.0", "id": "uibc", "method": method,
+                           "params": params}).encode()
+        req = _ur.Request(host, data=body, headers={
+            "Content-Type": "application/json",
+            **({"Authorization": auth} if auth else {})})
+        with _ur.urlopen(req, timeout=timeout) as r:
+            doc = json.loads(r.read().decode())
+        if doc.get("error"):
+            raise RuntimeError(doc["error"])
+        return doc["result"]
+
+    try:
+        node_hash = call("getblockhash", [height])
+        header = call("getblockheader", [node_hash])
+        tips = call("getblockchaininfo", [])
+        evidence = {"checked": True, "node_block_hash": node_hash,
+                    "confirmations": header.get("confirmations"),
+                    "chainwork": header.get("chainwork"),
+                    "node_height": tips.get("blocks"),
+                    "node_chain": tips.get("chain"),
+                    "hash_matches_explorers": node_hash == block_hash,
+                    "is_most_work_chain": True}  # a node's active chain is the most-work one it knows
+    except Exception as e:  # noqa: BLE001 - unreachable node is data, not a verdict
+        evidence = {"checked": False, "reason": "%s: %s" % (type(e).__name__, str(e)[:120])}
+    return evidence
+
+
+def chain_check(proof_path, height=None, timeout=30, max_blocks=4000, rpc_url=None):
     """Walk prev-hashes from the tip down to the attested block, checking every header.
 
     What this establishes, and only this: every block from the attested one up to
@@ -347,6 +395,9 @@ def chain_check(proof_path, height=None, timeout=30, max_blocks=4000):
         "all_headers_linked_by_prev_hash": all(linkage) if linkage else True,
         "all_headers_meet_their_target": not pow_failed,
     }
+    doc["node"] = node_block_evidence(rpc_url, height, block_hash, timeout)
+    if doc["node"].get("checked") and not doc["node"].get("hash_matches_explorers"):
+        checks["node_agrees_on_block"] = False
     doc.update({"checks": checks, "headers_from_attested_to_tip": len(headers),
                 "expected_length": expected,
                 "difficulty_failures": pow_failed,
@@ -396,6 +447,8 @@ def main(argv=None):
     ap.add_argument("--chain-check", metavar="RECEIPT",
                     help="offline check of a chain-segment receipt")
     ap.add_argument("--timeout", type=int, default=30)
+    ap.add_argument("--node", metavar="RPC_URL",
+                    help="Bitcoin Core RPC (http://user:pass@host:8332) for the global most-work check; omit and the receipt says it was not done")
     a = ap.parse_args(argv)
 
     if a.chain_check:
@@ -421,7 +474,7 @@ def main(argv=None):
     print(text)
     print("verdict=%s" % doc["verdict"])
     if a.chain:
-        chain = chain_check(a.proof, a.height, a.timeout)
+        chain = chain_check(a.proof, a.height, a.timeout, rpc_url=a.node)
         chain_text = json.dumps(chain, indent=2, sort_keys=True)
         path = a.chain_out or ((a.out or a.proof) + ".chain.json")
         with open(path, "w", encoding="utf-8", newline="\n") as f:

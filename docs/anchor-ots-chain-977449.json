@@ -6,11 +6,16 @@
     "segment_length_matches_tip": true,
     "walk_reached_attested_block": true
   },
-  "cumulative_work": "92072576467946920218489204",
-  "cumulative_work_hex": "4c29205f241483bb5c7174",
+  "cumulative_work": "92651649275921429150680960",
+  "cumulative_work_hex": "4ca3bff8b1fe1a4bd5c780",
   "difficulty_failures": [],
-  "expected_length": 159,
+  "expected_length": 160,
   "headers": [
+    {
+      "block_hash": "00000000000000000001b73a5a2490567c8470294263e2f64838e477e803f1c9",
+      "header_hex": "00400220c7911a621c448a04e34e7a41e233339732ac7670b4f7010000000000000000008fbe9c3cc7de3602ffa2129fc2395342340e8a2a0051be44a560cc859e05ba5c4c97076b73160217a4ff66ef",
+      "height": 977609
+    },
     {
       "block_hash": "00000000000000000001f7b47076ac32973333e2417a4ee3048a441c621a91c7",
       "header_hex": "00e00020990f101f2e505ba7e469e97f74a66f4f6c11860dda5d000000000000000000003c332101916b4e5732fe5f90d2226fc32aa6a667d8ac18ed87d856c4c6616d241c94076b731602171c8e86f1",
@@ -807,19 +812,23 @@
       "height": 977450
     }
   ],
-  "headers_from_attested_to_tip": 159,
+  "headers_from_attested_to_tip": 160,
   "height": 977449,
+  "node": {
+    "checked": false,
+    "reason": "no node configured; global most-work is not established"
+  },
   "ok": true,
   "problems": [],
   "proof": "tests\\fixtures\\anchor\\ots_head.ots",
   "tips": {
     "blockchain.info": {
-      "block_hash": "00000000000000000001f7b47076ac32973333e2417a4ee3048a441c621a91c7",
-      "height": 977608
+      "block_hash": "00000000000000000001b73a5a2490567c8470294263e2f64838e477e803f1c9",
+      "height": 977609
     },
     "blockstream.info": {
-      "block_hash": "00000000000000000001f7b47076ac32973333e2417a4ee3048a441c621a91c7",
-      "height": 977608
+      "block_hash": "00000000000000000001b73a5a2490567c8470294263e2f64838e477e803f1c9",
+      "height": 977609
     }
   },
   "verdict": "CHAIN_SEGMENT_VERIFIED"

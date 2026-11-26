@@ -11,7 +11,7 @@
     "merkle_root_matches_attestation": true,
     "merkle_root_matches_sources": true
   },
-  "confirmations": 159,
+  "confirmations": 160,
   "depth_meets_6": true,
   "header_hex": "0060eb25376a5dd8435a416e052a0504c78a5b13961c1151d75300000000000000000000de1ba0eb8504cbcc251c42f8240c15a22dbe187e79ab6e7663bcfde44ae12947d83a066b731602171632a61f",
   "header_sha256d": "00000000000000000001b9b568f25bb0dbb631c3084632a22135c3bfcb0f11a7",
@@ -36,8 +36,8 @@
     "blockchain.info"
   ],
   "tip_heights": {
-    "blockchain.info": 977608,
-    "blockstream.info": 977608
+    "blockchain.info": 977609,
+    "blockstream.info": 977609
   },
   "verdict": "HEADER_MATCHES_ATTESTATION"
 }

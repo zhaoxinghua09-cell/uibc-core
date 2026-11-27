@@ -3,7 +3,7 @@
 the file, never typed."""
 import io, json, os
 
-ROOT = r"D:\lgd-work\uibc-core-r19"
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 corpus = json.load(io.open(os.path.join(ROOT, "benchmarks", "corpus",
                                         "mutation-corpus-500.json"), encoding="utf-8"))
 summary = corpus["summary"]
@@ -67,6 +67,7 @@ rollback family has a head-pinned variant; it is not a claim that 0/500 would be
 ```bash
 python tools/mutation_corpus.py --out /tmp/corpus.json     # regenerate (~2-3 min)
 python tools/corpus_selfcheck.py --receipt my-receipt.md     # compare against the shipped file
+python tools/corpus_erm.py                                  # the ERM companion, 15 cases
 ```
 
 `corpus_selfcheck.py` regenerates into a temporary directory, compares every case id's verdicts
@@ -78,6 +79,30 @@ document, so that is the artifact to send us.
 What the self-check does **not** establish: that the corpus is complete, that the families were
 chosen fairly, or that the verifier is strong. It establishes one thing — this repository's
 numbers can be regenerated from this repository's code.
+
+## The ERM companion corpus (15 cases)
+
+`benchmarks/corpus/mutation-corpus-erm.json`, built by `tools/corpus_erm.py`, carries three
+families this 500-case file did not, all of them taken from an outside measuring tape (ERM,
+measured against this repo on 2026-11-27), plus one negative control:
+
+| family | cases | what it does | expected |
+|---|---|---|---|
+| seal-encoding | 6 | rewrite the seal's base64 (`signature` / `public_key`) as unpadded, urlsafe, or line-wrapped | caught (S6) |
+| merkle-double | 3 | delete two Merkle proofs, leaving size/root describing the full tree | caught (S13) |
+| trunc-recompute | 3 | cut lifecycle events and recompute both `lifecycle_head` and `checkpoint_head` | caught (S8) |
+| evidence-dotfile | 3 | undeclared file renamed to start with a dot | caught (S1) |
+
+The third family exposed a real gap: S13 verified the proofs it was handed and never asked
+whether every leaf had one, so `size 5, root X, 3 proofs` read as a complete tree (accepted
+in open mode and under a pinned key). S13 now requires a proof for every indexed file; the
+case that used to pass is the regression test.
+
+ERM also produced a prediction this corpus disproved: truncation was expected to survive
+without an external head pin. It does not — S8 recomputes the checkpoint from more fields
+than the manifest records, so a self-consistently shortened package still mismatches. Rollback
+(swapping in an older, self-consistent package) remains the one class only an out-of-band head
+pin can catch.
 
 ## Known gaps (stated here, not in an appendix)
 

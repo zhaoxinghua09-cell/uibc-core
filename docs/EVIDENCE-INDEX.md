@@ -2,7 +2,7 @@
 
 每条检查对应到：验证器里的定义、覆盖它的测试、指向它的红队攻击、以及提到它的文档。**重新生成即可复核**，不会随记忆漂移。
 
-**测试套件：2102 个用例**（静态计数：`tests/` 下 `def test_*` 的个数，跨平台一致；这是**源码里有几个测试函数**，不等于运行期收集到的用例数——pytest 会把参数化展开成多条（实跑更多），平台跳过又会少一些。别处只引用本页，不再抄写这个数字）。
+**测试套件：2113 个用例**（静态计数：`tests/` 下 `def test_*` 的个数，跨平台一致；这是**源码里有几个测试函数**，不等于运行期收集到的用例数——pytest 会把参数化展开成多条（实跑更多），平台跳过又会少一些。别处只引用本页，不再抄写这个数字）。
 
 
 | 检查 | 名称 | 出厂包是否走到 | 测试 | 红队 | 文档 |
@@ -13,14 +13,14 @@
 | S3 | lifecycle state machine + semantics | 是 | 12 | 1 | 22 |
 | S4 | evidence integrity | 是 | 24 | 3 | 45 |
 | S5 | evidence root | 是 | 14 | 3 | 36 |
-| S6 | seal signature | 是 | 26 | 1 | 42 |
+| S6 | seal signature | 是 | 27 | 1 | 42 |
 | S7 | evidence index metadata | 否 | 7 | 1 | 19 |
 | S8 | package checkpoint head | 否 | 9 | 2 | 31 |
 | S9 | head pinned out-of-band | 否 | 9 | 1 | 41 |
 | S10 | attestation closure declared | 否 | 6 | 2 | 12 |
 | S11 | strict serialization | 是 | 7 | 1 | 22 |
 | S12 | timestamp and identifier strictness | 是 | 12 | 2 | 22 |
-| S13 | merkle inclusion proofs | 否 | 9 | 4 | 14 |
+| S13 | merkle inclusion proofs | 否 | 10 | 4 | 15 |
 | S14 | strict base64 | 否 | 5 | 2 | 9 |
 | S15 | anchor event resolution | 否 | 7 | 4 | 14 |
 | S16 | external timestamp (RFC 3161) | 否 | 9 | 4 | 26 |

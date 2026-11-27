@@ -1,3 +1,17 @@
+## 未发布 — 格式 v2（未声明证据从「点名告警」升为「默认 FAIL」；发版号 0.5.6 待定）
+
+- **上一轮留下的那句话，这一轮做掉**：0.5.5 把沉默改成点名（`warnings` + stderr 一行），但默认仍判 PASS。当时写明的理由是"这是格式版本问题，不是补丁"。现在按版本做：`uibc submit` 在 `manifest.json` 写 `format_version: 2`，验证器读到 2 即对 `evidence/` 下索引未声明的文件判 **S1 FAIL**，不必加 `--strict`。
+- **为什么不追溯收紧 v1 包**：一个 2026-11 之前封的包，封的时候规则是宽松的。事后把它判死，等于用今天的法判昨天的手续。v1 包（manifest 无该字段或为 1）行为完全不变：S1 PASS + `warnings` 点名它放过的文件，措辞里写明"本包为 format v1"。
+- **未知版本不按 v1 判**：`format_version: 3` 这类本验证器没实现的值，S1 判 `INCONCLUSIVE`，detail 点名版本号与"已知 1、2"。理由与 `min_verifier_version` 门槛同构——拿旧规则判新格式，会在自己没读过的字段上报 PASS。
+- **改动面**：`uibc_core/verify.py`（读 `format_version`、`evidence_complete = strict or fmt == 2`、S1 三态、报文新增顶层 `format_version`）；`uibc_core/cli.py`（`submit` 写 `format_version: 2`）；`__init__.py` 版本 0.5.5 → **0.5.6**；`docs/STRICT-MODE.md` 增 v2 一节与迁移说明。
+- **测试**：`tests/test_strict_mode.py` 8 → **15** 项，新增 7 条（v2 不传 flag 即 FAIL、v2 干净包 S1 PASS、v2 仍豁免格式结构件、v1 保持 note+warning、v3 判 INCONCLUSIVE、`.lock` 不算证据、点文件不能借 `.lock` 的豁免）。全量结果见文末实测行。
+- **改这一版时被自己的新规则打了一拳（记在这里，因为它比改动本身重要）**：v2 一上来，本仓自己刚封的包**全部 FAIL**——`uibc_core/locking.py` 往 `evidence/.lock` 写锁文件，而 v2 把 `evidence/` 下每个未声明文件都判死。处理方式不是"把 v2 放宽"，是**按名字豁免 .lock**（`_EVIDENCE_NOT_EVIDENCE`），并另加一条负控：`evidence/.payload` 这类点文件**仍然 FAIL**。按"任何点文件都豁免"会直接开出藏证据的口子。
+- **同一轮发现的第二个真缺陷（S13 覆盖率）**：`evidence/merkle.json` 删掉两个证明、size 与 root 仍描述整棵树时，**open 与 pinned 两档都 PASS**（corpus_erm E2 root-untouched）。原因：S13 只验证"递上来的证明"，从不问"每片叶子是否都有证明"——`size 5 / root X / 3 个 proof` 被读成一棵完整的树。已改为**必须覆盖每个索引文件**，缺一条即 FAIL。这条属判决口径变化，写在版本号里（0.5.6）。
+- **ERM 三族并进自测（D2）**：新增 `tools/corpus_erm.py` + `benchmarks/corpus/mutation-corpus-erm.json`（15 例）+ `tests/test_corpus_erm.py`（4 条）。族：`seal-encoding`（base64 等价写法，S6 拦 6/6）、`merkle-double`（删两叶证明，S13 拦 3/3）、`trunc-recompute`（截断并重算两个 head，S8 拦 3/3）、`evidence-dotfile`（点文件负控，S1 拦 3/3）。**不并进 500 例**：500 例的条数与族名被十余处断言钉住，重编号会让"同一批用例"失去可比性。
+- **一条预测被自己的语料推翻**：我原本把 `trunc-recompute` 预期为"存活"（包内没有东西能证明曾经更长），实测 **S8 三例全拦**。已按实测改写 docstring 与文档：自洽缩短拦得住，**回滚**（换成更旧的、自洽的包）才是只能靠外部钉 head 的那一类。
+- **500 例：重生成，结论不变**。`BASE` 现在由 0.5.6 产出（带 `format_version: 2`），重跑 `tools/mutation_corpus.py`：open **60/500 = 12.0%**、pinned **20/500 = 4.0%**、head-pinned **0/60**，与上一版逐字相同；变化的只是每族 `caught_by` 更全（`evidence-add` 现在也记 S1）。`docs/MUTATION-CORPUS.md` 由工具重生成（新增 ERM 一节），`tools/build_corpus_doc.py` 里写死的 `D:\lgd-work\uibc-core-r19` 改为**相对路径**——那是作者机器上的路径，外人克隆后跑不通。
+- **对 ERM 表的影响（诚实记账）**：本仓 `M06` 现在分两种情况——v2 包**必拦**，v1 包仍 PASS 但带点名告警。对外表格的"逃逸"格应改为"v1 包逃逸 / v2 包不逃逸"，而不是笼统写"已修"。
+
 ## 未发布 — 2026-11-27（PASS 不再沉默：放过的文件要点名，而不是只藏在 S1 的 detail 里）
 
 - **起因（外部实测，不是自查）**：ERM（Escape-Rate Matrix）用与 proofbundle/proofline 同一套 12 族变异器打本仓，`M06 注入未声明文件`（往 `evidence/` 放一个 index 从未声明过的文件）在 open / `--pubkey` / `--expect-head` **三档都返回 PASS、退出码 0**。同一族对两家第三方验证器都是 FAIL。

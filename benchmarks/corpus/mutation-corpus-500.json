@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at_utc": "2026-11-24T02:18:15Z",
+    "generated_at_utc": "2026-11-26T23:50:40Z",
     "cases": 500,
     "verifier": "uibc-core verify()",
     "deterministic": true,
@@ -108,12 +108,12 @@
       "accepted_open": 0,
       "accepted_pinned": 0,
       "caught_by": {
+        "S1": 6,
         "S12": 2,
         "S7": 2,
         "S8": 5,
         "S5": 5,
         "S6": 4,
-        "S1": 1,
         "S2": 1
       }
     },
@@ -122,6 +122,7 @@
       "accepted_open": 0,
       "accepted_pinned": 0,
       "caught_by": {
+        "S1": 24,
         "S4": 24,
         "S12": 24,
         "S7": 24,
@@ -6870,6 +6871,7 @@
         "open": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S12",
             "S7",
             "S8",
@@ -6880,6 +6882,7 @@
         "pinned": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S12",
             "S7",
             "S8",
@@ -6897,6 +6900,7 @@
         "open": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S7",
             "S8",
             "S5",
@@ -6907,6 +6911,7 @@
         "pinned": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S7",
             "S8",
             "S5",
@@ -6924,6 +6929,7 @@
         "open": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S12",
             "S8",
             "S5",
@@ -6934,6 +6940,7 @@
         "pinned": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S12",
             "S8",
             "S5",
@@ -6951,6 +6958,7 @@
         "open": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S8",
             "S5",
             "S6"
@@ -6960,6 +6968,7 @@
         "pinned": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S8",
             "S5",
             "S6"
@@ -6976,6 +6985,7 @@
         "open": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S8",
             "S5"
           ],
@@ -6984,6 +6994,7 @@
         "pinned": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S8",
             "S5",
             "S6"
@@ -7023,6 +7034,7 @@
         "open": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S4",
             "S12",
             "S7",
@@ -7033,6 +7045,7 @@
         "pinned": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S4",
             "S12",
             "S7",
@@ -7050,6 +7063,7 @@
         "open": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S4",
             "S12",
             "S7",
@@ -7060,6 +7074,7 @@
         "pinned": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S4",
             "S12",
             "S7",
@@ -7077,6 +7092,7 @@
         "open": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S4",
             "S12",
             "S7",
@@ -7087,6 +7103,7 @@
         "pinned": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S4",
             "S12",
             "S7",
@@ -7104,6 +7121,7 @@
         "open": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S4",
             "S12",
             "S7",
@@ -7114,6 +7132,7 @@
         "pinned": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S4",
             "S12",
             "S7",
@@ -7131,6 +7150,7 @@
         "open": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S4",
             "S12",
             "S7",
@@ -7141,6 +7161,7 @@
         "pinned": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S4",
             "S12",
             "S7",
@@ -7158,6 +7179,7 @@
         "open": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S4",
             "S12",
             "S7",
@@ -7168,6 +7190,7 @@
         "pinned": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S4",
             "S12",
             "S7",
@@ -7185,6 +7208,7 @@
         "open": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S4",
             "S12",
             "S7",
@@ -7195,6 +7219,7 @@
         "pinned": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S4",
             "S12",
             "S7",
@@ -7212,6 +7237,7 @@
         "open": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S4",
             "S12",
             "S7",
@@ -7222,6 +7248,7 @@
         "pinned": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S4",
             "S12",
             "S7",
@@ -7239,6 +7266,7 @@
         "open": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S4",
             "S12",
             "S7",
@@ -7249,6 +7277,7 @@
         "pinned": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S4",
             "S12",
             "S7",
@@ -7266,6 +7295,7 @@
         "open": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S4",
             "S12",
             "S7",
@@ -7276,6 +7306,7 @@
         "pinned": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S4",
             "S12",
             "S7",
@@ -7293,6 +7324,7 @@
         "open": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S4",
             "S12",
             "S7",
@@ -7303,6 +7335,7 @@
         "pinned": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S4",
             "S12",
             "S7",
@@ -7320,6 +7353,7 @@
         "open": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S4",
             "S12",
             "S7",
@@ -7330,6 +7364,7 @@
         "pinned": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S4",
             "S12",
             "S7",
@@ -7347,6 +7382,7 @@
         "open": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S4",
             "S12",
             "S7",
@@ -7357,6 +7393,7 @@
         "pinned": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S4",
             "S12",
             "S7",
@@ -7374,6 +7411,7 @@
         "open": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S4",
             "S12",
             "S7",
@@ -7384,6 +7422,7 @@
         "pinned": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S4",
             "S12",
             "S7",
@@ -7401,6 +7440,7 @@
         "open": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S4",
             "S12",
             "S7",
@@ -7411,6 +7451,7 @@
         "pinned": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S4",
             "S12",
             "S7",
@@ -7428,6 +7469,7 @@
         "open": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S4",
             "S12",
             "S7",
@@ -7438,6 +7480,7 @@
         "pinned": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S4",
             "S12",
             "S7",
@@ -7455,6 +7498,7 @@
         "open": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S4",
             "S12",
             "S7",
@@ -7465,6 +7509,7 @@
         "pinned": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S4",
             "S12",
             "S7",
@@ -7482,6 +7527,7 @@
         "open": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S4",
             "S12",
             "S7",
@@ -7492,6 +7538,7 @@
         "pinned": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S4",
             "S12",
             "S7",
@@ -7509,6 +7556,7 @@
         "open": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S4",
             "S12",
             "S7",
@@ -7519,6 +7567,7 @@
         "pinned": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S4",
             "S12",
             "S7",
@@ -7536,6 +7585,7 @@
         "open": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S4",
             "S12",
             "S7",
@@ -7546,6 +7596,7 @@
         "pinned": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S4",
             "S12",
             "S7",
@@ -7563,6 +7614,7 @@
         "open": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S4",
             "S12",
             "S7",
@@ -7573,6 +7625,7 @@
         "pinned": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S4",
             "S12",
             "S7",
@@ -7590,6 +7643,7 @@
         "open": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S4",
             "S12",
             "S7",
@@ -7600,6 +7654,7 @@
         "pinned": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S4",
             "S12",
             "S7",
@@ -7617,6 +7672,7 @@
         "open": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S4",
             "S12",
             "S7",
@@ -7627,6 +7683,7 @@
         "pinned": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S4",
             "S12",
             "S7",
@@ -7644,6 +7701,7 @@
         "open": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S4",
             "S12",
             "S7",
@@ -7654,6 +7712,7 @@
         "pinned": {
           "verdict": "FAIL",
           "failed_checks": [
+            "S1",
             "S4",
             "S12",
             "S7",

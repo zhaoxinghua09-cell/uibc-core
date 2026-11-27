@@ -1,0 +1,360 @@
+{
+  "meta": {
+    "generated_at_utc": "2026-11-26T23:49:44Z",
+    "cases": 15,
+    "verifier": "uibc-core verify()",
+    "origin": "ERM (Escape-Rate Matrix) measured 2026-11-27",
+    "note": "three ERM families the 500-case corpus did not carry, plus a dotfile negative control for the .lock exemption"
+  },
+  "families": {
+    "seal-encoding": {
+      "n": 6,
+      "accepted_open": 0,
+      "accepted_pinned": 0,
+      "caught_by": {
+        "S6": 6
+      }
+    },
+    "merkle-double": {
+      "n": 3,
+      "accepted_open": 0,
+      "accepted_pinned": 0,
+      "caught_by": {
+        "S13": 3
+      }
+    },
+    "trunc-recompute": {
+      "n": 3,
+      "accepted_open": 0,
+      "accepted_pinned": 0,
+      "caught_by": {
+        "S8": 3
+      }
+    },
+    "evidence-dotfile": {
+      "n": 3,
+      "accepted_open": 0,
+      "accepted_pinned": 0,
+      "caught_by": {
+        "S1": 3
+      }
+    }
+  },
+  "rows": [
+    {
+      "id": "E1-signature-unpadded",
+      "family": "seal-encoding",
+      "mutation": "seal.signature 换成 unpadded 写法",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S6"
+          ],
+          "accepted": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S6"
+          ],
+          "accepted": false
+        }
+      }
+    },
+    {
+      "id": "E1-signature-urlsafe",
+      "family": "seal-encoding",
+      "mutation": "seal.signature 换成 urlsafe 写法",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S6"
+          ],
+          "accepted": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S6"
+          ],
+          "accepted": false
+        }
+      }
+    },
+    {
+      "id": "E1-signature-wrapped",
+      "family": "seal-encoding",
+      "mutation": "seal.signature 换成 wrapped 写法",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S6"
+          ],
+          "accepted": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S6"
+          ],
+          "accepted": false
+        }
+      }
+    },
+    {
+      "id": "E1-public_key-unpadded",
+      "family": "seal-encoding",
+      "mutation": "seal.public_key 换成 unpadded 写法",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S6"
+          ],
+          "accepted": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S6"
+          ],
+          "accepted": false
+        }
+      }
+    },
+    {
+      "id": "E1-public_key-urlsafe",
+      "family": "seal-encoding",
+      "mutation": "seal.public_key 换成 urlsafe 写法",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S6"
+          ],
+          "accepted": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S6"
+          ],
+          "accepted": false
+        }
+      }
+    },
+    {
+      "id": "E1-public_key-wrapped",
+      "family": "seal-encoding",
+      "mutation": "seal.public_key 换成 wrapped 写法",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S6"
+          ],
+          "accepted": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S6"
+          ],
+          "accepted": false
+        }
+      }
+    },
+    {
+      "id": "E2-root-untouched",
+      "family": "merkle-double",
+      "mutation": "删两个叶子证明（root-untouched）",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S13"
+          ],
+          "accepted": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S13"
+          ],
+          "accepted": false
+        }
+      }
+    },
+    {
+      "id": "E2-shrink-size-only",
+      "family": "merkle-double",
+      "mutation": "删两个叶子证明（shrink-size-only）",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S13"
+          ],
+          "accepted": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S13"
+          ],
+          "accepted": false
+        }
+      }
+    },
+    {
+      "id": "E2-recompute",
+      "family": "merkle-double",
+      "mutation": "删两个叶子证明（recompute）",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S13"
+          ],
+          "accepted": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S13"
+          ],
+          "accepted": false
+        }
+      }
+    },
+    {
+      "id": "E3-drop1",
+      "family": "trunc-recompute",
+      "mutation": "截断 1 条并把 lifecycle/checkpoint 都重算自洽",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S8"
+          ],
+          "accepted": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S8"
+          ],
+          "accepted": false
+        }
+      }
+    },
+    {
+      "id": "E3-drop3",
+      "family": "trunc-recompute",
+      "mutation": "截断 3 条并把 lifecycle/checkpoint 都重算自洽",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S8"
+          ],
+          "accepted": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S8"
+          ],
+          "accepted": false
+        }
+      }
+    },
+    {
+      "id": "E3-drop5",
+      "family": "trunc-recompute",
+      "mutation": "截断 5 条并把 lifecycle/checkpoint 都重算自洽",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S8"
+          ],
+          "accepted": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S8"
+          ],
+          "accepted": false
+        }
+      }
+    },
+    {
+      "id": "E4-dotpayload",
+      "family": "evidence-dotfile",
+      "mutation": "evidence/.payload（未声明，点开头）",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S1"
+          ],
+          "accepted": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S1"
+          ],
+          "accepted": false
+        }
+      }
+    },
+    {
+      "id": "E4-dothiddendottxt",
+      "family": "evidence-dotfile",
+      "mutation": "evidence/.hidden.txt（未声明，点开头）",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S1"
+          ],
+          "accepted": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S1"
+          ],
+          "accepted": false
+        }
+      }
+    },
+    {
+      "id": "E4-dotdotconf",
+      "family": "evidence-dotfile",
+      "mutation": "evidence/..conf（未声明，点开头）",
+      "modes": {
+        "open": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S1"
+          ],
+          "accepted": false
+        },
+        "pinned": {
+          "verdict": "FAIL",
+          "failed_checks": [
+            "S1"
+          ],
+          "accepted": false
+        }
+      }
+    }
+  ]
+}

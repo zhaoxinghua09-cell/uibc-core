@@ -82,8 +82,9 @@ def package_lock(package, timeout=30.0):
     """Hold an exclusive advisory lock on one package.
 
     The lock file lives inside the package (evidence/.lock). It is not
-    evidence: S1 permits dotfiles next to the index, and this file is
-    documented rather than hidden.
+    evidence: verify's S1 exempts this exact name, under both the lenient and
+    the format-v2 rules (the exemption is by name, not by "dotfile", so an
+    undeclared file cannot hide behind it).
     """
     path = os.path.join(package, "evidence", ".lock")
     os.makedirs(os.path.dirname(path), exist_ok=True)

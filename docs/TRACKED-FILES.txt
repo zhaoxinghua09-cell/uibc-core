@@ -206,6 +206,7 @@ benchmarks/build_leaderboard.py
 benchmarks/calibration/always-accept.json
 benchmarks/calibration/always-refuse.json
 benchmarks/corpus/mutation-corpus-500.json
+benchmarks/corpus/mutation-corpus-erm.json
 benchmarks/leaderboard.md
 benchmarks/run_benchmarks.py
 benchmarks/run_external.py
@@ -1952,6 +1953,7 @@ tests/test_conformance_harness.py
 tests/test_conformance_package.py
 tests/test_conformance_runner_preflight.py
 tests/test_contribution.py
+tests/test_corpus_erm.py
 tests/test_corpus_snapshots.py
 tests/test_cose_min.py
 tests/test_coverage_feed.py
@@ -2253,6 +2255,7 @@ tools/conformance_coverage.py
 tools/conformance_harness.py
 tools/conformance_vectors.py
 tools/convention_crosswalk.py
+tools/corpus_erm.py
 tools/corpus_selfcheck.py
 tools/cose_sign1_interop.py
 tools/cose_stdlib_interop.py

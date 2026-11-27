@@ -10,6 +10,7 @@
   "lifecycle_head": "sha256:33c5e2a08e8a55ab9d63673b6ba31bd2d789c457fcd257c3c78bdc5e8e103af1",
   "checkpoint_head": "sha256:e2bc952e8ce1d12dbc3e5ee065dec6d2a25d9331f4d13be1f6263ad43523a13b",
   "min_verifier_version": "0.5.5",
+  "format_version": 2,
   "closure": {
     "model_weights": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
     "tokenizer": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",

@@ -410,6 +410,15 @@ def cmd_submit(args):
     # claim it never read (MIGRATION-RESULTS.md, M2c).
     from . import __version__ as _builder_version
     manifest["min_verifier_version"] = _builder_version
+    # Format v2 declares what v1 left implicit: from v2 on, everything under
+    # evidence/ is either promised by evidence/index.json or structural by the
+    # format, and anything else fails S1 by default. v1 packages (no field) keep
+    # the note-plus-warning behaviour, so a package sealed before this change is
+    # judged by the rules that were in force when it was sealed. The number is
+    # positive evidence from the producer, not a floor the verifier infers: a
+    # verifier that guessed "this looks v2" would be tightening somebody else's
+    # package on its own initiative (ERM family M06).
+    manifest["format_version"] = 2
     # Optional: carry the verifier inside the package, so an archive can be
     # checked with nothing but Python - parity with AIVS, which ships verify.py
     # in the bundle. The builder records path + hash; verify.py binds it in S1,

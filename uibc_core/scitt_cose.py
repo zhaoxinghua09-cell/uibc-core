@@ -622,7 +622,15 @@ def verify_transparent_statement(vector: dict, now: int = None):
                              % (claims.get(CWT_ISS), issuer_identity))
             # Stage 6 - validity window against the statement's fixed time
             if now is None:
-                now = _epoch(vector.get("verificationTime"))
+                # A corpus may carry the instant as an epoch integer or as an
+                # RFC 3339 string. `_epoch` only understands the string form, so
+                # passing an integer through it returned None and the window was
+                # skipped silently - a statement judged "valid" at every instant.
+                fixed = vector.get("verificationTime")
+                if isinstance(fixed, int) and not isinstance(fixed, bool):
+                    now = fixed
+                else:
+                    now = _epoch(fixed)
             if now is not None:
                 if CWT_EXP in claims and isinstance(claims[CWT_EXP], int) and claims[CWT_EXP] < now:
                     codes.append("statement-expired")

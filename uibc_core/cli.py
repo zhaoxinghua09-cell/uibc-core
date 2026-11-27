@@ -989,6 +989,116 @@ def cmd_verify_cose(args):
     sys.exit(0 if conforming == len(members) else 1)
 
 
+def cmd_emit_cose(args):
+    """Produce a small `aee-scitt-cose/v0.1` corpus, then read it back.
+
+    The read-back is not a courtesy check: it is the only thing that makes
+    "we can produce statements" a fact rather than an intention. Every emitted
+    vector is judged by the same reader a foreign corpus is judged by, and the
+    counts printed here are the counts that go into the evidence record.
+    """
+    from . import scitt_cose_emit as emit
+    from .scitt_cose import verify_transparent_statement
+
+    out = os.path.abspath(args.out)
+    count = int(args.count)
+    if count < 1:
+        sys.exit("error: --count must be at least 1")
+    seed = bytes.fromhex(args.seed_hex)
+    ts_seed = bytes.fromhex(args.ts_seed_hex)
+    kid = bytes.fromhex(args.kid_hex)
+    ts_kid = bytes.fromhex(args.ts_kid_hex)
+    issuer_pub = _ed.publickey(seed)
+    ts_pub = _ed.publickey(ts_seed)
+
+    payloads, statements, digests = [], [], []
+    for i in range(count):
+        subject = ("uibc-emit-subject-%d" % i).encode("utf-8")
+        digest = hashlib.sha256(subject).hexdigest()
+        payload = emit.build_payload(subject_sha256=digest, issued_at=args.issued_at)
+        payloads.append(payload)
+        digests.append(digest)
+    for i, payload in enumerate(payloads):
+        statements.append(emit.build_statement(
+            seed=seed, kid=kid, iss=args.iss, payload=payload,
+            exp=args.exp, nbf=args.nbf,
+            detached=(args.detached_index == i)))
+
+    entries = [emit.entry_bytes(s) for s in statements]
+    root = emit.merkle_root(entries)
+    # Register the receipt-carrying form: a receipt covers the entry, and the
+    # entry is what is left after the receipts are removed, so the second pass
+    # produces the same entry bytes as the first.
+    carrying = []
+    for i, payload in enumerate(payloads):
+        receipt = emit.build_receipt(ts_seed=ts_seed, ts_kid=ts_kid, entry=entries[i],
+                                     tree_size=len(entries), leaf_index=i,
+                                     path=emit.inclusion_path(entries, i), root=root)
+        carrying.append(emit.build_statement(
+            seed=seed, kid=kid, iss=args.iss, payload=payload,
+            exp=args.exp, nbf=args.nbf, receipts=[receipt],
+            detached=(args.detached_index == i)))
+
+    stmt_dir = os.path.join(out, "statements")
+    os.makedirs(stmt_dir, exist_ok=True)
+    vectors = []
+    for i, (statement, payload) in enumerate(zip(carrying, payloads)):
+        vector_id = "s%d" % i
+        vector = emit.build_vector(
+            vector_id=vector_id, statement=statement, payload=payload,
+            verification_time=args.at, issuer_iss=args.iss, issuer_kid=kid,
+            issuer_pub=issuer_pub, ts_iss=args.ts_iss, ts_kid=ts_kid, ts_pub=ts_pub,
+            detached=(args.detached_index == i))
+        path = os.path.join(stmt_dir, "%s.json" % vector_id)
+        with open(path, "w", encoding="utf-8", newline="\n") as fh:
+            json.dump(vector, fh, indent=2, sort_keys=True)
+            fh.write("\n")
+        vectors.append(vector)
+
+    manifest = {
+        "suite": "uibc-emit-scitt-cose",
+        "profile": emit.PROFILE_NAME,
+        "counts": {"accept": count, "reject": 0, "indeterminate": 0},
+        "verificationTime": args.at,
+        "treeRoot": root.hex(),
+        "subjects": digests,
+        "vectors": [{"id": "s%d" % i, "file": "statements/s%d.json" % i,
+                     "expected": {"verdict": "valid"}} for i in range(count)],
+        "issuer": {"iss": args.iss, "kid": kid.hex(),
+                   "key": {"kty": "OKP", "crv": "Ed25519", "x": issuer_pub.hex()}},
+        "transparencyService": {"iss": args.ts_iss, "kid": ts_kid.hex(),
+                                "key": {"kty": "OKP", "crv": "Ed25519", "x": ts_pub.hex()}},
+        "notClaimed": ["that a foreign rail has judged this corpus",
+                       "that these keys are anything but throwaway emit keys"],
+    }
+    core = json.dumps(manifest, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    manifest["corpusDigest"] = hashlib.sha256(core).hexdigest()
+    mpath = os.path.join(out, "MANIFEST.json")
+    with open(mpath, "w", encoding="utf-8", newline="\n") as fh:
+        json.dump(manifest, fh, indent=2, sort_keys=True)
+        fh.write("\n")
+
+    lines, valid = [], 0
+    for vector in vectors:
+        verdict = verify_transparent_statement(vector)
+        ok = verdict["verdict"] == "valid" and not verdict["codes"]
+        valid += 1 if ok else 0
+        line = _cose_report_line(vector["vector"], verdict["verdict"], verdict["codes"],
+                                 verdict["notes"], 0 if ok else 1, conforms=ok)
+        lines.append(line)
+        print("%s %s%s" % (vector["vector"], verdict["verdict"].upper(),
+                           "" if ok else " " + ",".join(verdict["codes"])))
+    if args.report:
+        with open(os.path.abspath(args.report), "w", encoding="utf-8", newline="\n") as fh:
+            for line in lines:
+                fh.write(json.dumps(line, sort_keys=True, ensure_ascii=False) + "\n")
+    print()
+    print("emitted %d, read back valid %d/%d, tree root %s"
+          % (count, valid, count, root.hex()))
+    print("manifest: %s" % mpath)
+    sys.exit(0 if valid == count else 1)
+
+
 def cmd_explain(args):
     """The same verifier, printed for a person.
 
@@ -1183,6 +1293,32 @@ def main():
     p.add_argument("--json-out", dest="json_out", default=None, metavar="JSON",
                    help="write per-vector rows and the conforming count here")
     p.set_defaults(func=cmd_verify_cose)
+
+    p = sub.add_parser("emit-cose", help="produce aee-scitt-cose/v0.1 statements, "
+                                         "then read them back with our own reader")
+    p.add_argument("--out", required=True, metavar="DIR",
+                   help="where statements/ and MANIFEST.json are written")
+    p.add_argument("--count", type=int, default=3, metavar="N",
+                   help="how many statements to emit (one Merkle tree over all of them)")
+    p.add_argument("--at", type=int, required=True, metavar="EPOCH",
+                   help="the verification instant every emitted vector declares")
+    p.add_argument("--exp", type=int, default=None, metavar="EPOCH")
+    p.add_argument("--nbf", type=int, default=None, metavar="EPOCH")
+    p.add_argument("--issued-at", dest="issued_at", type=int, default=None, metavar="EPOCH")
+    # Seeds are required, never defaulted: a convenience default that signs with a
+    # known key is exactly the kind of thing that later gets used in earnest.
+    p.add_argument("--seed-hex", dest="seed_hex", required=True, metavar="HEX",
+                   help="32-byte issuer seed (test keys only)")
+    p.add_argument("--ts-seed-hex", dest="ts_seed_hex", required=True, metavar="HEX",
+                   help="32-byte transparency-service seed (test keys only)")
+    p.add_argument("--kid-hex", dest="kid_hex", required=True, metavar="HEX")
+    p.add_argument("--ts-kid-hex", dest="ts_kid_hex", required=True, metavar="HEX")
+    p.add_argument("--iss", default="uibc-core emitter", metavar="NAME")
+    p.add_argument("--ts-iss", dest="ts_iss", default="uibc-core emit log", metavar="NAME")
+    p.add_argument("--detached-index", dest="detached_index", type=int, default=-1,
+                   metavar="I", help="emit statement I with a detached payload")
+    p.add_argument("--report", default=None, metavar="JSONL")
+    p.set_defaults(func=cmd_emit_cose)
 
     p = sub.add_parser("explain", help="verify and print why, one check per line")
     p.add_argument("path")

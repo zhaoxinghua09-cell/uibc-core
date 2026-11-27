@@ -5,6 +5,9 @@
 - **两件 PyPI 产物都没有 provenance**：本轮仍走 long-lived token（`twine` + `__token__`），不是 trusted publishing；`python tools/check_pypi_provenance.py --pkg uibc-core --version 0.5.6` 报 `2 of 2 file(s) lack provenance`。0.5.0–0.5.5 同缺陷，未修。
 - **Zenodo 没有为 0.5.6 存缴**：`CITATION.cff` 因此仍钉 `0.5.5`（tests/test_archive_scope.py 把这条钉死）。拿 0.5.5 的 DOI 去引 0.5.6 的字节是错的，README 也这样写。
 
+- **release 页那句话是假的，本轮改掉（2026-11-27 复核时发现）**：README 与 `docs/AUDIT-KIT.md` 曾写 "release page carries the same bytes, attached on 2026-11-27"。实测 `GET /repos/zhaoxinghua09-cell/uibc-core/releases/tags/v0.5.6` → **404**：`v0.5.6` tag 被 `release-tags-immutable` 规则集冻住（tag 不可删、不可复用，第二个 release 报 `tag_name was used by an immutable release`，已上传的副本停在草稿里）。这一轮把两处改成"release 页不承载该归档、只从树内 raw URL 取"，`tools/check_outsider_entry.py` 改成"要么点名活资产、要么明写 release 页不承载"，并堵住"文档打印 404 链接"这一类；新增两条回归（`tests/test_outsider_entry.py`）。顺带修掉 `docs/AUDIT-KIT.md` 里 0.4.1 段把 36 例写成 `58/58` 的旧笔误。
+- **外部 AI 逐例复核的另一条发现（P1，未修）**：SiliconFlow `deepseek-ai/DeepSeek-V3` 独立跑完 58 例，54 例与期望一致；4 个 accept 例（02/03/04/05）被判拒，理由是它把"`evidence/` 下所有文件必须在 manifest 里声明"当硬规则，而本格式允许追加树/追加证据。共识率 93.1%，但这条说明**规范文字不足以让独立判读者推出"允许扩展"**，属下一轮要补的判定文本。
+
 - **上一轮留下的那句话，这一轮做掉**：0.5.5 把沉默改成点名（`warnings` + stderr 一行），但默认仍判 PASS。当时写明的理由是"这是格式版本问题，不是补丁"。现在按版本做：`uibc submit` 在 `manifest.json` 写 `format_version: 2`，验证器读到 2 即对 `evidence/` 下索引未声明的文件判 **S1 FAIL**，不必加 `--strict`。
 - **为什么不追溯收紧 v1 包**：一个 2026-11 之前封的包，封的时候规则是宽松的。事后把它判死，等于用今天的法判昨天的手续。v1 包（manifest 无该字段或为 1）行为完全不变：S1 PASS + `warnings` 点名它放过的文件，措辞里写明"本包为 format v1"。
 - **未知版本不按 v1 判**：`format_version: 3` 这类本验证器没实现的值，S1 判 `INCONCLUSIVE`，detail 点名版本号与"已知 1、2"。理由与 `min_verifier_version` 门槛同构——拿旧规则判新格式，会在自己没读过的字段上报 PASS。

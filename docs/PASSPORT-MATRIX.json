@@ -1,0 +1,252 @@
+{
+  "generated_at": "2026-11-27T03:36:27+00:00",
+  "probe": "uibc-passport-matrix/1.0",
+  "checks": [
+    "签名可验（离线，第三方持公钥）",
+    "内容绑定（改一个字段验签必失败）",
+    "规范化确定（换键序规范串不变）",
+    "标识可解析（无上下文）",
+    "吊销可追（吊销=一条可验证据）",
+    "第三方可独立跑（有可安装实现）"
+  ],
+  "systems": [
+    "APS (IETF draft-pidlisnyi-aps)",
+    "AIAgentMark v1.0 (个人自持)",
+    "APIS v2.1 (Passport Alliance)",
+    "AIP (IETF draft-singla) did:aip",
+    "AIP (IETF draft-prakash) aip:web"
+  ],
+  "summary": {
+    "APS (IETF draft-pidlisnyi-aps)": {
+      "PASS": 5,
+      "JUDGE": 1,
+      "UNKNOWN": 0,
+      "FAIL": 0,
+      "total": 6
+    },
+    "AIAgentMark v1.0 (个人自持)": {
+      "PASS": 3,
+      "JUDGE": 1,
+      "UNKNOWN": 1,
+      "FAIL": 1,
+      "total": 6
+    },
+    "APIS v2.1 (Passport Alliance)": {
+      "PASS": 0,
+      "JUDGE": 3,
+      "UNKNOWN": 2,
+      "FAIL": 1,
+      "total": 6
+    },
+    "AIP (IETF draft-singla) did:aip": {
+      "PASS": 0,
+      "JUDGE": 3,
+      "UNKNOWN": 2,
+      "FAIL": 1,
+      "total": 6
+    },
+    "AIP (IETF draft-prakash) aip:web": {
+      "PASS": 1,
+      "JUDGE": 2,
+      "UNKNOWN": 2,
+      "FAIL": 1,
+      "total": 6
+    }
+  },
+  "totals": {
+    "PASS": 9,
+    "JUDGE": 10,
+    "UNKNOWN": 7,
+    "FAIL": 4
+  },
+  "results": [
+    {
+      "system": "APS (IETF draft-pidlisnyi-aps)",
+      "check": "签名可验（离线，第三方持公钥）",
+      "verdict": "PASS",
+      "detail": "verify_passport(allow_self_signed=True) -> valid=True, self_signed_accepted=True"
+    },
+    {
+      "system": "APS (IETF draft-pidlisnyi-aps)",
+      "check": "内容绑定（改一个字段验签必失败）",
+      "verdict": "PASS",
+      "detail": "篡改 mission 后 verify -> valid=False（应为 False）"
+    },
+    {
+      "system": "APS (IETF draft-pidlisnyi-aps)",
+      "check": "规范化确定（换键序规范串不变）",
+      "verdict": "PASS",
+      "detail": "JCS 换键序 -> 同串（e69bb60d894e5e34）"
+    },
+    {
+      "system": "APS (IETF draft-pidlisnyi-aps)",
+      "check": "标识可解析（无上下文）",
+      "verdict": "JUDGE",
+      "detail": "护照自带 verification_method + keyPair；agent_id 本身不是可解析标识，解析靠随护照携带的文档，不需网络 —— 与 DID 的\"可解析\"不是同一含义"
+    },
+    {
+      "system": "APS (IETF draft-pidlisnyi-aps)",
+      "check": "吊销可追（吊销=一条可验证据）",
+      "verdict": "PASS",
+      "detail": "撤销记录离线可验：canonical 后 Ed25519 验签 True；改 reason 后 False；换 revokedBy 后 False。draft 路径 issue_authority_revocation / verify_authority_revocation / verify_authority_revocation_signature 三个符号均在场（3/3）。边界：委派工件本身不携带吊销态，拿不到该记录者仍判 valid=True，判定需外部源"
+    },
+    {
+      "system": "APS (IETF draft-pidlisnyi-aps)",
+      "check": "第三方可独立跑（有可安装实现）",
+      "verdict": "PASS",
+      "detail": "pip install agent-passport-system 4.3.0 与 npm i agent-passport-system 8.1.1 均成功；跨实现字节对照 8/8 一致（含 333333333.33333329、1e30、-0.0、1e-27、30 位整数、UTF-16 键序）；Python 现造自签护照由 TS 独立进程 verifyPassport 验通 valid=true，篡改后 TS 转 Invalid signature —— 厂商自测之外的第一条第三方证据"
+    },
+    {
+      "system": "AIAgentMark v1.0 (个人自持)",
+      "check": "签名可验（离线，第三方持公钥）",
+      "verdict": "PASS",
+      "detail": "按白皮书三条 conformance 条款（Ed25519 + RFC8785 JCS + 规范字段）复现一份，自建验签器验通"
+    },
+    {
+      "system": "AIAgentMark v1.0 (个人自持)",
+      "check": "内容绑定（改一个字段验签必失败）",
+      "verdict": "PASS",
+      "detail": "给 capabilities 追加一项后验签必失败（内容绑定成立）"
+    },
+    {
+      "system": "AIAgentMark v1.0 (个人自持)",
+      "check": "规范化确定（换键序规范串不变）",
+      "verdict": "PASS",
+      "detail": "白皮书明确 RFC 8785 JCS；换键序串不变（与 APS 同一实现验证）"
+    },
+    {
+      "system": "AIAgentMark v1.0 (个人自持)",
+      "check": "标识可解析（无上下文）",
+      "verdict": "JUDGE",
+      "detail": "白皮书明言\"不注册、无服务器、无中间商\"——标识不可在线解析，靠持 owner 公钥离线验"
+    },
+    {
+      "system": "AIAgentMark v1.0 (个人自持)",
+      "check": "吊销可追（吊销=一条可验证据）",
+      "verdict": "UNKNOWN",
+      "detail": "白皮书 v1.0 未给吊销机制（到期 + 换钥是唯一手段）"
+    },
+    {
+      "system": "AIAgentMark v1.0 (个人自持)",
+      "check": "第三方可独立跑（有可安装实现）",
+      "verdict": "FAIL",
+      "detail": "无公开实现、无 SDK、无样例凭证 —— 第三方无法独立跑，只能按白皮书复现"
+    },
+    {
+      "system": "APIS v2.1 (Passport Alliance)",
+      "check": "签名可验（离线，第三方持公钥）",
+      "verdict": "UNKNOWN",
+      "detail": "未获发任何 APIS 凭证；一致性基线未公开下载，无法取得样例"
+    },
+    {
+      "system": "APIS v2.1 (Passport Alliance)",
+      "check": "内容绑定（改一个字段验签必失败）",
+      "verdict": "JUDGE",
+      "detail": "规范要求 issuer/principal/delegate 三签与链式托管；未获样例，判规范可设不可验"
+    },
+    {
+      "system": "APIS v2.1 (Passport Alliance)",
+      "check": "规范化确定（换键序规范串不变）",
+      "verdict": "JUDGE",
+      "detail": "规范未统一指定 canonicalization（与 APS/AIAgentMark 不同），跨实现有风险"
+    },
+    {
+      "system": "APIS v2.1 (Passport Alliance)",
+      "check": "标识可解析（无上下文）",
+      "verdict": "UNKNOWN",
+      "detail": "realm-scoped DID（did:passport:[realm]:[uuid]）；未公开解析入口，试探 example.com → HTTP 404"
+    },
+    {
+      "system": "APIS v2.1 (Passport Alliance)",
+      "check": "吊销可追（吊销=一条可验证据）",
+      "verdict": "JUDGE",
+      "detail": "规范定义即时吊销与 issuer 登记镜像；无公开实例可测"
+    },
+    {
+      "system": "APIS v2.1 (Passport Alliance)",
+      "check": "第三方可独立跑（有可安装实现）",
+      "verdict": "FAIL",
+      "detail": "一致性测试\"初始基线\"由联盟自发布，未见第三方复核；无公开实现"
+    },
+    {
+      "system": "AIP (IETF draft-singla) did:aip",
+      "check": "签名可验（离线，第三方持公钥）",
+      "verdict": "UNKNOWN",
+      "detail": "无公开实现、无样例凭证"
+    },
+    {
+      "system": "AIP (IETF draft-singla) did:aip",
+      "check": "内容绑定（改一个字段验签必失败）",
+      "verdict": "JUDGE",
+      "detail": "规范定义了 token/capability 结构与确定性校验；未获样例"
+    },
+    {
+      "system": "AIP (IETF draft-singla) did:aip",
+      "check": "规范化确定（换键序规范串不变）",
+      "verdict": "JUDGE",
+      "detail": "规范要求 canonical JSON（引用自身规则），未统一到 RFC 8785"
+    },
+    {
+      "system": "AIP (IETF draft-singla) did:aip",
+      "check": "标识可解析（无上下文）",
+      "verdict": "UNKNOWN",
+      "detail": "did:aip 明确\"单独一个 did 串不编码其 Registry，解析需要 Registry 上下文\"——本探针未获 Registry 地址；同目录下 did:cn 平台列表 HTTP 200（不同方法，仅作对照）"
+    },
+    {
+      "system": "AIP (IETF draft-singla) did:aip",
+      "check": "吊销可追（吊销=一条可验证据）",
+      "verdict": "JUDGE",
+      "detail": "AID 不可变、一次性；吊销走 Registry，无公开实例可测"
+    },
+    {
+      "system": "AIP (IETF draft-singla) did:aip",
+      "check": "第三方可独立跑（有可安装实现）",
+      "verdict": "FAIL",
+      "detail": "两份 draft 均无测试数字、无实现"
+    },
+    {
+      "system": "AIP (IETF draft-prakash) aip:web",
+      "check": "签名可验（离线，第三方持公钥）",
+      "verdict": "UNKNOWN",
+      "detail": "无公开实现、无样例凭证"
+    },
+    {
+      "system": "AIP (IETF draft-prakash) aip:web",
+      "check": "内容绑定（改一个字段验签必失败）",
+      "verdict": "JUDGE",
+      "detail": "身份文档自签、Ed25519 + JCS（规范明确 RFC 8785）——与 APS/AIAgentMark 同法"
+    },
+    {
+      "system": "AIP (IETF draft-prakash) aip:web",
+      "check": "规范化确定（换键序规范串不变）",
+      "verdict": "PASS",
+      "detail": "规范明确 RFC 8785 JCS（唯一一处与 APS 完全对齐的地方）"
+    },
+    {
+      "system": "AIP (IETF draft-prakash) aip:web",
+      "check": "标识可解析（无上下文）",
+      "verdict": "JUDGE",
+      "detail": "机制确定：GET https://<domain>/.well-known/aip/<path>.json；无公开实例，example.com 试探 → HTTP 404"
+    },
+    {
+      "system": "AIP (IETF draft-prakash) aip:web",
+      "check": "吊销可追（吊销=一条可验证据）",
+      "verdict": "UNKNOWN",
+      "detail": "吊销只在令牌过期层面；无证书吊销语义"
+    },
+    {
+      "system": "AIP (IETF draft-prakash) aip:web",
+      "check": "第三方可独立跑（有可安装实现）",
+      "verdict": "FAIL",
+      "detail": "无公开实现、无测试数字"
+    }
+  ],
+  "limitation": "五家里只有 APS 有可安装的第三方实现；其余四家无公开实现/样例凭证。因此 PASS（实测）只覆盖 APS 与 AIAgentMark（后者为本探针按白皮书复现，非厂商实现）。",
+  "env": {
+    "python": "3.13.18",
+    "agent_passport_system": "4.3.0",
+    "cryptography": "50.0.2",
+    "network": "仅两处 GET 试探（example.com 未公开解析入口），其余全部离线"
+  },
+  "json_sha256_16": "e329d6d9f841fe39"
+}

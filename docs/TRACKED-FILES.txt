@@ -1178,6 +1178,9 @@ docs/OUTSIDER-RUN.md
 docs/PAPER-EVIDENCE.md
 docs/PARITY-MATRIX.md
 docs/PARITY-SENSITIVITY.md
+docs/PASSPORT-MATRIX-BOARD.html
+docs/PASSPORT-MATRIX.json
+docs/PASSPORT-MATRIX.md
 docs/PCCP-21CFR892.2055-MAPPING.md
 docs/PEER-SURVEY.md
 docs/PEERS.json
@@ -2373,6 +2376,7 @@ tools/parity_d3_bracket.py
 tools/parity_evidence_lines.py
 tools/parity_realrun.py
 tools/parity_sensitivity.py
+tools/passport_matrix.py
 tools/pccp_case.py
 tools/pin_release.py
 tools/pre_push_gate.py
@@ -2397,6 +2401,7 @@ tools/release_lab_bundle.py
 tools/release_status.py
 tools/render_bid_binary_layout.py
 tools/render_outsider_board.py
+tools/render_passport_matrix.py
 tools/reproduce_gate.py
 tools/resolve_generated.py
 tools/reverify.ps1

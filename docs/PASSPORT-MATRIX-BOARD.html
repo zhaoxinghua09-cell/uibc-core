@@ -1,0 +1,70 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>五方护照对照 · 实测表</title><style>
+body{margin:0;background:#0e1116;color:#e6edf3;font:15px/1.6 -apple-system,"Segoe UI","PingFang SC",sans-serif}
+.wrap{max-width:1040px;margin:0 auto;padding:32px 24px 60px}
+h1{font-size:24px;margin:0 0 6px} .sub{color:#98a4b3;font-size:13px;margin-bottom:24px}
+h2{font-size:17px;margin:32px 0 12px;padding-left:11px;border-left:3px solid #58a6ff}
+table{width:100%;border-collapse:collapse;font-size:13.5px;background:#151a22;border:1px solid #232b36;margin:8px 0}
+th,td{padding:8px 10px;border:1px solid #232b36;vertical-align:top}
+th{background:#1b222c;font-size:12.5px;color:#c9d4e0}
+.legend{display:flex;gap:18px;font-size:13px;margin:10px 0 0;flex-wrap:wrap}
+.note{color:#98a4b3;font-size:13px;margin:10px 0}
+.hl{background:#141d16;border:1px solid #2a4a2f;border-radius:10px;padding:16px 18px;margin:14px 0}
+code{background:#1b222c;padding:1px 5px;border-radius:4px;font-size:12.5px}
+</style></head><body><div class="wrap">
+<h1>五方护照对照 · 实测表</h1>
+<div class="sub">2026-11-27T03:36:27+00:00 · 30 条判读 · JSON sha256[:16] <code>e329d6d9f841fe39</code></div>
+<div class="hl"><b>这张表此前没有人做过</b>——五套规范里只有一家（APS）提供可安装的第三方实现。
+<br>同时也要看清：<b>9 个 ● 只说明"这一项我们真的跑通了"，不能外推成"这家整体合格"。</b></div>
+<h2>一、矩阵</h2>
+<table><tr><th style="width:22%">体系</th><th style="text-align:center">C1</th><th style="text-align:center">C2</th><th style="text-align:center">C3</th><th style="text-align:center">C4</th><th style="text-align:center">C5</th><th style="text-align:center">C6</th></tr>
+<tr><td><b>APS（IETF）</b></td><td style="text-align:center;background:#122117;color:#3fb950;border:1px solid #2a4a2f"><span style="font-size:16px">●</span></td><td style="text-align:center;background:#122117;color:#3fb950;border:1px solid #2a4a2f"><span style="font-size:16px">●</span></td><td style="text-align:center;background:#122117;color:#3fb950;border:1px solid #2a4a2f"><span style="font-size:16px">●</span></td><td style="text-align:center;background:#1f1a10;color:#d29922;border:1px solid #4a3a1a"><span style="font-size:16px">◐</span></td><td style="text-align:center;background:#122117;color:#3fb950;border:1px solid #2a4a2f"><span style="font-size:16px">●</span></td><td style="text-align:center;background:#122117;color:#3fb950;border:1px solid #2a4a2f"><span style="font-size:16px">●</span></td></tr>
+<tr><td><b>AIAgentMark</b></td><td style="text-align:center;background:#122117;color:#3fb950;border:1px solid #2a4a2f"><span style="font-size:16px">●</span></td><td style="text-align:center;background:#122117;color:#3fb950;border:1px solid #2a4a2f"><span style="font-size:16px">●</span></td><td style="text-align:center;background:#122117;color:#3fb950;border:1px solid #2a4a2f"><span style="font-size:16px">●</span></td><td style="text-align:center;background:#1f1a10;color:#d29922;border:1px solid #4a3a1a"><span style="font-size:16px">◐</span></td><td style="text-align:center;background:#171d25;color:#98a4b3;border:1px solid #2a323d"><span style="font-size:16px">○</span></td><td style="text-align:center;background:#1f1315;color:#f85149;border:1px solid #4a2a2a"><span style="font-size:16px">✕</span></td></tr>
+<tr><td><b>APIS v2.1</b></td><td style="text-align:center;background:#171d25;color:#98a4b3;border:1px solid #2a323d"><span style="font-size:16px">○</span></td><td style="text-align:center;background:#1f1a10;color:#d29922;border:1px solid #4a3a1a"><span style="font-size:16px">◐</span></td><td style="text-align:center;background:#1f1a10;color:#d29922;border:1px solid #4a3a1a"><span style="font-size:16px">◐</span></td><td style="text-align:center;background:#171d25;color:#98a4b3;border:1px solid #2a323d"><span style="font-size:16px">○</span></td><td style="text-align:center;background:#1f1a10;color:#d29922;border:1px solid #4a3a1a"><span style="font-size:16px">◐</span></td><td style="text-align:center;background:#1f1315;color:#f85149;border:1px solid #4a2a2a"><span style="font-size:16px">✕</span></td></tr>
+<tr><td><b>AIP·singla</b></td><td style="text-align:center;background:#171d25;color:#98a4b3;border:1px solid #2a323d"><span style="font-size:16px">○</span></td><td style="text-align:center;background:#1f1a10;color:#d29922;border:1px solid #4a3a1a"><span style="font-size:16px">◐</span></td><td style="text-align:center;background:#1f1a10;color:#d29922;border:1px solid #4a3a1a"><span style="font-size:16px">◐</span></td><td style="text-align:center;background:#171d25;color:#98a4b3;border:1px solid #2a323d"><span style="font-size:16px">○</span></td><td style="text-align:center;background:#1f1a10;color:#d29922;border:1px solid #4a3a1a"><span style="font-size:16px">◐</span></td><td style="text-align:center;background:#1f1315;color:#f85149;border:1px solid #4a2a2a"><span style="font-size:16px">✕</span></td></tr>
+<tr><td><b>AIP·prakash</b></td><td style="text-align:center;background:#171d25;color:#98a4b3;border:1px solid #2a323d"><span style="font-size:16px">○</span></td><td style="text-align:center;background:#1f1a10;color:#d29922;border:1px solid #4a3a1a"><span style="font-size:16px">◐</span></td><td style="text-align:center;background:#122117;color:#3fb950;border:1px solid #2a4a2f"><span style="font-size:16px">●</span></td><td style="text-align:center;background:#1f1a10;color:#d29922;border:1px solid #4a3a1a"><span style="font-size:16px">◐</span></td><td style="text-align:center;background:#171d25;color:#98a4b3;border:1px solid #2a323d"><span style="font-size:16px">○</span></td><td style="text-align:center;background:#1f1315;color:#f85149;border:1px solid #4a2a2a"><span style="font-size:16px">✕</span></td></tr>
+</table>
+<div class="legend"><span style="color:#3fb950">● 9</span><span style="color:#d29922">◐ 10</span><span style="color:#98a4b3">○ 7</span><span style="color:#f85149">✕ 4</span></div>
+<h2>二、逐条判读（含依据）</h2>
+<table><tr><th style="width:15%">体系</th><th style="width:14%">检查</th><th>判读依据</th></tr>
+<tr><td>APS（IETF）</td><td style="color:#3fb950">● 签名可验</td><td style="color:#98a4b3;font-size:12.5px">verify_passport(allow_self_signed=True) -> valid=True, self_signed_accepted=True</td></tr>
+<tr><td>APS（IETF）</td><td style="color:#3fb950">● 内容绑定</td><td style="color:#98a4b3;font-size:12.5px">篡改 mission 后 verify -> valid=False（应为 False）</td></tr>
+<tr><td>APS（IETF）</td><td style="color:#3fb950">● 规范化确定</td><td style="color:#98a4b3;font-size:12.5px">JCS 换键序 -> 同串（e69bb60d894e5e34）</td></tr>
+<tr><td>APS（IETF）</td><td style="color:#d29922">◐ 标识可解析</td><td style="color:#98a4b3;font-size:12.5px">护照自带 verification_method + keyPair；agent_id 本身不是可解析标识，解析靠随护照携带的文档，不需网络 —— 与 DID 的"可解析"不是同一含义</td></tr>
+<tr><td>APS（IETF）</td><td style="color:#3fb950">● 吊销可追</td><td style="color:#98a4b3;font-size:12.5px">撤销记录离线可验：canonical 后 Ed25519 验签 True；改 reason 后 False；换 revokedBy 后 False。draft 路径 issue_authority_revocation / verify_authority_revocation / verify_authority_revocation_signature 三个符号均在场（3/3）。边界：委派工件本身不携带吊销态，拿不到该记录者仍判 valid=True，判定需外部源</td></tr>
+<tr><td>APS（IETF）</td><td style="color:#3fb950">● 第三方可独立跑</td><td style="color:#98a4b3;font-size:12.5px">pip install agent-passport-system 4.3.0 与 npm i agent-passport-system 8.1.1 均成功；跨实现字节对照 8/8 一致（含 333333333.33333329、1e30、-0.0、1e-27、30 位整数、UTF-16 键序）；Python 现造自签护照由 TS 独立进程 verifyPassport 验通 valid=true，篡改后 TS 转 Invalid signature —— 厂商自测之外的第一条第三方证据</td></tr>
+<tr><td>AIAgentMark</td><td style="color:#3fb950">● 签名可验</td><td style="color:#98a4b3;font-size:12.5px">按白皮书三条 conformance 条款（Ed25519 + RFC8785 JCS + 规范字段）复现一份，自建验签器验通</td></tr>
+<tr><td>AIAgentMark</td><td style="color:#3fb950">● 内容绑定</td><td style="color:#98a4b3;font-size:12.5px">给 capabilities 追加一项后验签必失败（内容绑定成立）</td></tr>
+<tr><td>AIAgentMark</td><td style="color:#3fb950">● 规范化确定</td><td style="color:#98a4b3;font-size:12.5px">白皮书明确 RFC 8785 JCS；换键序串不变（与 APS 同一实现验证）</td></tr>
+<tr><td>AIAgentMark</td><td style="color:#d29922">◐ 标识可解析</td><td style="color:#98a4b3;font-size:12.5px">白皮书明言"不注册、无服务器、无中间商"——标识不可在线解析，靠持 owner 公钥离线验</td></tr>
+<tr><td>AIAgentMark</td><td style="color:#98a4b3">○ 吊销可追</td><td style="color:#98a4b3;font-size:12.5px">白皮书 v1.0 未给吊销机制（到期 + 换钥是唯一手段）</td></tr>
+<tr><td>AIAgentMark</td><td style="color:#f85149">✕ 第三方可独立跑</td><td style="color:#98a4b3;font-size:12.5px">无公开实现、无 SDK、无样例凭证 —— 第三方无法独立跑，只能按白皮书复现</td></tr>
+<tr><td>APIS v2.1</td><td style="color:#98a4b3">○ 签名可验</td><td style="color:#98a4b3;font-size:12.5px">未获发任何 APIS 凭证；一致性基线未公开下载，无法取得样例</td></tr>
+<tr><td>APIS v2.1</td><td style="color:#d29922">◐ 内容绑定</td><td style="color:#98a4b3;font-size:12.5px">规范要求 issuer/principal/delegate 三签与链式托管；未获样例，判规范可设不可验</td></tr>
+<tr><td>APIS v2.1</td><td style="color:#d29922">◐ 规范化确定</td><td style="color:#98a4b3;font-size:12.5px">规范未统一指定 canonicalization（与 APS/AIAgentMark 不同），跨实现有风险</td></tr>
+<tr><td>APIS v2.1</td><td style="color:#98a4b3">○ 标识可解析</td><td style="color:#98a4b3;font-size:12.5px">realm-scoped DID（did:passport:[realm]:[uuid]）；未公开解析入口，试探 example.com → HTTP 404</td></tr>
+<tr><td>APIS v2.1</td><td style="color:#d29922">◐ 吊销可追</td><td style="color:#98a4b3;font-size:12.5px">规范定义即时吊销与 issuer 登记镜像；无公开实例可测</td></tr>
+<tr><td>APIS v2.1</td><td style="color:#f85149">✕ 第三方可独立跑</td><td style="color:#98a4b3;font-size:12.5px">一致性测试"初始基线"由联盟自发布，未见第三方复核；无公开实现</td></tr>
+<tr><td>AIP·singla</td><td style="color:#98a4b3">○ 签名可验</td><td style="color:#98a4b3;font-size:12.5px">无公开实现、无样例凭证</td></tr>
+<tr><td>AIP·singla</td><td style="color:#d29922">◐ 内容绑定</td><td style="color:#98a4b3;font-size:12.5px">规范定义了 token/capability 结构与确定性校验；未获样例</td></tr>
+<tr><td>AIP·singla</td><td style="color:#d29922">◐ 规范化确定</td><td style="color:#98a4b3;font-size:12.5px">规范要求 canonical JSON（引用自身规则），未统一到 RFC 8785</td></tr>
+<tr><td>AIP·singla</td><td style="color:#98a4b3">○ 标识可解析</td><td style="color:#98a4b3;font-size:12.5px">did:aip 明确"单独一个 did 串不编码其 Registry，解析需要 Registry 上下文"——本探针未获 Registry 地址；同目录下 did:cn 平台列表 HTTP 200（不同方法，仅作对照）</td></tr>
+<tr><td>AIP·singla</td><td style="color:#d29922">◐ 吊销可追</td><td style="color:#98a4b3;font-size:12.5px">AID 不可变、一次性；吊销走 Registry，无公开实例可测</td></tr>
+<tr><td>AIP·singla</td><td style="color:#f85149">✕ 第三方可独立跑</td><td style="color:#98a4b3;font-size:12.5px">两份 draft 均无测试数字、无实现</td></tr>
+<tr><td>AIP·prakash</td><td style="color:#98a4b3">○ 签名可验</td><td style="color:#98a4b3;font-size:12.5px">无公开实现、无样例凭证</td></tr>
+<tr><td>AIP·prakash</td><td style="color:#d29922">◐ 内容绑定</td><td style="color:#98a4b3;font-size:12.5px">身份文档自签、Ed25519 + JCS（规范明确 RFC 8785）——与 APS/AIAgentMark 同法</td></tr>
+<tr><td>AIP·prakash</td><td style="color:#3fb950">● 规范化确定</td><td style="color:#98a4b3;font-size:12.5px">规范明确 RFC 8785 JCS（唯一一处与 APS 完全对齐的地方）</td></tr>
+<tr><td>AIP·prakash</td><td style="color:#d29922">◐ 标识可解析</td><td style="color:#98a4b3;font-size:12.5px">机制确定：GET https://<domain>/.well-known/aip/<path>.json；无公开实例，example.com 试探 → HTTP 404</td></tr>
+<tr><td>AIP·prakash</td><td style="color:#98a4b3">○ 吊销可追</td><td style="color:#98a4b3;font-size:12.5px">吊销只在令牌过期层面；无证书吊销语义</td></tr>
+<tr><td>AIP·prakash</td><td style="color:#f85149">✕ 第三方可独立跑</td><td style="color:#98a4b3;font-size:12.5px">无公开实现、无测试数字</td></tr>
+</table>
+<h2>三、自限</h2>
+<div class="note">
+1. 只有 9 项是实测，其余因对象无公开实现而无法实测；<br>
+2. 只做 <code>example.com</code> 的 <code>.well-known</code> 试探，未扫私有端点；<br>
+3. AIAgentMark 的 ● 为本仓库按白皮书复现，非厂商实现；<br>
+4. 未复核厂商自述测试数字，只记"自发布"。<br>
+复跑：<code>python tools/passport_matrix.py --check</code>（离线） / <code>--run</code>（联网）。
+</div>
+</div></body></html>

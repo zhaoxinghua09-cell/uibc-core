@@ -34,6 +34,8 @@ $steps = @(
     @{ Name = "AITB no-endpoint card is honest";    Cmd = "python tools/aitb_evaluate.py --check --report docs/aitb-example-no-endpoint.json" },
     @{ Name = "national methods census";            Cmd = "python tools/national_methods_snapshot.py --check" },
     @{ Name = "whole-registry census";              Cmd = "python tools/registry_census.py --check" }
+    @{ Name = "passport matrix is self-consistent";  Cmd = "python tools/passport_matrix.py --check" },
+    @{ Name = "passport matrix docs match JSON";    Cmd = "python tools/render_passport_matrix.py --check" }
 )
 
 if ($Network) {

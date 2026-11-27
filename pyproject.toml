@@ -42,7 +42,7 @@ test = ["pytest>=8"]
 # is not taken when the corpus already exists, and a bare-environment control that is
 # skipped once langchain-core is present). CI runs this extra in `test-with-extras`.
 interop = [
-  "agent-action-capsule==0.17.0",
+  "agent-action-capsule==0.19.0",
   "langchain-core>=0.3",
   "opentimestamps-client>=0.7",
   "pynostr>=0.6",

@@ -1,0 +1,748 @@
+{
+  "kind": "uibc-kit-cites",
+  "generated": "2026-11-27",
+  "source_manifest_sha256": "fc2b578242f6ec064db8de687d5b380c4a41d4bea7c7013091c5cd094e070af7",
+  "note": "Document-level citations only. No section numbers until each is read against the source text. Internal anchors name this repository's own spec clause, not a standard.",
+  "coverage": {
+    "cases": 58,
+    "with_external_standard": 42,
+    "internal_only": 16
+  },
+  "cases": [
+    {
+      "id": "01",
+      "attack": "the shipped package, untouched",
+      "expect": "accept",
+      "expected_checks": [],
+      "cites": [
+        "uibc-core spec: three-valued verdict (PASS/FAIL/INCONCLUSIVE)"
+      ],
+      "external": 0
+    },
+    {
+      "id": "02",
+      "attack": "a package with its tree and chain appended",
+      "expect": "accept",
+      "expected_checks": [],
+      "cites": [
+        "draft-ietf-scitt-architecture (signed receipts)"
+      ],
+      "external": 1
+    },
+    {
+      "id": "03",
+      "attack": "a package with extended evidence appended",
+      "expect": "accept",
+      "expected_checks": [],
+      "cites": [
+        "RFC 4648 (Base64)"
+      ],
+      "external": 1
+    },
+    {
+      "id": "04",
+      "attack": "a package with a checkpoint appended",
+      "expect": "accept",
+      "expected_checks": [],
+      "cites": [
+        "uibc-core spec: three-valued verdict (PASS/FAIL/INCONCLUSIVE)"
+      ],
+      "external": 0
+    },
+    {
+      "id": "05",
+      "attack": "a package with one more declared evidence file",
+      "expect": "accept",
+      "expected_checks": [],
+      "cites": [
+        "uibc-core spec: three-valued verdict (PASS/FAIL/INCONCLUSIVE)"
+      ],
+      "external": 0
+    },
+    {
+      "id": "06",
+      "attack": "a package sealed with Ed25519",
+      "expect": "accept",
+      "expected_checks": [],
+      "cites": [
+        "RFC 8032 (Ed25519)"
+      ],
+      "external": 1
+    },
+    {
+      "id": "07",
+      "attack": "flip one byte in evidence",
+      "expect": null,
+      "expected_checks": [
+        "S4"
+      ],
+      "cites": [
+        "FIPS 180-4 (SHA-256)",
+        "uibc-core spec: evidence byte binding (S4)"
+      ],
+      "external": 1
+    },
+    {
+      "id": "08",
+      "attack": "truncate one evidence file",
+      "expect": null,
+      "expected_checks": [
+        "S4"
+      ],
+      "cites": [
+        "FIPS 180-4 (SHA-256)",
+        "uibc-core spec: evidence byte binding (S4)"
+      ],
+      "external": 1
+    },
+    {
+      "id": "09",
+      "attack": "delete one evidence file",
+      "expect": null,
+      "expected_checks": [
+        "S4"
+      ],
+      "cites": [
+        "uibc-core spec: evidence byte binding (S4)"
+      ],
+      "external": 0
+    },
+    {
+      "id": "10",
+      "attack": "edit the evidence root",
+      "expect": null,
+      "expected_checks": [
+        "S5"
+      ],
+      "cites": [
+        "RFC 9162 (Merkle tree hashes, transparency logs)",
+        "uibc-core spec: evidence root (S5)"
+      ],
+      "external": 1
+    },
+    {
+      "id": "11",
+      "attack": "add an undeclared file",
+      "expect": null,
+      "expected_checks": [
+        "S1"
+      ],
+      "cites": [
+        "uibc-core spec: three-valued verdict (PASS/FAIL/INCONCLUSIVE)"
+      ],
+      "external": 0
+    },
+    {
+      "id": "12",
+      "attack": "duplicate a JSON member name",
+      "expect": null,
+      "expected_checks": [
+        "S11"
+      ],
+      "cites": [
+        "RFC 8259 (JSON)",
+        "uibc-core spec: JSON well-formedness (S11)"
+      ],
+      "external": 1
+    },
+    {
+      "id": "13",
+      "attack": "impossible calendar date",
+      "expect": null,
+      "expected_checks": [
+        "S12",
+        "S3"
+      ],
+      "cites": [
+        "RFC 3339 (Date and Time on the Internet)",
+        "uibc-core spec: declaration consistency (S12)",
+        "uibc-core spec: lifecycle ordering (S3)"
+      ],
+      "external": 1
+    },
+    {
+      "id": "14",
+      "attack": "mismatch agent identity",
+      "expect": null,
+      "expected_checks": [
+        "S2"
+      ],
+      "cites": [
+        "uibc-core spec: agent identity (S2)"
+      ],
+      "external": 0
+    },
+    {
+      "id": "15",
+      "attack": "drop the tail entry and file",
+      "expect": null,
+      "expected_checks": [
+        "S5"
+      ],
+      "cites": [
+        "RFC 9162 (Merkle tree hashes, transparency logs)",
+        "uibc-core spec: evidence root (S5)"
+      ],
+      "external": 1
+    },
+    {
+      "id": "16",
+      "attack": "deregister an entry, keep the file",
+      "expect": null,
+      "expected_checks": [
+        "S12",
+        "S5"
+      ],
+      "cites": [
+        "uibc-core spec: declaration consistency (S12)",
+        "uibc-core spec: evidence root (S5)"
+      ],
+      "external": 0
+    },
+    {
+      "id": "17",
+      "attack": "tamper the seal",
+      "expect": null,
+      "expected_checks": [
+        "S6"
+      ],
+      "cites": [
+        "RFC 8032 (Ed25519)",
+        "uibc-core spec: seal verification (S6)"
+      ],
+      "external": 1
+    },
+    {
+      "id": "18",
+      "attack": "replace merkle root",
+      "expect": null,
+      "expected_checks": [
+        "S13"
+      ],
+      "cites": [
+        "RFC 9162 (Merkle tree hashes, transparency logs)",
+        "uibc-core spec: merkle inclusion proofs (S13)"
+      ],
+      "external": 1
+    },
+    {
+      "id": "19",
+      "attack": "inflate merkle size",
+      "expect": null,
+      "expected_checks": [
+        "S13"
+      ],
+      "cites": [
+        "RFC 9162 (Merkle tree hashes, transparency logs)",
+        "uibc-core spec: merkle inclusion proofs (S13)"
+      ],
+      "external": 1
+    },
+    {
+      "id": "20",
+      "attack": "corrupt one inclusion proof",
+      "expect": null,
+      "expected_checks": [
+        "S13"
+      ],
+      "cites": [
+        "RFC 9162 (Merkle tree hashes, transparency logs)",
+        "uibc-core spec: merkle inclusion proofs (S13)"
+      ],
+      "external": 1
+    },
+    {
+      "id": "21",
+      "attack": "swap a proof index",
+      "expect": null,
+      "expected_checks": [
+        "S13"
+      ],
+      "cites": [
+        "RFC 9162 (Merkle tree hashes, transparency logs)",
+        "uibc-core spec: merkle inclusion proofs (S13)"
+      ],
+      "external": 1
+    },
+    {
+      "id": "22",
+      "attack": "edit a receipt body",
+      "expect": null,
+      "expected_checks": [
+        "S17"
+      ],
+      "cites": [
+        "draft-ietf-scitt-architecture (signed receipts)",
+        "uibc-core spec: receipt chain (S17)"
+      ],
+      "external": 1
+    },
+    {
+      "id": "23",
+      "attack": "claim a genesis predecessor",
+      "expect": null,
+      "expected_checks": [
+        "S17"
+      ],
+      "cites": [
+        "draft-ietf-scitt-architecture (signed receipts)",
+        "uibc-core spec: receipt chain (S17)"
+      ],
+      "external": 1
+    },
+    {
+      "id": "24",
+      "attack": "strip base64 padding",
+      "expect": null,
+      "expected_checks": [
+        "S14"
+      ],
+      "cites": [
+        "RFC 4648 (Base64)",
+        "uibc-core spec: base64 encoding (S14)"
+      ],
+      "external": 1
+    },
+    {
+      "id": "25",
+      "attack": "put a stray character in base64",
+      "expect": null,
+      "expected_checks": [
+        "S14"
+      ],
+      "cites": [
+        "RFC 4648 (Base64)",
+        "uibc-core spec: base64 encoding (S14)"
+      ],
+      "external": 1
+    },
+    {
+      "id": "26",
+      "attack": "corrupt an anchor inclusion proof",
+      "expect": null,
+      "expected_checks": [
+        "S15"
+      ],
+      "cites": [
+        "RFC 9162 (Merkle tree hashes, transparency logs)",
+        "uibc-core spec: anchors (S15)"
+      ],
+      "external": 1
+    },
+    {
+      "id": "27",
+      "attack": "make a leaf hash a non-digest",
+      "expect": null,
+      "expected_checks": [
+        "S15"
+      ],
+      "cites": [
+        "FIPS 180-4 (SHA-256)",
+        "RFC 9162 (Merkle tree hashes, transparency logs)",
+        "uibc-core spec: anchors (S15)"
+      ],
+      "external": 2
+    },
+    {
+      "id": "28",
+      "attack": "date an anchor 30 February",
+      "expect": null,
+      "expected_checks": [
+        "S15"
+      ],
+      "cites": [
+        "RFC 3339 (Date and Time on the Internet)",
+        "uibc-core spec: anchors (S15)"
+      ],
+      "external": 1
+    },
+    {
+      "id": "29",
+      "attack": "anchor to a root we cannot recompute",
+      "expect": null,
+      "expected_checks": [
+        "S15"
+      ],
+      "cites": [
+        "RFC 9162 (Merkle tree hashes, transparency logs)",
+        "uibc-core spec: anchors (S15)"
+      ],
+      "external": 1
+    },
+    {
+      "id": "30",
+      "attack": "edit a policy artefact",
+      "expect": null,
+      "expected_checks": [
+        "S18"
+      ],
+      "cites": [
+        "RFC 8785 (JSON Canonicalization Scheme)",
+        "uibc-core spec: policy artefacts (S18)"
+      ],
+      "external": 1
+    },
+    {
+      "id": "31",
+      "attack": "point a policy digest at nothing",
+      "expect": null,
+      "expected_checks": [
+        "S18"
+      ],
+      "cites": [
+        "FIPS 180-4 (SHA-256)",
+        "uibc-core spec: policy artefacts (S18)"
+      ],
+      "external": 1
+    },
+    {
+      "id": "32",
+      "attack": "rewrite index metadata, content untouched",
+      "expect": null,
+      "expected_checks": [
+        "S7",
+        "S8"
+      ],
+      "cites": [
+        "FIPS 180-4 (SHA-256)",
+        "uibc-core spec: index metadata (S7)",
+        "uibc-core spec: lifecycle log (S8)"
+      ],
+      "external": 1
+    },
+    {
+      "id": "33",
+      "attack": "drop engine_build from the closure",
+      "expect": null,
+      "expected_checks": [
+        "S10"
+      ],
+      "cites": [
+        "uibc-core spec: closure digest (S10)"
+      ],
+      "external": 0
+    },
+    {
+      "id": "34",
+      "attack": "truncate the lifecycle log",
+      "expect": null,
+      "expected_checks": [
+        "S8"
+      ],
+      "cites": [
+        "FIPS 180-4 (SHA-256)",
+        "draft-ietf-scitt-architecture (signed receipts)",
+        "uibc-core spec: lifecycle log (S8)"
+      ],
+      "external": 2
+    },
+    {
+      "id": "35",
+      "attack": "declare a closure digest that is not a digest",
+      "expect": null,
+      "expected_checks": [
+        "S10"
+      ],
+      "cites": [
+        "FIPS 180-4 (SHA-256)",
+        "uibc-core spec: closure digest (S10)"
+      ],
+      "external": 1
+    },
+    {
+      "id": "36",
+      "attack": "flip one bit in an Ed25519 signature",
+      "expect": null,
+      "expected_checks": [
+        "S6"
+      ],
+      "cites": [
+        "RFC 8032 (Ed25519)",
+        "uibc-core spec: seal verification (S6)"
+      ],
+      "external": 1
+    },
+    {
+      "id": "37",
+      "attack": "swap the bytes of two evidence files",
+      "expect": null,
+      "expected_checks": [
+        "S4"
+      ],
+      "cites": [
+        "FIPS 180-4 (SHA-256)",
+        "uibc-core spec: evidence byte binding (S4)"
+      ],
+      "external": 1
+    },
+    {
+      "id": "38",
+      "attack": "append one newline to an evidence file",
+      "expect": null,
+      "expected_checks": [
+        "S4"
+      ],
+      "cites": [
+        "uibc-core spec: evidence byte binding (S4)"
+      ],
+      "external": 0
+    },
+    {
+      "id": "39",
+      "attack": "give two entries the same evidence_id",
+      "expect": null,
+      "expected_checks": [
+        "S12"
+      ],
+      "cites": [
+        "uibc-core spec: declaration consistency (S12)"
+      ],
+      "external": 0
+    },
+    {
+      "id": "40",
+      "attack": "set an evidence date to November 31",
+      "expect": null,
+      "expected_checks": [
+        "S12"
+      ],
+      "cites": [
+        "RFC 3339 (Date and Time on the Internet)",
+        "uibc-core spec: declaration consistency (S12)"
+      ],
+      "external": 1
+    },
+    {
+      "id": "41",
+      "attack": "write a timestamp without the Z form",
+      "expect": null,
+      "expected_checks": [
+        "S12"
+      ],
+      "cites": [
+        "RFC 3339 (Date and Time on the Internet)",
+        "uibc-core spec: declaration consistency (S12)"
+      ],
+      "external": 1
+    },
+    {
+      "id": "42",
+      "attack": "declare an evidence file that does not exist",
+      "expect": null,
+      "expected_checks": [
+        "S12",
+        "S4"
+      ],
+      "cites": [
+        "uibc-core spec: declaration consistency (S12)",
+        "uibc-core spec: evidence byte binding (S4)"
+      ],
+      "external": 0
+    },
+    {
+      "id": "43",
+      "attack": "let an index path leave the evidence tree",
+      "expect": null,
+      "expected_checks": [
+        "S4"
+      ],
+      "cites": [
+        "uibc-core spec: evidence byte binding (S4)"
+      ],
+      "external": 0
+    },
+    {
+      "id": "44",
+      "attack": "count one file fewer than declared",
+      "expect": null,
+      "expected_checks": [
+        "S12"
+      ],
+      "cites": [
+        "uibc-core spec: declaration consistency (S12)"
+      ],
+      "external": 0
+    },
+    {
+      "id": "45",
+      "attack": "change the agent id in identity.json only",
+      "expect": null,
+      "expected_checks": [
+        "S2"
+      ],
+      "cites": [
+        "uibc-core spec: agent identity (S2)"
+      ],
+      "external": 0
+    },
+    {
+      "id": "46",
+      "attack": "record a lifecycle event before creation",
+      "expect": null,
+      "expected_checks": [
+        "S3"
+      ],
+      "cites": [
+        "uibc-core spec: lifecycle ordering (S3)"
+      ],
+      "external": 0
+    },
+    {
+      "id": "47",
+      "attack": "upper-case one stored hash",
+      "expect": null,
+      "expected_checks": [
+        "S4"
+      ],
+      "cites": [
+        "FIPS 180-4 (SHA-256)",
+        "uibc-core spec: evidence byte binding (S4)"
+      ],
+      "external": 1
+    },
+    {
+      "id": "48",
+      "attack": "truncate one stored hash to 16 characters",
+      "expect": null,
+      "expected_checks": [
+        "S4"
+      ],
+      "cites": [
+        "FIPS 180-4 (SHA-256)",
+        "uibc-core spec: evidence byte binding (S4)"
+      ],
+      "external": 1
+    },
+    {
+      "id": "49",
+      "attack": "declare the same file twice",
+      "expect": null,
+      "expected_checks": [
+        "S12",
+        "S5"
+      ],
+      "cites": [
+        "uibc-core spec: declaration consistency (S12)",
+        "uibc-core spec: evidence root (S5)"
+      ],
+      "external": 0
+    },
+    {
+      "id": "50",
+      "attack": "truncate an evidence file to zero bytes",
+      "expect": null,
+      "expected_checks": [
+        "S4"
+      ],
+      "cites": [
+        "FIPS 180-4 (SHA-256)",
+        "uibc-core spec: evidence byte binding (S4)"
+      ],
+      "external": 1
+    },
+    {
+      "id": "51",
+      "attack": "flip one byte in the second evidence file",
+      "expect": null,
+      "expected_checks": [
+        "S4"
+      ],
+      "cites": [
+        "FIPS 180-4 (SHA-256)",
+        "uibc-core spec: evidence byte binding (S4)"
+      ],
+      "external": 1
+    },
+    {
+      "id": "52",
+      "attack": "truncate the second evidence file",
+      "expect": null,
+      "expected_checks": [
+        "S4"
+      ],
+      "cites": [
+        "FIPS 180-4 (SHA-256)",
+        "uibc-core spec: evidence byte binding (S4)"
+      ],
+      "external": 1
+    },
+    {
+      "id": "53",
+      "attack": "set the second entry to February 30",
+      "expect": null,
+      "expected_checks": [
+        "S12"
+      ],
+      "cites": [
+        "RFC 3339 (Date and Time on the Internet)",
+        "uibc-core spec: declaration consistency (S12)"
+      ],
+      "external": 1
+    },
+    {
+      "id": "54",
+      "attack": "truncate the second stored hash to 40 characters",
+      "expect": null,
+      "expected_checks": [
+        "S4"
+      ],
+      "cites": [
+        "FIPS 180-4 (SHA-256)",
+        "uibc-core spec: evidence byte binding (S4)"
+      ],
+      "external": 1
+    },
+    {
+      "id": "55",
+      "attack": "shift every Merkle proof index by one",
+      "expect": null,
+      "expected_checks": [
+        "S13"
+      ],
+      "cites": [
+        "RFC 9162 (Merkle tree hashes, transparency logs)",
+        "uibc-core spec: merkle inclusion proofs (S13)"
+      ],
+      "external": 1
+    },
+    {
+      "id": "56",
+      "attack": "cut one Merkle proof step",
+      "expect": null,
+      "expected_checks": [
+        "S13"
+      ],
+      "cites": [
+        "RFC 9162 (Merkle tree hashes, transparency logs)",
+        "uibc-core spec: merkle inclusion proofs (S13)"
+      ],
+      "external": 1
+    },
+    {
+      "id": "57",
+      "attack": "zero the back-link of the second receipt",
+      "expect": null,
+      "expected_checks": [
+        "S17"
+      ],
+      "cites": [
+        "draft-ietf-scitt-architecture (signed receipts)",
+        "uibc-core spec: receipt chain (S17)"
+      ],
+      "external": 1
+    },
+    {
+      "id": "58",
+      "attack": "swap the order of the receipt chain",
+      "expect": null,
+      "expected_checks": [
+        "S17"
+      ],
+      "cites": [
+        "draft-ietf-scitt-architecture (signed receipts)",
+        "uibc-core spec: receipt chain (S17)"
+      ],
+      "external": 1
+    }
+  ]
+}

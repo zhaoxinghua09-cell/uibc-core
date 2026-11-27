@@ -1835,6 +1835,7 @@ independent_verifier/iverify.py
 index.html
 interop/CONSUMERS.json
 interop/README.md
+interop/verify-report.schema.json
 lgd-core/COMPLIANCE.md
 lgd-core/EXAMPLES/example-medical-ai-agent.manifest.yaml
 lgd-core/EXAMPLES/example-minimal-agent.manifest.yaml
@@ -2088,6 +2089,7 @@ tests/test_release_parity.py
 tests/test_release_pin.py
 tests/test_release_pins.py
 tests/test_release_readiness.py
+tests/test_report_schema.py
 tests/test_reproduce.py
 tests/test_reproduce_gate_guard.py
 tests/test_resolve_generated.py
@@ -2408,6 +2410,7 @@ tools/release_lab_bundle.py
 tools/release_status.py
 tools/render_bid_binary_layout.py
 tools/render_outsider_board.py
+tools/report_lint.py
 tools/reproduce_gate.py
 tools/resolve_generated.py
 tools/reverify.ps1

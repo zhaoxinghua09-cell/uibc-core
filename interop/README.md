@@ -74,6 +74,14 @@ as `external-output-absent` when it handed us single statements. `verify-dir` ex
 when any child is not PASS and prints `n/m packages PASS`; an empty directory exits
 3 and writes nothing, because "nothing was judged" must not read as "all passed".
 
+The shape is published as JSON Schema, so a consumer does not have to read
+prose: `interop/verify-report.schema.json` (draft 2020-12). It pins the three
+things a reader can get wrong - `FAIL` must name the failing check, `ERROR` must
+carry a reason and exit 3, and `PASS`/`INCONCLUSIVE` must not carry failed
+checks. `tools/report_lint.py <file.jsonl` checks any producer's file against
+those rules without needing a third-party library, so the schema can be used
+rather than merely quoted.
+
 The line carries this project's verdict vocabulary and check ids. A consumer
 mapping FAIL / INCONCLUSIVE onto its own scale is making its own claim, not ours.
 

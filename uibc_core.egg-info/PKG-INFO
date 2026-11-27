@@ -1,0 +1,649 @@
+Metadata-Version: 2.4
+Name: uibc-core
+Version: 0.5.6
+Summary: UIBC Core reference implementation - agent lifecycle evidence packaging and verification with three-valued verdicts and public Ed25519 seals. LGD: registry / evidence / gates.
+Author: Xinghua Zhao
+License-Expression: Apache-2.0
+Project-URL: Homepage, https://github.com/zhaoxinghua09-cell/uibc-core
+Project-URL: Repository, https://github.com/zhaoxinghua09-cell/uibc-core
+Project-URL: Issues, https://github.com/zhaoxinghua09-cell/uibc-core/issues
+Keywords: ai-agent,provenance,evidence,attestation,verification,ed25519,lifecycle,governance
+Classifier: Development Status :: 4 - Beta
+Classifier: Programming Language :: Python :: 3
+Classifier: Topic :: Security :: Cryptography
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Provides-Extra: verify
+Requires-Dist: cryptography>=41; extra == "verify"
+Requires-Dist: asn1crypto>=1.5; extra == "verify"
+Requires-Dist: securesystemslib>=1.6; extra == "verify"
+Provides-Extra: conformance
+Requires-Dist: agent-evidence-vectors==0.36.3; extra == "conformance"
+Provides-Extra: test
+Requires-Dist: pytest>=8; extra == "test"
+Provides-Extra: interop
+Requires-Dist: agent-action-capsule==0.17.0; extra == "interop"
+Requires-Dist: langchain-core>=0.3; extra == "interop"
+Requires-Dist: opentimestamps-client>=0.7; extra == "interop"
+Requires-Dist: pynostr>=0.6; extra == "interop"
+Requires-Dist: coincurve>=18; extra == "interop"
+Dynamic: license-file
+
+# uibc-core
+
+<!-- mcp-name: io.github.zhaoxinghua09-cell/uibc-core -->
+
+**Name note:** UIBC here means *Uniform Identity-Behavior Chain* — an agent-evidence verifier.
+It is **not** the clinical chemistry assay of the same acronym (unsaturated iron binding capacity),
+and it is unrelated to the UIBCDF computational-biology organisation.
+
+> **有人验过吗？先看 [EVIDENCE-INDEX.md](EVIDENCE-INDEX.md)** — 按 L1 自我复现／L2 异体审查／L3 第二实现／L3.5 外部语料／L4 外部节点分级；外部节点当前为 **2**（[EXTERNAL-NODE-001](docs/external-review/EXTERNAL-NODE-001.md)：异体机、无特权、按 README 逐字跑，首跑即复现了我们自己报的 S4/S5 分歧；[EXTERNAL-NODE-002](docs/external-review/EXTERNAL-NODE-002.md)：macOS、回传 `external_node_result.json`、判 CONSISTENT、探针 3/3 拒），以 [docs/EXTERNAL-NODES.md](docs/EXTERNAL-NODES.md) 为唯一真源；其余等级仍为 0。
+>
+> **不知道从哪进？先看 [STRUCTURE.md](STRUCTURE.md)** — 五层地图（规范／实现／工具／验证／存证）与三条阅读路线。
+>
+> **RFC 9162 哈希树语料（63 条）** → **[docs/upstream-package/scitt-rfc9162/](docs/upstream-package/scitt-rfc9162/README.md)** — 每条负向量都有同形状正孪生、拒绝词表闭合、穷举到 512 叶且带收据；第三方库（pymerkle 6.0.0，RFC 6962 模式）独立重建真树根 49/49 一致，边界与不覆盖项写在 [docs/THIRD-PARTY-CROSSCHECK.md](docs/THIRD-PARTY-CROSSCHECK.md)。
+>
+> **想知道现在到底到哪一步？看 [STATUS.md](STATUS.md)** — 一页纸，每个数字都由 `python tools/status_page.py` 从仓库里算出来，
+> 它和仓库对不上时 `--check` 会红；六个维度的"我们缺什么"逐条列出，不留形容词。
+> **中文导读（五分钟）** → **[docs/zh-guide.md](docs/zh-guide.md)** — 三律在代码里落在哪、`PASS` 的确切含义、21 类篡改逐类结果、两台机器上的复核延迟，以及本仓现在还差什么（含红队的灰区）。每一句能对外说的话，钉到一条你能跑的命令上：**[docs/claims-register.md](docs/claims-register.md)**。
+
+## Verify it yourself — one command, no install, no account
+
+```bash
+git clone --depth 1 https://github.com/zhaoxinghua09-cell/uibc-core.git
+cd uibc-core && python tools/external_node_check.py
+```
+
+It prints `CONSISTENT` only when **both** hold: a second, independently written verifier agrees with the reference one, **and** three packages that must be rejected (timestamp without a zone, `1900-02-29`, uppercase UUID) are rejected. A checker that answers PASS for everything cannot pass this.
+
+### Or don't clone at all — run the corpus in about sixty seconds
+
+Fetch it anonymously, without cloning (no login, no token — measured 2026-11-20, the bytes match the pin exactly):
+
+```bash
+curl -fL -o corpus.zip \
+  https://github.com/zhaoxinghua09-cell/uibc-core/raw/main/conformance/uibc-conformance-0.5.5.zip
+sha256sum corpus.zip   # 9cab24943117801ed4f02c8400a899916f237a1e2e668116eaac4accfb17932e, 359,696 bytes
+unzip -q corpus.zip -d corpus && cd corpus && python run.py
+```
+
+The release page carries the same bytes, attached on 2026-11-25: `https://github.com/zhaoxinghua09-cell/uibc-core/releases/download/v0.5.5/uibc-conformance-0.5.5.zip`. Either URL serves this hash; the older `v0.5.0` asset is a different corpus (36 cases) and the `v0.4.0` one a third (30 cases). Neither is this one.. The build is deterministic for a given tree, but "rebuilding gives the same bytes" is true only from the tree the archive was built from: `0.4.1` came out of commit `d72c4f9`, and the runner template was fixed for the unstartable-verifier case afterwards, so rebuilding `0.4.1` from today's tree yields a different archive (`083c0dbc…`). The builder now refuses to overwrite a pinned archive and prints both hashes instead (measured 2026-11-20, exit 3).
+
+No repository, no network, no `pip install`: the archive carries its own verifier as a single file (`uibc_core.pyz`), and `run.py` uses it. Expected tail `strict 58/58` in about six seconds, and a `receipt.json` you can publish. A verifier that answers PASS to everything scores **6/58**, so refusing nothing does not pass.
+
+#### Or one line in your own workflow — no clone, no install
+
+This repository now ships a composite action, so a package can be verified inside someone else's CI without them installing anything:
+
+```yaml
+- uses: zhaoxinghua09-cell/uibc-core@v0.5.5
+  with:
+    path: path/to/package        # the package directory to verify
+    strict: 'true'               # optional: fail on undeclared files under evidence/
+```
+
+Three outputs, read from the verifier's own JSON rather than from the process status: `verdict` (`PASS` / `FAIL` / `INCONCLUSIVE`), `exit_code` (0 / 2 / 3 / 4), and `report` (the path to the JSON). Only `PASS` is green — the action is fail-closed — but the log says which of the three it was and why, because a gate that cannot say why it went red is measuring the wrong thing. This exists so that "an outsider ran it" never again means "somebody clicked a button inside our own repository".
+
+#### Or the RFC 9162 vector set — 41 vectors, and seven of them isolate path structure
+
+```bash
+git clone --depth 1 https://github.com/zhaoxinghua09-cell/uibc-core.git
+cd uibc-core && python tools/check_scitt_vectors_standalone.py
+```
+
+That script imports **nothing** from this project. It re-derives the leaf hash (`SHA-256(0x00 ‖ x)`), the node hash (`SHA-256(0x01 ‖ l ‖ r)`) and the fold from the RFC 9162 text, then walks all 41 vectors in [`docs/upstream-package/scitt-rfc9162`](docs/upstream-package/scitt-rfc9162/README.md). Expected tail:
+
+```
+  ambiguous-tree-size: ambiguity confirmed — size 8 folds to the same root
+  vectors: 41
+VERDICT: CONSISTENT
+```
+
+The middle line is the one worth stealing: `tree_size` is **not** authenticated by the signed root, and a verifier that does the obvious bounds work — `index < size`, then `size = (size+1)//2` at each level, require `size == 1` at the end — accepts the same path under a declared size of 7 *and* 8, because both trees are three levels tall. Root comparison cannot see it. This is reported as an erratum to RFC 9942 §5.2.1 and raised on the SCITT list; the vector is ours, and the ask is that it be regenerated by someone else's tooling rather than trusted because we said so.
+
+The number above is **our own run**. It becomes an external node report only when someone else runs this same archive digest elsewhere and posts the receipt — the format, the checker (`tools/check_outward_receipt.py`) and the issue form are in [`docs/RECEIPT-FORMAT.md`](docs/RECEIPT-FORMAT.md), and the walk-through is [`docs/AUDIT-KIT.md`](docs/AUDIT-KIT.md). If no unrelated party has done that by **2027-05-19**, that sentence gets downgraded to "self-run only" rather than left standing; the clause is in AUDIT-KIT, written before the outcome was known.
+
+**What a PASS means** — and nothing more:
+
+> A uibc PASS means: within the observed evidence boundary, no violation was detected. It does not claim the agent was correct, safe, or wise; that the recorded inputs were true or complete; or that any real-world outcome followed.
+
+**Current state, including what we are short of:** the full suite green on Linux / Python 3.12 (the exact count is pinned in `docs/EVIDENCE-INDEX.md`; a stale number here is worse than no number) (3 skipped with `.[verify,interop,conformance]` on a full clone, 4 on a shallow one; it was 16 before those extras existed — see `docs/SKIPPED.md`, now the single source for each reason); the CI matrix runs the same suite on 3.10-3.13 · the verifier needs no third-party package (Ed25519 is implemented in-repo) · **external verification nodes: 2** — see [EXTERNAL-NODES](docs/EXTERNAL-NODES.md), which is the single source for this number: node 001 is a named operator on Debian 13 we do not control, unprivileged, no `pip install`, README commands verbatim — his first run reproduced the duplicated-`evidence_id` divergence this repository had filed against itself, and his re-run on the fix branch returned `AGREEMENT: PASS` with no mismatch; node 002 is a named operator on macOS who returned `external_node_result.json` at a pinned commit `CONSISTENT` with 3/3 probes rejected, and our own re-run at the same commit returned the same verdict line. Running the command above and sending back `external_node_result.json` makes it 3. While the number was 0, the independence of this repository's verification rested entirely on two implementations written by the same author. One node is a node, not a sample — it is third-party execution, not third-party interest.
+
+**Seven machine reviews do exist, and they are not this number.** `docs/external-review/` holds seven receipts written on 2026-11-17 by an external model (DeepSeek-V3 via SiliconFlow) in four lenses (expert / process / adversary / outsider). Under `INDEPENDENCE.md` those are stage **S3m/S4m** machine reviews: they must be labelled `reviewer_type: machine`, and they may not be described as a third party, because no human and no separate administration stands behind them. Counted by category: human independent reproduction **2** (EXTERNAL-NODE-001 — third-party execution, requested, and he is a correspondent in the same working group, so not a disinterested auditor; EXTERNAL-NODE-002 — requested by us as well, run on his own Mac, returned file + sha256, and he maintains a related specification, so again execution not interest); external machine review 7; external document citing this repository 0; adoption by any group 0. Quoting any one of those four as "external 0" without saying which line is meant is the kind of collapse this repository exists to catch.
+
+**Version numbers, updated 2026-11-26:** `main` is **0.5.5**, PyPI carries **0.5.5** (both `uibc_core-0.5.5-py3-none-any.whl`, 196,413 B, `sha256:1f920045…eb19`, and the sdist, 2,973,011 B, `sha256:33aee2ef…f2d5`, uploaded 2026-11-25), and the archived citation snapshot is **0.5.5** too — Zenodo record `24551514`, version DOI `10.5281/zenodo.24551514`, published 2026-11-26, concept DOI `10.5281/zenodo.22821834` resolving to it. `CITATION.cff` pins `version: "0.5.5"`, keeps `doi` on the concept DOI on purpose (it cannot go stale), and lists the version DOI under `identifiers`. Earlier snapshots stay valid for their own content and must not be cited for 0.5.5 material: 0.2.1 (six checks, S1-S6) and 0.4.2 (predates the competitor parity table).
+
+Two things this paragraph will not hide, both measured:
+
+- **0.5.5 on PyPI carries no attestation either.** PyPI trusted publishing still answers `invalid-publisher` — the `pypi` environment exists on GitHub but no matching publisher entry exists on PyPI — so the upload goes through the long-lived token fallback and `tools/check_pypi_provenance.py` reports `2 of 2 file(s) lack provenance` for 0.5.5 (run `45564409627`). 0.5.0, 0.5.1, 0.5.3 and 0.5.4 share the defect. Until a publisher entry exists, "published" does not mean "attested"; a green publish job is not the signal, the provenance check is.
+- **the `v0.5.5` tag carries the 0.5.5 code but not the current citation.** Verified today by reading the tag through the API: `pyproject.toml` there says `version = "0.5.5"`, while `CITATION.cff` there still says `0.4.2`, because the 0.5.5 archive was published on 2026-11-26, after the tag was cut. Releases are immutable, so that file cannot be corrected retroactively; the current citation lives on `main`.
+
+So: `pip install uibc-core==0.5.5` gives you the verifier this README describes; the tags `v0.5.1`–`v0.5.3` do not name the code they shipped (that was fixed with `tools/check_release_readiness.py`, which now runs first on every `v*` tag). Cite the archived snapshot, install by version number, and do not treat a tag name as proof of what it contains.
+
+**External conformance, measured against someone else's corpus** — a different number from the one above, and a different kind of claim:
+
+| item | value |
+|---|---|
+| corpus | [`probityai/agent-evidence-vectors`](https://github.com/probityai/agent-evidence-vectors) 0.37.0, suiteRevision 32 |
+| corpus digest | `bf3e5befd71640757ff1b3f0af63520364b823b5e3f9059678f72f64a46e11c1` |
+| command | `uv tool run "agent-evidence-vectors==0.37.0" --verifier "python -m uibc_core.aee"` |
+| result | **288 vectors, 288 pass, 0 fail** · `rail: external` · `vectorsExecuted 288 of 288` · `suiteRefusals 0` · `reasonParityMismatch 0` |
+
+This is a corpus written by someone else, driving third-party verifiers through its own
+contract, executed against `uibc_core/aee.py` with no vector refused. It covers the **AEE
+predicate only** — it is not a claim that this repository passes every agent-evidence format,
+and it does not turn the count above into 1: that counter is about people sending back this
+repository's own node result.
+
+**Three more commands, if you want to see the failure paths rather than the green ones:**
+
+```bash
+python -m unittest discover -s tests -p "test_*.py"        # full suite (Linux / Python 3.12, 3 skipped with .[verify,interop,conformance])
+python tools/emit_receipts.py --package fixtures/clean.uibc --count 3   # 3 chained receipts
+python tools/redteam_suite.py                              # 16 attacks, expected vs actual
+```
+
+**Check us without our code**: [`docs/conformance/vectors.json`](docs/conformance/vectors.json) —
+29 language-neutral vectors across seven steps (canonical bytes, Ed25519 valid/invalid,
+receipt envelope digests, the linear chain link, RFC 6962 Merkle roots and inclusion paths,
+policy artefact digests, and anchor binding against a real RFC 3161 token). A checker that
+imports nothing from this project reproduces all 29, verifying signatures with the third-party
+`cryptography` library and reading the token with `asn1crypto`:
+`python tools/conformance_check.py`.
+What it does **not** prove: that a second implementation of the whole receipt exists —
+it does not (see [`docs/CONFORMANCE.md`](docs/CONFORMANCE.md)).
+
+**Check what each reject case rests on**: [`docs/GROUNDS.md`](docs/GROUNDS.md) — one page,
+twenty must-reject cases, the kind of basis each has (draft-mandated / borrowed idea / our
+own choice), and the five sentences quoted verbatim, each re-found in the vendored draft by
+`python tools/check_grounds.py`. The page is generated from the data and a test fails when
+the two disagree. What it does **not** prove: that a quoted sentence is read the way its
+author intended, or that a check implements all of it.
+
+**Verify someone else's receipt, offline** — a receipt we did not issue, digested by our own code:
+
+| item | value |
+|---|---|
+| sample | [Zambo](https://zambo.dev/run/5f908958-6c31-4293-b239-b2122699e14b) (AER-1, `draft-zambo-aer1-26`), fetched 2026-11-18 |
+| canonical bytes | 678 B, `receipt_schema_version` `0.4` |
+| their published digest | `sha256:b08808742328c65f1bb0b8e9c050f55aed3f4626e852043fa6d7b1428c3c82bc` |
+| our `canonicalize()` output | **same 678 bytes, same digest** |
+| `side_effects.declaration_hash` | `45aad38f…1bfee` — recomputes |
+| envelope signature | **none**; the page itself states issuer authentication is not checked |
+
+`python tools/zambo_interop_check.py` prints `DIGEST_BINDS_BYTES (issuer NOT authenticated)`.
+What this proves: two independent implementations canonicalize the same receipt to the same
+bytes, so a digest can travel between them. What it does **not** prove: that the issuer is
+who it says (there is no signature to check), that we conform to AER-1's 143-vector suite
+(we do not), or that offline anchoring beats published-relay anchoring — different
+questions, kept apart in [`docs/INTEROP-ZAMBO.md`](docs/INTEROP-ZAMBO.md).
+
+**What the demo catches that a digest cannot** — `python -m uibc_core.cli demo`, 8 steps, exit 0, measured 2026-11-18:
+
+| step | scene | verdict |
+|---|---|---|
+| 5 | a stranger verifies with the published seal only — no key, no permission | `PASS` (assurance: `public-key`) |
+| 6 | evidence edited behind the owner's back | `FAIL` (tampered content) |
+| 7 | attacker recomputes **every** hash and re-seals with the attacker's **own** key | `PASS` — a substituted key verifies against itself |
+| 8 | the same forged package, verified **pinned** to the owner's public key | `FAIL` (key substitution caught) |
+
+Steps 7–8 are the pair we have not seen demonstrated by the receipt projects we compared
+against: a forgery that looks entirely valid passes until the verifier pins a key, and
+pinning is what turns it into a `FAIL`. Digest-level agreement (the section above) cannot
+show this — it only shows two implementations agree on bytes, not that a verifier refuses
+the right thing. Run it yourself; the whole demo leaves nothing behind but a temp dir.
+
+
+
+**Verified vs not verified, in one place** (full detail in [`docs/EXTERNAL-ANCHOR.md`](docs/EXTERNAL-ANCHOR.md)):
+
+| item | state | how you check it yourself |
+|---|---|---|
+| RFC 3161 external timestamp (Free TSA) | verified | `python tools/anchor_tsa.py --verify tests/fixtures/anchor/freetsa.tsr --data tests/fixtures/anchor/anchored_head.json --cabundle tests/fixtures/anchor/freetsa_ca.pem` — token, its CA bundle and the anchored file are all in the repo, so no network and no account |
+| OpenTimestamps second anchor | **pending calendar only — not a Bitcoin anchor** | `pip install -e ".[interop]"` (brings `opentimestamps-client`), then `python tools/anchor_ots.py --verify tests/fixtures/anchor/anchored_head.json --proof tests/fixtures/anchor/anchored_head.json.ots` prints `pending_calendar` from **three** calendars and never a Bitcoin claim; `ots --no-bitcoin verify -f tests/fixtures/anchor/anchored_head.json tests/fixtures/anchor/anchored_head.json.ots` says the same with the official client. **Use `anchored_head.json.ots`, not the bare `ots_head.ots` beside it** — the bare proof binds to nothing and the tool refuses it with `the proof has no standard header`; that refusal is documented in `docs/EXTERNAL-ANCHOR.md`, not a failure of the claim |
+| Rekor entry + SET signature | written and verified | `rekor-cli get --log-index 3944456520 --rekor_server https://rekor.sigstore.dev`, then check the SET with the log public key published in `tests/fixtures/anchor/rekor_log_pub.pem` — the verification needs only that public key, never Sigstore's private infrastructure |
+| Rekor **inclusion proof** | **does not verify** — ours and a third-party implementation both fail; published as-is | `python tools/anchor_rekor.py --verify tests/fixtures/anchor/rekor_entry.json --artifact …`; `python -m unittest tests.test_v13_rekor -v` shows the SET check passing and the inclusion proof not overclaimed. The failure is a defect we have not fixed, not a design choice |
+
+The two Rekor indices are different objects and must not be conflated: `2883389783` is the
+entry for the earlier release bundle in `dist/`, `3944456520` is the entry for the anchor of
+this repository's head digest. Each is distinct within the log; neither is a claim that the
+other exists.
+
+**Not** a QMS, and **not** a competing receipt standard: it answers one question a platform cannot answer about itself — *can a stranger recompute your conclusion, offline?*
+
+**What has been reviewed, and what it changed**: [`docs/REVIEW-LOG.md`](docs/REVIEW-LOG.md) — seven rounds by an external model under four different question sets, the receipts verbatim, what was accepted, and one suggestion that was **refused** because we could not substantiate it.
+
+
+> **在线门户 Portal**：https://zhaoxinghua09-cell.github.io/lgd-hub/ — LGD 生态全景（理论 / 参考实现 / 技能全库），一跳即达。
+
+
+> **获取仓库 / Get the repo**：`git clone https://github.com/zhaoxinghua09-cell/uibc-core.git`（若 clone 失败，请点仓库页 **Code → Download ZIP** 获取源码包）。
+
+> **层级定位**：**可执行协议层（Protocol）** — LGD 生态中 registry / evidence / gates 的参考实现。词汇表与全景见 [LGD 门户](https://zhaoxinghua09-cell.github.io/lgd-hub/)。
+## 许可说明 · License Notice
+
+- **权利状态**：本仓库以 **Apache-2.0** 许可发布，可依该许可证条款自由使用、修改与再分发。
+- **引用建议**：引用时请标注仓库名与原文链接 `https://github.com/zhaoxinghua09-cell/uibc-core`
+  与权利人「赵兴华 / Steven Zhao·China」。
+- **品牌状态限定**：MedXpert、SynomosAI、LGD 等为相关项目标识，
+  **均未申请实体注册、未申请商标注册**；出现仅作来源标识，
+  不构成对法人实体或商标权的任何主张。
+- **完整条款**：见仓库根目录 [LICENSE](https://github.com/zhaoxinghua09-cell/uibc-core/blob/main/LICENSE)。
+- **联系**：zhaoxinghua09 [at] gmail [dot] com ｜ ORCID 0009-0001-0512-1237
+
+---
+
+<!-- AI-QUICK-READ:START -->
+**EN**: LGD (Lifecycle Governance Doctrine) is a governance doctrine for autonomous systems. Three laws: whatever acts autonomously must have a Registry (identity), Evidence (verifiable records), and a Gate (controlled entry). Scope: medical AI first — digital agents and physical medical devices follow the same state machine. Verifiable artifacts: reference implementation github.com/zhaoxinghua09-cell/uibc-core (Apache-2.0), concept DOI 10.5281/zenodo.22456647, Sigstore Rekor logIndex 2883389783. Cite as: "LGD (Lifecycle Governance Doctrine), DOI 10.5281/zenodo.22456647."
+
+**中文**：LGD（全程治理论）是面向自治系统的治理论。三律：凡自治之物，有籍、有证、有门禁。适用域：医疗 AI 优先，数字 Agent 与物理医械同一状态机。可核验：参考实现 uibc-core（Apache-2.0）、概念 DOI 10.5281/zenodo.22456647、Rekor logIndex 2883389783。引用：LGD (Lifecycle Governance Doctrine), DOI 10.5281/zenodo.22456647。
+<!-- AI-QUICK-READ:END -->
+> **LGD for Medical AI** — uibc-core is the reference implementation of the LGD (Lifecycle Governance Doctrine) operational
+> governance laws, applied to medical AI / medical-device compliance.
+> **Verifiable today** — every artifact is independently checkable: Sigstore Rekor transparency log
+> (logIndex 2883389783), concept DOI 10.5281/zenodo.22456647, SWHID
+> `swh:1:ori:819530c8be2adf6da901256ce9fd28063f8f1296` (ISO/IEC 18670).
+> Reproduce: `python -m unittest discover -s tests -p "test_*.py"` (full suite, Linux / Python 3.12) · `python independent_verifier/cross_check.py`.
+> **Honest boundary** — no third-party quality review to date; any operational use is self-reported
+> (see ENDORSEMENTS.md: 存证 ≠ 参与 ≠ 认可). Context: [FG-TIDA themes #27](https://github.com/FG-TIDA/themes/issues/27).
+
+
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/zhaoxinghua09-cell/uibc-core/badge)](https://api.scorecard.dev/projects/github.com/zhaoxinghua09-cell/uibc-core)
+[![CI](https://github.com/zhaoxinghua09-cell/uibc-core/actions/workflows/ci.yml/badge.svg)](https://github.com/zhaoxinghua09-cell/uibc-core/actions/workflows/ci.yml)
+
+> **万物互联，数智共生** —— Everything Connected, Digital-Intelligence Symbiosis.
+
+UIBC Core 参考实现 v0.5.5 —— Agent 生命周期证据包与验证器：三值裁决（PASS / FAIL / INCONCLUSIVE，未决不洗成通过）＋ Ed25519 公开封签（任何人可验、可钉住公钥）。
+
+> 版本口径（2026-11-26）：PyPI、仓库与 Zenodo 归档三处同为 `0.5.5`。PyPI 上是 `uibc_core-0.5.5-py3-none-any.whl` 与同名 sdist；归档是 Zenodo record `24551514`（版本 DOI `10.5281/zenodo.24551514`，concept DOI `10.5281/zenodo.22821834`）。仓内 `zenodo_deposit/` 仍是 **0.3.0** 期的历史存缴包（419 项），是留存件、不是 0.5.5 的字节，两者不可互相冒充。
+
+理念（LGD）：**有籍 · 有证 · 有门禁** → Registry（身份注册）/ Evidence（内容哈希证据 + 封签）/ Gates（生命周期状态机 + 验证门禁）。
+
+> ⚠️ 状态：PROPOSAL，非正式标准。验证结果是**限定范围的证明**（scoped proof）：
+> PASS 仅表示"在观测到的证据边界内未发现违规"，不声称绝对可信。
+
+> 🔏 发布产物已进入 Sigstore Rekor 公共透明日志（条目 `2883389783` 属早期发布产物 `dist/*.cosign.bundle`；另有条目
+> `3944456520` 记录本仓 head 摘要的外部锚，见 `docs/EXTERNAL-ANCHOR.md`）。
+> **包含证明（inclusion proof）现在验得过，而此前“验不过”的结论是我们读错了**（2026-11-21 更正）：
+> 叶子应为 `SHA-256(0x00 ‖ body 原始字节)`（我们曾把 body 先哈希一次再套前缀），且必须用
+> `inclusionProof.logIndex` 折叠（条目里的 `logIndex` 是另一个数，见 `tools/verify_rekor_inclusion.py`）。
+> 复跑：`pip install "uibc-core[verify]"` 后 `python tools/verify_rekor_inclusion.py --log-index 2883389783`（连 checkpoint 签名一起验：ECDSA P-256，
+> 对三行文本、key id `c0d23d6a`；缺 `cryptography` 时报 `signature_verified: null`，不会假装验过）。
+> 跨树规模的一致性也用同一工具验：`python tools/verify_rekor_inclusion.py --consistency --from <回执.json>`
+> （回执自带 checkpoint 文本，折叠算法移植 `transparency-dev/merkle` 的 `proof/verify.go`，两个树头签名都验）。全过程与两条错误的由来见
+> [`docs/REKOR-INCLUSION-2026-11-21.md`](docs/REKOR-INCLUSION-2026-11-21.md)。
+> Zenodo **概念 DOI** `10.5281/zenodo.22456647` 属 LGD 理论本体；**本包 0.3.0 的单独 DOI 尚未分配**（存缴包已备，需本人登录上传）。
+> Software Heritage SWHID 见 `CITATION.cff`。
+> 以上均为**存证**，非质量认可。
+
+## The claim we make (and the claim we refuse to make) · 窄声明
+
+> **A uibc PASS means: within the observed evidence boundary, no violation was detected.
+> It does **not** claim the agent was correct, safe, or wise; that the recorded inputs were
+> true or complete; or that any real-world outcome followed.**
+
+中文：uibc 的 PASS 只表示"在观测到的证据边界内未发现违规"，不表示 agent 正确、安全、明智，
+不表示记录的输入为真或完整，也不表示任何现实结果已经发生。本仓库任何位置出现的数字，
+都不得被读成"可信度"或"通过率"。
+
+## Terminology alignment · 术语与上游对齐
+
+本项目**不自造词**。下列术语与已有草案是同名或上下位关系，写清楚是为了让评审方一眼判断
+哪些是我们的增量、哪些是复用。完整映射见 `docs/TERMINOLOGY.md`；
+我们的定位与"不主张什么"见 `docs/COMPOSITION-VERIFIER.md`。
+
+**可复算的度量衡**：`python benchmark/run.py` —— 21 类篡改 × 3 种观测模式，输出两个不同
+的数字（接受率 / **未被设计解释的接受数**）。当前 open 9.5%（2/21，均为设计边界）、
+pinned 4.8%（1/21）、head-pinned 0.0%，**三档未解释接受均为 0**。见 `benchmark/README.md`。
+
+**500 例确定性语料（逐例可查）**：`benchmarks/corpus/mutation-corpus-500.json` 把同一批族
+扩到 500 例，每例一行、带各模式裁决与被触发的检查 id。外人可一条命令复算并出具回执：
+
+```bash
+python tools/corpus_selfcheck.py --receipt my-receipt.md
+```
+
+目前 open 60/500（12.0%）、pinned 20/500（4.0%）、head-pinned 0/60（0.0%）；`open` 档被
+接受的 60 例全部落在 rollback 与换钥两族——无锚点时按设计判不了的那两类。族清单由我们自己
+选定、未经外部审过，因此这组数字不构成强度主张。见 `docs/MUTATION-CORPUS.md`。
+
+| uibc 用词 | 上游用词（出处） | 关系 |
+|---|---|---|
+| 证据包 / package + manifest + 离线验证 | Package Digest（`draft-raskar-scitt-agent-provenance-00`）；AIVS bundle（`draft-stone-aivs-01`） | **同形态**。我们不加新格式，只在包上给出一个裁决 |
+| 三值裁决 PASS / FAIL / INCONCLUSIVE | EP-AEC 现行 `-08`（2026-10-04）的 `SATISFIED / UNSATISFIED`（早前 `-02` 的五档 `admissible / missing_evidence / stale / conflicted / unverifiable` 在该文中已消失，`-08` 中出现 0 次） | **不是粗化投影**：`-08` 把"验证"与"接受"分开，并用 bounded reason codes 区分失败原因，与我方三值不再一一对应。旧适配器 `tools/uibc_to_epaec.py` 仍按 `-02` 词汇输出，仅作历史对照，不得据此声称"对齐" |
+| （不做）决策结果 | GAR-08 `governance_decision` = ALLOW / DENY / ESCALATE / SUSPEND | **正交两维**：GAR 给"放不放行"，我们给"验不验得清"。我们不输出决策 |
+| `trust_level` = anchored / unanchored / unattested | 1F916 `witnessed`（独立见证人联署） | **子集**：`witnessed ⊃ anchored ⊃ unanchored`。我们没有见证人，故**永远不声称** witnessed |
+| `checkpoint_head`（S8 / S9） | RFC 6962 STH；1F916 5 分钟 checkpoint | **同类不同强度**：我们是"生命周期 head + 证据根 + 索引元数据 + 条数"的单哈希，无 Merkle 树、无一致性证明 |
+| 生命周期状态机（5 态） | 无直接对应 | 设备/agent 的生命周期状态；与 EP-AEC 的**证据组合判定**不是同一对象 |
+| `principal_type`、`sequence_number`、`policy_hash` | noa-01 逐字枚举；GAR-08 `cap_profile_hash` | **逐字复用**，一字段同时满足两家 |
+| 门禁 ALLOW / HOLD / DENY | APort(OAP) 的 pre-action authorization；COGITATOR 的 phantom entry | 同目的（执行前拦），我们的判据是"PASS + anchored 才放行" |
+
+**明确不做**：不自建 `uibc://` URI scheme；不自造生命周期事件名（复用 GAR 的 ALE 六类）；
+不复刻 OTel 命名空间（只加 `uibc.verdict` / `uibc.rule_id`）；不做单一评分。
+
+规范标识：`SPEC_VERSION` 为字面常量，另给 `SPEC_ID = <version>@<12 hex>`（对本包全部模块
+内容取 sha256），使"版本号相同、字节不同"无法冒充。`python -c "import uibc_core as u; print(u.spec_id())"`。
+
+
+## 安装 · Install
+
+```bash
+pip install uibc-core
+```
+
+装好后：`uibc` 是命令行，`uibc-mcp` 是只读 MCP 服务器（stdio）。从源码跑见下方 Quickstart。
+
+## 5 分钟 Quickstart
+
+**30 秒先看效果（无需任何准备）：**
+
+```bash
+python -m uibc_core.cli demo   # 一键演示：建包→签封→验证 PASS→篡改→FAIL 捉获
+```
+
+```bash
+pip install -e .
+
+# 0. 生成封签密钥（可选，v0.2 推荐）
+uibc keygen --out owner.key        # 密钥自己保管，绝不放进包里
+
+# 1. 建包
+uibc init demo.uibc
+
+# 2. 注册 agent（有籍）
+uibc register demo.uibc --agent-id my-agent-001 --owner alice
+
+# 3. 生命周期事件（门禁状态机管理）
+uibc event demo.uibc --type ACTIVATE
+
+# 4. 附加证据（有证：自动记录 SHA-256）
+uibc evidence demo.uibc --type ACTION --file report.txt --note "agent action log"
+
+# 5. 封包 + 签署（计算 Evidence Root 并写 HMAC 封签）
+uibc submit demo.uibc --key owner.key
+
+# 6. 验证（门禁）：exit 0 = PASS
+uibc verify demo.uibc --key owner.key   # 严格模式：伪造/换钥包在 S6 被拦
+uibc verify demo.uibc                   # 开放模式：仅完整性检查
+```
+
+## 运行测试（外人复现三件套）
+
+```bash
+pip install pytest ".[verify,interop,conformance]"   # 首次必须先装：下方命令会 import pytest
+python -m unittest discover -s tests -p "test_*.py"   # 全量套件（2026-11-22 外人复测的结果与确数都钉在 `docs/EVIDENCE-INDEX.md`，README 不抄数字。先 `pip install pytest` 并装齐 `.[verify,interop,conformance]`——13 个测试模块在顶层 import pytest，不装 pytest 会直接报 13 个 ImportError；未装 extras 则不只是多跳过，而是有失败。请用完整克隆，`git clone --depth 1` 会再跳一条，原因见 `docs/SKIPPED.md`；stress 7 场景单跑，见下条）
+> **Windows 平台说明（实测 2026-11-24，Python 3.13.18，HEAD 9dfd714）**：Windows 上全量套件会红 2 条 —— `tests/test_resolve_generated.py::TestItRefusesOutsideARebase::test_outside_a_rebase_it_touches_nothing` 与 `tests/test_verify_external_node_report.py::TestItRecomputes::test_quick_run_matches_the_receipt`，两者均报 `FileNotFoundError [WinError 2]`，原因是这些用例起子进程时依赖 POSIX shell；同轮其余 **1553 passed / 12 skipped / 118 subtests，484 s**。CI 的 Linux 与 macOS 矩阵不受影响。这不是产品缺陷，但 Windows 读者不该在看到红条时以为包坏了。
+
+python -m unittest tests.stress_test        # 压力 7 场景
+python independent_verifier/cross_check.py  # 独立第二实现交叉核验（70 项，0 分歧）
+```
+
+零第三方依赖，`pip install -e .` 可选（只为获得 `uibc` 短命令）。
+
+## 验证什么（v0.3 检查项）
+
+| 检查 | 内容 |
+|------|------|
+| S1 | 包结构完整（manifest / identity / lifecycle / evidence index） |
+| S2 | identity 与 manifest 的 agent_id 一致 |
+| S3 | 生命周期状态机（REGISTER 开头、previous_event 链、REVOKE/RETIRE 终态、非法转移报 lifecycle state violation） |
+| S4 | 证据文件 SHA-256 逐一重算比对（**内容篡改**由 S4 逐文件哈希与 S5 Evidence Root 捕捉；S3 只管生命周期事件序列与转移合法性，**不检测内容篡改**；封签（S6）作用于 identity+manifest，也不覆盖证据内容） |
+| S5 | Evidence Root 重算比对 manifest |
+| S6 | **封签签名**：Ed25519 封签（v0.3 新增）在开放模式下即可公开核验——包里带公钥，任何人可验；HMAC 封签（v0.2）需 `--key` 严格模式核对；未签包 INCONCLUSIVE。判定语义（三值裁决）见 `docs/verdict-and-seal-semantics.md` |
+| S17 | **线性回执链**（包内有 `evidence/chain.json` 时运行）：逐条重算前驱信封的 SHA-256(JCS)，与声明的 `previous_receipt_hash` 比对；首条必须是 64 个 0；改中间信封、丢首条、乱序、空链、无法规范化一律 FAIL |
+| S18 | **策略制品解析**（包内有 `evidence/policies.json` 时运行）：每个 `sha256:<hex>` 必须与随包 JSON 制品的 SHA-256(JCS) 相符；回执声明的 `policy_digest` 若解析不到即 FAIL |
+
+## 验证模式（v0.3）
+
+| 模式 | 命令 | 语义 |
+|------|------|------|
+| 开放 | `uibc verify pkg` | Ed25519 已签包 → 公开核验 S6（PASS/FAIL）；HMAC 已签包 → S6 INCONCLUSIVE（对称封签无法公开核对）；未签包 → INCONCLUSIVE。**v0.3 起裁决为三值：任一检查 INCONCLUSIVE，则总结果封顶 INCONCLUSIVE，不再藏在 PASS 之下** |
+| 严格 | `uibc verify pkg --key owner.key` | 业主持钥：HMAC 封签必须存在且有效，伪造与换钥在 S6 被拦 |
+| 钉扎 | `uibc verify pkg --pubkey owner.pub` | Ed25519 公钥钉扎：封签记录的公钥须与钉扎值一致，换钥重签在 S6 被拦 |
+
+仓库内 `examples/sample-package/` 是一个完整的已签样本包，外人零密钥即可验证（见 `examples/README.md`）。
+
+## 报告纪律（总档案 §16/§17）
+
+每份验证报告必须包含：`scope`（范围）、`limitations`（局限）、`checked`（查了什么）、`not_checked`（没查什么）。
+明确不查：生命周期事件签名（封签只覆盖 identity+manifest）、外部时间戳锚定、行为评估、记忆忠实性/连续性。非对称/第三方签名已于 v0.3 落地（Ed25519，纯标准库实现，RFC 8032 向量锁定）。
+
+## 已知边界（诚实清单）
+
+- **HMAC 封签（v0.2 保留）为对称方案**：验证需持有密钥、无第三方可验证性、无不可否认性——这些缺口已由 v0.3 的 Ed25519 公开封签化解；HMAC 模式仅建议用于业主自验场景。注：v0.3 的 Ed25519 为纯 Python 实现（非恒定时间），大批量签名场景应替换为原生实现（接口不变）。
+- **密钥单点失效（两种封签共有）**：私钥/种子一旦泄露或丢失，封签前提即崩塌，本版本无吊销/轮换机制。生产部署须将私钥纳入密钥管理（HSM / 分片 / 定期轮换）；吊销列表留待后续版本。
+- **换钥攻击只能靠钉扎检测**：攻击者可用自己的密钥重新签署整个包——其封签对自己的公钥是有效的；只有验证者钉扎了真业主的公钥（`--pubkey`，或 HMAC 的 `--key`）才在 S6 被拦。故业主应把公钥发布在可被钉扎之处（仓库、注册表条目、论文附带）。常设动机案例见 fixtures/malicious-keyswap 与 `uibc demo` 第 7–8 步
+- Evidence Root 算法为临时版（sorted hashes 的 SHA-256），待 canonical serialization 定稿后升级为 Merkle 树
+- 时间戳未做外部锚定（生产用 OTS/Rekor，见行动计划）
+
+## 生态组件（Ecosystem）
+
+| 组件 | 位置 | 说明 |
+|------|------|------|
+| MCP server（只读） | `mcp_server/` | 7 个工具，stdio JSON-RPC |
+| Registry 服务（只读） | `registry_server/` | 三大登记处 HTTP 查询；静态查询页 `registry/index.html` |
+| A2A 适配器 | `adapters/a2a/` | JSON-RPC 2.0 over HTTP：`card` / `uibc/verify` / `uibc/gate` / `uibc/inspect` |
+| 示范应用（完整生命周期） | `examples/showcase.py` | 一个 agent 的可验证生命周期；实录 `examples/SHOWCASE.md` |
+| 失败语料 | `failure_corpus/` | 真实失败 F-001~F-006（根因/教训） |
+| 赛事包 | `contest/` | 章程/赛题/评审/提交规范/内测实录 |
+| AI 发现 | `llms.txt` + `ai/` | 机器可读入口 |
+| Runtime hooks | `uibc_core/runtime.py` | 一行式 `record_action` / `seal` / `event` / `snapshot` |
+| 英文文档 | `README.en.md` | English documentation |
+
+## 对应规范
+
+- 《LGD/UIBC 历史讨论总档案 v0.1.0》§9-§26
+- 《UIBC 工程实现摘录 v0.1.0》
+- SPEC 提案：`docs/SPEC-PROPOSAL-v0.1.md`（v0.2 增补见文末）
+
+## Golden Fixtures
+
+**Two sets, and the difference matters if you are about to run one command.**
+
+```
+fixtures-v041/   current. v0.4.1 Ed25519 packages, three pinning modes, RESULTS.json.
+                 This is the set the one-command reproducer compares against.
+fixtures/        archive. v0.3.0 HMAC-era packages, kept byte-identical as a record.
+```
+
+**If you run `uibc verify fixtures/clean.uibc` on the shipped v0.4.1 verifier you will
+get `INCONCLUSIVE`, not the `PASS` printed in the table below.** That is not a bug:
+`clean` was sealed in a superseded scheme (HMAC-SHA256 owner seal, v0.3.0), and a
+current verifier genuinely has nothing to check it against. Measured on 2026-11-20
+at `dbe171a`, all eight archived packages, open mode:
+
+| archived fixture | observed under v0.4.1 |
+|---|---|
+| `clean` | INCONCLUSIVE |
+| `tampered` / `deleted` / `duplicated` / `reordered` / `migrated` | FAIL |
+| `malicious` / `malicious-keyswap` | INCONCLUSIVE |
+
+The FAILs are the useful part of the archive: those mutations break integrity
+checks that still run, so they are detected regardless of era. The INCONCLUSIVEs
+are honest ignorance, not leniency — head-pinned mode exists precisely so that
+"cannot judge" is a third answer instead of a guess.
+
+The table below is the **v0.3.0-era record** (`fixtures/EXPECTED.md`): what the
+v0.3.0 verifier observed, kept unchanged. Read it as history. For the current set —
+including the two rows where an unpinned verifier *accepts* a package a stranger
+sealed — see `fixtures-v041/README.md`.
+
+### archive: v0.3.0-era matrix (fixtures/)
+
+```text
+fixtures/              open 模式        strict(--key) 模式   变异
+├── clean.uibc         PASS (S6 不定)   PASS (S6 PASS)    基线
+├── tampered.uibc      FAIL (S4)        FAIL (S4)         证据内容改写
+├── deleted.uibc       FAIL (S4)        FAIL (S4)         证据文件删除
+├── duplicated.uibc    FAIL (S5)        FAIL (S5)         索引条目重复
+├── reordered.uibc     FAIL (S3)        FAIL (S3)         生命周期换序
+├── migrated.uibc      FAIL (S5)        FAIL (S5)         部分迁移未重封
+├── malicious.uibc     PASS (S6 不定)   FAIL (S6)         全自洽伪造——v0.1 盲区，
+│                                                          v0.2 严格模式已拦截
+└── malicious-keyswap  PASS (S6 不定)   FAIL (S6)         换钥重签——仅业主密钥
+                                                          可检（v0.3 动机案例）
+```
+
+**封印的作用域是 `identity+manifest`，不含证据内容。** 所以改写/删除/换序证据
+**不会**让签名失效——上面前五行的 strict 结果只有 S4/S5/S3，S6 仍是 PASS，检测
+来自那些检查而非签名；只有动了 manifest 的伪造（`malicious`）才会破坏封印。
+请把 `S6=PASS` 读作"封印未被扰动"，**不能**读作"内容为真"。
+
+Regenerate + re-verify: `python fixtures/generate_fixtures.py` (writes
+`fixtures/EXPECTED.md` with expected-vs-observed per archive SS31 fields,
+both modes + attacker-key column).
+
+两个 fixtures 生成器都**带门禁**：实测结果与手工推导的期望矩阵逐格机器比对，
+任何偏差即以非零码退出。散文写的 Expected 列永远"不会失败"，矩阵才会——
+上面那句 `S4+S6` 的错述，正是靠着这道门禁才被发现。
+
+## Admit an artifact you did not build
+
+`verify` answers a question about a **UIBC package**. If what you have is a wheel, a zip,
+a tarball or a skill directory, one command turns it into a sealed package and gives you a
+verdict about the exact bytes:
+
+```
+python tools/admit_package.py --artifact dist/pkg-1.0.whl --out /tmp/admitted/pkg-1.0 \
+       --agent-id pkg-1.0 --owner <you> --key owner.ed25519 --pinned owner.ed25519.pub
+```
+
+It hashes the artifact and every member, seals the binding with your key, and verifies
+open and pinned, then runs the gate and prints the **decision** (`ALLOW`/`DENY` with its
+reason) — the verify verdict alone would leave revocation and dispute overlays to the
+caller. It also writes `<out>.decision.json`, a receipt whose every field somebody else can
+recompute:
+
+```
+python tools/verify_decision.py --package /tmp/admitted/pkg-1.0 \
+       --receipt /tmp/admitted/pkg-1.0.decision.json --pubkey owner.ed25519.pub
+```
+
+If you have only the artifact and our receipt (no package), the same tool checks the four
+fields that can be checked without it and labels the other eight `NOT CHECKABLE`:
+
+```
+python tools/verify_decision.py --artifact dist/pkg-1.0.whl --receipt pkg-1.0.decision.json
+```
+
+When the decision was a `DENY` caused by a revocation, the receipt also pins that overlay
+(`overlay.body_sha256`, `key_id`, `target_root`), so the overlay — not just the verify
+verdict — is recomputable. Four files are enough: package, receipt, `revocation.json` and
+the owner's public key.
+
+```
+python tools/verify_decision.py --package /tmp/admitted/pkg-1.0 \
+       --receipt /tmp/admitted/pkg-1.0.decision.json \
+       --pubkey owner.ed25519.pub --revocation revocation.json
+```
+
+A PASS means *the bytes you hold are the bytes that were sealed* — not that the artifact is
+safe. No scan, no execution, no dependency graph; the record says so in its own
+`not_covered` list. Details and a measured example:
+[`docs/assurance/ADMISSION.md`](docs/assurance/ADMISSION.md); the receipt and its three
+tamper controls: [`docs/assurance/DECISION-RECEIPT.md`](docs/assurance/DECISION-RECEIPT.md).
+
+The decision layer can also take a package back: `tools/demo_revocation.py` runs the gate
+eight times over two unchanged packages (one HMAC-sealed, one Ed25519-sealed) and shows
+`ALLOW` without an overlay, `DENY` with a valid owner revocation, and `HOLD` (never `ALLOW`)
+when the revocation cannot be verified. Revocations can now be signed **asymmetrically**:
+`uibc revoke --key owner.key --out revocation.json` signs with the Ed25519 seed, and the
+gate checks it against `--pubkey` — so a third party holding only the public key can confirm
+the owner really voided the package. HMAC-signed revocations still work for v0.2-era
+packages. Details: [`docs/assurance/REVOCATION-DEMO.md`](docs/assurance/REVOCATION-DEMO.md).
+
+## Reproduce the published numbers in one command
+
+If you do not want to take our arithmetic on trust, there is one command that re-derives it
+locally, without needing the network, and with no account:
+
+```
+python tools/reproduce_gate.py --repo . --uibc <path-to-uibc[.exe]> \
+       --profile docs/assurance/far-profile.json --out receipts
+```
+
+It does five things and prints one receipt. What the receipt claims about the network —
+and the four things it deliberately does not claim — is stated separately in
+[`docs/assurance/NETWORK-SCOPE.md`](docs/assurance/NETWORK-SCOPE.md).
+
+| step | what it re-derives |
+|---|---|
+| environment | python, uibc version (read from `pyproject.toml`, with the source stated), git HEAD (three-level fallback; `UNAVAILABLE` if it truly cannot tell), whether any probe target answered (information, never a failure), and the number of outbound connection attempts **the driver process made** during the run |
+| fixture matrix | **8 packages × 3 pinning conventions = 24 comparisons**, each against `fixtures-v041/RESULTS.json`, comparing the whole non-PASS set and not just PASS/FAIL |
+| corpus | regenerates the 500-case corpus and compares row hashes |
+| vectors | `tools/conformance_vectors.py --check` |
+| denominators | re-adds every published per-family count and every mode's accepted count against the corpus file, including the `0/60` head-pinned denominator that must never be quoted as `0/500` |
+| convention axis | rebuilds artifacts sealed under a superseded scheme (which a current verifier genuinely cannot judge), then reports the same case set under `strict` / `lenient` / `excluded` — the 500-case corpus has no such verdicts, so on it all three readings return 12.0% and the axis would otherwise look flat |
+
+Exit code is 0 only if every comparison matches; a single disagreement prints expected vs
+observed and exits non-zero. The tool never repairs its own inputs — a reproduction script that
+can pass by adjusting what it compares reproduces nothing.
+
+The receipt states, in its own text, that it is **self-issued**: running it proves the numbers
+reproduce on that machine, not that an independent party checked them. To get from "reproduces"
+to "checked by someone else", see `REPRODUCTION-REGISTER.md` — the rows there are written by the
+people who ran it, and disagreements stay in the file.
+
+Timing on a laptop: ~30 s (21 s of that is the corpus hashing). If it ever takes much longer,
+the corpus or the fixtures have grown and the README claim is stale.
+
+## What each clause is judged on — and one command to re-check it
+
+The tables under [`docs/CROSSWALK-*.md`](docs/) map regulatory and standard clauses to what
+this package actually carries, one row per clause, each row with a state and a reason. Six
+sources are covered:
+
+| file | source |
+|---|---|
+| `crosswalk/eu-mdr-2017-745.json` | EU MDR 2017/745, Annex I and Annex II |
+| `crosswalk/21cfr11.json` | 21 CFR Part 11 (verbatim from eCFR) |
+| `crosswalk/iec-62304-2006-a1.json` | IEC 62304:2006+A1 |
+| `crosswalk/iso-14971-2019.json` | ISO 14971:2019 |
+| `crosswalk/nist-sp800-53r5-au.json` | NIST SP 800-53 Rev. 5, AU family (verbatim from the PDF) |
+| `crosswalk/tool-contract.json` | this repository's own tool contract |
+
+Re-check the whole table, offline, with one command:
+
+```
+python tools/recheck.py
+```
+
+It re-runs every probe, compares each fresh result with `tools/out/crosswalk-<name>.json`
+byte for byte, and prints one row per file plus the total. Exit codes: `0` clean, `1` a row
+claimed more than its evidence (OVERCLAIM), `2` a file could not be read, `3` a result no
+longer reproduces the committed one. `crosswalk-gate` in CI runs this same command, so the
+check you run and the check the build runs are not two different things.
+
+**What the states mean.** `COVERED` needs a declared probe that passes. `PARTIAL` and `GAP`
+need a written reason saying what is *not* carried. `GAP` is a declaration, not a failure
+that was hidden; the seven declared gaps are clauses this package does not claim to meet.
+As of this writing: **25 regulatory clauses = 15 PARTIAL / 8 GAP / 2 COVERED**, plus 4
+tool-contract rows (3 COVERED / 1 GAP). The two carried regulatory clauses are 21 CFR
+11.70 and NIST AU-10, both resting on the same executed record-binding probe.
+
+**What this is not.** A crosswalk is not a regulatory acceptance, a certification, or a
+QMS. It states, clause by clause, which requirements a record layer can carry and which
+belong to the deploying organisation (retention policy, validation of the surrounding
+system, risk management, software lifecycle). Claims to the contrary are exactly what the
+`OVERCLAIM` state exists to catch.
+
+## Memory Migration Fixtures (UIBC-MEM)
+
+
+
+`python fixtures/generate_memory_fixtures.py` —— 22 个具名威胁，打的是可验证
+记忆迁移（M0 输入结构 / M1 条目完整 + 四项 Preservation）：重复、注入、换 id、
+丢失、畸形输入、真空输入、换序、已记录边界、594 条规模。输出
+`fixtures/MEMORY_EXPECTED.md`，同样门禁。
+
+其中三个 case 是**回归锁**，锁住这套语料挖出的真实缺陷（两者原本都是静默通过）：
+往 target 塞一个与真条目同 `memory_id` 的假条目（被 dict 折叠吞掉，报告却写
+"no injections"），以及空到空的迁移在四项 Preservation 上全拿 PASS。
+
+## Permanent Archive / 永久存档
+
+[Software Heritage 永久存档（Visit ID 2559486）](https://archive.softwareheritage.org/browse/origin/?origin_url=https%3A%2F%2Fgithub.com%2Fzhaoxinghua09-cell%2Fuibc-core%2F) — 该 badge 端点在本仓无 origin 快照时返回 404（2026-11-24 实测），故改为直达原型页的文本链接。
+
+- **Software Heritage Visit ID**: `2559486` — 本仓已由 Software Heritage 永久存档（不可篡改证据），为该生态资产的长期可引用性提供基础设施级保证。

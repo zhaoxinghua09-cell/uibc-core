@@ -10,10 +10,10 @@ A conformance corpus and verifier for a per-action evidence format, published wi
 
 | fact | value | where it comes from |
 |---|---|---|
-| version | 0.5.5 | `pyproject.toml` |
-| conformance archive | `conformance/uibc-conformance-0.5.5.zip` | `conformance/uibc-conformance-0.5.5.zip` |
-| archive sha256 | `9cab24943117801ed4f02c8400a899916f237a1e2e668116eaac4accfb17932e` | pin file |
-| archive bytes | 359696 | pin file |
+| version | 0.5.6 | `pyproject.toml` |
+| conformance archive | `conformance/uibc-conformance-0.5.6.zip` | `conformance/uibc-conformance-0.5.6.zip` |
+| archive sha256 | `31bbeff40e67041c77b23eefe364d71ec72b192f0e59618ffc1589d14d059c09` | pin file |
+| archive bytes | 388388 | pin file |
 | cases inside the archive | 58 | counted from the zip |
 | archive carries its own verifier | yes | zip listing |
 | oracle cases | 30 | `conformance/oracle/cases` |

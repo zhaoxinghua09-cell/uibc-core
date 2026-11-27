@@ -4,7 +4,7 @@ Before this, a file dropped into evidence/ that the index never promised stayed
 a note. The reason was real: the format itself puts the tree, the chain, the
 anchors and the policy artefacts there, so failing every undeclared file broke
 every existing package. --strict was the mode. Format v2 is the durable
-fix (release 0.5.6; the tree still ships 0.5.5 until the artefacts exist):
+fix (release 0.5.6, on PyPI since 2026-11-27):
 the producer declares the version, and from v2 the default is FAIL, while
 v1 packages keep being judged by the rules in force when they were sealed.
 """

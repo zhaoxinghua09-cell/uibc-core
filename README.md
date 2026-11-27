@@ -31,12 +31,12 @@ Fetch it anonymously, without cloning (no login, no token — measured 2026-11-2
 
 ```bash
 curl -fL -o corpus.zip \
-  https://github.com/zhaoxinghua09-cell/uibc-core/raw/main/conformance/uibc-conformance-0.5.5.zip
-sha256sum corpus.zip   # 9cab24943117801ed4f02c8400a899916f237a1e2e668116eaac4accfb17932e, 359,696 bytes
+  https://github.com/zhaoxinghua09-cell/uibc-core/raw/main/conformance/uibc-conformance-0.5.6.zip
+sha256sum corpus.zip   # 31bbeff40e67041c77b23eefe364d71ec72b192f0e59618ffc1589d14d059c09, 388,388 bytes
 unzip -q corpus.zip -d corpus && cd corpus && python run.py
 ```
 
-The release page carries the same bytes, attached on 2026-11-25: `https://github.com/zhaoxinghua09-cell/uibc-core/releases/download/v0.5.5/uibc-conformance-0.5.5.zip`. Either URL serves this hash; the older `v0.5.0` asset is a different corpus (36 cases) and the `v0.4.0` one a third (30 cases). Neither is this one.. The build is deterministic for a given tree, but "rebuilding gives the same bytes" is true only from the tree the archive was built from: `0.4.1` came out of commit `d72c4f9`, and the runner template was fixed for the unstartable-verifier case afterwards, so rebuilding `0.4.1` from today's tree yields a different archive (`083c0dbc…`). The builder now refuses to overwrite a pinned archive and prints both hashes instead (measured 2026-11-20, exit 3).
+The release page carries the same bytes, attached on 2026-11-27: `https://github.com/zhaoxinghua09-cell/uibc-core/releases/download/v0.5.6/uibc-conformance-0.5.6.zip`. Either URL serves this hash; the older `v0.5.0` asset is a different corpus (36 cases) and the `v0.4.0` one a third (30 cases). Neither is this one.. The build is deterministic for a given tree, but "rebuilding gives the same bytes" is true only from the tree the archive was built from: `0.4.1` came out of commit `d72c4f9`, and the runner template was fixed for the unstartable-verifier case afterwards, so rebuilding `0.4.1` from today's tree yields a different archive (`083c0dbc…`). The builder now refuses to overwrite a pinned archive and prints both hashes instead (measured 2026-11-20, exit 3).
 
 No repository, no network, no `pip install`: the archive carries its own verifier as a single file (`uibc_core.pyz`), and `run.py` uses it. Expected tail `strict 58/58` in about six seconds, and a `receipt.json` you can publish. A verifier that answers PASS to everything scores **6/58**, so refusing nothing does not pass.
 
@@ -45,7 +45,7 @@ No repository, no network, no `pip install`: the archive carries its own verifie
 This repository now ships a composite action, so a package can be verified inside someone else's CI without them installing anything:
 
 ```yaml
-- uses: zhaoxinghua09-cell/uibc-core@v0.5.5
+- uses: zhaoxinghua09-cell/uibc-core@v0.5.6
   with:
     path: path/to/package        # the package directory to verify
     strict: 'true'               # optional: fail on undeclared files under evidence/
@@ -80,14 +80,14 @@ The number above is **our own run**. It becomes an external node report only whe
 
 **Seven machine reviews do exist, and they are not this number.** `docs/external-review/` holds seven receipts written on 2026-11-17 by an external model (DeepSeek-V3 via SiliconFlow) in four lenses (expert / process / adversary / outsider). Under `INDEPENDENCE.md` those are stage **S3m/S4m** machine reviews: they must be labelled `reviewer_type: machine`, and they may not be described as a third party, because no human and no separate administration stands behind them. Counted by category: human independent reproduction **2** (EXTERNAL-NODE-001 — third-party execution, requested, and he is a correspondent in the same working group, so not a disinterested auditor; EXTERNAL-NODE-002 — requested by us as well, run on his own Mac, returned file + sha256, and he maintains a related specification, so again execution not interest); external machine review 7; external document citing this repository 0; adoption by any group 0. Quoting any one of those four as "external 0" without saying which line is meant is the kind of collapse this repository exists to catch.
 
-**Version numbers, updated 2026-11-26:** `main` is **0.5.5**, PyPI carries **0.5.5** (both `uibc_core-0.5.5-py3-none-any.whl`, 196,413 B, `sha256:1f920045…eb19`, and the sdist, 2,973,011 B, `sha256:33aee2ef…f2d5`, uploaded 2026-11-25), and the archived citation snapshot is **0.5.5** too — Zenodo record `24551514`, version DOI `10.5281/zenodo.24551514`, published 2026-11-26, concept DOI `10.5281/zenodo.22821834` resolving to it. `CITATION.cff` pins `version: "0.5.5"`, keeps `doi` on the concept DOI on purpose (it cannot go stale), and lists the version DOI under `identifiers`. Earlier snapshots stay valid for their own content and must not be cited for 0.5.5 material: 0.2.1 (six checks, S1-S6) and 0.4.2 (predates the competitor parity table).
+**Version numbers, updated 2026-11-27:** `main` is **0.5.6**, PyPI carries **0.5.6** (both `uibc_core-0.5.6-py3-none-any.whl`, 226,327 B, `sha256:34eda43c…5699`, and the sdist, 3,940,189 B, `sha256:2b31e7af…0b80`, uploaded 2026-11-27 01:46 UTC), and the archived citation snapshot is still **0.5.5**, because no deposit was made for 0.5.6 — Zenodo record `24551514`, version DOI `10.5281/zenodo.24551514`, published 2026-11-26, concept DOI `10.5281/zenodo.22821834` resolving to it. `CITATION.cff` pins `version: "0.5.5"` on purpose — bumping it without a deposit would claim a DOI covers bytes it never saw — keeps `doi` on the concept DOI (it cannot go stale), and lists the version DOI under `identifiers`. Earlier snapshots stay valid for their own content and must not be cited for 0.5.6 material: 0.2.1 (six checks, S1-S6) and 0.4.2 (predates the competitor parity table).
 
 Two things this paragraph will not hide, both measured:
 
-- **0.5.5 on PyPI carries no attestation either.** PyPI trusted publishing still answers `invalid-publisher` — the `pypi` environment exists on GitHub but no matching publisher entry exists on PyPI — so the upload goes through the long-lived token fallback and `tools/check_pypi_provenance.py` reports `2 of 2 file(s) lack provenance` for 0.5.5 (run `45564409627`). 0.5.0, 0.5.1, 0.5.3 and 0.5.4 share the defect. Until a publisher entry exists, "published" does not mean "attested"; a green publish job is not the signal, the provenance check is.
+- **0.5.6 on PyPI carries no attestation either.** The bytes were uploaded with `twine` and a long-lived account token, not by trusted publishing: PyPI has no publisher entry for this repository's `pypi` environment, the lookup answers `invalid-publisher`, so no OIDC exchange happened and neither file has a provenance attestation. `python tools/check_pypi_provenance.py --pkg uibc-core --version 0.5.6` reports `2 of 2 file(s) lack provenance` (measured 2026-11-27). 0.5.0 through 0.5.5 share the defect. Until a publisher entry exists, "published" does not mean "attested"; a green publish job is not the signal, the provenance check is.
 - **the `v0.5.5` tag carries the 0.5.5 code but not the current citation.** Verified today by reading the tag through the API: `pyproject.toml` there says `version = "0.5.5"`, while `CITATION.cff` there still says `0.4.2`, because the 0.5.5 archive was published on 2026-11-26, after the tag was cut. Releases are immutable, so that file cannot be corrected retroactively; the current citation lives on `main`.
 
-So: `pip install uibc-core==0.5.5` gives you the verifier this README describes; the tags `v0.5.1`–`v0.5.3` do not name the code they shipped (that was fixed with `tools/check_release_readiness.py`, which now runs first on every `v*` tag). Cite the archived snapshot, install by version number, and do not treat a tag name as proof of what it contains.
+So: `pip install uibc-core==0.5.6` gives you the verifier this README describes; the tags `v0.5.1`–`v0.5.3` do not name the code they shipped (that was fixed with `tools/check_release_readiness.py`, which now runs first on every `v*` tag). Cite the archived snapshot, install by version number, and do not treat a tag name as proof of what it contains.
 
 **External conformance, measured against someone else's corpus** — a different number from the one above, and a different kind of claim:
 
@@ -222,9 +222,9 @@ other exists.
 
 > **万物互联，数智共生** —— Everything Connected, Digital-Intelligence Symbiosis.
 
-UIBC Core 参考实现 v0.5.5 —— Agent 生命周期证据包与验证器：三值裁决（PASS / FAIL / INCONCLUSIVE，未决不洗成通过）＋ Ed25519 公开封签（任何人可验、可钉住公钥）。
+UIBC Core 参考实现 v0.5.6 —— Agent 生命周期证据包与验证器：三值裁决（PASS / FAIL / INCONCLUSIVE，未决不洗成通过）＋ Ed25519 公开封签（任何人可验、可钉住公钥）。
 
-> 版本口径（2026-11-26）：PyPI、仓库与 Zenodo 归档三处同为 `0.5.5`。PyPI 上是 `uibc_core-0.5.5-py3-none-any.whl` 与同名 sdist；归档是 Zenodo record `24551514`（版本 DOI `10.5281/zenodo.24551514`，concept DOI `10.5281/zenodo.22821834`）。仓内 `zenodo_deposit/` 仍是 **0.3.0** 期的历史存缴包（419 项），是留存件、不是 0.5.5 的字节，两者不可互相冒充。
+> 版本口径（2026-11-27）：PyPI 与仓库同为 `0.5.6`（`uibc_core-0.5.6-py3-none-any.whl` 226,327 B / `sha256:34eda43c…5699`，sdist 3,940,189 B / `sha256:2b31e7af…0b80`，2026-11-27 01:46 UTC 上传；两件均**无** provenance 证明）。Zenodo 归档仍是 `0.5.5`：record `24551514`（版本 DOI `10.5281/zenodo.24551514`，concept DOI `10.5281/zenodo.22821834`），本轮**未**为 0.5.6 存缴，故该 DOI 不覆盖 0.5.6 的内容。仓内 `zenodo_deposit/` 仍是 **0.3.0** 期的历史存缴包（419 项），是留存件、不是当前版本的字节，两者不可互相冒充。
 
 理念（LGD）：**有籍 · 有证 · 有门禁** → Registry（身份注册）/ Evidence（内容哈希证据 + 封签）/ Gates（生命周期状态机 + 验证门禁）。
 

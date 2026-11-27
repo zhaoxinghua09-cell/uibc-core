@@ -39,7 +39,10 @@ def _lines(tmp):
     return out
 
 
-pytestmark = pytest.mark.skipif(not os.path.isdir(FIXTURES), reason="no fixtures")
+pytestmark = pytest.mark.skipif(
+    not (os.path.isdir(FIXTURES) and os.path.exists(SCHEMA) and os.path.exists(LINT)),
+    reason="interop/ and fixtures/ are repository material, not sdist payload; "
+           "run this from a checkout")
 
 
 def test_the_schema_is_a_file_a_stranger_can_read():

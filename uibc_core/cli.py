@@ -20,7 +20,7 @@ from .verify import verify
 from . import verify as verify_mod
 from . import lifecycle
 from . import did as did_mod
-from . import SPEC_VERSION, __version__
+from . import SPEC_VERSION, VERIFIER_ID, __version__
 
 REQUIRED = ["manifest.json", "identity.json", "lifecycle.json", "evidence/index.json"]
 
@@ -711,8 +711,10 @@ def _report_line(vector, report, exit_code, error=None):
         "vector": vector,
         "result": (report or {}).get("result") if error is None else "ERROR",
         "checks_failed": [] if error else _failed_checks(report),
-        "verifier_id": (report or {}).get("verifier_id"),
-        "verifier_version": (report or {}).get("verifier_version"),
+        # Our identity is known even when the package is not: an ERROR line that
+        # does not name the verifier reads as an anonymous complaint.
+        "verifier_id": (report or {}).get("verifier_id") or VERIFIER_ID,
+        "verifier_version": (report or {}).get("verifier_version") or __version__,
         "when_utc": _now_utc(),
         "exit": exit_code,
     }
@@ -732,8 +734,22 @@ def _append_line(path, line):
 
 def cmd_verify(args):
     pkg = os.path.abspath(args.path)
+    rpt = getattr(args, "report", None)
+    vid = getattr(args, "vector_id", None) or os.path.basename(pkg) or pkg
+
+    def _report_and_exit(code, report=None, error=None):
+        # A caller that asked for a report gets a line even when we could not
+        # read the input. "No line" is the one answer a harness cannot tell
+        # apart from "this vector was silently dropped" - and it is exactly what
+        # a foreign rail reported as external-output-absent when it handed us
+        # single-statement vectors instead of package directories.
+        if rpt:
+            _append_line(rpt, _report_line(vid, report, code, error=error))
+        sys.exit(code)
+
     if not os.path.isdir(pkg):
-        sys.exit(f"error: package dir not found: {pkg}")
+        print(f"error: package dir not found: {pkg}", file=sys.stderr)
+        _report_and_exit(3, error="package dir not found: %s" % pkg)
     key = _load_key(args.key) if args.key else None
     pubkey = _load_pubkey(args.pubkey) if getattr(args, "pubkey", None) else None
     # A DID pins the key as a file would -- but the key travels with the DID
@@ -742,10 +758,16 @@ def cmd_verify(args):
         if pubkey is not None:
             sys.exit("error: --did and --pubkey both pin a key; pass one of them")
         pubkey = _pubkey_from_did(args.did, getattr(args, "did_endpoint", None))
-    report = verify(pkg, key=key, pubkey=pubkey,
-                    expect_head=getattr(args, "expect_head", None),
-                    strict=getattr(args, "strict", False),
-                    state_file=getattr(args, "state_file", None))
+    try:
+        report = verify(pkg, key=key, pubkey=pubkey,
+                        expect_head=getattr(args, "expect_head", None),
+                        strict=getattr(args, "strict", False),
+                        state_file=getattr(args, "state_file", None))
+    except SystemExit:
+        raise
+    except Exception as exc:                        # a package we cannot even read
+        print(f"error: {exc}", file=sys.stderr)
+        _report_and_exit(3, error=exc)
     print(json.dumps(report, ensure_ascii=False, indent=2))
     # Warnings are not failures, so they must not go into stdout and confuse a
     # parser -- but a PASS that ignored unjudged files must be visible to a
@@ -753,9 +775,8 @@ def cmd_verify(args):
     for w in report.get("warnings", []):
         print(f"warning [{w['code']}]: {w['detail']}", file=sys.stderr)
     code = 0 if report["result"] == "PASS" else 1
-    rpt = getattr(args, "report", None)
     if rpt:
-        _append_line(rpt, _report_line(getattr(args, "vector_id", None) or pkg, report, code))
+        _append_line(rpt, _report_line(vid, report, code))
     sys.exit(code)
 
 
@@ -785,7 +806,7 @@ def cmd_verify_dir(args):
             report = verify(pkg, key=key, pubkey=pubkey,
                             strict=getattr(args, "strict", False))
         except Exception as exc:                      # a package we cannot even read
-            line = _report_line(name, None, 2, error=exc)
+            line = _report_line(name, None, 3, error=exc)
             if getattr(args, "report", None):
                 _append_line(args.report, line)
             failed.append(name)

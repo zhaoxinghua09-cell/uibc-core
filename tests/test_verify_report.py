@@ -7,8 +7,10 @@ Contracts:
    is unnamed is a claim without a claimant;
 2. `--report` appends, so a harness can collect many runs in one file and no
    earlier line is lost when a later package fails;
-3. the line is written whatever the verdict is: a failing package is exactly
-   the case a harness needs a line for;
+3. the line is written whatever happens: a failing package is exactly the case a
+   harness needs a line for, and so is an input we cannot read at all - "no
+   line" is indistinguishable from "this vector was silently dropped", which is
+   what a foreign rail reported as external-output-absent;
 4. `verify-dir` exits non-zero when any child is not PASS, and prints the count;
 5. an empty directory is a setup problem (exit 3) and writes nothing, because
    "nothing was judged" must never read as "everything passed".
@@ -94,6 +96,28 @@ def test_verify_dir_counts_and_refuses_to_flatter():
     assert any(l["result"] == "FAIL" and l["checks_failed"] for l in lines)
     passes = sum(1 for l in lines if l["result"] == "PASS")
     assert "%d/2 packages PASS" % passes in proc.stdout
+
+
+def test_an_unreadable_input_still_gets_a_line():
+    """A statement file is not a package: the verdict is ERROR, but the line exists.
+
+    This is the shape a foreign rail hands over - single statements, not package
+    directories - and "exit 2, no line" is what it named as external-output-absent.
+    """
+    out = os.path.join(tempfile.mkdtemp(prefix="rpt-"), "r.jsonl")
+    proc = _run(["verify", os.path.join(ROOT, "README.md"), "--report", out,
+                 "--vector-id", "v-not-a-package"])
+    assert proc.returncode == 3, proc.stdout + proc.stderr
+    line = _lines(out)[0]
+    assert line["vector"] == "v-not-a-package"
+    assert line["result"] == "ERROR"
+    assert line["exit"] == 3
+    assert line["checks_failed"] == []
+    assert "error" in line and line["error"]
+    # An ERROR line must still name who wrote it, or it reads as an anonymous
+    # complaint: the verifier's identity is knowable even when the input is not.
+    assert line["verifier_id"] == "uibc-core-verifier"
+    assert line["verifier_version"]
 
 
 def test_an_empty_directory_is_a_setup_problem():

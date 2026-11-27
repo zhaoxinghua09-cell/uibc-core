@@ -38,6 +38,7 @@
 .well-known/uibc-ownership.json
 .zenodo.json
 AGENTS.md
+APPEALS.md
 ARCHITECTURE.md
 ATTESTATION.md
 CHANGELOG.md
@@ -63,6 +64,7 @@ QUICKSTART.md
 README.en.md
 README.md
 REPRODUCTION-REGISTER.md
+ROLES.md
 SECURITY.md
 STATUS.md
 STRUCTURE.md
@@ -135,6 +137,12 @@ anchors/attestations/v0.5.5/CORPUS-DIGESTS.txt.ots
 anchors/attestations/v0.5.5/CORPUS-DIGESTS.txt.sig
 anchors/attestations/v0.5.5/anchor_freetsa.tsr
 anchors/attestations/v0.5.5/anchor_freetsa_ca.pem
+anchors/attestations/v0.5.8/ATTESTATION.json
+anchors/attestations/v0.5.8/CORPUS-DIGESTS.txt
+anchors/attestations/v0.5.8/CORPUS-DIGESTS.txt.ots
+anchors/attestations/v0.5.8/CORPUS-DIGESTS.txt.sig
+anchors/attestations/v0.5.8/anchor_freetsa.tsr
+anchors/attestations/v0.5.8/anchor_freetsa_ca.pem
 anchors/pins/uibc-conformance-0.4.1.sha256
 anchors/pins/uibc-conformance-0.5.0.sha256
 anchors/pins/uibc-conformance-0.5.3.sha256
@@ -151,6 +159,7 @@ anchors/pins/uibc-release-v0.4.0.json
 anchors/pins/uibc-release-v0.4.1.json
 anchors/pins/uibc-release-v0.5.0.json
 anchors/pins/uibc-release-v0.5.5.json
+anchors/pins/uibc-release-v0.5.8.json
 anchors/release-signing-key.json
 audit/20261121/README.md
 audit/20261121/p13_anchor_registry/anchor_registry.py
@@ -1261,6 +1270,7 @@ docs/aitb-example-report.json
 docs/anchors/ROOT-28a23ff.txt
 docs/anchors/ROOT-28a23ff.txt.ots
 docs/api-scope.md
+docs/appeals/README.md
 docs/assurance/ADMISSION.md
 docs/assurance/CONFORMANCE-CLARIFICATIONS.md
 docs/assurance/CONVENTION-CROSSWALK.md

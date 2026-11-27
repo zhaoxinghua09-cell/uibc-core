@@ -1344,6 +1344,7 @@ docs/spec-sources/draft-marques-asqav-compliance-receipts-01.txt
 docs/spec-sources/draft-noa-scitt-ai-agent-receipt-00.txt
 docs/spec-sources/draft-sharif-agent-audit-trail-03.txt
 docs/spec-sources/rfc3161.txt
+docs/supply-chain-pinning.md
 docs/sweep-receipt-512.json
 docs/thesis/00-topic-and-abstract.md
 docs/thesis/01-introduction.md

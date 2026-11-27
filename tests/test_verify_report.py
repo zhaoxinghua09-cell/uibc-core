@@ -114,6 +114,10 @@ def test_an_unreadable_input_still_gets_a_line():
     assert line["exit"] == 3
     assert line["checks_failed"] == []
     assert "error" in line and line["error"]
+    # An ERROR line must still name who wrote it, or it reads as an anonymous
+    # complaint: the verifier's identity is knowable even when the input is not.
+    assert line["verifier_id"] == "uibc-core-verifier"
+    assert line["verifier_version"]
 
 
 def test_an_empty_directory_is_a_setup_problem():

@@ -20,7 +20,7 @@ from .verify import verify
 from . import verify as verify_mod
 from . import lifecycle
 from . import did as did_mod
-from . import SPEC_VERSION, __version__
+from . import SPEC_VERSION, VERIFIER_ID, __version__
 
 REQUIRED = ["manifest.json", "identity.json", "lifecycle.json", "evidence/index.json"]
 
@@ -711,8 +711,10 @@ def _report_line(vector, report, exit_code, error=None):
         "vector": vector,
         "result": (report or {}).get("result") if error is None else "ERROR",
         "checks_failed": [] if error else _failed_checks(report),
-        "verifier_id": (report or {}).get("verifier_id"),
-        "verifier_version": (report or {}).get("verifier_version"),
+        # Our identity is known even when the package is not: an ERROR line that
+        # does not name the verifier reads as an anonymous complaint.
+        "verifier_id": (report or {}).get("verifier_id") or VERIFIER_ID,
+        "verifier_version": (report or {}).get("verifier_version") or __version__,
         "when_utc": _now_utc(),
         "exit": exit_code,
     }

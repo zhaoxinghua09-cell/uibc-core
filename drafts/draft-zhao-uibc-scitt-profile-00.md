@@ -44,6 +44,10 @@ consequence:
 - what a passing receipt check therefore does and does not establish (Section 6);
 - what stays outside the profile (Section 7).
 
+The two receipt profiles the working group added in November 2026 are listed in
+Section 10, not restated here: this document does not choose a tree construction,
+it only refuses to invent one.
+
 Everything it fixes is a *choice*, not a deduction from [RFC9943]. The choice is
 narrow on purpose: a profile that decided less would not remove the disagreement
 it exists to remove.
@@ -66,13 +70,32 @@ Two terms are specific to this profile:
 - **Package holder**: whoever holds the package bytes. The holder need not be the
   issuer, and need not be the TS.
 
-## 3. What the profile does not change
+## 3. What the profile does not change, and what it must decide
 
 This profile adds no header parameter, registers no value, and amends no
-procedure in [RFC9942]. A TS that implements [RFC9943] and [RFC9942] and knows
-nothing about this document will still register a statement from an issuer that
-follows it, and will return a receipt that a verifier following this document can
-check. That is the test of whether this is a profile and not a fork.
+procedure in [RFC9942]. A transparency service that implements [RFC9943] and
+[RFC9942] needs no extension to register a statement from an issuer that follows
+this document: it receives a COSE_Sign1, registers it, and returns a receipt.
+
+The one behaviour this profile leans on is not a new requirement — it is what a
+transparency service does with any statement: register the bytes it received. A
+service that re-serialises a payload breaks the commitment, and the issuer
+detects it at Section 5 step 2 rather than assuming it did not happen.
+
+The obvious objection is that Section 4.2 does define a payload, and a payload
+definition is a format. It is, and that is the point rather than an oversight.
+[RFC9942] and [RFC9943] leave the payload to the application; an application
+profile of a protocol that leaves a field open must say what goes in that field,
+or the two documents say nothing about each other. The alternative was tried
+first in this repository — a document defining a package format and asking a
+reader to infer how it relates to a transparency service — and the result was
+three readers reaching three conclusions. Fixing four members is the smallest
+decision that removes that ambiguity; anything less leaves the question of
+"registered what?" open, which is the question this document exists to answer.
+
+What stays untouched is the machinery: the receipt, its headers, the tree
+constructions, and the security considerations all remain those of [RFC9942]
+and [RFC9943], and none of them is restated or redefined here.
 
 ## 4. Registration
 
@@ -122,6 +145,12 @@ The value MUST be serialized per [RFC8785] before signing, and the same bytes
 MUST be what is registered. A TS that re-serializes the payload has broken the
 commitment; the issuer detects this by checking that the receipt's payload equals
 its own bytes (Section 5, step 2).
+
+This member set is a *decision of this profile*, not a reading of [RFC9942]:
+the RFC fixes neither members nor their names, and a different profile of the
+same receipts may fix a different set. What makes this one checkable is that it
+is stated in one place, so a disagreement about "what was registered" is a
+disagreement with this text rather than an inference from silence.
 
 ### 4.3 What travels with the package, and what does not
 

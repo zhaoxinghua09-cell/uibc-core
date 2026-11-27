@@ -52,24 +52,47 @@ def _asset_rows(tag):
     if not gh:
         raise RuntimeError("gh is not on PATH; the pin must be read from the page")
     jq = r'.assets[] | "\(.name)\t\(.size)\t\(.digest // "-")"'
+
+    def rows_from(stdout):
+        rows = []
+        for line in (stdout or "").splitlines():
+            parts = line.split("\t")
+            if len(parts) != 3 or not parts[1].strip().isdigit():
+                continue
+            rows.append((parts[0], int(parts[1]), "" if parts[2] == "-" else parts[2]))
+        return rows
+
+    last_err = ""
+    # `gh release view` first: it resolves a tag whether the release is a draft or
+    # public, and it does not make jq iterate over a null body when the tag exists
+    # but `/releases/tags/<tag>` answers 404 (drafts). Measured 2026-11-27 on run
+    # 45987858244 (v0.5.8, first tag push): both API queries ended in
+    # `cannot read v0.5.8: cannot iterate over: null` while the page held nine
+    # assets, so the release stayed unpublished for want of its own pin.
+    proc = subprocess.run([gh, "release", "view", tag, "-R", REPO,
+                           "--json", "assets,isDraft",
+                           "--jq", jq],
+                          capture_output=True, text=True, timeout=60)
+    if proc.returncode == 0:
+        rows = rows_from(proc.stdout)
+        if rows:
+            return rows
+        last_err = "no assets found for %s" % tag
+    else:
+        last_err = proc.stderr.strip()[:200]
+
     queries = [
         (_gh_releases_url(tag), jq),
         ("repos/%s/releases?per_page=100" % REPO,
          r'.[] | select(.tag_name == "%s") | .assets[] | ' % tag + jq),
     ]
-    last_err = ""
     for url, query in queries:
         proc = subprocess.run([gh, "api", url, "--jq", query],
                               capture_output=True, text=True, timeout=60)
         if proc.returncode != 0:
             last_err = proc.stderr.strip()[:200]
             continue
-        rows = []
-        for line in (proc.stdout or "").splitlines():
-            parts = line.split("\t")
-            if len(parts) != 3:
-                continue
-            rows.append((parts[0], int(parts[1]), "" if parts[2] == "-" else parts[2]))
+        rows = rows_from(proc.stdout)
         if rows:
             return rows
         last_err = "no assets found for %s" % tag

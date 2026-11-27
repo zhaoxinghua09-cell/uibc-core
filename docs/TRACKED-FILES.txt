@@ -1049,6 +1049,7 @@ dist/uibc-core-0.2.1.zip.cosign.bundle
 dist/uibc-core-0.2.1.zip.ots
 dist/uibc-core-0.2.1.zip.sha256
 dist/upload-response.json
+docs/ACCEPT-REFUSE-BOUNDARY.md
 docs/ACCOUNT-GATE.md
 docs/ACPS-SPEC-IN-HAND.md
 docs/ACPS-SPEC-MAP.md

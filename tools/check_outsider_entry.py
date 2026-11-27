@@ -10,9 +10,10 @@ reader who went looking for a `0.4.1` release asset found nothing.
 This tool holds the three things that failed together:
 
 1. the pinned archive on disk has the pinned bytes and the pinned hash;
-2. both URLs the documents print (raw and release) point at that archive, at the
-   revision the pin names, and no document sends a reader to an asset for a
-   version that has none;
+2. the raw URL the documents print points at that archive at the revision the pin
+   names; the release page is either named with a live asset or declared absent, no
+   document prints a release URL that 404s, and no document sends a reader to an asset
+   for a version that has none;
 3. with `--probe`, the URL answers anonymously and serves exactly the pinned bytes.
 
 Usage:
@@ -45,6 +46,13 @@ RAW_URL = ("https://github.com/%s/raw/main/conformance/uibc-conformance-%s.zip"
 RELEASE_URL = ("https://github.com/%s/releases/download/v%s/uibc-conformance-%s.zip"
                % (REPO_SLUG, VERSION, VERSION))
 DOCS = ("README.md", os.path.join("docs", "AUDIT-KIT.md"))
+# 2026-11-27: the v0.5.6 release page could not be published. The tag was frozen by the
+# repository's `release-tags-immutable` rule set, so `GET /releases/tags/v0.5.6` answers
+# 404 and the uploaded copy sits in a draft that cannot be turned into a release. A
+# document that says this, and stops printing the dead URL, is telling the truth: the
+# raw path is then the only documented source. Printing the dead URL is still refused,
+# because a reader who follows it gets 404.
+RELEASE_ABSENT = "release page does not carry"
 # A release asset named for a different version is a different corpus. Until 2026-11-20
 # the only such asset was 0.4.0, and pointing a reader at it would hand them 30 cases
 # while the page promised 36.
@@ -108,9 +116,13 @@ def check_docs(pin):
             reasons.append("%s does not print the raw download URL" % rel)
         else:
             shown += 1
-        # Since 2026-11-20 the release page carries the same archive. Saying so is part
-        # of the entry point being findable; saying it must not replace the raw path.
+        # Until 2026-11-20 the release URL was missing and the reader had nowhere to fetch
+        # the corpus. From 2026-11-27 the v0.5.6 release page cannot exist, so a document
+        # may either name the asset or state that the page does not carry it -- but it must
+        # say one of the two, and it must never print a release URL that answers 404.
         if RELEASE_URL in text:
+            reasons.append("%s prints a release URL that does not resolve for this version" % rel)
+        if RELEASE_ABSENT in text:
             releases_named += 1
         if pin["sha256"][:12] not in text:
             reasons.append("%s does not print the pinned hash prefix %s" % (rel, pin["sha256"][:12]))
@@ -121,7 +133,8 @@ def check_docs(pin):
     if shown < len(DOCS):
         reasons.append("the raw URL appears in %d of %d documents" % (shown, len(DOCS)))
     if releases_named == 0:
-        reasons.append("no document names the release asset that now carries this archive")
+        reasons.append("no document either names the release asset for this archive or "
+                       "states that the release page does not carry it")
     return reasons
 
 
@@ -210,8 +223,8 @@ def main(argv=None):
         for reason in reasons:
             print("NOT ACCEPTABLE - %s" % reason)
         return 1
-    print("ACCEPTABLE - both documented URLs are present, the archive matches the pin, "
-          "and no document points at another version's asset")
+    print("ACCEPTABLE - the raw URL is printed, the archive matches the pin, and the "
+          "release page is either named with a live asset or declared absent")
     return 0
 
 

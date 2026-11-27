@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/zhaoxinghua09-cell/uibc-core/interop/verify-report.schema.json",
+  "title": "UIBC verify report line",
+  "description": "One line of a JSON Lines file produced by `uibc_core.pyz verify --report`. The line describes one vector and the verifier that judged it. It deliberately carries no aggregate: a harness that wants a score computes its own, because a score is a claim about the harness, not about the verifier.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "vector", "result", "checks_failed", "verifier_id", "verifier_version", "when_utc", "exit"],
+  "properties": {
+    "format": {"const": "uibc-verify-report/1"},
+    "vector": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The caller's name for the package, from --vector-id. Defaults to the package path, so a consumer should not parse it."
+    },
+    "result": {
+      "enum": ["PASS", "FAIL", "INCONCLUSIVE", "ERROR"],
+      "description": "INCONCLUSIVE means the verifier ran but could not reach a verdict (usually an unsigned package stopping at S6). ERROR means the verifier could not read the input at all. Neither is a pass."
+    },
+    "checks_failed": {
+      "type": "array",
+      "items": {"type": "string", "pattern": "^S[0-9]+$"},
+      "description": "The check ids that reported FAIL. Empty when the verdict is PASS, INCONCLUSIVE or ERROR."
+    },
+    "verifier_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Who produced this line. A report whose producer is not named is a claim without a claimant."
+    },
+    "verifier_version": {"type": "string", "minLength": 1},
+    "when_utc": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+    },
+    "exit": {
+      "enum": [0, 1, 2, 3],
+      "description": "0 PASS, 1 judged and not PASS, 3 the input could not be read. A consumer that only wants pass/fail reads this, not `result`."
+    },
+    "error": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 300,
+      "description": "The reason, present exactly when result is ERROR."
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"result": {"const": "ERROR"}}, "required": ["result"]},
+      "then": {"required": ["error"]},
+      "else": {"not": {"required": ["error"]}}
+    },
+    {
+      "if": {"properties": {"result": {"const": "ERROR"}}, "required": ["result"]},
+      "then": {"properties": {"exit": {"const": 3}, "checks_failed": {"maxItems": 0}}}
+    },
+    {
+      "if": {"properties": {"result": {"enum": ["PASS", "INCONCLUSIVE"]}}, "required": ["result"]},
+      "then": {"properties": {"checks_failed": {"maxItems": 0}}}
+    },
+    {
+      "if": {"properties": {"result": {"const": "FAIL"}}, "required": ["result"]},
+      "then": {"properties": {"checks_failed": {"minItems": 1}}, "description": "a FAIL line with no failing check names nothing"}
+    }
+  ]
+}

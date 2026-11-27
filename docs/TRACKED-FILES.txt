@@ -1835,6 +1835,7 @@ independent_verifier/iverify.py
 index.html
 interop/CONSUMERS.json
 interop/README.md
+interop/scitt-cose-report.schema.json
 interop/verify-report.schema.json
 lgd-core/COMPLIANCE.md
 lgd-core/EXAMPLES/example-medical-ai-agent.manifest.yaml
@@ -2100,6 +2101,7 @@ tests/test_run_registry.py
 tests/test_run_script_preflight.py
 tests/test_runtime.py
 tests/test_same_ruler_svg.py
+tests/test_scitt_cose.py
 tests/test_scitt_crosswalk.py
 tests/test_seal_v03.py
 tests/test_semantics_freeze.py
@@ -2513,6 +2515,7 @@ uibc_core/phantom.py
 uibc_core/policy.py
 uibc_core/records.py
 uibc_core/runtime.py
+uibc_core/scitt_cose.py
 uibc_core/signing.py
 uibc_core/sm2.py
 uibc_core/status_list.py

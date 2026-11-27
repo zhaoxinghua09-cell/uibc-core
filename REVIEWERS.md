@@ -4,11 +4,22 @@ This repository is a **local draft plus a verifier**, not a standard and not a
 submission. Everything below can be checked from the bytes in this repository;
 nothing below asks you to trust a summary.
 
+Two documents live here, and which one you read first depends on what you are:
+`drafts/draft-zhao-uibc-scitt-profile-00.md` is the **standards-facing** one —
+it defines what an agent evidence package registers in a SCITT transparency service
+(RFC 9943/9942) and how a receipt is read, and its normative references are
+published RFCs only. `drafts/draft-zhao-uibc-evidence-chain-01.md` is the
+**implementation-facing** one — the package layout and the 19 checks that produce
+the bytes the profile registers. The first exists because the second was read as
+"a new format"; if you only have time for one, read the profile and then its
+Appendix A.
+
 ## 1. Read these four files, in this order
 
 | # | File | Why |
 |---|---|---|
-| 1 | `drafts/draft-zhao-uibc-evidence-chain-01.md` | The claim. §4.1 states what each object commits and what it does not. Read that table first; it is the part most drafts leave implicit. |
+| 1 | `drafts/draft-zhao-uibc-scitt-profile-00.md` | The claim, in the vocabulary of the published standards. §4.2 fixes the four registered members; §6 is the one sentence this profile exists to make unambiguous. |
+| 2 | `drafts/draft-zhao-uibc-evidence-chain-01.md` | The package it registers. §4.1 states what each object commits and what it does not — the part most drafts leave implicit. |
 | 2 | `REPRODUCTION.md` | How to get the bytes without corrupting them, and the one extraction trap that makes a correct verifier look broken on Windows. |
 | 3 | `conformance/oracle/README.md` | What the 32 cases are, and why a rejection-only corpus proves nothing (§5.1 of the draft). |
 | 4 | `drafts/…-01.md` Appendix F | The conformance tiers are a **proposal**. If a sentence in the body leans on them, that is a defect; report it. |

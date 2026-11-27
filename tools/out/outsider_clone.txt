@@ -1,0 +1,6 @@
+2026-11-27 anonymous-clone probe (no credential helper, GIT_TERMINAL_PROMPT=0)
+git ls-remote --heads https://github.com/zhaoxinghua09-cell/uibc-core.git -> OK, refs returned
+GET .../info/refs?service=git-upload-pack -> HTTP 200, 44873 bytes
+GET https://github.com/zhaoxinghua09-cell/uibc-core (HTML view) -> connection timeout 21s from this network
+GET https://api.github.com/repos/zhaoxinghua09-cell/uibc-core -> 403 (unauthenticated rate limit)
+conclusion: clone works without credentials; HTML/API views are network/rate-limit artefacts, not repository access limits

@@ -47,7 +47,7 @@ URLS = [
     ("ScopeGate", "https://scopegate.dev/"),
     ("McpVanguard (PyPI)", "https://pypi.org/project/mcp-vanguard/"),
     ("agentgateway", "https://agentgateway.dev/"),
-    ("uibc-core 公开仓", "https://github.com/zhaoxinghua09-cell/uibc-core"),
+    ("uibc-core 公开仓", "https://api.github.com/repos/zhaoxinghua09-cell/uibc-core"),
     # --- 第五轮（2026-11-17 下午）新增 ---
     ("AAT 审计轨迹 -03", "https://www.ietf.org/archive/id/draft-sharif-agent-audit-trail-03.txt"),
     ("AIVS -01", "https://www.ietf.org/archive/id/draft-stone-aivs-01.html"),
@@ -69,6 +69,20 @@ URLS = [
     ("ISO/IEC 24970 标准页", "https://www.iso.org/standard/88723.html"),
     ("IMDRF PCCP N90", "https://www.imdrf.org/sites/default/files/2026-08/IMDRF%20SaMD%20WG%20N90%20FINAL%20Essential%20Principles%20and%20Content%20PCCPs.pdf"),
     ("AER-1 公开语料", "https://zambo.dev/aer1/corpus.json"),
+    # Added 2026-11-27, when the survey found these are the documents the draft
+    # now leans on: the receipts RFC, and the two receipt profiles the WG added
+    # in November. A citation the draft uses but the probe never touches is a
+    # citation nobody checked.
+    ("RFC 9942 (COSE Receipts)", "https://www.rfc-editor.org/rfc/rfc9942.html"),
+    ("CCF 收据档位 -06", "https://datatracker.ietf.org/doc/html/draft-ietf-scitt-receipts-ccf-profile-06"),
+    ("MMR 收据档位 -00", "https://datatracker.ietf.org/doc/html/draft-ietf-scitt-receipts-mmr-profile-00"),
+    ("gruszka 语句标识 -05", "https://datatracker.ietf.org/doc/html/draft-gruszka-scitt-statement-identification-05"),
+    ("nestorov P10 欠定 -03", "https://datatracker.ietf.org/doc/html/draft-nestorov-scitt-p10-underdetermination-03"),
+    # The profile's normative set. Its whole argument is "these are published and
+    # I add nothing to them", so each of them has to be reachable from a cold start.
+    ("RFC 9943 (SCITT Architecture)", "https://www.rfc-editor.org/rfc/rfc9943.html"),
+    ("RFC 8785 (JCS)", "https://www.rfc-editor.org/rfc/rfc8785.html"),
+    ("RFC 9162 (Certificate Transparency 2.0)", "https://www.rfc-editor.org/rfc/rfc9162.html"),
 ]
 
 

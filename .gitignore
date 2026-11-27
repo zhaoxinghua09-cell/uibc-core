@@ -16,3 +16,5 @@ tools/out/rekor_ec_key.pem
 
 # built outside-kit archives
 dist/
+
+drafts/_stray_*/

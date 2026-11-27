@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/zhaoxinghua09-cell/uibc-core/interop/scitt-cose-report.schema.json",
+  "title": "UIBC SCITT/COSE verdict line",
+  "description": "One line of the JSON Lines file produced by `uibc verify-cose`. It describes what the verifier decided about one Transparent Statement under the aee-scitt-cose/v0.1 profile, and why. It is a second shape rather than the package report, because that report names failing checks as S-ids and this profile refuses on named faults (a missing inclusion proof, a deprecated algorithm) that no S-number describes.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "vector", "verdict", "codes", "notes", "verifier_id", "verifier_version", "when_utc", "exit"],
+  "properties": {
+    "format": {"const": "uibc-scitt-cose-report/1"},
+    "vector": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The corpus member's id, or the file name when judging one statement."
+    },
+    "verdict": {
+      "enum": ["valid", "invalid"],
+      "description": "valid = the statement satisfied every stage the profile requires; invalid = it was refused, and `codes` says on what ground. A verifier that cannot read the bytes also answers invalid, with code `unreadable`, because a reader that reports nothing has not reported a verdict."
+    },
+    "codes": {
+      "type": "array",
+      "items": {"type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"},
+      "description": "Refusal codes, in the order the profile's stages found them. Empty exactly when the verdict is valid."
+    },
+    "notes": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "What the verifier observed: the reason behind each code, and the observer position a relying party needs (vantage, layer, whether the observed party could reach the recorder)."
+    },
+    "conforms_to_expected": {
+      "type": ["boolean", "null"],
+      "description": "Whether this verdict conforms to what the corpus member declares. Null when the caller did not supply a corpus member, which is the case for a single vector file."
+    },
+    "verifier_id": {"type": "string", "minLength": 1},
+    "verifier_version": {"type": "string", "minLength": 1},
+    "when_utc": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"},
+    "exit": {
+      "enum": [0, 1],
+      "description": "0 valid, 1 refused. There is no 3: an unreadable statement is a refusal with code `unreadable`, not a crash."
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"verdict": {"const": "invalid"}}, "required": ["verdict"]},
+      "then": {"properties": {"codes": {"minItems": 1}, "exit": {"const": 1}}},
+      "else": {"properties": {"codes": {"maxItems": 0}, "exit": {"const": 0}}}
+    }
+  ]
+}

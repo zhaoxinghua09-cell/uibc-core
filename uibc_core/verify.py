@@ -483,18 +483,49 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
     # Files the format itself places under evidence/ and resolves by their own
     # check: the tree, the receipt chain, the anchor set, the policy artefacts.
     _EVIDENCE_STRUCTURAL = {"evidence/merkle.json", "evidence/chain.json",
-                            "evidence/anchors.json", "evidence/policies.json"}
+                            "evidence/anchors.json", "evidence/policies.json",
+                            # owned by S16 (external RFC 3161 timestamp): the
+                            # pointer to the token, not evidence in its own right
+                            "evidence/external_anchor.json"}
+    # The package lock (uibc_core/locking.py) is a zero-byte-ish advisory file
+    # the builder creates next to the index. It is not evidence and never will
+    # be: excluding it by exact name, not by "any dotfile", so a file renamed to
+    # .payload cannot ride the same exemption (see corpus_erm E4 dotfile case).
+    _EVIDENCE_NOT_EVIDENCE = {"evidence/.lock"}
     uncommitted = []
     # Computed in BOTH modes, so the lenient run can name what it is letting
     # through. Proof discipline: a verifier that says PASS while ignoring files
     # it could have judged must say which files those are (see warnings below).
     _uncommitted_all = [u for u in evidence_extras
                         if u not in _EVIDENCE_STRUCTURAL
+                        and u not in _EVIDENCE_NOT_EVIDENCE
                         and not u.startswith("evidence/policies/")]
-    if strict:
+    # Format v2: the producer declares the format version in the manifest, and
+    # from v2 on "declared by the index, or structural by the format" is the only
+    # legal content of evidence/. Absent or 1 keeps v1 behaviour (note + warning),
+    # because tightening a v1 package retroactively would fail packages that were
+    # correct when they were sealed. An unknown version is not judged with v1
+    # rules: a verifier that applies yesterday's rules to tomorrow's package
+    # reports PASS on fields it never read (the same class of error as the
+    # min_verifier_version floor below).
+    _fmt_raw = manifest.get("format_version") if isinstance(manifest, dict) else None
+    try:
+        _fmt = 1 if _fmt_raw is None else int(_fmt_raw)
+    except (TypeError, ValueError):
+        _fmt = None
+    _fmt_known = _fmt in (1, 2)
+    _fmt_problems = []
+    if not _fmt_known:
+        _fmt_problems.append(f"manifest.format_version={_fmt_raw!r} is not a version "
+                             f"this verifier implements (known: 1, 2) - it cannot "
+                             f"claim this package has no undeclared evidence")
+    evidence_complete = bool(strict) or _fmt == 2
+    uncommitted = []
+    if evidence_complete:
         uncommitted = list(_uncommitted_all)
     aux_extras = [u for u in nested_extras if not u.startswith("evidence/")]
     s1_detail = []
+    s1_detail.extend(_fmt_problems)
     if embedded_problems:
         s1_detail.extend(embedded_problems)
     if missing:
@@ -505,13 +536,14 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
     if uncommitted:
         s1_detail.append(f"uncommitted files under evidence/: {sorted(uncommitted)}")
     elif evidence_extras:
-        if strict:
+        if evidence_complete:
             s1_detail.append(f"structural members under evidence/: "
                              f"{sorted(evidence_extras)} (exempt by format)")
         else:
-            s1_detail.append(f"note (lenient mode): {sorted(evidence_extras)} under "
+            s1_detail.append(f"note (format v1, lenient): {sorted(evidence_extras)} under "
                              f"evidence/ are structural or uncommitted; pass --strict "
-                             f"to fail uncommitted ones")
+                             f"to fail uncommitted ones (format v2 packages fail them "
+                             f"by default)")
     if aux_extras:
         s1_detail.append(f"note: {sorted(aux_extras)} outside evidence/, not covered "
                          f"by the evidence root")
@@ -528,7 +560,7 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
         s1_detail.append(f"this package declares min_verifier_version={floor.strip()!r}; "
                          f"verifier is {__version__}, below the floor - fields it "
                          f"carries cannot be judged here")
-    if _floor_ok:
+    if _floor_ok and _fmt_known:
         record("S1", "package structure",
                not missing and not root_extras and not uncommitted
                and not embedded_problems,
@@ -798,6 +830,17 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
                 continue
             if not _mk.verify_inclusion(leaves[i], i, len(leaves), pf, root):
                 s13_problems.append("inclusion proof for %r does not verify" % path)
+        # Proofs are a claim of coverage, not a sample. Before this, a package
+        # that dropped two proofs still passed: S13 verified the proofs it was
+        # handed and never asked whether every leaf had one, so "size 5, root X,
+        # 3 proofs" read as a full tree. Measured 2026-11-27 (corpus_erm E2
+        # root-untouched: two proofs deleted, size and root left describing the
+        # full set - accepted in open and under a pinned key).
+        proven = {pr.get("path") for pr in proofs}
+        unproven = [e.get("path") for e in order if e.get("path") not in proven]
+        if unproven:
+            s13_problems.append("%d evidence file(s) carry no inclusion proof: %s"
+                                % (len(unproven), unproven[:4]))
         record("S13", "merkle inclusion proofs", not s13_problems,
                "; ".join(s13_problems[:4]) if s13_problems else
                "root %s... over %d leaves; %d inclusion proofs verified"
@@ -1292,15 +1335,18 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
         "key_custody": identity.get("key_custody"),
         "subject": manifest.get("agent_id"),
         # A PASS that ignored files it could have judged must not be silent.
-        # Lenient mode keeps PASS for compatibility (tightening S1 broke every
-        # package carrying structural members), but it now names the files it
-        # let through, in a field a caller can gate on. --strict turns them
-        # into a FAIL (ERM family M06, measured 2026-11-27).
-        "warnings": ([] if strict or not _uncommitted_all else
+        # v1 packages keep PASS for compatibility (tightening S1 retroactively
+        # broke every package carrying structural members), but the PASS names
+        # the files it let through, in a field a caller can gate on. --strict,
+        # or a package sealed at format v2, turns them into a FAIL (ERM family
+        # M06, measured 2026-11-27; v2 declared by the producer in this tree; release 0.5.6).
+        "format_version": _fmt,
+        "warnings": ([] if evidence_complete or not _uncommitted_all else
                      [{"code": "S1_UNCOMMITTED_EVIDENCE",
                        "detail": "files under evidence/ are not declared by the "
-                                 f"index: {sorted(_uncommitted_all)}; pass --strict "
-                                 f"to fail them"}]),
+                                 f"index: {sorted(_uncommitted_all)}; this package is "
+                                 f"format v1, so the verdict is a note - re-seal at "
+                                 f"format v2, or pass --strict, to fail them"}]),
         "checks": checks,
         "root_algorithm": "sha256(canonical-json(sorted(content_hashes))) v0.1-provisional",
         "assurance": assurance,

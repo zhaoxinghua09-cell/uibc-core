@@ -6,6 +6,7 @@
   "evidence_count": 2,
   "evidence_index_digest": "sha256:35732501d03c763407461932134e39370f551ec731392a32e27e267b134e0740",
   "evidence_root": "ad48bda4312bb3ac2f2426654c428dd529f0d7feed11b3f5102cca7800df40cf",
+  "format_version": 2,
   "freshness_head": {
     "sequence": 3,
     "subject": "oracle"

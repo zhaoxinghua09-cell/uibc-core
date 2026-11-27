@@ -59,6 +59,13 @@ graft crosswalk
 # which is exactly why that job exists.
 graft vectors
 
+# Eighth pass, 2026-11-27. benchmarks/corpus/ arrived with the 500-case corpus and the
+# ERM companion set, and only `benchmark/` (singular, the older 21-case bench) was
+# grafted. tests/test_corpus_erm.py opens benchmarks/corpus/mutation-corpus-erm.json,
+# so the sdist carried the test and not the corpus it reads -- the same failure class
+# as schemas/, crosswalk/ and vectors/ above. Caught by sdist-self-check.
+graft benchmarks
+
 # Built output and byte-code never belong in a source distribution.
 prune tools/out
 prune build

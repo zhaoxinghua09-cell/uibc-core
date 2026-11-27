@@ -48,9 +48,37 @@ uibc verify <pkg> --strict
 
 四种情形由 `tests/test_strict_mode.py`（5 项）逐一守住，其中一项跑真实 CLI，确认退出码为 1。
 
+## 格式 v2：新包默认就是严格（发版号 0.5.6；当前树的版本串仍是 0.5.5，因为 0.5.6 的产物还不存在）
+
+严格模式只解决"能不能判"，不解决"默认判不判"。默认宽松这件事本身仍是一个可测量弱点：ERM 用同一把尺子打本仓，`M06` 在三档默认模式下都拿到 PASS，而同一族对 proofbundle / proofline 都是 FAIL。本树把它落到格式版本上：
+
+- 生产者（`uibc submit`）在 `manifest.json` 写 `format_version: 2`；
+- 验证器读到 **2**，就按严格规则判 `evidence/` 下的未声明文件，**不需要 `--strict`**；
+- 读到**缺省或 1**，保持旧行为（note + `warnings` 点名），因为那些包封的时候规则就是那样，不能事后追溯收紧；
+- 读到**其他数字**，S1 判 `INCONCLUSIVE`——用 v1 规则去判一个自己没读过的格式，和低于 `min_verifier_version` 却照发 PASS 是同一类错误。
+
+`--strict` 保留，含义不变：对**任何**包强制严格，包括 v1 包。
+
+| 场景 | v1 包（缺省） | v2 包 | `--strict`（任意版本） |
+|---|---|---|---|
+| 干净包 | S1 PASS | S1 PASS | S1 PASS |
+| 干净包 + `evidence/extra.txt` | S1 PASS + `warnings` 点名 | **S1 FAIL** | **S1 FAIL** |
+| 带 Merkle 树与收据链 | S1 PASS | S1 PASS（结构件豁免） | S1 PASS |
+| `format_version: 3` | — | S1 `INCONCLUSIVE` | S1 `INCONCLUSIVE` |
+
+迁移：v1 包若要获得"默认严判"的保护，用 0.5.6 重新 `submit` 封一次即可，内容不必改；不重封的包继续按 v1 规则被正确判定，只是 `warnings` 会一直点名它放过的文件。
+
+两处细节必须写在这里，因为它们各自都是一个口子：
+
+- **`evidence/.lock` 不算证据**：`uibc_core/locking.py` 会在 `evidence/` 下建一个锁文件。v2 第一版把每个未声明文件都判死，结果**本仓自己刚封的包全 FAIL**。豁免按**名字**做（`_EVIDENCE_NOT_EVIDENCE`），不按"点开头"：`evidence/.payload` 仍然 FAIL，负控写在 `tests/test_strict_mode.py`。
+- **结构件豁免不等于"树可以只带部分证明"**：`evidence/merkle.json` 的 `proofs` 必须覆盖每一个索引文件，缺一条 S13 就判 FAIL（本树起，发版后即 0.5.6）。此前 `size 5 / root X / 3 个 proof` 会被读成一棵完整的树——由 `tools/corpus_erm.py` 的 `E2-root-untouched` 打出来的。
+
+`tests/test_strict_mode.py` 15 项守住上表四行与上面两条负控。
+
 ## 论文里怎么写
 
 - 默认宽松不是疏漏，是**向前兼容**的取舍：收紧会令既有包全部失效。
+- v2 之后这条取舍由**生产者声明**承担：新包默认严判，旧包按旧规则判，两句话都能被同一个验证器说清，因此可以写成「未声明证据在 v2 包中默认 FAIL，在 v1 包中为点名告警」。
 - 严格模式让「未声明文件」在**新包**上成为可判定的违规，因此可以这样写一句：「本实现提供严格模式，对 `evidence/` 下未声明文件判 FAIL，并豁免格式自身的结构成员（共 5 类）」。
 - 不能写成「已完全覆盖」：默认模式仍然只记 note，这句话必须带上模式限定。
 

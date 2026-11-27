@@ -54,7 +54,7 @@ Three problems recur when an agent's behaviour must be shown to a third party:
    judges it, so a passing verdict carries no information.
 
 This document answers each: a byte-level package (Section 3, 4), an
-an out-of-band head (Appendix F) and an anchor commitment (Section 8), and a
+out-of-band head (Section 2) and an anchor commitment (Section 8), and a
 verification procedure whose
 outcomes include *inconclusive* rather than only pass/fail (Section 5).
 
@@ -73,11 +73,12 @@ described in [RFC2119] and [RFC8174].
   verification procedure; it is a local working name, not a registered
   vocabulary term, and it expands to nothing.
 - **Outcome**: `PASS`, `FAIL`, or `INCONCLUSIVE`, per check.
-- **Head**: the signed statement of Appendix F over the root, the tree size, the
-  signer's `role` (`owner` or `witness`, and the two roles must use distinct
-  keys), and optionally the verifier identity `verifier_id` (Section 2). A head
-  is not a package
-  and does not carry evidence; the root is one of its members, not the whole.
+- **Head**: the signed statement defined in Section 2 — the root, the tree size,
+  the signer's `role` (`owner` or `witness`, and the two roles must use distinct
+  keys), and optionally the verifier identity `verifier_id`. A head is not a
+  package and does not carry evidence; the root is one of its members, not the
+  whole. Appendix F states the tiers that range over heads; it does not define
+  the statement, so the two sections do not point at each other.
 - **Tree size**: the number of leaves a head commits to; monotone non-decreasing
   across successive heads (Appendix F).
 - **Witness**: an independent key holder that co-signs a head; a witness is
@@ -237,8 +238,13 @@ Two invocation modes differ only in what the reader supplies out of band:
 - **strict**: the reader supplies the owner key (and a head where one is
   expected). A missing or non-verifying seal is `FAIL`, because in this mode the
   question asked is "is this the package that key signed", and an absent seal
-  answers it in the negative. Strict also fails uncommitted files under
-  `evidence/` (S1), which open mode reports as a note.
+  answers it in the negative. Strict also fails a file under `evidence/` that no
+  index entry declares (S1); open mode reports the same file as a note. The word
+  "uncommitted" is not used for this, because it has a second meaning here — the
+  anchor claim is uncommitted by the root (Section 3) — and one word for two
+  conditions is how a reader concludes that strict fails every package that
+  carries `evidence/anchors.json`. It does not: `anchors.json` is a declared
+  structural member, and strict fails *undeclared* files only.
 
 | ID | Check | Notes |
 |---|---|---|
@@ -366,7 +372,8 @@ implementation choices rather than specification choices:
   rule; any other reading produces a different, equally defensible answer for
   the same bytes.
 - **`evidence/index.json` admits exactly `entries` and `schema`.** The metadata
-  digest covers each entry's path, type, note and action digest, so a member
+  digest covers each entry's `path`, `media_type`, `content_hash`, `recorded_at`
+  and `action_type`, so a member
   added at the top level of the index sits outside every check: measured, a
   package with an extra `generated_at` member verified PASS before this rule
   existed. An undeclared member is now refused (S7), because a reader that
@@ -376,7 +383,11 @@ Interoperability with AER-1 receipts is defined by an explicit mapping
 (Appendix A), not by similarity of intent. The reference implementation
 demonstrates both directions: emitting AER-1 receipts that the AER-1
 publisher's own runner accepts, and judging external AER-1 receipts
-with 27 accepted (21 valid and 6 anchored) and 36 rejected, out of 64. The accept side is the control: by
+with 28 accepted (21 valid, 6 anchored, and 1 invalid-profile receipt that this
+document accepts and records a declared granularity difference for) and 36
+rejected, out of 64. That last case is why the count is 28 and not 27: it is
+listed as a rejection in the AER-1 runner's own inventory and as an acceptance
+here, and the difference is the finding, not a rounding error. The accept side is the control: by
 Appendix E.1 a rejection count alone proves nothing, and the 28 documents from two
 unrelated protocols that were all rejected are therefore not quoted as interop
 evidence — they appear only in the corpus report, where the denominator is stated.
@@ -509,16 +520,23 @@ such a field and is rejected (Appendix G.2, rule 4); an unknown
 
 ## Implementation Status
 
-_As of 2026-11-27, repository `bf91c81`, reference verifier 0.5.5._
+_As of 2026-11-27, at the branch head pushed to the public repository (the commit
+is recorded in the gate file rather than here, because a document that names its
+own commit is wrong the moment it is committed); reference verifier 0.5.5._
 
 - Implemented and re-runnable: the 19-check procedure, the 32-case corpus with a
   validator, anchor handling (`evidence-merkle` today; OpenTimestamps + Nostr
-  exist as tools, and `pending` vs `anchored` is proposed in Appendix G but not
-  read by the verifier),
-  the differential report with two denominators, the per-axis report
-  (`tools/axis_report.py`), the verification bundle (`--bundle-out`), the reader
-  trust ladder (`--trustlist`), and head co-signature by two distinct keys
+  exist as tools), the differential report with two denominators, the per-axis
+  report (`tools/axis_report.py`), the verification bundle (`--bundle-out`), the
+  reader trust ladder (`--trustlist`), and head co-signature by two distinct keys
   (`tools/cosign_head.py`).
+- **Proposed, not implemented: Appendix G.** `pending` vs `anchored`, the
+  `absent_reason` values, and the four rejections in Appendix G.2 are rules this
+  document states and the verifier does **not** read today; an anchor record in
+  that shape is carried and reported, not judged. Section 8.2 says what a
+  verifier must do once the rules are implemented; it is a requirement on future
+  behaviour, and this paragraph is where the gap is admitted. Reading the two
+  together, the rule is not in force yet.
 - Prototyped outside the published CLI: nothing above; all of it is behind a flag
   or a tool that leaves the default verdict unchanged. None of it carries its own
   vectors yet, so no conformance claim is made for the new flags.
@@ -642,9 +660,12 @@ The reference implementation reports this in `uibc-aer1-corpus/1`
 (`tools/aer1_corpus_matrix.py`). Measured 2026-11-19 against AER-1's
 `base/test-vectors` at kit 1.5.7: 64 receipts across four directories — 21 valid,
 36 invalid, 6 anchored and 1 profile case — with four of four directories in
-agreement. Our verdicts: 27 accepted (21 valid + 6 anchored), 36 rejected, and
-the single `invalid-profile` receipt accepted with the difference recorded as
-granularity, not disagreement.
+agreement. Our verdicts: 28 accepted (21 valid + 6 anchored + the single
+`invalid-profile` receipt), 36 rejected, of 64 total. That receipt is the one
+case where our reading and the runner's inventory differ; it is counted as an
+acceptance here and as a rejection there, and the difference is recorded as
+granularity, not as disagreement. A reader who adds 21 + 6 and expects the accept
+side to be 27 is reading the earlier text, which omitted this case.
 
 This is a bounded claim on purpose. Judging another organisation's corpus
 does not make that organisation a witness to ours; Section 8 covers external

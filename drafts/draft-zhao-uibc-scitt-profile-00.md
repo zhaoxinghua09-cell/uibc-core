@@ -307,6 +307,19 @@ their 2026-11 revisions:
 `draft-ietf-scitt-receipts-ccf-profile-06`,
 `draft-ietf-scitt-receipts-mmr-profile-00`.
 
+The two numbers are not a mistake: `-ccf-profile` is a document that has been
+iterated since 2023 and stands at revision 06, while `-mmr-profile` is a new
+document whose first revision is 00. Both were read in the same month, which is
+why they appear together with different numbers.
+
+Neither is normative here, and that has a consequence for how far this profile
+can go: the shape of the inclusion proof (`vdp`) is defined by the verifiable-data-structure
+profile a service applies, not by [RFC9942]. A verifier that checked a `vdp` without
+first choosing one of those profiles would be guessing at its encoding. This
+document therefore stops at the step-3 boundary and says so, rather than defining
+a `vdp` of its own — which would be exactly the "new format" this profile exists
+to avoid.
+
 ## Appendix A. Mapping to the companion package document
 
 | This profile | Companion document |
@@ -344,7 +357,11 @@ Three limits of that code, stated rather than implied by it passing:
 
 - **It never returns `OK`.** There is no hash-tree implementation here, so the
   inclusion proof (`vdp`) is not evaluated and the best outcome is
-  `PARTIAL_INCLUSION_UNCHECKED`. That is a limit of the code, not of the profile.
+  `PARTIAL_INCLUSION_UNCHECKED`. That is a limit of the code, not of the profile —
+  and it is also the honest boundary: `vdp` is shaped by the verifiable-data-structure
+  profile a service applies (Section 10), so checking it without choosing one would
+  mean inventing an encoding. A verifier that reports `OK` while guessing at `vdp`
+  is worse than one that reports `PARTIAL`.
 - **`vds` values are supplied by the caller.** The registry entries that would pin
   them are still `TBD`, so supporting a tree is a decision a verifier makes and
   states, not something this document can hand it.

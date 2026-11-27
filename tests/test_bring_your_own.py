@@ -116,3 +116,13 @@ def test_verifier_can_be_taken_from_the_archive(kit):
     receipt = json.load(open(out, encoding="utf-8"))
     assert receipt["passed"] == receipt["cases"] == 3
     assert receipt["run_by"] is None, "an anonymous run must not invent an author"
+
+
+def test_a_blank_run_by_is_not_a_signature(kit):
+    """\"\" must be recorded as null: an empty name is not an author."""
+    work, expect = _subset(kit, ["01"])
+    out = os.path.join(work, "r.json")
+    proc = _run(work, expect, out=out, pyz=os.path.join(kit, "uibc_core.pyz"), run_by="   ")
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    receipt = json.load(open(out, encoding="utf-8"))
+    assert receipt["run_by"] is None

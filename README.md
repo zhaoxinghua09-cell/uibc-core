@@ -184,6 +184,7 @@ other exists.
 
 
 > **在线门户 Portal**：https://zhaoxinghua09-cell.github.io/lgd-hub/ — LGD 生态全景（理论 / 参考实现 / 技能全库），一跳即达。
+> **生态索引 Ecosystem index**：https://github.com/zhaoxinghua09-cell/lgd-ecosystem-hub — 理论 / 参考实现 / 技能三块各一条链接，并把「不主张什么」写在首页。
 
 
 > **获取仓库 / Get the repo**：`git clone https://github.com/zhaoxinghua09-cell/uibc-core.git`（若 clone 失败，请点仓库页 **Code → Download ZIP** 获取源码包）。

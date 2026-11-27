@@ -1,6 +1,6 @@
 # 五方护照对照：实测表
 
-生成时间：2026-11-27T03:36:27+00:00　·　JSON sha256[:16] `46debc68575e271e`
+生成时间：2026-11-27T03:36:27+00:00　·　JSON sha256[:16] `e329d6d9f841fe39`
 
 **这张表此前没有人做过。** 原因是五套规范里只有一家提供可安装的第三方实现。
 
@@ -8,13 +8,13 @@
 
 | 体系 | C1 | C2 | C3 | C4 | C5 | C6 |
 |---|---|---|---|---|---|---|
-| APS（IETF） | ● | ● | ● | ◐ | ◐ | ● |
+| APS（IETF） | ● | ● | ● | ◐ | ● | ● |
 | AIAgentMark | ● | ● | ● | ◐ | ○ | ✕ |
 | APIS v2.1 | ○ | ◐ | ◐ | ○ | ◐ | ✕ |
 | AIP·singla | ○ | ◐ | ◐ | ○ | ◐ | ✕ |
 | AIP·prakash | ○ | ◐ | ● | ◐ | ○ | ✕ |
 
-合计 **8 ● / 11 ◐ / 7 ○ / 4 ✕**，共 30 项判读。
+合计 **9 ● / 10 ◐ / 7 ○ / 4 ✕**，共 30 项判读。
 
 **图例**：● 实测通过　◐ 依规范可判、未能实测　○ 规范内无解析入口 / 不可判定　✕ 缺该功能
 
@@ -35,8 +35,8 @@
 | APS（IETF） | 内容绑定（改一个字段验签必失败） | ● | 篡改 mission 后 verify -> valid=False（应为 False） |
 | APS（IETF） | 规范化确定（换键序规范串不变） | ● | JCS 换键序 -> 同串（e69bb60d894e5e34） |
 | APS（IETF） | 标识可解析（无上下文） | ◐ | 护照自带 verification_method + keyPair；agent_id 本身不是可解析标识，解析靠随护照携带的文档，不需网络 —— 与 DID 的"可解析"不是同一含义 |
-| APS（IETF） | 吊销可追（吊销=一条可验证据） | ◐ | SDK 暴露吊销相关符号 5 个（revoke_delegation, revoke_endorsement, revoke_from_fleet, revoke_source_receipt）；本探针未构造级联吊销用例 |
-| APS（IETF） | 第三方可独立跑（有可安装实现） | ● | pip install agent-passport-system 成功，import 可用（本机实测） |
+| APS（IETF） | 吊销可追（吊销=一条可验证据） | ● | 撤销记录离线可验：canonical 后 Ed25519 验签 True；改 reason 后 False；换 revokedBy 后 False。draft 路径 issue_authority_revocation / verify_authority_revocation / verify_authority_revocation_signature 三个符号均在场（3/3）。边界：委派工件本身不携带吊销态，拿不到该记录者仍判 valid=True，判定需外部源 |
+| APS（IETF） | 第三方可独立跑（有可安装实现） | ● | pip install agent-passport-system 4.3.0 与 npm i agent-passport-system 8.1.1 均成功；跨实现字节对照 8/8 一致（含 333333333.33333329、1e30、-0.0、1e-27、30 位整数、UTF-16 键序）；Python 现造自签护照由 TS 独立进程 verifyPassport 验通 valid=true，篡改后 TS 转 Invalid signature —— 厂商自测之外的第一条第三方证据 |
 | AIAgentMark | 签名可验（离线，第三方持公钥） | ● | 按白皮书三条 conformance 条款（Ed25519 + RFC8785 JCS + 规范字段）复现一份，自建验签器验通 |
 | AIAgentMark | 内容绑定（改一个字段验签必失败） | ● | 给 capabilities 追加一项后验签必失败（内容绑定成立） |
 | AIAgentMark | 规范化确定（换键序规范串不变） | ● | 白皮书明确 RFC 8785 JCS；换键序串不变（与 APS 同一实现验证） |
@@ -64,7 +64,7 @@
 
 ## 四、自限（不藏）
 
-1. 30 项里只有 8 项是实测，其余因对象无公开实现而无法实测；
+1. 30 项里只有 9 项是实测，其余因对象无公开实现而无法实测；
 2. 只做 `example.com` 的 `.well-known` 试探，未扫任何私有端点；
 3. AIAgentMark 的 ● 为本仓库按白皮书 conformance 条款复现，非厂商实现，字段命名可能有细微出入；
 4. 未复核厂商自述的测试数字（APS 1,634 例、APIS 初始基线），只记“自发布”。

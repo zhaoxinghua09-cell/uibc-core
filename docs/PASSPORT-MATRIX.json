@@ -18,8 +18,8 @@
   ],
   "summary": {
     "APS (IETF draft-pidlisnyi-aps)": {
-      "PASS": 4,
-      "JUDGE": 2,
+      "PASS": 5,
+      "JUDGE": 1,
       "UNKNOWN": 0,
       "FAIL": 0,
       "total": 6
@@ -54,8 +54,8 @@
     }
   },
   "totals": {
-    "PASS": 8,
-    "JUDGE": 11,
+    "PASS": 9,
+    "JUDGE": 10,
     "UNKNOWN": 7,
     "FAIL": 4
   },
@@ -87,14 +87,14 @@
     {
       "system": "APS (IETF draft-pidlisnyi-aps)",
       "check": "吊销可追（吊销=一条可验证据）",
-      "verdict": "JUDGE",
-      "detail": "SDK 暴露吊销相关符号 5 个（revoke_delegation, revoke_endorsement, revoke_from_fleet, revoke_source_receipt）；本探针未构造级联吊销用例"
+      "verdict": "PASS",
+      "detail": "撤销记录离线可验：canonical 后 Ed25519 验签 True；改 reason 后 False；换 revokedBy 后 False。draft 路径 issue_authority_revocation / verify_authority_revocation / verify_authority_revocation_signature 三个符号均在场（3/3）。边界：委派工件本身不携带吊销态，拿不到该记录者仍判 valid=True，判定需外部源"
     },
     {
       "system": "APS (IETF draft-pidlisnyi-aps)",
       "check": "第三方可独立跑（有可安装实现）",
       "verdict": "PASS",
-      "detail": "pip install agent-passport-system 成功，import 可用（本机实测）"
+      "detail": "pip install agent-passport-system 4.3.0 与 npm i agent-passport-system 8.1.1 均成功；跨实现字节对照 8/8 一致（含 333333333.33333329、1e30、-0.0、1e-27、30 位整数、UTF-16 键序）；Python 现造自签护照由 TS 独立进程 verifyPassport 验通 valid=true，篡改后 TS 转 Invalid signature —— 厂商自测之外的第一条第三方证据"
     },
     {
       "system": "AIAgentMark v1.0 (个人自持)",
@@ -248,5 +248,5 @@
     "cryptography": "50.0.2",
     "network": "仅两处 GET 试探（example.com 未公开解析入口），其余全部离线"
   },
-  "json_sha256_16": "cbdae20a08a5a49a"
+  "json_sha256_16": "e329d6d9f841fe39"
 }

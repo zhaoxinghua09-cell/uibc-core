@@ -324,17 +324,38 @@ The companion document keeps its own vocabulary (`head`, `seal`,
 
 ## Appendix B. Re-running the claims in this document
 
-The repository ships a 32-case corpus and a verifier, and a reader can check the
-profile's steps without trusting this text:
+The steps above are not prose: `uibc_core/profile.py` implements Sections 5 and 4.2,
+and a reader can run them against the shipped example package without a
+transparency service:
 
 ```
 git clone https://github.com/zhaoxinghua09-cell/uibc-core.git
 cd uibc-core && git checkout feat/standards-exceed-20261125
+python tools/verify_profile.py examples/demo.uibc --selftest
+```
+
+`--selftest` prints four runs: a receipt for this package, the same package with a
+receipt for other bytes, a receipt from a tree this code does not implement, and a
+receipt with no proof. The four verdicts differ (`PARTIAL_INCLUSION_UNCHECKED`,
+`FAIL_VALUE_MISMATCH`, `UNSUPPORTED_SCHEME`, `FAIL_MALFORMED`), which is the point:
+a verifier that prints one word for all four failures cannot be acted on.
+
+Three limits of that code, stated rather than implied by it passing:
+
+- **It never returns `OK`.** There is no hash-tree implementation here, so the
+  inclusion proof (`vdp`) is not evaluated and the best outcome is
+  `PARTIAL_INCLUSION_UNCHECKED`. That is a limit of the code, not of the profile.
+- **`vds` values are supplied by the caller.** The registry entries that would pin
+  them are still `TBD`, so supporting a tree is a decision a verifier makes and
+  states, not something this document can hand it.
+- **No live service was involved.** Step 3 is checked against synthetic receipts and
+  against AER-1's published receipt corpus as a consumer; no case registers
+  anything in a real log. That gap is written here instead of being left for a
+  reader to discover from a green test run.
+
+The rest of the repository is unchanged by this profile and still runs:
+
+```
 python tools/axis_report.py       # 32 cases, expectation per case in expected.json
 python -m pytest -q               # ~2,100 tests
 ```
-
-What the corpus does **not** cover: no case exercises a real transparency service.
-Step 3 is checked against synthetic receipts and against AER-1's published
-receipt corpus as a consumer; it is not checked against a live log. That gap is
-stated here rather than implied by a passing test suite.

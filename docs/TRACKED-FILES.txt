@@ -1083,6 +1083,7 @@ docs/CHECK-MATRIX.md
 docs/CHECK-MATRIX.svg
 docs/CHECKS-REFERENCE.md
 docs/CITATION-REACHABILITY.md
+docs/CITES.md
 docs/COMBINATIONS.md
 docs/COMPETITIVE-COVERAGE-AAC.md
 docs/COMPETITIVE-CROSSWALL-TOOLS-20261124.md
@@ -1266,6 +1267,7 @@ docs/assurance/NETWORK-SCOPE.md
 docs/assurance/REVOCATION-DEMO.md
 docs/assurance/far-profile.json
 docs/citation-kit.md
+docs/cites.json
 docs/claims-register.md
 docs/comparison.md
 docs/competitor-evidence-lines.json

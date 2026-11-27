@@ -426,7 +426,7 @@ def write_receipt(digest, files, results, content=None, content_files=None,
         "steps": results,
         "ok": all(r["ok"] for r in results) and len(results) == len(STEPS),
     }
-    open(RECEIPT, "w", encoding="utf-8").write(json.dumps(receipt, indent=1, ensure_ascii=False) + "\n")
+    open(RECEIPT, "w", encoding="utf-8", newline="\n").write(json.dumps(receipt, indent=1, ensure_ascii=False) + "\n")
     page = ["# 外人重跑：换一个目录、换一套环境，还成不成立", "",
             f"生成时间 {receipt['generated_at']}，运行环境 Python {receipt['runner']['python']} / "
             f"{receipt['runner']['system']}。", "",
@@ -452,7 +452,7 @@ def write_receipt(digest, files, results, content=None, content_files=None,
              "同一个提交两条通道给两套字节。这一根轴用来把\"换行差异\"与\"有人改了字节\"分开，"
              "`--check` 因此能报 `VERDICT: DELIVERY MATCH`（同名同内容、只差换行）。",
              "", "复核：`python tools/outsider_rerun.py --check`（重算两根摘要＋逐步判定），或 `--run` 重新跑一遍。"]
-    open(PAGE, "w", encoding="utf-8").write("\n".join(page) + "\n")
+    open(PAGE, "w", encoding="utf-8", newline="\n").write("\n".join(page) + "\n")
     print("OUTSIDER OK" if receipt["ok"] else "OUTSIDER FAIL",
           f"tree={digest[:12]} steps={len(results)}")
     return 0 if receipt["ok"] else 1

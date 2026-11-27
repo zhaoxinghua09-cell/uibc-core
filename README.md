@@ -31,12 +31,12 @@ Fetch it anonymously, without cloning (no login, no token — measured 2026-11-2
 
 ```bash
 curl -fL -o corpus.zip \
-  https://github.com/zhaoxinghua09-cell/uibc-core/raw/main/conformance/uibc-conformance-0.5.6.zip
-sha256sum corpus.zip   # 31bbeff40e67041c77b23eefe364d71ec72b192f0e59618ffc1589d14d059c09, 388,388 bytes
+  https://github.com/zhaoxinghua09-cell/uibc-core/raw/main/conformance/uibc-conformance-0.5.8.zip
+sha256sum corpus.zip   # a5c0e5b703ee8dd9293844d759df9cf2fad2b865c9271c98c7548393ddf71ffc, 389,203 bytes
 unzip -q corpus.zip -d corpus && cd corpus && python run.py
 ```
 
-The release page does not carry it: the tag `v0.5.6` was used by a release that the repository's immutable-release rule froze, and that rule also refuses a second one (`GET /releases/tags/v0.5.6` answers 404 on 2026-11-27), so the copy uploaded to the draft cannot be published while the rule set is active. The raw URL above is the only path that serves this hash today; the older `v0.5.0` asset is a different corpus (36 cases) and the `v0.4.0` one a third (30 cases). Neither is this one.. The build is deterministic for a given tree, but "rebuilding gives the same bytes" is true only from the tree the archive was built from: `0.4.1` came out of commit `d72c4f9`, and the runner template was fixed for the unstartable-verifier case afterwards, so rebuilding `0.4.1` from today's tree yields a different archive (`083c0dbc…`). The builder now refuses to overwrite a pinned archive and prints both hashes instead (measured 2026-11-20, exit 3).
+The release page does not carry it: the tag `v0.5.6` was frozen by the repository's immutable-release rule (`GET /releases/tags/v0.5.6` answers 404, measured 2026-11-27), so the raw URL above is the only path that serves this hash today; `0.5.8` has no release page yet. The older `v0.5.0` asset is a different corpus (36 cases) and the `v0.4.0` one a third (30 cases). Neither is this one. The build is deterministic for a given tree, but "rebuilding gives the same bytes" holds only from the tree the archive was built from: `0.4.1` came out of commit `d72c4f9`, and the runner template was fixed for the unstartable-verifier case afterwards, so rebuilding `0.4.1` from today's tree yields a different archive (`083c0dbc...`). The builder refuses to overwrite a pinned archive and prints both hashes instead (measured 2026-11-20, exit 3).
 
 No repository, no network, no `pip install`: the archive carries its own verifier as a single file (`uibc_core.pyz`), and `run.py` uses it. Expected tail `strict 58/58` in about six seconds, and a `receipt.json` you can publish. A verifier that answers PASS to everything scores **6/58**, so refusing nothing does not pass.
 

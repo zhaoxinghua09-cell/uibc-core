@@ -52,15 +52,15 @@ If you have not cloned anything, the corpus is one anonymous download away — n
 
 ```bash
 curl -fL -o corpus.zip \
-  https://github.com/zhaoxinghua09-cell/uibc-core/raw/main/conformance/uibc-conformance-0.5.6.zip
-sha256sum corpus.zip   # 31bbeff40e67041c77b23eefe364d71ec72b192f0e59618ffc1589d14d059c09, 388,388 bytes
+  https://github.com/zhaoxinghua09-cell/uibc-core/raw/main/conformance/uibc-conformance-0.5.8.zip
+sha256sum corpus.zip   # a5c0e5b703ee8dd9293844d759df9cf2fad2b865c9271c98c7548393ddf71ffc, 389,203 bytes
 unzip -q corpus.zip -d corpus && cd corpus && python run.py
 ```
 
 Expected: `strict 58/58`, a `receipt.json`, exit 0. Measured this way on 2026-11-27 (download →
 unzip → run, `PYTHONPATH` empty, nothing installed, Windows 10 / Python 3.13.18): the archive came
-down as 388,388 bytes with that hash, `run.py` printed `strict 58/58`, and the receipt recorded
-`verifier_version 0.5.6 / cases 58 / passed 58`. A verifier that answers PASS to everything scores
+down as 389,203 bytes with that hash, `run.py` printed `strict 58/58`, and the receipt recorded
+`verifier_version 0.5.8 / cases 58 / passed 58`. A verifier that answers PASS to everything scores
 6/58 through the same runner (`--verify` with an accept-all script), so refusing nothing does not pass.
 
 Note what changed on 2026-11-20: the release page used to carry no archive for this corpus at all —

@@ -800,8 +800,24 @@ def cmd_verify_dir(args):
     key = _load_key(args.key) if getattr(args, "key", None) else None
     pubkey = _load_pubkey(args.pubkey) if getattr(args, "pubkey", None) else None
     failed = []
+    not_a_package = []
+    judged = 0
     for name in names:
         pkg = os.path.join(root, name)
+        # A child that is not a UIBC package was never judged, so it must not be
+        # scored. Reporting it as FAIL turns "we do not read this format" into
+        # "this evidence failed", which is the one miscount a differential rail
+        # cannot recover from: a dashboard reading the totals sees a failure rate
+        # where the truth is a format gate. ERROR/exit 3 is that gate.
+        if not os.path.exists(os.path.join(pkg, "manifest.json")):
+            exc = "not-a-package: no manifest.json in %s" % name
+            line = _report_line(name, None, 3, error=exc)
+            if getattr(args, "report", None):
+                _append_line(args.report, line)
+            not_a_package.append(name)
+            print(f"{name}: ERROR {exc}", file=sys.stderr)
+            continue
+        judged += 1
         try:
             report = verify(pkg, key=key, pubkey=pubkey,
                             strict=getattr(args, "strict", False))
@@ -819,7 +835,12 @@ def cmd_verify_dir(args):
             failed.append(name)
             print(f"{name}: {report['result']} failed {_failed_checks(report)}",
                   file=sys.stderr)
-    print(f"{len(names) - len(failed)}/{len(names)} packages PASS")
+    print(f"{judged - len(failed)}/{judged} packages PASS")
+    if not_a_package:
+        print("not checked: %d child(ren) carry no manifest.json (%s)"
+              % (len(not_a_package), ", ".join(not_a_package)), file=sys.stderr)
+    if judged == 0:
+        sys.exit(3)                      # nothing judged is not a pass
     sys.exit(0 if not failed else 1)
 
 

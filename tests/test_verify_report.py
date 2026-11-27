@@ -126,3 +126,31 @@ def test_an_empty_directory_is_a_setup_problem():
     proc = _run(["verify-dir", work, "--report", out])
     assert proc.returncode == 3, proc.stdout + proc.stderr
     assert not os.path.exists(out)
+
+
+def test_a_foreign_corpus_is_not_checked_rather_than_failed():
+    """A child directory without manifest.json was never judged.
+
+    The AER-1 corpus (143 JSON vectors under a kit, none of them a UIBC
+    package) is the live example: scoring it "2/2 FAIL" reports a format gate
+    as an evidence failure, and a dashboard reading the totals inherits the
+    miscount. ERROR/exit 3 is the honest verdict for "we do not read this".
+    """
+    work = tempfile.mkdtemp(prefix="rpt-foreign-")
+    for name in ("vec-a", "vec-b"):
+        os.makedirs(os.path.join(work, name))
+        with open(os.path.join(work, name, "vector.json"), "w",
+                  encoding="utf-8") as fh:
+            fh.write('{"note": "not a uibc package"}\n')
+    out = os.path.join(work, "r.jsonl")
+    proc = _run(["verify-dir", work, "--report", out])
+    assert proc.returncode == 3, proc.stdout + proc.stderr
+    lines = _lines(out)
+    assert len(lines) == 2
+    for line in lines:
+        assert line["result"] == "ERROR"
+        assert line["exit"] == 3
+        assert line["checks_failed"] == []
+        assert "not-a-package" in line["error"]
+    assert "0/0 packages PASS" in proc.stdout
+    assert "not checked: 2" in proc.stderr

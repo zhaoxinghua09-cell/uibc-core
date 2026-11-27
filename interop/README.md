@@ -144,6 +144,32 @@ differently at a different instant, and both numbers are published rather than
 the flattering one alone. 27/27 is our reading of their published corpus; their
 rail has not been re-run against this build, so it is not their scoring.
 
+## Produce a statement, not only read one
+
+Reading another project's corpus is one direction. The other is handing back
+something that project's reader can judge, and until `uibc emit-cose` existed
+this repository could only read.
+
+```
+uibc emit-cose --out corpus/ --count 3 --at 1785000000 --exp 1790000000 \
+    --nbf 1780000000 --seed-hex <64 hex> --ts-seed-hex <64 hex> \
+    --kid-hex <hex> --ts-kid-hex <hex> --detached-index 2
+```
+
+It writes `statements/*.json` plus a `MANIFEST.json` that lists them, so the
+same `verify-cose --manifest` path reads it back, and then it prints its own
+read-back before exiting: **emitted 3, read back valid 3/3, tree root
+052d3ad994eb059c…199d** on 2026-11-27 (one of the three carried a detached
+payload). The keys are throwaway emit keys and have to be passed in; there is no
+default seed, because a signing default is a key that later gets used for real.
+
+Two things this does not establish. It does not establish that another
+implementation accepts these statements - the peer's reader on the other side
+has not been run against them, and there is no Go toolchain on this machine to
+run it with. And the emitted corpus contains only statements that should come
+back `valid`; refusals are covered by `tests/test_scitt_cose_emit.py`, which
+builds each fault from bytes, not by a corpus of broken statements.
+
 ## What this does not do
 
 It does not import a foreign corpus wholesale. A corpus in someone else's layout

@@ -1,3 +1,14 @@
+## 未发布 — 2026-11-27（能产出同一 profile 的语句，而不只是读别人的）
+
+- **为什么做这件事**：读者落地后互操作仍只有一半——对方的 rail 可以喂我们，我们却没有一条语句可供对方读。"读得懂别人"是审查别人的能力，"拿得出自己的"才是被审查的资格；缺后一半，任何"互操作"都只是单向取材。
+- **新增 `uibc_core/scitt_cose_emit.py`**：确定性 CBOR 沿用 `cose_min`，外壳加 CBOR tag 18；protected 头写 alg(-19)、kid、CWT Claims（只一次）、content-type、typ，观察位置在则**强制**写进 `crit`（不给"存在但不 critical"这个口子，因为那正是读者会拒的形状）；回执放 unprotected 的 394，每条 vds=1、inclusion proof 在 396/-1（内容为 `[tree_size, leaf_index, path]` 的 CBOR），并对"自己从证明里重算出的 root"签名——签名覆盖 root 而非条目，正是"回执针对别的叶"会被拒的原因。Merkle 树按 RFC 9162 §2.1.1 自建、审计路径按 §2.1.3.2（3 叶长度为 2/2/1、4 叶为 2/2/2/2，已写进测试固定下来）。
+- **CLI 新增 `emit-cose`**：`--out / --count / --at(必填) / --exp / --nbf / --detached-index`，两个 seed **必须显式传入**（不给默认值：一个能签名的默认种子，迟早会被当真用）。产出 `statements/*.json` 与 `MANIFEST.json`（带 `vectors` 列表，所以本仓的语料模式读得回自己产的东西），并在产出后**逐条用 `verify_transparent_statement` 读回**、打印、可选写 `uibc-scitt-cose-report/1` 行。产而不读的生成器等于没有验收。
+- **实测（本机 Windows 10 / Python 3.13）**：`emit-cose --count 3 --at 1785000000`（含 1 条 detached）→ 读回 **3/3 valid**，树 root `052d3ad994eb059c…199d`；再用 `verify-cose --manifest … --statements …` 的语料模式读同一批 → **3/3 与声明一致**。
+- **生产侧把读者的两个真缺陷照出来了（本次一并修掉）**：(1) `verificationTime` 若是整数，`_epoch` 只认 RFC 3339 字符串 → 返回 None → `exp`/`nbf` 整段被**静默跳过**，同一串字节在任何时刻都判 valid；(2) `sub` 若按 payload 字节的摘要计算，就与 payload 自述的 subject 摘要不符（读者正确地报 `subject-digest-mismatch`）。两条都改成显式处理：整数时刻直接用，`sub` 取自 payload 自述且不一致即抛错。
+- **回归**：修完重测对方 `vectors-scitt-cose` 27 条，**27/27**（witness 时刻 `1789041600`）与 **26/27**（各自 `verificationTime`）均未漂移。
+- **测试**：`tests/test_scitt_cose_emit.py` 15 项——单条与三条读回、同输入同字节、detached 有/无 payload、`sub` 不符抛错、过期与未生效被拒、kid 未知被拒、篡改 payload 导致签名失败、回执指向别的叶被拒、审计路径长度、剥掉 inclusion proof 被拒、观察位置必进 `crit` 且读回标为自报、CLI `emit-cose` → 语料模式回读全绿。
+- **边界（写在这里而不是脚注）**：`emit-cose` 只产"应当 valid"的语料，不产 reject 语料；归档未重封、版本未动；**对方 Go 侧 reader 是否接受我们产的语句未测**（本机无 Go 工具链），所以"对方能读我们"这句话目前不成立，也不进任何对外主张。
+
 ## 未发布 — 2026-11-27（读得了对方的 SCITT/COSE 语句：外部 rail 点名的那半个缺口）
 
 - **为什么做这件事**：`probityai/agent-evidence-vectors` 的 external rail 把我们的验证器喂进 27 条 `vectors-scitt-cose` 成员，得到 27 执行 / 0 通过 / 27 失败 + 4 次 suite 级拒绝，点名 `external-output-absent`，理由是"exit 2 且不写报告行"。输出侧在 #584/#588 补上了（读不了也留一行、退 3）。真正剩下的那一半是**读不了**：那是带 CBOR tag 18 的 COSE_Sign1，protected 头里有 CWT claims、私有用途标签 -70001 的观察位置，unprotected 头里是 RFC 9942 回执与 inclusion proof——`cose_min.py` 的确定性 CBOR 子集没有 tag，算法只认 -8，故每条都只能答"读不了"。一个验证器读不懂国际 profile 点名的格式，就没有互操作可讲。

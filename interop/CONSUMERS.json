@@ -27,6 +27,13 @@
       "caveat": "27/27 is a self-run of their published corpus with our own reader. Their rail has not been re-run against this build, so this is a measurement of our reading, not of their scoring"
     },
     {
+      "id": "uibc-emitted-scitt-cose-corpus",
+      "what": "a small aee-scitt-cose/v0.1 corpus of our own making: tag-18 COSE_Sign1 statements with CWT claims and RFC 9942 receipts, plus a manifest that lists them",
+      "where": "uibc_core.pyz emit-cose --out DIR --count N --at EPOCH --seed-hex ... --ts-seed-hex ... --kid-hex ... --ts-kid-hex ...",
+      "measured": "2026-11-27: emitted 3 statements over one Merkle tree (root 052d3ad994eb059c...199d), one of them carrying a detached payload; read back 3/3 valid by our own reader and 3/3 conforming in corpus mode",
+      "caveat": "the statements are produced and judged by the same project, and no foreign reader has been run against them; the emitter also only produces statements that should be valid, so it is not a corpus of refusals"
+    },
+    {
       "id": "uibc-verifier-json",
       "what": "one JSON object per package: result, checks with ids, and the reason for each",
       "where": "uibc_core.pyz verify <package dir>",

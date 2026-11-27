@@ -2102,6 +2102,7 @@ tests/test_run_script_preflight.py
 tests/test_runtime.py
 tests/test_same_ruler_svg.py
 tests/test_scitt_cose.py
+tests/test_scitt_cose_emit.py
 tests/test_scitt_crosswalk.py
 tests/test_seal_v03.py
 tests/test_semantics_freeze.py
@@ -2516,6 +2517,7 @@ uibc_core/policy.py
 uibc_core/records.py
 uibc_core/runtime.py
 uibc_core/scitt_cose.py
+uibc_core/scitt_cose_emit.py
 uibc_core/signing.py
 uibc_core/sm2.py
 uibc_core/status_list.py

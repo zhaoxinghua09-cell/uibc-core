@@ -17,7 +17,7 @@ workflows:
         - 'actions/upload-artifact@v4.4.0'
     '.github/workflows/codeql-sast.yml':
         - 'actions/checkout@v7.0.1'
-        - 'github/codeql-action@v3.38.3'
+        - 'github/codeql-action@v4.39.4'
     '.github/workflows/differential-nightly.yml':
         - 'actions/checkout@v7.0.1'
         - 'actions/setup-python@v7.1.0'
@@ -55,14 +55,14 @@ workflows:
     '.github/workflows/trusted-verify.yml':
         - 'actions/checkout@v7.0.1'
         - 'actions/setup-python@v7.1.0'
-    '.github/workflows/version-gate.yml':
-        - 'actions/checkout@v4.4.0'
-        - 'actions/setup-python@v7.1.0'
     '.github/workflows/upstream-corpus-watch.yml':
         - 'actions/checkout@v7.0.1'
         - 'actions/setup-python@v7.1.0'
     '.github/workflows/vector-package.yml':
         - 'actions/checkout@v7.0.1'
+        - 'actions/setup-python@v7.1.0'
+    '.github/workflows/version-gate.yml':
+        - 'actions/checkout@v4.4.0'
         - 'actions/setup-python@v7.1.0'
 dependencies:
     'actions/attest-build-provenance@v4.2.2':
@@ -117,9 +117,9 @@ dependencies:
         commit: 'sha1-ea165f8d65b6e75b540449e92b4886f43607fa02'
         owner_id: 44036562
         repo_id: 192625955
-    'github/codeql-action@v3.38.3':
-        ref: 'v3.38.3'
-        commit: 'sha1-9f759ee644a3e7c15c1390abf49868036c00067b'
+    'github/codeql-action@v4.39.4':
+        ref: 'v4.39.4'
+        commit: 'sha1-1bd86f2fdb4b86187fa4059f16f31a3202acc9ea'
         owner_id: 9919
         repo_id: 259445878
     'ossf/scorecard-action@v2.5.0':

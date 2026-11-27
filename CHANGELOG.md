@@ -1,4 +1,9 @@
-## 未发布 — 格式 v2（未声明证据从「点名告警」升为「默认 FAIL」；发版号 0.5.6 待定）
+## 0.5.6 — 2026-11-27 发布（格式 v2：未声明证据从「点名告警」升为「默认 FAIL」）
+
+- **发布事实（发版后补写，放在最前面，因为读者先要的是字节和哈希）**：PyPI `uibc-core 0.5.6` 于 2026-11-27 01:46 UTC 上传 —— `uibc_core-0.5.6-py3-none-any.whl` 226,327 B / `sha256:34eda43c…5699`，`uibc_core-0.5.6.tar.gz` 3,940,189 B / `sha256:2b31e7af…0b80`。一致性语料归档 `conformance/uibc-conformance-0.5.6.zip` 388,388 B / `sha256:31bbeff40e67…9d14`，pin 见 `anchors/pins/uibc-conformance-0.5.6.sha256`；同一棵树上重跑 `tools/build_conformance_bundle.py 0.5.6` 得到同字节（该工具有 `identical:` 分支）。
+- **语料没有跟着重封（这是决定，不是漏做）**：`conformance/cases` 仍是 0.5.5 时期封的那批，`min_verifier_version` 留在 `0.5.0`。原因是被 `Trusted verify (base-owned oracle)` 打出来的：用 0.5.6 重封 58 例会把每例门槛抬到 0.5.6，而那条 job 用**基线树**（本次 PR 的基线是 0.5.5）判 PR 的语料，读到高于自己的门槛就判 INCONCLUSIVE —— 6 个 accept 例当场全变 INCONCLUSIVE，job 记 MISMATCH。所以语料与验证器分两轮：这一轮升验证器、语料保持旧封；下一轮再重封，并事先接受"基线判不了"这个已知结果。`conformance/oracle` 的 30 例与本轮一致（`tools/oracle_check.py` → `ORACLE: PASS`）。
+- **两件 PyPI 产物都没有 provenance**：本轮仍走 long-lived token（`twine` + `__token__`），不是 trusted publishing；`python tools/check_pypi_provenance.py --pkg uibc-core --version 0.5.6` 报 `2 of 2 file(s) lack provenance`。0.5.0–0.5.5 同缺陷，未修。
+- **Zenodo 没有为 0.5.6 存缴**：`CITATION.cff` 因此仍钉 `0.5.5`（tests/test_archive_scope.py 把这条钉死）。拿 0.5.5 的 DOI 去引 0.5.6 的字节是错的，README 也这样写。
 
 - **上一轮留下的那句话，这一轮做掉**：0.5.5 把沉默改成点名（`warnings` + stderr 一行），但默认仍判 PASS。当时写明的理由是"这是格式版本问题，不是补丁"。现在按版本做：`uibc submit` 在 `manifest.json` 写 `format_version: 2`，验证器读到 2 即对 `evidence/` 下索引未声明的文件判 **S1 FAIL**，不必加 `--strict`。
 - **为什么不追溯收紧 v1 包**：一个 2026-11 之前封的包，封的时候规则是宽松的。事后把它判死，等于用今天的法判昨天的手续。v1 包（manifest 无该字段或为 1）行为完全不变：S1 PASS + `warnings` 点名它放过的文件，措辞里写明"本包为 format v1"。

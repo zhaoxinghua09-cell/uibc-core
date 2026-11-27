@@ -1,0 +1,4 @@
+[console_scripts]
+uibc = uibc_core.cli:main
+uibc-core = uibc_core.mcp_server:main
+uibc-mcp = uibc_core.mcp_server:main

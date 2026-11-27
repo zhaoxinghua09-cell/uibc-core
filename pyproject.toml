@@ -1,6 +1,6 @@
 [project]
 name = "uibc-core"
-version = "0.5.5"
+version = "0.5.6"
 description = "UIBC Core reference implementation - agent lifecycle evidence packaging and verification with three-valued verdicts and public Ed25519 seals. LGD: registry / evidence / gates."
 readme = "README.md"
 requires-python = ">=3.10"

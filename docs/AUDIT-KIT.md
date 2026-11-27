@@ -52,8 +52,8 @@ If you have not cloned anything, the corpus is one anonymous download away — n
 
 ```bash
 curl -fL -o corpus.zip \
-  https://github.com/zhaoxinghua09-cell/uibc-core/raw/main/conformance/uibc-conformance-0.5.5.zip
-sha256sum corpus.zip   # 5f3a72cb277dac8f285cd50df304dd9befe762caf42f40b98b907bcfc20cce8c
+  https://github.com/zhaoxinghua09-cell/uibc-core/raw/main/conformance/uibc-conformance-0.5.6.zip
+sha256sum corpus.zip   # 31bbeff40e67041c77b23eefe364d71ec72b192f0e59618ffc1589d14d059c09, 388,388 bytes
 unzip -q corpus.zip -d corpus && cd corpus && python run.py
 ```
 
@@ -65,7 +65,7 @@ Note what changed on 2026-11-20: the release page used to carry no archive for t
 the only release asset anywhere was `uibc-conformance-0.4.0.zip`, a 30-case archive under a different
 version. Running the release workflow for the existing `v0.4.1` tag attached
 `uibc-conformance-0.4.1.zip` (228,000 bytes, the pin's hash) to
-The release carries the same bytes: https://github.com/zhaoxinghua09-cell/uibc-core/releases/download/v0.5.5/uibc-conformance-0.5.5.zip (attached 2026-11-25).
+The release carries the same bytes: https://github.com/zhaoxinghua09-cell/uibc-core/releases/download/v0.5.6/uibc-conformance-0.5.6.zip (attached 2026-11-27).
 Both that and the raw URL above serve the same bytes; `tools/check_outsider_entry.py` fails if either
 disappears from the documents, or if a document points at an asset for a different version. The commands below need the
 repository, because they rebuild the suite rather than run it.

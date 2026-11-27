@@ -685,6 +685,51 @@ def cmd_revocation_digest(args):
     print(json.dumps(out, ensure_ascii=False, indent=2, sort_keys=True))
 
 
+REPORT_FORMAT = "uibc-verify-report/1"
+
+
+def _now_utc():
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def _failed_checks(report):
+    return sorted({str(c.get("id")) for c in (report or {}).get("checks", [])
+                   if str(c.get("result", "")).upper() == "FAIL"})
+
+
+def _report_line(vector, report, exit_code, error=None):
+    """One line per package, in a shape another harness can read.
+
+    Section 3.6 of the draft keeps the verdict and the checks apart, so the line
+    carries both: a consumer that only wants pass/fail reads `result`, and a
+    consumer that wants to know *why* reads `checks_failed`. The verifier identity
+    travels with every line, because a report whose producer is not named is a
+    claim without a claimant.
+    """
+    line = {
+        "format": REPORT_FORMAT,
+        "vector": vector,
+        "result": (report or {}).get("result") if error is None else "ERROR",
+        "checks_failed": [] if error else _failed_checks(report),
+        "verifier_id": (report or {}).get("verifier_id"),
+        "verifier_version": (report or {}).get("verifier_version"),
+        "when_utc": _now_utc(),
+        "exit": exit_code,
+    }
+    if error is not None:
+        line["error"] = str(error)[:300]
+    return line
+
+
+def _append_line(path, line):
+    # Append, never rewrite: a harness that runs many packages must be able to
+    # collect them in one file, and a line already written must not be lost when
+    # a later package fails. Explicit newline so the file does not change shape
+    # depending on the operating system that produced it.
+    with open(path, "a", encoding="utf-8", newline="\n") as f:
+        f.write(json.dumps(line, ensure_ascii=False, sort_keys=True) + "\n")
+
+
 def cmd_verify(args):
     pkg = os.path.abspath(args.path)
     if not os.path.isdir(pkg):
@@ -707,7 +752,55 @@ def cmd_verify(args):
     # human reading the console. A machine caller gates on report["warnings"].
     for w in report.get("warnings", []):
         print(f"warning [{w['code']}]: {w['detail']}", file=sys.stderr)
-    sys.exit(0 if report["result"] == "PASS" else 1)
+    code = 0 if report["result"] == "PASS" else 1
+    rpt = getattr(args, "report", None)
+    if rpt:
+        _append_line(rpt, _report_line(getattr(args, "vector_id", None) or pkg, report, code))
+    sys.exit(code)
+
+
+def cmd_verify_dir(args):
+    """Verify every immediate subdirectory, one report line per package.
+
+    This is the shape a foreign harness needs: it hands over a directory whose
+    children are its own vectors and gets back one line per vector, each naming
+    the verifier that judged it. Nothing here assumes our case names.
+
+    An empty directory is not a success: it exits 3 and writes no report, because
+    "no packages were judged" must never read the same as "all packages passed".
+    """
+    root = os.path.abspath(args.dir)
+    if not os.path.isdir(root):
+        sys.exit(f"error: directory not found: {root}")
+    names = sorted(d for d in os.listdir(root) if os.path.isdir(os.path.join(root, d)))
+    if not names:
+        print(f"error: no packages under {root}", file=sys.stderr)
+        sys.exit(3)
+    key = _load_key(args.key) if getattr(args, "key", None) else None
+    pubkey = _load_pubkey(args.pubkey) if getattr(args, "pubkey", None) else None
+    failed = []
+    for name in names:
+        pkg = os.path.join(root, name)
+        try:
+            report = verify(pkg, key=key, pubkey=pubkey,
+                            strict=getattr(args, "strict", False))
+        except Exception as exc:                      # a package we cannot even read
+            line = _report_line(name, None, 2, error=exc)
+            if getattr(args, "report", None):
+                _append_line(args.report, line)
+            failed.append(name)
+            print(f"{name}: ERROR {str(exc)[:120]}", file=sys.stderr)
+            continue
+        code = 0 if report["result"] == "PASS" else 1
+        if getattr(args, "report", None):
+            _append_line(args.report, _report_line(name, report, code))
+        if code:
+            failed.append(name)
+            print(f"{name}: {report['result']} failed {_failed_checks(report)}",
+                  file=sys.stderr)
+    print(f"{len(names) - len(failed)}/{len(names)} packages PASS")
+    sys.exit(0 if not failed else 1)
+
 
 
 def cmd_explain(args):
@@ -870,7 +963,23 @@ def main():
                         "next run, so a rollback is refused without the caller "
                         "supplying --expect-head every time. First observation is "
                         "INCONCLUSIVE, not PASS")
+    p.add_argument("--report", default=None, metavar="JSONL",
+                   help="append one JSON line describing this run, in a shape another "
+                        "harness can read: vector, result, checks_failed, verifier "
+                        "identity, exit code. Appending rather than rewriting lets a "
+                        "caller collect many runs in one file")
+    p.add_argument("--vector-id", dest="vector_id", default=None, metavar="ID",
+                   help="name this package in the report line; default is its path")
     p.set_defaults(func=cmd_verify)
+
+    p = sub.add_parser("verify-dir", help="verify every immediate subdirectory, "
+                                          "one report line per package")
+    p.add_argument("dir")
+    p.add_argument("--key", default=None, metavar="KEYFILE")
+    p.add_argument("--pubkey", default=None, metavar="PUBFILE")
+    p.add_argument("--strict", action="store_true")
+    p.add_argument("--report", default=None, metavar="JSONL")
+    p.set_defaults(func=cmd_verify_dir)
 
     p = sub.add_parser("explain", help="verify and print why, one check per line")
     p.add_argument("path")

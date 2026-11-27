@@ -63,13 +63,14 @@ def test_page_states_the_run_is_not_evidence(rr, rec):
     assert rr.check() == 0
 
 
-def test_check_refuses_a_record_that_moves_the_score(rr, rec, capsys):
+def test_check_refuses_a_record_that_moves_the_score(rr, rec, capsys, tmp_path, monkeypatch):
+    # Same trap as test_refs_check: rewriting the tracked record and putting it
+    # back leaves CRLF in the working copy on Windows. Use a copy.
     bad = json.loads(json.dumps(rec))
     bad["records"][0]["affects_score"] = True
-    original = open(rr.RECORD, encoding="utf-8").read()
-    try:
-        open(rr.RECORD, "w", encoding="utf-8").write(json.dumps(bad))
-        assert rr.check() == 1
-        assert "claims to affect the score" in capsys.readouterr().out
-    finally:
-        open(rr.RECORD, "w", encoding="utf-8").write(original)
+    copy = tmp_path / "competitor-realrun.json"
+    with open(copy, "w", encoding="utf-8", newline="\n") as fh:
+        fh.write(json.dumps(bad))
+    monkeypatch.setattr(rr, "RECORD", str(copy))
+    assert rr.check() == 1
+    assert "claims to affect the score" in capsys.readouterr().out

@@ -122,7 +122,8 @@ def main():
     args = ap.parse_args()
     if args.write_page:
         rec, _ = load()
-        open(PAGE, "w", encoding="utf-8").write(render(rec))
+        with open(PAGE, "w", encoding="utf-8", newline="\n") as fh:
+            fh.write(render(rec))
         print("written", PAGE)
         return 0
     if args.run:

@@ -13,6 +13,13 @@
       "caveat": "the archive is not byte-identical across operating systems: the same tree built on Linux gives 389,201 bytes / e57c052f..."
     },
     {
+      "id": "uibc-verify-report",
+      "what": "one JSON line per package, written by the verifier itself: vector, result, checks_failed, verifier identity, exit code",
+      "where": "uibc_core.pyz verify <pkg> --report <file.jsonl> --vector-id <id>, or uibc_core.pyz verify-dir <dir> --report <file.jsonl>",
+      "measured": "2026-11-27: five contracts covered by tests/test_verify_report.py; a directory of packages yields one line each, an empty directory exits 3 and writes nothing",
+      "caveat": "the line carries our verdict vocabulary and our check ids; a consumer still has to map both. Lines are appended, so a harness must not assume one line per file"
+    },
+    {
       "id": "uibc-verifier-json",
       "what": "one JSON object per package: result, checks with ids, and the reason for each",
       "where": "uibc_core.pyz verify <package dir>",
@@ -50,7 +57,7 @@
       "id": "scitt-cose-statement-vectors",
       "status": "not-consumed",
       "measured": "2026-11-27: 3 SCITT COSE statements fed straight to our verifier gave 0/3 (S1 and S2 fail, no PASS is invented). Through probityai/agent-evidence-vectors' external rail the same verifier gave 27 vectors executed, 0 passed, 27 failed, 4 suite-level refusals, and the rail named external-output-absent as the cause: our verifier exits 2 and writes no per-vector report line",
-      "blocked_by": "no reader for the scitt-cose-carriage-conformance corpus, and our verifier has no output mode that writes one line per vector"
+      "blocked_by": "no reader for the scitt-cose-carriage-conformance corpus. The output side is no longer the blocker: since 2026-11-27 the verifier can write one report line per package (--report, verify-dir), which is what the external rail named as missing"
     },
     {
       "id": "json-canonicalisation-rfc8785",

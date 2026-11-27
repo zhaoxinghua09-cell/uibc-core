@@ -13,10 +13,12 @@ registered**, **what a receipt then proves about the package**, and **what the
 receipt does not prove**, stated once so that two readers cannot disagree about
 it while both being right about [RFC9942].
 
-Status: individual draft, not submitted, not adopted by any working group. It
-supersedes nothing. The companion document it profiles is
+Status: individual draft dated 2026-11-27, not submitted, not adopted by any
+working group. It supersedes nothing. The companion document it profiles is
 `draft-zhao-uibc-evidence-chain` (this repository), which defines the package
-layout that this profile registers.
+layout that this profile registers. Dates in this document are stated as of that
+date: [RFC9942] and [RFC9943] were published 2026-06-30, and the two receipt
+profiles in Section 10 were read at their November 2026 revisions.
 
 ## 1. Introduction
 
@@ -65,8 +67,11 @@ there: *package*, *evidence root*, *seal*, *head*, *anchor claim*.
 
 Two terms are specific to this profile:
 
-- **Registered value**: the bytes the issuer submits as the statement payload, as
-  fixed by Section 4.2.
+- **Registered value**: one exact byte string — the RFC 8785 serialization of the
+  four-member object in Section 4.2. Where this document says "the object", it
+  means the members; where it says "the value", it means those bytes. The
+  distinction matters at Section 5 step 2, which compares bytes to bytes, and it
+  is the only sense in which this profile uses the term.
 - **Package holder**: whoever holds the package bytes. The holder need not be the
   issuer, and need not be the TS.
 
@@ -173,15 +178,27 @@ transparency service, and it is false.
 A verifier holds a package and a receipt, and does the following. Steps 1–4 are
 required; steps 5–6 are required only when the inputs named are present.
 
+The package layout belongs to the companion document, but step 1 cannot be
+followed on a pointer alone, so the three facts it needs are restated here and
+this section can be read without that document: the package carries its evidence
+under `evidence/`, one file per entry; `evidence/index.json` lists, for each entry,
+`path`, `media_type` and `content_hash`; and the evidence root is the hash over
+the sorted content hashes, with the entry count taken from the index. Everything
+else about the layout — naming, optional members, seals — is not needed to check
+a receipt, and a verifier that only reads those three facts is conformant to this
+profile even if it knows nothing else about the package.
+
 1. **Reconstruct the root.** From the package's `evidence/index.json` and the
-   evidence bytes, recompute the evidence root as the companion document defines
-   it, and refuse if any declared file is missing or any undeclared file sits
-   under `evidence/`. The verifier MUST NOT take the root from the package's own
+   evidence bytes, recompute the evidence root over the sorted content hashes,
+   and refuse if any declared file is missing or any undeclared file sits under
+   `evidence/`. The verifier MUST NOT take the root from the package's own
    `manifest.json` without recomputing it: that field is what is being checked.
 2. **Reconstruct the registered value.** Build the four-member object of
    Section 4.2 from the recomputed root, the recomputed entry count, the
    `agent_id` and the profile string, serialize with [RFC8785], and require the
-   receipt's detached payload to equal those bytes exactly. A mismatch is a
+   receipt's payload to equal the resulting bytes exactly. Build and compare
+   bytes; do not compare parsed objects, because two parsers that agree on meaning
+   can disagree on bytes and the commitment is over bytes. A mismatch is a
    failure of the receipt, not a warning: it means this receipt was issued for
    different bytes.
 3. **Check the receipt against the registered value.** Verify the COSE signature,

@@ -41,8 +41,16 @@ def test_the_one_sentence_is_present():
     assert "It does not establish that the evidence is true" in text
 
 
-def test_it_claims_no_adoption():
+def test_step_one_is_readable_without_the_companion_document():
     text = read()
+    assert "the three facts it needs are restated here" in text
+    for fact in ("`evidence/index.json` lists", "sorted content hashes",
+                 "entry count taken from the index"):
+        assert fact in text, fact
+
+
+def test_it_claims_no_adoption():
+    text = " ".join(read().split())
     assert "not submitted, not adopted" in text
     for word in ("adopted by", "accepted by the working group", "standard-track"):
         if word == "adopted by":

@@ -1,3 +1,12 @@
+## 0.5.8 — 2026-11-27 构建（**未发布到 PyPI**：缺 trusted publisher）
+
+- **构建事实**：本机（Windows 10 / Python 3.13）`tools/build_conformance_bundle.py 0.5.8` → `conformance/uibc-conformance-0.5.8.zip` **389,203 B** / `sha256:a5c0e5b703ee8dd9293844d759df9cf2fad2b865c9271c98c7548393ddf71ffc`，pin `anchors/pins/uibc-conformance-0.5.8.sha256`；空目录 `python run.py` → `strict 58/58`，rc=0。**同一棵树在 Linux 上构建得到的是另一套字节（389,201 B / e57c052f…）**——归档并不跨操作系统逐字节相同，所以 pin 必须连"哪台机器构建"一起说。
+- **为什么不是把 0.5.7 升为正门**：0.5.7（389,197 B / `fd37e0f8…512a`）已公开、pin 已发布。升正门要改版本串 → `uibc_core.pyz` 变 → 必须重封 → 覆盖已公开字节，撞 `tests/test_published_bytes_are_never_rewritten.py`。一个版本号对应一套字节，所以另起 0.5.8。
+- **没有发布，是决定**：PyPI 上本仓仍无 trusted publisher 条目（0.5.0–0.5.6 都走 long-lived token，`tools/check_pypi_provenance.py` 报 `2 of 2 file(s) lack provenance`）。条目建好之前推 `v0.5.8` 只会再造一份无 provenance 的产物，故 **tag 未推、PyPI 未动**。
+- **换行这条写下来**：归档与回执必须在 **git 归一化之后的工作树**上产生。用 Git-data API 传 blob 不经过 `text=auto eol=lf`；而手动把整树刷成 LF 会改坏 `accept-binary` 这类本来就存 CRLF 的用例（58 → 57）。这次只改动了版本、文档与 pin 这几处文本，语料与 oracle 的字节一律不动。
+- **生成器改了一处**：`tools/outsider_rerun.py` 写 `docs/outsider-rerun-receipt.json` 与 `docs/OUTSIDER-RERUN.md` 时显式 `newline="\n"`。此前在 Windows 上这两个文件按平台默认写成 CRLF，而仓库以 `* text=auto eol=lf` 归一化，于是同一棵树在两台机器上算出的摘要不同（实测 2,517 vs 2,521 文件、两套 tree 摘要）。改成 LF 之后，这类文件不再随构建主机漂移。
+- **派生件**：`conformance/oracle` 30 例按 0.5.8 重发（与 main 逐字节只差版本串，往返不一致 0 处）；`conformance/MANIFEST.sha256` 795 条。
+
 ## 0.5.6 — 2026-11-27 发布（格式 v2：未声明证据从「点名告警」升为「默认 FAIL」）
 
 - **发布事实（发版后补写，放在最前面，因为读者先要的是字节和哈希）**：PyPI `uibc-core 0.5.6` 于 2026-11-27 01:46 UTC 上传 —— `uibc_core-0.5.6-py3-none-any.whl` 226,327 B / `sha256:34eda43c…5699`，`uibc_core-0.5.6.tar.gz` 3,940,189 B / `sha256:2b31e7af…0b80`。一致性语料归档 `conformance/uibc-conformance-0.5.6.zip` 388,388 B / `sha256:31bbeff40e67…9d14`，pin 见 `anchors/pins/uibc-conformance-0.5.6.sha256`；同一棵树上重跑 `tools/build_conformance_bundle.py 0.5.6` 得到同字节（该工具有 `identical:` 分支）。

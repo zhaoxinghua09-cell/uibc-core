@@ -9,6 +9,6 @@
   "evidence_index_digest": "sha256:4263495fb68bdc48cf8df3bbef8f70436c20419e4b403e07ab9b90880b7577a5",
   "lifecycle_head": "sha256:6f6e052ac4df3562608103439cf160e4527c8b68b067edbc9eb9be5bca051970",
   "checkpoint_head": "sha256:90ab1b5dbe38e7b989835bc0adc5c67ca2b8c0e2bc9204fe3e285b7319a9370d",
-  "min_verifier_version": "0.5.6",
+  "min_verifier_version": "0.5.8",
   "format_version": 2
 }

@@ -1,15 +1,15 @@
 {
- "generated_at": "2026-11-27T11:31:45Z",
- "tree_sha256": "5d2619f444ba9533b1e1b79678336695cb96327b9efd84b645b09ac621ad4429",
- "files_hashed": 2516,
- "content_sha256": "825f7e4276227e0c76702c456894c4b0612a2bc499d430b62a26a62bbaf555f8",
- "content_files": 2516,
- "content_lf_sha256": "ff1d46e6e98deba90160bef32a9b680bf4e1ffc89c71f0fb0b857dc2f6e87466",
+ "generated_at": "2026-11-27T11:44:33Z",
+ "tree_sha256": "cfdd58e97b01673838f7bfa77eff6118aa8de80d9aa6dd8292c002fde764a937",
+ "files_hashed": 2520,
+ "content_sha256": "c1a18cfbe8895e1ae714f68262251e1db8f1e42cdcd9c8ef48a7913b428767bd",
+ "content_files": 2520,
+ "content_lf_sha256": "bccc96de2afe251f79976423cfb8259cf4bfa0fb8c04f3aabc89def6a0c21271",
  "delivery": "archive",
  "files_manifest": {
   "path": "docs/OUTSIDER-FILES.txt",
-  "sha256": "463052f77b5d66fd7d9b4cdd271eff4b1ac1ee1c55ba787368ddd56f4a040b25",
-  "entries": 2516
+  "sha256": "eebb3a05d46683da52469edd92652235eb50f720bd480318fa53da1e948445b2",
+  "entries": 2520
  },
  "digest_excludes": [
   "docs/OUTSIDER-BOARD.html",
@@ -46,7 +46,7 @@
    "rc": 0,
    "expect": "GATE OK",
    "ok": true,
-   "seconds": 0.4,
+   "seconds": 0.5,
    "tail": "GATE OK"
   },
   {
@@ -55,7 +55,7 @@
    "rc": 0,
    "expect": "PARITY OK",
    "ok": true,
-   "seconds": 0.5,
+   "seconds": 0.7,
    "tail": "PARITY OK: 41 repositories pinned and re-scored, best competitor 3/10, this repository 10/10"
   },
   {
@@ -64,7 +64,7 @@
    "rc": 0,
    "expect": "ALL OK",
    "ok": true,
-   "seconds": 0.5,
+   "seconds": 0.2,
    "tail": "ALL OK"
   },
   {
@@ -73,8 +73,8 @@
    "rc": 0,
    "expect": "passed",
    "ok": true,
-   "seconds": 4.4,
-   "tail": "41 passed in 3.66s"
+   "seconds": 4.2,
+   "tail": "41 passed in 3.44s"
   }
  ],
  "ok": true

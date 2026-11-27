@@ -115,6 +115,9 @@ def main(argv=None):
     ap.add_argument("--run-by", default=None)
     ap.add_argument("--timeout", type=int, default=180)
     a = ap.parse_args(argv)
+    # A blank --run-by is not an author. Recording "" would read as a signature
+    # with an empty name, so it is collapsed to null, the same as not passing it.
+    a.run_by = (a.run_by or "").strip() or None
 
     if a.from_kit:
         a.cases = a.cases or os.path.join(a.from_kit, "cases")

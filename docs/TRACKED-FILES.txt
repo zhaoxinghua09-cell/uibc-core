@@ -1833,6 +1833,8 @@ independent_verifier/CHECK-MAP.md
 independent_verifier/cross_check.py
 independent_verifier/iverify.py
 index.html
+interop/CONSUMERS.json
+interop/README.md
 lgd-core/COMPLIANCE.md
 lgd-core/EXAMPLES/example-medical-ai-agent.manifest.yaml
 lgd-core/EXAMPLES/example-minimal-agent.manifest.yaml
@@ -1935,6 +1937,7 @@ tests/test_bid_protocol.py
 tests/test_bid_trusted.py
 tests/test_bid_vectors.py
 tests/test_binding_note.py
+tests/test_bring_your_own.py
 tests/test_bundle_builder_args.py
 tests/test_certificate.py
 tests/test_chain_second_impl.py
@@ -2192,6 +2195,7 @@ tools/banned_phrases.txt
 tools/bid_sdk_address.mjs
 tools/bid_sdk_address_batch.mjs
 tools/board_check.js
+tools/bring_your_own.py
 tools/build_checks_reference.py
 tools/build_competitors_svg.py
 tools/build_conformance_bundle.py

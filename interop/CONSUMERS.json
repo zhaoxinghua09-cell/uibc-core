@@ -1,0 +1,72 @@
+{
+  "format": "uibc-interop/consumers/1",
+  "note": "What this project produces that another project can consume, and what it currently consumes from others. Written so a reader does not have to reverse-engineer the repository to find out. Every 'measured' line is something that was run, with the date; every 'not-consumed' line is a real absence, not a plan.",
+  "project": "zhaoxinghua09-cell/uibc-core",
+  "updated": "2026-11-27",
+  "produces": [
+    {
+      "id": "uibc-conformance-archive",
+      "what": "a zip that unpacks into a runner, a verifier and 58 cases",
+      "where": "conformance/uibc-conformance-0.5.8.zip",
+      "how": "curl the raw URL, unpack, `python run.py` in a clean directory",
+      "measured": "2026-11-27: 389,203 bytes, sha256 a5c0e5b7...71ffc, 58/58 rc=0 on Windows and on Linux, anonymously fetched on both",
+      "caveat": "the archive is not byte-identical across operating systems: the same tree built on Linux gives 389,201 bytes / e57c052f..."
+    },
+    {
+      "id": "uibc-verifier-json",
+      "what": "one JSON object per package: result, checks with ids, and the reason for each",
+      "where": "uibc_core.pyz verify <package dir>",
+      "how": "run the pyz with a Python 3 interpreter; stdout is the JSON, stderr is the explanation",
+      "measured": "2026-11-27: on 58 shipped cases, and on 3 packages built by someone else, the verdict never disagreed with the expectation",
+      "caveat": "the verdict vocabulary is ours. A consumer expecting a boolean pass/fail has to map FAIL, INCONCLUSIVE and abstention onto its own scale, and that mapping is the consumer's claim, not ours"
+    },
+    {
+      "id": "uibc-receipt",
+      "what": "the record a kit run leaves behind: verifier version, case count, passed count, and who ran it",
+      "where": "receipt.json, written by run.py",
+      "measured": "2026-11-27: run_by is null in anonymous runs, so a receipt written by the author and one written by a stranger are distinguishable"
+    },
+    {
+      "id": "uibc-bring-your-own-receipt",
+      "what": "the record of testing someone else's packages with our verifier",
+      "where": "tools/bring_your_own.py --out <file>",
+      "measured": "2026-11-27: 58/58 against the shipped kit, and 3/3 against three packages written outside this project",
+      "caveat": "one person, one machine, one run. Not an audit, not a certification"
+    },
+    {
+      "id": "uibc-evidence-package",
+      "what": "the per-action evidence layout the verifier reads: identity, lifecycle, manifest, evidence files, one digest chain",
+      "where": "schemas/ and conformance/manifest.json",
+      "caveat": "documented at the file level, not as a normative specification with a versioned grammar"
+    }
+  ],
+  "consumes": [
+    {
+      "id": "uibc-evidence-package",
+      "status": "implemented",
+      "measured": "2026-11-27: 58/58 shipped cases, plus 3 foreign packages accepted or refused as their authors expected"
+    },
+    {
+      "id": "scitt-cose-statement-vectors",
+      "status": "not-consumed",
+      "measured": "2026-11-27: 3 SCITT COSE statements fed straight to our verifier gave 0/3 (S1 and S2 fail, no PASS is invented). Through probityai/agent-evidence-vectors' external rail the same verifier gave 27 vectors executed, 0 passed, 27 failed, 4 suite-level refusals, and the rail named external-output-absent as the cause: our verifier exits 2 and writes no per-vector report line",
+      "blocked_by": "no reader for the scitt-cose-carriage-conformance corpus, and our verifier has no output mode that writes one line per vector"
+    },
+    {
+      "id": "json-canonicalisation-rfc8785",
+      "status": "consumed",
+      "measured": "2026-11-27: one cite of RFC 8785 across the 58 cases"
+    },
+    {
+      "id": "merkle-log-rfc9162",
+      "status": "consumed",
+      "measured": "2026-11-27: eleven cites of RFC 9162 across the 58 cases"
+    }
+  ],
+  "not_claimed": [
+    "that any of the consumed formats are conformant beyond the cases shipped here",
+    "that the verdict vocabulary matches any other project's",
+    "that a receipt from this project has been accepted by anyone else",
+    "that any third party has reproduced any run of this project"
+  ]
+}

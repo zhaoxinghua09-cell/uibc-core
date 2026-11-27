@@ -6,6 +6,7 @@
 - **换行这条写下来**：归档与回执必须在 **git 归一化之后的工作树**上产生。用 Git-data API 传 blob 不经过 `text=auto eol=lf`；而手动把整树刷成 LF 会改坏 `accept-binary` 这类本来就存 CRLF 的用例（58 → 57）。这次只改动了版本、文档与 pin 这几处文本，语料与 oracle 的字节一律不动。
 - **发布页读 pin 的读取器修了一处**：`tools/make_release_pin.py` 先试 `gh release view <tag> --json assets`，再退回两条 API 查询。第一次推 tag（run 45987858244，v0.5.8 的首个 tag）时两条 API 查询都以 `cannot read v0.5.8: cannot iterate over: null` 结束，页面上却明明有九个附件——于是发布页因缺自己的 pin 一直停在 draft。`gh release view` 对 draft 与公开页都能解析，不再拿 null 去迭代。
 - **生成器改了一处**：`tools/outsider_rerun.py` 写 `docs/outsider-rerun-receipt.json` 与 `docs/OUTSIDER-RERUN.md` 时显式 `newline="\n"`。此前在 Windows 上这两个文件按平台默认写成 CRLF，而仓库以 `* text=auto eol=lf` 归一化，于是同一棵树在两台机器上算出的摘要不同（实测 2,517 vs 2,521 文件、两套 tree 摘要）。改成 LF 之后，这类文件不再随构建主机漂移。
+- **别人拿自己的包来测这条入口已入仓**：`tools/bring_your_own.py` + `interop/CONSUMERS.json` + `interop/README.md` + `tests/test_bring_your_own.py`。判据不看退出码：`accept` 只要有一条检查报 FAIL 就算失败，`reject` 只要拒了却没点出你写的那条检查也算失败；setup 问题退 3 且**不写回执**；回执里的 `run_by` 原样记录、没人签名就留 null。实测：对随包 58 例 **58/58**（`--from-kit` 与 `--pyz <zip>:uibc_core.pyz` 两种取法都跑过），对项目外三个包 **3/3**。`CONSUMERS.json` 把「产什么、吃什么、还吃不下什么」写成机器可读：其中 SCITT COSE 向量明确记为 `not-consumed`（直喂 0/3，经外部 rail 27 条 0 通过）。
 - **派生件**：`conformance/oracle` 30 例按 0.5.8 重发（与 main 逐字节只差版本串，往返不一致 0 处）；`conformance/MANIFEST.sha256` 795 条。
 
 ## 0.5.6 — 2026-11-27 发布（格式 v2：未声明证据从「点名告警」升为「默认 FAIL」）

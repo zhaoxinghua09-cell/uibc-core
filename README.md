@@ -521,6 +521,28 @@ gate checks it against `--pubkey` — so a third party holding only the public k
 the owner really voided the package. HMAC-signed revocations still work for v0.2-era
 packages. Details: [`docs/assurance/REVOCATION-DEMO.md`](docs/assurance/REVOCATION-DEMO.md).
 
+## Test your own packages with this verifier
+
+If you have evidence packages of your own, you do not need our corpus, our case
+names or our archive layout. One directory per package plus one table saying what
+you expect:
+
+```bash
+python tools/bring_your_own.py --cases ./my-cases --expect ./my-expected.json \
+    --pyz uibc_core.pyz --out my-receipt.json --run-by "<your handle>"
+```
+
+The judging rules do not trust the exit code: an `accept` case fails when any
+check reports `FAIL`, and a `reject` case fails when the refusal names none of the
+checks you expected. A setup problem exits 3 and writes no receipt, so a run
+either happened or it did not. The receipt records `run_by` verbatim, and leaves
+it null when nobody signed.
+
+What this does **not** do is import a foreign corpus wholesale — that needs that
+corpus's own reader. `interop/CONSUMERS.json` is the machine-readable statement of
+what this project produces and consumes, including the formats it currently
+cannot read, e.g. the SCITT COSE vectors that this verifier still refuses.
+
 ## Reproduce the published numbers in one command
 
 If you do not want to take our arithmetic on trust, there is one command that re-derives it

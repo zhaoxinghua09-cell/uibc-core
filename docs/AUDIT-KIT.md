@@ -57,17 +57,24 @@ sha256sum corpus.zip   # 31bbeff40e67041c77b23eefe364d71ec72b192f0e59618ffc1589d
 unzip -q corpus.zip -d corpus && cd corpus && python run.py
 ```
 
-Expected: `strict 58/58`, a `receipt.json`, exit 0. Measured this way on 2026-11-20 (download →
-unzip → run, `PYTHONPATH` empty, nothing installed): the archive came down as 228,000 bytes with
-that hash, and the run printed `strict 58/58` with `verifier_version 0.4.1 / cases 36 / passed 36`.
+Expected: `strict 58/58`, a `receipt.json`, exit 0. Measured this way on 2026-11-27 (download →
+unzip → run, `PYTHONPATH` empty, nothing installed, Windows 10 / Python 3.13.18): the archive came
+down as 388,388 bytes with that hash, `run.py` printed `strict 58/58`, and the receipt recorded
+`verifier_version 0.5.6 / cases 58 / passed 58`. A verifier that answers PASS to everything scores
+6/58 through the same runner (`--verify` with an accept-all script), so refusing nothing does not pass.
 
 Note what changed on 2026-11-20: the release page used to carry no archive for this corpus at all —
 the only release asset anywhere was `uibc-conformance-0.4.0.zip`, a 30-case archive under a different
 version. Running the release workflow for the existing `v0.4.1` tag attached
-`uibc-conformance-0.4.1.zip` (228,000 bytes, the pin's hash) to
-The release carries the same bytes: https://github.com/zhaoxinghua09-cell/uibc-core/releases/download/v0.5.6/uibc-conformance-0.5.6.zip (attached 2026-11-27).
-Both that and the raw URL above serve the same bytes; `tools/check_outsider_entry.py` fails if either
-disappears from the documents, or if a document points at an asset for a different version. The commands below need the
+`uibc-conformance-0.4.1.zip` (228,000 bytes, the pin's hash) to that release.
+
+The release page does not carry this archive. The `v0.5.6` tag was frozen by the repository's
+`release-tags-immutable` rule set: the tag cannot be deleted or reused, a second release is refused
+(`tag_name was used by an immutable release`), and the uploaded copy sits in a draft that cannot be
+published. Measured 2026-11-27: `GET /repos/zhaoxinghua09-cell/uibc-core/releases/tags/v0.5.6` → 404.
+The raw URL above is therefore the only documented source; `tools/check_outsider_entry.py` fails if the
+raw URL disappears, if a document prints a release URL that answers 404, or if a document points at an
+asset for a different version. The commands below need the
 repository, because they rebuild the suite rather than run it.
 
 ```

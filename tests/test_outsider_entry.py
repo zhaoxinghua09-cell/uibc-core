@@ -100,12 +100,23 @@ def test_a_document_pointing_at_another_versions_asset_is_refused(tmp_path, monk
     assert run_checker(repo, monkeypatch) == 1
 
 
-def test_the_release_asset_must_be_named(tmp_path, monkeypatch):
+def test_saying_the_release_page_cannot_carry_it_is_required(tmp_path, monkeypatch):
+    """Since 2026-11-27 the v0.5.6 release page cannot exist; a document that silently
+    drops the release sentence leaves the reader guessing whether a release exists."""
     repo = clone_repo(tmp_path)
     for rel in ("README.md", os.path.join("docs", "AUDIT-KIT.md")):
         path = os.path.join(repo, rel)
-        text = open(path, encoding="utf-8").read().replace(entry.RELEASE_URL, "the release page")
+        text = open(path, encoding="utf-8").read().replace(entry.RELEASE_ABSENT, "the release page")
         open(path, "w", encoding="utf-8", newline="\n").write(text)
+    assert run_checker(repo, monkeypatch) == 1
+
+
+def test_a_release_url_that_does_not_resolve_is_refused(tmp_path, monkeypatch):
+    repo = clone_repo(tmp_path)
+    readme = os.path.join(repo, "README.md")
+    text = open(readme, encoding="utf-8").read()
+    text += "\nThe release page carries the same bytes: %s\n" % entry.RELEASE_URL
+    open(readme, "w", encoding="utf-8", newline="\n").write(text)
     assert run_checker(repo, monkeypatch) == 1
 
 

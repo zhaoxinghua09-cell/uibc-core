@@ -31,8 +31,12 @@ Fetch it anonymously, without cloning (no login, no token — measured 2026-11-2
 
 ```bash
 curl -fL -o corpus.zip \
-  https://github.com/zhaoxinghua09-cell/uibc-core/raw/main/conformance/uibc-conformance-0.5.6.zip
-sha256sum corpus.zip   # 31bbeff40e67041c77b23eefe364d71ec72b192f0e59618ffc1589d14d059c09, 388,388 bytes
+  https://github.com/zhaoxinghua09-cell/uibc-core/raw/main/conformance/uibc-conformance-0.5.7.zip
+sha256sum corpus.zip   # fd37e0f841e6ed576d8ebf649d60d9011edceff477611968f7625ce90e0e512a, 389,197 bytes
+# 0.5.7 keeps the same 58 cases and the same expected.json; it adds two refusals inside run.py:
+# exit 1 when expected.json and manifest.json disagree, exit 3 when the bundled uibc_core.pyz
+# does not match the uibc_core.sha256 shipped beside it. The older 0.5.6 archive (388,388 bytes,
+# 31bbeff4...) still verifies, and simply lacks those two refusals.
 unzip -q corpus.zip -d corpus && cd corpus && python run.py
 ```
 

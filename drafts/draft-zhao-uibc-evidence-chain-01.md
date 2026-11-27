@@ -182,7 +182,7 @@ here, and no later section may widen it.
 |---|---|---|
 | Evidence root (this section) | each index entry's `content_hash`, sorted | paths, media types, index metadata, lifecycle, identity, or any manifest field other than `evidence_root` |
 | Seal (Section 6) | RFC 8785 canonical bytes of `identity.json` + `manifest.json` + `lifecycle.json` | the evidence bytes themselves (only their hashes, through `manifest.evidence_root`), paths, index metadata |
-| Head (Appendix F) | the root, the tree size, and optionally the verifier identity `verifier_id`, inside one signed statement | everything the root does not commit, for the same reasons |
+| Head (Section 4.2; the tiers that range over it are Appendix F) | the root, the tree size, and optionally the verifier identity `verifier_id`, inside one signed statement | everything the root does not commit, for the same reasons |
 | Anchor (Section 8) | the evidence root alone, submitted to an external backend | identity, lifecycle, seal, paths, metadata |
 
 Consequences, stated rather than implied:
@@ -192,7 +192,7 @@ Consequences, stated rather than implied:
   or which lifecycle events accompanied it.
 - What ties identity and lifecycle to the anchored root is the **seal** (whose
   key the reader must trust out of band, Section 6) plus the **head** (whose
-  only-grew property Appendix F constrains). A package whose seal is absent, or
+  only-grew property Section 4.2 requires and Appendix F states as a tier). A package whose seal is absent, or
   whose key was swapped with the content, has an anchored root that says nothing
   about its actor.
 - Because paths and index metadata are outside the root, an attacker holding a
@@ -445,8 +445,13 @@ evidence — they appear only in the corpus report, where the denominator is sta
 
 ## 11. IANA Considerations
 
-This document requests no IANA action. No media type registration is
-requested at this version.
+This document requests no IANA action at this version: no media type, no
+registry, and no code point. The three vocabularies of Section 15 are published
+**with this document**, as files in the same repository, and are therefore not
+registered anywhere; a reader who wants a shared meaning for an extension value
+gets it from those files and the document that ships them. A registry, if one is
+ever requested, would be requested together with Section 15's policies — the
+document does not claim one now.
 
 ## 12. References
 
@@ -508,7 +513,10 @@ The bundle carries claims and inputs, not secrets.
 ## 15. Vocabularies: informational, never a rejection
 
 Outcome, action and disposition vocabularies are published with this document and
-follow a `Specification Required` policy. A verifier **MUST NOT** reject a record
+are **not** registered in an IANA registry at this version (Section 11). The
+policies below are what would govern them if a registry were requested: a
+`Specification Required` policy for the three lists, because a shared meaning
+needs a written specification and a designated expert, not a vote. A verifier **MUST NOT** reject a record
 for carrying an unregistered value **in an extension member**: registration
 governs shared meaning, never acceptance. Every vocabulary check is performable
 from the record's own bytes.

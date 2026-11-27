@@ -1,15 +1,15 @@
 {
- "generated_at": "2026-11-27T04:59:31Z",
- "tree_sha256": "0fcf2fd2674461ce9ef0bc3e574ec58b340a02f4757805e23355cb913552fe25",
- "files_hashed": 2510,
- "content_sha256": "bb40efbc740681b4c26640a026f995911aac7be84761c11154e673aa94b76ec8",
- "content_files": 2510,
- "content_lf_sha256": "0dbfb583a244be3e368f93a7e82377b959448c2a0e5c25f0a79c535b2c674063",
+ "generated_at": "2026-11-27T05:47:14Z",
+ "tree_sha256": "ed24a774f6e4cab9a649efcfc96a7354649cf933cb717a0cc3641f17723ce752",
+ "files_hashed": 2514,
+ "content_sha256": "589789f238251a202edf11d051f0707014311a8d344d4ae733b44c9afe7c8dd4",
+ "content_files": 2514,
+ "content_lf_sha256": "a648f535d94a67051c9d2130368a1e5c02e01618b9f85de5d76c34a614294508",
  "delivery": "commit",
  "files_manifest": {
   "path": "docs/OUTSIDER-FILES.txt",
-  "sha256": "6f077c6daacccb03454ae120f862d8888dae0c52efd7ac7f06db7faef36dd17d",
-  "entries": 2510
+  "sha256": "fde442aa5f206fb248cffc8afec4a2a28eb86bcf1580429232d86da02554641d",
+  "entries": 2514
  },
  "digest_excludes": [
   "docs/OUTSIDER-BOARD.html",
@@ -18,9 +18,9 @@
   "docs/outsider-rerun-receipt.json"
  ],
  "runner": {
-  "python": "3.12.11",
-  "machine": "x86_64",
-  "system": "Linux"
+  "python": "3.13.18",
+  "machine": "AMD64",
+  "system": "Windows"
  },
  "environment": {
   "variables_kept": [
@@ -46,7 +46,7 @@
    "rc": 0,
    "expect": "GATE OK",
    "ok": true,
-   "seconds": 0.2,
+   "seconds": 0.7,
    "tail": "GATE OK"
   },
   {
@@ -55,7 +55,7 @@
    "rc": 0,
    "expect": "PARITY OK",
    "ok": true,
-   "seconds": 0.3,
+   "seconds": 1.1,
    "tail": "PARITY OK: 41 repositories pinned and re-scored, best competitor 3/10, this repository 10/10"
   },
   {
@@ -64,7 +64,7 @@
    "rc": 0,
    "expect": "ALL OK",
    "ok": true,
-   "seconds": 0.1,
+   "seconds": 0.5,
    "tail": "ALL OK"
   },
   {
@@ -73,8 +73,8 @@
    "rc": 0,
    "expect": "passed",
    "ok": true,
-   "seconds": 5.2,
-   "tail": "41 passed in 1.40s"
+   "seconds": 6.3,
+   "tail": "41 passed in 5.08s"
   }
  ],
  "ok": true

@@ -66,7 +66,11 @@ Each line is `{"format": "uibc-verify-report/1", "vector": ..., "result": ...,
 "checks_failed": [...], "verifier_id": ..., "verifier_version": ..., "when_utc":
 ..., "exit": 0|1}`. `--report` appends, so a batch run accumulates in one file and
 a failing package cannot erase the lines already written. A failing package still
-gets a line — that is the case a harness most needs. `verify-dir` exits non-zero
+gets a line — that is the case a harness most needs — and so does an input we cannot
+read at all: hand it a single statement file instead of a package directory and the
+line says `result: ERROR`, `exit: 3`, and the reason. `no line` would be indistinguishable
+from `this vector was silently dropped`, which is precisely what a foreign rail reported
+as `external-output-absent` when it handed us single statements. `verify-dir` exits non-zero
 when any child is not PASS and prints `n/m packages PASS`; an empty directory exits
 3 and writes nothing, because "nothing was judged" must not read as "all passed".
 

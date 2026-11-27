@@ -16,7 +16,7 @@
       "id": "uibc-verify-report",
       "what": "one JSON line per package, written by the verifier itself: vector, result, checks_failed, verifier identity, exit code",
       "where": "uibc_core.pyz verify <pkg> --report <file.jsonl> --vector-id <id>, or uibc_core.pyz verify-dir <dir> --report <file.jsonl>",
-      "measured": "2026-11-27: five contracts covered by tests/test_verify_report.py; a directory of packages yields one line each, an empty directory exits 3 and writes nothing",
+      "measured": "2026-11-27: six contracts in tests/test_verify_report.py; on Linux, 58 shipped cases produced 58 lines and 52 of them named the failing check; an unreadable input (a single statement file) produced one ERROR line with exit 3",
       "caveat": "the line carries our verdict vocabulary and our check ids; a consumer still has to map both. Lines are appended, so a harness must not assume one line per file"
     },
     {

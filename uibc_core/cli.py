@@ -824,6 +824,171 @@ def cmd_verify_dir(args):
 
 
 
+COSE_REPORT_FORMAT = "uibc-scitt-cose-report/1"
+
+
+def _cose_report_line(vector_id, verdict, codes, notes, exit_code, conforms=None):
+    """One line per SCITT/COSE vector, in a shape a foreign harness can read.
+
+    Deliberately not the package report shape: `checks_failed` there is a list
+    of S-ids, and this profile refuses on named faults (an inclusion proof that
+    is absent, an algorithm that is deprecated) that no S-number describes. The
+    line says what a verifier decided and why, and leaves any score to the
+    harness that asked for it.
+    """
+    line = {
+        "format": COSE_REPORT_FORMAT,
+        "vector": vector_id,
+        "verdict": verdict,
+        "codes": sorted(set(codes)),
+        "notes": list(notes),
+        "conforms_to_expected": conforms,
+        "verifier_id": VERIFIER_ID,
+        "verifier_version": __version__,
+        "when_utc": _now_utc(),
+        "exit": exit_code,
+    }
+    return line
+
+
+def _expected_conforms(expected, verdict, codes):
+    """Does this verdict conform to a corpus member's declared answer?
+
+    An accept member pins `valid`; a reject member pins `invalid` plus the code
+    it carries; an indeterminate member pins readings, any one of which
+    conforms, and those readings are not the words "valid"/"invalid" but
+    statements about what a verifier does (e.g. "receipt-not-of-inclusion").
+    Every reading other than `valid` is read as a refusal under another name,
+    because that is what the corpus means by them.
+    """
+    if not isinstance(expected, dict):
+        return None
+    verdict_expected = expected.get("verdict")
+    if verdict_expected == "valid":
+        return verdict == "valid"
+    if verdict_expected == "invalid":
+        if verdict != "invalid":
+            return False
+        wanted = expected.get("codes") or []
+        return bool(set(wanted) & set(codes)) if wanted else True
+    readings = expected.get("readings")
+    if isinstance(readings, dict) and readings:
+        accepts = [r for r in readings.values() if r == "valid"]
+        refuses = [r for r in readings.values() if r != "valid"]
+        if verdict == "valid":
+            return bool(accepts)
+        return bool(refuses)
+    return None
+
+
+def cmd_verify_cose(args):
+    """Read SCITT/COSE Transparent Statements under aee-scitt-cose/v0.1.
+
+    Two modes, because a corpus and a single statement need different inputs:
+
+      * `--manifest M --statements DIR` judges every member of a corpus and
+        prints how many answers conform to what the corpus declares;
+      * `--vector F` judges one vector file and prints the verdict.
+
+    A vector file carries its own trust inputs and a fixed verification time, so
+    no key material is passed on the command line here. `--at` pins the instant
+    exp and nbf are judged against; without it the vector's own
+    `verificationTime` is used, and the wall clock only where it carries none.
+    """
+    from . import scitt_cose
+
+    at = getattr(args, "at", None)
+    report_path = getattr(args, "report", None)
+
+    if getattr(args, "vector", None):
+        path = os.path.abspath(args.vector)
+        try:
+            with open(path, encoding="utf-8") as fh:
+                vector = json.load(fh)
+        except (OSError, ValueError) as exc:
+            print(f"error: cannot read vector: {exc}", file=sys.stderr)
+            sys.exit(3)
+        verdict = scitt_cose.verify_transparent_statement(vector, now=at)
+        line = _cose_report_line(os.path.basename(path), verdict["verdict"],
+                                 verdict["codes"], verdict["notes"],
+                                 0 if verdict["verdict"] == "valid" else 1)
+        if report_path:
+            _append_line(report_path, line)
+        print(json.dumps(verdict, ensure_ascii=False, indent=2))
+        sys.exit(0 if verdict["verdict"] == "valid" else 1)
+
+    manifest_path = getattr(args, "manifest", None)
+    if not manifest_path:
+        sys.exit("error: pass --manifest with --statements, or --vector FILE")
+    try:
+        with open(os.path.abspath(manifest_path), encoding="utf-8") as fh:
+            manifest = json.load(fh)
+    except (OSError, ValueError) as exc:
+        print(f"error: cannot read manifest: {exc}", file=sys.stderr)
+        sys.exit(3)
+    root = os.path.abspath(args.statements) if getattr(args, "statements", None) else None
+    if root is None:
+        sys.exit("error: --manifest needs --statements DIR")
+    if not os.path.isdir(root):
+        sys.exit(f"error: statements directory not found: {root}")
+
+    members = manifest.get("vectors") or []
+    if not members:
+        print("error: the manifest lists no vectors", file=sys.stderr)
+        sys.exit(3)
+    conforming = 0
+    rows = []
+    for member in members:
+        name = os.path.basename(member.get("file") or "")
+        if not name:
+            print(f"error: manifest member {member.get('id')} names no file",
+                  file=sys.stderr)
+            sys.exit(3)
+        path = os.path.join(root, name)
+        try:
+            with open(path, encoding="utf-8") as fh:
+                vector = json.load(fh)
+        except (OSError, ValueError) as exc:
+            # A member we cannot open is not a verdict, and it is not a pass.
+            line = _cose_report_line(member.get("id") or name, "invalid",
+                                     ["unreadable"], [str(exc)][:1], 1, conforms=False)
+            if report_path:
+                _append_line(report_path, line)
+            rows.append({"id": member.get("id"), "verdict": "invalid",
+                         "codes": ["unreadable"], "conforms": False})
+            continue
+        verdict = scitt_cose.verify_transparent_statement(vector, now=at)
+        conforms = _expected_conforms(member.get("expected"), verdict["verdict"],
+                                      verdict["codes"])
+        if conforms:
+            conforming += 1
+        line = _cose_report_line(member.get("id") or name, verdict["verdict"],
+                                 verdict["codes"], verdict["notes"],
+                                 0 if verdict["verdict"] == "valid" else 1, conforms)
+        if report_path:
+            _append_line(report_path, line)
+        rows.append({"id": member.get("id"), "verdict": verdict["verdict"],
+                     "codes": verdict["codes"], "conforms": conforms})
+
+    declared = manifest.get("counts") or {}
+    summary = {
+        "format": COSE_REPORT_FORMAT,
+        "profile": manifest.get("profile"),
+        "vectors": len(members),
+        "conforming": conforming,
+        "declared_accept": declared.get("accept"),
+        "declared_reject": declared.get("reject"),
+        "declared_indeterminate": declared.get("indeterminate"),
+        "at": at,
+        "rows": rows,
+    }
+    if getattr(args, "json_out", None):
+        with open(args.json_out, "w", encoding="utf-8", newline="\n") as fh:
+            fh.write(json.dumps(summary, ensure_ascii=False, indent=2) + "\n")
+    print(f"{conforming}/{len(members)} answers conform to the corpus' declared answers")
+    sys.exit(0 if conforming == len(members) else 1)
+
+
 def cmd_explain(args):
     """The same verifier, printed for a person.
 
@@ -1001,6 +1166,23 @@ def main():
     p.add_argument("--strict", action="store_true")
     p.add_argument("--report", default=None, metavar="JSONL")
     p.set_defaults(func=cmd_verify_dir)
+
+    p = sub.add_parser("verify-cose", help="read SCITT/COSE Transparent Statements "
+                                            "under aee-scitt-cose/v0.1 (corpus or one vector)")
+    p.add_argument("--manifest", default=None, metavar="JSON",
+                   help="a corpus manifest: every listed member is judged")
+    p.add_argument("--statements", default=None, metavar="DIR",
+                   help="where the manifest's statement files live")
+    p.add_argument("--vector", default=None, metavar="FILE",
+                   help="judge one vector file instead of a corpus")
+    p.add_argument("--at", type=int, default=None, metavar="EPOCH",
+                   help="judge exp and nbf at this instant; default is the vector's "
+                        "own verificationTime")
+    p.add_argument("--report", default=None, metavar="JSONL",
+                   help="append one uibc-scitt-cose-report/1 line per vector")
+    p.add_argument("--json-out", dest="json_out", default=None, metavar="JSON",
+                   help="write per-vector rows and the conforming count here")
+    p.set_defaults(func=cmd_verify_cose)
 
     p = sub.add_parser("explain", help="verify and print why, one check per line")
     p.add_argument("path")

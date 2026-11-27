@@ -20,6 +20,13 @@
       "caveat": "the line carries our verdict vocabulary and our check ids; a consumer still has to map both. Lines are appended, so a harness must not assume one line per file"
     },
     {
+      "id": "uibc-scitt-cose-report",
+      "what": "one JSON line per SCITT/COSE Transparent Statement: verdict, the named ground for a refusal, the observer position, and the verifier identity",
+      "where": "uibc_core.pyz verify-cose --manifest M --statements DIR --report <file.jsonl>; shape: interop/scitt-cose-report.schema.json; checker: tools/report_lint.py",
+      "measured": "2026-11-27: on probityai/agent-evidence-vectors corpora/vectors-scitt-cose (27 members, corpusDigest 79d651d3...) 27/27 answers conform to the answers the corpus declares, judged at the instant its own witnesses use (1789041600 = 2026-09-10T12:00Z); at each vector's own verificationTime 26/27, and the one that differs is the expiry member, whose exp (1789038000) is after the verificationTime that file carries (1788955200) and before the corpus' witness clock",
+      "caveat": "27/27 is a self-run of their published corpus with our own reader. Their rail has not been re-run against this build, so this is a measurement of our reading, not of their scoring"
+    },
+    {
       "id": "uibc-verifier-json",
       "what": "one JSON object per package: result, checks with ids, and the reason for each",
       "where": "uibc_core.pyz verify <package dir>",
@@ -55,9 +62,9 @@
     },
     {
       "id": "scitt-cose-statement-vectors",
-      "status": "not-consumed",
-      "measured": "2026-11-27: 3 SCITT COSE statements fed straight to our verifier gave 0/3 (S1 and S2 fail, no PASS is invented). Through probityai/agent-evidence-vectors' external rail the same verifier gave 27 vectors executed, 0 passed, 27 failed, 4 suite-level refusals, and the rail named external-output-absent as the cause: our verifier exits 2 and writes no per-vector report line",
-      "blocked_by": "no reader for the scitt-cose-carriage-conformance corpus. The output side is no longer the blocker: since 2026-11-27 the verifier can write one report line per package (--report, verify-dir), which is what the external rail named as missing"
+      "status": "consumed (reader implemented 2026-11-27)",
+      "measured": "2026-11-27: our verifier now reads tagged COSE_Sign1 (tag 18) with CWT claims, the private-use observer position (label -70001) and RFC 9942 receipts; on the peer corpus' 27 members it agreed with the declared answer 27/27 at the corpus' witness instant and 26/27 at each vector's own verificationTime; the reader re-derives the RFC 9162 inclusion root itself instead of sharing the corpus' tree code",
+      "blocked_by": "none for reading. Remaining gap: their external rail has not run against this build, and their corpus' expiry member carries a verificationTime that contradicts its own declared verdict, which is recorded rather than smoothed over"
     },
     {
       "id": "json-canonicalisation-rfc8785",
@@ -74,6 +81,7 @@
     "that any of the consumed formats are conformant beyond the cases shipped here",
     "that the verdict vocabulary matches any other project's",
     "that a receipt from this project has been accepted by anyone else",
-    "that any third party has reproduced any run of this project"
+    "that any third party has reproduced any run of this project",
+    "that a conforming reading of another project's corpus is an endorsement by that project"
   ]
 }

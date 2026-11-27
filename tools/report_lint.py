@@ -1,4 +1,4 @@
-"""Lint a verify-report JSONL file against interop/verify-report.schema.json.
+"""Lint a verify-report JSONL file against the schema that shape belongs to.
 
 Why a separate linter: the schema is a promise to someone outside this
 repository. Testing our own output against a schema we wrote and validating
@@ -19,10 +19,13 @@ import os
 import re
 import sys
 
-SCHEMA = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                      "interop", "verify-report.schema.json")
+HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SCHEMA = os.path.join(HERE, "interop", "verify-report.schema.json")
+COSE_SCHEMA = os.path.join(HERE, "interop", "scitt-cose-report.schema.json")
 
 FORMAT = "uibc-verify-report/1"
+COSE_FORMAT = "uibc-scitt-cose-report/1"
+COSE_CODE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 RESULTS = {"PASS", "FAIL", "INCONCLUSIVE", "ERROR"}
 EXITS = {0, 1, 2, 3}
 WHEN = re.compile(r"^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$")
@@ -76,6 +79,68 @@ def problems(line):
     return out
 
 
+COSE_REQUIRED = ("format", "vector", "verdict", "codes", "notes", "verifier_id",
+                 "verifier_version", "when_utc", "exit")
+COSE_OPTIONAL = ("conforms_to_expected",)
+
+
+def cose_problems(line):
+    """The second shape: what a verifier decided about one Transparent Statement.
+
+    Kept separate from `problems` rather than generalised into it: the two
+    shapes answer different questions, and a validator that accepts either
+    without saying which rules it applied is the failure mode this file exists
+    to catch. The contract is small enough to state: a valid verdict carries no
+    codes, a refusal carries at least one and exits 1.
+    """
+    if not isinstance(line, dict):
+        return ["not a JSON object"]
+    out = []
+    for k in COSE_REQUIRED:
+        if k not in line:
+            out.append("missing %r" % k)
+    for k in sorted(set(line) - set(COSE_REQUIRED) - set(COSE_OPTIONAL)):
+        out.append("unknown key %r" % k)
+    if out:
+        return out
+    if line["format"] != COSE_FORMAT:
+        out.append("format is %r, expected %r" % (line["format"], COSE_FORMAT))
+    for k in ("vector", "verifier_id", "verifier_version"):
+        if not isinstance(line[k], str) or not line[k]:
+            out.append("%s must be a non-empty string" % k)
+    if line["verdict"] not in ("valid", "invalid"):
+        out.append("verdict %r is neither 'valid' nor 'invalid'" % (line["verdict"],))
+    codes = line["codes"]
+    if not isinstance(codes, list) or any(
+            not isinstance(c, str) or not COSE_CODE.match(c) for c in codes):
+        out.append("codes must be a list of lower-case hyphenated tokens")
+    elif line["verdict"] == "invalid" and not codes:
+        out.append("an invalid verdict with no code names no ground for the refusal")
+    elif line["verdict"] == "valid" and codes:
+        out.append("a valid verdict must not carry refusal codes")
+    notes = line["notes"]
+    if not isinstance(notes, list) or any(not isinstance(n, str) for n in notes):
+        out.append("notes must be a list of strings")
+    if "conforms_to_expected" in line:
+        v = line["conforms_to_expected"]
+        if v is not None and not isinstance(v, bool):
+            out.append("conforms_to_expected must be true, false or null")
+    if not isinstance(line["when_utc"], str) or not WHEN.match(line["when_utc"]):
+        out.append("when_utc must be YYYY-MM-DDTHH:MM:SSZ")
+    if line["exit"] not in (0, 1) or isinstance(line["exit"], bool):
+        out.append("exit must be 0 (valid) or 1 (refused)")
+    elif (line["verdict"] == "valid") != (line["exit"] == 0):
+        out.append("exit %r does not match verdict %r" % (line["exit"], line["verdict"]))
+    return out
+
+
+def problems_any(line):
+    """Validate one line against the shape its `format` field names."""
+    if isinstance(line, dict) and line.get("format") == COSE_FORMAT:
+        return cose_problems(line)
+    return problems(line)
+
+
 def lint(path):
     bad, total = [], 0
     with open(path, encoding="utf-8") as fh:
@@ -88,7 +153,7 @@ def lint(path):
             except ValueError as exc:
                 bad.append((n, ["not JSON: %s" % exc]))
                 continue
-            why = problems(line)
+            why = problems_any(line)
             if why:
                 bad.append((n, why))
     return total, bad
@@ -113,7 +178,8 @@ def main(argv=None):
     if bad:
         print("\nREPORT LINT FAIL (%d of %d line(s))" % (len(bad), total))
         return 1
-    print("REPORT LINT OK: %d line(s), schema %s" % (total, os.path.basename(args.schema)))
+    print("REPORT LINT OK: %d line(s), schemas %s and %s"
+          % (total, os.path.basename(SCHEMA), os.path.basename(COSE_SCHEMA)))
     return 0
 
 

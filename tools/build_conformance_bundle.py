@@ -170,6 +170,7 @@ def main():
     # Build beside the target and decide before replacing anything: a pinned archive
     # whose bytes would change is refused, because every published hash, receipt and
     # invitation cites it.
+    pyz = build_pyz()
     tmp_out = out + ".tmp"
     with zipfile.ZipFile(tmp_out, "w", zipfile.ZIP_DEFLATED) as z:
         for name in sorted(cases):
@@ -179,7 +180,12 @@ def main():
             json.dumps(expected, ensure_ascii=False, indent=2).encode("utf-8"))
         add(z, "run.py", runner)
         add(z, "README.md", readme)
-        add(z, "uibc_core.pyz", build_pyz())
+        add(z, "uibc_core.pyz", pyz)
+        # Red team A9 (measured 2026-11-27): appending 64 bytes to uibc_core.pyz still
+        # ran 58/58, because nothing bound the archive to the verifier it carries. The
+        # seal now ships the digest beside the pyz, and run.py refuses on mismatch.
+        add(z, "uibc_core.sha256",
+            ("%s  uibc_core.pyz\n" % hashlib.sha256(pyz).hexdigest()).encode("ascii"))
 
     digest = hashlib.sha256(read(tmp_out)).hexdigest()
     if os.path.isfile(out):

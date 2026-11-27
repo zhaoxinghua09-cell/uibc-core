@@ -1,15 +1,15 @@
 {
- "generated_at": "2026-11-27T23:17:28Z",
- "tree_sha256": "10fb67d843f5f73b15208863fb729131db9a8da54e7c60b22a3f3379d8121027",
- "files_hashed": 2539,
- "content_sha256": "42ac6a38a7393dd493772a71c8b177050ff48db19072ec356943218edfd92605",
- "content_files": 2539,
- "content_lf_sha256": "ab642d8dddd07b2236ffd5446343af0c69a876bc4a83e4215aa19cde2d513f5c",
+ "generated_at": "2026-11-27T23:34:32Z",
+ "tree_sha256": "9d109d6f16023e802b7490416714137028ba863545dc256c4028a35d46986e95",
+ "files_hashed": 2540,
+ "content_sha256": "87305f82b9721c87e8f8c6483e88358fec50af0ed152db7303008d7ebd20d2c3",
+ "content_files": 2540,
+ "content_lf_sha256": "f04b2b3dfa562aabeb9a7a23fee002725bb2e496e4b26f8b410e75effd080b84",
  "delivery": "commit",
  "files_manifest": {
   "path": "docs/OUTSIDER-FILES.txt",
-  "sha256": "8e11af66e3dd0dec110ddd1577974b1af6cc517e9ec8347662ce7a8e78750dd4",
-  "entries": 2539
+  "sha256": "be786ff1f96232d926e837d544aa8e8a8c85c0ebaa135ad27755a0d649e893b9",
+  "entries": 2540
  },
  "digest_excludes": [
   "docs/OUTSIDER-BOARD.html",
@@ -73,8 +73,8 @@
    "rc": 0,
    "expect": "passed",
    "ok": true,
-   "seconds": 4.0,
-   "tail": "41 passed in 1.21s"
+   "seconds": 3.5,
+   "tail": "41 passed in 1.12s"
   }
  ],
  "ok": true

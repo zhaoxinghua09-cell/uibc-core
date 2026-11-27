@@ -32,22 +32,23 @@
 
 ## 与 `actions.lock` 的冲突（实测，非推测）
 
-本仓原先用 `gh-actions-lock` 维护 `.github/workflows/actions.lock`（lockfile version `v0.0.3`），共享 CI（`LGD-AI/lgd-ci` 可复用工作流，`verify-lockfile` 默认 `true`）在流水线里跑 `gh actions-lock --verify`。两套机制不兼容，实测三条证据：
+本仓原先用 `gh-actions-lock` 维护 `.github/workflows/actions.lock`（lockfile version `v0.0.3`）。两套机制不兼容，且**拦在门口的不是 CI，是 GitHub 自己**：
 
-1. `gh actions-lock --verify` 对 SHA 钉法报 `✗ Not pinned actions/checkout@<sha> ... used in workflow but not pinned in lockfile` —— 它按"字面 ref 与锁条目一一对应"比对，而锁条目只允许 `OWNER/REPO@REF`。
-2. 在临时副本上把工作流改回 SHA 后运行 `gh actions-lock`（不带 `--verify`），工具把全部 `@<sha> # vX` **改写回 `@vX`**（`Pinned 0 actions`）——即该工具把 SHA 钉法视为需要"修复"的偏差，跑一次就是一次降级。
-3. 锁文件不接受子路径键：手写 `'github/codeql-action/init@<sha>':` 报 `dependency key ... is not a valid pin (expected OWNER/REPO@REF)`；只用 `OWNER/REPO@<sha>` 又无法与 `codeql-action/init@<sha>`、`/analyze@<sha>` 两处 `uses:` 对齐。
+1. **GitHub 在运行启动时校验该文件**。钉了 SHA 却未在锁里登记，整个工作流不创建任何作业，直接 `startup_failure`，注解原文：`Invalid lockfile: .github/workflows/actions.lock#L1 — The lockfile is missing actions/checkout@<sha>, ... Regenerate it by running gh actions-lock.`（run `46084630159`；同批次 8 个工作流全部 0 作业，只有未改的 `codeql-sast` 与 `vector-package` 正常起跑）。
+2. `gh-actions-lock --verify` 对 SHA 钉法报 `✗ Not pinned ... used in workflow but not pinned in lockfile`；不带 `--verify` 跑一次，工具把全部 `@<sha> # vX` **改写回 `@vX`**（`Pinned 0 actions`）——即该工具把 SHA 钉法当作需要"修复"的偏差，跑一次就是一次降级。
+3. 该工具的锁键只认 `OWNER/REPO@REF`：手写 `'github/codeql-action/init@<sha>':` 报 `dependency key ... is not a valid pin`。而 GitHub 侧要求的是 `OWNER/REPO@<sha>`（对 `/init`、`/analyze` 这类子路径动作，仓库级键即可覆盖）。
 
 ## 处置
 
-取更强的一侧：**保留 SHA 钉版，关闭锁文件校验**。
+取更强的一侧：**保留 SHA 钉版，并把锁文件重新按 SHA 键写**。
 
-- `.github/workflows/lgd-ci.yml` 传 `verify-lockfile: false`（该输入由可复用工作流声明、默认 `true`，属调用方可配置项，不需要改上游仓）。
-- `.github/workflows/actions.lock` 加 SUPERSEDED 注记后保留：它的 tag→commit 对照仍有参考价值，但不再被校验，也不再被信任。
+- `.github/workflows/actions.lock` 的 `workflows:` 列表与 `dependencies:` 键全部改为 40 位 commit（`ref:` 字段保留原 tag 以便阅读），与工作流里的 `@<sha> # tag` 一一对应。生成脚本从原锁的 `commit: sha1-...` 反推映射，未手填任何 SHA。
+- `.github/workflows/lgd-ci.yml` 传 `verify-lockfile: false`：`gh actions-lock --verify` 读不动 SHA 键形式，留着只会把构建判红；替代它的门禁是 GitHub 自己的启动校验（上方第 1 条），强度不低于原检查。
 - 钉版表落在本文件，任何人可用 `git ls-remote`/GitHub API 复算。
 
 ## 残余风险（如实记录）
 
-- 关掉的是一条**已经在跑的**校验。SHA 钉版严格强于"tag + 锁文件记录"：tag 可被上游移动，锁文件的保护来自 diff 可见性，而 SHA 钉版直接消除可变引用；但本仓现在少了一道自动化比对，**新增工作流若忘了钉 SHA，没有门禁会拦**。这是本次处置的真实代价，已在此写明，不做美化。
-- 该关闭只作用于本仓；其他仓若继续用 tag + 锁文件，仍会被共享 CI 校验。
-- 上级是共享可复用工作流（`LGD-AI/lgd-ci`），若要根治，正解是在上游支持 `OWNER/REPO@SHA` 与子路径键，或把锁文件模型换成"钉 SHA 即合规"。本仓无法单方面改上游，故此处只做本仓范围的最小处置。
+- 改的是锁文件的**键形式**，不是拆掉校验：新增工作流若钉了 SHA 却忘了登记，GitHub 仍会 `startup_failure`；若忘了钉 SHA（仍用 tag），GitHub 不拦、CI 侧那道 `--verify` 也已关闭，则**没有任何门禁会说话**。这是本次处置的真实代价，不做美化。
+- `gh actions-lock` 一旦被谁重新运行，会把 SHA 钉法与锁文件一起降回 tag 形式；本文件与 `lgd-ci.yml` 里的注记即为拦阻说明。
+- 该处置只作用于本仓；其他仓若继续用 tag + 锁文件，仍会被共享 CI 的 `--verify` 校验。
+- 真正该修的是工具：`gh-actions-lock` 应接受 `OWNER/REPO@<sha>` 键并停止把 SHA 钉法改回 tag。GitHub 侧已经接受这种形式，工具侧没有跟上——这是上游问题，本仓只能绕开而不是修好。

@@ -1,0 +1,26 @@
+{
+  "kind": "uibc-attestation-v0",
+  "release": "v0.5.8",
+  "what": "These are the bytes v0.5.8 uploaded to its GitHub release page, copied here on 2026-11-28 so a reader can check the page against something that is not the page. The release is still a draft, so the page is not public; the assets are read through the release asset API by an authenticated caller in the same repository. anchors/pins/uibc-release-v0.5.8.json is the repository form of the pin the page does not yet carry.",
+  "digest_file": "CORPUS-DIGESTS.txt",
+  "digest_file_sha256": "44b1c487c4acaa5cfd3df8acc2f0b2148dae3898795dc9fccff5ec26d429bb31",
+  "signature": {
+    "file": "CORPUS-DIGESTS.txt.sig",
+    "kind": "uibc-detached-signature-v0",
+    "key_id": "179c615aef27cbcd",
+    "verified_here": "Ed25519 verify passed locally against the public_key_b64 the signature file carries (2026-11-28, cryptography 50.0.2); the same key_id and public key as v0.5.5"
+  },
+  "timestamp_on_the_digest": {
+    "file": "CORPUS-DIGESTS.txt",
+    "file_sha256": "44b1c487c4acaa5cfd3df8acc2f0b2148dae3898795dc9fccff5ec26d429bb31",
+    "tsa": {
+      "state": "unverified here",
+      "detail": "anchor_freetsa.tsr is in this directory (4,643 bytes, sha256 271ec1df35a0b0c071a152789acaea4e81670c8455ed4eaf42df9cb0848e2a54); verify with tools/check_release_anchors.py, which needs the network"
+    },
+    "ots": {
+      "state": "copied",
+      "detail": "CORPUS-DIGESTS.txt.ots as the page serves it (915 bytes, sha256 5a8a0a73e29f514bfed545f80f579e09cc1d61683c42953bd8d5fa4b8f043f66)"
+    }
+  },
+  "limits": "A signature says which key signed these bytes, not who controls that key outside this repository. The timestamp states what the token says; neither proves who published the page or that the workflow behaved. The release being a draft means the page cannot be cited as public evidence."
+}

@@ -71,3 +71,21 @@ therefore contains, and keeps growing:
 
 If you find that any published claim in `README.md` overstates what the code
 actually does, that is also a security-relevant bug. Report it.
+
+## Disclosure timeline
+
+| Stage | Target |
+|---|---|
+| Acknowledgement of report | 5 business days |
+| Initial assessment (in scope / out of scope) | 10 business days |
+| Fix or documented mitigation | 90 days for HIGH severity, 180 days for others |
+| Public advisory | after the fix ships, or at 90 days if unresolved - whichever comes first |
+
+- Reports without a reproducible input are answered within the same 5 business days, stating what is missing.
+- An out-of-scope report is answered with the reason and, where possible, a pointer to the repository that owns the code.
+- This timeline does not oblige the project to accept a report, and it does not make the project a certification body.
+
+## Appeals
+
+Findings produced by this project's tooling can be challenged under `APPEALS.md`.
+

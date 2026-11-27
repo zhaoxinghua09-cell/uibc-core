@@ -4,6 +4,7 @@
 - **为什么不是把 0.5.7 升为正门**：0.5.7（389,197 B / `fd37e0f8…512a`）已公开、pin 已发布。升正门要改版本串 → `uibc_core.pyz` 变 → 必须重封 → 覆盖已公开字节，撞 `tests/test_published_bytes_are_never_rewritten.py`。一个版本号对应一套字节，所以另起 0.5.8。
 - **没有发布，是决定**：PyPI 上本仓仍无 trusted publisher 条目（0.5.0–0.5.6 都走 long-lived token，`tools/check_pypi_provenance.py` 报 `2 of 2 file(s) lack provenance`）。条目建好之前推 `v0.5.8` 只会再造一份无 provenance 的产物，故 **tag 未推、PyPI 未动**。
 - **换行这条写下来**：归档与回执必须在 **git 归一化之后的工作树**上产生。用 Git-data API 传 blob 不经过 `text=auto eol=lf`；而手动把整树刷成 LF 会改坏 `accept-binary` 这类本来就存 CRLF 的用例（58 → 57）。这次只改动了版本、文档与 pin 这几处文本，语料与 oracle 的字节一律不动。
+- **发布页读 pin 的读取器修了一处**：`tools/make_release_pin.py` 先试 `gh release view <tag> --json assets`，再退回两条 API 查询。第一次推 tag（run 45987858244，v0.5.8 的首个 tag）时两条 API 查询都以 `cannot read v0.5.8: cannot iterate over: null` 结束，页面上却明明有九个附件——于是发布页因缺自己的 pin 一直停在 draft。`gh release view` 对 draft 与公开页都能解析，不再拿 null 去迭代。
 - **生成器改了一处**：`tools/outsider_rerun.py` 写 `docs/outsider-rerun-receipt.json` 与 `docs/OUTSIDER-RERUN.md` 时显式 `newline="\n"`。此前在 Windows 上这两个文件按平台默认写成 CRLF，而仓库以 `* text=auto eol=lf` 归一化，于是同一棵树在两台机器上算出的摘要不同（实测 2,517 vs 2,521 文件、两套 tree 摘要）。改成 LF 之后，这类文件不再随构建主机漂移。
 - **派生件**：`conformance/oracle` 30 例按 0.5.8 重发（与 main 逐字节只差版本串，往返不一致 0 处）；`conformance/MANIFEST.sha256` 795 条。
 

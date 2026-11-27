@@ -170,6 +170,56 @@ run it with. And the emitted corpus contains only statements that should come
 back `valid`; refusals are covered by `tests/test_scitt_cose_emit.py`, which
 builds each fault from bytes, not by a corpus of broken statements.
 
+## Read an MCP authorization observation
+
+The peer's `corpora/vectors-mcp-authz` does not ask whether a document parses.
+It asks whether a server's whole authorization surface behaves: seven surfaces
+of one observation, each judged, with the harness reading a single line.
+
+```bash
+# one observation: last stdout line is {"verdict": ..., "codes": [...]}
+python uibc_core.pyz verify-mcp-authz --file observations/one.json
+
+# the whole corpus: every member against the answer key in its MANIFEST.json
+python uibc_core.pyz verify-mcp-authz --dir corpora/vectors-mcp-authz \
+       --report runs.jsonl
+```
+
+Exit codes follow the corpus convention, not ours: `0` valid, `1` invalid, `3`
+unreadable. `--dir` prints `n/m members conform to the corpus answer key` and
+exits 1 when any member disagrees with what the corpus declares, so a reader
+cannot pass by printing nothing.
+
+The surfaces and their codes:
+
+| surface | codes |
+| --- | --- |
+| protected resource metadata | `prm-not-served`, `prm-resource-not-identical`, `prm-authorization-servers-missing`, `prm-bearer-header-missing`, `prm-scope-offline-access` |
+| 401 challenge | `challenge-missing`, `challenge-scheme-not-bearer`, `challenge-resource-metadata-missing`, `challenge-scope-offline-access`, `challenge-insufficient-scope-not-403`, `unauthenticated-request-accepted`, `required-scope-not-enforced` |
+| authorization server metadata | `as-metadata-not-json`, `as-required-field-missing`, `as-issuer-mismatch`, `as-issuer-not-in-prm`, `as-pkce-s256-missing`, `as-response-type-code-missing`, `as-registration-endpoint-missing`, `config-resource-url-missing`, `config-scopes-not-obtainable` |
+| DPoP | `dpop-proof-typ-invalid`, `dpop-proof-alg-not-asymmetric`, `dpop-proof-key-private`, `dpop-htm-mismatch`, `dpop-htu-mismatch`, `dpop-ath-mismatch`, `dpop-proof-replayed`, `dpop-key-binding-mismatch` |
+| workload federation | `wif-issuer-untrusted`, `wif-audience-mismatch`, `wif-token-expired`, `wif-subject-unbound`, `wif-scope-widened` |
+| client ID metadata document | `cimd-client-id-not-a-clean-https-url`, `cimd-document-client-id-mismatch`, `cimd-symmetric-authentication`, `cimd-redirect-uri-unregistered`, `cimd-support-not-advertised` |
+| identity assertion grant | `id-jag-typ-invalid`, `id-jag-audience-mismatch`, `id-jag-client-mismatch`, `id-jag-expired`, `id-jag-jti-missing` |
+
+Two rules this reader was built to keep. A surface that is **absent from
+`observed`** is not judged: "we were not shown the metadata" and "the metadata
+was missing" are different findings, and folding the first into the second is
+how a verifier turns its own blind spot into someone else's failure. And the
+auth-params of a challenge are only read when the scheme is Bearer, because
+`resource_metadata` in a `Basic realm=` header is a field the server never
+wrote.
+
+Measured, 2026-11-28, against `corpora/vectors-mcp-authz` (11 members, 1 accept
+/ 10 reject, head `08f16c3`): **11 of 11 conform to the corpus' convention** -
+verdict matches, at least one declared code named, no declared code missed. Two
+members carry one extra code each (`as-issuer-not-in-prm` on
+`resource-metadata-defective`, `challenge-resource-metadata-missing` on
+`settings-inconsistent`); they are reported because the conditions hold, and
+the convention allows extra codes. The finding vocabulary is this project's, so
+this is agreement on verdicts and on named faults, not a code-by-code identity
+with the peer's verifier.
+
 ## What this does not do
 
 It does not import a foreign corpus wholesale. A corpus in someone else's layout

@@ -1,15 +1,15 @@
 {
- "generated_at": "2026-11-27T23:55:54Z",
- "tree_sha256": "773daa207dd006862c31dd54bf812b1d7e645415dfbeba195ce901dd566416c4",
- "files_hashed": 2540,
- "content_sha256": "7d581d557a2e5bb0cb4d34447d660e90c28eeff0d90a5d2ae4e521247cfc5860",
- "content_files": 2540,
- "content_lf_sha256": "292372ad7b778eaa6bd3ff75bfb5839ce9a21e9f6c3a2e7d6c25f49b1f3b2651",
+ "generated_at": "2026-11-28T00:20:33Z",
+ "tree_sha256": "fa9dc242cd4e61ea57ef69aca90be7a5cfd20783e7d6501e34b2f86e0f758ee6",
+ "files_hashed": 2542,
+ "content_sha256": "edfb522dce45f9ea674dc4a92a89ca063bb5442a40f9e324be7618fd5d14a7f5",
+ "content_files": 2542,
+ "content_lf_sha256": "16d3e756a4436ced0f1f2e5cdc1ef2d6c3225d8e8219a8925b9a6e95cea649d5",
  "delivery": "commit",
  "files_manifest": {
   "path": "docs/OUTSIDER-FILES.txt",
-  "sha256": "ed72812d1fa9ae4b7b254791935599080683486013c59b4501d79b16277399d9",
-  "entries": 2540
+  "sha256": "fbb40be8756268220e4e02c692d06cd684b6038c4433d79c5f31aa2f0400305e",
+  "entries": 2542
  },
  "digest_excludes": [
   "docs/OUTSIDER-BOARD.html",
@@ -18,9 +18,9 @@
   "docs/outsider-rerun-receipt.json"
  ],
  "runner": {
-  "python": "3.12.11",
-  "machine": "x86_64",
-  "system": "Linux"
+  "python": "3.13.15",
+  "machine": "AMD64",
+  "system": "Windows"
  },
  "environment": {
   "variables_kept": [
@@ -46,7 +46,7 @@
    "rc": 0,
    "expect": "GATE OK",
    "ok": true,
-   "seconds": 0.2,
+   "seconds": 0.3,
    "tail": "GATE OK"
   },
   {
@@ -55,7 +55,7 @@
    "rc": 0,
    "expect": "PARITY OK",
    "ok": true,
-   "seconds": 0.3,
+   "seconds": 0.4,
    "tail": "PARITY OK: 41 repositories pinned and re-scored, best competitor 3/10, this repository 10/10"
   },
   {
@@ -64,7 +64,7 @@
    "rc": 0,
    "expect": "ALL OK",
    "ok": true,
-   "seconds": 0.1,
+   "seconds": 0.2,
    "tail": "ALL OK"
   },
   {
@@ -73,8 +73,8 @@
    "rc": 0,
    "expect": "passed",
    "ok": true,
-   "seconds": 3.9,
-   "tail": "41 passed in 1.12s"
+   "seconds": 3.0,
+   "tail": "41 passed, 1 warning in 2.31s"
   }
  ],
  "ok": true

@@ -1,3 +1,14 @@
+## 未发布 — 2026-11-28（读得了对方的 MCP 授权语料，且先证明自己没把"没检查"算成"失败"）
+
+- **为什么做这件事**：#766 里对方给了我们一个更硬的说法——"未检查不等于失败"，并公开了 AER-1 的 kit 与语料。#595 用那份 kit 照出我们自己的缺陷：`verify-dir` 把没有 `manifest.json` 的目录判 FAIL。改完那一处之后，新的一步是把对方新登记的 `corpora/vectors-mcp-authz`（11 条观测、1 accept / 10 reject）读进来。动机不是"再刷一个数"，而是：对方用**判定约定**（verifier 最后一行 stdout 输出 `{"verdict","codes"}`、reject 成员须 invalid 且命中它自己的码）把"读得懂"具体化成了可执行的东西，我们的读者若对不上，就等于在自己的口径之外另立一套。
+- **新增 `uibc_core/mcp_authz.py`**（仅 stdlib）：八个 surface 各自检查——受保护资源元数据（PRM 供体与 `resource` 逐字节相等、`authorization_servers` 非空且含本 AS、`header` 是唯一承载方式、不得出现 `offline_access`）、401 挑战（缺 `resource_metadata`、非 Bearer、`offline_access`、把 403 场景答成 401）、AS 元数据（非 JSON、缺 S256、缺 `code`、issuer 与本 AS/PRM 不符）、DPoP（`typ` 必须是 `dpop+jwt`、alg 必须非对称、私钥字段不得出现、`htm`/`htu`/`ath` 逐个比对、`jti` 重放、`cnf.jkt` 绑定）、工作负载联合（issuer 不在信任集、aud 不符、过期、subject 无绑定、scope 被放宽）、客户端元数据文档（`client_id` 必须是干净 https URL、文档自述 ID 必须相同、不得出现对称密钥、重定向必须登记、支持位必须已宣告）、身份断言授权（`typ`、aud、client、过期、`jti`）。`jwk_thumbprint` 按 RFC 7638 自算，`ath` = base64url(sha256(token)) 自算——不 import 任何共享实现。
+- **"没观测到"与"观测到缺失"分开**：surface 未出现在 `observed` 里就跳过，不产出"缺失"码。这直接来自 #595 的教训：把不可判定写成失败，比漏报更容易骗过自己的看板。
+- **CLI 新增 `verify-mcp-authz`**：`--file` 判一条并把 `{"verdict","codes"}` 作为最后一行 stdout 输出（对方 harness 读的就是这一行）、`--dir` 判整个语料并与 `MANIFEST.json` 的答案键逐条比对、`--report` 追加 `uibc-mcp-authz-report/1` 行。verdict 与 codes 一起走，没有 codes 的判定是意见。
+- **实测（本机 Windows / Python 3.13，对 `corpora/vectors-mcp-authz` @ `08f16c3`）**：**11/11 通过其判定约定**（1 accept 判 valid、10 reject 判 invalid，每条至少命中一个自己的码，期望码一条未漏）；`--dir` 模式打印 `11/11 members conform to the corpus answer key`、exit 0。附加码两条（`resource-metadata-defective` 上的 `as-issuer-not-in-prm`、`settings-inconsistent` 上的 `challenge-resource-metadata-missing`）**照报不吞**——条件成立就写出来，约定允许附加码。
+- **一处按实测改掉的真问题**：首轮 `Basic realm=` 的 401 既报 `challenge-scheme-not-bearer` 又报 `challenge-resource-metadata-missing`。RFC 6750 的 auth-params 只挂在 Bearer 上，从 Basic 头里读 `resource_metadata` 等于替服务器编造它没说过的字段；改成只有 `scheme=bearer` 才读参数，`challenge-defective` 仍在 Bearer 头里正确报出缺 `resource_metadata`。
+- **测试**：`tests/test_mcp_authz.py` 31 项，全部内联构造单 surface 故障（不 vendoring 别人的 fixtures——邻居改文件导致我们变红，教不会本仓任何事）；含"未观测≠缺失""Basic 头不产出 Bearer 参数"两条口径测试，以及 CLI 契约测试（最后一行可被 `json.loads` 成 `{"verdict","codes"}`、valid exit 0 / invalid exit 1）。
+- **边界**：这是**我们读他们的语料**的自测，不是他们 harness 复跑；`predicate/v1|v2/revocation-list`（含 delta 形态的序号+摘要链折叠）仍未实现；报告格式尚无 JSON Schema；本条未改版本、未重封归档。
+
 ## 未发布 — 2026-11-27（能产出同一 profile 的语句，而不只是读别人的）
 
 - **为什么做这件事**：读者落地后互操作仍只有一半——对方的 rail 可以喂我们，我们却没有一条语句可供对方读。"读得懂别人"是审查别人的能力，"拿得出自己的"才是被审查的资格；缺后一半，任何"互操作"都只是单向取材。

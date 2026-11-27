@@ -74,6 +74,12 @@
       "blocked_by": "none for reading. Remaining gap: their external rail has not run against this build, and their corpus' expiry member carries a verificationTime that contradicts its own declared verdict, which is recorded rather than smoothed over"
     },
     {
+      "id": "mcp-authz-observation-v1",
+      "status": "consumed (reader implemented 2026-11-28)",
+      "measured": "2026-11-28: on the peer corpus corpora/vectors-mcp-authz at head 08f16c3 (11 members: 1 accept, 10 reject) our reader reached 11/11 by the corpus' own convention - verdict matches and at least one of the member's declared codes is named; no declared code was missed. Two members carry one extra code each, reported rather than suppressed. The corpus was the peer's, not ours: this is our reading of their files, not their harness re-running us.",
+      "blocked_by": "none for reading. The finding vocabulary is ours, so a code-by-code comparison against their verifier has not been done; delta-form revocation lists (predicate/v2/revocation-list) are still unread"
+    },
+    {
       "id": "json-canonicalisation-rfc8785",
       "status": "consumed",
       "measured": "2026-11-27: one cite of RFC 8785 across the 58 cases"

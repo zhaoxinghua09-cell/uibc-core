@@ -1,3 +1,11 @@
+## 未发布 — 2026-11-27（五套 AI 护照规范，放同一组检查下打一遍）
+
+- **问题**：做身份码的人都在问"该跟谁学"。答案不能只靠读规范——规范写得漂亮和第三方真能验通是两件事，而这五套体系此前没人在同一组检查下跑过。
+- **做法**：`tools/passport_matrix.py` 对 APS / APIS v2.1 / AIP(draft-singla) / AIP(draft-prakash) / AIAgentMark v1.0 跑 C1–C6 六项：签名可离线验、内容绑定、规范化确定、标识可解析、吊销可追、第三方可跑。四档判读 `PASS / JUDGE / UNKNOWN / FAIL`；`--check` 离线自检（结构、复现、文档对齐），`--run` 联网重跑；MD 与看板由 `tools/render_passport_matrix.py` 从 JSON 重渲。
+- **实测（全离线）**：`pip install agent-passport-system`（4.3.0）→ `create_passport` 生成自签护照 → `verify_passport(allow_self_signed=True)` 返回 `valid=True`；把 `mission` 尾部追加 ` [tampered]` 后重验 → `valid=False`；键序打乱经 `canonicalize_jcs` → 同串。C1/C2/C3/C6 因此拿到 PASS。
+- **读数**：8 ● / 11 ◐ / 7 ○ / 4 ✕，共 30 项。只有 APS 一家有可安装的第三方实现；AIAgentMark 的三个 ● 是本仓库按白皮书 conformance 条款复现，**不是厂商实现**——两件事在文档里分开写。
+- **三条结论**：①"离线可验"不等于"标识可解析"（APS 是携带式文档，不是 DID 那种给串就解析，故 C4 只给 ◐）；②五套里没有一套公开第三方对照结果，自测（APS 1,634 例、APIS 初始基线）只能记"自发布"；③APIS 未统一 canonicalization，跨实现天然有缝——这是它能被同一张表照出来的原因。
+
 ## 0.5.6 — 2026-11-27 发布（格式 v2：未声明证据从「点名告警」升为「默认 FAIL」）
 
 - **发布事实（发版后补写，放在最前面，因为读者先要的是字节和哈希）**：PyPI `uibc-core 0.5.6` 于 2026-11-27 01:46 UTC 上传 —— `uibc_core-0.5.6-py3-none-any.whl` 226,327 B / `sha256:34eda43c…5699`，`uibc_core-0.5.6.tar.gz` 3,940,189 B / `sha256:2b31e7af…0b80`。一致性语料归档 `conformance/uibc-conformance-0.5.6.zip` 388,388 B / `sha256:31bbeff40e67…9d14`，pin 见 `anchors/pins/uibc-conformance-0.5.6.sha256`；同一棵树上重跑 `tools/build_conformance_bundle.py 0.5.6` 得到同字节（该工具有 `identical:` 分支）。

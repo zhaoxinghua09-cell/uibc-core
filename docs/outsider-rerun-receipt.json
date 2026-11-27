@@ -1,15 +1,15 @@
 {
- "generated_at": "2026-11-27T04:59:31Z",
- "tree_sha256": "0fcf2fd2674461ce9ef0bc3e574ec58b340a02f4757805e23355cb913552fe25",
- "files_hashed": 2510,
- "content_sha256": "bb40efbc740681b4c26640a026f995911aac7be84761c11154e673aa94b76ec8",
- "content_files": 2510,
- "content_lf_sha256": "0dbfb583a244be3e368f93a7e82377b959448c2a0e5c25f0a79c535b2c674063",
- "delivery": "commit",
+ "generated_at": "2026-11-27T07:40:38Z",
+ "tree_sha256": "36bd24cc3b1e432bc85c5c79e5d87379ab64dffdbb2284ef33090876d2659f88",
+ "files_hashed": 2512,
+ "content_sha256": "8d3e3225d3dd118bc4fb591702c8e2232e4eb71713ca769445065c5f00524c46",
+ "content_files": 2512,
+ "content_lf_sha256": "df22cd31b50c7ce5b8fe2c108f8e2be84a63f1a6ddb3c31c1e0e8e620acc1065",
+ "delivery": "archive",
  "files_manifest": {
   "path": "docs/OUTSIDER-FILES.txt",
-  "sha256": "6f077c6daacccb03454ae120f862d8888dae0c52efd7ac7f06db7faef36dd17d",
-  "entries": 2510
+  "sha256": "774472239cd58f843f2951690cb8a25c427fa8e5c63b5daf207947ef2f73c652",
+  "entries": 2512
  },
  "digest_excludes": [
   "docs/OUTSIDER-BOARD.html",
@@ -18,9 +18,9 @@
   "docs/outsider-rerun-receipt.json"
  ],
  "runner": {
-  "python": "3.12.11",
-  "machine": "x86_64",
-  "system": "Linux"
+  "python": "3.13.18",
+  "machine": "AMD64",
+  "system": "Windows"
  },
  "environment": {
   "variables_kept": [
@@ -46,7 +46,7 @@
    "rc": 0,
    "expect": "GATE OK",
    "ok": true,
-   "seconds": 0.2,
+   "seconds": 1.0,
    "tail": "GATE OK"
   },
   {
@@ -55,7 +55,7 @@
    "rc": 0,
    "expect": "PARITY OK",
    "ok": true,
-   "seconds": 0.3,
+   "seconds": 1.3,
    "tail": "PARITY OK: 41 repositories pinned and re-scored, best competitor 3/10, this repository 10/10"
   },
   {
@@ -64,7 +64,7 @@
    "rc": 0,
    "expect": "ALL OK",
    "ok": true,
-   "seconds": 0.1,
+   "seconds": 0.4,
    "tail": "ALL OK"
   },
   {
@@ -73,8 +73,8 @@
    "rc": 0,
    "expect": "passed",
    "ok": true,
-   "seconds": 5.2,
-   "tail": "41 passed in 1.40s"
+   "seconds": 10.1,
+   "tail": "41 passed in 7.96s"
   }
  ],
  "ok": true

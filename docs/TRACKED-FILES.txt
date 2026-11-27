@@ -141,6 +141,7 @@ anchors/pins/uibc-conformance-0.5.3.sha256
 anchors/pins/uibc-conformance-0.5.4.sha256
 anchors/pins/uibc-conformance-0.5.5.sha256
 anchors/pins/uibc-conformance-0.5.6.sha256
+anchors/pins/uibc-conformance-0.5.7.sha256
 anchors/pins/uibc-core-0.4.0.sha256
 anchors/pins/uibc-core-0.4.1.sha256
 anchors/pins/uibc-release-anchor-001.json
@@ -1011,6 +1012,7 @@ conformance/uibc-conformance-0.5.3.zip
 conformance/uibc-conformance-0.5.4.zip
 conformance/uibc-conformance-0.5.5.zip
 conformance/uibc-conformance-0.5.6.zip
+conformance/uibc-conformance-0.5.7.zip
 contest/BENCHMARK.md
 contest/BENCHMARKING.md
 contest/INCENTIVES.md

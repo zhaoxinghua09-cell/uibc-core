@@ -197,6 +197,46 @@ def main():
     if not os.path.isdir(CASES):
         sys.exit("error: cases/ not found next to this script; unzip the archive first")
 
+    # Red team A9 (measured 2026-11-27): appending 64 bytes to uibc_core.pyz still
+    # ran 58/58, because nothing bound the archive to the verifier it carries. The
+    # seal writes uibc_core.sha256 beside the pyz; a mismatch is a setup failure,
+    # not a verdict about the corpus.
+    side = os.path.join(HERE, "uibc_core.sha256")
+    if bundled and os.path.isfile(side):
+        with open(side, encoding="ascii") as f:
+            want = f.read().split()[0].strip().lower()
+        with open(pyz, "rb") as f:
+            got = hashlib.sha256(f.read()).hexdigest()
+        if got != want:
+            sys.stderr.write(
+                "\nThis archive's verifier does not match the hash it ships with.\n"
+                "  declared %s\n  found    %s\n"
+                "That is a setup problem, not a verdict about the corpus: refusing to "
+                "write a receipt that would read as conformance results.\n" % (want, got))
+            sys.exit(3)
+
+    # Red team A7 (measured 2026-11-27): expected.json is a second copy of the same
+    # truth and run.py used to read only manifest.json, so an edit to expected.json
+    # changed nothing and said nothing. Two carriers must agree before a run starts.
+    exp_path = os.path.join(HERE, "expected.json")
+    if os.path.isfile(exp_path):
+        with open(exp_path, encoding="utf-8") as f:
+            exp = json.load(f)
+        with open(MANIFEST, encoding="utf-8") as f:
+            man = json.load(f)
+        m_exp = {c["id"]: (c.get("expect") or
+                          ("accept" if not c.get("expected_checks") else "refuse"))
+                 for c in man["cases"]}
+        e_exp = {c["id"]: c.get("expect") for c in exp.get("cases", [])}
+        drift = sorted(k for k in set(m_exp) | set(e_exp) if m_exp.get(k) != e_exp.get(k))
+        if drift:
+            sys.stderr.write(
+                "\nexpected.json and manifest.json disagree on %d case(s): %s\n"
+                "Two copies of one truth: refusing to run rather than pick one.\n"
+                "Re-seal the archive, or delete expected.json if the manifest is the "
+                "only table you intend to ship.\n" % (len(drift), ", ".join(drift[:5])))
+            sys.exit(1)
+
     # Measured 2026-11-20: the archive's own control ("a machine without the verifier
     # must exit 3") went green on a runner that had `uibc-core` pip-installed, because
     # this script fell back to `python -m uibc_core.cli`. The fallback made "the archive

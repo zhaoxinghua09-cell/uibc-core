@@ -2148,6 +2148,7 @@ tests/test_vendored_corpus.py
 tests/test_verify_external_node_report.py
 tests/test_verify_js.py
 tests/test_verify_rekor_inclusion.py
+tests/test_verify_report.py
 tests/test_version_floor.py
 tests/test_vocabulary.py
 tests/test_witnesses.py

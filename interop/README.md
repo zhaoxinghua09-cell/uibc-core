@@ -52,6 +52,27 @@ The receipt records `run_by` verbatim. Leave it unset and it stays null, so a
 receipt written by this project's author and one written by a stranger are
 distinguishable without anybody having to ask.
 
+## Read the results from another harness
+
+A harness that wants to run this verifier over its own vectors needs one line
+per vector, not one pretty JSON document per package:
+
+```bash
+python uibc_core.pyz verify ./one-package --report runs.jsonl --vector-id v-17
+python uibc_core.pyz verify-dir ./my-vectors --report runs.jsonl
+```
+
+Each line is `{"format": "uibc-verify-report/1", "vector": ..., "result": ...,
+"checks_failed": [...], "verifier_id": ..., "verifier_version": ..., "when_utc":
+..., "exit": 0|1}`. `--report` appends, so a batch run accumulates in one file and
+a failing package cannot erase the lines already written. A failing package still
+gets a line — that is the case a harness most needs. `verify-dir` exits non-zero
+when any child is not PASS and prints `n/m packages PASS`; an empty directory exits
+3 and writes nothing, because "nothing was judged" must not read as "all passed".
+
+The line carries this project's verdict vocabulary and check ids. A consumer
+mapping FAIL / INCONCLUSIVE onto its own scale is making its own claim, not ours.
+
 ## What this does not do
 
 It does not import a foreign corpus wholesale. A corpus in someone else's layout

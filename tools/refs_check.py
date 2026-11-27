@@ -201,8 +201,10 @@ def run(cache_token=None):
             "verified_via_api": sum(1 for r in rows if r.get("via") == "api-commit"),
         },
     }
-    open(REPORT, "w", encoding="utf-8").write(json.dumps(report, indent=1, ensure_ascii=False) + "\n")
-    open(PAGE, "w", encoding="utf-8").write(render_page(report))
+    with open(REPORT, "w", encoding="utf-8", newline="\n") as fh:
+        fh.write(json.dumps(report, indent=1, ensure_ascii=False) + "\n")
+    with open(PAGE, "w", encoding="utf-8", newline="\n") as fh:
+        fh.write(render_page(report))
     print("written", REPORT, PAGE)
     return 0 if report["summary"]["dead"] == 0 and report["summary"].get("dead_after_move", 0) == 0 else 1
 

@@ -63,24 +63,23 @@ def test_report_covers_the_snapshot_exactly(refs, snap):
     assert report["summary"]["dead"] == 0
 
 
-def test_a_dead_citation_fails_the_check(refs, capsys):
+def test_a_dead_citation_fails_the_check(refs, capsys, tmp_path, monkeypatch):
+    # Mutating the tracked report and putting it back leaves CRLF behind on
+    # Windows, so the working copy and the committed file diverge with no
+    # content difference. Work on a copy instead.
+    copy = tmp_path / "refs-report.json"
+    copy.write_bytes(open(refs.REPORT, "rb").read())
+    monkeypatch.setattr(refs, "REPORT", str(copy))
     report = json.load(open(refs.REPORT, encoding="utf-8"))
     victim = dict(report["entries"][0], status=404, error="")
     report["entries"][0] = victim
-    open(refs.REPORT + ".bak", "w", encoding="utf-8").write(json.dumps(report))
-    try:
-        # swap the report in, run the check, put it back
-        original = open(refs.REPORT, encoding="utf-8").read()
-        open(refs.REPORT, "w", encoding="utf-8").write(json.dumps(report))
-        rc = refs.check()
-        assert rc == 1
-        out = capsys.readouterr().out
-        assert "dead citation" in out
-        assert victim["repo"] in out
-        open(refs.REPORT, "w", encoding="utf-8").write(original)
-    finally:
-        if os.path.exists(refs.REPORT + ".bak"):
-            os.remove(refs.REPORT + ".bak")
+    with open(refs.REPORT, "w", encoding="utf-8", newline="\n") as fh:
+        fh.write(json.dumps(report))
+    rc = refs.check()
+    assert rc == 1
+    out = capsys.readouterr().out
+    assert "dead citation" in out
+    assert victim["repo"] in out
 
 
 def test_a_redirect_is_moved_not_dead(refs):
@@ -104,23 +103,22 @@ def test_a_move_must_be_live_at_the_new_name(refs):
         assert refs.alive(f), (e["repo"], "still not reachable at", f.get("repo_now"))
 
 
-def test_a_moved_citation_that_lands_on_404_fails(refs, capsys):
+def test_a_moved_citation_that_lands_on_404_fails(refs, capsys, tmp_path, monkeypatch):
     """The WARN about a rename must not paper over a citation that is really gone."""
     if not refs.os.path.exists(refs.REPORT):
         pytest.skip("no report")
-    original = open(refs.REPORT, encoding="utf-8").read()
-    report = json.loads(original)
+    report = json.load(open(refs.REPORT, encoding="utf-8"))
     idx = next((i for i, e in enumerate(report["entries"]) if refs.moved(e)), None)
     if idx is None:
         pytest.skip("this report has no moves")
     report["entries"][idx]["followed"] = {"repo_now": "nowhere/renamed", "url": "u",
                                           "status": 404, "error": "", "final_url": ""}
-    try:
-        open(refs.REPORT, "w", encoding="utf-8").write(json.dumps(report))
-        assert refs.check() == 1
-        assert "new location is not reachable" in capsys.readouterr().out
-    finally:
-        open(refs.REPORT, "w", encoding="utf-8").write(original)
+    copy = tmp_path / "refs-report.json"
+    with open(copy, "w", encoding="utf-8", newline="\n") as fh:
+        fh.write(json.dumps(report))
+    monkeypatch.setattr(refs, "REPORT", str(copy))
+    assert refs.check() == 1
+    assert "new location is not reachable" in capsys.readouterr().out
 
 
 def test_the_page_is_generated(refs):

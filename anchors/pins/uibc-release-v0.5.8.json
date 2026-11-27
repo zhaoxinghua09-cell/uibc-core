@@ -1,0 +1,63 @@
+{
+  "kind": "uibc-release-pin-v0",
+  "tag": "v0.5.8",
+  "frozen_at": "2026-11-27T11:07:29Z",
+  "measured": "gh api repos/zhaoxinghua09-cell/uibc-core/releases (v0.5.8 is draft; 9 assets, digests read from the asset API on 2026-11-27, not from the page text)",
+  "why": "0.5.8 was cut on 2026-11-27T11:07:29Z (commit 7b0faa5) and the PyPI wheel followed at 11:08:34Z, but the GitHub release was left as a draft, so the page carries the auto-generated changelog instead of the seven fields VERSIONING.md §3 requires. The conformance sha256 pin already landed (anchors/pins/uibc-conformance-0.5.8.sha256); this file is the release record for the same tag, written from the asset API so that every byte is named by its measured digest. The record does not make the tag public: publishing the release is a separate, explicitly approved step.",
+  "assets": [
+    {
+      "name": "ANCHORS.json",
+      "bytes": 367,
+      "sha256": "562d363f0800d9c8bad3fd43b3237c3ce165f928b79eef2dd2ca088e9080b4d9"
+    },
+    {
+      "name": "anchor_freetsa.tsr",
+      "bytes": 4643,
+      "sha256": "271ec1df35a0b0c071a152789acaea4e81670c8455ed4eaf42df9cb0848e2a54"
+    },
+    {
+      "name": "anchor_freetsa_ca.pem",
+      "bytes": 5107,
+      "sha256": "b8201c19ae46a882ceb83ce58251662fa0e47b0ebff40d6bc025f3e4626ab51e"
+    },
+    {
+      "name": "CORPUS-DIGESTS.txt",
+      "bytes": 288,
+      "sha256": "44b1c487c4acaa5cfd3df8acc2f0b2148dae3898795dc9fccff5ec26d429bb31"
+    },
+    {
+      "name": "CORPUS-DIGESTS.txt.ots",
+      "bytes": 915,
+      "sha256": "5a8a0a73e29f514bfed545f80f579e09cc1d61683c42953bd8d5fa4b8f043f66"
+    },
+    {
+      "name": "CORPUS-DIGESTS.txt.sig",
+      "bytes": 467,
+      "sha256": "bb3cf6704b05516c74b781a840b79e1f283fed9e1e87994fc7ed9a3eef4832f0"
+    },
+    {
+      "name": "receipt.json",
+      "bytes": 13936,
+      "sha256": "0b7e4d3af448e099a1adad6a6ec5204185594c985c8965d3c1b7eee3a9ec0cef"
+    },
+    {
+      "name": "uibc-conformance-0.5.8.zip",
+      "bytes": 389203,
+      "sha256": "a5c0e5b703ee8dd9293844d759df9cf2fad2b865c9271c98c7548393ddf71ffc"
+    },
+    {
+      "name": "uibc-lab-bundle-0.5.8.json",
+      "bytes": 328464,
+      "sha256": "d3e4fc50a610322d9034e2771536cfb60909d80bf4a0cd8bddb44e00be7093fc"
+    }
+  ],
+  "excluded": [
+    "uibc-release-pin.json"
+  ],
+  "notes": [
+    "uibc-conformance-0.5.8.zip digest recomputed locally (Get-FileHash) and equals the asset API digest and the existing conformance pin.",
+    "anchor_freetsa_ca.pem is byte-identical to the 0.5.5 release, so the same CA key issued both timestamps.",
+    "anchors/attestations/v0.5.8/ holds the release's digest file, its detached signature, its .ots and the FreeTSA token, copied from the draft release assets on 2026-11-28; the Ed25519 signature verifies against CORPUS-DIGESTS.txt locally (key_id 179c615aef27cbcd, same key as 0.5.5).",
+    "The tag is still a draft: this record pins what was uploaded, it does not publish the release."
+  ]
+}

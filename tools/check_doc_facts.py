@@ -131,7 +131,21 @@ CITE_INSTEAD = "docs/EVIDENCE-INDEX.md"
 
 
 def check(facts, paths=None):
-    bad = []
+    """Compatibility wrapper: the mismatches only, as before."""
+    return check_strict(facts, paths)[0]
+
+
+def check_strict(facts, paths=None):
+    """Return (bad, unmeasurable).
+
+    Red team 2026-11-28 (A8): `measure()` wraps the attack and red-team counts in
+    `try/except` and stores `None` when the import fails, and `check()` then skipped
+    every claim whose `actual` was `None`. So a broken dependency turned the gate
+    into "all published numbers match" while the numbers were never counted - the same
+    shape as a verifier that cannot run being reported as a pass. "Could not measure"
+    is now its own outcome, and it is not green.
+    """
+    bad, unmeasurable = [], []
     for f in scan(paths or all_targets()):
         actual = facts.get(f["kind"])
         if f["kind"] == "tests":
@@ -143,13 +157,16 @@ def check(facts, paths=None):
             bad.append(dict(f, actual=actual,
                             why="cite %s instead of typing the count" % CITE_INSTEAD))
             continue
-        if actual is None or f["claimed"] == actual:
+        if actual is None:
+            unmeasurable.append(dict(f, why="no measurement available for %r" % f["kind"]))
+            continue
+        if f["claimed"] == actual:
             continue
         # A claim inside a fenced historical quote or a percentage/ratio phrase
         # is not a claim about the current tree; the line text is kept so a
         # reader can judge, and the exit code stays honest either way.
         bad.append(dict(f, actual=actual))
-    return bad
+    return bad, unmeasurable
 
 
 if __name__ == "__main__":
@@ -158,15 +175,26 @@ if __name__ == "__main__":
     ap.add_argument("--files", nargs="*", default=None)
     a = ap.parse_args()
     facts = measure()
-    bad = check(facts, a.files or TARGETS)
+    # Red team 2026-11-28 (A7): the CLI defaulted to TARGETS while check() defaulted
+    # to all_targets(), so the five docs/ pages that opt in with `<!-- facts: current -->`
+    # were never scanned by the command anyone actually runs. A page could state
+    # "999 attacks" and the gate still printed "0 mismatch(es)". The marker had no
+    # teeth; it does now.
+    bad, unmeasurable = check_strict(facts, a.files if a.files else all_targets())
     if a.json:
-        print(json.dumps({"facts": facts, "mismatches": bad}, ensure_ascii=False, indent=2))
+        print(json.dumps({"facts": facts, "mismatches": bad,
+                          "unmeasurable": unmeasurable}, ensure_ascii=False, indent=2))
     else:
         print("measured: %s" % facts)
-        if not bad:
+        for u in unmeasurable:
+            print("%s:%d  %s claims %d, and this tree cannot measure it\n    %s"
+                  % (u["file"], u["line"], u["kind"], u["claimed"], u["text"]))
+        if not bad and not unmeasurable:
             print("all published numbers match")
         for b in bad:
             print("%s:%d  %s claims %d, measured %d\n    %s"
                   % (b["file"], b["line"], b["kind"], b["claimed"], b["actual"], b["text"]))
-        print("\n%d mismatch(es)" % len(bad))
+        print("\n%d mismatch(es), %d unmeasurable claim(s)" % (len(bad), len(unmeasurable)))
+    if unmeasurable:
+        sys.exit(2)   # cannot measure is not the same as nothing to fix
     sys.exit(1 if bad else 0)

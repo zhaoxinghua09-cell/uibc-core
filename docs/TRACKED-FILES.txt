@@ -1841,6 +1841,8 @@ fixtures/tampered.uibc/identity.json
 fixtures/tampered.uibc/lifecycle.json
 fixtures/tampered.uibc/manifest.json
 fixtures/tampered.uibc/signatures/seal.json
+fuzz/README.md
+fuzz/fuzz_jcs.py
 icon.svg
 independent_verifier/CHECK-MAP.md
 independent_verifier/cross_check.py
@@ -2048,6 +2050,8 @@ tests/test_interop_result.py
 tests/test_iverify_pubkey_pin.py
 tests/test_jcs.py
 tests/test_jcs_number_form.py
+tests/test_key_revocation_list.py
+tests/test_key_revocation_list_corpus.py
 tests/test_lab_bundle.py
 tests/test_landscape_corrections.py
 tests/test_landscape_recheck.py
@@ -2525,6 +2529,7 @@ uibc_core/freshness.py
 uibc_core/gate.py
 uibc_core/identity_adapter.py
 uibc_core/interop_result.py
+uibc_core/key_revocation_list.py
 uibc_core/lifecycle.py
 uibc_core/locking.py
 uibc_core/mcp_authz.py

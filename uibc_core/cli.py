@@ -1097,6 +1097,91 @@ def cmd_verify_revocation_list(args):
     sys.exit(0 if ok else 1)
 
 
+KEY_REVOCATION_LIST_REPORT_FORMAT = "uibc-key-revocation-list-report/1"
+
+
+def _key_revocation_list_line(member, decision, reason, basis, exit_code, error=None):
+    """One report line for a key-revocation-list case.
+
+    The decision travels with the rule that produced it: in this suite
+    ``rejected`` can mean four different things, and a report that says only
+    ``rejected`` hands the reader nothing to check.
+    """
+    line = {
+        "format": KEY_REVOCATION_LIST_REPORT_FORMAT,
+        "vector": member,
+        "result": "ERROR" if error else ("PASS" if decision in ("revoked", "not_revoked",
+                                                                "no_statement") else "FAIL"),
+        "decision": None if error else decision,
+        "reason": None if error else reason,
+        "basis": None if error else basis,
+        "verifier_id": VERIFIER_ID,
+        "verifier_version": __version__,
+        "when_utc": _now_utc(),
+        "exit": exit_code,
+    }
+    if error is not None:
+        line["error"] = str(error)[:300]
+    return line
+
+
+def cmd_verify_key_revocation_list(args):
+    """Judge a signed key-revocation list under key-revocation-list/v1.
+
+      * `--case F` judges one `case.json` beside its `list.json` and prints, as
+        its last stdout line, `{"decision", "reason", "exit", "basis", "facts"}`.
+        The process exits by the decision (0 revoked, 1 not_revoked,
+        2 no_statement, 3 rejected, 4 stale), which is the contract this
+        suite's external verifiers are run under.
+      * `--dir D` judges a corpus and compares every decision and reason, plus
+        the two signature facts the manifest declares, with its `MANIFEST.json`.
+    """
+    from . import key_revocation_list as krl
+
+    report_path = getattr(args, "report", None)
+
+    if getattr(args, "case", None):
+        path = os.path.abspath(args.case)
+        try:
+            result = krl.judge_case_or_refusal(path)
+        except OSError as exc:
+            if report_path:
+                _append_line(report_path, _key_revocation_list_line(
+                    os.path.basename(path), None, None, None, 3, error=exc))
+            print(f"error: cannot read the case {path}: {exc}", file=sys.stderr)
+            sys.exit(3)
+        if report_path:
+            _append_line(report_path, _key_revocation_list_line(
+                os.path.basename(os.path.dirname(path)), result["decision"],
+                result["reason"], result["basis"], result["exit"]))
+        print(json.dumps(result))
+        sys.exit(result["exit"])
+
+    corpus = os.path.abspath(getattr(args, "dir", None) or ".")
+    if not os.path.isdir(corpus):
+        sys.exit(f"error: corpus directory not found: {corpus}")
+    if not os.path.isfile(os.path.join(corpus, "MANIFEST.json")):
+        sys.exit("error: the corpus carries no MANIFEST.json to answer to")
+
+    summary = krl.judge_corpus(corpus)
+    for record in summary["records"]:
+        ident = record["id"]
+        got, expected = record["got"], record["expected"]
+        if report_path:
+            _append_line(report_path, _key_revocation_list_line(
+                ident, got["decision"], got["reason"], record.get("basis"),
+                krl.EXIT_FOR.get(got.get("decision") or "", 3)))
+        if record["conforms"]:
+            print(f"{ident}: {got['decision']} {got['reason']} (matches the answer key)")
+        else:
+            print(f"{ident}: {got['decision']} {got['reason']}, expected "
+                  f"{expected['decision']} {expected['reason']}; "
+                  f"differs on {', '.join(record['mismatched'])}", file=sys.stderr)
+    print(f"{summary['conforming']}/{summary['members']} members conform to the corpus answer key")
+    ok = summary["members"] and summary["conforming"] == summary["members"]
+    sys.exit(0 if ok else 1)
+
+
 def cmd_verify_cose(args):
     """Read SCITT/COSE Transparent Statements under aee-scitt-cose/v0.1.
 
@@ -1514,6 +1599,17 @@ def main():
     p.add_argument("--report", default=None, metavar="JSONL",
                    help="append one uibc-revocation-list-report/1 line per member")
     p.set_defaults(func=cmd_verify_revocation_list)
+
+    p = sub.add_parser("verify-key-revocation-list",
+                       help="read the signed key-revocation list "
+                            "(key-revocation-list/v1); exits by the decision")
+    p.add_argument("--case", default=None, metavar="FILE",
+                   help="judge one case.json beside its list.json")
+    p.add_argument("--dir", default=None, metavar="DIR",
+                   help="judge a corpus and compare with its answer key")
+    p.add_argument("--report", default=None, metavar="JSONL",
+                   help="append one uibc-key-revocation-list-report/1 line per member")
+    p.set_defaults(func=cmd_verify_key_revocation_list)
 
     p = sub.add_parser("verify-cose", help="read SCITT/COSE Transparent Statements "
                                             "under aee-scitt-cose/v0.1 (corpus or one vector)")

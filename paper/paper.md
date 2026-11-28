@@ -69,7 +69,7 @@ timestamp parsing; when they are absent the corresponding checks report
 INCONCLUSIVE rather than PASS, so the absence is visible instead of papered
 over. The code is organised in three layers -- registry (identity records),
 evidence (hash/seal construction) and gates (state machine + validators) --
-implemented across 51 modules. The CLI supports package creation, validation
+implemented across 52 modules. The CLI supports package creation, validation
 and report emission, and reads two formats authored elsewhere (tagged
 SCITT/COSE statements and MCP authorization observations); validation
 semantics are intentionally conservative and

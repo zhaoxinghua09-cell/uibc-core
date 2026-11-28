@@ -66,11 +66,28 @@ def _jcs_number_str(x) -> str:
     if isinstance(x, bool):
         raise TypeError("bool is not a JSON number")
     if isinstance(x, int):
-        if not (-(2 ** 53) + 1 <= x <= 2 ** 53 - 1):
+        if -(2 ** 53) + 1 <= x <= 2 ** 53 - 1:
+            return str(x)
+        # An integer beyond the safe range is still an acceptable JSON number
+        # when IEEE-754 can hold it exactly: `1e17` and `1e20` are exact doubles,
+        # and ECMAScript serialises them in the fixed form this class of value
+        # produces. Refusing them instead broke the canonical form's own
+        # fixpoint - `canonicalize(1e20)` emits 21 digits, and re-reading those
+        # digits yields an int that the old gate rejected, so the bytes the
+        # library produced could not be canonicalised by the library. Atheris
+        # found this on the first twenty-second run (2026-11-28).
+        #
+        # `2**53 + 1` is still refused, because no double equals it: the gate
+        # is about precision loss in the counterparty's parser, not about size.
+        try:
+            as_double = float(x)
+        except OverflowError:
+            as_double = math.inf
+        if as_double != x:
             raise ValueError(
-                "JCS: integer %r outside ECMAScript safe range "
-                "[-(2**53)+1, 2**53-1]" % (x,))
-        return str(x)
+                "JCS: integer %r outside ECMAScript safe range and not exactly "
+                "representable as an IEEE-754 double" % (x,))
+        return _jcs_number_str(as_double)
     if isinstance(x, float):
         if math.isnan(x) or math.isinf(x):
             raise ValueError("JCS: NaN/Infinity are not valid JSON numbers")

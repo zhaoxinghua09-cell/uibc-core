@@ -1,15 +1,15 @@
 {
- "generated_at": "2026-11-28T16:51:12Z",
- "tree_sha256": "12adaeafab0cb830f73cee7798092fc58c6b15a3476552ea244dfc58d6897b1f",
- "files_hashed": 2562,
- "content_sha256": "88bcb9b59ec162ec9b056aa4b0e003028d7a9c0db482657a4ffbd34b5ff5829a",
- "content_files": 2562,
- "content_lf_sha256": "4e7f93df8092fe71369a31ea7b647081f69a55a10e8a3f4ab9418005ae0132e5",
+ "generated_at": "2026-11-28T16:52:05Z",
+ "tree_sha256": "d3549d2e1c5a0c215b2f3e99b334b69be670aab9fe5dd9cbb1e9b4367afaf527",
+ "files_hashed": 2561,
+ "content_sha256": "efd70f2941819ae0a3413e42646ea1e89a80681cf58f3295636889eeee3d04d7",
+ "content_files": 2561,
+ "content_lf_sha256": "43f8b097818231ba961899017b304b4ba0523f090cbe7858e8cb543502e5a5db",
  "delivery": "commit",
  "files_manifest": {
   "path": "docs/OUTSIDER-FILES.txt",
-  "sha256": "d76e2c00e3a980182e585054641b3d874c8c7f6faad5d858386154c7520301c2",
-  "entries": 2562
+  "sha256": "05900f67b95cfd509e1ebe1e5eec794f4708441dd75a1a28ded5f0aaf08a7a14",
+  "entries": 2561
  },
  "digest_excludes": [
   "docs/OUTSIDER-BOARD.html",
@@ -304,7 +304,7 @@
    ],
    "missing": [],
    "ok": true,
-   "seconds": 1.1,
+   "seconds": 0.7,
    "stdout_sha256": "5e12fa3725d323bd994ffa45469fa7ef027fd4f8510357bfc39b900891b4c6f2",
    "tail": "GATE OK"
   },
@@ -319,7 +319,7 @@
    ],
    "missing": [],
    "ok": true,
-   "seconds": 1.1,
+   "seconds": 0.9,
    "stdout_sha256": "f087fdf4464161f266ca40008d6f948a22b074adbfa1fdebb90cf9168f235455",
    "tail": "PARITY OK: 41 repositories pinned and re-scored, best competitor 3/10, this repository 10/10"
   },
@@ -333,7 +333,7 @@
    ],
    "missing": [],
    "ok": true,
-   "seconds": 0.7,
+   "seconds": 0.5,
    "stdout_sha256": "96ad7c7274e78f4d3b138957aec96cc67f217585d9f1479216a81d8507063309",
    "tail": "ALL OK"
   },
@@ -347,9 +347,9 @@
    ],
    "missing": [],
    "ok": true,
-   "seconds": 7.4,
+   "seconds": 7.0,
    "stdout_sha256": "ec2f02dd08839abcf9b2cd9ae69d74d2594ef160ab6a460837c26b4ab34f70cc",
-   "tail": "41 passed in 5.46s"
+   "tail": "41 passed in 5.57s"
   }
  ],
  "ok": true

@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-28T12:28:07Z",
+ "generated_at": "2026-11-28T12:59:28Z",
  "tree_sha256": "0ad8983322ef2e956e0b0edda01f3d4a926c7baed047252c268240e17491f57d",
  "files_hashed": 2552,
  "content_sha256": "40dfc602691877c802f39fcd77c5c95c6a23fa3aa98afb171b275b857026318d",
@@ -303,7 +303,7 @@
    ],
    "missing": [],
    "ok": true,
-   "seconds": 1.5,
+   "seconds": 0.8,
    "stdout_sha256": "5e12fa3725d323bd994ffa45469fa7ef027fd4f8510357bfc39b900891b4c6f2",
    "tail": "GATE OK"
   },
@@ -318,7 +318,7 @@
    ],
    "missing": [],
    "ok": true,
-   "seconds": 1.4,
+   "seconds": 0.9,
    "stdout_sha256": "f087fdf4464161f266ca40008d6f948a22b074adbfa1fdebb90cf9168f235455",
    "tail": "PARITY OK: 41 repositories pinned and re-scored, best competitor 3/10, this repository 10/10"
   },
@@ -332,7 +332,7 @@
    ],
    "missing": [],
    "ok": true,
-   "seconds": 0.6,
+   "seconds": 0.4,
    "stdout_sha256": "96ad7c7274e78f4d3b138957aec96cc67f217585d9f1479216a81d8507063309",
    "tail": "ALL OK"
   },
@@ -346,9 +346,9 @@
    ],
    "missing": [],
    "ok": true,
-   "seconds": 11.5,
+   "seconds": 9.4,
    "stdout_sha256": "ec2f02dd08839abcf9b2cd9ae69d74d2594ef160ab6a460837c26b4ab34f70cc",
-   "tail": "41 passed in 9.16s"
+   "tail": "41 passed in 7.01s"
   }
  ],
  "ok": true

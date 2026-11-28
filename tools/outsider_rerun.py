@@ -485,7 +485,7 @@ def write_receipt(digest, files, results, content=None, content_files=None,
              "判 FAIL——所以陌生人不必相信 \"PASS\" 这个词，他可以看这几处字样自己有没有看见。"]
     dists = receipt["environment"].get("distributions") or []
     page += ["", "**环境也记下来，不让你猜**：`Python {ver}` / {impl}，`PYTHONHASHSEED=0`（集合顺序不会自己变），"
-             "`PYTHONNOUSERSITE=1`（谁自己 pip 装的包不能替你做决定），`PYTHONPATH` 清空。当时这台机器上的第三方面"
+             "`PYTHONNOUSERSITE=1`（谁自己 pip 装的包不能替你做决定），`PYTHONPATH` 清空。当时这台机器上的第三方包"
              "共 {n} 个，清单的 sha256 是 `{h}`（全表在收据 `environment.distributions` 里）。".format(
                  ver=receipt["runner"]["python"],
                  impl=receipt["environment"].get("python_implementation") or "Python",

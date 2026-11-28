@@ -2107,6 +2107,8 @@ tests/test_report_schema.py
 tests/test_reproduce.py
 tests/test_reproduce_gate_guard.py
 tests/test_resolve_generated.py
+tests/test_revocation_list.py
+tests/test_revocation_list_corpus.py
 tests/test_revocation_overlay.py
 tests/test_robustness.py
 tests/test_run_all_evidence.py
@@ -2529,6 +2531,7 @@ uibc_core/neutral_anchor.py
 uibc_core/phantom.py
 uibc_core/policy.py
 uibc_core/records.py
+uibc_core/revocation_list.py
 uibc_core/runtime.py
 uibc_core/scitt_cose.py
 uibc_core/scitt_cose_emit.py

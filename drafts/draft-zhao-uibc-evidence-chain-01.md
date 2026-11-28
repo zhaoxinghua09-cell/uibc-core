@@ -73,9 +73,11 @@ described in [RFC2119] and [RFC8174].
   verification procedure; it is a local working name, not a registered
   vocabulary term, and it expands to nothing.
 - **Outcome**: `PASS`, `FAIL`, or `INCONCLUSIVE`, per check.
-- **Head**: the signed statement defined in Section 2 — the root, the tree size,
+- **Head**: a signed statement whose members are the root, the tree size,
   the signer's `role` (`owner` or `witness`, and the two roles must use distinct
-  keys), and optionally the verifier identity `verifier_id`. A head is not a
+  keys), and optionally the verifier identity `verifier_id` (Section 2 specifies
+  the encoding; this bullet is self-contained so that the definition does not
+  point at itself). A head is not a
   package and does not carry evidence; the root is one of its members, not the
   whole. Appendix F states the tiers that range over heads; it does not define
   the statement, so the two sections do not point at each other.
@@ -360,6 +362,8 @@ between witnesses, never to the anchor backend, which has no use for it.
 
 A report MUST NOT use the word "anchored" for the pending state, and a package that never submitted anything is `pending` with `absent_reason: not-submitted`. Reading absence as confirmation would be the one thing Section 1 forbids: inventing a fact.
 
+This subsection is a requirement on a verifier that implements the state rules, not a description of the reference verifier's present behaviour: today the reference verifier carries and reports an anchor record in this shape and does not judge it, which is stated again in the implementation status list. A reader who wants the two states judged today is asking for Appendix G to be implemented, not for a rule that is already in force.
+
 The pending-to-anchored transition is a **re-emission**, not an edit. The reason
 is not that the file is committed — Section 3 says it is not — but that a
 generation is defined by the root and the head it carries: a package whose
@@ -417,7 +421,10 @@ implementation choices rather than specification choices:
   S2, S3, S4, S12, S7, S8, S5, S6), so "the first failure" is undefined until
   this rule is fixed. Both the corpus generator and the per-axis report use this
   rule; any other reading produces a different, equally defensible answer for
-  the same bytes.
+  the same bytes. A printed report also stops at the first check whose outcome
+  makes the rest unanswerable (Section 5), so a failing package prints fewer than
+  nineteen lines; the number of lines is not the number of checks implemented, and
+  Section 5's table — not the report length — is the list of checks.
 - **`evidence/index.json` admits exactly `entries` and `schema`.** The metadata
   digest covers each entry's `path`, `media_type`, `content_hash`, `recorded_at`
   and `action_type`, so a member

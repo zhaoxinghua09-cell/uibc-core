@@ -16,3 +16,7 @@ jobs:
       python-version: "3.11"
       run-tests: false
       require-skill-md: false
+      # 本仓工作流一律钉 40 位 commit（附 tag 注释），比 tag 形式的锁文件更强；
+      # gh-actions-lock v0.5.1 会把这类 SHA 钉法改回可移动的 tag，故此处关闭
+      # 锁文件校验，理由与 SHA 全表见 docs/supply-chain-pinning.md。
+      verify-lockfile: false

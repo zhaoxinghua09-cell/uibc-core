@@ -12,6 +12,7 @@ hold for the scheduled job to mean anything:
 
 import json
 import os
+import re
 import subprocess
 import sys
 
@@ -60,8 +61,8 @@ def test_the_workflow_runs_the_same_command_and_on_a_schedule():
     assert "python tools/watch_upstream_corpus.py" in wf
     assert "workflow_dispatch:" in wf
     # Pinned actions, like every other workflow here.
-    assert "actions/checkout@v7.0.1" in wf
-    assert "actions/setup-python@v7.1.0" in wf
+    assert re.search(r"actions/checkout@[0-9a-f]{40} # v7\.0\.1", wf)
+    assert re.search(r"actions/setup-python@[0-9a-f]{40} # v7\.1\.0", wf)
 
 
 def test_the_receipt_it_watches_is_the_one_the_sweep_uses():

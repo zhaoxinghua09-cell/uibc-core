@@ -19,14 +19,16 @@ on:
         default: "false"
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   bundle:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write   # writes the release assets, this job only
     steps:
-      - uses: actions/checkout@v4.4.0 # v4
-      - uses: actions/setup-python@v7.1.0 # v7.1.0
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.12"
 
@@ -64,7 +66,7 @@ jobs:
           python tools/check_lab_bundle.py "release/uibc-lab-bundle-${{ steps.v.outputs.version }}.json" \
             --archive "release/uibc-conformance-${{ steps.v.outputs.version }}.zip"
 
-      - uses: actions/upload-artifact@v4.6.2 # v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: lab-bundle
           path: release/

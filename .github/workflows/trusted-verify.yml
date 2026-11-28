@@ -32,7 +32,8 @@ jobs:
       # graded by changes pr-data, not this environment, so the relaxation cannot
       # take effect here. Same shape as agent-governance-vocabulary's validate-trusted.
       - name: install the base verifier
-        run: pip install -e ./trusted
+        run: |
+          python -m pip install --no-deps -e ./trusted
       - name: run the base verifier over the pull request's cases
         run: |
           python - <<'PY'

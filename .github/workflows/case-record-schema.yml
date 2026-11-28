@@ -24,7 +24,9 @@ jobs:
           python-version: "3.12"
 
       - name: Install the validator's dependency
-        run: python -m pip install --quiet jsonschema
+        run: |
+          python -m pip wheel --wheel-dir "$RUNNER_TEMP/ci-wheels" jsonschema
+          python -m pip install --no-deps "$RUNNER_TEMP/ci-wheels"/*.whl
 
       - name: Every record in the suite validates
         run: python tools/validate_case_records.py
@@ -38,5 +40,6 @@ jobs:
         # The schema lives in schemas/, not conformance/, on purpose: adding a
         # file to conformance/ changes released bytes. This step keeps that true.
         run: |
-          python -m pip install --quiet pytest
+          python -m pip wheel --wheel-dir "$RUNNER_TEMP/ci-wheels" pytest
+          python -m pip install --no-deps "$RUNNER_TEMP/ci-wheels"/*.whl
           python -m pytest -q tests/test_conformance_package.py

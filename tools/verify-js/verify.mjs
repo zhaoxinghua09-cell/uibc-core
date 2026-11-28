@@ -20,7 +20,8 @@
 
 import { createHash, createPublicKey, verify as cryptoVerify } from "node:crypto";
 import { verifyToken as verifyRfc3161 } from "./rfc3161.mjs";
-import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
+import { readFileSync, readdirSync, statSync, existsSync, writeFileSync,
+         renameSync, openSync, closeSync, unlinkSync } from "node:fs";
 import { join, normalize, sep } from "node:path";
 
 const sha256 = (buf) => createHash("sha256").update(buf).digest("hex");
@@ -200,6 +201,111 @@ function verify(pkg, opts = {}) {
   const strict = opts.strict === true;
   const checks = [];
   const warnings = [];
+// ---- freshness state helpers (S19) ---------------------------------------
+// The package checkpoint, computed the way the sealed manifest expects: the
+// lifecycle head, the evidence root, the index-metadata digest and the evidence
+// count over RFC 8785 bytes. S8 and S19 need the same string, and a state file
+// written by one reader has to be readable by the other, so it is the same
+// value, not a similar one.
+function checkpointOf(pkg) {
+  const idx = existsSync(join(pkg, "evidence/index.json"))
+    ? readJson(join(pkg, "evidence/index.json")) : { entries: [] };
+  const entries = idx.entries || [];
+  const hs = [];
+  for (const e of entries) {
+    try { hs.push(sha256(readFileSync(join(pkg, "evidence", String(e.path))))); }
+    catch { /* S4 reports the missing file; the count still stands */ }
+  }
+  const root = sha256(canonicalBytes(hs.slice().sort()));
+  const meta = entries.map((e) => ({
+    path: String(e.path || ""), type: e.type, note: e.note,
+    action_digest: e.action_digest ?? null,
+  }));
+  meta.sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0));
+  const indexDigest = "sha256:" + sha256(canonicalBytes(meta));
+  const lcPath = join(pkg, "lifecycle.json");
+  const lc = existsSync(lcPath) ? readJson(lcPath) : {};
+  const events = lc.events || [];
+  const last = events.length ? events[events.length - 1] : null;
+  const lcHead = "sha256:" + sha256(canonicalBytes({
+    count: events.length,
+    last_sequence_number: last ? (last.sequence_number ?? null) : null,
+    last_event_digest: last ? sha256(canonicalBytes(last)) : null,
+  }));
+  return "sha256:" + sha256(canonicalBytes({
+    lifecycle_head: lcHead,
+    evidence_root: root,
+    evidence_index_digest: indexDigest,
+    evidence_count: entries.length,
+  }));
+}
+
+function readState(path) {
+  if (!existsSync(path)) return { schema: "uibc-freshness/1", subjects: {} };
+  const doc = JSON.parse(readFileSync(path, "utf8"));
+  if (!doc || typeof doc !== "object" || typeof doc.subjects !== "object" || doc.subjects === null) {
+    throw new Error("state file is not an object with a 'subjects' map");
+  }
+  return doc;
+}
+
+function evaluateFreshness(state, subject, head, sequence, prevHead) {
+  const row = (state.subjects || {})[subject];
+  if (!row) {
+    return ["INCONCLUSIVE", "first observation of " + JSON.stringify(subject) +
+                            ": no high-water mark to compare against"];
+  }
+  const recordedHead = String(row.head ?? "");
+  const recordedSeq = row.sequence ?? null;
+  if (sequence === null || sequence === undefined) {
+    if (String(head) === recordedHead) return ["PASS", "same head as the last accepted observation"];
+    return ["INCONCLUSIVE", "a different head was presented with no sequence, so it cannot " +
+                            "be placed before or after the recorded one"];
+  }
+  const seq = Number(sequence);
+  if (!Number.isFinite(seq)) return ["INCONCLUSIVE", "sequence is not a number"];
+  if (recordedSeq === null) {
+    if (String(head) === recordedHead) return ["PASS", "same head; the recorded observation has no sequence"];
+    return ["INCONCLUSIVE", "a sequence was presented but the remembered observation has none"];
+  }
+  const last = Number(recordedSeq);
+  if (!Number.isFinite(last)) return ["INCONCLUSIVE", "recorded sequence is not a number"];
+  if (seq < last) {
+    return ["FAIL", "regressed: sequence " + seq + " is older than the remembered " + last];
+  }
+  if (seq === last) {
+    if (String(head) === recordedHead) return ["PASS", "same sequence, same head"];
+    return ["FAIL", "two different heads at sequence " + seq + " - fork"];
+  }
+  if (prevHead !== null && prevHead !== undefined &&
+      String(prevHead).toLowerCase() !== recordedHead.toLowerCase()) {
+    return ["FAIL", "sequence advanced past " + last +
+                    " but prev_head does not match the remembered head"];
+  }
+  return ["PASS", "advanced from " + last + " to " + seq];
+}
+
+function recordFreshness(path, subject, head, sequence) {
+  const lock = path + ".lock";
+  let fd;
+  try { fd = openSync(lock, "wx"); } catch { throw new Error("another writer holds " + lock); }
+  try {
+    closeSync(fd);
+    const state = readState(path);
+    const row = { head: String(head) };
+    const n = Number(sequence);
+    if (sequence !== null && sequence !== undefined && Number.isFinite(n)) row.sequence = n;
+    state.subjects = state.subjects || {};
+    state.subjects[subject] = row;
+    const tmp = path + "." + Math.random().toString(16).slice(2) + ".tmp";
+    writeFileSync(tmp, JSON.stringify(state, null, 1) + "\n", "utf8");
+    renameSync(tmp, path);
+  } finally {
+    try { unlinkSync(lock); } catch { /* best effort */ }
+  }
+}
+// ---- end freshness helpers ----------------------------------------------
+
   const note = (id, name, ok, detail) =>
     checks.push({ id, name, result: ok ? "PASS" : "FAIL", detail });
   // The third verdict. A check whose input is itself untrustworthy has found
@@ -872,6 +978,60 @@ function verify(pkg, opts = {}) {
     }
   }
 
+  // S19 freshness state (opt-in). Same four limits as the reference reader:
+  // the state file is the caller's own input, one writer per file, ordering
+  // needs a stated sequence, and a first observation is INCONCLUSIVE rather
+  // than PASS. None of this is a claim about authenticity (S6) or correctness
+  // (S1-S5, S8). It does not run without --freshness, and it says INCONCLUSIVE
+  // rather than PASS when there is nothing to compare against.
+  if (opts.freshness) {
+    const m2 = existsSync(join(pkg, "manifest.json"))
+      ? readJson(join(pkg, "manifest.json")) : null;
+    let subject = m2 && m2.agent_id ? m2.agent_id : null;
+    let sequence = null;
+    let prevHead = null;
+    const hf = m2 && m2.freshness_head;
+    if (hf && typeof hf === "object") {
+      subject = hf.subject || subject;
+      sequence = hf.sequence ?? null;
+      prevHead = hf.prev_head ?? null;
+    }
+    let stateDoc = null;
+    let unreadable = null;
+    try {
+      stateDoc = readState(opts.freshness);
+    } catch (err) { unreadable = err.message; }
+    if (unreadable) {
+      note("S19", "freshness state", false, "state file unreadable: " + unreadable);
+    } else if (!subject) {
+      inconclusive("S19", "freshness state",
+        "no agent_id or freshness_head.subject: a high-water mark cannot be keyed to anything");
+    } else {
+      let head = null;
+      try { head = checkpointOf(pkg); } catch { head = null; }
+      if (head === null) {
+        note("S19", "freshness state", false,
+             "checkpoint is not computable, so no observation can be placed");
+      } else {
+        const [verdict19, detail19] =
+          evaluateFreshness(stateDoc, subject, head, sequence, prevHead);
+        if (verdict19 === "FAIL") note("S19", "freshness state", false, detail19);
+        else if (verdict19 === "PASS") note("S19", "freshness state", true, detail19);
+        else inconclusive("S19", "freshness state", detail19);
+        const seen = (stateDoc.subjects || {})[subject];
+        if (verdict19 === "PASS" || (verdict19 === "INCONCLUSIVE" && !seen)) {
+          // A first observation is remembered, or the mark could never start.
+          try {
+            recordFreshness(opts.freshness, subject, head, sequence);
+          } catch (err) {
+            inconclusive("S19", "freshness state",
+              "observation not recorded: " + err.message);
+          }
+        }
+      }
+    }
+  }
+
   // S15 anchor resolution. A checkpoint head says "this is where my log was";
   // an anchor says "and here is evidence somebody outside my log saw it at
   // time T". Resolving against OUR OWN evidence root proves the anchor was
@@ -1239,9 +1399,13 @@ const argv = process.argv.slice(2);
 let target = null;
 let expectHead = null;
 let strict = false;
+let freshness = null;
 for (let i = 0; i < argv.length; i += 1) {
   if (argv[i] === "--expect-head") {
     expectHead = argv[i + 1] ?? null;
+    i += 1;
+  } else if (argv[i] === "--freshness") {
+    freshness = argv[i + 1] ?? null;
     i += 1;
   } else if (argv[i] === "--strict") {
     strict = true;
@@ -1250,11 +1414,12 @@ for (let i = 0; i < argv.length; i += 1) {
   }
 }
 if (!target) {
-  console.error("usage: node tools/verify-js/verify.mjs <package-dir> [--strict] [--expect-head <head>]");
+  console.error("usage: node tools/verify-js/verify.mjs <package-dir> [--strict] [--expect-head <head>] " +
+                "[--freshness <state.json>]");
   process.exit(2);
 }
 try {
-  process.stdout.write(JSON.stringify(verify(target, { expectHead, strict }), null, 2) + "\n");
+  process.stdout.write(JSON.stringify(verify(target, { expectHead, strict, freshness }), null, 2) + "\n");
 } catch (err) {
   process.stdout.write(JSON.stringify({
     result: "FAIL", trust_level: "FAIL", failed_checks: 1,

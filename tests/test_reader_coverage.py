@@ -32,10 +32,16 @@ def test_reference_runs_every_check():
     assert rs["reference"]["covered"] == 19
 
 
-def test_the_node_gap_is_an_input_it_does_not_hold():
+def test_the_node_reader_has_a_path_for_every_check_but_two_run_only_with_input():
     rs = {r["reader"]: r for r in _mod().rows()}
-    assert rs["node"]["missing"] == [19], rs["node"]["missing"]
-    assert "freshness" in rs["node"]["why"]["19"]
+    assert rs["node"]["missing"] == [], rs["node"]["missing"]
+    assert rs["node"]["covered"] == 19
+    # Having the code path is not the same as running it: S19 fires only when
+    # a state file is passed. That is why the node coverage says 19/19 while the
+    # behaviour tests still check "no flag, no line".
+    src = open(os.path.join(REPO, "tools", "verify-js", "verify.mjs"), encoding="utf-8").read()
+    assert "if (opts.freshness)" in src
+    assert "--freshness" in src
 
 
 def test_independent_reader_reports_ten_outcomes():

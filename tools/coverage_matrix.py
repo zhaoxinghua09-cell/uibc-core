@@ -41,7 +41,8 @@ def reference_ids():
 def node_ids():
     text = "".join(l for l in open(os.path.join(REPO, "tools/verify-js/verify.mjs"),
                                   encoding="utf-8") if not l.lstrip().startswith("//"))
-    return {int(m) for m in re.findall(r'note\(\s*"S(\d+)"', text)}
+    return ({int(m) for m in re.findall(r'note\(\s*"S(\d+)"', text)} |
+            {int(m) for m in re.findall(r'inconclusive\(\s*"S(\d+)"', text)})
 
 
 def independent():
@@ -86,7 +87,7 @@ def rows():
 def render(rs):
     lines = ["# 读者覆盖面（现读，不是手写）", "",
              "由 `python tools/coverage_matrix.py --write` 生成。数字来自三个读者自己的源码：",
-             "参考实现数 `record(\"Sx\")` 与 `{\"id\": \"Sx\"}`，Node 读者数代码里的 `note(\"Sx\")`（注释不计），",
+             "参考实现数 `record(\"Sx\")` 与 `{\"id\": \"Sx\"}`，Node 读者数代码里的 `note(\"Sx\")` 与 `inconclusive(\"Sx\")`（注释不计），",
              "独立读者取自 `tools/cross_impl.py` 的 V→S 映射。", "",
              "| 读者 | 源码 | 覆盖 | 缺 | 缺的原因 |",
              "|---|---|---|---|---|"]
@@ -97,9 +98,10 @@ def render(rs):
         if "outcomes" in r:
             cov += "（%d 条自有结论）" % r["outcomes"]
         lines.append("| %s | `%s` | %s | %s | %s |" % (r["reader"], r["source"], cov, miss, why))
-    lines += ["", "**读法**：Node 读者的 S19 与参考实现的 S16/S19 都需要读者自己持有的外部输入",
-              "（新鲜度状态文件、时间戳 token），所以它们是「未跑」而不是「不会」。独立读者的价值",
-              "在于它与参考实现不同源；它缺的四项不补，补齐就等于把它改成参考实现的副本。", ""]
+    lines += ["", "**读法**：Node 读者现在 19/19，但其中 S19 与参考实现的 S16/S19 都只能在**读者自己持有的外部输入**",
+              "在场时才跑（`--freshness` 状态文件、RFC 3161 时间戳 token）；不传就不是「通过了」，是「根本没跑」——",
+              "Node 实现里这两条在不传输入时连一行结果都不发，宁可缺席也不发一个无人核对过的 PASS。",
+              "独立读者的价值在于它与参考实现不同源；它缺的四项不补，补齐就等于把它改成参考实现的副本。", ""]
     return "\n".join(lines)
 
 

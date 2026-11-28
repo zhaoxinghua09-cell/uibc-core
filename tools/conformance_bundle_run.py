@@ -131,30 +131,62 @@ def reported_failures(got):
             if str(c.get("result", "")).upper() == "FAIL"}
 
 
-def judge(case, got):
+def judge(case, got, strict=False, all_checks=False):
+    """Score one case.
+
+    Two modes, and the difference matters:
+      refusal-only (default, unchanged): an accept case passes when the verdict is
+        anything but FAIL. A verifier that answers INCONCLUSIVE to everything
+        therefore clears every accept case, and scores the same as one that answers
+        PASS to everything. Measured 2026-11-27: always-PASS, always-INCONCLUSIVE
+        and roots-only all score 6/58 = 10.3%.
+      strict (`--strict-verdict`): the verdict must equal the `expected_result` this
+        repository declares for the case. That number is already in the manifest and
+        was never used for scoring; an accept case that says INCONCLUSIVE where the
+        repo says PASS now fails, which is the whole point of having a declared
+        expectation.
+      all_checks (`--require-all-checks`): a refusal must cover every expected check
+        rather than intersect one of them. Measured 2026-11-27 on the 200-case
+        corpus: name-one let a three-line 'FAIL + [S4]' script score 42.0% (S4 occurs
+        in 71 of the 142 refusal cases); name-all puts every single-code liar at
+        <=13.5% and leaves the reference implementation at 200/200, because a real
+        verifier reports the whole failure set and is not penalised by the tighter
+        rule.
+    """
     verdict = (got.get("result") or "").upper()
     parsed = not got.get("unparsed", False)
+    expected = (case.get("expected_result") or "").upper()
     if case.get("expect") == "accept":
-        ok = verdict != "FAIL" and not reported_failures(got)
+        if strict and expected:
+            ok = verdict == expected and not reported_failures(got)
+            note = "" if ok else "verdict %s, expected %s on a correct package" % (
+                verdict or "none", expected)
+        else:
+            ok = verdict != "FAIL" and not reported_failures(got)
+            note = "" if ok else "refused a package that is correct"
         return {"id": case["id"], "attack": case["attack"], "ok": ok,
                 "verdict": verdict, "reported": [], "expected": [],
-                "note": "" if ok else "refused a package that is correct",
+                "note": note,
                 "verifier_parsed": parsed,
                 "verifier_stderr": got.get("stderr", "")}
     reported = reported_failures(got)
-    named = bool(reported & set(case["expected_checks"]))
+    required = set(case["expected_checks"])
+    named = required <= reported if all_checks else bool(reported & required)
     refused = verdict in ("FAIL", "INCONCLUSIVE")
+    verdict_matches = (not strict) or (not expected) or verdict == expected
     return {"id": case["id"], "attack": case["attack"],
-            "ok": refused and named, "verdict": verdict,
+            "ok": refused and named and verdict_matches, "verdict": verdict,
             "reported": sorted(reported), "expected": case["expected_checks"],
-            "note": ("" if refused and named else
+            "note": ("" if refused and named and verdict_matches else
+                     "verdict %s, expected %s on a broken package" % (verdict or "none", expected)
+                     if refused and named and not verdict_matches else
                      "refused but did not name an expected check" if refused
                      else "did not refuse a package that is broken"),
             "verifier_parsed": parsed,
             "verifier_stderr": got.get("stderr", "")}
 
 
-def run_all(command):
+def run_all(command, strict=False, all_checks=False):
     with open(MANIFEST, encoding="utf-8") as f:
         man = json.load(f)
     tmp = tempfile.mkdtemp(prefix="uibc-conf-")
@@ -166,7 +198,8 @@ def run_all(command):
             src = os.path.join(HERE, case["path"])
             pkg = os.path.join(tmp, case["id"])
             shutil.copytree(src, pkg)
-            rows.append(judge(case, call_verifier(command, pkg)))
+            rows.append(judge(case, call_verifier(command, pkg), strict=strict,
+                              all_checks=all_checks))
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
     return rows
@@ -188,6 +221,16 @@ def main():
                     help="accept a verifier installed in this Python when the archive "
                          "carries none; without it that case is a setup failure (exit 3)")
     ap.add_argument("--json", action="store_true")
+    ap.add_argument("--strict-verdict", action="store_true",
+                    help="also require the verdict to equal the case's declared "
+                         "expected_result; without it an accept case passes on any "
+                         "verdict that is not FAIL")
+    ap.add_argument("--require-all-checks", action="store_true",
+                    help="a refusal must name every expected check, not just one. "
+                         "Measured 2026-11-27 on the 200-case corpus: with name-one a "
+                         "blanket 'FAIL + [S4]' scores 42.0% and 'FAIL + [S12]' 32.5%; "
+                         "with name-all the same liars score 13.5% and 9.5%, while the "
+                         "reference implementation stays at 200/200")
     ap.add_argument("--receipt", default="receipt.json",
                     help="where to write the run receipt; '' to skip")
     ap.add_argument("--run-by", default="",
@@ -256,7 +299,7 @@ def main():
             % sys.executable)
         sys.exit(3)
 
-    rows = run_all(a.verify)
+    rows = run_all(a.verify, strict=a.strict_verdict, all_checks=a.require_all_checks)
     passed = sum(1 for r in rows if r["ok"])
 
     # Preflight, in effect: if not one case produced JSON, the verifier did not
@@ -325,6 +368,7 @@ def main():
             "verifier_source": ("bundled with the archive" if bundled
                                 else "installed in the Python that ran this"),
             "manifest_sha256": sha256(MANIFEST) if os.path.isfile(MANIFEST) else None,
+            "scoring": ("strict-verdict" if a.strict_verdict else "refusal-only") + ("+all-checks" if a.require_all_checks else ""),
             "cases": len(public_rows), "passed": passed,
             "rows": public_rows,
         }
@@ -335,7 +379,9 @@ def main():
             print("\nreceipt written to %s" % a.receipt)
 
     if a.json:
-        print(json.dumps({"cases": len(rows), "passed": passed, "rows": _public(rows)},
+        print(json.dumps({"cases": len(rows), "passed": passed,
+                          "scoring": ("strict-verdict" if a.strict_verdict else "refusal-only") + ("+all-checks" if a.require_all_checks else ""),
+                          "rows": _public(rows)},
                          ensure_ascii=False, indent=2))
     sys.exit(0 if passed == len(rows) else 1)
 

@@ -17,7 +17,6 @@ Usage:
     python tools/aep_to_uibc.py --measure <test-vectors-dir> <work-dir>
 """
 
-import io
 import json
 import os
 import shutil
@@ -29,7 +28,7 @@ if _REPO not in sys.path:
     sys.path.insert(0, _REPO)
 
 import uibc_core.cli as ucli  # noqa: E402
-from uibc_core.signing import generate_key, seal_sign  # noqa: E402
+from uibc_core.signing import generate_key  # noqa: E402
 
 def NS(**kw):
     from types import SimpleNamespace
@@ -78,7 +77,6 @@ def convert(aep_path, out_dir, fault=None):
     meta, payload, recorded = _read(aep_path)
 
     agent_id = str(meta.get("agent_id") or "eatf-agent").replace(":", ".")[:120]
-    started = str(meta.get("created_at") or "2026-01-01T00:00:00Z")
 
     ucli.cmd_init(NS(path=out_dir))
     ucli.cmd_register(NS(path=out_dir, agent_id=agent_id, owner="eatf",

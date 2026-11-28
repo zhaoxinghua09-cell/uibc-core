@@ -309,7 +309,6 @@ if __name__ == "__main__":
         import tools.cross_impl_check as cic
 
         cic.ensure_cases()
-        rows = cic.main(emit=False) if False else None
         report = json.loads(subprocess.run(
             ["python3", os.path.join(_REPO, "tools", "cross_impl_check.py"), "--json"],
             capture_output=True, text=True, cwd=_REPO).stdout)

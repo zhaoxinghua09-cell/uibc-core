@@ -14,7 +14,6 @@ from uibc_core.bid_binary import (
     ACSNS_SPELLINGS,
     ASSUMPTIONS,
     FLAG_ORDER_CHOICES,
-    Header,
     Unit,
     build_header,
     build_unit,

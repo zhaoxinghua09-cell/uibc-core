@@ -30,7 +30,6 @@ from . import interop_result as ir
 
 try:  # read-only X.509 parsing; no chain building either way
     from cryptography import x509
-    from cryptography.hazmat.primitives import hashes
     _HAS_PKIX = True
 except Exception:  # noqa: BLE001 - absence is a supported state, not a failure
     _HAS_PKIX = False

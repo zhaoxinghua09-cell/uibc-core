@@ -13,7 +13,6 @@ a two-valued top-level PASS. v0.3 answers in two moves:
 The pure-Python Ed25519 is locked to the RFC 8032 section 7.1 vectors.
 """
 
-import base64
 import json
 import os
 import shutil
@@ -28,8 +27,7 @@ import uibc_core.cli as ucli  # noqa: E402
 from uibc_core import ed25519  # noqa: E402
 from uibc_core.canonical import evidence_root, hash_file  # noqa: E402
 from uibc_core.signing import ed_generate_seed, ed_public_key, ed_seal_sign  # noqa: E402
-from uibc_core.canonical import (checkpoint_head, evidence_root, hash_file,
-                               index_metadata_digest, lifecycle_head)
+from uibc_core.canonical import (checkpoint_head, index_metadata_digest, lifecycle_head)
 from uibc_core.verify import verify  # noqa: E402
 
 # RFC 8032 section 7.1, verbatim.

@@ -41,7 +41,6 @@ def main():
             return 2
 
     exp = json.load(open(EXPECTED, encoding="utf-8"))
-    by_id = {c["id"]: c for c in exp["cases"]}
     by_design = {m: set(exp["by_design_accept"].get(m, [])) for m in MODES}
     observed = json.load(open(RESULTS, encoding="utf-8"))
 

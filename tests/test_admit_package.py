@@ -6,7 +6,6 @@ the seal and the verdict flips — without that, "PASS" would mean "we looked at
 it", which is not a claim anyone can check.
 """
 import hashlib
-import json
 import os
 import subprocess
 import sys
@@ -60,7 +59,7 @@ class TestAdmitPackage(unittest.TestCase):
         self.assertEqual(r["checks"], [], "no non-PASS check should remain")
 
     def test_a_changed_byte_flips_the_verdict(self):
-        r = ap.admit(self.art, self.out, "demo-1.0", "alice", sys.executable,
+        ap.admit(self.art, self.out, "demo-1.0", "alice", sys.executable,
                      key=self.seed, pinned=self.pub)
         # the evidence copy inside the package is what a verifier hashes
         ev = os.path.join(self.out, "evidence")

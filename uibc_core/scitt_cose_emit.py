@@ -41,7 +41,6 @@ import hashlib
 import json
 
 from . import cose_min, ed25519
-from .cose_min import CborError
 from .scitt_cose import (
     ALG_ED25519,
     CONTENT_TYPE,

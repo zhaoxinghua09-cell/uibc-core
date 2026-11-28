@@ -4,7 +4,7 @@
 
 > **万物互联，数智共生** — Everything Connected, Digital-Intelligence Symbiosis.
 
-UIBC Core reference implementation v0.3.0 — agent lifecycle evidence
+UIBC Core reference implementation v0.5.8 — agent lifecycle evidence
 packages and a verifier, with three-valued verdicts (PASS / FAIL /
 INCONCLUSIVE — an undecided check is never washed into a PASS) and
 public Ed25519 seals anyone can verify, with optional key pinning.
@@ -16,6 +16,13 @@ plus verification gates.
 > ⚠️ Status: PROPOSAL, not a formal standard. Verification results are
 > **scoped proofs**: PASS only means "no violation found within the observed
 > evidence boundary" — it does not claim absolute trust.
+
+## Get it, tell us things, contribute, report a vulnerability
+
+- **Get it**: `pip install uibc-core`, or `git clone` and `pip install -e .`.
+- **Feedback**: bugs, disagreements and reproducible differences go to [Issues](https://github.com/zhaoxinghua09-cell/uibc-core/issues) — searchable, linkable by URL, no client software required.
+- **Contribute**: the process is in [CONTRIBUTING.md](CONTRIBUTING.md) — branch, pull request, tests required, CI must be green. Conduct: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md). Roles and decisions: [GOVERNANCE.md](GOVERNANCE.md).
+- **Security**: do **not** open a public issue for a vulnerability. Follow [SECURITY.md](SECURITY.md); private vulnerability reporting is enabled on this repository and first reply is within five business days.
 
 ## 5-minute quickstart
 

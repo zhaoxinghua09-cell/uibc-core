@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Build parity-battery cases + CLI ground truth for the verify.html port."""
-import base64, json, os, re, shutil, sys
+import base64, json, os, shutil, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.abspath(os.path.join(HERE, "..", "..")))

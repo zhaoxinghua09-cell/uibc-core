@@ -10,7 +10,6 @@ those three disagree, so what is tested here is the failing:
   * the corpus is found by its tail, not by "some directory with json in it".
 """
 
-import json
 import os
 import subprocess
 import sys

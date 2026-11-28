@@ -28,7 +28,6 @@ shipped corpus rather than one implementation being wrong.
 import argparse
 import base64
 import copy
-import hashlib
 import importlib.util
 import json
 import os

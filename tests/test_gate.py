@@ -294,7 +294,6 @@ class GateTests(unittest.TestCase):
 
     def test_17_forged_coverage_signature_holds(self):
         from uibc_core.signing import ed_generate_seed
-        from uibc_core.signing import ed_generate_seed
         other = ed_generate_seed()
         pkg, kf = _make_pkg(self.tmp, sign_ed=True)
         seed = _seed_from_keyfile(kf)

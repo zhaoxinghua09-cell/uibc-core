@@ -8,6 +8,34 @@ permissions:
   contents: read
 
 jobs:
+  # Measured 2026-11-28: nothing in this repository had ever linted the Python.
+  # CodeQL covers security patterns and the suite covers behaviour, so both stayed
+  # green while three things sat in the tree untouched: a helper in tools/ that
+  # called an undefined KEY (dead, but only because nobody had called it), a test
+  # module that referenced pytest.skip without importing pytest (so its skip path
+  # could only ever raise NameError), and a duplicated import that made one of two
+  # definitions silently win. A gate that cannot fail is not a gate, and none of
+  # these three could fail. ruff runs over the whole tree with E9+F only - the
+  # rules that find bugs, not the ones that argue about layout - and the tree was
+  # cleaned to zero before this job was added, so it starts green and stays green.
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - name: Install ruff
+        # Pinned to the version that produced the clean run, and fetched the same
+        # way as every other dependency (wheel into .ci-wheels, then installed by
+        # wheel name) so the supply-chain check keeps counting this as pinned.
+        run: |
+          python -m pip wheel --wheel-dir .ci-wheels ruff==0.17.6
+          python -m pip install --no-deps .ci-wheels/*.whl
+      - name: Lint
+        run: ruff check .
+
   test:
     runs-on: ubuntu-latest
     strategy:

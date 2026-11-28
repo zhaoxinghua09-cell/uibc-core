@@ -21,7 +21,6 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "tools"))
 
-import stranger_competitor_check as stranger  # noqa: E402
 import verify_external_run_receipt as ver  # noqa: E402
 
 TOOL = os.path.join(ROOT, "tools", "verify_external_run_receipt.py")
@@ -125,7 +124,7 @@ def test_a_receipt_that_skipped_a_step_cannot_still_say_reproduced():
 
 
 def test_the_limitation_is_stated_in_the_output():
-    out = subprocess.run([sys.executable, TOOL, "--help"],
+    subprocess.run([sys.executable, TOOL, "--help"],
                          capture_output=True, text=True)
     with open(TOOL, encoding="utf-8") as f:
         src = f.read()

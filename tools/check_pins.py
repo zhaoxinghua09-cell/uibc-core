@@ -18,9 +18,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-import os
 import sys
-import tempfile
 import urllib.request
 
 PROJECT = sys.argv[1] if len(sys.argv) > 1 else "uibc-core"

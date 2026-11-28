@@ -320,8 +320,6 @@ def test_a_list_that_names_this_statement_revokes_it():
 
 
 def test_a_list_that_names_another_statement_does_not_revoke_this_one():
-    """The refused case has to be the statement's digest, not any digest."""
-def test_a_list_that_names_another_statement_does_not_revoke_this_one():
     """The refused case has to be this statement's digest, not any digest."""
     case = base_case()
     case["list"] = make_list(revoked=[("ab" * 32)])

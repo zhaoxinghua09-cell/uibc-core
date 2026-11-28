@@ -61,10 +61,6 @@ def _override(cid):
     return (rec["class"], note)
 
 
-CLASS_LABEL = {"direct": "草案明文规定", "related": "思想来源（非直接规定）",
-               "none": "无"}
-
-
 _ID_RE = re.compile(r'"id":\s*"(S\d+)"\s*,\s*"name":\s*"([^"]+)"')
 _RECORD_RE = re.compile(r'record\(\s*"(S\d+)"\s*,\s*"([^"]+)"')
 _DETAIL_RE = re.compile(r'"detail":\s*(["\'])(.*?)\1', re.S)

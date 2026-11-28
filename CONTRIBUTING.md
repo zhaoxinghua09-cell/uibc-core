@@ -21,7 +21,7 @@ about the code.
 
 ## Development setup
 
-Python **3.9+**, standard library only. No runtime dependencies.
+Python **3.10+** (`requires-python` in `pyproject.toml`; CI runs 3.10–3.13 plus macOS), standard library only. No runtime dependencies.
 
 ```bash
 git clone https://github.com/zhaoxinghua09-cell/uibc-core.git

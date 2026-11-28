@@ -21,7 +21,6 @@ Two things make the reading hard, and both are deliberate:
 This reader mints and signs nothing.
 """
 
-import base64
 import hashlib
 import json
 import os

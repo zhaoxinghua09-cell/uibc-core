@@ -17,13 +17,11 @@ Exit 0 only if every question got the answer it should.
 """
 from __future__ import annotations
 
-import json
 import os
 import shutil
 import subprocess
 import sys
 import tempfile
-import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)

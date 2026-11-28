@@ -50,7 +50,6 @@ from .revocation_list import (
     _is_hex64,
     _is_identifier,
     _is_list_digest,
-    _parse_list_bytes,
     _read_time,
     _shape,
 )

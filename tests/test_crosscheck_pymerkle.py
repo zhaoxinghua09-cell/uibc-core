@@ -10,7 +10,6 @@ library is absent: a missing dependency must not silently turn into a pass.
 import importlib.util
 import json
 import os
-import sys
 import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))

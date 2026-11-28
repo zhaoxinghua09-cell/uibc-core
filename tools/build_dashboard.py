@@ -22,8 +22,6 @@ for p in (_REPO, _TOOLS):
     if p not in sys.path:
         sys.path.insert(0, p)
 
-import check_release_parity as parity   # noqa: E402
-import compare_diagnostics as diag      # noqa: E402
 from uibc_core import basis             # noqa: E402
 
 INK = "#1a1a1a"
@@ -95,7 +93,7 @@ def render(d):
                       13, MUTED))
 
     # panel 1: three channels
-    px, py, pw = 40, 110, 520
+    px, py, _pw = 40, 110, 520
     out.append(_label(px, py, "同一个包，三个渠道各报几项检查", 16, INK, "bold"))
     ch = d["channels"]
     vmax = max(ch.values()) or 1

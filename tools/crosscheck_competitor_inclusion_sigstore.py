@@ -34,7 +34,6 @@ HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(HERE, "tools"))
 sys.path.insert(0, os.path.join(HERE, "tools", "third_party"))
 
-import sweep_competitor_corpus as sweep  # noqa: E402
 import sigstore_merkle as sig  # noqa: E402
 
 RECEIPT = os.path.join(HERE, "docs", "upstream-package", "competitor-defects",

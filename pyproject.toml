@@ -65,3 +65,24 @@ include = ["uibc_core*"]
 # reader run the suite with a bare `pytest`, while the self-check stays runnable
 # directly:  python audit/20261121/p13_anchor_registry/test_anchor_registry.py
 norecursedirs = [".git", ".venv", "venv", "build", "dist", "*.egg", "audit"]
+
+[tool.ruff]
+# A gate, not a style campaign. The rule set is the one that finds bugs rather than
+# argues about layout: E9 is syntax-level, F is pyflakes (undefined names, unused
+# imports, redefinitions). Measured 2026-11-28 over the whole tree, F alone found
+# 167 findings, four of them undefined names - including a helper in tools/ that had
+# called an undefined KEY since it was written, and a test module that referenced
+# `pytest.skip` without importing pytest, so the skip path could only ever raise
+# NameError. All 167 are fixed below, so the gate starts at zero rather than at a
+# baseline nobody would ever drain. Line length is a ceiling, not a target; the
+# existing tree is not reflowed.
+target-version = "py310"
+line-length = 120
+extend-exclude = ["audit", ".ci-wheels", "dist", "build", "*.egg"]
+
+[tool.ruff.lint]
+select = ["E9", "F"]
+
+[tool.ruff.lint.per-file-ignores]
+# A package __init__ exists to re-export; pyflakes reads a re-export as an unused import.
+"__init__.py" = ["F401"]

@@ -4,7 +4,7 @@ A witness is an *independent* key holder that asserts "I saw this checkpoint".
 Policy: at least one cosignature, from a key different from the package seal key.
 No log, no network - the cosignature file travels with the disclosure bundle.
 """
-import base64, json
+import base64
 from . import signing
 from .canonical import canonicalize
 

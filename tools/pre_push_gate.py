@@ -54,10 +54,15 @@ def main(argv=None):
     allowed = [s.strip().lower() for s in
                (os.environ.get("GIT_ALLOWED_OWNERS") or "").split(",") if s.strip()]
 
-    rc, url, _ = (subprocess.run(["git", "remote", "get-url", "origin"],
-                                 capture_output=True, text=True).returncode,
-                  subprocess.run(["git", "remote", "get-url", "origin"],
-                                 capture_output=True, text=True).stdout.strip(), "")
+    # One call, and the exit code is read: a git that cannot answer is a gate
+    # that must refuse, not a gate that reasons about an empty string.
+    proc = subprocess.run(["git", "remote", "get-url", "origin"],
+                          capture_output=True, text=True)
+    if proc.returncode != 0:
+        print("GATE FAIL: cannot read origin: %s"
+              % (proc.stderr.strip() or proc.returncode))
+        return 1
+    url = proc.stdout.strip()
     owner = remote_owner(url)
     if not owner:
         print("GATE FAIL: cannot parse a GitHub owner from origin=%r" % url)

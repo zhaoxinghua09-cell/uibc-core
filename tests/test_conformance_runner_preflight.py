@@ -7,7 +7,6 @@ now catches the OSError so the existing preflight turns it into exit 3 with a re
 """
 import importlib.util
 import os
-import sys
 
 import pytest
 

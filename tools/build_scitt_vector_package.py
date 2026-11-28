@@ -696,7 +696,6 @@ def verify(out=OUT):
         if exp.get("kind") == "consistency":
             m, n = exp["old_size"], exp["new_size"]
             old_root = bytes.fromhex(exp["old_root"])
-            new_root = bytes.fromhex(exp["new_root"])
             proof = [bytes.fromhex(h) for h in exp["consistency_path"]]
             rec = reconstruct_consistency(m, n, old_root, proof)
             ro_hex = rec[0].hex() if rec else ""

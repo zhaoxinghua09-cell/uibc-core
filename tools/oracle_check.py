@@ -29,7 +29,6 @@ sys.path.insert(0, os.path.join(ROOT, "independent_verifier"))
 
 from uibc_core.verify import verify                      # noqa: E402
 from uibc_core import cli as ucli                        # noqa: E402
-from uibc_core.signing import generate_key  # unused by _oracle_key; kept for build_bad               # noqa: E402
 from iverify import independent_verify                   # noqa: E402
 import outsider_audit as oa                              # noqa: E402  (mutations only)
 

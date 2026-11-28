@@ -10,7 +10,6 @@ figures only; the full run is exercised when the tool is called without it.
 """
 
 import os
-import re
 import subprocess
 import sys
 import unittest

@@ -67,13 +67,11 @@ def test_every_calendar_that_answered_ends_up_in_the_one_proof(tmp_path):
     """Measured 2026-11-25: the proof used to stop at the first answer, so the
     published anchor depended on one operator staying up."""
     pytest.importorskip("opentimestamps", reason="needs the library to merge timestamps")
-    import hashlib
 
     from opentimestamps.core.notary import PendingAttestation
     from opentimestamps.core.timestamp import Timestamp
 
     target = _write(tmp_path, "digests.txt", b"hello\n")
-    digest = hashlib.sha256(b"hello\n").digest()
     seen = []
 
     def submit(calendar, d):
@@ -197,7 +195,6 @@ def test_the_repository_records_a_signing_key():
 
 
 def test_the_pin_matches_an_unchanged_page(tmp_path):
-    import shutil as _shutil
     pin = os.path.join(ROOT, "anchors", "pins", "uibc-release-v0.4.1.json")
     assert os.path.isfile(pin)
     blob = json.load(open(pin, encoding="utf-8"))

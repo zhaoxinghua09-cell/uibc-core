@@ -23,7 +23,6 @@ constant is reported as *un corroborated by this library*, not as agreement.
     python3 tools/crosscheck_scitt_pymerkle.py --self-test
 """
 import argparse
-import hashlib
 import json
 import os
 import sys

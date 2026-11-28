@@ -60,7 +60,7 @@ def test_the_render_is_deterministic():
 
 def test_a_stale_page_is_detected(tmp_path, monkeypatch):
     f, missing = sp.facts(REPO)
-    page = sp.render(f, missing)
+    sp.render(f, missing)
     stale = sp.render(f, missing).replace(str(f["archive_bytes"]), "227999")
     (tmp_path / "STATUS.md").write_text(stale, encoding="utf-8")
     monkeypatch.chdir(tmp_path)

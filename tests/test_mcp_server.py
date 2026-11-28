@@ -11,7 +11,7 @@ import unittest
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, REPO)
 
-from mcp_server.server import handle, TOOLS, TOOL_FUNCS  # noqa: E402
+from mcp_server.server import handle, TOOL_FUNCS  # noqa: E402
 from uibc_core.cli import main as cli_main  # noqa: E402
 
 

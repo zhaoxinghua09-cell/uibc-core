@@ -20,7 +20,6 @@ import shutil
 import sys
 import subprocess
 import tempfile
-import zipfile
 
 _REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 TOOLS = os.path.join(_REPO, "tools")
@@ -30,7 +29,6 @@ for p in (_REPO, TOOLS):
 
 import outsider_audit as oa  # noqa: E402
 import redteam_scale as rscale  # noqa: E402
-from uibc_core.verify import verify  # noqa: E402
 
 CLEAN = os.path.join(_REPO, "fixtures", "clean.uibc")
 OUT = os.path.join(_REPO, "conformance")

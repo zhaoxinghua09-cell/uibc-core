@@ -111,15 +111,15 @@ def replay_chain(kit) -> list:
     rows = []
     d = json.load(open(os.path.join(kit, "chain-vectors.json")))
     for v in d["vectors"]:
-        prev, verdict, why = "0" * 64, "valid", None
+        prev, verdict, _why = "0" * 64, "valid", None
         for i, e in enumerate(v["timeline"]):
             raw = base64.b64decode(e["canonical_bytes"])
             if e["prev_digest"] != prev:
-                verdict, why = "invalid", "entry%d link broken" % i
+                verdict, _why = "invalid", "entry%d link broken" % i
                 break
             prev = _sha_hex(raw)
         if verdict == "valid" and v["timeline"][-1].get("close") is not True:
-            verdict, why = "invalid", "last entry lacks close=true"
+            verdict, _why = "invalid", "last entry lacks close=true"
         rows.append(("chain", v["name"], verdict == v["expected_verdict"],
                      verdict, v["expected_verdict"]))
     return rows

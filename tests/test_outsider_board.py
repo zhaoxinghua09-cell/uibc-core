@@ -4,7 +4,6 @@ import importlib.util
 import json
 import os
 import re
-import sys
 
 import pytest
 

@@ -22,7 +22,6 @@ from uibc_core.signing import (ALGORITHM, generate_key, key_id, seal_payload,
                                seal_sign, seal_verify)
 from uibc_core.verify import verify
 from uibc_core import cli as ucli
-from uibc_core import SPEC_VERSION, __version__
 
 
 def ev(etype, eid, prev=None):

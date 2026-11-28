@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/zhaoxinghua09-cell/uibc-core/interop/revocation-list-report.schema.json",
+  "title": "UIBC revocation list report line",
+  "description": "One line of a JSON Lines file produced by `uibc_core.pyz verify-revocation-list --report`. The line records what a signed, cumulative revocation list chain forced, and where the verifier stopped. The refusal travels with the position it was reached at, because a chain verdict without the position does not say which list was rejected.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "vector", "result", "verdict", "reason", "index", "verifier_id", "verifier_version", "when_utc", "exit"],
+  "properties": {
+    "format": {"const": "uibc-revocation-list-report/1"},
+    "vector": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The corpus member this line is about."
+    },
+    "result": {
+      "enum": ["PASS", "FAIL", "ERROR"],
+      "description": "PASS means the chain was read and every list held; FAIL means at least one list was refused; ERROR means the chain could not be read at all."
+    },
+    "verdict": {
+      "enum": ["valid", "invalid", null],
+      "description": "null only on an ERROR line."
+    },
+    "reason": {
+      "type": ["string", "null"],
+      "description": "The refusal, as one of the peer's revocation_list_* tokens: shape, signer_not_a_root, signature_unverified, other_chain, rollback, gap, previous_mismatch, time_reversed, entry_from_future, drops_entry. Null on a valid chain or an ERROR line."
+    },
+    "index": {
+      "type": ["integer", "null"],
+      "minimum": 0,
+      "description": "0-based position of the list the verifier stopped on. Null when the refusal concerns the document as a whole rather than one entry."
+    },
+    "verifier_id": {"type": "string", "minLength": 1},
+    "verifier_version": {"type": "string", "minLength": 1},
+    "when_utc": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"},
+    "exit": {
+      "enum": [0, 1, 3],
+      "description": "0 for a valid chain, 1 for a refusal, 3 when nothing could be judged."
+    },
+    "error": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 300,
+      "description": "Present only on an ERROR line, and required there."
+    }
+  },
+  "$comment": "Cross-field rules the subset here cannot express: a valid verdict carries reason null and index null; a refusal carries a reason token; an ERROR line carries no verdict, no reason, no index, and an error string."
+}

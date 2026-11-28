@@ -69,10 +69,11 @@ timestamp parsing; when they are absent the corresponding checks report
 INCONCLUSIVE rather than PASS, so the absence is visible instead of papered
 over. The code is organised in three layers -- registry (identity records),
 evidence (hash/seal construction) and gates (state machine + validators) --
-implemented across 53 modules. The CLI supports package creation, validation
-and report emission, and reads five formats authored elsewhere (tagged SCITT/COSE
-statements, MCP authorization observations, signed revocation lists, key-revocation
-lists and receipts over A2A agent cards); validation
+implemented across 54 modules. The CLI supports package creation, validation
+and report emission, and reads six formats authored elsewhere (tagged SCITT/COSE
+statements, MCP authorization observations, signed revocation lists in both their
+cumulative and delta forms, key-revocation lists and receipts over A2A agent
+cards); validation
 semantics are intentionally conservative and
 scoped (see Summary). Test coverage is counted once, in
 `docs/EVIDENCE-INDEX.md`, and not retyped here; the suite skips

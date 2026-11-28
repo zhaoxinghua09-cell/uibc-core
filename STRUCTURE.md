@@ -8,7 +8,7 @@
 | 层 | 位置 | 职责 | 首选入口 |
 |---|---|---|---|
 | **规范层** | `docs/`、`lgd-core/`、`ai/`、`llms.txt` | 协议文本、三律、面向机器读者的摘要 | `docs/SPEC-PROPOSAL-v0.1.md` |
-| **实现层** | `uibc_core/`（22 模块） | 规范化、签名、判定、门禁、锚定、组合 | `uibc_core/README.md` |
+| **实现层** | `uibc_core/`（54 模块） | 规范化、签名、判定、门禁、锚定、组合 | `uibc_core/README.md` |
 | **工具层** | `tools/`（34 脚本） | 一致性语料、外部视角、红队基准、锚定、发布门禁、场景演示 | `tools/publish_gate.py` |
 | **验证层** | `independent_verifier/`、`tests/`、`fixtures/`、`failure_corpus/` | 第二实现交叉比对、测试、对抗夹具、失败语料 | `independent_verifier/`、`EVIDENCE-INDEX.md` |
 | **存证与生态** | `dist/`、`timestamps/`、`registry/`、`registry_server/`、`mcp_server/`、`adapters/`、`contest/`、`examples/`、`paper/`、`brand/` | 归档、时间锚、注册表、集成、赛事、示例 | `examples/README.md`、`dist/README.md` |

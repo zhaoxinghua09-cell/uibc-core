@@ -42,4 +42,8 @@ RUN python -m pip install --no-cache-dir --require-hashes -r /tmp/requirements-v
 # would fail the run rather than quietly shrink it.
 COPY . /repo
 
-CMD ["python", "tools/outsider_rerun.py", "--check"]
+# Default entry: re-run the four steps here rather than only verify a receipt that
+# was sealed elsewhere. `--check` is the other half, and the workflow runs both:
+# the same image must be able to reproduce the steps and to agree with the receipt
+# that ships in it.
+CMD ["python", "tools/outsider_rerun.py", "--run"]

@@ -65,12 +65,26 @@ jobs:
           sha256sum docker/base-image.pin docker/requirements-verify.txt
 
       - name: Four steps inside the pinned environment
-        run: docker run --rm uibc-verify:${{ github.sha }} | tee container-check.log
-
-      - name: The run has to say the receipt matched
         run: |
-          grep -F "OUTSIDER OK: receipt matches" container-check.log
-          grep -F "4 steps passed" container-check.log
+          set -o pipefail
+          docker run --rm uibc-verify:${{ github.sha }} | tee container-run.log
+
+      - name: The steps have to pass here, not only in a receipt
+        run: |
+          grep -c -E "PASS (gate|parity|demo|tests) " container-run.log | grep -Fx 4
+          grep -F "OUTSIDER OK" container-run.log
+
+      - name: The shipped receipt still answers for the shipped tree
+        run: |
+          set -o pipefail
+          docker run --rm uibc-verify:${{ github.sha }} \
+            python tools/outsider_rerun.py --check | tee container-check.log
+
+      - name: The check has to say the membership and the receipt agree
+        run: |
+          grep -F "INVENTORY OK" container-check.log
+          grep -E "(OUTSIDER OK: receipt matches|VERDICT: DELIVERY MATCH)" container-check.log
+          grep -F "timestamp:" container-check.log
 
       - name: Export the image and attest its bytes (push to main only)
         if: github.event_name != 'pull_request'
@@ -90,6 +104,8 @@ jobs:
         if: always()
         uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
         with:
-          name: container-check-log
-          path: container-check.log
+          name: container-run-log
+          path: |
+            container-run.log
+            container-check.log
           if-no-files-found: warn

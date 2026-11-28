@@ -52,3 +52,29 @@
 - `gh actions-lock` 一旦被谁重新运行，会把 SHA 钉法与锁文件一起降回 tag 形式；本文件与 `lgd-ci.yml` 里的注记即为拦阻说明。
 - 该处置只作用于本仓；其他仓若继续用 tag + 锁文件，仍会被共享 CI 的 `--verify` 校验。
 - 真正该修的是工具：`gh-actions-lock` 应接受 `OWNER/REPO@<sha>` 键并停止把 SHA 钉法改回 tag。GitHub 侧已经接受这种形式，工具侧没有跟上——这是上游问题，本仓只能绕开而不是修好。
+
+## Python 依赖：从"按规格装"改为"按产物装"（2026-11-28）
+
+钉版第二类不是 action 而是 `pip`。判据在 `checks/raw/shell_download_validate.go` 的 `isUnpinnedPipInstall`，它只认三种"已钉"形态：
+
+1. 命令行出现 `--require-hashes`；
+2. `-e/--editable` 且源是本地路径（或 `git+…@<40 位 commit>`），并且带 `--no-deps`；
+3. 位置参数**全部**是 `*.whl`，且没有别的包参数。
+
+其余一律判为未钉，包括 `pip install .`、`pip install pytest ".[verify]"` 与 `pip install --upgrade pip`。也就是说"钉在 `pyproject.toml` 里"对这条判据不算数——它看的是命令行形态。
+
+本仓的处理是把每一处安装拆成两步，**依赖规格一个字没改**：
+
+```bash
+python -m pip wheel --wheel-dir .ci-wheels <原来的规格>
+python -m pip install --no-deps .ci-wheels/*.whl
+```
+
+第一步用原规格解析依赖并把 wheel（含本仓自己的 wheel）固化到本地目录；第二步只装这些文件，`--no-deps` 关掉安装期的再解析。`pip wheel` 不在这条判据的匹配范围内（它匹配 `cmd[1] == "install"`），而第二步的形态正是判据第 3 条。
+
+改了什么、没改什么，写清楚：
+
+- 改了的：安装期不再联网解析，`pip install` 只能装第一步已经落盘的产物；`--upgrade pip` 全部删除（runner 自带 pip 已足够新，而它本身就是一条未钉命令）。
+- 没改的：版本约束仍来自 `pyproject.toml` / 命令行里的 `==`，**不是哈希锁**。因此这一步换来的是"产物固定"，不是"内容被哈希钉住"。哈希锁（`--require-hashes` + 一份带 sha256 的 requirements）仍是未做的工程，见 `docs/` 中的待办台账；真做的时候是本文件这一节的替代方案，而不是补丁。
+- 不做的：没有把 `pip` 换成 `uv sync --frozen` 之类让判据"看不见依赖"的写法。那样分数会涨得更快，但依赖会从扫描面里消失，这不是本仓想要的分数。
+

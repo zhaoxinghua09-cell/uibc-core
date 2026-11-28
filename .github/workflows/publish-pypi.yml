@@ -20,7 +20,8 @@ jobs:
           python-version: "3.12"
       - name: Build sdist and wheel
         run: |
-          python -m pip install --upgrade pip build
+          python -m pip wheel --wheel-dir .ci-wheels build
+          python -m pip install --no-deps .ci-wheels/*.whl
           python -m build
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
@@ -57,7 +58,8 @@ jobs:
         if: steps.oidc.outcome == 'failure' && env.UV_PUBLISH_TOKEN != ''
         continue-on-error: true
         run: |
-          python -m pip install --upgrade pip uv
+          python -m pip wheel --wheel-dir .ci-wheels uv
+          python -m pip install --no-deps .ci-wheels/*.whl
           uv publish --token "$UV_PUBLISH_TOKEN"
       - name: Verify the version is actually on PyPI
         if: always()

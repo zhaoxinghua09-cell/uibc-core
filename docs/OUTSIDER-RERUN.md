@@ -1,6 +1,6 @@
 # 外人重跑：换一个目录、换一套环境，还成不成立
 
-生成时间 2026-11-28T14:48:22Z，运行环境 Python 3.13.18 / Windows。
+生成时间 2026-11-28T15:09:02Z，运行环境 Python 3.13.18 / Windows。
 
 做法：把仓库整棵拷到临时目录（不含 `.git`、不含任何缓存），用只保留白名单变量的干净环境，在该目录下跑四个公开入口；每一步记录退出码与输出末行；整棵树的 sha256 一并记下。
 
@@ -25,15 +25,13 @@
 
 **收据还带一枚时间戳**：`docs/outsider-rerun-receipt.json.ots`（OpenTimestamps，同一份字节同时提交给三个日历）。它证明的是「这些字节在提交那一刻就已经是这些字节」——不是我们事后补的。核验：`python tools/anchor_ots.py --verify docs/outsider-rerun-receipt.json`。区块确认之前状态写 `pending_calendar`，确认后变成 `confirmed`；两者都说明提交已经发生，区别只是 Bitcoin 区块有没有把它记下来。
 
-**归档的来历也签了名**：`build-provenance` 作业在每次 main 推送时，用本仓库自己的 OIDC 身份，为 `dist` 下的 sdist、wheel 和你下载的那只归档各签一份构建来源证明（SLSA build provenance）。核验：`gh attestation verify conformance/uibc-conformance-0.7.0.zip --repo zhaoxinghua09-cell/uibc-core`。它证明的是「这些字节在本仓库某次由本仓库签发的运行里出现过」；它**不**证明归档是隔离构建出来的——归档是仓库里的文件，不是当场构建的产物。这句区别写在这里，免得被当成比实际更强的东西。
-
-**树摘要 `baf6779cf49515e6…`（2561 个文件，排除本页与 receipt 自身）**。
-**内容摘要 `a693ebc218445a28…`（只看每个文件的字节，不看文件名）**。
+**树摘要 `120eb319a1d85ca1…`（2561 个文件，排除本页与 receipt 自身）**。
+**内容摘要 `879b89301ee86aa9…`（只看每个文件的字节，不看文件名）**。
 
 为什么有两根轴：路径与内容一起算的那个摘要最严，但也会被解包器连累。Windows 自带的 `tar` 把 UTF-8 文件名当 CP936 解，出来的 `r茅sum茅.md` 一个字节都没错，严摘要却红。于是收据同时记一根只算内容的摘要，`--check` 因此能说出是 `NAMES-ONLY`（字节全同、名字坏了，问题在你的解包器）还是 `CONTENT`（真的有字节动了）。
 在 Windows 上解包请用 `python -c "import tarfile,sys;tarfile.open(sys.argv[1]).extractall(sys.argv[2])" <包> <目录>`，或直接在 POSIX 上解包。
 
-**第三根轴 `b93b599a0769c557…`：内容摘要再折一次换行（CRLF→LF）**，收据记的是 `commit` 这一路的字节。原因实测：本仓有 83 个文件的 blob 按 CRLF 存，而 `.gitattributes` 写的是 `text=auto eol=lf`——`git archive` 给的是存储的字节，检出给的是规整后的字节，同一个提交两条通道给两套字节。这一根轴用来把"换行差异"与"有人改了字节"分开，`--check` 因此能报 `VERDICT: DELIVERY MATCH`（同名同内容、只差换行）。
+**第三根轴 `7dbc0a828a106ffd…`：内容摘要再折一次换行（CRLF→LF）**，收据记的是 `commit` 这一路的字节。原因实测：本仓有 83 个文件的 blob 按 CRLF 存，而 `.gitattributes` 写的是 `text=auto eol=lf`——`git archive` 给的是存储的字节，检出给的是规整后的字节，同一个提交两条通道给两套字节。这一根轴用来把"换行差异"与"有人改了字节"分开，`--check` 因此能报 `VERDICT: DELIVERY MATCH`（同名同内容、只差换行）。
 
 **先拿归档**：`conformance/uibc-conformance-0.7.0.zip`，1087869 字节，sha256 `fbdb7b80d341f9fd7761b201175fdcfde40b3f227f1426f95184730865604602`。
 这一份不需要我们的任何程序，也不需要信任本页的任何数字——下载后自己算 sha256，对上就说明拿到的正是收据描述的那一份：

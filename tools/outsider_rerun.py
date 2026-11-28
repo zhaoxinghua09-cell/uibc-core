@@ -570,7 +570,7 @@ def write_receipt(digest, files, results, content=None, content_files=None,
     return 0 if receipt["ok"] else 1
 
 
-def check():
+def check(verify_timestamp=True):
     if not os.path.exists(RECEIPT):
         print("FAIL no receipt; run --run first")
         return 1
@@ -697,7 +697,7 @@ def check():
         return 1
     print(f"OUTSIDER OK: receipt matches this {view_name} ({count} files, {digest[:12]}, "
           f"content {cdigest[:12]}), {len(steps)} steps passed")
-    if not check_timestamp():
+    if verify_timestamp and not check_timestamp():
         return 1
     for name, (d, c, l, n) in views:
         if name != view_name and d != digest:
@@ -748,8 +748,13 @@ def check_inventory():
 
 
 def stamp_receipt():
-    """Submit the receipt to the calendars; the proof lands next to it as `.ots`."""
-    if check() != 0:
+    """Submit the receipt to the calendars; the proof lands next to it as `.ots`.
+
+    The tree is checked *without* the timestamp, because a receipt that has just
+    been re-sealed is precisely the case where the old proof is stale - refusing
+    here would make the stale proof impossible to replace.
+    """
+    if check(verify_timestamp=False) != 0:
         print("refusing to stamp: the receipt does not match this tree")
         return 1
     proc = subprocess.run([sys.executable, os.path.join(HERE, "tools", "anchor_ots.py"),

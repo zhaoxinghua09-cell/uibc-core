@@ -262,6 +262,81 @@ The corpus itself is not vendored: `tests/test_revocation_list_corpus.py` runs
 only when `UIBC_REVOCATION_CORPUS` names a checkout, and the checked-in tests
 build their own lists from fixtures signed once with fixed seeds.
 
+## Read the delta form of the same list
+
+`uibc_core/revocation_delta.py` reads `predicate/v2/revocation-list`, the form
+the peer's records package has emitted since 0.10.0. Both types are live
+upstream: a list already signed as v1 keeps its type, so a reader that knew only
+one of them would refuse half the lists in circulation.
+
+The framing is the v1 framing — `{"body": BODY, "sig": base64(Ed25519 over
+"probity-revocation-v1\0" || JCS(BODY))}`, roots pinned out of band, the same
+canonicaliser and the same Ed25519 verifier, imported rather than copied. What
+changes is what a list *means*:
+
+- **A list carries only what it newly revokes.** The revocations in force after
+  list *n* are the union of lists 1 to *n*. An entry is published once and never
+  again; a list naming a subject an earlier list of its chain revoked is refused
+  (`revocation_entry_repeated`), so no list can quietly un-revoke.
+- **An empty entry list is a freshness list**: a new sequence number and issue
+  time, nothing newly revoked.
+- **`seq` is an epoch, not a position.** It rises by one; `previous` is the
+  digest of the prior body; roots rotate through `successor` on a `key` entry
+  and can never be re-added after revocation.
+- **Eight subject kinds, not seven.** The delta form adds `idp-key`, an
+  identity provider's token-signing key named by its RFC 7638 JWWK thumbprint
+  (SHA-256, base64url, no padding, 43 digits) rather than by this format's own
+  hex key id. `grant`, `key` and `permit` stay 64 lowercase hex; the rest are
+  1–512 printable ASCII characters.
+- **The type is named under either host.** `https://probityai.github.io/...`
+  and `https://probityai.org/...` name one type; the match is byte-exact on the
+  scheme and the host, so `http://`, a port, an upper-case host or a trailing
+  dot is not the type.
+
+Ten refusals, checked in this order:
+
+| code | detail |
+|---|---|
+| `revocation_list_shape` | the 22 shape faults of the v1 reader minus the cumulative-only ones, plus `entry_id_form:idp-key` and `type` |
+| `revocation_list_signer_not_a_root` | — |
+| `revocation_list_signature_unverified` | `signature_not_canonical_base64` when the signature is not the canonical base64 of 64 bytes |
+| `revocation_list_other_chain` | — |
+| `revocation_list_rollback` | `SEQ<=HELD_SEQ` |
+| `revocation_list_gap` | `SEQ>HELD_SEQ+1` |
+| `revocation_list_previous_mismatch` | — |
+| `revocation_list_time_reversed` | — |
+| `revocation_entry_from_future` | — |
+| `revocation_entry_repeated` | `KIND:ID_TRUNCATED_12` |
+
+A signature that is not the canonical base64 of 64 bytes is an *unverified*
+signature, not a malformed list: the first thing a reader owes a caller is the
+distinction between "your document is invalid" and "your document is spelled
+wrong".
+
+```bash
+# one chain document: {"roots": [...], "lists": [{"body":..., "sig":...}, ...]}
+python uibc_core.pyz verify-revocation-delta --chain chain.json
+
+# the shared vectors, against the answer key the file carries
+python uibc_core.pyz verify-revocation-delta --suite revocation.json --report runs.jsonl
+
+# one case of that file
+python uibc_core.pyz verify-revocation-delta --suite revocation.json --case RL25
+```
+
+Measured, 2026-11-28, against `vectors/shared/revocation.json` of
+`probityai/probity` at `c86b20c` (52 cases, 7 accept / 45 reject, file sha256
+`e9d4284d…ef00fc`): **52 of 52 members match the answer key** — the seven
+acceptances on the whole folded state (head, issue time, list id, the eight
+revoked sets, roots, sequence) and the forty-five refusals on the token and the
+position. A reader that refused everything would score 45/52 and one that
+accepted everything 7/52, so the two halves are reported separately in the
+corpus test.
+
+The suite is not vendored: `tests/test_revocation_delta_corpus.py` runs only
+when `UIBC_REVOCATION_DELTA_CORPUS` names that file, and the checked-in tests
+sign their own chains at test time from fixed seeds.
+
 ## Read a receipt over an A2A agent card
 
 `uibc_core/agent_card_receipt.py` reads the suite's four files — the card as
@@ -377,10 +452,10 @@ for every member. The corpus digest recomputed from the files themselves
 matches the one it declares, so this is the same corpus version. Reading is
 ours; their harness was not re-run.
 
-## Every report shape has a schema, and one linter judges all six
+## Every report shape has a schema, and one linter judges all seven
 
-Six JSON Lines shapes are produced by this repository, and since 2026-11-28 each
-has its own draft 2020-12 schema in this directory:
+Seven JSON Lines shapes are produced by this repository, and since 2026-11-28
+each has its own draft 2020-12 schema in this directory:
 
 | format | schema | what one line says |
 |---|---|---|
@@ -390,13 +465,16 @@ has its own draft 2020-12 schema in this directory:
 | `uibc-revocation-list-report/1` | `revocation-list-report.schema.json` | one signed chain, and the list it stopped on |
 | `uibc-key-revocation-list-report/1` | `key-revocation-list-report.schema.json` | one question — is this key revoked now — decision, reason, rule |
 | `uibc-agent-card-receipt-report/1` | `agent-card-receipt-report.schema.json` | one receipt over a card: decision, one of sixteen reasons, the digest computed |
+| `uibc-revocation-delta-report/1` | `revocation-delta-report.schema.json` | one case of a delta suite: decision, one of ten suite tokens, and the `head`/`seq` an acceptance leaves in force |
 
 `tools/report_lint.py` takes any producer's JSONL file and judges each line by
 the rules its own `format` names, with no third-party dependency. It also runs
 the cross-field rules a schema subset cannot express: a refusal that exits 0, a
 `no_statement` filed as `not_revoked`, a reached decision with no rule behind
-it, an `ERROR` line carrying a verdict, or — in the receipt shape — an `accept`
-wearing one of the fifteen refusing reasons are all refused by name.
+it, an `ERROR` line carrying a verdict, in the receipt shape an `accept`
+wearing one of the fifteen refusing reasons, and in the delta shape an
+acceptance with no head to carry forward or a head on a refusal. Each is
+refused by name.
 
 ```
 python tools/report_lint.py runs.jsonl

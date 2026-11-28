@@ -42,6 +42,13 @@
       "caveat": "the verdict vocabulary is ours. A consumer expecting a boolean pass/fail has to map FAIL, INCONCLUSIVE and abstention onto its own scale, and that mapping is the consumer's claim, not ours"
     },
     {
+      "id": "uibc-revocation-delta-report",
+      "what": "one JSON line per delta-suite case: the decision, one of the ten suite tokens for a refusal, and for an acceptance the folded head and sequence a later list must extend",
+      "where": "uibc_core.pyz verify-revocation-delta --suite <file> [--case ID] --report <file.jsonl>, or --chain <file>; shape: interop/revocation-delta-report.schema.json; checker: tools/report_lint.py",
+      "measured": "2026-11-28: tests/test_report_schema_families.py now carries fifteen emitted lines across the seven shapes, five contracts specific to this one (acceptance without a head, a head on a refusal, a rejection wearing in_force, a head that is not a list digest, and the optional jsonschema pass over the published schema), plus the CLI in tests/test_revocation_delta.py",
+      "caveat": "the token vocabulary is ours for the ten codes the suite names; a consumer expecting their exact refusal strings has to map them, and the mapping is the consumer's claim"
+    },
+    {
       "id": "uibc-receipt",
       "what": "the record a kit run leaves behind: verifier version, case count, passed count, and who ran it",
       "where": "receipt.json, written by run.py",
@@ -78,7 +85,7 @@
       "id": "revocation-list-v1",
       "status": "consumed (reader implemented 2026-11-28)",
       "measured": "2026-11-28: on the peer corpus corpora/vectors-revocation-list at head 1ab5db7 (87 members: 9 accept, 78 reject, corpusDigest 87dfad7d...be95) our reader reproduced all five recorded fields - decision, the refused list's index, the reason as code:detail, the digests of every list up to the refused one, and the list in force at the verdict - for 87/87. Signatures are checked with this package's own Ed25519 verifier over RFC 8785 canonical bodies, and the chain is folded here rather than delegated to their harness.",
-      "blocked_by": "none for reading the cumulative chain. The delta form (predicate/v2/revocation-list, deltas folded by sequence number and digest) is still unread, and their reference verifier has not been re-run against this build, so this is our reading of their files."
+      "blocked_by": "none for reading the cumulative chain. The delta form is read separately (see revocation-list-delta-v2). Their reference verifier has not been re-run against this build, so this is our reading of their files."
     },
     {
       "id": "uibc-evidence-package",
@@ -95,7 +102,13 @@
       "id": "mcp-authz-observation-v1",
       "status": "consumed (reader implemented 2026-11-28)",
       "measured": "2026-11-28: on the peer corpus corpora/vectors-mcp-authz at head 08f16c3 (11 members: 1 accept, 10 reject) our reader reached 11/11 by the corpus' own convention - verdict matches and at least one of the member's declared codes is named; no declared code was missed. Two members carry one extra code each, reported rather than suppressed. The corpus was the peer's, not ours: this is our reading of their files, not their harness re-running us.",
-      "blocked_by": "none for reading. The finding vocabulary is ours, so a code-by-code comparison against their verifier has not been done; delta-form revocation lists (predicate/v2/revocation-list) are still unread"
+      "blocked_by": "none for reading. The finding vocabulary is ours, so a code-by-code comparison against their verifier has not been done"
+    },
+    {
+      "id": "revocation-list-delta-v2",
+      "status": "consumed (reader implemented 2026-11-28)",
+      "measured": "2026-11-28: on the shared vectors packages/probity-records/vectors/shared/revocation.json of probityai/probity at c86b20c (52 cases: 7 accept, 45 reject, file sha256 e9d4284d...ef00fc - a single file, not a manifest'd directory) our reader matched the answer key for 52/52, on all eight folded fields for the acceptances and on the token plus the position for the refusals (shape 24, signer_not_a_root 6, signature_unverified 4, entry_repeated 3, gap 2, rollback 2, entry_from_future 1, other_chain 1, previous_mismatch 1, time_reversed 1). Deltas are folded here, the eight kinds are checked including the RFC 7638 thumbprint form of idp-key, and both type hosts are accepted.",
+      "blocked_by": "none for reading. The suite lives in their records package rather than in the vectors repository, so a reader following spec/predicates/REGISTRY.md alone would not find it; one member carries a seq beyond 2^53 and the suite expects it refused as shape, which is matched, and their reader's integer-range rule is otherwise checked against our own cases rather than theirs; their reference verifier has not been re-run against this build."
     },
     {
       "id": "json-canonicalisation-rfc8785",

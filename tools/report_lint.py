@@ -35,6 +35,7 @@ MCP_SCHEMA = os.path.join(HERE, "interop", "mcp-authz-report.schema.json")
 REVOKE_SCHEMA = os.path.join(HERE, "interop", "revocation-list-report.schema.json")
 KEY_REVOKE_SCHEMA = os.path.join(HERE, "interop", "key-revocation-list-report.schema.json")
 RECEIPT_SCHEMA = os.path.join(HERE, "interop", "agent-card-receipt-report.schema.json")
+DELTA_SCHEMA = os.path.join(HERE, "interop", "revocation-delta-report.schema.json")
 
 FORMAT = "uibc-verify-report/1"
 COSE_FORMAT = "uibc-scitt-cose-report/1"
@@ -42,6 +43,7 @@ MCP_FORMAT = "uibc-mcp-authz-report/1"
 REVOKE_FORMAT = "uibc-revocation-list-report/1"
 KEY_REVOKE_FORMAT = "uibc-key-revocation-list-report/1"
 RECEIPT_FORMAT = "uibc-agent-card-receipt-report/1"
+DELTA_FORMAT = "uibc-revocation-delta-report/1"
 SCHEMAS = {
     FORMAT: SCHEMA,
     COSE_FORMAT: COSE_SCHEMA,
@@ -49,6 +51,7 @@ SCHEMAS = {
     REVOKE_FORMAT: REVOKE_SCHEMA,
     KEY_REVOKE_FORMAT: KEY_REVOKE_SCHEMA,
     RECEIPT_FORMAT: RECEIPT_SCHEMA,
+    DELTA_FORMAT: DELTA_SCHEMA,
 }
 COSE_CODE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 RESULTS = {"PASS", "FAIL", "INCONCLUSIVE", "ERROR"}
@@ -436,6 +439,81 @@ def receipt_problems(line):
     return out
 
 
+DELTA_REQUIRED = ("format", "vector", "result", "decision", "reason", "index", "head", "seq",
+                  "verifier_id", "verifier_version", "when_utc", "exit")
+DELTA_OPTIONAL = ("error",)
+DELTA_REASONS = (
+    "revocation_list_shape",
+    "revocation_list_signer_not_a_root",
+    "revocation_list_signature_unverified",
+    "revocation_list_other_chain",
+    "revocation_list_rollback",
+    "revocation_list_gap",
+    "revocation_list_previous_mismatch",
+    "revocation_list_time_reversed",
+    "revocation_entry_from_future",
+    "revocation_entry_repeated",
+)
+LIST_HEAD = re.compile(r"^sha256:[0-9a-f]{64}$")
+
+
+def delta_problems(line):
+    """What a verifier holding a delta-form chain says it holds.
+
+    Three things are pinned: an acceptance names the head a reader would pin
+    next and the sequence it reached (a "the chain holds" with no head cannot
+    be carried forward); a refusal names neither, because a head for a list that
+    was never installed is the mistake the refusal exists to prevent; and the
+    ten tokens are the whole vocabulary, so a refusal invented outside them
+    would pass an exit-code check while saying nothing a reader can act on.
+    """
+    out = _scaffold(line, DELTA_REQUIRED, DELTA_OPTIONAL, DELTA_FORMAT)
+    if out:
+        return out
+    if line["result"] not in ("PASS", "FAIL", "ERROR"):
+        out.append("result %r is not one of PASS, FAIL, ERROR" % (line["result"],))
+    dec, reason, idx = line["decision"], line["reason"], line["index"]
+    head, seq = line["head"], line["seq"]
+    if dec not in ("accept", "reject", None):
+        out.append("decision %r is neither 'accept' nor 'reject'" % (dec,))
+        dec = None
+    if reason is not None and reason != "in_force" and reason not in DELTA_REASONS:
+        out.append("reason %r is not 'in_force' or one of the ten suite tokens" % (reason,))
+    if idx is not None and (isinstance(idx, bool) or not isinstance(idx, int) or idx < 0):
+        out.append("index must be a non-negative integer or null")
+        idx = None
+    if head is not None and (not isinstance(head, str) or not LIST_HEAD.match(head)):
+        out.append("head must be 'sha256:' plus 64 lowercase hex, or null")
+    if seq is not None and (isinstance(seq, bool) or not isinstance(seq, int) or seq < 1):
+        out.append("seq must be a positive integer or null")
+    if line["result"] == "PASS":
+        if dec != "accept" or reason != "in_force":
+            out.append("a PASS line carries accept/in_force, not %r/%r" % (dec, reason))
+        if idx is not None:
+            out.append("an accepted chain names no position")
+        if head is None or seq is None:
+            out.append("a PASS line must carry the head and seq it holds")
+    elif line["result"] == "FAIL":
+        if dec != "reject":
+            out.append("a FAIL line carries decision 'reject', not %r" % (dec,))
+        if reason not in DELTA_REASONS:
+            out.append("a refusal must name one of the ten suite tokens, not %r" % (reason,))
+        if idx is None:
+            out.append("a refusal must name the position it stopped on")
+        if head is not None or seq is not None:
+            out.append("a refusal installs nothing, so it carries null head and seq")
+    elif line["result"] == "ERROR":
+        if dec is not None or reason is not None or idx is not None or head is not None or seq is not None:
+            out.append("an ERROR line carries null decision, reason, index, head and seq")
+        if line["exit"] != 3:
+            out.append("an ERROR line exits 3, not %r" % (line["exit"],))
+    expected_exit = {"PASS": 0, "FAIL": 1}.get(line["result"])
+    if expected_exit is not None and line["exit"] != expected_exit:
+        out.append("result %r exits %d, not %r" % (line["result"], expected_exit, line["exit"]))
+    _error_block(line, out)
+    return out
+
+
 def problems_any(line):
     """Validate one line against the shape its `format` field names."""
     if isinstance(line, dict):
@@ -450,6 +528,8 @@ def problems_any(line):
             return key_revoke_problems(line)
         if fmt == RECEIPT_FORMAT:
             return receipt_problems(line)
+        if fmt == DELTA_FORMAT:
+            return delta_problems(line)
     return problems(line)
 
 

@@ -1,3 +1,17 @@
+## 未发布 — 2026-11-28（读得了对方的第六族：吊销清单的 delta 形态 52/52，两种形态并存都读）
+
+- **为什么做这件事**：对方 `probity-records` 在 0.10.0 起把吊销清单改成 **delta**——每份只列它**新**吊销的条目，状态要靠按 `seq` 与 `previous` 折叠整条链。这不是"另一份清单"，是"同一份清单的另一种含义"：一份已按 v1 签发的清单仍按 v1 有效，所以只认一种形态的读者会拒掉流通中的一半。规范在 `packages/probity-records/src/probity_records/revocation.py`（读到全文 348 行），语料在**另一个仓库** `probityai/probity` 的 `packages/probity-records/vectors/shared/revocation.json`（52 例，`spec/predicates/REGISTRY.md` 只登记了类型名，顺着它找不到语料）。
+- **信封不变，含义变了**：域名仍是 `probity-revocation-v1\0`，签名仍是 Ed25519 over JCS(body)，根仍由带外钉住——因此**复用** v1 的 shape/base64/时间/标识符助手与 aee 的 JCS/Ed25519，而不是抄一份：两种形态对同一串字节必须给出同一判决，只有共用同一段代码才谈得上。
+- **五处只有把规范读完才做得对的规则**：① 条目只能出现一次，已在本链早先清单里吊销过的条目再出现即 `revocation_entry_repeated`（否则后一份清单能悄悄"解吊销"）；② **空条目表是合法的**（新序号+新签发时刻，什么都不新吊销，就是一次新鲜度声明）；③ `idp-key` 是第八种 kind，标识是 **RFC 7638 thumbprint**（43 位 base64url、末位只取 `AEIMQUYcgkosw048`）而非本格式的 64 位小写 hex；④ 类型名可在**两个宿主**下（`probityai.github.io` 与 `probityai.org`），按 scheme+host 逐字比较，`http://`、带端口、大写、尾点都不算；⑤ 根轮转 =（根集 ∪ 被本表吊销的根的 successor）− 已早吊销的 successor − 本表吊销的全部键。
+- **新增 `uibc_core/revocation_delta.py`**（仅 stdlib）：`verify_chain(roots, lists)` 按给定顺序折叠出 `RevocationState`（累计条目、根集、head、seq、签发时刻、链 id），10 个拒绝码按 **shape → signer_not_a_root → signature_unverified → other_chain → rollback → gap → previous_mismatch → time_reversed → entry_from_future → entry_repeated** 的顺序报首个失败；`judge_suite` / `load_suite` / `judge_case` / `judge_chain_file` 四个入口。
+- **两处只有实跑才暴露的坑**：① 语料里有一条 `seq` 超过 2^53 的用例，若走 v1 那条含整数范围检查的解析器，**整份语料**会被判成不可读（52 条全丢），所以 suite/chain 入口改走只做重名/浮点/深度/标量拒绝、不做整数范围检查的解析器，让那一条按 `revocation_list_shape` 正常拒绝；② 签名与 `issuerKey` 的"规范 base64"必须与**交付原串**逐字比较，先剥换行再比会把带换行的签名当成验通。
+- **一处按语料才看清的归属**：非规范 base64 的签名属于 `signature_unverified`（**不是** shape）——上游在验签的 try 块里因解码失败抛出，读者最该知道的是"这份清单认证不了"，而不是"这份清单拼错了"。原型首轮 51/52，唯一差异就是这一条（RL25），改后 52/52。
+- **CLI 新增 `verify-revocation-delta`**：`--suite F` 逐条比对答案键、`--suite F --case ID` 判一条、`--chain F` 折叠一份 `{"roots":[…],"lists":[…]}` 文档；退出码 0 接受 / 1 拒绝 / 3 读不动；`--report` 追加 `uibc-revocation-delta-report/1`。子命令总数 23。
+- **报告行把"接受之后的状态"写进去**：接受行带 `head`（`sha256:`+64 hex）与 `seq`，拒绝行的 `head`/`seq` 必须为 null——下一份清单要接的正是这两个值，写不出就没法把判定串成链。`tools/report_lint.py` 扩到**七种形状**，判两条 schema 表达不了的跨字段规则：接受行无 head、拒绝行带 head。
+- **实测（本机 Windows / Python 3.13，对 `probityai/probity` @ `c86b20c`，52 条 = accept 7 / reject 45，文件 sha256 `e9d4284d…ef00fc`）**：**52/52 与答案键全同**——7 条接受逐字段比整份折叠状态（head、签发时刻、链 id、八个吊销集合、根集、seq），45 条拒绝比对 token 与位置；拒绝码分布 shape 24、signer_not_a_root 6、signature_unverified 4、entry_repeated 3、gap 2、rollback 2、from_future 1、other_chain 1、previous_mismatch 1、time_reversed 1。"全拒"的读者能得 45/52、"全收"的得 7/52，所以语料测试把两半分着报。
+- **测试**：`tests/test_revocation_delta.py` 41 项（测试期用包内 Ed25519 从固定种子自签，不 vendor 对方文件）：折叠、空表新鲜度、八种 kind、10 个拒绝码逐个、11 个 shape 参数、两宿主类型、根轮转三例（同一表吊销 successor、早先已吊销的 successor 不再入根）、CLI 退出码与报告行、大 seq 仍可判；`tests/test_revocation_delta_corpus.py` 5 项（`UIBC_REVOCATION_DELTA_CORPUS` 门控，默认 skip），其中一条专门确认"表内轮转真的被折叠"而不是只对了退出码。
+- **边界**：这是我们读他们公开语料的自测，不是他们 harness 复跑；52/52 是"两边对同一文件给出同一答案"，不是"我们的判法被他们认可"。delta 形态目前只有这一份语料（在 records 包里而非 vectors 仓），所以"两种形态并存都读"的覆盖面就是这一份 + 我们自建夹具。
+
 ## 未发布 — 2026-11-28（读得了对方的第五族：卡片回执 49/49，且把"读不懂吊销状态"判成拒绝）
 
 - **为什么做这件事**：对方 `agent-card-receipt/v1` 问的不是"证据包自洽吗"，而是"某张 A2A 卡片被外人跑过、评过，那份评分到此刻还算数吗"。它把三件事绑在一处：卡片的**规范化摘要**、评分的**有效期**、以及**吊销状态**。前四族的读法在这里都只对一半——卡片是浮点数合法的 JSON（本仓规范化器是 integers-only），摘要在**去掉顶层 `signatures`** 之后算，而吊销清单换了信封（DSSE、`application/vnd.agent-evidence.agent-card-receipt-revocations.v1+json`）。

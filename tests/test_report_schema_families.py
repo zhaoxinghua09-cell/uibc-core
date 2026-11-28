@@ -27,7 +27,8 @@ SCHEMAS = {
     name: os.path.join(ROOT, "interop", name)
     for name in ("mcp-authz-report.schema.json", "revocation-list-report.schema.json",
                  "key-revocation-list-report.schema.json",
-                 "agent-card-receipt-report.schema.json")
+                 "agent-card-receipt-report.schema.json",
+                 "revocation-delta-report.schema.json")
 }
 
 pytestmark = pytest.mark.skipif(
@@ -50,8 +51,9 @@ def _lint(lines):
 
 
 def _ours():
-    """One line of each of the twelve shapes the four emitters can produce."""
+    """One line of each of the fifteen shapes the five emitters can produce."""
     digest = "a" * 64
+    head = "sha256:" + "b" * 64
     return [
         cli._mcp_authz_line("case-1", "valid", [], 0),
         cli._mcp_authz_line("case-2", "invalid", ["prm-absent", "ath-mismatch"], 1),
@@ -68,13 +70,16 @@ def _ours():
         cli._agent_card_receipt_line("case-2", "reject", "revocation_list_absent",
                                      None, 1),
         cli._agent_card_receipt_line("case-3", None, None, None, 3, error="not JSON"),
+        cli._revocation_delta_line("RL01", "accept", "in_force", None, 0, head=head, seq=1),
+        cli._revocation_delta_line("RL07", "reject", "revocation_entry_repeated", 1, 1),
+        cli._revocation_delta_line("RL01", None, None, None, 3, error="not readable"),
     ]
 
 
 def test_our_own_lines_pass_the_linter():
     proc = _lint(_ours())
     assert proc.returncode == 0, proc.stdout + proc.stderr
-    assert "REPORT LINT OK: 12 line(s)" in proc.stdout
+    assert "REPORT LINT OK: 15 line(s)" in proc.stdout
 
 
 def test_the_linter_names_every_format_it_can_judge():
@@ -188,6 +193,41 @@ def test_a_digest_that_is_not_lowercase_hex_is_refused():
     proc = _lint([line])
     assert proc.returncode == 1
     assert "subject_digest must be 64 lowercase hex" in proc.stdout
+
+
+def test_an_acceptance_without_the_head_it_holds_is_refused():
+    """A PASS that names no head cannot be carried forward by a reader."""
+    line = cli._revocation_delta_line("RL01", "accept", "in_force", None, 0,
+                                      head="sha256:" + "b" * 64, seq=1)
+    line["head"] = None
+    proc = _lint([line])
+    assert proc.returncode == 1
+    assert "must carry the head and seq it holds" in proc.stdout
+
+
+def test_a_refusal_that_carries_a_head_is_refused():
+    """A head on a refusal names a list that was never installed."""
+    line = cli._revocation_delta_line("RL07", "reject", "revocation_entry_repeated", 1, 1)
+    line["head"] = "sha256:" + "b" * 64
+    proc = _lint([line])
+    assert proc.returncode == 1
+    assert "carries null head and seq" in proc.stdout
+
+
+def test_a_refusal_wearing_in_force_is_refused():
+    line = cli._revocation_delta_line("RL07", "reject", "revocation_entry_repeated", 1, 1)
+    line["reason"] = "in_force"
+    proc = _lint([line])
+    assert proc.returncode == 1
+    assert "must name one of the ten suite tokens" in proc.stdout
+
+
+def test_a_head_that_is_not_a_list_digest_is_refused():
+    line = cli._revocation_delta_line("RL01", "accept", "in_force", None, 0,
+                                      head="sha256:" + "B" * 64, seq=1)
+    proc = _lint([line])
+    assert proc.returncode == 1
+    assert "head must be 'sha256:' plus 64 lowercase hex" in proc.stdout
 
 
 def test_each_new_schema_is_a_file_a_stranger_can_read_and_is_valid():

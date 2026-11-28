@@ -1098,6 +1098,143 @@ def cmd_verify_revocation_list(args):
     sys.exit(0 if ok else 1)
 
 
+REVOCATION_DELTA_REPORT_FORMAT = "uibc-revocation-delta-report/1"
+
+
+def _revocation_delta_line(member, decision, reason, index, exit_code,
+                           error=None, head=None, seq=None):
+    """One report line for a delta-form revocation list case.
+
+    An acceptance carries the head a verifier would pin next and the sequence
+    number it reached, because "the chain holds" is only checkable if the
+    reader says which list it holds. A refusal carries neither: naming a head
+    for a list that was not installed is the mistake the refusal exists to
+    prevent.
+    """
+    accepted = decision == "accept"
+    line = {
+        "format": REVOCATION_DELTA_REPORT_FORMAT,
+        "vector": member,
+        "result": "ERROR" if error else ("PASS" if accepted else "FAIL"),
+        "decision": None if error else decision,
+        "reason": None if error else reason,
+        "index": None if error else index,
+        "head": None if error or not accepted else head,
+        "seq": None if error or not accepted else seq,
+        "verifier_id": VERIFIER_ID,
+        "verifier_version": __version__,
+        "when_utc": _now_utc(),
+        "exit": exit_code,
+    }
+    if error is not None:
+        line["error"] = str(error)[:300]
+    return line
+
+
+def cmd_verify_revocation_delta(args):
+    """Judge a signed revocation list in delta form (revocation-list/delta).
+
+      * `--chain F` judges one chain document — `{"roots": [...], "lists":
+        [{"body", "sig"}, …]}` — and prints, as its last stdout line, the folded
+        state or the refusal with the index it stopped on.
+      * `--suite F` judges a shared vectors file and compares every case with
+        the answer key the file carries.
+      * `--suite F --case RL07` judges one case of that file.
+
+    Six things decide a verdict here and none of them is read off the list:
+    the type names this format under one of the two recognised hosts; ids are
+    shaped by kind (a key, permit or grant by hex digest, an identity provider
+    key by RFC 7638 thumbprint, the rest by identifier); the body is exact;
+    entries ascend strictly; the signer is a pinned root; and a repeat, a
+    rollback, a gap, a jump to another chain, a previous digest that does not
+    match, an issue time that moves backwards, an entry from the future, or a
+    signature that does not verify all refuse by their own name.
+    """
+    from . import revocation_delta as rd
+
+    report_path = getattr(args, "report", None)
+
+    if getattr(args, "chain", None):
+        path = os.path.abspath(args.chain)
+        member = os.path.basename(path)
+        try:
+            result = rd.judge_chain_file(path)
+        except (OSError, ValueError) as exc:
+            if report_path:
+                _append_line(report_path,
+                             _revocation_delta_line(member, None, None, None, 3, error=exc))
+            print(f"error: cannot read the chain {path}: {exc}", file=sys.stderr)
+            sys.exit(3)
+        if report_path:
+            _append_line(report_path,
+                         _revocation_delta_line(member, result["decision"], result["reason"],
+                                                result["index"],
+                                                0 if result["decision"] == "accept" else 1,
+                                                head=result["state"].get("head"),
+                                                seq=result["state"].get("seq")))
+        if result["decision"] != "accept":
+            print(f"refusal: {result['reason']} at list {result['index']}")
+        print(json.dumps({"decision": result["decision"], "reason": result["reason"],
+                          "index": result["index"]}))
+        sys.exit(0 if result["decision"] == "accept" else 1)
+
+    suite_path = getattr(args, "suite", None)
+    if not suite_path:
+        sys.exit("error: pass --suite FILE, or --chain FILE, to judge something")
+    try:
+        cases = rd.load_suite(os.path.abspath(suite_path))
+    except (OSError, ValueError) as exc:
+        sys.exit(f"error: cannot read the suite {suite_path}: {exc}")
+
+    wanted = getattr(args, "case", None)
+    if wanted:
+        chosen = [c for c in cases if c.get("id") == wanted]
+        if not chosen:
+            sys.exit(f"error: the suite carries no case {wanted!r}")
+        case = chosen[0]
+        result = rd.judge_case(case)
+        expected = case.get("expected") or {}
+        if report_path:
+            _append_line(report_path,
+                         _revocation_delta_line(case.get("id"), result["decision"],
+                                                result["refusal"]["code"] if result["refusal"] else result["reason"],
+                                                result["index"],
+                                                0 if result["decision"] == "accept" else 1,
+                                                head=result["state"].get("head"),
+                                                seq=result["state"].get("seq")))
+        if result["decision"] != "accept":
+            print(f"refusal: {result['reason']} at list {result['index']}")
+        print(json.dumps({"decision": result["decision"],
+                          "reason": result["refusal"]["code"] if result["refusal"] else result["reason"],
+                          "index": result["index"]}))
+        if expected.get("state") is not None:
+            conforms = result["state"] == expected["state"]
+        else:
+            conforms = (result["refusal"] and result["refusal"]["code"] == expected.get("refused")
+                        and result["index"] == expected.get("index"))
+        sys.exit(0 if result["decision"] == "accept" and conforms else 1)
+
+    summary = rd.judge_suite(os.path.abspath(suite_path))
+    for record in summary["records"]:
+        ident = record["id"]
+        got, want = record["got"], record["expected"]
+        if report_path:
+            _append_line(report_path,
+                         _revocation_delta_line(ident, got.get("decision"), got.get("reason"),
+                                                got.get("index"),
+                                                0 if record["conforms"] else 1,
+                                                head=(got.get("state") or {}).get("head"),
+                                                seq=(got.get("state") or {}).get("seq")))
+        if record["conforms"]:
+            print(f"{ident}: {got['decision']} (matches the answer key)")
+        else:
+            print(f"{ident}: {got['decision']}, expected {want.get('decision')}; "
+                  f"differs on {', '.join(record['mismatched'])}", file=sys.stderr)
+    print(f"{summary['conforming']}/{summary['members']} members conform to the shared answer key")
+    ok = summary["members"] and summary["conforming"] == summary["members"]
+    sys.exit(0 if ok else 1)
+
+
 KEY_REVOCATION_LIST_REPORT_FORMAT = "uibc-key-revocation-list-report/1"
 
 
@@ -1696,6 +1833,19 @@ def main():
     p.add_argument("--report", default=None, metavar="JSONL",
                    help="append one uibc-revocation-list-report/1 line per member")
     p.set_defaults(func=cmd_verify_revocation_list)
+
+    p = sub.add_parser("verify-revocation-delta",
+                       help="read the signed revocation list in delta form "
+                            "(revocation-list/delta); exits by the decision")
+    p.add_argument("--suite", default=None, metavar="FILE",
+                   help="judge a shared vectors file and compare with its answer key")
+    p.add_argument("--case", default=None, metavar="ID",
+                   help="judge one case of that file, by its id")
+    p.add_argument("--chain", default=None, metavar="FILE",
+                   help="judge one chain document {roots, lists}")
+    p.add_argument("--report", default=None, metavar="JSONL",
+                   help="append one uibc-revocation-delta-report/1 line per member")
+    p.set_defaults(func=cmd_verify_revocation_delta)
 
     p = sub.add_parser("verify-key-revocation-list",
                        help="read the signed key-revocation list "

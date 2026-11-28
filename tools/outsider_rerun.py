@@ -770,22 +770,37 @@ def stamp_receipt():
 
 
 def check_timestamp():
-    """Is the published proof about *this* receipt? Pending is fine, mismatched is not."""
+    """Is the published proof about *this* receipt? Pending is fine, mismatched is not.
+
+    The binding is checked without the OpenTimestamps client: a proof carries the
+    sha256 of the file it was taken of as 32 raw bytes inside it, so looking for
+    those bytes answers "is this proof about this receipt" with no dependency at
+    all. The client is only consulted afterwards, and only for the *status* - a
+    checkout without it must not turn this into a failure, which is exactly the
+    mistake this function made in its first version.
+    """
     if not os.path.exists(OTS):
         print("FAIL no timestamp: docs/outsider-rerun-receipt.json.ots is missing; run --stamp")
         return False
+    with open(RECEIPT, "rb") as f:
+        digest = hashlib.sha256(f.read()).digest()
+    with open(OTS, "rb") as f:
+        raw = f.read()
+    if digest not in raw:
+        print("FAIL the timestamp proves a different file: stamp the receipt again")
+        print(f"  receipt sha256 {digest.hex()[:16]} does not appear in the proof")
+        return False
+    try:
+        import opentimestamps  # noqa: F401
+    except Exception:                                              # noqa: BLE001
+        print("timestamp: proof carries this receipt's digest (client not installed, "
+              "block status not read)")
+        return True
     proc = subprocess.run([sys.executable, os.path.join(HERE, "tools", "anchor_ots.py"),
                            "--verify", RECEIPT, "--proof", OTS, "--json"], cwd=HERE,
                           capture_output=True, text=True, encoding="utf-8", errors="replace")
-    text = (proc.stdout or "") + (proc.stderr or "")
-    stale = ("another digest" in text.lower() or "mismatch" in text.lower()
-             or "does not match" in text.lower())
-    if stale or (proc.returncode != 0 and "status=" not in text):
-        print("FAIL the timestamp proves a different file: stamp the receipt again")
-        if text.strip():
-            print("  " + text.strip().splitlines()[-1][:200])
-        return False
-    status = [ln for ln in text.splitlines() if ln.startswith("status=")]
+    status = [ln for ln in ((proc.stdout or "") + (proc.stderr or "")).splitlines()
+              if ln.startswith("status=")]
     print(f"timestamp: {status[-1][7:] if status else 'proof present'}")
     return True
 

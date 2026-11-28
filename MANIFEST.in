@@ -66,6 +66,13 @@ graft vectors
 # as schemas/, crosswalk/ and vectors/ above. Caught by sdist-self-check.
 graft benchmarks
 
+# Ninth pass, 2026-11-27 (node-receipt-verifier). verify-node/ arrived with the Node
+# cross-implementation check, and tests/test_receipt_node_parity.py shells out to
+# verify-node/verify_receipt.mjs. Not grafted, so the sdist carried the test and not the
+# script it runs -- the same failure class as schemas/, crosswalk/, vectors/ and
+# benchmarks/ above, caught by sdist-self-check on this branch.
+graft verify-node
+
 # Built output and byte-code never belong in a source distribution.
 prune tools/out
 prune build

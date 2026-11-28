@@ -2094,6 +2094,7 @@ tests/test_quickstart.py
 tests/test_rate_limit.py
 tests/test_reach_ladder_svg.py
 tests/test_readme_crosswalk_counts.py
+tests/test_receipt_node_parity.py
 tests/test_recheck.py
 tests/test_records_surface.py
 tests/test_refs_check.py
@@ -2550,4 +2551,6 @@ uibc_core/witness.py
 uibc_core/witness_registry.py
 vectors/authority-age/cases.json
 vectors/bid-resolution-v1.json
+verify-node/README.md
+verify-node/verify_receipt.mjs
 verify.html

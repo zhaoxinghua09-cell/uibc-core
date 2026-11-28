@@ -1,3 +1,11 @@
+## 未发布 — 2026-11-28（三种报告格式补齐 JSON Schema，五种形状一个判器）
+
+- **为什么做这件事**：上一件收尾时，`uibc-mcp-authz-report/1`、`uibc-revocation-list-report/1`、`uibc-key-revocation-list-report/1` 只是"自描述"的 JSON——没有 schema，`tools/report_lint.py` 也不认它们。一个格式对外承诺了形状却没人能机器核，等于承诺只在自家脚本记得的时候成立。
+- **新增三份 draft 2020-12 schema**：`interop/mcp-authz-report.schema.json`、`interop/revocation-list-report.schema.json`、`interop/key-revocation-list-report.schema.json`，`additionalProperties: false`，把跨字段约束（schema 子集表达不了的那些）写成 `$comment`，并逐条落进判器。
+- **`tools/report_lint.py` 扩到五种形状**，按行的 `format` 分派，互不借用规则。判的正是三种套件最容易说错的地方：拒绝却 exit 0；`no_statement` 被记成 `not_revoked`；`rejected` 被归进 PASS；到了判决却不说依据哪条规则（`basis.rule`）；`ERROR` 行还带 verdict/reason/index。错误信息点名，不写"invalid line"。
+- **测试** `tests/test_report_schema_families.py` 11 项：正例用 CLI 自己的 `_mcp_authz_line` / `_revocation_list_line` / `_key_revocation_list_line` 生成（不手抄，字段改名时会一起动），九种行（每种形状 PASS/FAIL/ERROR 各一条）必须过判器；八条负例必须被点名拒绝；装了 `jsonschema` 时再把三份 schema 当 JSON Schema 校验一遍并对我们的行实跑。
+- **边界**：schema 只约束**我们产出的格式**（`uibc-*-report/1`），不是对方语料的形状；判器不替任何外部 producer 背书，判的是"这一行是否符合它自称的格式"。
+
 ## 未发布 — 2026-11-28（读得了对方的整套吊销判定：13/13，五判决九理由）
 
 - **为什么做这件事**：上一件把 cumulative 吊销链读通了，但对方还有一族 `key-revocation-list/v1`——它问的不是"这份清单是否自洽"，而是"某个键在某个时刻是否被吊销"，并把答案分成五种：`revoked` / `not_revoked` / `no_statement` / `rejected` / `stale`，对外验证器契约是 exit 0/1/2/3/4。这一族的关键在于三处不易做对的边界：信任只能由**从键重算**的 thumbprint 决定（信封自称的那一串不算），已被看见的吊销不能被后来的清单抹掉，清单没覆盖的键只能答"没有陈述"而不是"未吊销"。
@@ -7,7 +15,7 @@
 - **实测（本机 Windows / Python 3.13，对 `corpora/vectors-key-revocation-list` @ head `08f16c3`，`corpusDigest f790ade4…e77`，13 条）**：**13/13 判决与理由全同**，且两条 `retained` 事实（信封自称 thumbprint 是否诚实、签名是否在被携带的键下验通）逐条与 MANIFEST 声明一致；`--dir` 打印 `13/13 members conform to the corpus answer key`、exit 0。另用本仓自己重算 `corpusDigest`（按文件字节、不是按声明哈希）与 MANIFEST 相同，确认读的是同一版语料。
 - **一处只有按契约才看得见的差别**：四种不同故障都落在 `rejected`，报告若只写 `rejected` 就没法复核，因此每行同时带 `reason` 与 `basis`（`trusted_by_recomputed_thumbprint` / `signature` / `freshness` / `retained` / `absent` / `shape`），说明这条判决是哪条规则给的。
 - **测试**：`tests/test_key_revocation_list.py` 36 项——18 个夹具（固定种子签一次、base64 内嵌，测试期不产签名）、五判决与退出码契约、检查顺序（不可信签名者先于坏签名）、自称可信 thumbprint 不能换来信任、已见吊销在后续清单里存活、下一更新时刻仍是当前而晚一秒即 stale、两种时间拼法被拒、同键两时刻被拒、`retained` 由字节重算、CLI 以判决而非 pass/fail 退出；另 `tests/test_key_revocation_list_corpus.py` 两条语料门（`UIBC_KEY_REVOCATION_CORPUS` 门控，默认 skip），其中一条专测 `corpusDigest` 可由文件字节重算。
-- **边界**：这是**我们读他们公开语料**的自测，不是他们 harness 复跑；`uibc-key-revocation-list-report/1` 尚无 JSON Schema；本族在对方语料之外没有夹具，key 覆盖面（`keysCovered` 之外键的"没有陈述"）只在语料那一条上验过。本条未改版本、未重封归档。
+- **边界**：这是**我们读他们公开语料**的自测，不是他们 harness 复跑；`uibc-key-revocation-list-report/1` 当时尚无 JSON Schema（同日补上，见上一条）；本族在对方语料之外没有夹具，key 覆盖面（`keysCovered` 之外键的"没有陈述"）只在语料那一条上验过。本条未改版本、未重封归档。
 
 ## 未发布 — 2026-11-28（读得了对方的吊销清单，并把"折叠"本身当验收对象）
 

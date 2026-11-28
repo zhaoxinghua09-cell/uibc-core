@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/zhaoxinghua09-cell/uibc-core/interop/key-revocation-list-report.schema.json",
+  "title": "UIBC key revocation list report line",
+  "description": "One line of a JSON Lines file produced by `uibc_core.pyz verify-key-revocation-list --report`. It answers one question — is this key revoked at this time — and carries the rule that produced the answer, because `rejected` here can mean four different things and a bare decision hands the reader nothing to check. The decision maps onto the suite's external-verifier contract: 0 revoked, 1 not revoked, 2 no statement, 3 rejected, 4 stale.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "vector", "result", "decision", "reason", "basis", "verifier_id", "verifier_version", "when_utc", "exit"],
+  "properties": {
+    "format": {"const": "uibc-key-revocation-list-report/1"},
+    "vector": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The corpus member (one case directory) this line is about."
+    },
+    "result": {
+      "enum": ["PASS", "FAIL", "ERROR"],
+      "description": "PASS for revoked, not_revoked and no_statement — the three answers the suite treats as reached; FAIL for rejected and stale; ERROR when the case could not be read. PASS here is a conforming answer, not an approval of the key."
+    },
+    "decision": {
+      "enum": ["revoked", "not_revoked", "no_statement", "rejected", "stale", null],
+      "description": "null only on an ERROR line. `no_statement` means the list does not cover this key: it is not `not_revoked`."
+    },
+    "reason": {
+      "type": ["string", "null"],
+      "description": "One of the suite's nine tokens: signer_not_trusted, list_signature_invalid, list_older_than_accepted, list_stale, revoked_in_list, revoked_kept_from_earlier_list, revocation_not_yet_effective, key_not_covered, covered_no_entry."
+    },
+    "basis": {
+      "type": ["object", "null"],
+      "description": "The rule that produced the decision, with whatever facts it rested on: {\"rule\": \"trusted_by_recomputed_thumbprint\" | \"signature\" | \"freshness\" | \"in_list\" | \"retained\" | \"absent\" | \"shape\", ...}. Null only on an ERROR line."
+    },
+    "verifier_id": {"type": "string", "minLength": 1},
+    "verifier_version": {"type": "string", "minLength": 1},
+    "when_utc": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"},
+    "exit": {
+      "enum": [0, 1, 2, 3, 4],
+      "description": "The suite's contract: the process exits by the decision. 3 is reached both by `rejected` and by an unreadable case; the `result` field tells them apart."
+    },
+    "error": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 300,
+      "description": "Present only on an ERROR line, and required there."
+    }
+  },
+  "$comment": "Cross-field rules the subset here cannot express: exit equals the decision's code (revoked 0, not_revoked 1, no_statement 2, rejected 3, stale 4); result is FAIL only for rejected and stale; an ERROR line carries null decision, null reason, null basis and an error string."
+}

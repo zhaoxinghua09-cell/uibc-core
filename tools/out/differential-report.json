@@ -30,9 +30,10 @@
     "S16",
     "S17",
     "S18",
-    "S19"
+    "S19",
+    "S20"
   ],
-  "checks_total": 19,
+  "checks_total": 20,
   "exact_pairs": [
     {
       "check": "S1",
@@ -60,7 +61,7 @@
     }
   ],
   "exact_pairs_count": 6,
-  "generated_at": "2026-11-19T16:57:13+0800",
+  "generated_at": "2026-11-28T21:32:03+0800",
   "hostile": {
     "declined_to_judge": 9,
     "false_pass": 0,

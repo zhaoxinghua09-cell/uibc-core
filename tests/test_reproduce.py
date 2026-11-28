@@ -35,10 +35,10 @@ class TestReproduceSheet(unittest.TestCase):
 
     def test_one_claim_really_executes(self):
         """Not the whole sheet -- one command, and it must produce its figure."""
-        table, what, cmd, argv = next(c for c in br.CLAIMS if c[1] == "19 checks")
+        table, what, cmd, argv = next(c for c in br.CLAIMS if c[1] == "20 checks")
         out, code = br.run(argv)
         self.assertEqual(code, 0)
-        self.assertIn("19", out)
+        self.assertIn("20", out)
 
     def test_pickers_read_the_figure_not_the_preamble(self):
         fixture = ('log line\n'

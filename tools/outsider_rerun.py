@@ -307,17 +307,12 @@ def all_digests(root):
                                content_lf_digest(root)[0], len(tracked_files(root)))))
     return views
 
+# Deliberately set, never inherited: these three decide the outcome as much as PATH does.
+PINNED = {"PYTHONUTF8": "1", "PYTHONHASHSEED": "0", "PYTHONNOUSERSITE": "1", "PYTHONPATH": ""}
+
+
 def clean_env():
-    return {k: os.environ[k] for k in ENV_KEEP if k in os.environ} | {
-        "PYTHONUTF8": "1",
-        # Two knobs that make a rerun comparable rather than merely repeatable: the
-        # hash seed is fixed (set iteration order does not move between machines),
-        # and the user site directory is off (a package someone pip-installed for
-        # themselves cannot quietly decide the outcome).
-        "PYTHONHASHSEED": "0",
-        "PYTHONNOUSERSITE": "1",
-        "PYTHONPATH": "",
-    }
+    return {k: os.environ[k] for k in ENV_KEEP if k in os.environ} | dict(PINNED)
 
 
 def installed_distributions(env):

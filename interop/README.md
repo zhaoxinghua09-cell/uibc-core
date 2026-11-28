@@ -300,6 +300,33 @@ for every member. The corpus digest recomputed from the files themselves
 matches the one it declares, so this is the same corpus version. Reading is
 ours; their harness was not re-run.
 
+## Every report shape has a schema, and one linter judges all five
+
+Five JSON Lines shapes are produced by this repository, and since 2026-11-28 each
+has its own draft 2020-12 schema in this directory:
+
+| format | schema | what one line says |
+|---|---|---|
+| `uibc-verify-report/1` | `verify-report.schema.json` | one package, per-check outcome |
+| `uibc-scitt-cose-report/1` | `scitt-cose-report.schema.json` | one Transparent Statement, valid or refused with codes |
+| `uibc-mcp-authz-report/1` | `mcp-authz-report.schema.json` | one authorization observation, verdict plus findings |
+| `uibc-revocation-list-report/1` | `revocation-list-report.schema.json` | one signed chain, and the list it stopped on |
+| `uibc-key-revocation-list-report/1` | `key-revocation-list-report.schema.json` | one question — is this key revoked now — decision, reason, rule |
+
+`tools/report_lint.py` takes any producer's JSONL file and judges each line by
+the rules its own `format` names, with no third-party dependency. It also runs
+the cross-field rules a schema subset cannot express: a refusal that exits 0, a
+`no_statement` filed as `not_revoked`, a reached decision with no rule behind
+it, or an `ERROR` line carrying a verdict are all refused by name.
+
+```
+python tools/report_lint.py runs.jsonl
+```
+
+The linter is the fallback, not the only check: where `jsonschema` is installed
+the test suite validates the published schemas themselves, so a schema that is
+invalid JSON Schema cannot pass by looking fine to us.
+
 ## What this does not do
 
 It does not import a foreign corpus wholesale. A corpus in someone else's layout

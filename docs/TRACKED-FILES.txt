@@ -1851,6 +1851,9 @@ independent_verifier/iverify.py
 index.html
 interop/CONSUMERS.json
 interop/README.md
+interop/key-revocation-list-report.schema.json
+interop/mcp-authz-report.schema.json
+interop/revocation-list-report.schema.json
 interop/scitt-cose-report.schema.json
 interop/verify-report.schema.json
 lgd-core/COMPLIANCE.md
@@ -2113,6 +2116,7 @@ tests/test_release_pin.py
 tests/test_release_pins.py
 tests/test_release_readiness.py
 tests/test_report_schema.py
+tests/test_report_schema_families.py
 tests/test_reproduce.py
 tests/test_reproduce_gate_guard.py
 tests/test_resolve_generated.py

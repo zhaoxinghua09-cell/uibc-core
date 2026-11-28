@@ -1,33 +1,34 @@
 # 检查项参考手册（`tools/build_checks_reference.py` 生成）
 
-20 项检查各自回答一个问题。**最后两列是给评审看的**：有没有外部规范说要这么做，以及失败时它说什么。
+21 项检查各自回答一个问题。**最后两列是给评审看的**：有没有外部规范说要这么做，以及失败时它说什么。
 
 | 检查 | 名称 | 回答的问题 | 依据类别 | 依据说明 | 源码行 |
 |---|---|---|---|---|---|
-| S0 | verifier robustness | 包根本无法处理时，验证器是崩溃还是给出判定？ | 无 | 异常时也必须给出判定，不得崩溃（本项目自定） | 1423 |
-| S1 | package structure | 声明的每个文件都在，且没有多出不该有的文件？ | 无 | 包文件布局（声明的文件都在、无多出文件）为本项目自定；草案规定的是回执载荷字段，不是包的文件布局 | 414 |
-| S2 | identity consistency | 包自称的 agent 身份与生命周期事件里的一致？ | 草案明文规定 | 主体标识（draft-noa-scitt-ai-agent-receipt-00） | 637 |
-| S3 | lifecycle state machine + semantics | 生命周期事件序列合法（类型、顺序、时间），不是伪造的转场？ | 思想来源（非直接规定） | 状态机自定；事件类型集合参照该草案（draft-maintainer-1f916-agent-record-01） | 656 |
-| S4 | evidence integrity | 每个证据文件的字节未被改动，且没有指向证据目录之外的符号链接？ | 无 | 内容哈希为通用做法；符号链接围栏为本项目自定的安全加固 | 714 |
-| S5 | evidence root | 所有证据的根承诺与清单声明一致（含整条尾部被删除）？ | 思想来源（非直接规定） | Merkle 根的思想；本包的根构造自定（RFC 6962） | 1184 |
-| S6 | seal signature | 封条签名有效，且签名覆盖的是当前这份内容？ | 思想来源（非直接规定） | Ed25519 签名；「签名须覆盖当前内容」的组合检查自定（RFC 8032） | 1205 |
-| S7 | evidence index metadata | 索引自身的元数据（类型、备注）未被改写（内容哈希看不到这层）？ | 无 | 索引元数据未可改由内容哈希看不到、需单独摘要，为本项目自定；草案中没有对应条款 | 1026 |
-| S8 | package checkpoint head | 整包状态与封存的检查点一致（能看见被截短的日志）？ | 思想来源（非直接规定） | checkpoint 概念；整状态提交自定（draft-maintainer-1f916-agent-record-01） | 1085 |
-| S9 | head pinned out-of-band | 包与外部钉住的链头一致（能看见回滚到旧的自洽包）？ | 思想来源（非直接规定） | 链头需在外部被观察；pin 机制自定（draft-bailey-scitt-agent-session-receipt） | 1108 |
-| S10 | attestation closure declared | 六个证明闭包成分都被声明并给了摘要（只声明，不验内容）？ | 草案明文规定 | 证明闭包六成分（draft-sharif-agent-audit-trail-03 §13.6） | 1055 |
-| S11 | strict serialization | 序列化严格（重复成员名、非 ECMAScript 数值都会被拒）？ | 思想来源（非直接规定） | JCS 严格序列化；重复成员名拒收为加固（RFC 8785） | 363 |
-| S12 | timestamp and identifier strictness | 时间戳与标识符严格（2 月 30 日这样的日期不可能通过；evidence_id 缺失或重复也在此拒收）？ | 无 | 时间戳与标识符按不可能值拒收（本项目自定） | 774 |
-| S13 | merkle inclusion proofs | merkle 包含证明可复算，且证明与被证明项对应？ | 思想来源（非直接规定） | 包含证明的构造；本包证明格式自定（RFC 6962） | 844 |
-| S14 | strict base64 | base64 严格（缺填充、混入杂字符都不接受）？ | 思想来源（非直接规定） | 严格 base64：不得缺填充、不得混入杂字符（RFC 4648 §4） | 881 |
-| S15 | anchor event resolution | 锚定事件可解析，锚覆盖的根可由包内内容重算出来？ | 无 | 锚定事件解析与根重算（本项目自定） | 907 |
-| S16 | external timestamp (RFC 3161) | 存在真实的第三方时间戳（RFC 3161），且它覆盖的是本包的链头？ | 草案明文规定 | 时间戳协议本体；「须覆盖本包链头」的判定自定（RFC 3161） | 923 |
-| S17 | linear receipt chain | 收据链线性、无分叉、无伪造的创世前驱？ | 草案明文规定 | 收据与摘要（draft-marques-asqav-compliance-receipts-01） | 990 |
-| S18 | policy artefact resolution | 策略产物存在，且其摘要与收据引用的摘要一致？ | 草案明文规定 | 摘要须可解析（draft-marques-asqav-compliance-receipts-01 §4.2.4） | 1011 |
-| S19 | freshness state | 包比这个验证器上次接受的那份更新（而不是一个更旧但签名合法的包）？ | 思想来源（非直接规定） | 新鲜度只能由外部状态判定，签名不蕴含时间顺序；高水位记忆机制为本项目自定。机制并不新：draft-chang-delta1-settlement-00 §7.2/§12.4 已要求序号单调、拒绝重放；draft-maintainer-1f916-agent-record 用 checkpoint 加见证方；RFC 9162 的 STH 管的是日志侧。本项目做的是把这条放进离线验包器，作为可选的验证器侧状态，并给出三值裁决口径（draft-bailey-scitt-agent-session-receipt） | 1140 |
+| S0 | verifier robustness | 包根本无法处理时，验证器是崩溃还是给出判定？ | 无 | 异常时也必须给出判定，不得崩溃（本项目自定） | 1406 |
+| S1 | package structure | 声明的每个文件都在，且没有多出不该有的文件？ | 无 | 包文件布局（声明的文件都在、无多出文件）为本项目自定；草案规定的是回执载荷字段，不是包的文件布局 | 426 |
+| S2 | identity consistency | 包自称的 agent 身份与生命周期事件里的一致？ | 草案明文规定 | 主体标识（draft-noa-scitt-ai-agent-receipt-00） | 613 |
+| S3 | lifecycle state machine + semantics | 生命周期事件序列合法（类型、顺序、时间），不是伪造的转场？ | 思想来源（非直接规定） | 状态机自定；事件类型集合参照该草案（draft-maintainer-1f916-agent-record-01） | 632 |
+| S4 | evidence integrity | 每个证据文件的字节未被改动，且没有指向证据目录之外的符号链接？ | 无 | 内容哈希为通用做法；符号链接围栏为本项目自定的安全加固 | 690 |
+| S5 | evidence root | 所有证据的根承诺与清单声明一致（含整条尾部被删除）？ | 思想来源（非直接规定） | Merkle 根的思想；本包的根构造自定（RFC 6962） | 1180 |
+| S6 | seal signature | 封条签名有效，且签名覆盖的是当前这份内容？ | 思想来源（非直接规定） | Ed25519 签名；「签名须覆盖当前内容」的组合检查自定（RFC 8032） | 1201 |
+| S7 | evidence index metadata | 索引自身的元数据（类型、备注）未被改写（内容哈希看不到这层）？ | 无 | 索引元数据未可改由内容哈希看不到、需单独摘要，为本项目自定；草案中没有对应条款 | 991 |
+| S8 | package checkpoint head | 整包状态与封存的检查点一致（能看见被截短的日志）？ | 思想来源（非直接规定） | checkpoint 概念；整状态提交自定（draft-maintainer-1f916-agent-record-01） | 1081 |
+| S9 | head pinned out-of-band | 包与外部钉住的链头一致（能看见回滚到旧的自洽包）？ | 思想来源（非直接规定） | 链头需在外部被观察；pin 机制自定（draft-bailey-scitt-agent-session-receipt） | 1104 |
+| S10 | attestation closure declared | 六个证明闭包成分都被声明并给了摘要（只声明，不验内容）？ | 草案明文规定 | 证明闭包六成分（draft-sharif-agent-audit-trail-03 §13.6） | 1051 |
+| S11 | strict serialization | 序列化严格（重复成员名、非 ECMAScript 数值都会被拒）？ | 思想来源（非直接规定） | JCS 严格序列化；重复成员名拒收为加固（RFC 8785） | 375 |
+| S12 | timestamp and identifier strictness | 时间戳与标识符严格（2 月 30 日这样的日期不可能通过；evidence_id 缺失或重复也在此拒收）？ | 无 | 时间戳与标识符按不可能值拒收（本项目自定） | 750 |
+| S13 | merkle inclusion proofs | merkle 包含证明可复算，且证明与被证明项对应？ | 思想来源（非直接规定） | 包含证明的构造；本包证明格式自定（RFC 6962） | 809 |
+| S14 | strict base64 | base64 严格（缺填充、混入杂字符都不接受）？ | 思想来源（非直接规定） | 严格 base64：不得缺填充、不得混入杂字符（RFC 4648 §4） | 846 |
+| S15 | anchor event resolution | 锚定事件可解析，锚覆盖的根可由包内内容重算出来？ | 无 | 锚定事件解析与根重算（本项目自定） | 872 |
+| S16 | external timestamp (RFC 3161) | 存在真实的第三方时间戳（RFC 3161），且它覆盖的是本包的链头？ | 草案明文规定 | 时间戳协议本体；「须覆盖本包链头」的判定自定（RFC 3161） | 888 |
+| S17 | linear receipt chain | 收据链线性、无分叉、无伪造的创世前驱？ | 草案明文规定 | 收据与摘要（draft-marques-asqav-compliance-receipts-01） | 955 |
+| S18 | policy artefact resolution | 策略产物存在，且其摘要与收据引用的摘要一致？ | 草案明文规定 | 摘要须可解析（draft-marques-asqav-compliance-receipts-01 §4.2.4） | 976 |
+| S19 | freshness state | 包比这个验证器上次接受的那份更新（而不是一个更旧但签名合法的包）？ | 思想来源（非直接规定） | 新鲜度只能由外部状态判定，签名不蕴含时间顺序；高水位记忆机制为本项目自定。机制并不新：draft-chang-delta1-settlement-00 §7.2/§12.4 已要求序号单调、拒绝重放；draft-maintainer-1f916-agent-record 用 checkpoint 加见证方；RFC 9162 的 STH 管的是日志侧。本项目做的是把这条放进离线验包器，作为可选的验证器侧状态，并给出三值裁决口径（draft-bailey-scitt-agent-session-receipt） | 1136 |
+| S20 | media type declaration | 包声明的媒体类型在闭集内，且没有用未声明的类型蒙混过去？ | 思想来源（非直接规定） | 媒体类型本就是注册表里的闭集词表，类型/子类型有固定语法；但「包内必须声明、且只能声明闭集内的一类」是自定约束，载体（JCS 载荷里的 media_type 字段）也不是哪份草案规定的。来源最近的是 OCI Image Spec 对 mediaType 的必填与枚举，本项目只是把同一思路移到离线验包器，用 12 类闭集判定越界（RFC 2045 §5.1 / RFC 6838（媒体类型注册表）） | 1020 |
 
 ## 关于「外部依据」这一列
 
-草案明文规定 5 项；思想来源 9 项；完全自定 6 项（S0, S1, S4, S7, S12, S15）。
+草案明文规定 5 项；思想来源 10 项；完全自定 6 项（S0, S1, S4, S7, S12, S15）。
 
 三类的区别不是措辞，是责任：第一类写「按某草案要求」，第二类只能写「借鉴某处思想」，第三类必须写「本项目自定」。**混写会被抓住。**
 
@@ -46,3 +47,4 @@
 - **S17**：evidence/index.json metadata does not match
 - **S18**：evidence/index.json metadata does not match
 - **S19**：no agent_id or freshness_head.subject: a
+- **S20**：%d entr(y/ies) declare a media type outside the

@@ -46,7 +46,7 @@ class TestOracle(unittest.TestCase):
         spec.loader.exec_module(mod)
         for _name, _pre, _fn, _verdict, first in mod.ORACLE_EXT:
             self.assertIsNotNone(first, "an extension row must state a first failure")
-            self.assertLessEqual(int(first[1:]), 19)
+            self.assertLessEqual(int(first[1:]), 20)
 
     def test_first_failure_is_ordered_by_check_number(self):
         """Report order is not check order; the tool must not depend on it."""
@@ -62,15 +62,19 @@ class TestOracle(unittest.TestCase):
     def test_the_coverage_numbers_are_computed_not_claimed(self):
         """The three numbers the docs quote must come out of the run.
 
-        "19", "9 rules" and "6 of 19" used to be sentences in a document. A declared check
+        "20", "9 rules" and "6 of 20" used to be sentences in a document. A declared check
         that no package ever reaches is indistinguishable from a check that does not
         exist, so all three are now printed by the tool and asserted here.
+
+        S20 (media type declaration) moved these from 19 to 20 on 2026-11-28; the
+        oracle's own S20 vector is `oracle-s16-token-byte`'s sibling in the manifest
+        corpus, not here, so the count moved without a new oracle case.
         """
         r = subprocess.run([sys.executable, TOOL], cwd=ROOT, capture_output=True)
         out = (r.stdout + r.stderr).decode("utf-8", "replace")
-        self.assertIn("checks evaluated by the reference across these cases: 19", out)
+        self.assertIn("checks evaluated by the reference across these cases: 20", out)
         self.assertIn("rules the independent implementation emits: 9", out)
-        self.assertIn("exact id-mapped pairs (CHECK_MAP): 6 of 19", out)
+        self.assertIn("exact id-mapped pairs (CHECK_MAP): 6 of 20", out)
         self.assertIn("unmapped independent rules: V7, V8, V9", out)
         self.assertIn("measured: V7 fires alone -> reference FAIL S1", out)
         self.assertIn("reference says FAIL and the second says INCONCLUSIVE", out)

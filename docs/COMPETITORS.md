@@ -25,7 +25,7 @@ verifier that refuses malformed input).
 | Verifier modules | 40 | 40 |
 | Test files / test functions | 221 / 1765 (1919 collected, parametrised cases counted once each) | 95 / 1189 |
 | Conformance material | 30 packages (20 must-reject, 1 control, 9 must-accept), shipped with per-case `expected.json`, two of them carrying the outside input S9 and S19 need, rebuildable byte for byte, and every must-reject case naming its basis in `docs/GROUNDS.md` | 1,952 cases in 55 sets under `vectors/`, referenced by tests, in neither the sdist nor the wheel |
-| Second implementation is a **CI gate** | Yes — `second-implementation` job, 18 of 20 checks, 36/36 identical FAIL sets | No second implementation to gate |
+| Second implementation is a **CI gate** | Yes — `second-implementation` job, 18 of 21 checks, 36/36 identical FAIL sets | No second implementation to gate |
 | Hostile-input suite | `tools/redteam_robustness.py`, 10 cases, table in `docs/ROBUSTNESS.md` | `tests/test_json_nesting_vectors.py`, `tests/test_verify_bounds.py`, `tests/test_parse.py` |
 | Deep-nesting ceiling | **512 levels, both implementations, refuses with S11** | 128 levels, refuses at parse time |
 | External time proof | RFC 3161 timestamp verified in both implementations (real FreeTSA token, 7/7 red-team on the token verifier) | SCITT transparency log via an anchor client and witness records |

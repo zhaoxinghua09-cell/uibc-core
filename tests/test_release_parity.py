@@ -36,14 +36,17 @@ class TestReleaseParity(unittest.TestCase):
         self.assertEqual(self.r["channels"]["archive (DOI)"]["checks"],
                          ["S1", "S2", "S3", "S4", "S5", "S6"])
 
-    def test_thirteen_checks_exist_only_in_the_repository(self):
-        """S7-S10 (4) + S11-S12 (2) + S13-S19 (7). A bare id count is a weak
-        assertion, so the ids are named as well."""
+    def test_fourteen_checks_exist_only_in_the_repository(self):
+        """S7-S10 (4) + S11-S12 (2) + S13-S20 (8). A bare id count is a weak
+        assertion, so the ids are named as well. S20 was added on 2026-11-28 and
+        is unpublished exactly like the other thirteen: the archive still ships
+        0.5.5 with 58 cases, so this list must grow when the code grows."""
         only = [c for c in self.r["only_the_repository_has"] if c != "S0"]
         self.assertEqual(sorted(only, key=lambda c: int(c[1:])),
                          ["S7", "S8", "S9", "S10", "S11", "S12",
-                          "S13", "S14", "S15", "S16", "S17", "S18", "S19"])
-        for cid in ("S7", "S8", "S9", "S10", "S13", "S18", "S19"):
+                          "S13", "S14", "S15", "S16", "S17", "S18", "S19",
+                          "S20"])
+        for cid in ("S7", "S8", "S9", "S10", "S13", "S18", "S19", "S20"):
             self.assertIn(cid, only)
 
     def test_the_decisive_measurement_is_recorded(self):

@@ -66,7 +66,7 @@ did not run their vectors.
 3. **Vaara is ahead on**: policy enforcement at the call site and EU AI Act
    Article 12 framing. Behind on: cryptographic structure of the record.
 4. **We are ahead on**: a public repository an outsider can clone and run
-   (full suite - count in `docs/EVIDENCE-INDEX.md` - 16 red-team scenarios, 37 attacks, all re-run from a fresh anonymous clone), a
+   (full suite - count in `docs/EVIDENCE-INDEX.md` - 16 red-team scenarios, 38 attacks, all re-run from a fresh anonymous clone), a
    published crosswalk to an IETF draft with the failing cells written down, and
    a habit of publishing our own failed verification attempts — including one we
    had to retract: the Rekor inclusion "failure" was our reading error, corrected

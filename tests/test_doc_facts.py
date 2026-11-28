@@ -51,7 +51,10 @@ class TestDocFacts(unittest.TestCase):
             self.assertIsNotNone(facts.get(key), "%s could not be measured, so a "
                                                 "claim about it is unchecked" % key)
         self.assertGreater(facts["tests"], 100)
-        self.assertEqual(facts["checks"], 20)
+        # 21 checks as of 2026-11-28: the sibling lane's commit added S20 (media type
+        # declaration) to verify.py; this number is a fact about the code, so it moves
+        # when the code moves. It was 20 before that commit.
+        self.assertEqual(facts["checks"], 21)
 
     def test_no_published_number_is_stale(self):
         facts = cdf.measure()
@@ -80,6 +83,26 @@ class TestDocFacts(unittest.TestCase):
                             "the two attack counts must stay distinguishable, "
                             "or one of them is being silently checked against "
                             "the other")
+
+    def test_a_number_that_cannot_be_measured_is_not_a_pass(self):
+        """Red team 2026-11-28 (A8): a failed import stored None, and every claim
+        about an None fact was skipped - so the gate said "all published numbers
+        match" about numbers it had not counted."""
+        path = os.path.join(tempfile.mkdtemp(prefix="docfacts-"), "x.md")
+        with open(path, "w", encoding="utf-8") as fh:
+            fh.write("this build ran 999 attacks\n")
+        bad, unmeasurable = cdf.check_strict({"attacks": None}, [path])
+        self.assertEqual(bad, [])
+        self.assertEqual(len(unmeasurable), 1, "unmeasured claim was silently skipped")
+        self.assertEqual(unmeasurable[0]["claimed"], 999)
+
+    def test_measuring_still_distinguishes_match_from_drift(self):
+        path = os.path.join(tempfile.mkdtemp(prefix="docfacts-"), "x.md")
+        with open(path, "w", encoding="utf-8") as fh:
+            fh.write("this build ran 999 attacks\n")
+        self.assertEqual(cdf.check_strict({"attacks": 999}, [path]), ([], []))
+        bad, unmeasurable = cdf.check_strict({"attacks": 998}, [path])
+        self.assertEqual((len(bad), unmeasurable), (1, []))
 
 
 if __name__ == "__main__":

@@ -64,6 +64,12 @@ BASIS = {
                     "拒绝重放；draft-maintainer-1f916-agent-record 用 checkpoint 加"
                     "见证方；RFC 9162 的 STH 管的是日志侧。本项目做的是把这条"
                     "放进离线验包器，作为可选的验证器侧状态，并给出三值裁决口径"},
+    "S20": {"class": "related", "citation": "RFC 2045 §5.1 / RFC 6838（媒体类型注册表）",
+            "note": "媒体类型本就是注册表里的闭集词表，类型/子类型有固定语法；"
+                    "但「包内必须声明、且只能声明闭集内的一类」是自定约束，"
+                    "载体（JCS 载荷里的 media_type 字段）也不是哪份草案规定的。"
+                    "来源最近的是 OCI Image Spec 对 mediaType 的必填与枚举，"
+                    "本项目只是把同一思路移到离线验包器，用 12 类闭集判定越界"},
 }
 
 CLASSES = ("direct", "related", "none")

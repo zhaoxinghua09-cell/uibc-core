@@ -1,14 +1,14 @@
 {
- "generated_at": "2026-11-28T12:59:28Z",
- "tree_sha256": "0ad8983322ef2e956e0b0edda01f3d4a926c7baed047252c268240e17491f57d",
+ "generated_at": "2026-11-28T12:14:46Z",
+ "tree_sha256": "015da7e90b104dcc16499ccff3d2c4b9bcd68f851ca15dce7f20edaf4d82dc00",
  "files_hashed": 2552,
- "content_sha256": "40dfc602691877c802f39fcd77c5c95c6a23fa3aa98afb171b275b857026318d",
+ "content_sha256": "71795231fde3491e459b2a76343e2d78a8bee5f1c127e797e827562e229eaa41",
  "content_files": 2552,
- "content_lf_sha256": "b8948065897cc19f267a8083e7b8f776378ac31dd97725a7b8cdf76901fe6eb5",
+ "content_lf_sha256": "603d99225784a079811086170728c53ace3e057a3b4f6f9d0debd57ae608249d",
  "delivery": "commit",
  "files_manifest": {
   "path": "docs/OUTSIDER-FILES.txt",
-  "sha256": "a34cc61c9a1bf26817571a7178f6e79e1e6c35cd99f616d61a48d52abcd5114d",
+  "sha256": "264437e1f642216e063c1d72b8a8748c4c1272ea9968e77633f85d126bd29eb2",
   "entries": 2552
  },
  "digest_excludes": [
@@ -289,7 +289,6 @@
    "zipp==4.1.2",
    "zstandard==0.25.0"
   ],
-  "distributions_sha256": "2746a3af6935e7b30eed574d11020fe44a063cf5afe196e8cb89e71abd86fc9f",
   "note": "no tokens, no cloud credentials, nothing from the author's shell; the hash seed and the user site directory are pinned so that another machine's state cannot decide the outcome"
  },
  "steps": [
@@ -304,7 +303,6 @@
    "missing": [],
    "ok": true,
    "seconds": 0.8,
-   "stdout_sha256": "5e12fa3725d323bd994ffa45469fa7ef027fd4f8510357bfc39b900891b4c6f2",
    "tail": "GATE OK"
   },
   {
@@ -319,7 +317,6 @@
    "missing": [],
    "ok": true,
    "seconds": 0.9,
-   "stdout_sha256": "f087fdf4464161f266ca40008d6f948a22b074adbfa1fdebb90cf9168f235455",
    "tail": "PARITY OK: 41 repositories pinned and re-scored, best competitor 3/10, this repository 10/10"
   },
   {
@@ -332,8 +329,7 @@
    ],
    "missing": [],
    "ok": true,
-   "seconds": 0.4,
-   "stdout_sha256": "96ad7c7274e78f4d3b138957aec96cc67f217585d9f1479216a81d8507063309",
+   "seconds": 0.3,
    "tail": "ALL OK"
   },
   {
@@ -346,9 +342,8 @@
    ],
    "missing": [],
    "ok": true,
-   "seconds": 9.4,
-   "stdout_sha256": "ec2f02dd08839abcf9b2cd9ae69d74d2594ef160ab6a460837c26b4ab34f70cc",
-   "tail": "41 passed in 7.01s"
+   "seconds": 6.8,
+   "tail": "41 passed in 5.39s"
   }
  ],
  "ok": true

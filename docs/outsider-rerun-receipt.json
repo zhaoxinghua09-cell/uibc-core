@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-28T14:02:09Z",
+ "generated_at": "2026-11-28T14:02:50Z",
  "tree_sha256": "ffa9a65b568332e152933afcaad5330a49fefec9606673d26593c34cf9c2b042",
  "files_hashed": 2557,
  "content_sha256": "1325c6e57193fa565b82a04f272557a7772c1a4a8695ebc211b2ced7236045c4",
@@ -319,7 +319,7 @@
    ],
    "missing": [],
    "ok": true,
-   "seconds": 0.9,
+   "seconds": 1.0,
    "stdout_sha256": "f087fdf4464161f266ca40008d6f948a22b074adbfa1fdebb90cf9168f235455",
    "tail": "PARITY OK: 41 repositories pinned and re-scored, best competitor 3/10, this repository 10/10"
   },
@@ -347,9 +347,9 @@
    ],
    "missing": [],
    "ok": true,
-   "seconds": 8.1,
+   "seconds": 7.8,
    "stdout_sha256": "ec2f02dd08839abcf9b2cd9ae69d74d2594ef160ab6a460837c26b4ab34f70cc",
-   "tail": "41 passed in 5.88s"
+   "tail": "41 passed in 6.13s"
   }
  ],
  "ok": true

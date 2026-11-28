@@ -1098,6 +1098,143 @@ def cmd_verify_revocation_list(args):
     sys.exit(0 if ok else 1)
 
 
+REVOCATION_DELTA_REPORT_FORMAT = "uibc-revocation-delta-report/1"
+
+
+def _revocation_delta_line(member, decision, reason, index, exit_code,
+                           error=None, head=None, seq=None):
+    """One report line for a delta-form revocation list case.
+
+    An acceptance carries the head a verifier would pin next and the sequence
+    number it reached, because "the chain holds" is only checkable if the
+    reader says which list it holds. A refusal carries neither: naming a head
+    for a list that was not installed is the mistake the refusal exists to
+    prevent.
+    """
+    accepted = decision == "accept"
+    line = {
+        "format": REVOCATION_DELTA_REPORT_FORMAT,
+        "vector": member,
+        "result": "ERROR" if error else ("PASS" if accepted else "FAIL"),
+        "decision": None if error else decision,
+        "reason": None if error else reason,
+        "index": None if error else index,
+        "head": None if error or not accepted else head,
+        "seq": None if error or not accepted else seq,
+        "verifier_id": VERIFIER_ID,
+        "verifier_version": __version__,
+        "when_utc": _now_utc(),
+        "exit": exit_code,
+    }
+    if error is not None:
+        line["error"] = str(error)[:300]
+    return line
+
+
+def cmd_verify_revocation_delta(args):
+    """Judge a signed revocation list in delta form (revocation-list/delta).
+
+      * `--chain F` judges one chain document — `{"roots": [...], "lists":
+        [{"body", "sig"}, …]}` — and prints, as its last stdout line, the folded
+        state or the refusal with the index it stopped on.
+      * `--suite F` judges a shared vectors file and compares every case with
+        the answer key the file carries.
+      * `--suite F --case RL07` judges one case of that file.
+
+    Six things decide a verdict here and none of them is read off the list:
+    the type names this format under one of the two recognised hosts; ids are
+    shaped by kind (a key, permit or grant by hex digest, an identity provider
+    key by RFC 7638 thumbprint, the rest by identifier); the body is exact;
+    entries ascend strictly; the signer is a pinned root; and a repeat, a
+    rollback, a gap, a jump to another chain, a previous digest that does not
+    match, an issue time that moves backwards, an entry from the future, or a
+    signature that does not verify all refuse by their own name.
+    """
+    from . import revocation_delta as rd
+
+    report_path = getattr(args, "report", None)
+
+    if getattr(args, "chain", None):
+        path = os.path.abspath(args.chain)
+        member = os.path.basename(path)
+        try:
+            result = rd.judge_chain_file(path)
+        except (OSError, ValueError) as exc:
+            if report_path:
+                _append_line(report_path,
+                             _revocation_delta_line(member, None, None, None, 3, error=exc))
+            print(f"error: cannot read the chain {path}: {exc}", file=sys.stderr)
+            sys.exit(3)
+        if report_path:
+            _append_line(report_path,
+                         _revocation_delta_line(member, result["decision"], result["reason"],
+                                                result["index"],
+                                                0 if result["decision"] == "accept" else 1,
+                                                head=result["state"].get("head"),
+                                                seq=result["state"].get("seq")))
+        if result["decision"] != "accept":
+            print(f"refusal: {result['reason']} at list {result['index']}")
+        print(json.dumps({"decision": result["decision"], "reason": result["reason"],
+                          "index": result["index"]}))
+        sys.exit(0 if result["decision"] == "accept" else 1)
+
+    suite_path = getattr(args, "suite", None)
+    if not suite_path:
+        sys.exit("error: pass --suite FILE, or --chain FILE, to judge something")
+    try:
+        cases = rd.load_suite(os.path.abspath(suite_path))
+    except (OSError, ValueError) as exc:
+        sys.exit(f"error: cannot read the suite {suite_path}: {exc}")
+
+    wanted = getattr(args, "case", None)
+    if wanted:
+        chosen = [c for c in cases if c.get("id") == wanted]
+        if not chosen:
+            sys.exit(f"error: the suite carries no case {wanted!r}")
+        case = chosen[0]
+        result = rd.judge_case(case)
+        expected = case.get("expected") or {}
+        if report_path:
+            _append_line(report_path,
+                         _revocation_delta_line(case.get("id"), result["decision"],
+                                                result["refusal"]["code"] if result["refusal"] else result["reason"],
+                                                result["index"],
+                                                0 if result["decision"] == "accept" else 1,
+                                                head=result["state"].get("head"),
+                                                seq=result["state"].get("seq")))
+        if result["decision"] != "accept":
+            print(f"refusal: {result['reason']} at list {result['index']}")
+        print(json.dumps({"decision": result["decision"],
+                          "reason": result["refusal"]["code"] if result["refusal"] else result["reason"],
+                          "index": result["index"]}))
+        if expected.get("state") is not None:
+            conforms = result["state"] == expected["state"]
+        else:
+            conforms = (result["refusal"] and result["refusal"]["code"] == expected.get("refused")
+                        and result["index"] == expected.get("index"))
+        sys.exit(0 if result["decision"] == "accept" and conforms else 1)
+
+    summary = rd.judge_suite(os.path.abspath(suite_path))
+    for record in summary["records"]:
+        ident = record["id"]
+        got, want = record["got"], record["expected"]
+        if report_path:
+            _append_line(report_path,
+                         _revocation_delta_line(ident, got.get("decision"), got.get("reason"),
+                                                got.get("index"),
+                                                0 if record["conforms"] else 1,
+                                                head=(got.get("state") or {}).get("head"),
+                                                seq=(got.get("state") or {}).get("seq")))
+        if record["conforms"]:
+            print(f"{ident}: {got['decision']} (matches the answer key)")
+        else:
+            print(f"{ident}: {got['decision']}, expected {want.get('decision')}; "
+                  f"differs on {', '.join(record['mismatched'])}", file=sys.stderr)
+    print(f"{summary['conforming']}/{summary['members']} members conform to the shared answer key")
+    ok = summary["members"] and summary["conforming"] == summary["members"]
+    sys.exit(0 if ok else 1)
+
+
 KEY_REVOCATION_LIST_REPORT_FORMAT = "uibc-key-revocation-list-report/1"
 
 
@@ -1177,6 +1314,102 @@ def cmd_verify_key_revocation_list(args):
         else:
             print(f"{ident}: {got['decision']} {got['reason']}, expected "
                   f"{expected['decision']} {expected['reason']}; "
+                  f"differs on {', '.join(record['mismatched'])}", file=sys.stderr)
+    print(f"{summary['conforming']}/{summary['members']} members conform to the corpus answer key")
+    ok = summary["members"] and summary["conforming"] == summary["members"]
+    sys.exit(0 if ok else 1)
+
+
+AGENT_CARD_RECEIPT_REPORT_FORMAT = "uibc-agent-card-receipt-report/1"
+
+
+def _agent_card_receipt_line(member, decision, reason, subject_digest, exit_code, error=None):
+    """One report line for an agent-card-receipt case.
+
+    A refusal here is one of fifteen rules, so the reason token travels beside
+    the decision; and because the whole judgement turns on a digest of the card
+    as served, the digest the reader computed travels too, so a reader of the
+    report can recompute it from the card and compare without trusting us.
+    """
+    line = {
+        "format": AGENT_CARD_RECEIPT_REPORT_FORMAT,
+        "vector": member,
+        "result": "ERROR" if error else ("PASS" if decision == "accept" else "FAIL"),
+        "decision": None if error else decision,
+        "reason": None if error else reason,
+        "subject_digest": None if error else subject_digest,
+        "verifier_id": VERIFIER_ID,
+        "verifier_version": __version__,
+        "when_utc": _now_utc(),
+        "exit": exit_code,
+    }
+    if error is not None:
+        line["error"] = str(error)[:300]
+    return line
+
+
+def cmd_verify_agent_card_receipt(args):
+    """Judge an agent-card receipt under agent-card-receipt/v1.
+
+      * `--case D` judges one case directory (`card.json`, `statement.json`,
+        `context.json`, and `revocations.json` if present) and prints, as its
+        last stdout line, `{"decision", "reason", "exit"}`; the process exits
+        0 accept, 1 reject.
+      * `--dir D` judges a corpus and compares every decision and reason with
+        the answer key in its `MANIFEST.json`.
+
+    The list is read with `revocations.json` under its own envelope; a missing
+    file is rule 11 (`revocation_list_absent`), not an unreadable case. This
+    reader mints and signs nothing.
+    """
+    from . import agent_card_receipt as acr
+
+    report_path = getattr(args, "report", None)
+
+    if getattr(args, "case", None):
+        path = os.path.abspath(args.case)
+        try:
+            result = acr.judge_case(path)
+        except (OSError, ValueError) as exc:
+            if report_path:
+                _append_line(report_path, _agent_card_receipt_line(
+                    os.path.basename(path), None, None, None, 3, error=exc))
+            print(f"error: cannot read the case {path}: {exc}", file=sys.stderr)
+            sys.exit(3)
+        if report_path:
+            _append_line(report_path, _agent_card_receipt_line(
+                os.path.basename(path), result["decision"], result["reason"],
+                result.get("subjectDigest"), result["exit"]))
+        if result["reason"] != "receipt_current":
+            print(f"refusal: {result['reason']}"
+                  + (f" ({result['detail']})" if result.get("detail") else ""))
+        print(json.dumps({"decision": result["decision"], "reason": result["reason"],
+                          "exit": result["exit"]}))
+        sys.exit(result["exit"])
+
+    corpus = os.path.abspath(getattr(args, "dir", None) or ".")
+    if not os.path.isdir(corpus):
+        sys.exit(f"error: corpus directory not found: {corpus}")
+    if not os.path.isfile(os.path.join(corpus, "MANIFEST.json")):
+        sys.exit("error: the corpus carries no MANIFEST.json to answer to")
+
+    summary = acr.judge_corpus(corpus)
+    for record in summary["records"]:
+        ident = record["id"]
+        got, expected = record["got"], record["expected"]
+        if report_path:
+            if got.get("error"):
+                _append_line(report_path, _agent_card_receipt_line(
+                    ident, None, None, None, 3, error=got["error"]))
+            else:
+                _append_line(report_path, _agent_card_receipt_line(
+                    ident, got["decision"], got["reason"], got.get("subjectDigest"),
+                    got["exit"]))
+        if record["conforms"]:
+            print(f"{ident}: {got['decision']} {got['reason']} (matches the answer key)")
+        else:
+            print(f"{ident}: {got['decision']}/{got['reason']}, expected "
+                  f"{expected['decision']}/{expected['reason']}; "
                   f"differs on {', '.join(record['mismatched'])}", file=sys.stderr)
     print(f"{summary['conforming']}/{summary['members']} members conform to the corpus answer key")
     ok = summary["members"] and summary["conforming"] == summary["members"]
@@ -1601,6 +1834,19 @@ def main():
                    help="append one uibc-revocation-list-report/1 line per member")
     p.set_defaults(func=cmd_verify_revocation_list)
 
+    p = sub.add_parser("verify-revocation-delta",
+                       help="read the signed revocation list in delta form "
+                            "(revocation-list/delta); exits by the decision")
+    p.add_argument("--suite", default=None, metavar="FILE",
+                   help="judge a shared vectors file and compare with its answer key")
+    p.add_argument("--case", default=None, metavar="ID",
+                   help="judge one case of that file, by its id")
+    p.add_argument("--chain", default=None, metavar="FILE",
+                   help="judge one chain document {roots, lists}")
+    p.add_argument("--report", default=None, metavar="JSONL",
+                   help="append one uibc-revocation-delta-report/1 line per member")
+    p.set_defaults(func=cmd_verify_revocation_delta)
+
     p = sub.add_parser("verify-key-revocation-list",
                        help="read the signed key-revocation list "
                             "(key-revocation-list/v1); exits by the decision")
@@ -1611,6 +1857,17 @@ def main():
     p.add_argument("--report", default=None, metavar="JSONL",
                    help="append one uibc-key-revocation-list-report/1 line per member")
     p.set_defaults(func=cmd_verify_key_revocation_list)
+
+    p = sub.add_parser("verify-agent-card-receipt",
+                       help="judge a receipt binding an evaluation result to an "
+                            "A2A card (agent-card-receipt/v1); exits by the decision")
+    p.add_argument("--case", default=None, metavar="DIR",
+                   help="judge one case directory (card/statement/context/revocations)")
+    p.add_argument("--dir", default=None, metavar="DIR",
+                   help="judge a corpus and compare with its answer key")
+    p.add_argument("--report", default=None, metavar="JSONL",
+                   help="append one uibc-agent-card-receipt-report/1 line per member")
+    p.set_defaults(func=cmd_verify_agent_card_receipt)
 
     p = sub.add_parser("verify-cose", help="read SCITT/COSE Transparent Statements "
                                             "under aee-scitt-cose/v0.1 (corpus or one vector)")

@@ -308,7 +308,27 @@ def all_digests(root):
     return views
 
 def clean_env():
-    return {k: os.environ[k] for k in ENV_KEEP if k in os.environ} | {"PYTHONUTF8": "1"}
+    return {k: os.environ[k] for k in ENV_KEEP if k in os.environ} | {
+        "PYTHONUTF8": "1",
+        # Two knobs that make a rerun comparable rather than merely repeatable: the
+        # hash seed is fixed (set iteration order does not move between machines),
+        # and the user site directory is off (a package someone pip-installed for
+        # themselves cannot quietly decide the outcome).
+        "PYTHONHASHSEED": "0",
+        "PYTHONNOUSERSITE": "1",
+        "PYTHONPATH": "",
+    }
+
+
+def installed_distributions(env):
+    """What else was on this machine, in the author's own words: `name==version`."""
+    try:
+        out = subprocess.run([sys.executable, "-m", "pip", "freeze"], capture_output=True,
+                             text=True, encoding="utf-8", errors="replace", env=env, timeout=120)
+        lines = [l.strip() for l in (out.stdout or "").splitlines() if l.strip()]
+        return sorted(l for l in lines if not l.startswith("-"))
+    except Exception:                                                # noqa: BLE001
+        return []
 
 
 def copy_tree(dest):
@@ -349,7 +369,7 @@ def run(steps_only=None):
     shutil.rmtree(tmp, ignore_errors=True)
     return {"digest": digest, "files": count, "content_digest": cdigest,
             "content_files": ccount, "content_lf_digest": lfdigest,
-            "delivery": delivery,
+            "delivery": delivery, "distributions": installed_distributions(env),
             "files_manifest": files_manifest,
             "results": results}
 
@@ -417,7 +437,7 @@ def read_manifest(root):
 
 
 def write_receipt(digest, files, results, content=None, content_files=None,
-                  content_lf=None, delivery=None, files_manifest=None):
+                  content_lf=None, delivery=None, files_manifest=None, distributions=None):
     receipt = {
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "tree_sha256": digest,
@@ -435,7 +455,14 @@ def write_receipt(digest, files, results, content=None, content_files=None,
         "runner": {"python": platform.python_version(), "machine": platform.machine(),
                    "system": platform.system()},
         "environment": {"variables_kept": list(ENV_KEEP),
-                        "note": "no tokens, no cloud credentials, nothing from the author's shell"},
+                        "python_implementation": platform.python_implementation(),
+                        "python_hash_seed": "0",
+                        "user_site": "off",
+                        "pythonpath": "",
+                        "distributions": distributions or [],
+                        "note": "no tokens, no cloud credentials, nothing from the author's shell; "
+                                "the hash seed and the user site directory are pinned so that "
+                                "another machine's state cannot decide the outcome"},
         "steps": results,
         "ok": all(r["ok"] for r in results) and len(results) == len(STEPS),
     }
@@ -461,6 +488,15 @@ def write_receipt(digest, files, results, content=None, content_files=None,
     page += ["", "**为什么记的是字样而不只是退出码**：`rc=0` 只说明进程没崩。每一步还记下它必须印出的"
              "几处字样（例如 `0 failed`、`repositories pinned`、`passed`），重跑时任何一处没出现，这一步就"
              "判 FAIL——所以陌生人不必相信 \"PASS\" 这个词，他可以看这几处字样自己有没有看见。"]
+    dists = receipt["environment"].get("distributions") or []
+    page += ["", "**环境也记下来，不让你猜**：`Python {ver}` / {impl}，`PYTHONHASHSEED=0`（集合顺序不会自己变），"
+             "`PYTHONNOUSERSITE=1`（谁自己 pip 装的包不能替你做决定），`PYTHONPATH` 清空。当时这台机器上的第三方面"
+             "共 {n} 个，清单的 sha256 是 `{h}`（全表在收据 `environment.distributions` 里）。".format(
+                 ver=receipt["runner"]["python"],
+                 impl=receipt["environment"].get("python_implementation") or "Python",
+                 n=len(dists),
+                 h=hashlib.sha256("\n".join(dists).encode()).hexdigest()[:16] if dists else "—"),
+             "换一台机器时，把 Python 版本对齐、让 pytest 在位即可；若上面那批字样不一致，差异在环境，不在收据。"]
     page += ["", f"**树摘要 `{receipt['tree_sha256'][:16]}…`（{files} 个文件，排除本页与 receipt 自身）**。",
              f"**内容摘要 `{str(receipt.get('content_sha256'))[:16]}…`（只看每个文件的字节，不看文件名）**。",
              "", "为什么有两根轴：路径与内容一起算的那个摘要最严，但也会被解包器连累。"
@@ -688,6 +724,7 @@ def main():
         rc = write_receipt(out["digest"], out["files"], out["results"],
                            content=out["content_digest"], content_files=out["content_files"],
                            content_lf=out["content_lf_digest"], delivery=out["delivery"],
+                           distributions=out.get("distributions"),
                            files_manifest=out.get("files_manifest") or file_manifest(HERE))
     else:
         rc = check()

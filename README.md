@@ -6,6 +6,13 @@
 It is **not** the clinical chemistry assay of the same acronym (unsaturated iron binding capacity),
 and it is unrelated to the UIBCDF computational-biology organisation.
 
+**Verdict scope travels with the verdict.** Every report carries `result_scope`
+(`anchored` / `unanchored` / `unattested`) and `result_label` (`PASS(unanchored)`).
+`unanchored` means the seal key came out of the package under test, so a
+substitution is internally consistent and indistinguishable (benchmark case M17);
+only `--pubkey` or `--key` — a channel the package does not control — earns
+`anchored`. Quoting a bare `PASS` without its scope is a misquote.
+
 > **有人验过吗？先看 [EVIDENCE-INDEX.md](EVIDENCE-INDEX.md)** — 按 L1 自我复现／L2 异体审查／L3 第二实现／L3.5 外部语料／L4 外部节点分级；外部节点当前为 **2**（[EXTERNAL-NODE-001](docs/external-review/EXTERNAL-NODE-001.md)：异体机、无特权、按 README 逐字跑，首跑即复现了我们自己报的 S4/S5 分歧；[EXTERNAL-NODE-002](docs/external-review/EXTERNAL-NODE-002.md)：macOS、回传 `external_node_result.json`、判 CONSISTENT、探针 3/3 拒），以 [docs/EXTERNAL-NODES.md](docs/EXTERNAL-NODES.md) 为唯一真源；其余等级仍为 0。
 >
 > **不知道从哪进？先看 [STRUCTURE.md](STRUCTURE.md)** — 五层地图（规范／实现／工具／验证／存证）与三条阅读路线。

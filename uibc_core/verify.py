@@ -379,6 +379,8 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
             "spec_version": SPEC_VERSION,
             "spec_id": _SPEC_ID,
             "result": "FAIL",
+            "result_scope": "unattested",
+            "result_label": "FAIL",
             "trust_level": "unattested",
             "key_custody": None,
             "subject": None,
@@ -419,6 +421,8 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
             "spec_version": SPEC_VERSION,
             "spec_id": _SPEC_ID,
             "result": "FAIL",
+            "result_scope": "unattested",
+            "result_label": "FAIL",
             "trust_level": "unattested",
             "key_custody": None,
             "subject": None,
@@ -1326,6 +1330,13 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
         "spec_version": SPEC_VERSION,
         "spec_id": _SPEC_ID,
         "result": result,
+        # Scope is part of the verdict, not a footnote. A reader who sees only
+        # "PASS" cannot tell a sealed package verified with an out-of-band key
+        # from one whose key came out of the package itself; the two differ by
+        # exactly the substitution case (benchmark M17). Downstream callers
+        # already gate on `result`, so the qualifier has to travel with it.
+        "result_scope": trust_level,
+        "result_label": result if result != "PASS" else f"PASS({trust_level})",
         # Anchor rule (draft-maintainer-1f916-agent-record-01 Section 3.6):
         # "A verification run is ANCHORED only when at least one key reached
         # the verifier through a channel the artifact does not control." A
@@ -1417,6 +1428,8 @@ def verify(package_dir: str, key: bytes = None, pubkey: bytes = None,
             "spec_version": SPEC_VERSION,
         "spec_id": _SPEC_ID,
             "result": "FAIL",
+            "result_scope": "unattested",
+            "result_label": "FAIL",
             "trust_level": "unattested",
             "key_custody": None,
             "subject": None,

@@ -1,14 +1,14 @@
 {
- "generated_at": "2026-11-28T11:10:20Z",
- "tree_sha256": "e56b9e0b373acb512cbccb85784bfccc287e90f8440d8256c8faf21809ebcd0e",
+ "generated_at": "2026-11-28T11:45:10Z",
+ "tree_sha256": "bb47bed265eafb238a3b8f995c5068f632dcac6b825ed59f4981b4262d4b9a79",
  "files_hashed": 2552,
- "content_sha256": "d94a4f32b87c105009b2fbdf44ecef7314245d2f850411ce56eb83fb1a3dbea9",
+ "content_sha256": "30b468e92d6aae5f62c3c794841eef057cb741c6e8758caa94ee3ec50ec5bf9c",
  "content_files": 2552,
- "content_lf_sha256": "0e2338d655e6ad0135ec6b421146264e5b58e27095fa1573f862e0070d11d6fb",
+ "content_lf_sha256": "53549673df6f380c2c81873056fa23eb223112809d7fa3e9827cb316e6862b1e",
  "delivery": "commit",
  "files_manifest": {
   "path": "docs/OUTSIDER-FILES.txt",
-  "sha256": "0f551b2a529219e11f818e5d057748de628de335f02371510593dd7fbf9f9ee9",
+  "sha256": "96e3ff1ed8c8a580052acc939483b71790cf5286662233d5b49abe85bec3b241",
   "entries": 2552
  },
  "digest_excludes": [
@@ -18,9 +18,9 @@
   "docs/outsider-rerun-receipt.json"
  ],
  "runner": {
-  "python": "3.12.11",
-  "machine": "x86_64",
-  "system": "Linux"
+  "python": "3.13.18",
+  "machine": "AMD64",
+  "system": "Windows"
  },
  "environment": {
   "variables_kept": [
@@ -45,8 +45,12 @@
    "cmd": "tools/mutation_gate.py",
    "rc": 0,
    "expect": "GATE OK",
+   "asserts": [
+    "0 failed"
+   ],
+   "missing": [],
    "ok": true,
-   "seconds": 0.2,
+   "seconds": 0.9,
    "tail": "GATE OK"
   },
   {
@@ -54,8 +58,13 @@
    "cmd": "tools/competitor_gate_parity.py",
    "rc": 0,
    "expect": "PARITY OK",
+   "asserts": [
+    "repositories pinned",
+    "re-scored"
+   ],
+   "missing": [],
    "ok": true,
-   "seconds": 0.3,
+   "seconds": 1.0,
    "tail": "PARITY OK: 41 repositories pinned and re-scored, best competitor 3/10, this repository 10/10"
   },
   {
@@ -63,8 +72,12 @@
    "cmd": "tools/demo_bid_binary.py",
    "rc": 0,
    "expect": "ALL OK",
+   "asserts": [
+    "ALL OK"
+   ],
+   "missing": [],
    "ok": true,
-   "seconds": 0.1,
+   "seconds": 0.4,
    "tail": "ALL OK"
   },
   {
@@ -72,9 +85,13 @@
    "cmd": "-m pytest tests/test_mutation_gate.py tests/test_competitor_parity.py tests/test_parity_board.py tests/test_refs_check.py tests/test_parity_sensitivity.py tests/test_parity_audit.py tests/test_parity_realrun.py -q",
    "rc": 0,
    "expect": "passed",
+   "asserts": [
+    "passed"
+   ],
+   "missing": [],
    "ok": true,
-   "seconds": 3.9,
-   "tail": "41 passed in 1.16s"
+   "seconds": 8.1,
+   "tail": "41 passed in 6.43s"
   }
  ],
  "ok": true

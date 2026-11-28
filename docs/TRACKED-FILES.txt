@@ -2048,6 +2048,7 @@ tests/test_lab_bundle.py
 tests/test_landscape_corrections.py
 tests/test_landscape_recheck.py
 tests/test_langchain_live.py
+tests/test_mcp_authz.py
 tests/test_mcp_packaged.py
 tests/test_mcp_server.py
 tests/test_measured_facts_are_pinned.py
@@ -2519,6 +2520,7 @@ uibc_core/identity_adapter.py
 uibc_core/interop_result.py
 uibc_core/lifecycle.py
 uibc_core/locking.py
+uibc_core/mcp_authz.py
 uibc_core/mcp_server.py
 uibc_core/memory.py
 uibc_core/merkle.py

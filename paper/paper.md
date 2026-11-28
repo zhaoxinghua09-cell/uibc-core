@@ -69,8 +69,10 @@ timestamp parsing; when they are absent the corresponding checks report
 INCONCLUSIVE rather than PASS, so the absence is visible instead of papered
 over. The code is organised in three layers -- registry (identity records),
 evidence (hash/seal construction) and gates (state machine + validators) --
-implemented across 49 modules. The CLI supports package creation, validation
-and report emission; validation semantics are intentionally conservative and
+implemented across 50 modules. The CLI supports package creation, validation
+and report emission, and reads two formats authored elsewhere (tagged
+SCITT/COSE statements and MCP authorization observations); validation
+semantics are intentionally conservative and
 scoped (see Summary). Test coverage comprises 520 unit/integration tests, skipping
 where the optional libraries or an external timestamp service are unavailable,
 executed in CI across Python 3.10-3.13.

@@ -902,6 +902,114 @@ def _expected_conforms(expected, verdict, codes):
     return None
 
 
+MCP_AUTHZ_REPORT_FORMAT = "uibc-mcp-authz-report/1"
+
+
+def _mcp_authz_line(member, verdict, codes, exit_code, error=None):
+    """One report line for an MCP authorization observation.
+
+    The verdict travels with the codes that produced it, because a verdict
+    without findings is an opinion: a consumer comparing two verifiers has to be
+    able to line up finding by finding.
+    """
+    line = {
+        "format": MCP_AUTHZ_REPORT_FORMAT,
+        "vector": member,
+        "result": "ERROR" if error else ("PASS" if verdict == "valid" else "FAIL"),
+        "verdict": None if error else verdict,
+        "codes": [] if error else list(codes),
+        "verifier_id": VERIFIER_ID,
+        "verifier_version": __version__,
+        "when_utc": _now_utc(),
+        "exit": exit_code,
+    }
+    if error is not None:
+        line["error"] = str(error)[:300]
+    return line
+
+
+def cmd_verify_mcp_authz(args):
+    """Judge MCP authorization observations under mcp-authz-observation/v1.
+
+      * `--file F` judges one observation and prints, as its last stdout line,
+        the object the corpus harness reads: {"verdict", "codes"}.
+      * `--dir D` judges a corpus and compares every verdict and finding with
+        the answer key in its MANIFEST.json, printing how many conform.
+
+    A member passes the corpus convention when the verdict matches and at least
+    one of the member's own codes is named. Extra codes are reported, not
+    suppressed: if the condition holds, saying nothing about it would be the
+    same miscount the not-checked vocabulary exists to prevent.
+    """
+    from . import mcp_authz as ma
+
+    report_path = getattr(args, "report", None)
+
+    if getattr(args, "file", None):
+        path = os.path.abspath(args.file)
+        try:
+            verdict, codes = ma.evaluate_file(path)
+        except (OSError, ValueError) as exc:
+            if report_path:
+                _append_line(report_path,
+                             _mcp_authz_line(os.path.basename(path), None, [], 3,
+                                             error=exc))
+            print(f"error: cannot judge {path}: {exc}", file=sys.stderr)
+            sys.exit(3)
+        if report_path:
+            _append_line(report_path,
+                         _mcp_authz_line(os.path.basename(path), verdict, codes,
+                                         0 if verdict == "valid" else 1))
+        for code in codes:
+            print(f"finding: {code}")
+        print(json.dumps({"verdict": verdict, "codes": list(codes)}))
+        sys.exit(0 if verdict == "valid" else 1)
+
+    corpus = os.path.abspath(getattr(args, "dir", None) or ".")
+    if not os.path.isdir(corpus):
+        sys.exit(f"error: corpus directory not found: {corpus}")
+    members = list(ma.iter_members(corpus))
+    if not members:
+        print("error: the corpus lists no members", file=sys.stderr)
+        sys.exit(3)
+
+    answer_key = {}
+    manifest_path = os.path.join(corpus, "MANIFEST.json")
+    if os.path.isfile(manifest_path):
+        with open(manifest_path, encoding="utf-8") as fh:
+            for member in json.load(fh).get("vectors") or []:
+                answer_key[member["id"]] = member
+
+    conforming = 0
+    judged = 0
+    for member_id, path in members:
+        try:
+            verdict, codes = ma.evaluate_file(path)
+        except (OSError, ValueError) as exc:
+            if report_path:
+                _append_line(report_path,
+                             _mcp_authz_line(member_id, None, [], 3, error=exc))
+            print(f"{member_id}: ERROR {str(exc)[:120]}", file=sys.stderr)
+            continue
+        judged += 1
+        expected = (answer_key.get(member_id) or {}).get("expected") or {}
+        wants = expected.get("verdict")
+        want_codes = set(expected.get("codes") or [])
+        ok = (verdict == wants) and (not want_codes or bool(want_codes & set(codes)))
+        conforming += 1 if ok else 0
+        if report_path:
+            _append_line(report_path,
+                         _mcp_authz_line(member_id, verdict, codes, 0 if ok else 1))
+        if ok:
+            print(f"{member_id}: {verdict} (matches the answer key)")
+        else:
+            missed = sorted(want_codes - set(codes))
+            print(f"{member_id}: {verdict}, expected {wants}; unmatched codes {missed}",
+                  file=sys.stderr)
+    print(f"{conforming}/{judged} members conform to the corpus answer key")
+    sys.exit(0 if judged and conforming == judged else 1)
+
+
 def cmd_verify_cose(args):
     """Read SCITT/COSE Transparent Statements under aee-scitt-cose/v0.1.
 
@@ -1297,6 +1405,17 @@ def main():
     p.add_argument("--strict", action="store_true")
     p.add_argument("--report", default=None, metavar="JSONL")
     p.set_defaults(func=cmd_verify_dir)
+
+    p = sub.add_parser("verify-mcp-authz",
+                       help="judge MCP authorization observations "
+                            "(mcp-authz-observation/v1)")
+    p.add_argument("--file", default=None, metavar="JSON",
+                   help="judge one observation and print verdict/codes")
+    p.add_argument("--dir", default=None, metavar="DIR",
+                   help="judge a corpus and compare with its answer key")
+    p.add_argument("--report", default=None, metavar="JSONL",
+                   help="append one uibc-mcp-authz-report/1 line per member")
+    p.set_defaults(func=cmd_verify_mcp_authz)
 
     p = sub.add_parser("verify-cose", help="read SCITT/COSE Transparent Statements "
                                             "under aee-scitt-cose/v0.1 (corpus or one vector)")

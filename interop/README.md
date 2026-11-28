@@ -262,6 +262,83 @@ The corpus itself is not vendored: `tests/test_revocation_list_corpus.py` runs
 only when `UIBC_REVOCATION_CORPUS` names a checkout, and the checked-in tests
 build their own lists from fixtures signed once with fixed seeds.
 
+## Read a receipt over an A2A agent card
+
+`uibc_core/agent_card_receipt.py` reads the suite's four files — the card as
+served, the unsigned receipt statement, the check context (issuer key and clock)
+and the issuer's signed revocation list — and answers one of two things:
+
+```bash
+# one case: last stdout line is {"decision": ..., "reason": ..., "exit": ...}
+python uibc_core.pyz verify-agent-card-receipt --case cases/accept-card-without-signatures
+
+# the whole corpus, against the answer key in its MANIFEST.json
+python uibc_core.pyz verify-agent-card-receipt \
+       --dir corpora/vectors-agent-card-receipt --report runs.jsonl
+```
+
+Exit codes: `0` accept, `1` reject, `3` a case that could not be read. The
+corpus mode prints `n/m members conform to the corpus answer key`.
+
+The hard part is the subject digest: SHA-256 over the RFC 8785 form of the card
+**without its top-level `signatures`** (A2A 8.4.1 rules 2 and 3). Three details
+decide whether two verifiers agree, and each of them is a case in the corpus:
+
+- the exclusion is by the **parsed** member name, so `"signatur\u0065s"` is
+  excluded like `"signatures"` and a raw-text comparison is wrong;
+- it is **not recursive**, so a `signatures` inside an extension stays in the
+  digested bytes;
+- it excludes that one member only, so `additionalSignatures` is digested as
+  served — and the default members a catalog leaves on are kept, never pruned.
+
+The digest also needs numbers the integers-only canonicaliser in this package
+refuses: `0.93` and `1e-06` are ordinary in a card, and RFC 8785 defines them by
+ECMAScript's `Number::toString`. This module carries that form, and the test
+suite checks it against RFC 8785 Appendix B's own table, from the raw bits.
+
+The fifteen rules, in the order the first failure is reported (one accept,
+fifteen refusals):
+
+| rule | reason |
+| --- | --- |
+| all fifteen pass | `receipt_current` |
+| statement parses (strict JSON), members exact | `statement_malformed` |
+| `_type` | `statement_type_wrong` |
+| `predicateType` | `predicate_type_wrong` |
+| one subject, `sha256` lowercase hex | `subject_malformed` |
+| predicate members, run, result, registry, instants, list URL, thumbprints | `predicate_malformed` |
+| `issuedAt < validUntil` | `validity_window_inverted` |
+| card parses, is an object, integers inside I-JSON | `card_malformed` |
+| card digest equals the named subject digest | `card_digest_mismatch` |
+| clock at or after `issuedAt` | `receipt_not_yet_valid` |
+| clock before `validUntil` (half-open) | `receipt_expired` |
+| a list was supplied | `revocation_list_absent` |
+| DSSE envelope, payload members, canonical base64, sorted `revoked` | `revocation_list_malformed` |
+| some signature verifies under the receipt signer's key | `revocation_list_signature` |
+| clock inside `[issuedAt, nextUpdate)` | `revocation_list_stale` |
+| this statement's bytes are not named by the list | `receipt_revoked` |
+
+Three of those are the point of the whole suite, and this reader refuses in all
+three: a list that is **absent**, **unreadable** or **signed by a foreign key**
+leaves the verifier unable to read the revocation state, and "I could not read
+it" is not "it is good". The stale case is the fourth in that family: a list
+whose window excludes the check time describes some other moment.
+
+The statement's digest, which the revoked set names, is over its **bytes as
+delivered** — the same rule the third family uses — not over a canonical form.
+
+Measured, 2026-11-28, against `corpora/vectors-agent-card-receipt` (49 members:
+13 accept / 36 reject, `corpusDigest 4eab50c3...8e18`, head `08f16c3`):
+**49 of 49 members match the answer key on decision and reason**, and the corpus
+digest recomputed from the files matches the one it declares. Reading is ours;
+their harness was not re-run against this build.
+
+Two things this does not establish. The card digest follows the rule the corpus'
+statements were signed under; it is not an A2A conformance result. And nothing
+here says the graded result in a receipt is true — the reader checks that the
+receipt is well formed, current and unrevoked, not that the agent deserves its
+`pass`.
+
 ## Answer "is this key revoked at this time"
 
 `uibc_core/key_revocation_list.py` reads one signed list of revoked keys, the
@@ -300,9 +377,9 @@ for every member. The corpus digest recomputed from the files themselves
 matches the one it declares, so this is the same corpus version. Reading is
 ours; their harness was not re-run.
 
-## Every report shape has a schema, and one linter judges all five
+## Every report shape has a schema, and one linter judges all six
 
-Five JSON Lines shapes are produced by this repository, and since 2026-11-28 each
+Six JSON Lines shapes are produced by this repository, and since 2026-11-28 each
 has its own draft 2020-12 schema in this directory:
 
 | format | schema | what one line says |
@@ -312,12 +389,14 @@ has its own draft 2020-12 schema in this directory:
 | `uibc-mcp-authz-report/1` | `mcp-authz-report.schema.json` | one authorization observation, verdict plus findings |
 | `uibc-revocation-list-report/1` | `revocation-list-report.schema.json` | one signed chain, and the list it stopped on |
 | `uibc-key-revocation-list-report/1` | `key-revocation-list-report.schema.json` | one question — is this key revoked now — decision, reason, rule |
+| `uibc-agent-card-receipt-report/1` | `agent-card-receipt-report.schema.json` | one receipt over a card: decision, one of sixteen reasons, the digest computed |
 
 `tools/report_lint.py` takes any producer's JSONL file and judges each line by
 the rules its own `format` names, with no third-party dependency. It also runs
 the cross-field rules a schema subset cannot express: a refusal that exits 0, a
 `no_statement` filed as `not_revoked`, a reached decision with no rule behind
-it, or an `ERROR` line carrying a verdict are all refused by name.
+it, an `ERROR` line carrying a verdict, or — in the receipt shape — an `accept`
+wearing one of the fifteen refusing reasons are all refused by name.
 
 ```
 python tools/report_lint.py runs.jsonl

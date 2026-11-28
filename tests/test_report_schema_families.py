@@ -1,4 +1,4 @@
-"""The three report shapes added for the peer's corpus readers must hold up.
+"""The report shapes added for the peer's corpus readers must hold up.
 
 Two things are pinned here, and they are different jobs:
 
@@ -8,8 +8,9 @@ Two things are pinned here, and they are different jobs:
    negative case that the linter must bite on.
 
 The positive lines are built with the same functions the CLI uses
-(`_mcp_authz_line`, `_revocation_list_line`, `_key_revocation_list_line`), not
-copied by hand: a copy drifts silently the first time a field is renamed.
+(`_mcp_authz_line`, `_revocation_list_line`, `_key_revocation_list_line`,
+`_agent_card_receipt_line`), not copied by hand: a copy drifts silently the
+first time a field is renamed.
 """
 
 import json
@@ -25,7 +26,8 @@ LINT = os.path.join(ROOT, "tools", "report_lint.py")
 SCHEMAS = {
     name: os.path.join(ROOT, "interop", name)
     for name in ("mcp-authz-report.schema.json", "revocation-list-report.schema.json",
-                 "key-revocation-list-report.schema.json")
+                 "key-revocation-list-report.schema.json",
+                 "agent-card-receipt-report.schema.json")
 }
 
 pytestmark = pytest.mark.skipif(
@@ -48,7 +50,8 @@ def _lint(lines):
 
 
 def _ours():
-    """One line of each of the nine shapes the three emitters can produce."""
+    """One line of each of the twelve shapes the four emitters can produce."""
+    digest = "a" * 64
     return [
         cli._mcp_authz_line("case-1", "valid", [], 0),
         cli._mcp_authz_line("case-2", "invalid", ["prm-absent", "ath-mismatch"], 1),
@@ -61,13 +64,17 @@ def _ours():
         cli._key_revocation_list_line("case-2", "rejected", "signer_not_trusted",
                                       {"rule": "shape", "refusal": "list_unsigned"}, 3),
         cli._key_revocation_list_line("case-3", None, None, None, 3, error="not JSON"),
+        cli._agent_card_receipt_line("case-1", "accept", "receipt_current", digest, 0),
+        cli._agent_card_receipt_line("case-2", "reject", "revocation_list_absent",
+                                     None, 1),
+        cli._agent_card_receipt_line("case-3", None, None, None, 3, error="not JSON"),
     ]
 
 
 def test_our_own_lines_pass_the_linter():
     proc = _lint(_ours())
     assert proc.returncode == 0, proc.stdout + proc.stderr
-    assert "REPORT LINT OK: 9 line(s)" in proc.stdout
+    assert "REPORT LINT OK: 12 line(s)" in proc.stdout
 
 
 def test_the_linter_names_every_format_it_can_judge():
@@ -142,6 +149,45 @@ def test_an_unknown_key_is_refused_in_the_new_shapes():
     proc = _lint([line])
     assert proc.returncode == 1
     assert "unknown key 'score'" in proc.stdout
+
+
+def test_a_pass_line_that_carries_a_refusing_reason_is_refused():
+    """`accept` has one reason; a PASS line wearing another is a smuggled refusal."""
+    line = cli._agent_card_receipt_line("c", "accept", "receipt_current", "a" * 64, 0)
+    line["reason"] = "revocation_list_absent"
+    proc = _lint([line])
+    assert proc.returncode == 1
+    assert "accept/receipt_current" in proc.stdout
+
+
+def test_a_rejection_named_receipt_current_is_refused():
+    line = cli._agent_card_receipt_line("c", "reject", "receipt_current", "a" * 64, 1)
+    proc = _lint([line])
+    assert proc.returncode == 1
+    assert "must name a refusing reason" in proc.stdout
+
+
+def test_a_receipt_refusal_that_exits_zero_is_refused():
+    line = cli._agent_card_receipt_line("c", "reject", "receipt_expired", "a" * 64, 1)
+    line["exit"] = 0
+    proc = _lint([line])
+    assert proc.returncode == 1
+    assert "result 'FAIL' exits 1" in proc.stdout
+
+
+def test_an_error_line_that_carries_a_digest_is_refused():
+    line = cli._agent_card_receipt_line("c", None, None, None, 3, error="not JSON")
+    line["subject_digest"] = "b" * 64
+    proc = _lint([line])
+    assert proc.returncode == 1
+    assert "null decision, reason and subject_digest" in proc.stdout
+
+
+def test_a_digest_that_is_not_lowercase_hex_is_refused():
+    line = cli._agent_card_receipt_line("c", "accept", "receipt_current", "A" * 64, 0)
+    proc = _lint([line])
+    assert proc.returncode == 1
+    assert "subject_digest must be 64 lowercase hex" in proc.stdout
 
 
 def test_each_new_schema_is_a_file_a_stranger_can_read_and_is_valid():

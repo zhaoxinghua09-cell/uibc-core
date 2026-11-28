@@ -69,13 +69,15 @@ timestamp parsing; when they are absent the corresponding checks report
 INCONCLUSIVE rather than PASS, so the absence is visible instead of papered
 over. The code is organised in three layers -- registry (identity records),
 evidence (hash/seal construction) and gates (state machine + validators) --
-implemented across 52 modules. The CLI supports package creation, validation
-and report emission, and reads two formats authored elsewhere (tagged
-SCITT/COSE statements and MCP authorization observations); validation
+implemented across 53 modules. The CLI supports package creation, validation
+and report emission, and reads five formats authored elsewhere (tagged SCITT/COSE
+statements, MCP authorization observations, signed revocation lists, key-revocation
+lists and receipts over A2A agent cards); validation
 semantics are intentionally conservative and
-scoped (see Summary). Test coverage comprises 520 unit/integration tests, skipping
+scoped (see Summary). Test coverage is counted once, in
+`docs/EVIDENCE-INDEX.md`, and not retyped here; the suite skips
 where the optional libraries or an external timestamp service are unavailable,
-executed in CI across Python 3.10-3.13.
+and runs in CI across Python 3.10-3.13.
 
 # Research impact statement
 

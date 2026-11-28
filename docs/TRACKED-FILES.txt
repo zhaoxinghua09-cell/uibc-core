@@ -1851,6 +1851,7 @@ independent_verifier/iverify.py
 index.html
 interop/CONSUMERS.json
 interop/README.md
+interop/agent-card-receipt-report.schema.json
 interop/key-revocation-list-report.schema.json
 interop/mcp-authz-report.schema.json
 interop/revocation-list-report.schema.json
@@ -1927,6 +1928,8 @@ tests/test_aer1_interop_demo.py
 tests/test_aer1_merkle_profile.py
 tests/test_aer1_spec_audit.py
 tests/test_aer1_verify_external.py
+tests/test_agent_card_receipt.py
+tests/test_agent_card_receipt_corpus.py
 tests/test_agent_id_policy.py
 tests/test_agent_identity_code.py
 tests/test_aitb_evaluate.py
@@ -2510,6 +2513,7 @@ uibc_core.egg-info/top_level.txt
 uibc_core/__init__.py
 uibc_core/acps_identity_code.py
 uibc_core/aee.py
+uibc_core/agent_card_receipt.py
 uibc_core/agent_identity_code.py
 uibc_core/anchor.py
 uibc_core/authority_age.py

@@ -55,7 +55,11 @@ MANIFEST = "docs/OUTSIDER-FILES.txt"
 # All four are written by this tool, so all four stay out of the digests: each of
 # them would otherwise hash a value that contains its own hash.
 GENERATED = {"docs/outsider-rerun-receipt.json", "docs/OUTSIDER-RERUN.md",
-             "docs/OUTSIDER-BOARD.html", MANIFEST}
+             "docs/OUTSIDER-BOARD.html", MANIFEST,
+             # The timestamp is taken *of* the receipt, so it cannot be part of it:
+             # otherwise every new proof would invalidate the file it proves.
+             "docs/outsider-rerun-receipt.json.ots"}
+OTS = os.path.join(HERE, "docs", "outsider-rerun-receipt.json.ots")
 
 IGNORE = (".git", "__pycache__", ".pytest_cache", ".mypy_cache", ".ruff_cache",
           "build", "*.egg-info",
@@ -527,6 +531,11 @@ def write_receipt(digest, files, results, content=None, content_files=None,
     page += ["自己按同一规则（去掉秒数、行尾空格、末尾空行）处理后与上面对比：对不上就说明输出真的变了。"
              "这同时管住了「脚本只要印出字样就算过」这条路——字样是被测代码印的，"
              "而印出的整段字节记在收据里，改动测试逻辑就会改掉这段字节。"]
+    page += ["", "**收据还带一枚时间戳**：`docs/outsider-rerun-receipt.json.ots`（OpenTimestamps，同一份字节同时提交给三个日历）。"
+             "它证明的是「这些字节在提交那一刻就已经是这些字节」——不是我们事后补的。核验："
+             "`python tools/anchor_ots.py --verify docs/outsider-rerun-receipt.json`。"
+             "区块确认之前状态写 `pending_calendar`，确认后变成 `confirmed`；两者都说明提交已经发生，"
+             "区别只是 Bitcoin 区块有没有把它记下来。"]
     page += ["", f"**树摘要 `{receipt['tree_sha256'][:16]}…`（{files} 个文件，排除本页与 receipt 自身）**。",
              f"**内容摘要 `{str(receipt.get('content_sha256'))[:16]}…`（只看每个文件的字节，不看文件名）**。",
              "", "为什么有两根轴：路径与内容一起算的那个摘要最严，但也会被解包器连累。"
@@ -683,6 +692,8 @@ def check():
         return 1
     print(f"OUTSIDER OK: receipt matches this {view_name} ({count} files, {digest[:12]}, "
           f"content {cdigest[:12]}), {len(steps)} steps passed")
+    if not check_timestamp():
+        return 1
     for name, (d, c, l, n) in views:
         if name != view_name and d != digest:
             print(f"NOTE: the {name} view differs from the {view_name} one. The receipt answers "
@@ -731,6 +742,40 @@ def check_inventory():
     return 0
 
 
+def stamp_receipt():
+    """Submit the receipt to the calendars; the proof lands next to it as `.ots`."""
+    if check() != 0:
+        print("refusing to stamp: the receipt does not match this tree")
+        return 1
+    proc = subprocess.run([sys.executable, os.path.join(HERE, "tools", "anchor_ots.py"),
+                           "--stamp", RECEIPT, "--json"], cwd=HERE, capture_output=True,
+                          text=True, encoding="utf-8", errors="replace")
+    tail = (proc.stdout or proc.stderr or "").strip().splitlines()
+    print("\n".join(tail[-6:]))
+    if not os.path.exists(OTS):
+        print(f"FAIL no proof was written to {OTS}")
+        return 1
+    print(f"stamped: {os.path.relpath(OTS, HERE)} ({os.path.getsize(OTS)} bytes)")
+    return 0
+
+
+def check_timestamp():
+    """Is the published proof about *this* receipt? Pending is fine, mismatched is not."""
+    if not os.path.exists(OTS):
+        print("FAIL no timestamp: docs/outsider-rerun-receipt.json.ots is missing; run --stamp")
+        return False
+    proc = subprocess.run([sys.executable, os.path.join(HERE, "tools", "anchor_ots.py"),
+                           "--verify", RECEIPT, "--proof", OTS, "--json"], cwd=HERE,
+                          capture_output=True, text=True, encoding="utf-8", errors="replace")
+    text = (proc.stdout or "") + (proc.stderr or "")
+    if "mismatch" in text.lower() or "does not match" in text.lower():
+        print("FAIL the timestamp proves a different file: stamp the receipt again")
+        return False
+    status = [ln for ln in text.splitlines() if ln.startswith("status=")]
+    print(f"timestamp: {status[-1][7:] if status else 'proof present'}")
+    return True
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--run", action="store_true", help="copy the tree and rerun every entry point")
@@ -741,6 +786,8 @@ def main():
                     help="with --inventory-write on a tree with no .git: this is a fresh archive")
     ap.add_argument("--inventory-check", action="store_true",
                     help="verify docs/TRACKED-FILES.txt against the tree and against git ls-files")
+    ap.add_argument("--stamp", action="store_true",
+                    help="submit the receipt to the OpenTimestamps calendars (writes .ots)")
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
     if args.inventory_write:
@@ -749,6 +796,8 @@ def main():
         rc = 0
     elif args.inventory_check:
         rc = check_inventory()
+    elif args.stamp:
+        rc = stamp_receipt()
     elif args.run:
         out = run()
         rc = write_receipt(out["digest"], out["files"], out["results"],

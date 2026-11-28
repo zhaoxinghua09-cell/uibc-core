@@ -202,7 +202,13 @@ profile even if it knows nothing else about the package.
    failure of the receipt, not a warning: it means this receipt was issued for
    different bytes.
 3. **Check the receipt against the registered value.** Verify the COSE signature,
-   the inclusion proof, and the `vds` value per [RFC9942]. The verifier MUST
+   the inclusion proof, and the `vds` value per [RFC9942]. The service's signing
+   key is obtained out of band. A signature checked only against the key the
+   receipt itself carries establishes self-consistency, not that the service
+   issued it; a verifier in that position MUST report the issuer question as
+   unchecked, and a receipt whose key is outside the verifier's trusted set MUST
+   be refused as an untrusted issuer rather than reported as a pass with a
+   warning. The verifier MUST
    reject a receipt whose `vds` it does not support; "I do not implement this tree"
    is a rejection and MUST be reported as an unsupported scheme, not as evidence
    that the package is false. The two are different claims and a report that
@@ -347,24 +353,32 @@ cd uibc-core && git checkout feat/standards-exceed-20261125
 python tools/verify_profile.py examples/demo.uibc --selftest
 ```
 
-`--selftest` prints four runs: a receipt for this package, the same package with a
-receipt for other bytes, a receipt from a tree this code does not implement, and a
-receipt with no proof. The four verdicts differ (`PARTIAL_INCLUSION_UNCHECKED`,
-`FAIL_VALUE_MISMATCH`, `UNSUPPORTED_SCHEME`, `FAIL_MALFORMED`), which is the point:
-a verifier that prints one word for all four failures cannot be acted on.
+`--selftest` prints the runs the code distinguishes: a receipt for this package, the
+same package with a receipt for other bytes, a receipt from a tree this code does
+not implement, a receipt with no proof, and a receipt signed by a key outside the
+trusted set. The verdicts differ (`PARTIAL_INCLUSION_UNCHECKED`,
+`FAIL_VALUE_MISMATCH`, `UNSUPPORTED_SCHEME`, `FAIL_MALFORMED`,
+`FAIL_UNTRUSTED_ISSUER`), which is the point: a verifier that prints one word for
+all of them cannot be acted on. `conformance/profile/cases.json` holds the same
+cases as bytes, and `python tools/run_profile_vectors.py` replays them without
+re-deriving anything.
 
-Three limits of that code, stated rather than implied by it passing:
+Four limits of that code, stated rather than implied by it passing:
 
-- **It never returns `OK`.** There is no hash-tree implementation here, so the
-  inclusion proof (`vdp`) is not evaluated and the best outcome is
-  `PARTIAL_INCLUSION_UNCHECKED`. That is a limit of the code, not of the profile —
-  and it is also the honest boundary: `vdp` is shaped by the verifiable-data-structure
-  profile a service applies (Section 10), so checking it without choosing one would
-  mean inventing an encoding. A verifier that reports `OK` while guessing at `vdp`
+- **It never returns `OK`.** The inclusion proof (`vdp`) is not evaluated and the
+  best outcome is `PARTIAL_INCLUSION_UNCHECKED`. The repository does have a Merkle
+  implementation (`uibc_core/merkle.py`) that checks RFC 6962 proofs; what it does
+  not have is an encoding to read a `vdp` out of, because [RFC9942] leaves the
+  shape to the verifiable-data-structure profile a service applies (Section 10).
+  Checking it without fixing one would mean inventing a format of our own. A verifier that reports `OK` while guessing at `vdp`
   is worse than one that reports `PARTIAL`.
 - **`vds` values are supplied by the caller.** The registry entries that would pin
   them are still `TBD`, so supporting a tree is a decision a verifier makes and
   states, not something this document can hand it.
+- **Issuer trust is the caller's input.** The code can refuse a key outside a
+  trusted set, but it cannot invent that set: without one, the issuer question is
+  reported as `NOT_CHECKED`, and a receipt any stranger could mint still reads
+  `PARTIAL_INCLUSION_UNCHECKED` rather than `OK`.
 - **No live service was involved.** Step 3 is checked against synthetic receipts and
   against AER-1's published receipt corpus as a consumer; no case registers
   anything in a real log. That gap is written here instead of being left for a

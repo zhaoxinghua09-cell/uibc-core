@@ -1,0 +1,168 @@
+{
+ "profile": "uibc-scitt/1",
+ "package_base_root": "f510e7500ecb1b79ecded40143f96912da8710c72142b833dac0a07dc0b572c4",
+ "as_of": "2026-11-28",
+ "note": "verdicts are recorded, not chosen: rebuild regenerates them from uibc_core/profile.py, and the tests fail if a recorded verdict and a fresh replay disagree",
+ "cases": [
+  {
+   "id": "good",
+   "change": "a well-formed receipt for this package",
+   "receipt": "cases/good.cose",
+   "package": "examples/demo.uibc",
+   "trusted_issuers": null,
+   "trusted_size": null,
+   "why": "the best this code can say without a vdp encoding: partial, never OK",
+   "expected": {
+    "verdict": "PARTIAL_INCLUSION_UNCHECKED",
+    "issuer": "NOT_CHECKED"
+   }
+  },
+  {
+   "id": "good-trusted",
+   "change": "the same receipt, with the issuer key supplied out of band",
+   "receipt": "cases/good-trusted.cose",
+   "package": "examples/demo.uibc",
+   "trusted_issuers": [
+    "d04ab232742bb4ab3a1368bd4615e4e6d0224ab71a016baf8520a332c9778737"
+   ],
+   "trusted_size": null,
+   "why": "issuer TRUSTED; the verdict does not move, the issuer field does",
+   "expected": {
+    "verdict": "PARTIAL_INCLUSION_UNCHECKED",
+    "issuer": "TRUSTED"
+   }
+  },
+  {
+   "id": "wrong-value",
+   "change": "a receipt issued for different bytes",
+   "receipt": "cases/wrong-value.cose",
+   "package": "examples/demo.uibc",
+   "trusted_issuers": null,
+   "trusted_size": null,
+   "why": "the package does not reproduce the value the receipt covers",
+   "expected": {
+    "verdict": "FAIL_VALUE_MISMATCH",
+    "issuer": "NOT_CHECKED"
+   }
+  },
+  {
+   "id": "other-key",
+   "change": "the same value, signed by a key outside the trusted set",
+   "receipt": "cases/other-key.cose",
+   "package": "examples/demo.uibc",
+   "trusted_issuers": [
+    "d04ab232742bb4ab3a1368bd4615e4e6d0224ab71a016baf8520a332c9778737"
+   ],
+   "trusted_size": null,
+   "why": "self-consistent is not authentic: refused as untrusted issuer",
+   "expected": {
+    "verdict": "FAIL_UNTRUSTED_ISSUER",
+    "issuer": "UNTRUSTED"
+   }
+  },
+  {
+   "id": "unknown-vds",
+   "change": "a receipt from a tree this profile does not implement",
+   "receipt": "cases/unknown-vds.cose",
+   "package": "examples/demo.uibc",
+   "trusted_issuers": null,
+   "trusted_size": null,
+   "why": "refusal, not a finding that the package is false",
+   "expected": {
+    "verdict": "UNSUPPORTED_SCHEME",
+    "issuer": "NOT_CHECKED"
+   }
+  },
+  {
+   "id": "no-vdp",
+   "change": "a receipt with no inclusion proof in the header",
+   "receipt": "cases/no-vdp.cose",
+   "package": "examples/demo.uibc",
+   "trusted_issuers": null,
+   "trusted_size": null,
+   "why": "",
+   "expected": {
+    "verdict": "FAIL_MALFORMED",
+    "issuer": "NOT_CHECKED"
+   }
+  },
+  {
+   "id": "corrupt",
+   "change": "bytes that are not a COSE_Sign1 at all",
+   "receipt": "cases/corrupt.cose",
+   "package": "examples/demo.uibc",
+   "trusted_issuers": null,
+   "trusted_size": null,
+   "why": "",
+   "expected": {
+    "verdict": "FAIL_MALFORMED",
+    "issuer": "NOT_CHECKED"
+   }
+  },
+  {
+   "id": "attached-ok",
+   "change": "a receipt that carries the value in its payload field",
+   "receipt": "cases/attached-ok.cose",
+   "package": "examples/demo.uibc",
+   "trusted_issuers": null,
+   "trusted_size": null,
+   "why": "",
+   "expected": {
+    "verdict": "PARTIAL_INCLUSION_UNCHECKED",
+    "issuer": "NOT_CHECKED"
+   }
+  },
+  {
+   "id": "attached-wrong",
+   "change": "an attached receipt carrying different bytes",
+   "receipt": "cases/attached-wrong.cose",
+   "package": "examples/demo.uibc",
+   "trusted_issuers": null,
+   "trusted_size": null,
+   "why": "",
+   "expected": {
+    "verdict": "FAIL_VALUE_MISMATCH",
+    "issuer": "NOT_CHECKED"
+   }
+  },
+  {
+   "id": "pkg-changed",
+   "change": "the package, with one evidence byte appended",
+   "receipt": "cases/pkg-changed.cose",
+   "package": "conformance/profile/packages/changed-byte",
+   "trusted_issuers": null,
+   "trusted_size": null,
+   "why": "step 1 recomputes and refuses; the receipt is irrelevant",
+   "expected": {
+    "verdict": "FAIL_PACKAGE",
+    "issuer": "NOT_CHECKED"
+   }
+  },
+  {
+   "id": "pkg-undeclared",
+   "change": "the package, with a file under evidence/ that the index omits",
+   "receipt": "cases/pkg-undeclared.cose",
+   "package": "conformance/profile/packages/undeclared-file",
+   "trusted_issuers": null,
+   "trusted_size": null,
+   "why": "",
+   "expected": {
+    "verdict": "FAIL_PACKAGE",
+    "issuer": "NOT_CHECKED"
+   }
+  },
+  {
+   "id": "trusted-size",
+   "change": "a well-formed receipt plus a trusted tree size",
+   "receipt": "cases/trusted-size.cose",
+   "package": "examples/demo.uibc",
+   "trusted_issuers": null,
+   "trusted_size": 1,
+   "why": "step 5 becomes checked instead of skipped",
+   "expected": {
+    "verdict": "PARTIAL_INCLUSION_UNCHECKED",
+    "issuer": "NOT_CHECKED"
+   }
+  }
+ ]
+}

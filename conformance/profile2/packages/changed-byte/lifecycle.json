@@ -1,0 +1,25 @@
+{
+  "schema": "uibc-core/0.1.0-proposal",
+  "events": [
+    {
+      "event_id": "d47c0fed-4876-4ef8-966a-b09a17b155ef",
+      "event_type": "REGISTER",
+      "agent_id": "demo-agent-001",
+      "timestamp": "2026-09-17T13:30:53Z",
+      "actor": "alice",
+      "payload_hash": null,
+      "previous_event": null,
+      "signature": null
+    },
+    {
+      "event_id": "44d6e371-bc5c-47f6-b382-518696213b6f",
+      "event_type": "ACTIVATE",
+      "agent_id": "demo-agent-001",
+      "timestamp": "2026-09-17T13:30:53Z",
+      "actor": "owner",
+      "payload_hash": null,
+      "previous_event": "d47c0fed-4876-4ef8-966a-b09a17b155ef",
+      "signature": null
+    }
+  ]
+}

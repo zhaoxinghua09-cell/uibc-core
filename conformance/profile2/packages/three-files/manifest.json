@@ -1,0 +1,9 @@
+{
+ "schema": "uibc-core/0.1.0-proposal",
+ "agent_id": "three-file-agent",
+ "agent_version": "0.1.0",
+ "created_at": "2026-11-29T00:00:00Z",
+ "evidence_count": 3,
+ "evidence_root": "09d681f9609a92e62063372eaa02d28ffa2fa92a133842f641fd501bf141ee26",
+ "status": "SUBMITTED"
+}

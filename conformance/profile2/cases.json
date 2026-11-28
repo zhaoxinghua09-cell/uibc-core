@@ -1,0 +1,254 @@
+{
+ "schema": "uibc-profile2-vectors/1",
+ "profile": "uibc-scitt/2",
+ "as_of": "2026-11-29",
+ "tree": "RFC 6962 MTH over leaves = SHA-256(0x00 || ascending content digest)",
+ "vdp": "[leaf_hash bstr32, index uint, tree_size uint, path [bstr32]]",
+ "ok_cases": [
+  "ok-one-leaf",
+  "ok-three-first",
+  "ok-three-middle",
+  "ok-three-last"
+ ],
+ "note": "verdicts are recorded, not chosen: rebuild regenerates them from uibc_core/profile2.py, and tests fail if a recorded verdict and a fresh replay disagree",
+ "cases": [
+  {
+   "id": "ok-one-leaf",
+   "change": "a one-leaf tree whose only leaf the proof names",
+   "receipt": "cases/ok-one-leaf.cose",
+   "package": "examples/demo.uibc",
+   "trusted_issuers": [
+    "d04ab232742bb4ab3a1368bd4615e4e6d0224ab71a016baf8520a332c9778737"
+   ],
+   "trusted_size": null,
+   "why": "the first case where the profile can say OK, not partial",
+   "expected": {
+    "verdict": "OK",
+    "issuer": "TRUSTED"
+   }
+  },
+  {
+   "id": "ok-three-first",
+   "change": "the first leaf of a three-leaf tree",
+   "receipt": "cases/ok-three-first.cose",
+   "package": "conformance/profile2/packages/three-files",
+   "trusted_issuers": [
+    "d04ab232742bb4ab3a1368bd4615e4e6d0224ab71a016baf8520a332c9778737"
+   ],
+   "trusted_size": null,
+   "why": "",
+   "expected": {
+    "verdict": "OK",
+    "issuer": "TRUSTED"
+   }
+  },
+  {
+   "id": "ok-three-middle",
+   "change": "the middle leaf: a non-empty sibling path",
+   "receipt": "cases/ok-three-middle.cose",
+   "package": "conformance/profile2/packages/three-files",
+   "trusted_issuers": [
+    "d04ab232742bb4ab3a1368bd4615e4e6d0224ab71a016baf8520a332c9778737"
+   ],
+   "trusted_size": null,
+   "why": "the path has two siblings; a one-leaf case would never exercise it",
+   "expected": {
+    "verdict": "OK",
+    "issuer": "TRUSTED"
+   }
+  },
+  {
+   "id": "ok-three-last",
+   "change": "the last leaf, whose path is built bottom-up around the tail",
+   "receipt": "cases/ok-three-last.cose",
+   "package": "conformance/profile2/packages/three-files",
+   "trusted_issuers": [
+    "d04ab232742bb4ab3a1368bd4615e4e6d0224ab71a016baf8520a332c9778737"
+   ],
+   "trusted_size": null,
+   "why": "",
+   "expected": {
+    "verdict": "OK",
+    "issuer": "TRUSTED"
+   }
+  },
+  {
+   "id": "partial-unchecked",
+   "change": "a valid proof, with no issuer list supplied",
+   "receipt": "cases/partial-unchecked.cose",
+   "package": "conformance/profile2/packages/three-files",
+   "trusted_issuers": null,
+   "trusted_size": null,
+   "why": "inclusion verified is not issuer verified; the verdict says so separately",
+   "expected": {
+    "verdict": "PARTIAL_ISSUER_UNCHECKED",
+    "issuer": "NOT_CHECKED"
+   }
+  },
+  {
+   "id": "wrong-index",
+   "change": "a genuine sibling path labelled with the wrong index",
+   "receipt": "cases/wrong-index.cose",
+   "package": "conformance/profile2/packages/three-files",
+   "trusted_issuers": [
+    "d04ab232742bb4ab3a1368bd4615e4e6d0224ab71a016baf8520a332c9778737"
+   ],
+   "trusted_size": null,
+   "why": "",
+   "expected": {
+    "verdict": "FAIL_INCLUSION",
+    "issuer": "NOT_CHECKED"
+   }
+  },
+  {
+   "id": "wrong-leaf",
+   "change": "a well-formed leaf that is not in this tree",
+   "receipt": "cases/wrong-leaf.cose",
+   "package": "conformance/profile2/packages/three-files",
+   "trusted_issuers": [
+    "d04ab232742bb4ab3a1368bd4615e4e6d0224ab71a016baf8520a332c9778737"
+   ],
+   "trusted_size": null,
+   "why": "",
+   "expected": {
+    "verdict": "FAIL_INCLUSION",
+    "issuer": "NOT_CHECKED"
+   }
+  },
+  {
+   "id": "size-mismatch",
+   "change": "tree_size larger than the registered count",
+   "receipt": "cases/size-mismatch.cose",
+   "package": "conformance/profile2/packages/three-files",
+   "trusted_issuers": [
+    "d04ab232742bb4ab3a1368bd4615e4e6d0224ab71a016baf8520a332c9778737"
+   ],
+   "trusted_size": null,
+   "why": "",
+   "expected": {
+    "verdict": "FAIL_INCLUSION",
+    "issuer": "NOT_CHECKED"
+   }
+  },
+  {
+   "id": "vdp-five-elements",
+   "change": "a proof array with a fifth element the profile does not define",
+   "receipt": "cases/vdp-five-elements.cose",
+   "package": "conformance/profile2/packages/three-files",
+   "trusted_issuers": [
+    "d04ab232742bb4ab3a1368bd4615e4e6d0224ab71a016baf8520a332c9778737"
+   ],
+   "trusted_size": null,
+   "why": "extension points are refused, not guessed",
+   "expected": {
+    "verdict": "FAIL_MALFORMED",
+    "issuer": "NOT_CHECKED"
+   }
+  },
+  {
+   "id": "vdp-not-cbor",
+   "change": "bytes where the proof should be",
+   "receipt": "cases/vdp-not-cbor.cose",
+   "package": "conformance/profile2/packages/three-files",
+   "trusted_issuers": [
+    "d04ab232742bb4ab3a1368bd4615e4e6d0224ab71a016baf8520a332c9778737"
+   ],
+   "trusted_size": null,
+   "why": "",
+   "expected": {
+    "verdict": "FAIL_MALFORMED",
+    "issuer": "NOT_CHECKED"
+   }
+  },
+  {
+   "id": "no-vdp",
+   "change": "a receipt with no proof label",
+   "receipt": "cases/no-vdp.cose",
+   "package": "conformance/profile2/packages/three-files",
+   "trusted_issuers": [
+    "d04ab232742bb4ab3a1368bd4615e4e6d0224ab71a016baf8520a332c9778737"
+   ],
+   "trusted_size": null,
+   "why": "",
+   "expected": {
+    "verdict": "FAIL_MALFORMED",
+    "issuer": "NOT_CHECKED"
+   }
+  },
+  {
+   "id": "unknown-vds",
+   "change": "a tree this profile does not implement",
+   "receipt": "cases/unknown-vds.cose",
+   "package": "conformance/profile2/packages/three-files",
+   "trusted_issuers": [
+    "d04ab232742bb4ab3a1368bd4615e4e6d0224ab71a016baf8520a332c9778737"
+   ],
+   "trusted_size": null,
+   "why": "",
+   "expected": {
+    "verdict": "UNSUPPORTED_SCHEME",
+    "issuer": "NOT_CHECKED"
+   }
+  },
+  {
+   "id": "other-key",
+   "change": "the same value signed by a key outside the trusted set",
+   "receipt": "cases/other-key.cose",
+   "package": "conformance/profile2/packages/three-files",
+   "trusted_issuers": [
+    "d04ab232742bb4ab3a1368bd4615e4e6d0224ab71a016baf8520a332c9778737"
+   ],
+   "trusted_size": null,
+   "why": "",
+   "expected": {
+    "verdict": "FAIL_UNTRUSTED_ISSUER",
+    "issuer": "UNTRUSTED"
+   }
+  },
+  {
+   "id": "wrong-value",
+   "change": "a receipt issued for a different root",
+   "receipt": "cases/wrong-value.cose",
+   "package": "conformance/profile2/packages/three-files",
+   "trusted_issuers": [
+    "d04ab232742bb4ab3a1368bd4615e4e6d0224ab71a016baf8520a332c9778737"
+   ],
+   "trusted_size": null,
+   "why": "",
+   "expected": {
+    "verdict": "FAIL_VALUE_MISMATCH",
+    "issuer": "NOT_CHECKED"
+   }
+  },
+  {
+   "id": "pkg-changed",
+   "change": "the demo package with one evidence byte appended",
+   "receipt": "cases/pkg-changed.cose",
+   "package": "conformance/profile2/packages/changed-byte",
+   "trusted_issuers": [
+    "d04ab232742bb4ab3a1368bd4615e4e6d0224ab71a016baf8520a332c9778737"
+   ],
+   "trusted_size": null,
+   "why": "",
+   "expected": {
+    "verdict": "FAIL_PACKAGE",
+    "issuer": "NOT_CHECKED"
+   }
+  },
+  {
+   "id": "v1-receipt",
+   "change": "a valid /1 receipt for the same package, offered to /2",
+   "receipt": "cases/v1-receipt.cose",
+   "package": "examples/demo.uibc",
+   "trusted_issuers": [
+    "d04ab232742bb4ab3a1368bd4615e4e6d0224ab71a016baf8520a332c9778737"
+   ],
+   "trusted_size": null,
+   "why": "profile ids are not interchangeable: /1 registers a flat root",
+   "expected": {
+    "verdict": "FAIL_MALFORMED",
+    "issuer": "NOT_CHECKED"
+   }
+  }
+ ]
+}

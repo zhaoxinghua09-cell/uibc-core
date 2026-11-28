@@ -13,8 +13,26 @@ registered**, **what a receipt then proves about the package**, and **what the
 receipt does not prove**, stated once so that two readers cannot disagree about
 it while both being right about [RFC9942].
 
-Status: individual draft dated 2026-11-27, not submitted, not adopted by any
-working group. It supersedes nothing. The companion document it profiles is
+This document defines two profile identifiers, and the difference between them
+is the difference between a value a tree cannot prove membership in and one it
+can:
+
+- **`uibc-scitt/1`** registers a *flat* evidence root (Section 4.2). No
+  verifiable-data structure profile fixes an encoding for that composition, so
+  `/1` never evaluates an inclusion proof and cannot return `OK`. It stays as
+  published in this draft; a receipt issued under it keeps the meaning it has.
+- **`uibc-scitt/2`** registers an RFC 6962 Merkle root over the same content
+  hashes and fixes the `vdp` encoding to four elements (Section 4.2.1, Appendix
+  C). It is the profile under which a check can succeed outright, and the only
+  one for which this document states what that success means.
+
+`/2` exists because fixing the proof under `/1` would silently change what every
+`/1` receipt covers: the two roots are different values over the same evidence,
+so the profile string has to separate them.
+
+Status: individual draft dated 2026-11-27, with the `/2` profile added
+2026-11-29, not submitted, not adopted by any working group. It supersedes
+nothing. The companion document it profiles is
 `draft-zhao-uibc-evidence-chain` (this repository), which defines the package
 layout that this profile registers. Dates in this document are stated as of that
 date: [RFC9942] and [RFC9943] were published 2026-06-30, and the two receipt
@@ -41,14 +59,19 @@ about what a passing check means.
 This profile fixes one of those choices, for one payload type, and states the
 consequence:
 
-- what the issuer registers (Section 4);
+- what the issuer registers (Section 4, including the `/2` tree in 4.2.1);
 - how a verifier reconstructs the registered value from bytes it holds (Section 5);
 - what a passing receipt check therefore does and does not establish (Section 6);
 - what stays outside the profile (Section 7).
 
 The two receipt profiles the working group added in November 2026 are listed in
-Section 10, not restated here: this document does not choose a tree construction,
-it only refuses to invent one.
+Section 10, not restated here. This document does not invent a tree
+construction: under `/1` it leaves the structure to the service; under `/2` it
+adopts [RFC9162]'s tree unchanged, because a profile that fixes a different
+construction of its own would be the very divergence this document exists to
+remove. What `/2` does fix is the one thing [RFC9942] explicitly delegates to the
+verifiable-data-structure profile and that no existing profile had fixed for
+application payloads: the encoding of `vdp`.
 
 Everything it fixes is a *choice*, not a deduction from [RFC9943]. The choice is
 narrow on purpose: a profile that decided less would not remove the disagreement
@@ -157,6 +180,58 @@ same receipts may fix a different set. What makes this one checkable is that it
 is stated in one place, so a disagreement about "what was registered" is a
 disagreement with this text rather than an inference from silence.
 
+### 4.2.1 `uibc-scitt/2`: a tree root, and an inclusion proof with a fixed shape
+
+`/1` registers a root that is a *flat* hash: [RFC8785] serialization of the
+sorted content hashes, hashed once. There is no tree under that value, so no
+inclusion proof can exist for it, and a `/1` receipt can never say `OK`. That is
+a property of the composition, not a gap in the verifier.
+
+`/2` changes exactly two things and nothing else.
+
+**The root.** The leaves are the package's content hashes, taken in ascending
+order of the 32-byte digest; each digest is hashed as bytes, `leaf =
+SHA-256(0x00 || digest)`, and the root is the [RFC9162] Merkle tree hash (its MTH
+definition, section 2.1 of that RFC) over those leaves. An empty tree is not reachable: a package with
+`count = 0` is refused at step 1, so the empty-tree convention never decides a
+verdict. The registered value is still four members, with the `profile` member
+`"uibc-scitt/2"` and `root` the Merkle root in lowercase hex.
+
+**The proof.** `vdp` (COSE label 396) is a CBOR array of exactly four elements:
+
+```
+vdp = [ leaf_hash, index, tree_size, path ]
+
+  leaf_hash   bstr, 32 bytes -- the RFC 6962 leaf hash, not the raw digest
+  index       uint           -- 0-based leaf position
+  tree_size   uint           -- MUST equal the registered `count`
+  path        array of bstr  -- sibling hashes, 32 bytes each, bottom-up
+```
+
+There are no optional members and no extension points. A reader that receives
+any other shape refuses the receipt as malformed rather than interpreting an
+extra element: an unused field is a field whose meaning is being guessed, and
+the cost of guessing is a verifier that accepts a proof it did not check.
+
+The same bytes must work in both directions: a reader can hand a file and its
+`vdp` to someone who holds only the receipt, and that someone recovers the root
+without the rest of the package. That is the practical reason `vdp` exists, and
+it is why a profile that leaves it undefined has not finished the registration
+problem.
+
+## 4.2.2 Why a second identifier and not an amendment
+
+The two roots are different values over identical evidence, so every `/1`
+receipt would become unverifiable the moment `/2`'s root definition replaced it
+under the same string. The `profile` member exists precisely so this cannot
+happen silently (rule 4 above); using it to version a root change is the
+straightforward application of that rule.
+
+A verifier that implements only `/1` sees a `/2` value as a payload it cannot
+reproduce (`FAIL_VALUE_MISMATCH`); a verifier that implements only `/2` sees a
+`/1` receipt as malformed under its own member set. Neither is a bug in the
+other. Both are the profile string doing its job.
+
 ### 4.3 What travels with the package, and what does not
 
 The evidence bytes do **not** go to the TS. Two reasons, both practical:
@@ -191,7 +266,9 @@ profile even if it knows nothing else about the package.
 1. **Reconstruct the root.** From the package's `evidence/index.json` and the
    evidence bytes, recompute the evidence root over the sorted content hashes,
    and refuse if any declared file is missing or any undeclared file sits under
-   `evidence/`. The verifier MUST NOT take the root from the package's own
+   `evidence/`. Under `/2` the recomputation is the Merkle tree of Section 4.2.1,
+   not the flat hash of `/1`; the same three facts are read either way. The
+   verifier MUST NOT take the root from the package's own
    `manifest.json` without recomputing it: that field is what is being checked.
 2. **Reconstruct the registered value.** Build the four-member object of
    Section 4.2 from the recomputed root, the recomputed entry count, the
@@ -208,11 +285,22 @@ profile even if it knows nothing else about the package.
    issued it; a verifier in that position MUST report the issuer question as
    unchecked, and a receipt whose key is outside the verifier's trusted set MUST
    be refused as an untrusted issuer rather than reported as a pass with a
-   warning. The verifier MUST
+   warning. Under `/2` the inclusion proof is read, not merely present: the verifier
+   MUST parse `vdp` as the four elements of Section 4.2.1, MUST require
+   `tree_size` to equal `count`, and MUST recompute the [RFC9162] path from
+   `leaf_hash` and `index` up to the recomputed root. A path that does not
+   reconstruct the root, or a shape other than four elements, is a refusal:
+   `FAIL_INCLUSION` for the first, `FAIL_MALFORMED` for the second, and the two
+   MUST NOT be merged. The verifier MUST
    reject a receipt whose `vds` it does not support; "I do not implement this tree"
    is a rejection and MUST be reported as an unsupported scheme, not as evidence
    that the package is false. The two are different claims and a report that
    merges them is unreadable to whoever has to act on it.
+   **Only after** the proof verifies *and* the issuer key is one the verifier was
+   given may the check conclude `OK` (Section 6). A verified proof with the issuer
+   question unasked is `PARTIAL_ISSUER_UNCHECKED`, a code `/2` adds so that
+   "proved to be in the tree" and "proved to be registered by the service I trust"
+   never collapse into one word.
 4. **Check the anchor claim against the receipt.** The package may carry an
    anchor claim (the companion document's `evidence/anchors.json`). A claim that
    says "anchored" MUST carry a receipt that verifies as above **for this
@@ -248,6 +336,14 @@ The value of the check is narrow and sufficient for one question: *did this
 package exist in this form, and was it registered?* That is the question an audit
 trail answers when it is asked months later and the producer's own records are
 gone.
+
+Under `/2` the sentence above is what `OK` means, and `OK` adds two narrow facts
+to it: the receipt names a file that is inside the size-`count` tree whose root
+was registered, and the signing key is one the verifier was given out of band.
+It still does not mean the evidence is true, that the service will keep the tree,
+or that the file was registered before or after any other file in it. A `/2`
+verifier that returns `OK` without a trusted issuer list is non-conformant:
+that situation is `PARTIAL_ISSUER_UNCHECKED`.
 
 ## 7. What stays outside the profile
 
@@ -363,22 +459,30 @@ all of them cannot be acted on. `conformance/profile/cases.json` holds the same
 cases as bytes, and `python tools/run_profile_vectors.py` replays them without
 re-deriving anything.
 
-Four limits of that code, stated rather than implied by it passing:
+Appendix C is the same kind of thing for `/2`: sixteen cases, four of which come
+out `OK`.
 
-- **It never returns `OK`.** The inclusion proof (`vdp`) is not evaluated and the
-  best outcome is `PARTIAL_INCLUSION_UNCHECKED`. The repository does have a Merkle
-  implementation (`uibc_core/merkle.py`) that checks RFC 6962 proofs; what it does
-  not have is an encoding to read a `vdp` out of, because [RFC9942] leaves the
-  shape to the verifiable-data-structure profile a service applies (Section 10).
-  Checking it without fixing one would mean inventing a format of our own. A verifier that reports `OK` while guessing at `vdp`
-  is worse than one that reports `PARTIAL`.
+```
+python tools/run_profile2_vectors.py
+node tools/verify-js/profile2.mjs --vectors conformance/profile2/cases.json
+```
+
+Three limits of that code, stated rather than implied by it passing:
+
+- **`/1` never returns `OK`, and that is now a property, not a gap.** `/1`
+  registers a flat root over sorted content hashes; nothing about that value can
+  support an inclusion proof, so `PARTIAL_INCLUSION_UNCHECKED` is its ceiling. A
+  reader who wants `OK` uses `/2` (Section 4.2.1), where the tree and the proof
+  encoding are both fixed and the vectors in Appendix C exercise a two-sibling
+  path rather than only a one-leaf tree.
 - **`vds` values are supplied by the caller.** The registry entries that would pin
   them are still `TBD`, so supporting a tree is a decision a verifier makes and
-  states, not something this document can hand it.
+  states, not something this document can hand it. `/2` accepts exactly `vds = 1`
+  (`rfc9162-sha256`); anything else is `UNSUPPORTED_SCHEME`.
 - **Issuer trust is the caller's input.** The code can refuse a key outside a
   trusted set, but it cannot invent that set: without one, the issuer question is
-  reported as `NOT_CHECKED`, and a receipt any stranger could mint still reads
-  `PARTIAL_INCLUSION_UNCHECKED` rather than `OK`.
+  reported as `NOT_CHECKED`, and `/2` returns `PARTIAL_ISSUER_UNCHECKED` — not
+  `OK` — even when the inclusion proof verifies.
 - **No live service was involved.** Step 3 is checked against synthetic receipts and
   against AER-1's published receipt corpus as a consumer; no case registers
   anything in a real log. That gap is written here instead of being left for a
@@ -390,3 +494,41 @@ The rest of the repository is unchanged by this profile and still runs:
 python tools/axis_report.py       # 32 cases, expectation per case in expected.json
 python -m pytest -q               # ~2,100 tests
 ```
+
+## Appendix C. The `/2` vectors, and what each one pins
+
+`conformance/profile2/cases.json` records sixteen cases: two packages (the
+shipped one-leaf example, and a three-file package generated from fixed bytes),
+four verdicts that must be `OK`, and twelve refusals. The bytes are regenerate-
+able (`python tools/build_profile2_vectors.py --check` fails if the directory no
+longer matches a fresh build), so a reader is not asked to trust a stored
+verdict.
+
+| Case | What it pins |
+| --- | --- |
+| `ok-one-leaf` | `OK` is reachable at all; the degenerate one-leaf path |
+| `ok-three-first` | index 0 of a 3-leaf tree: the path runs along the right edge |
+| `ok-three-middle` | a two-sibling path; the case a one-leaf vector cannot reach |
+| `ok-three-last` | the last leaf, where the tail makes the path asymmetric |
+| `partial-unchecked` | a valid proof with no issuer list is PARTIAL, never OK |
+| `wrong-index` | a genuine sibling path labelled with the wrong index |
+| `wrong-leaf` | a well-formed leaf that is not in the tree |
+| `size-mismatch` | `tree_size` above `count`, i.e. a proof for a bigger tree |
+| `vdp-five-elements` | a fifth element is refused, not interpreted |
+| `vdp-not-cbor` | bytes where the proof belongs |
+| `no-vdp` | no proof label at all |
+| `unknown-vds` | a tree this profile does not implement |
+| `other-key` | self-consistent but not a trusted issuer |
+| `wrong-value` | a receipt for a different root |
+| `pkg-changed` | one evidence byte appended under `evidence/` |
+| `v1-receipt` | a valid `/1` receipt offered to `/2`: the ids are not interchangeable |
+
+The last row is the one worth keeping: it is the only case that pins the
+version boundary rather than an input check. If `/2` ever started accepting `/1`
+values, that row would go green-to-red, which is the moment to notice that the
+profile string stopped meaning anything.
+
+The same sixteen bytes are replayed by two independent readers —
+`uibc_core/profile2.py` and `tools/verify-js/profile2.mjs` — and the Node reader
+does not import the Python one's helpers. A disagreement between them fails
+`tests/test_profile2.py`.

@@ -1,8 +1,10 @@
 name: codeql-sast
 
 on:
+  # Every branch, not just main: a commit that is never scanned is a commit whose
+  # findings arrive after the fact. OpenSSF Scorecard reads the triggers, and it
+  # says exactly that ("SAST tool detected but not run on all commits").
   push:
-    branches: [main]
   pull_request:
   schedule:
     - cron: "23 3 * * 1"

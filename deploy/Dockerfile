@@ -8,7 +8,11 @@
 # no cryptography, no numpy. If that ever stops being true, this file is where
 # it hurts first.
 
-FROM python:3.12-slim
+# Digest-pinned base image: a moving tag is the one dependency a reader cannot audit.
+# Same tag, pinned by manifest-list digest (linux/amd64 + linux/arm64), fetched 2026-11-28:
+#   docker manifest inspect python:3.12-slim sha256:191083cd...
+# To refresh: re-read the digest, replace it here, and say the date next to it.
+FROM python:3.12-slim@sha256:191083cdf6c7bda8c76158983163ead5d5cf7b77cf3033e805bb0f5296f51b4b
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1

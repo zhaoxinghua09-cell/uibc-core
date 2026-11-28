@@ -329,3 +329,28 @@ def test_an_edited_manifest_file_is_caught(tool, tmp_path, monkeypatch, capsys):
     assert tool.check() == 1
     out = capsys.readouterr().out
     assert "MANIFEST FILE" in out and "was edited" in out
+
+def test_the_clock_is_removed_before_the_digest(tool):
+    a = tool.stable_stdout("41 passed in 5.32s\n")
+    b = tool.stable_stdout("41 passed in 9.99s\n")
+    assert a == b == "41 passed"
+    assert tool.stable_stdout("GATE OK\n0 failed\n") == "GATE OK\n0 failed"
+
+
+def test_the_package_list_digest_is_full_length_and_order_independent(tool):
+    one = tool.distributions_digest(["Flask==3.1.3", "pytest==8.4.2"])
+    two = tool.distributions_digest(["Flask==3.1.3", "pytest==8.4.2"])
+    assert one == two and len(one) == 64
+    assert tool.distributions_digest(["pytest==8.4.2", "Flask==3.1.3"]) != one
+
+
+def test_receipt_states_an_output_digest_per_step(tool):
+    _require_full_tree()
+    receipt = json.load(open(tool.RECEIPT, encoding="utf-8"))
+    steps = [s["step"] for s in receipt["steps"]]
+    assert steps == [s[0] for s in tool.STEPS]
+    for step in receipt["steps"]:
+        assert len(step.get("stdout_sha256") or "") == 64, step["step"]
+    env = receipt["environment"]
+    assert len(env.get("distributions_sha256") or "") == 64
+    assert env["distributions_sha256"] == tool.distributions_digest(env["distributions"])

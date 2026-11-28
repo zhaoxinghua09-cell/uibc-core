@@ -41,6 +41,7 @@ import hashlib
 import json
 import os
 import platform
+import re
 import shutil
 import subprocess
 import sys
@@ -316,7 +317,11 @@ def clean_env():
 
 
 def installed_distributions(env):
-    """What else was on this machine, in the author's own words: `name==version`."""
+    """What else was on this machine, in the author's own words: `name==version`, sorted.
+
+    Sorted so that the digest of the list is a property of what is installed and not
+    of the order pip happened to print it in.
+    """
     try:
         out = subprocess.run([sys.executable, "-m", "pip", "freeze"], capture_output=True,
                              text=True, encoding="utf-8", errors="replace", env=env, timeout=120)
@@ -324,6 +329,26 @@ def installed_distributions(env):
         return sorted(l for l in lines if not l.startswith("-"))
     except Exception:                                                # noqa: BLE001
         return []
+
+
+def distributions_digest(lines):
+    """sha256 over the list exactly as the receipt prints it: one `name==version` per line."""
+    return hashlib.sha256("\n".join(lines).encode("utf-8")).hexdigest()
+
+
+def stable_stdout(text):
+    """A step's output with the clock removed, so the digest can be compared elsewhere.
+
+    `41 passed in 5.32s` becomes `41 passed`; nothing else is touched.  The point is
+    that a stranger can run the same rule over his own output and compare digests —
+    if the test logic were altered, the bytes would differ even with the same wording.
+    """
+    text = re.sub(r"\s+in\s+\d+(?:\.\d+)?\s*s(?:ec(?:onds)?)?\b", "", text)
+    text = re.sub(r"\b\d+(?:\.\d+)?\s*s\b", "", text)
+    lines = [ln.rstrip() for ln in text.splitlines()]
+    while lines and not lines[-1]:
+        lines.pop()
+    return "\n".join(lines)
 
 
 def copy_tree(dest):
@@ -358,6 +383,8 @@ def run(steps_only=None):
         results.append({"step": name, "cmd": " ".join(cmd[1:]), "rc": rc,
                         "expect": expect, "asserts": list(must), "missing": missing,
                         "ok": ok, "seconds": round(time.time() - t0, 1),
+                        "stdout_sha256": hashlib.sha256(
+                            stable_stdout(out).encode("utf-8")).hexdigest(),
                         "tail": tail or err.strip().splitlines()[-1][:160]})
         print(f"{'PASS' if ok else 'FAIL'} {name:6s} rc={rc} {round(time.time() - t0, 1)}s :: {tail}"
               + (f" | missing: {missing}" if missing else ""))
@@ -455,6 +482,7 @@ def write_receipt(digest, files, results, content=None, content_files=None,
                         "user_site": "off",
                         "pythonpath": "",
                         "distributions": distributions or [],
+                        "distributions_sha256": distributions_digest(distributions or []),
                         "note": "no tokens, no cloud credentials, nothing from the author's shell; "
                                 "the hash seed and the user site directory are pinned so that "
                                 "another machine's state cannot decide the outcome"},
@@ -486,12 +514,19 @@ def write_receipt(digest, files, results, content=None, content_files=None,
     dists = receipt["environment"].get("distributions") or []
     page += ["", "**环境也记下来，不让你猜**：`Python {ver}` / {impl}，`PYTHONHASHSEED=0`（集合顺序不会自己变），"
              "`PYTHONNOUSERSITE=1`（谁自己 pip 装的包不能替你做决定），`PYTHONPATH` 清空。当时这台机器上的第三方包"
-             "共 {n} 个，清单的 sha256 是 `{h}`（全表在收据 `environment.distributions` 里）。".format(
+             "共 {n} 个，清单逐行 `name==version` 排好序后取 sha256（全 64 位，不截断）是"
+             " `{h}`；全表在收据 `environment.distributions` 里，拿它重算一遍应当得到同一个值。".format(
                  ver=receipt["runner"]["python"],
                  impl=receipt["environment"].get("python_implementation") or "Python",
                  n=len(dists),
-                 h=hashlib.sha256("\n".join(dists).encode()).hexdigest()[:16] if dists else "—"),
+                 h=distributions_digest(dists) if dists else "—"),
              "换一台机器时，把 Python 版本对齐、让 pytest 在位即可；若上面那批字样不一致，差异在环境，不在收据。"]
+    page += ["", "**每一步的输出也有指纹**（把 `in 5.32s` 这类秒数去掉后逐字节取 sha256）："]
+    for r in results:
+        page.append("- `{step}`：`{h}`".format(step=r["step"], h=r.get("stdout_sha256") or "—"))
+    page += ["自己按同一规则（去掉秒数、行尾空格、末尾空行）处理后与上面对比：对不上就说明输出真的变了。"
+             "这同时管住了「脚本只要印出字样就算过」这条路——字样是被测代码印的，"
+             "而印出的整段字节记在收据里，改动测试逻辑就会改掉这段字节。"]
     page += ["", f"**树摘要 `{receipt['tree_sha256'][:16]}…`（{files} 个文件，排除本页与 receipt 自身）**。",
              f"**内容摘要 `{str(receipt.get('content_sha256'))[:16]}…`（只看每个文件的字节，不看文件名）**。",
              "", "为什么有两根轴：路径与内容一起算的那个摘要最严，但也会被解包器连累。"

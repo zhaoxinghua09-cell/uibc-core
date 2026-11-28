@@ -1,14 +1,14 @@
 {
- "generated_at": "2026-11-28T14:06:56Z",
- "tree_sha256": "0de00a97d1992f289611d80b2714e5262054fc7a0ebf9701bb8d92241c9562c3",
+ "generated_at": "2026-11-28T14:07:13Z",
+ "tree_sha256": "adc8395b87162014382c6cda286054572c7279349f1a93eef3d8c7f96d2382d2",
  "files_hashed": 2561,
- "content_sha256": "d472cff889bef220f184a30fe42c3a7f0bd3e0f8bd172c5fc2d8585b9eb363f0",
+ "content_sha256": "5f22bacd719796ae405d4dee644e957e369d97633ce0827207f2281ba9341284",
  "content_files": 2561,
- "content_lf_sha256": "2d7d6cc9c9302d53d3e210615549d3cae5bb09058f69df74c929ee7608185a9b",
+ "content_lf_sha256": "9a94bba806493fa393e165d329c4e1c2a08462e544febf5a82d7ce6b79cbdf61",
  "delivery": "commit",
  "files_manifest": {
   "path": "docs/OUTSIDER-FILES.txt",
-  "sha256": "5971c1ceb5a07325b909e7589e19a9ff42e91ad238681487c56e2a6349a8e5bc",
+  "sha256": "31ec33e83c6e7a19030b3ab023040592b64dc5279fc7f95f90c227620b7c1dd3",
   "entries": 2561
  },
  "digest_excludes": [
@@ -291,7 +291,7 @@
    ],
    "missing": [],
    "ok": true,
-   "seconds": 0.6,
+   "seconds": 0.4,
    "stdout_sha256": "5e12fa3725d323bd994ffa45469fa7ef027fd4f8510357bfc39b900891b4c6f2",
    "tail": "GATE OK"
   },
@@ -306,7 +306,7 @@
    ],
    "missing": [],
    "ok": true,
-   "seconds": 0.7,
+   "seconds": 0.5,
    "stdout_sha256": "f087fdf4464161f266ca40008d6f948a22b074adbfa1fdebb90cf9168f235455",
    "tail": "PARITY OK: 41 repositories pinned and re-scored, best competitor 3/10, this repository 10/10"
   },
@@ -334,9 +334,9 @@
    ],
    "missing": [],
    "ok": true,
-   "seconds": 3.5,
+   "seconds": 3.6,
    "stdout_sha256": "b0f293b725ad86fee3b37d08682eaf82e18bfb8dce36d464f477a87731100853",
-   "tail": "41 passed, 1 warning in 2.59s"
+   "tail": "41 passed, 1 warning in 2.80s"
   }
  ],
  "ok": true

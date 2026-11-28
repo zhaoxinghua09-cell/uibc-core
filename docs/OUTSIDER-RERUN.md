@@ -1,6 +1,6 @@
 # 外人重跑：换一个目录、换一套环境，还成不成立
 
-生成时间 2026-11-28T15:19:57Z，运行环境 Python 3.13.18 / Windows。
+生成时间 2026-11-28T15:20:32Z，运行环境 Python 3.13.18 / Windows。
 
 做法：把仓库整棵拷到临时目录（不含 `.git`、不含任何缓存），用只保留白名单变量的干净环境，在该目录下跑四个公开入口；每一步记录退出码与输出末行；整棵树的 sha256 一并记下。
 
@@ -9,7 +9,7 @@
 | gate | `tools/mutation_gate.py` | `0 failed` | 0 | PASS | 0.7s |
 | parity | `tools/competitor_gate_parity.py` | `repositories pinned`；`re-scored` | 0 | PASS | 0.8s |
 | demo | `tools/demo_bid_binary.py` | `ALL OK` | 0 | PASS | 0.3s |
-| tests | `-m pytest tests/test_mutation_gate.py tests/test_competitor_parity.py tests/test_parity_board.py tests/test_refs_check.py tests/test_parity_sensitivity.py tests/test_parity_audit.py tests/test_parity_realrun.py -q` | `passed` | 0 | PASS | 7.0s |
+| tests | `-m pytest tests/test_mutation_gate.py tests/test_competitor_parity.py tests/test_parity_board.py tests/test_refs_check.py tests/test_parity_sensitivity.py tests/test_parity_audit.py tests/test_parity_realrun.py -q` | `passed` | 0 | PASS | 6.6s |
 
 **为什么记的是字样而不只是退出码**：`rc=0` 只说明进程没崩。每一步还记下它必须印出的几处字样（例如 `0 failed`、`repositories pinned`、`passed`），重跑时任何一处没出现，这一步就判 FAIL——所以陌生人不必相信 "PASS" 这个词，他可以看这几处字样自己有没有看见。
 

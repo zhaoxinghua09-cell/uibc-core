@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-28T14:04:30Z",
+ "generated_at": "2026-11-28T14:05:11Z",
  "tree_sha256": "a031ef3243e7d2fe65c4a87c41dda6cdd171e264ecdbe072e16eec126449e58e",
  "files_hashed": 2557,
  "content_sha256": "cff4c532ac225e963e589f91153f2ff5aae060450df7cd5596734359483c2309",
@@ -347,9 +347,9 @@
    ],
    "missing": [],
    "ok": true,
-   "seconds": 7.4,
+   "seconds": 7.8,
    "stdout_sha256": "ec2f02dd08839abcf9b2cd9ae69d74d2594ef160ab6a460837c26b4ab34f70cc",
-   "tail": "41 passed in 5.93s"
+   "tail": "41 passed in 6.30s"
   }
  ],
  "ok": true

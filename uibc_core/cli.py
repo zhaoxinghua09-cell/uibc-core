@@ -833,7 +833,8 @@ def cmd_verify_dir(args):
             _append_line(args.report, _report_line(name, report, code))
         if code:
             failed.append(name)
-            print(f"{name}: {report['result']} failed {_failed_checks(report)}",
+            print(f"{name}: {report.get('result_label', report['result'])} "
+                  f"failed {_failed_checks(report)}",
                   file=sys.stderr)
     print(f"{judged - len(failed)}/{judged} packages PASS")
     if not_a_package:

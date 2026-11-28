@@ -284,11 +284,58 @@ result is *unanchored* until Section 8 applies.
 
 ## 7. Gate Outcomes
 
+### 7.1 Five questions, five verdicts
+
+A decision about a package rests on five questions that fail independently, so
+this document keeps five verdicts rather than one. Each MUST be recorded on its
+own, as `CHECKED_PASS`, `REFUSED`, or `NOT_CHECKED`, and none may be inferred
+from another:
+
+| Verdict | The question | What answers it here |
+|---|---|---|
+| `signature` | did the seal verify under a key the reader holds? | S6 (seal), S14 (the strict base64 that feeds it) |
+| `authority` | was this actor entitled to say this? | S3 (lifecycle actors, ordering, once-only activation) |
+| `binding` | is this the actor the package names? | S2 (identity consistent across identity, manifest and events) |
+| `status` | is this still the current state? | S8 (checkpoint), S9 (out-of-band pin), S15 (anchor resolution), S17 (receipt chain) |
+| `evidence` | do the bytes still hash to what is committed? | S1, S4, S5, S7, S10, S11, S12, S13, S18, and S19 where implemented |
+
+`NOT_CHECKED` is the verdict for a member check that did not run, was skipped,
+or returned `INCONCLUSIVE`. It is **not** a weaker pass: a dimension with no
+member check that ran is `NOT_CHECKED`, and a dimension whose member failed is
+`REFUSED`. A reader who needs `signature` to be true and finds `NOT_CHECKED`
+there has learned that nobody checked it, which is the honest statement.
+
+The partition is total over the checks this document defines: every check
+belongs to exactly one verdict, and a check that belongs to none is itself a
+draft defect (the reference implementation fails a test rather than dropping
+it).
+
+### 7.2 The export rule
+
+A decision record may leave the sender only when all five verdicts are
+`CHECKED_PASS`. Any `REFUSED`, any `NOT_CHECKED`, any unassigned check, and
+any absent dimension refuse the export. The rule is deliberately harsher than
+"no failures": a package where the authority question was never asked cannot
+be exported on the strength of four passing verdicts.
+
+Passing this gate establishes that the five questions were each answered
+affirmatively against bytes the reader can recompute. It does not establish
+that the claim is true (Section 1), that nothing was withheld (Section 10), or
+that the actor's authority was itself legitimate (that is the reader's policy,
+and Section 6 says the key is trusted out of band).
+
+### 7.3 Package-level outcomes
+
 When a package is presented for a decision rather than a verification, the
 outcome set is: `REVOKED`, `DISPUTED`, `MISMATCH`, `MALFORMED`,
 `UNVERIFIABLE`. A revocation or dispute MUST name the `target_root` it
 applies to and MUST be rejected if that root differs from the package's
 current root — otherwise a stale revocation silently applies to new content.
+
+`REVOKED` and `DISPUTED` are statements by somebody about the package; they
+are not verdicts of the five in 7.1, and a package that is `CHECKED_PASS` on
+all five can still be revoked. Keeping them in a separate list is the point
+of stating them separately.
 
 ## 8. External Anchoring
 

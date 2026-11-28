@@ -151,6 +151,7 @@ anchors/pins/uibc-conformance-0.5.5.sha256
 anchors/pins/uibc-conformance-0.5.6.sha256
 anchors/pins/uibc-conformance-0.5.7.sha256
 anchors/pins/uibc-conformance-0.5.8.sha256
+anchors/pins/uibc-conformance-0.7.0.sha256
 anchors/pins/uibc-core-0.4.0.sha256
 anchors/pins/uibc-core-0.4.1.sha256
 anchors/pins/uibc-release-anchor-001.json
@@ -1024,6 +1025,7 @@ conformance/uibc-conformance-0.5.5.zip
 conformance/uibc-conformance-0.5.6.zip
 conformance/uibc-conformance-0.5.7.zip
 conformance/uibc-conformance-0.5.8.zip
+conformance/uibc-conformance-0.7.0.zip
 contest/BENCHMARK.md
 contest/BENCHMARKING.md
 contest/INCENTIVES.md
@@ -1972,6 +1974,7 @@ tests/test_composed_forgery.py
 tests/test_concurrency_and_build.py
 tests/test_config_change.py
 tests/test_conformance.py
+tests/test_conformance_archive_070.py
 tests/test_conformance_archive_pin.py
 tests/test_conformance_corpus.py
 tests/test_conformance_harness.py

@@ -2,7 +2,7 @@
   "format": "uibc-interop/consumers/1",
   "note": "What this project produces that another project can consume, and what it currently consumes from others. Written so a reader does not have to reverse-engineer the repository to find out. Every 'measured' line is something that was run, with the date; every 'not-consumed' line is a real absence, not a plan.",
   "project": "zhaoxinghua09-cell/uibc-core",
-  "updated": "2026-11-27",
+  "updated": "2026-11-28",
   "produces": [
     {
       "id": "uibc-conformance-archive",
@@ -62,6 +62,12 @@
     }
   ],
   "consumes": [
+    {
+      "id": "revocation-list-v1",
+      "status": "consumed (reader implemented 2026-11-28)",
+      "measured": "2026-11-28: on the peer corpus corpora/vectors-revocation-list at head 1ab5db7 (87 members: 9 accept, 78 reject, corpusDigest 87dfad7d...be95) our reader reproduced all five recorded fields - decision, the refused list's index, the reason as code:detail, the digests of every list up to the refused one, and the list in force at the verdict - for 87/87. Signatures are checked with this package's own Ed25519 verifier over RFC 8785 canonical bodies, and the chain is folded here rather than delegated to their harness.",
+      "blocked_by": "none for reading the cumulative chain. The delta form (predicate/v2/revocation-list, deltas folded by sequence number and digest) is still unread, and their reference verifier has not been re-run against this build, so this is our reading of their files."
+    },
     {
       "id": "uibc-evidence-package",
       "status": "implemented",

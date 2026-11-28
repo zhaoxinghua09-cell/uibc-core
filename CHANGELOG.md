@@ -1,3 +1,15 @@
+## 未发布 — 2026-11-28（读得了对方的吊销清单，并把"折叠"本身当验收对象）
+
+- **为什么做这件事**：对方 11-27 新登记了 `predicate/v2/revocation-list`（delta 形态，只带本次新增吊销、靠序号与摘要链到上一条）与 `corpora/vectors-revocation-list`（87 条）。吊销是这类证据体系里唯一"必须能撤回"的语义：读不懂一条吊销链，就等于只能证明"曾经发生过什么"，不能证明"现在还算不算"。此前本仓 `revocation-list` 字样 0 处，自有 `revocation-digest` 是另一套口径，不冒充。
+- **新增 `uibc_core/revocation_list.py`**（仅 stdlib）：一条签名清单是 `{"body":BODY,"sig":base64(Ed25519 over "probity-revocation-v1\0" || JCS(BODY))}`；规范化与本仓证据层同一套（RFC 8785 的 integers-only I-JSON 剖面），验签同一套（RFC 8032，严格点解码），所以两边对同一串字节得出同一个判定。折叠按对方参考验证器的顺序实现：形状 → 签名者是否为钉住的根 → 签名 → 链号是否换链 → 序号是否回退 → 是否有空号 → 上一版摘要是否对上 → 签发时刻是否倒流 → 条目是否来自未来 → 是否丢了已发布条目。条目一经发布，后续清单必须逐字节保留，折叠时才带得走。
+- **十个拒收码与原样细节**：`revocation_list_shape`（27 种具名形状故障）、`_signer_not_a_root`、`_signature_unverified`、`_other_chain`、`_rollback:SEQ<=SEQ`、`_gap:SEQ>NEXT`、`_previous_mismatch`、`_time_reversed`、`revocation_entry_from_future`、`_drops_entry:KIND:ID[:12]`。回退与空号把两个数都写进拒理由，因为"哪一条被拒"与"当时手里是哪一版"是两件事。
+- **根的换代**：一条清单吊销某个根键时，若该条带 `successor`，新键在**本条生效前**加入钉住集合，随后被吊销的键一律移出——同一条里既给后代又吊销后代的，后代不留（顺序不能靠条目排序碰运气）。
+- **CLI 新增 `verify-revocation-list`**：`--case DIR` 判一个案（`roots.json` + 按序 `list-*.json`）并把 `{"verdict","reason","index"}` 作为最后一行 stdout 输出；`--dir DIR` 判整个语料并与 `MANIFEST.json` 答案键比对；`--report` 追加 `uibc-revocation-list-report/1` 行。
+- **实测（本机 Windows / Python 3.13，对 `corpora/vectors-revocation-list` @ head `1ab5db7`，`corpusDigest 87dfad7d…be95`，87 条 = accept 9 / reject 78）**：**87/87 五项字段全同**——decision、拒在第几条清单、`code:detail`、到该条为止的每份清单 `ListDigest`（读不动的记 `null`）、以及判决时手里的那一版（`head`/`seq`/`listId`/`issuedAt`/`roots`/七个类别的已吊销集合）。`--dir` 打印 `87/87 members conform to the corpus answer key`、exit 0；`--case` 对回退案打印 `revocation_list_rollback:1<=2 at list 2`。
+- **两处按实测改掉的真问题**：(1) 超出精确整数范围的 `seq`（`9007199254740992`）必须在**解析期**就判整份文件不可读（`signed_list_unreadable`），而不是晚一步说成 `shape:seq_not_a_positive_exact_integer`——前者是"这串字节不是我们能读的文档"，后者是"文档里这一项不合规"，两句话指向不同的责任；(2) 标准 base64 解码要像 Go 一样忽略行内换行，再由"重编码是否同字"给出 `not_canonical_base64`，否则一个带换行的键会把"非规范拼写"错记成"根本不是 base64"。
+- **测试**：`tests/test_revocation_list.py` 21 项，全部用**一次性签好、按 base64 嵌入的固定夹具**（固定种子，测试不携带签名器）：空首表在force、第二条带得走第一条的条目、回放判回退、跳号判空号、上一版不符、丢条目被点名、未钉住的键、签名篡改、根换代后交棒、换代前后两处各自被拒、七种形状故障、整份不可读、换 body 后签名失效、按目录判案。另 `tests/test_revocation_list_corpus.py` 一条语料门：设 `UIBC_REVOCATION_CORPUS` 指向对方语料目录时才跑全量比对，默认 skip——第三方语料不 vendoring 进本仓。
+- **边界（写在这里而不是脚注）**：这是**我们读他们公开语料**的自测，不是他们 harness 复跑；读的是 cumulative 链，`predicate/v2` 的 **delta 形态本身**（只带增量、需要把多条增量折进同一状态）仍未读；`uibc-revocation-list-report/1` 尚无 JSON Schema；本条未改版本、未重封归档。
+
 ## 未发布 — 2026-11-28（读得了对方的 MCP 授权语料，且先证明自己没把"没检查"算成"失败"）
 
 - **为什么做这件事**：#766 里对方给了我们一个更硬的说法——"未检查不等于失败"，并公开了 AER-1 的 kit 与语料。#595 用那份 kit 照出我们自己的缺陷：`verify-dir` 把没有 `manifest.json` 的目录判 FAIL。改完那一处之后，新的一步是把对方新登记的 `corpora/vectors-mcp-authz`（11 条观测、1 accept / 10 reject）读进来。动机不是"再刷一个数"，而是：对方用**判定约定**（verifier 最后一行 stdout 输出 `{"verdict","codes"}`、reject 成员须 invalid 且命中它自己的码）把"读得懂"具体化成了可执行的东西，我们的读者若对不上，就等于在自己的口径之外另立一套。

@@ -534,3 +534,32 @@ jobs:
         if: failure()
         run: python -m pytest tests/test_crosswalk_probe.py tests/test_actor_attribution.py -q --tb=short
 
+  # Fuzzing that runs, not fuzzing that is merely filed. The harness is the
+  # canonicaliser's three load-bearing properties: total on whatever
+  # `json.loads` accepts, a fixpoint (canonicalise of canonical form is the
+  # same bytes), and independent of key insertion order. A failure here is a
+  # counterexample, so the job is red only when one was found: libFuzzer exits
+  # 0 when `-max_total_time` runs out. The budget is deliberately small - 30
+  # seconds per push, against a pure-Python function that is already covered by
+  # the RFC 8785 vectors in tests/test_canonical.py. The point is to keep the
+  # corpus alive between pushes, not to replace the vectors.
+  fuzz-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+
+      - name: Install the package and the fuzzer
+        run: |
+          python -m pip install --upgrade pip
+          # atheris 2.3.0 publishes cp312 manylinux wheels; if the wheel is
+          # missing the source build needs clang, which ubuntu-latest has.
+          python -m pip install . atheris
+
+      - name: Fuzz the canonicaliser for 30 seconds
+        run: python fuzz/fuzz_jcs.py -max_total_time=30 -print_final_stats=1
+

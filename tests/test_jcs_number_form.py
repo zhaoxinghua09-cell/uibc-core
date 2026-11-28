@@ -60,5 +60,43 @@ class TestECMAScriptNumberForm(unittest.TestCase):
         self.assertEqual(once, twice)
 
 
+class TestBeyondSafeRangeIsNotBeyondTheDouble(unittest.TestCase):
+    """The gate is about precision, not size (2026-11-28).
+
+    Atheris found the old behaviour in its first twenty-second run: `1e20`
+    canonicalised to 21 digits, and re-reading those digits produced an `int`
+    that the same gate then refused. The canonical form was not a fixpoint of
+    the library that produced it. The gate now refuses only integers that no
+    double equals - `2**53 + 1` among them - and serialises the rest the way
+    ECMAScript serialises the double they equal.
+    """
+
+    CASES = [
+        (1e17, "100000000000000000"),
+        (1e20, "100000000000000000000"),
+        (2 ** 60, "1152921504606846976"),
+        (-1e20, "-100000000000000000000"),
+        (2 ** 70, "1.1805916207174113e+21"),
+    ]
+
+    def test_forms(self):
+        for value, want in self.CASES:
+            self.assertEqual(canonicalize({"x": value}).decode("utf-8"),
+                             '{"x":%s}' % want, "value %r" % (value,))
+
+    def test_fixpoint(self):
+        import json
+
+        for value, _ in self.CASES:
+            once = canonicalize({"x": value})
+            twice = canonicalize(json.loads(once.decode("utf-8")))
+            self.assertEqual(once, twice, "value %r" % (value,))
+
+    def test_an_integer_no_double_equals_is_still_refused(self):
+        for value in (2 ** 53 + 1, -(2 ** 53) - 1, 2 ** 53 + 3):
+            with self.assertRaises(ValueError):
+                canonicalize({"x": value})
+
+
 if __name__ == "__main__":
     unittest.main()

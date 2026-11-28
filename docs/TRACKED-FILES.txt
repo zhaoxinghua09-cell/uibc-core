@@ -1841,6 +1841,8 @@ fixtures/tampered.uibc/identity.json
 fixtures/tampered.uibc/lifecycle.json
 fixtures/tampered.uibc/manifest.json
 fixtures/tampered.uibc/signatures/seal.json
+fuzz/README.md
+fuzz/fuzz_jcs.py
 icon.svg
 independent_verifier/CHECK-MAP.md
 independent_verifier/cross_check.py

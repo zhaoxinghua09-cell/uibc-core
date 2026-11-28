@@ -21,12 +21,14 @@ from uibc_core.verify import verify  # noqa: E402
 BASE = os.path.join(_REPO, "fixtures", "clean.uibc")
 
 # Descriptive: changing it changes no verdict, and should not.
+# `evidence/index.json/entries[n]/media_type` moved OUT of this list on 2026-11-28:
+# S20 now refuses a declared media type outside the accepted vocabulary, so the
+# field is no longer silent. (It stays out of the S7 digest on purpose - S20
+# binds the label, not the bytes, which S4 already covers.)
 DESCRIPTIVE = {
     "manifest.json/schema", "manifest.json/agent_version",
     "identity.json/schema", "identity.json/version", "identity.json/agent_type",
     "lifecycle.json/schema",
-    "evidence/index.json/entries[0]/media_type",
-    "evidence/index.json/entries[1]/media_type",
     "evidence/index.json/entries[0]/note",
     "evidence/index.json/entries[1]/note",
     "signatures/seal.json/schema", "signatures/seal.json/created_at",

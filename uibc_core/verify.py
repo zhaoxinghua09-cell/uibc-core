@@ -42,6 +42,18 @@ EVIDENCE_TYPES = {
     "EVALUATION", "HUMAN_DECISION", "VERIFICATION", "INCIDENT", "RETIREMENT",
 }
 
+# Media types this verifier will accept as a DECLARATION (S20). The list is
+# deliberate and closed: a declared type is what a human reader uses to decide
+# how to open an artefact, so "application/x-whatever" is not a label this
+# project is willing to repeat without binding. S4 binds the bytes; S20 binds
+# the label that describes them. Unknown types are refused rather than
+# silently echoed -- add a type here only with a case that proves it.
+ALLOWED_MEDIA_TYPES = {
+    "text/plain", "text/markdown", "text/csv", "text/tab-separated-values",
+    "application/json", "application/pdf", "application/zip",
+    "application/octet-stream", "image/png", "image/jpeg", "image/svg+xml",
+}
+
 
 def _version_lt(current, floor):
     """True when `current` is older than `floor`.
@@ -1033,6 +1045,37 @@ def _verify_impl(package_dir: str, key: bytes = None, pubkey: bytes = None,
             checks.append({"id": "S7", "name": "evidence index metadata",
                            "result": "PASS",
                            "detail": "index metadata matches evidence_index_digest"})
+
+    # S20 media_type declaration must be a type we are willing to repeat (2026-11-28
+    # own-corpus finding): media_type was in neither S4's scope nor the
+    # index_metadata_digest, and this verifier never read it, so relabelling an
+    # evidence file's media type passed every check while the index still
+    # declared, say, "text/plain" for something it was not. S4 still binds the
+    # bytes, so a relabel cannot swap content -- what it can do is steer the
+    # reader who decides how to open the artefact. Absent media_type is not
+    # failed here (older packages legitimately omit it); a present but unknown
+    # one is, because an unknown label is exactly the unbound declaration.
+    bad_media = []
+    for e in index.get("entries", []):
+        mt = e.get("media_type")
+        if mt is None:
+            continue
+        if not isinstance(mt, str) or mt not in ALLOWED_MEDIA_TYPES:
+            bad_media.append({"path": e.get("path"), "media_type": mt})
+    if bad_media:
+        ok = False
+        checks.append({"id": "S20", "name": "media type declaration",
+                       "result": "FAIL",
+                       "detail": "%d entr(y/ies) declare a media type outside the "
+                                 "accepted vocabulary: %s"
+                                 % (len(bad_media),
+                                    "; ".join("%s -> %r" % (b.get("path"), b.get("media_type"))
+                                              for b in bad_media[:3]))})
+    else:
+        checks.append({"id": "S20", "name": "media type declaration",
+                       "result": "PASS",
+                       "detail": "every declared media_type is in the accepted "
+                                 "vocabulary (or absent)"})
 
     # S10 attestation closure (draft-sharif-agent-audit-trail-03 Section 13.6).    # AAT's point is that any component left outside the attested set is a
     # forgery channel: weights, tokenizer, chat template, engine build, decoding

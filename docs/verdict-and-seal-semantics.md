@@ -146,3 +146,18 @@ established:
 
 Reading this table is the whole threat model. Everything not covered
 here is not claimed.
+
+
+## S20 - the declared media type is answerable
+
+`evidence/index.json` entries may declare a `media_type`. Until 2026-11-28
+neither S4 (which binds the bytes) nor S7 (which binds path/type/note/action_digest
+through `evidence_index_digest`) covered that field, and the verifier never read
+it, so relabelling an evidence file's media type passed every check.
+
+S20 closes the labelling channel rather than the content one: a declared type
+outside the accepted vocabulary FAILS, an absent one does not (packages sealed
+before 0.3 legitimately omit it), and the bytes stay bound by S4 alone. It is
+deliberately a closed vocabulary and not an extension heuristic - a list can be
+audited, a guess cannot. See `tests/test_media_type_declaration.py`,
+`conformance/cases/61-*`, and the `promoted` group in `tools/export_conformance.py`.

@@ -6,9 +6,9 @@
   "checks": "docs/EVIDENCE-INDEX.md"
  },
  "totals": {
-  "cases": 58,
-  "checks": 19,
-  "covered": 16,
+  "cases": 61,
+  "checks": 20,
+  "covered": 17,
   "uncovered": 3
  },
  "checks": [
@@ -69,7 +69,9 @@
    "title": "seal signature",
    "cases": [
     "17",
-    "36"
+    "36",
+    "59",
+    "60"
    ]
   },
   {
@@ -179,6 +181,13 @@
    "id": "S19",
    "title": "freshness state",
    "cases": []
+  },
+  {
+   "id": "S20",
+   "title": "media type declaration",
+   "cases": [
+    "61"
+   ]
   }
  ],
  "excluded": [

@@ -762,32 +762,74 @@
       ],
       "path": "cases/58-swap-the-order-of-the-receipt-chain",
       "sha256": "b94b507b865b66061de02d82f6b172dc3e35e4a1a8b969c376bbd812dac03fc8"
+    },
+    {
+      "id": "59",
+      "group": "promoted",
+      "attack": "halve the signature of a publicly verifiable seal",
+      "why": "a truncated signature is not a signature; S6 must refuse it",
+      "expectation": "FAIL",
+      "expect": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S6"
+      ],
+      "path": "cases/59-halve-the-signature-of-a-publicly-verifiable-sea",
+      "sha256": "e9e13961d4fc42388971e56ccb899a5f33c9b2c18414786a586c95cd8721daea"
+    },
+    {
+      "id": "60",
+      "group": "promoted",
+      "attack": "misspell the schema string after a public seal",
+      "why": "an unknown schema identifier cannot be judged, and the seal no longer covers the manifest; S6 must refuse it",
+      "expectation": "FAIL",
+      "expect": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S6"
+      ],
+      "path": "cases/60-misspell-the-schema-string-after-a-public-seal",
+      "sha256": "174d5ffd17c00bd4858e707f2aeeb90b8d2c97ed67ec8a5c7f07df2d28ac972f"
+    },
+    {
+      "id": "61",
+      "group": "promoted",
+      "attack": "relabel media_type on a publicly sealed package",
+      "why": "S20: a declared media type outside the accepted vocabulary is an unbound label - the bytes are still bound by S4, the description is not",
+      "expectation": "FAIL",
+      "expect": "FAIL",
+      "expected_result": "FAIL",
+      "expected_checks": [
+        "S20"
+      ],
+      "path": "cases/61-relabel-media-type-on-a-publicly-sealed-package",
+      "sha256": "272dfb223c7301b0dcb769d4c141e1998560ec1ad43a1a05dbc7898e166dc6ce"
     }
   ],
   "skipped": [
     {
       "attack": "use a status token outside the vocabulary",
-      "reason": "no check fired; not exportable as a vector"
+      "reason": "still no dedicated check: the seal catches this mutation (S6) only because the sealed manifest is covered; the status vocabulary itself is ungated - registered as a defect, not a vector"
     },
     {
       "attack": "reverse the order of the evidence index",
-      "reason": "no check fired; not exportable as a vector"
+      "reason": "by design: index_metadata_digest sorts by path, so reordering is harmless and must not be a vector"
     },
     {
       "attack": "delete the seal",
-      "reason": "no check fired; not exportable as a vector"
+      "reason": "on the unsigned base this is S6 INCONCLUSIVE, not FAIL; it cannot be a FAIL vector. A sealed package that loses its seal cannot reach PASS"
     },
     {
       "attack": "cut the seal signature in half",
-      "reason": "no check fired; not exportable as a vector"
+      "reason": "on the HMAC base this is INCONCLUSIVE without the owner key; the publicly sealed version is case 59"
     },
     {
       "attack": "misspell the manifest schema string",
-      "reason": "no check fired; not exportable as a vector"
+      "reason": "the HMAC base cannot be checked without the key; the publicly sealed version is case 60"
     },
     {
       "attack": "relabel an evidence file's media type",
-      "reason": "no check fired; not exportable as a vector"
+      "reason": "the audit mutated `type` (covered by S7), not `media_type`; the media_type relabel is case 61"
     }
   ]
 }

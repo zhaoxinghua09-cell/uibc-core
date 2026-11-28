@@ -71,6 +71,55 @@ SEAL_GROUP = (
                "FAIL", "S6 verifies against the recorded public key")]),
 )
 
+
+# --- Promoted from `skipped` (2026-11-28 own-corpus probe) -------------------
+# The manifest used to carry six attacks under "no check fired; not exportable
+# as a vector". Re-running each one against the shipped verifier showed that
+# three of them DO fail: the reason recorded in 2026-11-24 was simply wrong.
+# These three become vectors; the ones that really do not fire stay in `skipped`,
+# and each of those is registered as a defect rather than quietly dropped.
+def halve_seal_signature(pkg):
+    _seal_with_ed25519(pkg)
+    path = os.path.join(pkg, "signatures", "seal.json")
+    with open(path, encoding="utf-8") as fh:
+        seal = json.load(fh)
+    sig = seal["signature"]
+    seal["signature"] = sig[: max(1, len(sig) // 2)]
+    with open(path, "w", encoding="utf-8") as fh:
+        json.dump(seal, fh, ensure_ascii=False, indent=2)
+
+
+def misspell_manifest_schema(pkg):
+    _seal_with_ed25519(pkg)
+    path = os.path.join(pkg, "manifest.json")
+    with open(path, encoding="utf-8") as fh:
+        m = json.load(fh)
+    m["schema"] = str(m.get("schema")) + "-typo"
+    with open(path, "w", encoding="utf-8") as fh:
+        json.dump(m, fh, ensure_ascii=False, indent=2)
+
+
+def relabel_media_type(pkg):
+    _seal_with_ed25519(pkg)
+    path = os.path.join(pkg, "evidence", "index.json")
+    with open(path, encoding="utf-8") as fh:
+        idx = json.load(fh)
+    idx["entries"][0]["media_type"] = "application/x-bogus-media"
+    with open(path, "w", encoding="utf-8") as fh:
+        json.dump(idx, fh, ensure_ascii=False, indent=2)
+
+
+PROMOTED = (
+    ("halve the signature of a publicly verifiable seal", halve_seal_signature, "FAIL",
+     "a truncated signature is not a signature; S6 must refuse it"),
+    ("misspell the schema string after a public seal", misspell_manifest_schema, "FAIL",
+     "an unknown schema identifier cannot be judged, and the seal no longer "
+     "covers the manifest; S6 must refuse it"),
+    ("relabel media_type on a publicly sealed package", relabel_media_type, "FAIL",
+     "S20: a declared media type outside the accepted vocabulary is an unbound "
+     "label - the bytes are still bound by S4, the description is not"),
+)
+
 POSITIVE = (
     ("the shipped package, untouched", None,
      "no mutation at all: refusing this means the verifier rejects a correct package"),
@@ -94,6 +143,7 @@ GROUPS = (
     ("checkpoint", oa.CKPT_RED_TEAM),
 )
 GROUPS = GROUPS + SEAL_GROUP + (("scale", rscale.EXTRA_RED_TEAM),)
+GROUPS = GROUPS + (("promoted", PROMOTED),)
 
 
 def slug(name):
@@ -186,6 +236,34 @@ def build_case(name, fn, expectation, why, group, index):
 # in a handful of case files -- measured 2026-11-20: 6 of 294 files changed while
 # nothing about the corpus had. The value below is the moment the published 0.4.1
 # corpus was exported, so a rebuild reproduces those stamps byte for byte.
+# Measured 2026-11-28: three of the six "no check fired" attacks really do fire
+# once the package carries a PUBLIC seal, and are now vectors in the `promoted`
+# group. Their originals below stay in `skipped`, because on the unsigned / HMAC
+# base the audit used they cannot fire - an absent seal or an unverifiable
+# symmetric signature is INCONCLUSIVE, not FAIL. The note says so, so the
+# manifest no longer reads as "this attack is undetectable".
+SKIP_REASON = {
+    "use a status token outside the vocabulary": (
+        "still no dedicated check: the seal catches this mutation (S6) only "
+        "because the sealed manifest is covered; the status vocabulary itself is "
+        "ungated - registered as a defect, not a vector"),
+    "reverse the order of the evidence index": (
+        "by design: index_metadata_digest sorts by path, so reordering is "
+        "harmless and must not be a vector"),
+    "delete the seal": (
+        "on the unsigned base this is S6 INCONCLUSIVE, not FAIL; it cannot be a "
+        "FAIL vector. A sealed package that loses its seal cannot reach PASS"),
+    "cut the seal signature in half": (
+        "on the HMAC base this is INCONCLUSIVE without the owner key; the "
+        "publicly sealed version is case 59"),
+    "misspell the manifest schema string": (
+        "the HMAC base cannot be checked without the key; the publicly sealed "
+        "version is case 60"),
+    "relabel an evidence file's media type": (
+        "the audit mutated `type` (covered by S7), not `media_type`; the "
+        "media_type relabel is case 61"),
+}
+
 BUILD_EPOCH = "1795008087"
 
 
@@ -218,6 +296,10 @@ def export():
             else:
                 index -= 1
                 skipped.append({"attack": name, "reason": why_not})
+    for row in skipped:
+        note = SKIP_REASON.get(row["attack"])
+        if note:
+            row["reason"] = note
     manifest = {
         "format": "uibc-core/conformance/1",
         "generated_by": "tools/export_conformance.py",

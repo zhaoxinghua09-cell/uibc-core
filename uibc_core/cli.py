@@ -1010,6 +1010,93 @@ def cmd_verify_mcp_authz(args):
     sys.exit(0 if judged and conforming == judged else 1)
 
 
+REVOCATION_LIST_REPORT_FORMAT = "uibc-revocation-list-report/1"
+
+
+def _revocation_list_line(member, verdict, reason, index, exit_code, error=None):
+    """One report line for a revocation list case.
+
+    The refusal travels with its index, because a chain verdict without the
+    position it was reached at would not say which list the verifier stopped on.
+    """
+    line = {
+        "format": REVOCATION_LIST_REPORT_FORMAT,
+        "vector": member,
+        "result": "ERROR" if error else ("PASS" if verdict == "valid" else "FAIL"),
+        "verdict": None if error else verdict,
+        "reason": None if error else reason,
+        "index": None if error else index,
+        "verifier_id": VERIFIER_ID,
+        "verifier_version": __version__,
+        "when_utc": _now_utc(),
+        "exit": exit_code,
+    }
+    if error is not None:
+        line["error"] = str(error)[:300]
+    return line
+
+
+def cmd_verify_revocation_list(args):
+    """Judge a signed, cumulative revocation list under revocation-list/v1.
+
+      * `--case D` judges one case directory (pinned `roots.json` plus the
+        `list-*.json` files in order) and prints, as its last stdout line,
+        `{"verdict", "reason", "index"}`.
+      * `--dir D` judges a corpus and compares every decision, refusal, index,
+        digest and the list in force with the answer key in its `MANIFEST.json`.
+
+    This reader mints and signs nothing: it only says what a list in hand forces.
+    """
+    from . import revocation_list as rl
+
+    report_path = getattr(args, "report", None)
+
+    if getattr(args, "case", None):
+        path = os.path.abspath(args.case)
+        try:
+            result = rl.judge_case(path)
+        except OSError as exc:
+            if report_path:
+                _append_line(report_path,
+                             _revocation_list_line(os.path.basename(path), None, None, None, 3, error=exc))
+            print(f"error: cannot read the case {path}: {exc}", file=sys.stderr)
+            sys.exit(3)
+        if report_path:
+            _append_line(report_path,
+                         _revocation_list_line(os.path.basename(path), result["verdict"],
+                                               result["reason"], result["index"],
+                                               0 if result["verdict"] == "valid" else 1))
+        if result["reason"] != "in_force":
+            print(f"refusal: {result['reason']} at list {result['index']}")
+        print(json.dumps({"verdict": result["verdict"], "reason": result["reason"],
+                          "index": result["index"]}))
+        sys.exit(0 if result["verdict"] == "valid" else 1)
+
+    corpus = os.path.abspath(getattr(args, "dir", None) or ".")
+    if not os.path.isdir(corpus):
+        sys.exit(f"error: corpus directory not found: {corpus}")
+    if not os.path.isfile(os.path.join(corpus, "MANIFEST.json")):
+        sys.exit("error: the corpus carries no MANIFEST.json to answer to")
+
+    summary = rl.judge_corpus(corpus)
+    for record in summary["records"]:
+        ident = record["id"]
+        got, expected = record["got"], record["expected"]
+        if report_path:
+            _append_line(report_path,
+                         _revocation_list_line(ident, got["verdict"] if got.get("decision") else None,
+                                               got["reason"], got["index"],
+                                               0 if record["conforms"] else 1))
+        if record["conforms"]:
+            print(f"{ident}: {got['decision']} (matches the answer key)")
+        else:
+            print(f"{ident}: {got['decision']}, expected {expected['decision']}; "
+                  f"differs on {', '.join(record['mismatched'])}", file=sys.stderr)
+    print(f"{summary['conforming']}/{summary['members']} members conform to the corpus answer key")
+    ok = summary["members"] and summary["conforming"] == summary["members"]
+    sys.exit(0 if ok else 1)
+
+
 def cmd_verify_cose(args):
     """Read SCITT/COSE Transparent Statements under aee-scitt-cose/v0.1.
 
@@ -1416,6 +1503,17 @@ def main():
     p.add_argument("--report", default=None, metavar="JSONL",
                    help="append one uibc-mcp-authz-report/1 line per member")
     p.set_defaults(func=cmd_verify_mcp_authz)
+
+    p = sub.add_parser("verify-revocation-list",
+                       help="read the signed, cumulative revocation list "
+                            "(revocation-list/v1)")
+    p.add_argument("--case", default=None, metavar="DIR",
+                   help="judge one case directory and print verdict/reason/index")
+    p.add_argument("--dir", default=None, metavar="DIR",
+                   help="judge a corpus and compare with its answer key")
+    p.add_argument("--report", default=None, metavar="JSONL",
+                   help="append one uibc-revocation-list-report/1 line per member")
+    p.set_defaults(func=cmd_verify_revocation_list)
 
     p = sub.add_parser("verify-cose", help="read SCITT/COSE Transparent Statements "
                                             "under aee-scitt-cose/v0.1 (corpus or one vector)")

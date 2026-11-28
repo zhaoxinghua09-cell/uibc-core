@@ -220,6 +220,48 @@ the convention allows extra codes. The finding vocabulary is this project's, so
 this is agreement on verdicts and on named faults, not a code-by-code identity
 with the peer's verifier.
 
+## Read a signed revocation list
+
+`uibc_core/revocation_list.py` reads one signed, cumulative revocation list and
+folds it into the state a verifier holds. A list is
+`{"body": BODY, "sig": base64(Ed25519 over "probity-revocation-v1\0" || JCS(BODY))}`;
+lists chain by sequence number and digest; an entry, once published, stays in
+every later list byte for byte; roots are pinned out of band and never read from
+a list. Canonicalisation and signature checking are the ones this package already
+uses for the evidence tier, so the same bytes give the same verdict on both
+sides.
+
+Ten refusals, in the order they are checked, each with the detail that names the
+thing refused:
+
+| code | detail |
+|---|---|
+| `revocation_list_shape` | 27 named faults: `signed_list_unreadable`, `signed_list_members`, `body_members`, `type`, `list_id_form`, `seq_not_a_positive_exact_integer`, `previous_form`, `issuedAt_not_a_utc_second`, `issuedAt_not_a_calendar_instant`, `issuerKey_not_base64`, `issuerKey_not_an_ed25519_key`, `issuerKey_not_canonical_base64`, `entries_not_a_list`, `entry_not_an_object`, `entry_members`, `entry_kind_unknown`, `entry_id_form:<kind>`, `revokedAt_not_a_utc_second`, `revokedAt_not_a_calendar_instant`, `entry_reason_not_text`, `successor_on_non_key_entry`, `successor_not_base64`, `successor_not_an_ed25519_key`, `successor_not_canonical_base64`, `entries_not_strictly_ascending`, `entry_not_canonical`, `body_not_canonical` |
+| `revocation_list_signer_not_a_root` | — |
+| `revocation_list_signature_unverified` | — |
+| `revocation_list_other_chain` | — |
+| `revocation_list_rollback` | `SEQ<=HELD_SEQ` |
+| `revocation_list_gap` | `SEQ>HELD_SEQ+1` |
+| `revocation_list_previous_mismatch` | — |
+| `revocation_list_time_reversed` | — |
+| `revocation_entry_from_future` | — |
+| `revocation_list_drops_entry` | `KIND:ID_TRUNCATED_12` |
+
+A root that is revoked hands over to its successor in the same list: the
+successor joins the pinned set before the revocation takes effect, and every
+revoked key leaves it, so a successor revoked by the same list does not stay.
+
+Measured, 2026-11-28, against `corpora/vectors-revocation-list` (87 members,
+9 accept / 78 reject, head `1ab5db7`, `corpusDigest 87dfad7d...be95`): **87 of 87
+members match the answer key on all five recorded fields** — the decision, the
+refused list's index, the reason as `code:detail`, the digests of the lists up
+to the refused one, and the list in force at the verdict. Reading is ours; their
+harness was not re-run.
+
+The corpus itself is not vendored: `tests/test_revocation_list_corpus.py` runs
+only when `UIBC_REVOCATION_CORPUS` names a checkout, and the checked-in tests
+build their own lists from fixtures signed once with fixed seeds.
+
 ## What this does not do
 
 It does not import a foreign corpus wholesale. A corpus in someone else's layout

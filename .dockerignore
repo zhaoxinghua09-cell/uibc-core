@@ -1,0 +1,14 @@
+# Only what a clone would have anyway. Every pattern here is checked against
+# `git ls-files` before it is added: the container runs `outsider_rerun --check`,
+# which compares the tree inside the image with docs/TRACKED-FILES.txt, so an
+# ignore rule that swallowed a tracked file would turn the container run red
+# instead of quietly verifying a smaller repository.
+.git
+__pycache__
+*.pyc
+.pytest_cache
+.mypy_cache
+.ruff_cache
+htmlcov
+.coverage
+logs*.zip

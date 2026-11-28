@@ -578,6 +578,13 @@ def write_receipt(digest, files, results, content=None, content_files=None,
              "`gh attestation verify conformance/uibc-conformance-0.7.0.zip --repo zhaoxinghua09-cell/uibc-core`。"
              "它证明的是「这些字节在本仓库某次由本仓库签发的运行里出现过」；它**不**证明归档是隔离构建出来的——"
              "归档是仓库里的文件，不是当场构建的产物。这句区别写在这里，免得被当成比实际更强的东西。"]
+    page += ["", "**环境也可以不由标签决定**：`docker/base-image.pin` 写的是基础镜像的 manifest 摘要，"
+             "`docker/Dockerfile` 只许引用这一条（`tools/check_base_image_pin.py` 两边不一致就判红，"
+             "并去注册表确认这个摘要还能拉到、顺带告诉你标签如今漂到哪儿去了）；容器里只装四个按 sha256 钉住的 "
+             "wheel，然后跑同一条 `--check`。自己跑两条命令：",
+             "`docker build -f docker/Dockerfile -t uibc-verify . && docker run --rm uibc-verify`。",
+             "它证明的是「这四步在一个由摘要决定、而不是由标签决定的解释器里同样成立」；它**不**证明容器文件系统"
+             "逐字节可复现——层里的时间戳是构建那一刻的钟。这是钉住的环境，不是可复现的环境。"]
     page += ["", f"**树摘要 `{receipt['tree_sha256'][:16]}…`（{files} 个文件，排除本页与 receipt 自身）**。",
              f"**内容摘要 `{str(receipt.get('content_sha256'))[:16]}…`（只看每个文件的字节，不看文件名）**。",
              "", "为什么有两根轴：路径与内容一起算的那个摘要最严，但也会被解包器连累。"

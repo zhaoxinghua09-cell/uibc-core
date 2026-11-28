@@ -17,6 +17,15 @@ on:
   push:
     branches: [main]
     tags: ["v*"]
+  # A provenance job that only ever runs after the merge is a claim, not evidence:
+  # the pull request that introduces it should be able to show it green. Scoped
+  # narrowly - the archive, its pin, or this file - so it does not fire on every
+  # PR. Fork PRs get no OIDC identity, so this stays off `pull_request_target`.
+  pull_request:
+    paths:
+      - "conformance/uibc-conformance-0.*.zip"
+      - "anchors/pins/*.sha256"
+      - ".github/workflows/build-provenance.yml"
   workflow_dispatch:
 
 permissions:

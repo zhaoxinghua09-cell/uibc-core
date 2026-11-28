@@ -37,6 +37,25 @@ COPY docker/requirements-verify.txt /tmp/requirements-verify.txt
 RUN python -m pip install --no-cache-dir --require-hashes -r /tmp/requirements-verify.txt \
     && python -c "import pytest, sys; print('pytest', pytest.__version__, 'on', sys.version.split()[0])"
 
+# The second implementation's interpreter, pinned by tarball digest.
+#
+# One of the 41 tests shell-outs to `node` and skips itself when node is absent,
+# so without this line the image reported "40 passed, 1 skipped" and passed the
+# fourth step on a slightly narrower set than the host does. Node is installed from
+# the pinned tarball by docker/install-node.py - standard library only, no apt, no
+# unpinned Debian package - and the digest is re-checked before anything is
+# extracted. Only after that can the container also run the cross-implementation
+# digest check (`tools/tree_digest_second_impl.py --check`), which the workflow
+# does as a fifth step.
+ARG NODE_TARBALL=https://nodejs.org/dist/v26.13.1/node-v26.13.1-linux-x64.tar.xz
+ARG NODE_SHA256=5c063e46bab0fbc1c17cc445d7ff129cbdcd0471be6ed83b6ab864f8143bc864
+
+COPY docker/install-node.py /tmp/install-node.py
+RUN NODE_TARBALL="${NODE_TARBALL}" NODE_SHA256="${NODE_SHA256}" \
+    python /tmp/install-node.py \
+    && node --version \
+    && node -e "console.log('node reports', process.version, process.arch, process.platform)"
+
 # The published membership, not a subset: --check compares the tree it finds here
 # against docs/TRACKED-FILES.txt, so a .dockerignore that dropped a tracked file
 # would fail the run rather than quietly shrink it.

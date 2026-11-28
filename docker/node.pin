@@ -1,0 +1,28 @@
+# node.pin - the second implementation's interpreter, pinned by tarball digest.
+#
+# Why this file exists: the four outsider steps end with a pytest run in which one
+# test shell-outs to `node` and skips itself when node is absent. Skipped is not
+# passed. The container built for the first round of this work therefore passed
+# 40 of 41 tests and said so only in a footnote - the number was reported, the
+# reason was not.
+#
+# The fix is not "apt-get install nodejs": that would put an unpinned version,
+# from an unpinned Debian snapshot, into an image whose whole claim is that the
+# environment is fixed by digest. So the Node tarball itself is pinned by sha256:
+#
+#   https://nodejs.org/dist/v26.13.1/node-v26.13.1-linux-x64.tar.xz
+#   sha256 5c063e46bab0fbc1c17cc445d7ff129cbdcd0471be6ed83b6ab864f8143bc864
+#
+# (v26.13.1 "Lithium" LTS, downloaded 2026-11-29; the digest was taken from
+# SHASUMS256.txt published beside the file and then verified against the bytes
+# actually downloaded - 34,093,052 bytes.)
+#
+# One reference, one place: docker/Dockerfile quotes these two lines as the ARGs
+# NODE_TARBALL and NODE_SHA256, and tools/check_base_image_pin.py refuses a tree
+# where the two disagree. The tarball is unpacked by docker/install-node.py with
+# the standard library only, and the unpack step re-checks the digest before
+# anything is extracted.
+
+v26.13.1
+https://nodejs.org/dist/v26.13.1/node-v26.13.1-linux-x64.tar.xz
+sha256 5c063e46bab0fbc1c17cc445d7ff129cbdcd0471be6ed83b6ab864f8143bc864

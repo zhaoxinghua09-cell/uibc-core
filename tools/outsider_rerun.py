@@ -583,6 +583,10 @@ def write_receipt(digest, files, results, content=None, content_files=None,
              "并去注册表确认这个摘要还能拉到、顺带告诉你标签如今漂到哪儿去了）；容器里只装四个按 sha256 钉住的 "
              "wheel，然后跑同一条 `--check`。自己跑两条命令：",
              "`docker build -f docker/Dockerfile -t uibc-verify . && docker run --rm uibc-verify`。",
+             "第二实现也要在这个环境里成立：`docker/node.pin` 用 tarball 的 sha256 钉住 Node（不是版本号），"
+             "解包前重算摘要，解包只装 node/npm/npx 三个链接，不装 apt 包；于是容器里那条依赖 node 的测试不再"
+             "被跳过，`python tools/tree_digest_second_impl.py --check` 也在同一个镜像里跑出 `VERDICT: TREE OK`。"
+             "（第一版镜像没装 node，第四步报的是「40 passed, 1 skipped」——数字对，理由没说，现在理由没了。）",
              "它证明的是「这四步在一个由摘要决定、而不是由标签决定的解释器里同样成立」；它**不**证明容器文件系统"
              "逐字节可复现——层里的时间戳是构建那一刻的钟。这是钉住的环境，不是可复现的环境。"]
     page += ["", f"**树摘要 `{receipt['tree_sha256'][:16]}…`（{files} 个文件，排除本页与 receipt 自身）**。",

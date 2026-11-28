@@ -16,6 +16,13 @@ without reading three files at once:
    moved is not a failure - the pin is doing its job - but it is printed, because
    the next person deciding whether to bump should see how far it has drifted.
 
+A fourth claim covers the second interpreter. docker/node.pin, when it exists,
+names a Node tarball by URL *and* by the sha256 of its bytes, and the Dockerfile
+must quote both as ARGs; the URL must point at the version the pin names. A tree
+without the file is not failed for lacking one - but a tree with it cannot pass
+on a version string alone. That is the same rule as the base image, applied to a
+file rather than to a registry reference, because that is how Node is distributed.
+
 Exit codes: 0 = the three agree, 1 = they do not, 2 = the registry could not be
 reached (the local claim still holds: the message says which half was checked).
 """
@@ -38,6 +45,16 @@ REF_RE = re.compile(r"^(?P<repo>[A-Za-z0-9._/-]+):(?P<tag>[A-Za-z0-9._-]+)@"
 FROM_RE = re.compile(r"^\s*ARG\s+" + ARG_NAME + r"=(?P<ref>[^\s#]+)\s*$", re.M)
 PIN_REL = os.path.join("docker", "base-image.pin")
 DOCKERFILE_REL = os.path.join("docker", "Dockerfile")
+
+# The second interpreter, pinned the same way: not by a version string but by the
+# digest of the tarball that gets unpacked. A version string would let the file
+# behind it change; the digest would not.
+NODE_PIN_REL = os.path.join("docker", "node.pin")
+NODE_URL_RE = re.compile(r"^https://nodejs\.org/dist/v(?P<ver>[0-9]+\.[0-9]+\.[0-9]+)/"
+                         r"node-v(?P=ver)-linux-(?P<arch>x64|arm64)\.tar\.xz$")
+NODE_SHA_RE = re.compile(r"^sha256 (?P<sha>[0-9a-f]{64})$")
+ARG_RE = re.compile(r"^\s*ARG\s+(?P<name>[A-Z_][A-Z_0-9]*)=(?P<val>[^\s#]+)\s*$", re.M)
+NODE_ARGS = ("NODE_TARBALL", "NODE_SHA256")
 
 
 def read_pin(root=HERE):
@@ -135,6 +152,72 @@ def resolve_with_docker_cli(reference):
     return False, tail[-1] if tail else f"docker manifest inspect exited {p.returncode}"
 
 
+def read_node_pin(root=HERE):
+    """-> (url, sha256, None) or (None, None, reason); (None, None, None) if absent.
+
+    Absent is allowed because a tree that never claimed a second interpreter
+    should not be failed for not having one - but once the file exists, a
+    version string without a digest, a short digest, two digests, or a URL whose
+    version disagrees with the version line are all failures, not notes.
+    """
+    path = os.path.join(root, NODE_PIN_REL)
+    if not os.path.exists(path):
+        return None, None, None
+    lines = [l.strip() for l in open(path, encoding="utf-8") if l.strip()]
+    refs = [l for l in lines if not l.startswith("#")]
+    if len(refs) != 3:
+        if len(refs) == 2 and NODE_URL_RE.match(refs[1]):
+            return None, None, (f"{NODE_PIN_REL.replace(os.sep, '/')} has no `sha256 <64 hex>` line; "
+                                "a version without a digest pins nothing")
+        return None, None, (f"{NODE_PIN_REL.replace(os.sep, '/')} must hold a version, a URL and "
+                            f"one `sha256 <64 hex>` line, found {len(refs)} reference lines")
+    ver, url, sha_line = refs
+    m = NODE_URL_RE.match(url)
+    if not m:
+        return None, None, (f"{NODE_PIN_REL.replace(os.sep, '/')} URL {url!r} is not "
+                            "`https://nodejs.org/dist/v<ver>/node-v<ver>-linux-{x64,arm64}.tar.xz`")
+    ver_norm = ver[1:] if ver.startswith("v") else ver
+    if m.group("ver") != ver_norm:
+        return None, None, (f"{NODE_PIN_REL.replace(os.sep, '/')} says version {ver!r} but the "
+                            f"URL points at v{m.group('ver')}")
+    s = NODE_SHA_RE.match(sha_line)
+    if not s:
+        return None, None, (f"{NODE_PIN_REL.replace(os.sep, '/')} line {sha_line!r} is not "
+                            "`sha256 <64 hex>`; a version without a digest pins nothing")
+    return url, s.group("sha"), None
+
+
+def read_dockerfile_args(root=HERE, names=NODE_ARGS):
+    """-> ({name: value}, None) or (None, reason)."""
+    path = os.path.join(root, DOCKERFILE_REL)
+    if not os.path.exists(path):
+        return None, f"{DOCKERFILE_REL.replace(os.sep, '/')} is missing"
+    found = {m.group("name"): m.group("val")
+             for m in ARG_RE.finditer(open(path, encoding="utf-8").read())}
+    missing = [n for n in names if n not in found]
+    if missing:
+        return None, f"{DOCKERFILE_REL.replace(os.sep, '/')} has no `ARG {missing[0]}=...` line"
+    return {n: found[n] for n in names}, None
+
+
+def node_url_reachable(url):
+    """-> (ok_to_continue, note). A 404 is a failure; anything else is a note.
+
+    Not a full download: the build re-checks the bytes anyway, and pulling 34 MB in
+    a checker that runs on every PR would be a cost with no extra claim.
+    """
+    try:
+        req = urllib.request.Request(url, method="HEAD")
+        with urllib.request.urlopen(req, timeout=30) as r:
+            return True, f"HTTP {r.status}, {r.headers.get('Content-Length', '?')} bytes"
+    except urllib.error.HTTPError as e:
+        if e.code == 404:
+            return False, f"HTTP 404: {url} no longer exists"
+        return True, f"HTTP {e.code} on HEAD (the server answered; the pin is unaffected)"
+    except Exception as e:                                          # noqa: BLE001
+        return True, f"could not reach the URL ({type(e).__name__}); the pin is unaffected"
+
+
 def main(argv=None, root=HERE):
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--registry", action="store_true",
@@ -164,6 +247,31 @@ def main(argv=None, root=HERE):
         print("change both in the same commit and say in the message why the base moved.")
         return 1
     print(f"OK   {DOCKERFILE_REL.replace(os.sep, '/')} quotes the pinned reference")
+
+    # Second interpreter, same rule: the digest, not the version string.
+    node_url, node_sha, node_err = read_node_pin(root)
+    if node_err:
+        print("FAIL", node_err)
+        return 1
+    if node_url is None:
+        print("NOTE no docker/node.pin: this tree does not claim a second interpreter")
+    else:
+        df_args, err = read_dockerfile_args(root)
+        if err:
+            print("FAIL", err)
+            print("     docker/node.pin exists, so the Dockerfile must quote it in "
+                  "ARG NODE_TARBALL / ARG NODE_SHA256")
+            return 1
+        if df_args["NODE_TARBALL"] != node_url or df_args["NODE_SHA256"] != node_sha:
+            print(f"FAIL Dockerfile ARG NODE_TARBALL={df_args['NODE_TARBALL']}")
+            print(f"     ARG NODE_SHA256={df_args['NODE_SHA256']}")
+            print(f"     disagrees with docker/node.pin ({node_url}, sha256 {node_sha})")
+            print("\nHOW TO FIX: move the pin, not the tag. Bumping Node is an edit to "
+                  "docker/node.pin\nand the two ARGs in the same commit, and the container job "
+                  "has to run again.")
+            return 1
+        print(f"OK   Dockerfile quotes the pinned Node tarball ({node_url.rsplit('/', 1)[-1]}, "
+              f"sha256 {node_sha[:12]}…)")
 
     if not args.registry:
         print("NOTE registry not checked (--registry asks whether this digest still resolves)")
@@ -201,6 +309,15 @@ def main(argv=None, root=HERE):
         print("     The build uses the pinned digest, not the tag, so nothing moved. Bumping the")
         print("     pin is a deliberate edit: change docker/base-image.pin and the Dockerfile ARG")
         print("     together, and re-run the container job to see the four steps again.")
+
+    if node_url:
+        ok, note = node_url_reachable(node_url)
+        if not ok:
+            print(f"FAIL {note}")
+            print("     a pinned tarball nobody can download is not a pin: point docker/node.pin")
+            print("     at a version that still exists, or mirror it and pin the mirror's digest.")
+            return 1
+        print(f"NOTE Node tarball: {note}")
 
     print("VERDICT: PIN CONSISTENT (pin == Dockerfile == registry)")
     return 0

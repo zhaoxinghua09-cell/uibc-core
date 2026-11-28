@@ -99,3 +99,67 @@ def test_the_dockerfile_is_a_digest_not_a_tag_in_the_build_stage():
     assert from_lines, "no FROM line"
     for line in from_lines:
         assert "@sha256:" in line or "$" in line, line
+
+
+# --- the second interpreter -------------------------------------------------
+#
+# The one test that shell-outs to node skips itself when node is missing, so the
+# first container run reported "40 passed, 1 skipped" and passed the fourth step
+# on a narrower set than the host. Installing node from a pinned tarball is what
+# closes that, and these tests are about the pin being a digest rather than a
+# version string.
+
+NODE_SHA = "a" * 64
+NODE_URL = ("https://nodejs.org/dist/v26.13.1/node-v26.13.1-linux-x64.tar.xz")
+NODE_OK = (f"v26.13.1\n{NODE_URL}\nsha256 {NODE_SHA}\n")
+DF_WITH_NODE = (DOCKERFILE_OK + f'ARG NODE_TARBALL={NODE_URL}\nARG NODE_SHA256={NODE_SHA}\n')
+
+
+def _tree2(tmp_path, pin_text, dockerfile_text, node_text=None):
+    root = _tree(tmp_path, pin_text, dockerfile_text)
+    if node_text is not None:
+        (tmp_path / "docker" / "node.pin").write_text(node_text, encoding="utf-8")
+    return root
+
+
+def test_the_repository_pins_node_by_digest_too():
+    url, sha, err = pin.read_node_pin(ROOT)
+    assert err is None, err
+    assert url and len(sha) == 64
+    args, err = pin.read_dockerfile_args(ROOT)
+    assert err is None, err
+    assert args["NODE_TARBALL"] == url and args["NODE_SHA256"] == sha
+
+
+def test_a_node_version_without_a_digest_is_refused(tmp_path):
+    root = _tree2(tmp_path, REF + "\n", DOCKERFILE_OK,
+                  "v26.13.1\n" + NODE_URL + "\n")
+    _, _, err = pin.read_node_pin(root)
+    assert err and "pins nothing" in err
+
+
+def test_a_node_url_whose_version_disagrees_with_the_pin_is_refused(tmp_path):
+    root = _tree2(tmp_path, REF + "\n", DOCKERFILE_OK,
+                  "v26.13.0\n" + NODE_URL + f"\nsha256 {NODE_SHA}\n")
+    _, _, err = pin.read_node_pin(root)
+    assert err and "URL points at v26.13.1" in err
+
+
+def test_the_dockerfile_must_quote_the_node_pin(tmp_path):
+    other = "https://nodejs.org/dist/v24.0.0/node-v24.0.0-linux-x64.tar.xz"
+    root = _tree2(tmp_path, REF + "\n",
+                  DOCKERFILE_OK + f"ARG NODE_TARBALL={other}\nARG NODE_SHA256={NODE_SHA}\n",
+                  NODE_OK)
+    proc = subprocess.run([sys.executable, MODULE, "--root", root],
+                          capture_output=True, text=True)
+    assert proc.returncode == 1, proc.stdout + proc.stderr
+    assert "disagrees with docker/node.pin" in proc.stdout
+
+
+def test_a_tree_without_the_node_pin_is_merely_a_note(tmp_path):
+    root = _tree2(tmp_path, REF + "\n", DOCKERFILE_OK, None)
+    proc = subprocess.run([sys.executable, MODULE, "--root", root],
+                          capture_output=True, text=True)
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    assert "does not claim a second interpreter" in proc.stdout
+

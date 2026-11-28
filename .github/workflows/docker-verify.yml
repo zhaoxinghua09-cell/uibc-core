@@ -56,13 +56,14 @@ jobs:
       - name: Build the verifier image from the pinned base
         run: docker build -f docker/Dockerfile -t uibc-verify:${{ github.sha }} .
 
-      - name: State what was built (image id, base, interpreter, pytest)
+      - name: State what was built (image id, base, interpreter, pytest, node)
         run: |
           docker image inspect --format 'image id {{.Id}}' uibc-verify:${{ github.sha }}
           echo "base (from the pin, enforced by base-pin): $(grep -v '^#' docker/base-image.pin | tail -1)"
           docker run --rm uibc-verify:${{ github.sha }} \
             python -c "import sys, pytest; print('python', sys.version.split()[0], 'pytest', pytest.__version__)"
-          sha256sum docker/base-image.pin docker/requirements-verify.txt
+          docker run --rm uibc-verify:${{ github.sha }} node --version
+          sha256sum docker/base-image.pin docker/requirements-verify.txt docker/node.pin
 
       - name: Four steps inside the pinned environment
         run: |
@@ -73,6 +74,22 @@ jobs:
         run: |
           grep -c -E "PASS (gate|parity|demo|tests) " container-run.log | grep -Fx 4
           grep -F "OUTSIDER OK" container-run.log
+          if grep -q "skipped" container-run.log; then
+            echo "a step reported a skipped test: the environment is narrower than the claim"
+            grep "skipped" container-run.log
+            exit 1
+          fi
+
+      - name: The second implementation agrees inside the pinned environment
+        run: |
+          set -o pipefail
+          docker run --rm uibc-verify:${{ github.sha }} \
+            python tools/tree_digest_second_impl.py --check | tee container-tree.log
+          grep -F "VERDICT: TREE OK" container-tree.log
+          if grep -q "SKIP: no node binary" container-tree.log; then
+            echo "node was supposed to be installed from docker/node.pin"
+            exit 1
+          fi
 
       - name: The shipped receipt still answers for the shipped tree
         run: |
@@ -108,4 +125,5 @@ jobs:
           path: |
             container-run.log
             container-check.log
+            container-tree.log
           if-no-files-found: warn

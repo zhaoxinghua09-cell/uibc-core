@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-28T14:11:06Z",
+ "generated_at": "2026-11-28T14:11:47Z",
  "tree_sha256": "a031ef3243e7d2fe65c4a87c41dda6cdd171e264ecdbe072e16eec126449e58e",
  "files_hashed": 2557,
  "content_sha256": "cff4c532ac225e963e589f91153f2ff5aae060450df7cd5596734359483c2309",
@@ -304,7 +304,7 @@
    ],
    "missing": [],
    "ok": true,
-   "seconds": 0.7,
+   "seconds": 0.6,
    "stdout_sha256": "5e12fa3725d323bd994ffa45469fa7ef027fd4f8510357bfc39b900891b4c6f2",
    "tail": "GATE OK"
   },
@@ -333,7 +333,7 @@
    ],
    "missing": [],
    "ok": true,
-   "seconds": 0.4,
+   "seconds": 0.5,
    "stdout_sha256": "96ad7c7274e78f4d3b138957aec96cc67f217585d9f1479216a81d8507063309",
    "tail": "ALL OK"
   },
@@ -347,9 +347,9 @@
    ],
    "missing": [],
    "ok": true,
-   "seconds": 7.3,
+   "seconds": 7.9,
    "stdout_sha256": "ec2f02dd08839abcf9b2cd9ae69d74d2594ef160ab6a460837c26b4ab34f70cc",
-   "tail": "41 passed in 5.82s"
+   "tail": "41 passed in 6.36s"
   }
  ],
  "ok": true

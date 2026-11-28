@@ -87,6 +87,34 @@ def _decode_point(data: bytes):
     return (x, y, 1, x * y % _Q)
 
 
+def _canonical_y(data: bytes) -> bool:
+    """True iff the 32 bytes encode a y that is already reduced mod q.
+
+    Measured 2026-11-27: y == q (i.e. y = q + 0) was decoded without complaint and
+    produced a second byte encoding of the point y=0. RFC 8032 5.1.3 requires the
+    reduced value, so a second encoding of the same point must be refused rather than
+    accepted as a distinct signature.
+    """
+    if len(data) != 32:
+        return False
+    return (int.from_bytes(data, "little") & ((1 << 255) - 1)) < _Q
+
+
+def _small_order(P) -> bool:
+    """True iff [8]P is the identity, i.e. the point has order dividing 8.
+
+    Measured 2026-11-27: a public key of the identity point with R = identity and S = 0
+    verified every message, because both sides of [S]B == R + [h]A are the identity.
+    That signature is produced without any secret, so 'signature valid' could not be
+    read as 'the signer knew a private key'. Refusing small-order points restores that
+    reading; RFC 8032 5.1.7 permits (and libsodium practises) this rejection.
+    """
+    for _ in range(3):
+        P = _edwards_add(P, P)
+    zi = pow(P[2], _Q - 2, _Q)
+    return (P[0] * zi) % _Q == 0 and (P[1] * zi) % _Q == 1
+
+
 def _hint(data: bytes) -> int:
     return int.from_bytes(_sha512(data), "little")
 
@@ -127,6 +155,10 @@ def verify(public_key: bytes, message: bytes, signature: bytes) -> bool:
         A = _decode_point(public_key)
         S = _decode_int(signature[32:])
         if S >= _L:
+            return False
+        if not (_canonical_y(public_key) and _canonical_y(signature[:32])):
+            return False
+        if _small_order(A) or _small_order(R):
             return False
         h = _hint(signature[:32] + public_key + message) % _L
         # [S]B == R + [H]A  (checked in extended coordinates via affine compare)

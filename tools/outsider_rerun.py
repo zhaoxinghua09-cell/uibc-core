@@ -72,6 +72,15 @@ STEPS = (
                "tests/test_parity_realrun.py", "-q"], "passed"),
 )
 
+# What each step must print, not merely exit zero on. A step whose command still
+# returns 0 but no longer says "0 failed" is not evidence that nothing failed.
+ASSERTS = {
+    "gate": ("0 failed",),
+    "parity": ("repositories pinned", "re-scored"),
+    "demo": ("ALL OK",),
+    "tests": ("passed",),
+}
+
 ENV_KEEP = ("PATH", "SYSTEMROOT", "SYSTEMDRIVE", "WINDIR", "TEMP", "TMP", "HOME",
             "USERPROFILE", "LANG", "LC_ALL", "PYTHONUTF8", "PYTHONIOENCODING")
 
@@ -320,6 +329,7 @@ def run(steps_only=None):
     for name, cmd, expect in STEPS:
         if steps_only and name not in steps_only:
             continue
+        must = ASSERTS.get(name, ())
         t0 = time.time()
         try:
             proc = subprocess.run(cmd, cwd=work, capture_output=True, text=True,
@@ -328,11 +338,14 @@ def run(steps_only=None):
         except Exception as exc:                                     # noqa: BLE001
             out, err, rc = "", f"{type(exc).__name__}: {exc}", 124
         tail = (out.strip().splitlines() or [""])[-1][:160]
-        ok = rc == 0 and expect in out
+        missing = [m for m in must if m not in out]
+        ok = rc == 0 and expect in out and not missing
         results.append({"step": name, "cmd": " ".join(cmd[1:]), "rc": rc,
-                        "expect": expect, "ok": ok, "seconds": round(time.time() - t0, 1),
+                        "expect": expect, "asserts": list(must), "missing": missing,
+                        "ok": ok, "seconds": round(time.time() - t0, 1),
                         "tail": tail or err.strip().splitlines()[-1][:160]})
-        print(f"{'PASS' if ok else 'FAIL'} {name:6s} rc={rc} {round(time.time() - t0, 1)}s :: {tail}")
+        print(f"{'PASS' if ok else 'FAIL'} {name:6s} rc={rc} {round(time.time() - t0, 1)}s :: {tail}"
+              + (f" | missing: {missing}" if missing else ""))
     shutil.rmtree(tmp, ignore_errors=True)
     return {"digest": digest, "files": count, "content_digest": cdigest,
             "content_files": ccount, "content_lf_digest": lfdigest,
@@ -439,11 +452,15 @@ def write_receipt(digest, files, results, content=None, content_files=None,
             f"{receipt['runner']['system']}。", "",
             "做法：把仓库整棵拷到临时目录（不含 `.git`、不含任何缓存），用只保留白名单变量的干净环境，"
             "在该目录下跑四个公开入口；每一步记录退出码与输出末行；整棵树的 sha256 一并记下。", "",
-            "| 步骤 | 命令 | 退出码 | 结果 | 耗时 |", "|---|---|---|---|---|"]
+            "| 步骤 | 命令 | 必须出现的字样 | 退出码 | 结果 | 耗时 |", "|---|---|---|---|---|---|"]
     for r in results:
-        page.append("| {step} | `{cmd}` | {rc} | {ok} | {seconds}s |".format(
-            step=r["step"], cmd=r["cmd"], rc=r["rc"], ok="PASS" if r["ok"] else "FAIL",
-            seconds=r["seconds"]))
+        page.append("| {step} | `{cmd}` | {asserts} | {rc} | {ok} | {seconds}s |".format(
+            step=r["step"], cmd=r["cmd"],
+            asserts="；".join("`%s`" % m for m in r.get("asserts") or []) or "—",
+            rc=r["rc"], ok="PASS" if r["ok"] else "FAIL", seconds=r["seconds"]))
+    page += ["", "**为什么记的是字样而不只是退出码**：`rc=0` 只说明进程没崩。每一步还记下它必须印出的"
+             "几处字样（例如 `0 failed`、`repositories pinned`、`passed`），重跑时任何一处没出现，这一步就"
+             "判 FAIL——所以陌生人不必相信 \"PASS\" 这个词，他可以看这几处字样自己有没有看见。"]
     page += ["", f"**树摘要 `{receipt['tree_sha256'][:16]}…`（{files} 个文件，排除本页与 receipt 自身）**。",
              f"**内容摘要 `{str(receipt.get('content_sha256'))[:16]}…`（只看每个文件的字节，不看文件名）**。",
              "", "为什么有两根轴：路径与内容一起算的那个摘要最严，但也会被解包器连累。"
@@ -541,6 +558,8 @@ def check():
             fails.append(f"step {s.get('step')} did not pass in the recorded run")
         if s.get("expect") and s["expect"] not in (s.get("tail") or ""):
             fails.append(f"step {s.get('step')} tail does not carry its marker {s['expect']!r}")
+        if not s.get("asserts"):
+            fails.append(f"step {s.get('step')} records no asserted wording")
     if sorted(receipt.get("digest_excludes", [])) != sorted(GENERATED):
         fails.append("receipt excludes a different set of files than the checker")
     mf = receipt.get("files_manifest") or {}

@@ -1,0 +1,83 @@
+{
+ "schema": "uibc-freshness-vectors/1",
+ "as_of": "2026-11-29",
+ "package": "examples/demo.uibc",
+ "subject": "demo-agent-001",
+ "head": "sha256:64c95b247f64f696eb9a76e9900309956783fe7e130334f18b7394570c44f392",
+ "cases": [
+  {
+   "id": "01-first-observation",
+   "state": "states/empty.json",
+   "overlay": null,
+   "expect": "INCONCLUSIVE",
+   "why": "a first observation has nothing to compare against; a PASS here would assert the package is newer than something never seen"
+  },
+  {
+   "id": "02-same-package-twice",
+   "state": "states/after-first.json",
+   "overlay": null,
+   "expect": "PASS",
+   "why": "same head as the recorded observation"
+  },
+  {
+   "id": "03-no-state-no-line",
+   "state": null,
+   "overlay": null,
+   "expect": "ABSENT",
+   "why": "without a state file the check must not appear at all - an unearned PASS on an input nobody supplied is the failure mode this vector catches"
+  },
+  {
+   "id": "04-regressed-sequence",
+   "state": "states/seq-7.json",
+   "overlay": {
+    "freshness_head": {
+     "sequence": 4
+    }
+   },
+   "expect": "FAIL",
+   "why": "an older sequence presented as current is a rollback"
+  },
+  {
+   "id": "05-fork-same-sequence",
+   "state": "states/seq-7-other-head.json",
+   "overlay": {
+    "freshness_head": {
+     "sequence": 7
+    }
+   },
+   "expect": "FAIL",
+   "why": "the state records one head at sequence 7 and the package presents another: a fork at the same number, which no later observation can resolve"
+  },
+  {
+   "id": "06-prev-head-mismatch",
+   "state": "states/seq-7.json",
+   "overlay": {
+    "freshness_head": {
+     "sequence": 8,
+     "prev_head": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+    }
+   },
+   "expect": "FAIL",
+   "why": "claiming to descend from a head that was never recorded"
+  },
+  {
+   "id": "07-advance-with-prev-head",
+   "state": "states/seq-7.json",
+   "overlay": {
+    "freshness_head": {
+     "sequence": 8,
+     "prev_head": "HEAD_BEFORE"
+    }
+   },
+   "expect": "PASS",
+   "why": "a genuinely newer state that names the previous head"
+  },
+  {
+   "id": "08-unreadable-state",
+   "state": "states/corrupt.json.txt",
+   "overlay": null,
+   "expect": "FAIL",
+   "why": "a state file that cannot be parsed is a failure to check, not a pass"
+  }
+ ]
+}

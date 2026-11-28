@@ -1,0 +1,8 @@
+{
+ "schema": "uibc-freshness/1",
+ "subjects": {
+  "demo-agent-001": {
+   "head": "sha256:64c95b247f64f696eb9a76e9900309956783fe7e130334f18b7394570c44f392"
+  }
+ }
+}

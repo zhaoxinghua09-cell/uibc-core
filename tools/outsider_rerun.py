@@ -62,16 +62,24 @@ IGNORE = (".git", "__pycache__", ".pytest_cache", ".mypy_cache", ".ruff_cache",
           "*.pyc", "*.pyo", "*.egg-info")
 
 STEPS = (
-    ("gate", [sys.executable, "tools/mutation_gate.py"], "GATE OK", ("0 failed",)),
-    ("parity", [sys.executable, "tools/competitor_gate_parity.py"], "PARITY OK",
-     ("repositories pinned", "re-scored")),
-    ("demo", [sys.executable, "tools/demo_bid_binary.py"], "ALL OK", ("ALL OK",)),
+    ("gate", [sys.executable, "tools/mutation_gate.py"], "GATE OK"),
+    ("parity", [sys.executable, "tools/competitor_gate_parity.py"], "PARITY OK"),
+    ("demo", [sys.executable, "tools/demo_bid_binary.py"], "ALL OK"),
     ("tests", [sys.executable, "-m", "pytest", "tests/test_mutation_gate.py",
                "tests/test_competitor_parity.py", "tests/test_parity_board.py",
                "tests/test_refs_check.py", "tests/test_parity_sensitivity.py",
                "tests/test_parity_audit.py",
-               "tests/test_parity_realrun.py", "-q"], "passed", ("passed",)),
+               "tests/test_parity_realrun.py", "-q"], "passed"),
 )
+
+# What each step must print, not merely exit zero on. A step whose command still
+# returns 0 but no longer says "0 failed" is not evidence that nothing failed.
+ASSERTS = {
+    "gate": ("0 failed",),
+    "parity": ("repositories pinned", "re-scored"),
+    "demo": ("ALL OK",),
+    "tests": ("passed",),
+}
 
 ENV_KEEP = ("PATH", "SYSTEMROOT", "SYSTEMDRIVE", "WINDIR", "TEMP", "TMP", "HOME",
             "USERPROFILE", "LANG", "LC_ALL", "PYTHONUTF8", "PYTHONIOENCODING")
@@ -318,9 +326,10 @@ def run(steps_only=None):
     copy_tree(work)
     env = clean_env()
     results = []
-    for name, cmd, expect, must in STEPS:
+    for name, cmd, expect in STEPS:
         if steps_only and name not in steps_only:
             continue
+        must = ASSERTS.get(name, ())
         t0 = time.time()
         try:
             proc = subprocess.run(cmd, cwd=work, capture_output=True, text=True,

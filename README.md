@@ -23,6 +23,13 @@ only `--pubkey` or `--key` — a channel the package does not control — earns
 > 它和仓库对不上时 `--check` 会红；六个维度的"我们缺什么"逐条列出，不留形容词。
 > **中文导读（五分钟）** → **[docs/zh-guide.md](docs/zh-guide.md)** — 三律在代码里落在哪、`PASS` 的确切含义、21 类篡改逐类结果、两台机器上的复核延迟，以及本仓现在还差什么（含红队的灰区）。每一句能对外说的话，钉到一条你能跑的命令上：**[docs/claims-register.md](docs/claims-register.md)**。
 
+## 获取 / 反馈 / 参与 / 安全
+
+- **获取**：`pip install uibc-core`（或用源码：`git clone --depth 1` 后 `pip install -e .`）；不装不克隆也能跑语料，见下一节。
+- **反馈**：缺陷、异议、可复现的分歧都走 [Issues](https://github.com/zhaoxinghua09-cell/uibc-core/issues)——可搜索、可按 URL 引用、不需要装任何客户端软件。
+- **参与**：流程写在 [CONTRIBUTING.md](CONTRIBUTING.md)（分支、PR、改动必须带测试、CI 全绿才合）；行为准则 [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)，角色与决策 [GOVERNANCE.md](GOVERNANCE.md)。
+- **安全**：漏洞**不要开公开 issue**，按 [SECURITY.md](SECURITY.md) 报（邮箱 + 仓库已开启 GitHub 私密漏洞上报，5 个工作日内首次答复）。
+
 ## Verify it yourself — one command, no install, no account
 
 ```bash

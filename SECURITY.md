@@ -36,7 +36,8 @@ Out of scope (by design, and documented as such):
 
 | Version | Status |
 |---|---|
-| 0.2.x (current) | Supported |
+| 0.5.x (current) | Supported — security fixes land here |
+| 0.4.x and earlier | Unsupported — no security fixes; upgrade to 0.5.x |
 | 0.1.x | Unsupported — v0.1 had no signatures and a full-forgery case was **demonstrably UNDETECTED**. Do not rely on it. |
 
 ## Reporting a vulnerability

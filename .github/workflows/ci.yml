@@ -30,13 +30,13 @@ jobs:
         # The `verify` extra is installed on purpose: without it 17 tests exercise a
         # fallback instead of the real verification path (measured on 3.12, 2026-11-17).
         run: |
-          python -m pip wheel --wheel-dir "$RUNNER_TEMP/ci-wheels" pytest ".[verify]"
-          python -m pip install --no-deps "$RUNNER_TEMP/ci-wheels"/*.whl
+          python -m pip wheel --wheel-dir .ci-wheels pytest ".[verify]"
+          python -m pip install --no-deps .ci-wheels/*.whl
 
       - name: Install the package (exercises the build backend + console entry point)
         run: |
-          python -m pip wheel --wheel-dir "$RUNNER_TEMP/ci-wheels" .
-          python -m pip install --no-deps "$RUNNER_TEMP/ci-wheels"/*.whl
+          python -m pip wheel --wheel-dir .ci-wheels .
+          python -m pip install --no-deps .ci-wheels/*.whl
 
       - name: Run test suite
         run: python -m pytest tests -q
@@ -76,8 +76,8 @@ jobs:
 
       - name: Install test deps
         run: |
-          python -m pip wheel --wheel-dir "$RUNNER_TEMP/ci-wheels" pytest ".[verify]"
-          python -m pip install --no-deps "$RUNNER_TEMP/ci-wheels"/*.whl
+          python -m pip wheel --wheel-dir .ci-wheels pytest ".[verify]"
+          python -m pip install --no-deps .ci-wheels/*.whl
 
       - name: The platform-dependent branches, named
         run: python -c "import platform,sys; print(platform.platform(), sys.version)"
@@ -111,8 +111,8 @@ jobs:
       - name: Install test deps
         shell: bash
         run: |
-          python -m pip wheel --wheel-dir "$RUNNER_TEMP/ci-wheels" pytest ".[verify]"
-          python -m pip install --no-deps "$RUNNER_TEMP/ci-wheels"/*.whl
+          python -m pip wheel --wheel-dir .ci-wheels pytest ".[verify]"
+          python -m pip install --no-deps .ci-wheels/*.whl
 
       - name: Re-checkout the tree the way Git-for-Windows does by default
         shell: bash
@@ -223,8 +223,8 @@ jobs:
 
       - name: Install the suite with every optional dependency present
         run: |
-          python -m pip wheel --wheel-dir "$RUNNER_TEMP/ci-wheels" pytest ".[verify,interop,conformance]"
-          python -m pip install --no-deps "$RUNNER_TEMP/ci-wheels"/*.whl
+          python -m pip wheel --wheel-dir .ci-wheels pytest ".[verify,interop,conformance]"
+          python -m pip install --no-deps .ci-wheels/*.whl
 
       - name: Run the whole suite and refuse a dependency-shaped skip
         run: |
@@ -254,8 +254,8 @@ jobs:
 
       - name: Build an sdist
         run: |
-          python -m pip wheel --wheel-dir "$RUNNER_TEMP/ci-wheels" build
-          python -m pip install --no-deps "$RUNNER_TEMP/ci-wheels"/*.whl
+          python -m pip wheel --wheel-dir .ci-wheels build
+          python -m pip install --no-deps .ci-wheels/*.whl
           python -m build --sdist
 
       - name: Run the suite from the unpacked archive
@@ -263,8 +263,8 @@ jobs:
           mkdir -p /tmp/sd
           tar xzf dist/uibc_core-*.tar.gz -C /tmp/sd
           cd /tmp/sd/uibc_core-*
-          python -m pip wheel --wheel-dir "$RUNNER_TEMP/ci-wheels" pytest ".[verify]"
-          python -m pip install --no-deps "$RUNNER_TEMP/ci-wheels"/*.whl
+          python -m pip wheel --wheel-dir .ci-wheels pytest ".[verify]"
+          python -m pip install --no-deps .ci-wheels/*.whl
           python -m pytest tests -q
 
       - name: Assert the archive carried the whole suite
@@ -293,8 +293,8 @@ jobs:
 
       - name: The checker's own tests
         run: |
-          python -m pip wheel --wheel-dir "$RUNNER_TEMP/ci-wheels" pytest
-          python -m pip install --no-deps "$RUNNER_TEMP/ci-wheels"/*.whl
+          python -m pip wheel --wheel-dir .ci-wheels pytest
+          python -m pip install --no-deps .ci-wheels/*.whl
           python tools/check_register_row.py --self-test
           python -m pytest tests/test_register_row.py -q
 
@@ -318,8 +318,8 @@ jobs:
 
       - name: Install test deps
         run: |
-          python -m pip wheel --wheel-dir "$RUNNER_TEMP/ci-wheels" pytest ".[verify]"
-          python -m pip install --no-deps "$RUNNER_TEMP/ci-wheels"/*.whl
+          python -m pip wheel --wheel-dir .ci-wheels pytest ".[verify]"
+          python -m pip install --no-deps .ci-wheels/*.whl
 
       - name: Node the runner already ships is enough
         run: node --version
@@ -499,13 +499,13 @@ jobs:
 
       - name: Install test deps
         run: |
-          python -m pip wheel --wheel-dir "$RUNNER_TEMP/ci-wheels" pytest ".[verify]"
-          python -m pip install --no-deps "$RUNNER_TEMP/ci-wheels"/*.whl
+          python -m pip wheel --wheel-dir .ci-wheels pytest ".[verify]"
+          python -m pip install --no-deps .ci-wheels/*.whl
 
       - name: Install the package
         run: |
-          python -m pip wheel --wheel-dir "$RUNNER_TEMP/ci-wheels" .
-          python -m pip install --no-deps "$RUNNER_TEMP/ci-wheels"/*.whl
+          python -m pip wheel --wheel-dir .ci-wheels .
+          python -m pip install --no-deps .ci-wheels/*.whl
 
       - name: Every crosswalk reproduces its committed result
         # One command, the same one a reader runs. It re-runs every probe, compares
@@ -537,14 +537,14 @@ jobs:
       - name: Install test deps
         shell: bash
         run: |
-          python -m pip wheel --wheel-dir "$RUNNER_TEMP/ci-wheels" pytest ".[verify]"
-          python -m pip install --no-deps "$RUNNER_TEMP/ci-wheels"/*.whl
+          python -m pip wheel --wheel-dir .ci-wheels pytest ".[verify]"
+          python -m pip install --no-deps .ci-wheels/*.whl
 
       - name: Install the package
         shell: bash
         run: |
-          python -m pip wheel --wheel-dir "$RUNNER_TEMP/ci-wheels" .
-          python -m pip install --no-deps "$RUNNER_TEMP/ci-wheels"/*.whl
+          python -m pip wheel --wheel-dir .ci-wheels .
+          python -m pip install --no-deps .ci-wheels/*.whl
 
       - name: Every crosswalk reproduces its committed result under cmd.exe
         run: python tools/recheck.py
@@ -584,8 +584,8 @@ jobs:
         run: |
           # atheris 2.3.0 publishes cp312 manylinux wheels; if the wheel is
           # missing the source build needs clang, which ubuntu-latest has.
-          python -m pip wheel --wheel-dir "$RUNNER_TEMP/ci-wheels" . atheris
-          python -m pip install --no-deps "$RUNNER_TEMP/ci-wheels"/*.whl
+          python -m pip wheel --wheel-dir .ci-wheels . atheris
+          python -m pip install --no-deps .ci-wheels/*.whl
 
       - name: Fuzz the canonicaliser for 30 seconds
         run: python fuzz/fuzz_jcs.py -max_total_time=30 -print_final_stats=1

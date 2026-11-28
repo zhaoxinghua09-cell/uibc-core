@@ -28,8 +28,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          python -m pip wheel --wheel-dir "$RUNNER_TEMP/ci-wheels" cryptography asn1crypto
-          python -m pip install --no-deps "$RUNNER_TEMP/ci-wheels"/*.whl
+          python -m pip wheel --wheel-dir .ci-wheels cryptography asn1crypto
+          python -m pip install --no-deps .ci-wheels/*.whl
           set +e
           python tools/check_release_anchors.py --json > anchors-report.json
           code=$?

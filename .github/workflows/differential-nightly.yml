@@ -28,8 +28,8 @@ jobs:
 
       - name: Install
         run: |
-          python -m pip wheel --wheel-dir "$RUNNER_TEMP/ci-wheels" ".[verify]"
-          python -m pip install --no-deps "$RUNNER_TEMP/ci-wheels"/*.whl
+          python -m pip wheel --wheel-dir .ci-wheels ".[verify]"
+          python -m pip install --no-deps .ci-wheels/*.whl
 
       - name: Produce the machine-readable report
         run: python tools/oracle_check.py --json-out differential-report.json
@@ -78,8 +78,8 @@ jobs:
 
       - name: Install
         run: |
-          python -m pip wheel --wheel-dir "$RUNNER_TEMP/ci-wheels" ".[verify]"
-          python -m pip install --no-deps "$RUNNER_TEMP/ci-wheels"/*.whl
+          python -m pip wheel --wheel-dir .ci-wheels ".[verify]"
+          python -m pip install --no-deps .ci-wheels/*.whl
 
       - name: Fetch the corpus we do not own
         shell: bash

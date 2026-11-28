@@ -1332,6 +1332,7 @@ docs/gateway-conformance-0174.json
 docs/gateway-conformance-0174.md
 docs/governance.md
 docs/outsider-rerun-receipt.json
+docs/outsider-rerun-receipt.json.ots
 docs/parity-board.html
 docs/parity-d3-bracket.json
 docs/parity-sensitivity.json

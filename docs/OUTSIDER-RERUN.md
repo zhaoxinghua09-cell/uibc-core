@@ -1,6 +1,6 @@
 # 外人重跑：换一个目录、换一套环境，还成不成立
 
-生成时间 2026-11-28T13:18:15Z，运行环境 Python 3.13.18 / Windows。
+生成时间 2026-11-28T13:18:46Z，运行环境 Python 3.13.18 / Windows。
 
 做法：把仓库整棵拷到临时目录（不含 `.git`、不含任何缓存），用只保留白名单变量的干净环境，在该目录下跑四个公开入口；每一步记录退出码与输出末行；整棵树的 sha256 一并记下。
 
@@ -16,13 +16,13 @@
 **环境也记下来，不让你猜**：`Python 3.13.18` / CPython，`PYTHONHASHSEED=0`（集合顺序不会自己变），`PYTHONNOUSERSITE=1`（谁自己 pip 装的包不能替你做决定），`PYTHONPATH` 清空。当时这台机器上的第三方包共 135 个，清单的 sha256 是 `67a778709404e47c`（全表在收据 `environment.distributions` 里）。
 换一台机器时，把 Python 版本对齐、让 pytest 在位即可；若上面那批字样不一致，差异在环境，不在收据。
 
-**树摘要 `1e7a4627ec9451f0…`（2557 个文件，排除本页与 receipt 自身）**。
-**内容摘要 `e20b8b0aef6cf1fc…`（只看每个文件的字节，不看文件名）**。
+**树摘要 `dedbdae00fcdd806…`（2557 个文件，排除本页与 receipt 自身）**。
+**内容摘要 `8d4fa61f3bf0f7e5…`（只看每个文件的字节，不看文件名）**。
 
 为什么有两根轴：路径与内容一起算的那个摘要最严，但也会被解包器连累。Windows 自带的 `tar` 把 UTF-8 文件名当 CP936 解，出来的 `r茅sum茅.md` 一个字节都没错，严摘要却红。于是收据同时记一根只算内容的摘要，`--check` 因此能说出是 `NAMES-ONLY`（字节全同、名字坏了，问题在你的解包器）还是 `CONTENT`（真的有字节动了）。
 在 Windows 上解包请用 `python -c "import tarfile,sys;tarfile.open(sys.argv[1]).extractall(sys.argv[2])" <包> <目录>`，或直接在 POSIX 上解包。
 
-**第三根轴 `62f3247b0eac8bd7…`：内容摘要再折一次换行（CRLF→LF）**，收据记的是 `commit` 这一路的字节。原因实测：本仓有 83 个文件的 blob 按 CRLF 存，而 `.gitattributes` 写的是 `text=auto eol=lf`——`git archive` 给的是存储的字节，检出给的是规整后的字节，同一个提交两条通道给两套字节。这一根轴用来把"换行差异"与"有人改了字节"分开，`--check` 因此能报 `VERDICT: DELIVERY MATCH`（同名同内容、只差换行）。
+**第三根轴 `17b550422c046c9d…`：内容摘要再折一次换行（CRLF→LF）**，收据记的是 `commit` 这一路的字节。原因实测：本仓有 83 个文件的 blob 按 CRLF 存，而 `.gitattributes` 写的是 `text=auto eol=lf`——`git archive` 给的是存储的字节，检出给的是规整后的字节，同一个提交两条通道给两套字节。这一根轴用来把"换行差异"与"有人改了字节"分开，`--check` 因此能报 `VERDICT: DELIVERY MATCH`（同名同内容、只差换行）。
 
 **先拿归档**：`conformance/uibc-conformance-0.7.0.zip`，1087869 字节，sha256 `fbdb7b80d341f9fd7761b201175fdcfde40b3f227f1426f95184730865604602`。
 这一份不需要我们的任何程序，也不需要信任本页的任何数字——下载后自己算 sha256，对上就说明拿到的正是收据描述的那一份：

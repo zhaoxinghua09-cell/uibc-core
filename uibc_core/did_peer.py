@@ -34,7 +34,7 @@ import base64
 import json
 
 from .did import (DIDError, NotSelfResolving, _ED25519_MULTICODEC,
-                  _X25519_MULTICODEC, _b58decode, _b58encode)
+                  _X25519_MULTICODEC, _b58decode)
 
 METHOD = "peer"
 

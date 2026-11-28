@@ -1,7 +1,6 @@
 """One command must keep being the way to check all seven claims."""
 
 import os
-import re
 import unittest
 import xml.etree.ElementTree as ET
 

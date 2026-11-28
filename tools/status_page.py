@@ -11,12 +11,10 @@ page, because it is quoted.
 """
 
 import argparse
-import hashlib
 import io
 import json
 import os
 import re
-import sys
 import zipfile
 
 PAGE = "STATUS.md"

@@ -2,14 +2,12 @@ import json
 import os
 import sys
 
-import pytest
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(REPO, "tools"))
 
 import check_config_change as cc  # noqa: E402
 from uibc_core import ed25519  # noqa: E402
-from uibc_core.canonical import canonicalize  # noqa: E402
 
 SEED = bytes(range(32))
 OTHER = bytes(range(1, 33))

@@ -13,20 +13,17 @@ draft's mandatory list, not our convenience:
   * an empty chain is rejected, not passed.
 """
 
-import base64
 import os
 import sys
 import unittest
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from uibc_core.compliance import (GENESIS, build_receipt, canonical_action,  # noqa: E402
                                   receipt_digest, sign_receipt, verify_chain,
                                   verify_receipt)
-from uibc_core.ed25519 import publickey, sign  # noqa: E402
-from uibc_core.canonical import canonicalize  # noqa: E402
-from uibc_core.compliance import pae, RECEIPT_PAYLOAD_TYPE  # noqa: E402
+from uibc_core.ed25519 import publickey  # noqa: E402
 
 SEED = bytes(range(32))
 PUB = publickey(SEED)

@@ -5,9 +5,7 @@ Validation: every cosignature must come from a *listed* key, ids must be
 distinct, no witness may be the package seal key, and at least `quorum`
 distinct witnesses must cosign.
 """
-import base64
-from . import signing, witness
-from .canonical import canonicalize
+from . import witness
 
 
 def load_policy(doc: dict) -> dict:

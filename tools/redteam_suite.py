@@ -285,7 +285,6 @@ def main():
     with open(kp, "w", encoding="ascii") as f:
         f.write("ed25519:" + SEED.hex())
     base = build(os.path.join(tmp, "base.uibc"), kp)
-    pub = us.ed_public_key(SEED)
 
     rows = []
     for cid, name, expect, fn in CASES:

@@ -286,7 +286,6 @@ def test_revoking_a_root_with_a_successor_rotates_it():
 
 
 def test_a_successor_the_same_list_revokes_is_not_a_root():
-    successor = ROOT_B
     list1 = _signed(_body("A", 1))
     list2 = _signed(_body("A", 2, [
         _entry("key", ROOT_A, successor=_key("B")),

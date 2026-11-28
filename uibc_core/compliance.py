@@ -24,7 +24,6 @@ What is real here and what is not, stated up front:
 """
 
 import base64
-import json
 
 from .canonical import canonicalize, hash_obj
 from .ed25519 import publickey, sign, verify

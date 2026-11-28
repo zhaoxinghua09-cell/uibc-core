@@ -14,14 +14,13 @@ Every subcommand prints JSON and exits 0 on success, 1 on a failed verification,
 git commit, publishing an entry is a line in a file.
 """
 import argparse
-import base64
 import json
 import os
 import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from uibc_core import ed25519, translog as T   # noqa: E402
+from uibc_core import translog as T   # noqa: E402
 
 
 def _load(path):

@@ -142,7 +142,6 @@ def test_sm2_hashes_with_sm3_and_still_lands_in_the_abnf_range():
 
 
 def test_sub_chain_address_carries_the_ac_code_before_the_letters():
-    raw = bytes.fromhex(RFC_RAW_PUBLIC)
     main = A.derive_did("b0" + RFC_RAW_PUBLIC, version_byte=True)["did"]
     sub = A.derive_did("b0" + RFC_RAW_PUBLIC, acns="byo1", version_byte=True)["did"]
     assert main == "did:bid:ef38VPR182Y4uTkq32fykXjbKBPdQZutH"

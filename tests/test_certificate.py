@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from uibc_core import cli as ucli
 from uibc_core.certificate import CERT_SCHEMA, issue_certificate, verify_certificate
-from uibc_core.signing import generate_key, key_id
+from uibc_core.signing import generate_key
 
 
 def _make_pkg(tmp, key, name="c.uibc"):

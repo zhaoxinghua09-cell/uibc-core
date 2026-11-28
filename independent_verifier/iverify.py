@@ -24,7 +24,6 @@ import json
 import math
 import os
 import re
-import sys
 
 REQUIRED = ["manifest.json", "identity.json", "lifecycle.json", "evidence/index.json"]
 KNOWN_EVENTS = {"REGISTER", "ACTIVATE", "UPDATE", "TRANSFER", "DELEGATE",

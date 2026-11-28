@@ -662,7 +662,6 @@ def build_ckpt(pkg):
     """Add the four sealed fields, then refuse to continue unless they pass."""
     from uibc_core.canonical import (checkpoint_head, evidence_root,
                                      index_metadata_digest, lifecycle_head)
-    from uibc_core.canonical import hash_file
     from uibc_core.verify import CLOSURE_FIELDS, verify as _v
     import hashlib as _h
 

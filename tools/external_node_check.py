@@ -24,14 +24,12 @@ The output is designed to be quotable: if you run it and send back the file, tha
 is an external verification node - the number this project is actually short of.
 """
 import argparse
-import hashlib
 import json
 import os
 import platform
 import shutil
 import subprocess
 import sys
-import tempfile
 import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -133,8 +131,6 @@ def main(argv=None):
     ref_result, ref_ms, ref_detail = _reference(args.pkg)
     probe_rows = probes(args.pkg)
 
-    agree = (ref_detail is None or not isinstance(ref_detail, dict) or
-             ref_result == "PASS")
     report = {
         "schema": "uibc.external-node-result/1",
         "when_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),

@@ -8,7 +8,6 @@ never claiming more than the standard lets it claim.
 import unittest
 
 from uibc_core.agent_identity_code import (
-    CURRENT_VERSION,
     PREFIX,
     SEQUENCE_MAX,
     SPEC,

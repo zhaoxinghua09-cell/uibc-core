@@ -28,7 +28,6 @@ import json
 import os
 import shutil
 import sys
-import uuid
 from argparse import Namespace
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

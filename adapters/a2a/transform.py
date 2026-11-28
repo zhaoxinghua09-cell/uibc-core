@@ -168,9 +168,13 @@ def convert(payload, target_format, source_format=None):
             "pass source_format explicitly" % (source, ", ".join(FORMATS)))
 
     if source == target_format:
-        parsed = payload
         if isinstance(payload, str):
-            parsed = json.loads(payload) if source == "json" else ET.fromstring(payload)
+            # Parse once so a malformed payload is refused here, not three
+            # frames later inside the round-trip comparison.
+            if source == "json":
+                json.loads(payload)
+            else:
+                ET.fromstring(payload)
         return {"payload": payload, "source": source, "target": target_format,
                 "roundtrip": "not-needed"}
 

@@ -27,7 +27,6 @@ that, the endpoint only reports.
 Nothing here is exposed to the network by default: it binds 127.0.0.1.
 """
 
-import base64
 import io
 import json
 import os

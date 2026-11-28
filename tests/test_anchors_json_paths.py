@@ -8,7 +8,6 @@ nothing on a reader's machine.
 import importlib.util
 import json
 import os
-import sys
 
 import pytest
 

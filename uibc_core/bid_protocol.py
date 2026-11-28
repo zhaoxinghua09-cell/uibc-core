@@ -40,7 +40,6 @@ Deliberate limits (stated so nobody mistakes absence for oversight):
 
 from __future__ import annotations
 
-import binascii
 import json
 import re
 from dataclasses import dataclass, field
@@ -514,7 +513,6 @@ def verify_bid_document(doc: Any, did: Optional[str] = None) -> Tuple[bool, str]
     hexed = key.get("publicKeyHex")
     if not hexed:
         return False, "publicKey %r has no publicKeyHex to verify against" % (key.get("id"),)
-    raw = bytes.fromhex(hexed)
     if "SM2" in str(key.get("type") or "").upper():
         return _verify_sm2_key(key, doc, parsed)
     key_material, prefix = strip_key_prefix(hexed)

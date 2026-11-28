@@ -6,7 +6,6 @@ Two failure modes this file exists to catch:
 2. a diagram that was drawn once by hand and silently drifted from the constants.
 """
 
-import hashlib
 import io
 import os
 import subprocess

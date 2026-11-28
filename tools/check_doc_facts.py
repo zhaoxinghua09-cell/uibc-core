@@ -22,7 +22,6 @@ import json
 import os
 import re
 import sys
-import unittest
 
 _REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 for p in (_REPO, os.path.join(_REPO, "tools")):

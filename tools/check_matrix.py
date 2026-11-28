@@ -64,7 +64,6 @@ def build(d):
     for x in cs:
         rows.append(dict(x, n=len(x["checks"])))
     reach = {c: sum(1 for r in rows if c in r["checks"]) for c in used}
-    fanout = {r["name"]: r["n"] for r in rows}
     isolated = [r["name"] for r in rows if r["n"] == 1]
     return {"checks": used, "rows": rows, "reach": reach,
             "isolated": isolated,

@@ -9,7 +9,6 @@ import hashlib
 import io
 import json
 import os
-import sys
 import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))

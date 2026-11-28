@@ -78,7 +78,6 @@ def main():
     a = ap.parse_args()
 
     log = json.load(open(a.log, encoding="utf-8"))
-    cp = json.load(open(a.checkpoint, encoding="utf-8")) if a.checkpoint and os.path.isfile(a.checkpoint) else {}
     sizes = [int(x) for x in a.sizes.split(",")] if a.sizes else [T.tree_size(log)]
     summary = {"valid": 0, "invalid": 0}
 

@@ -9,9 +9,9 @@ Report discipline (archive SS16/SS17):
 import json
 import os
 import re
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 
-from .canonical import evidence_root, evidence_root_for, hash_file
+from .canonical import evidence_root_for, hash_file
 from .lifecycle import validate_lifecycle, validate_lifecycle_strict
 from .signing import (ALGORITHM, ALGORITHM_ED25519, b64decode_strict,
                       ed_key_id, ed_seal_verify_scoped, key_id, seal_verify)

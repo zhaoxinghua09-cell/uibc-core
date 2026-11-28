@@ -68,7 +68,6 @@ class CaseSkipped(Exception):
 def build(tmp):
     """Create one directory per hostile input and return a list of cases."""
     cases = []
-    evidence_index = os.path.join(BASE, "evidence", "index.json")
 
     def fresh(name):
         d = os.path.join(tmp, name)

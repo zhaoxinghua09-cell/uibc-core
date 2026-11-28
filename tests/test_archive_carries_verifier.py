@@ -8,7 +8,6 @@ The archive now carries `uibc_core.pyz`, and run.py prefers it. These tests keep
 that true: the file is present, it is a real zip with the package inside, and it
 actually verifies a shipped package when executed.
 """
-import hashlib
 import json
 import os
 import subprocess

@@ -145,7 +145,6 @@ def audit(receipt, material, assertions, min_quote=10, lenient=False):
         rows.append({"id": cid, "verdict": verdict, "state": state,
                      "quote": body[:160], "found_in": where})
 
-    scored = [r for r in rows if r["state"] != "UNCLEAR"]
     backed = sum(1 for r in rows if r["state"] == "BACKED")
     restated = sum(1 for r in rows if r["state"] == "RESTATED")
     unbacked = sum(1 for r in rows if r["state"] == "UNBACKED")

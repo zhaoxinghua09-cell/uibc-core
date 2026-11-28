@@ -7,10 +7,8 @@ Run:  python independent_verifier/cross_check.py
 Exit: 0 = full agreement, 1 = disagreement found.
 """
 
-import json
 import os
 import sys
-import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)

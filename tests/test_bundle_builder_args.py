@@ -8,7 +8,6 @@ builder must refuse rather than perform.
 """
 import importlib.util
 import os
-import sys
 
 import pytest
 

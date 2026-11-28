@@ -237,7 +237,6 @@ def render_doc(snap):
     best_strict = best if best_strict is None else best_strict
     ours_strict = bracket.get("ours_strict")
     ours_strict = ours if ours_strict is None else ours_strict
-    zero = {k: n - at_least[k] for k, _ in DIMS}
     # 同尺子：竞品侧每维最高只能记 1、D5 一律 0（见 score_one），分表分母是 4；
     # 本仓库侧每维可记 2。直接拿 10 比 3 会被正确地指责“分母不同”，所以另算一份。
     ours_capped = sum(1 for k, _ in DIMS if snap["ours"]["dims"].get(k, 0) >= 1)

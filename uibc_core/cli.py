@@ -77,7 +77,7 @@ def cmd_init(args):
         sys.exit(f"error: {pkg} already exists")
     os.makedirs(os.path.join(pkg, "evidence", "files"), exist_ok=True)
     for f in REQUIRED:
-        _write(os.path.join(pkg, f), {"_note": f"TODO: run 'uibc register' / add evidence", "schema": SPEC_VERSION})
+        _write(os.path.join(pkg, f), {"_note": "TODO: run 'uibc register' / add evidence", "schema": SPEC_VERSION})
     _write(os.path.join(pkg, "evidence", "index.json"), {"entries": []})
     print(f"initialized package skeleton at {pkg}")
     print(f"next: uibc register {pkg} --agent-id <id> --owner <owner>")
@@ -523,8 +523,7 @@ def cmd_demo(args):
     for e in idx["entries"]:
         e["content_hash"] = hash_file(os.path.join(forge, "evidence", e["path"]))
     _write(os.path.join(forge, "evidence", "index.json"), idx)
-    from .canonical import (checkpoint_head, evidence_root, index_metadata_digest,
-                       lifecycle_head)
+    from .canonical import (evidence_root)
     man = _read(os.path.join(forge, "manifest.json"))
     man["evidence_root"] = evidence_root([e["content_hash"] for e in idx["entries"]])
     _write(os.path.join(forge, "manifest.json"), man)

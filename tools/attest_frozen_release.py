@@ -8,7 +8,6 @@ So: the page stays as it is, and the publisher signs the digest it froze -- here
 the repository, where the page cannot rewrite the record.
 """
 import ctypes
-import ctypes.wintypes as wt
 import io
 import json
 import os

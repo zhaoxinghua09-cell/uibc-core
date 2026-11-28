@@ -5,7 +5,6 @@ If the harness cannot produce a disagreement for an adapter that refuses nothing
 then a receipt from it means nothing. That is the same lesson as the 2026-10-22
 gate fix, applied to the tool that collects outside reports.
 """
-import json
 import os
 import re
 import subprocess

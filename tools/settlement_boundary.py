@@ -20,7 +20,6 @@ ones that turn "we bind bytes" into "we settle money" without anyone editing a f
 import argparse
 import json
 import os
-import sys
 
 KIND = "uibc-settlement-boundary-v0"
 ANSWERS = ("supported", "partial", "not_ours")

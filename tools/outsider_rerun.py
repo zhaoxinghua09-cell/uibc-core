@@ -615,13 +615,6 @@ def write_receipt(digest, files, results, content=None, content_files=None,
 
 
 def check(verify_timestamp=True):
-    # Membership first: a receipt that answers for a file set the published
-    # inventory does not list is self-consistent and still wrong - that is exactly
-    # how a committed `logs*.zip` passed every local check in 0.7.x.
-    if check_inventory() != 0:
-        print("\nVERDICT: MEMBERSHIP DISAGREES (this tree is not the published membership)")
-        return 1
-    print()
     if not os.path.exists(RECEIPT):
         print("FAIL no receipt; run --run first")
         return 1
@@ -746,6 +739,19 @@ def check(verify_timestamp=True):
         print("from the commit, or reseal this tree with --run.")
         print(f"\nOUTSIDER FAIL ({len(fails)} problem(s))")
         return 1
+    # Membership last, and as a verdict of its own: a receipt can be
+    # self-consistent and still describe a file set the published inventory never
+    # listed - that is how a committed `logs*.zip` passed every local check while
+    # CI's inventory step said `FAIL git tracks and the inventory does not`.
+    # Running it after the digest comparisons keeps the digest verdict readable
+    # (NAMES-ONLY, DELIVERY, CONTENT) for the case that only concerns bytes.
+    if check_inventory() != 0:
+        print("\nHOW TO FIX: the published membership is docs/TRACKED-FILES.txt. Rewrite it on a")
+        print("clone (`--inventory-write`) so it lists what git tracks, and re-seal with `--run`;")
+        print("if the disagreement is a by-product that got committed, remove it from the index.")
+        print("\nVERDICT: MEMBERSHIP DISAGREES (this tree is not the published membership)")
+        return 1
+    print()
     print(f"OUTSIDER OK: receipt matches this {view_name} ({count} files, {digest[:12]}, "
           f"content {cdigest[:12]}), {len(steps)} steps passed")
     if verify_timestamp and not check_timestamp():

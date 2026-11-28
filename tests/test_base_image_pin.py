@@ -13,8 +13,6 @@ import os
 import subprocess
 import sys
 
-import pytest
-
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MODULE = os.path.join(ROOT, "tools", "check_base_image_pin.py")
 

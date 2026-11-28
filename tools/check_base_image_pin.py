@@ -24,7 +24,10 @@ import argparse
 import json
 import os
 import re
+import shutil
+import subprocess
 import sys
+import time
 import urllib.error
 import urllib.request
 
@@ -82,6 +85,56 @@ def resolve(repo, reference, accept="application/vnd.oci.image.index.v1+json,"
         return r.headers.get("docker-content-digest"), r.headers.get("content-type")
 
 
+def resolve_with_retry(repo, reference, attempts=3):
+    """-> (digest, media, None) or (None, None, reason).
+
+    Anonymous pulls from Docker Hub are rate limited and, on some egress paths,
+    answer 401 to a token that was just minted. That is a transport fact, not a
+    fact about the pin, so it is retried with a fresh token rather than reported
+    as a mismatch - and if the last attempt still fails, the reason is returned
+    instead of an exception, because the caller decides what it means.
+    """
+    reason = None
+    for i in range(attempts):
+        try:
+            d, media = resolve(repo, reference)
+            return d, media, None
+        except urllib.error.HTTPError as e:
+            body = ""
+            try:
+                body = (e.read() or b"")[:200].decode("utf-8", "replace")
+            except Exception:                                       # noqa: BLE001
+                pass
+            reason = f"HTTP {e.code}{': ' + body if body else ''}"
+            if e.code not in (401, 408, 429, 500, 502, 503):
+                return None, None, reason
+        except Exception as e:                                      # noqa: BLE001
+            reason = f"{type(e).__name__}: {e}"
+        time.sleep(1 + i)
+    return None, None, reason
+
+
+def resolve_with_docker_cli(reference):
+    """-> (True, note) when `docker manifest inspect` accepts the reference.
+
+    The same question as the HTTP path, asked through the client every runner has,
+    for the case where this host's egress is the thing that is broken. It only
+    answers "resolvable", not "which digest", so it never stands in for the pin.
+    """
+    exe = shutil.which("docker")
+    if not exe:
+        return False, "no docker CLI here either"
+    try:
+        p = subprocess.run([exe, "manifest", "inspect", reference],
+                           capture_output=True, text=True, timeout=60)
+    except Exception as e:                                          # noqa: BLE001
+        return False, f"docker CLI could not run ({type(e).__name__}: {e})"
+    if p.returncode == 0:
+        return True, "verified through the docker CLI (manifest inspect)"
+    tail = (p.stderr or p.stdout or "").strip().splitlines()
+    return False, tail[-1] if tail else f"docker manifest inspect exited {p.returncode}"
+
+
 def main(argv=None, root=HERE):
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--registry", action="store_true",
@@ -117,31 +170,33 @@ def main(argv=None, root=HERE):
         print("VERDICT: PIN CONSISTENT (local claim: pin == Dockerfile)")
         return 0
 
-    try:
-        by_digest, media = resolve(repo, "sha256:" + digest)
-    except urllib.error.HTTPError as e:
-        if e.code == 404:
+    by_digest, media, why = resolve_with_retry(repo, "sha256:" + digest)
+    if by_digest is None:
+        if why and "HTTP 404" in why:
             print(f"FAIL sha256:{digest} is not in {repo}: a pin nobody can pull is not a pin")
+            print(f"     registry said: {why}")
             return 1
-        print(f"FAIL registry answered {e.code} for sha256:{digest}")
-        return 2
-    except Exception as e:                                          # noqa: BLE001
-        print(f"FAIL registry unreachable ({type(e).__name__}: {e})")
-        print(f"VERDICT: LOCAL CONSISTENT, REGISTRY UNCHECKED (pin == Dockerfile, origin unresolved)")
+        print(f"NOTE HTTP path could not answer ({why}); asking the docker CLI")
+        ok, note = resolve_with_docker_cli(f"{repo}:{tag}@sha256:{digest}")
+        if ok:
+            print(f"OK   {note}")
+            print(f"OK   sha256:{digest} resolves (HTTP path was the thing that was broken)")
+            print("VERDICT: PIN CONSISTENT (pin == Dockerfile; digest resolvable with the docker CLI)")
+            return 0
+        print(f"FAIL digest unresolvable by both paths ({note})")
+        print("VERDICT: LOCAL CONSISTENT, REGISTRY UNCHECKED (pin == Dockerfile, origin unresolved)")
         return 2
     if by_digest != "sha256:" + digest:
         print(f"FAIL registry answered digest {by_digest} for a request by digest sha256:{digest}")
         return 1
     print(f"OK   registry resolves sha256:{digest} ({media})")
 
-    try:
-        by_tag, _ = resolve(repo, tag)
-    except Exception as e:                                          # noqa: BLE001
-        print(f"NOTE could not resolve the tag {tag} ({type(e).__name__}); the pin is unaffected")
-        by_tag = None
-    if by_tag == "sha256:" + digest:
+    by_tag, _, tag_why = resolve_with_retry(repo, tag, attempts=2)
+    if by_tag is None:
+        print(f"NOTE could not resolve the tag {tag} ({tag_why}); the pin is unaffected")
+    elif by_tag == "sha256:" + digest:
         print(f"OK   the tag {tag} still points here")
-    elif by_tag:
+    else:
         print(f"NOTE the tag {tag} now points at {by_tag}")
         print("     The build uses the pinned digest, not the tag, so nothing moved. Bumping the")
         print("     pin is a deliberate edit: change docker/base-image.pin and the Dockerfile ARG")

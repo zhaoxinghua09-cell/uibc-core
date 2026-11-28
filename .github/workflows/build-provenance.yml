@@ -17,6 +17,15 @@ on:
   push:
     branches: [main]
     tags: ["v*"]
+  # A provenance job that only ever runs after the merge is a claim, not evidence:
+  # the pull request that introduces it should be able to show it green. Scoped
+  # narrowly - the archive, its pin, or this file - so it does not fire on every
+  # PR. Fork PRs get no OIDC identity, so this stays off `pull_request_target`.
+  pull_request:
+    paths:
+      - "conformance/uibc-conformance-0.*.zip"
+      - "anchors/pins/*.sha256"
+      - ".github/workflows/build-provenance.yml"
   workflow_dispatch:
 
 permissions:
@@ -54,3 +63,29 @@ jobs:
         with:
           name: dist
           path: dist/
+
+  # The outsider is told to download one file: the pinned conformance archive.
+  # Provenance for it is a different claim from provenance for a wheel — this
+  # archive is committed, not rebuilt here — so it gets its own attestation rather
+  # than being folded into the one above. What it proves is that the exact bytes
+  # were present in this repository, under this commit, in a run this repository's
+  # workflow signed with its OIDC identity. What it does not prove is that the
+  # archive was produced by a hermetic build; the page says so in those words.
+  attest-conformance:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      attestations: write
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: State the digest being attested
+        run: |
+          sha256sum conformance/uibc-conformance-0.7.0.zip
+          wc -c conformance/uibc-conformance-0.7.0.zip
+
+      - name: Generate artifact attestation for the conformance archive
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: "conformance/uibc-conformance-0.7.0.zip"

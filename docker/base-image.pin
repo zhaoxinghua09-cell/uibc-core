@@ -1,0 +1,15 @@
+# The one moving part of the verifier environment, pinned by manifest digest.
+#
+# A tag is a pointer that upstream may repoint at any time; a digest is the bytes.
+# docker/Dockerfile's FROM line must quote this exact reference, and
+# tools/check_base_image_pin.py fails when the two disagree or when this digest
+# no longer exists in the registry (a digest that cannot be resolved is a claim
+# nobody else can reproduce).
+#
+# layout: <repo>:<tag>@sha256:<manifest-list digest>
+#
+# resolved 2026-11-29 from registry-1.docker.io
+#   tag    python:3.13-slim-bookworm
+#   index  sha256:f0fa218d5b06f9b9235024fa061cde2cb141f726de52134471053d2d9b5324a3
+#   amd64  sha256:1284ed9f6807edb3fb05db99bce501971395b964ea445bc6d19d4eb5712ffeb6
+python:3.13-slim-bookworm@sha256:f0fa218d5b06f9b9235024fa061cde2cb141f726de52134471053d2d9b5324a3

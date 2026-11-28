@@ -73,6 +73,14 @@ graft benchmarks
 # benchmarks/ above, caught by sdist-self-check on this branch.
 graft verify-node
 
+# Tenth pass, 2026-11-29 (pinned-container). `docker/` arrived with the pinned base
+# image and tests/test_base_image_pin.py reads docker/base-image.pin and
+# docker/Dockerfile. Not grafted, so the sdist carried the test and not the two
+# files it opens -- the same failure class as schemas/, crosswalk/, vectors/,
+# benchmarks/ and verify-node/ above, caught by sdist-self-check on this branch.
+graft docker
+include .dockerignore
+
 # Built output and byte-code never belong in a source distribution.
 prune tools/out
 prune build

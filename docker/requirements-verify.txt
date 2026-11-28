@@ -1,0 +1,26 @@
+# Everything the container is allowed to install, pinned by wheel hash.
+#
+# Why hashes and not just versions: a version is a name, a hash is the artefact.
+# pip refuses to install a wheel whose bytes do not match, so the environment the
+# four steps run in is fixed by the base-image digest in docker/base-image.pin
+# plus these four hashes and nothing else. No index is asked for a newer release,
+# no build backend runs, no compiler is needed.
+#
+# pytest 8.4.2 rather than a 9.x line: the suite predates it, and a container that
+# runs a different test runner than the repository's CI would be measuring a
+# different thing.
+#
+pytest==8.4.2 \
+    --hash=sha256:872f880de3fc3a5bdc88a11b39c9710c3497a547cfa9320bc3c5e62fbf272e79
+iniconfig==2.3.1 \
+    --hash=sha256:9121e2c1fdb355232495be3194c8dfe87ccc2d5dee45947b78e68f499790d7a7
+packaging==26.4 \
+    --hash=sha256:81383611a09c1bc0b08b76e0fd5829d7c6824c65b27a6aee339da133f4233ea2
+pluggy==1.7.0 \
+    --hash=sha256:7dd7b0d8832ba3cb632c306926ded123429211b83641b35dc5c41ad2d34f9bec
+# pytest 8.4.2 asks for pygments>=2.7.2, and --require-hashes refuses a range as well
+# as an unpinned name: the first build failed on exactly this line ("all requirements
+# must have their versions pinned with =="). A transitive requirement is still a
+# requirement, and leaving it ranged would let a re-run install different bytes.
+pygments==2.21.0 \
+    --hash=sha256:2363c69b61c4a97c838da3b130dcd6468f4848992b21a82f2a63ec34377137d9

@@ -92,6 +92,34 @@ ENV_KEEP = ("PATH", "SYSTEMROOT", "SYSTEMDRIVE", "WINDIR", "TEMP", "TMP", "HOME"
 
 INVENTORY = "docs/TRACKED-FILES.txt"
 
+# Things a run of this project produces and a repository must never publish: a
+# downloaded CI log bundle, a coverage file, a byte-code cache. This guard exists
+# because one of them did get committed (a `logs*.zip` fetched while chasing a red
+# job), the receipt was re-sealed afterwards so it did not answer for the file set
+# the membership published, and every local check still said OK - the subset of
+# checks that CI runs caught it instead. The membership check below is now part of
+# `--check`, and this list makes the mistake name itself before it is committed.
+ARTEFACT_PATTERNS = (
+    r"(^|/)logs?\d*\.zip",
+    r"(^|/)l\d+[a-z]?_?logs?\.zip",
+    r"\.log$",
+    r"(^|/)\.coverage",
+    r"(^|/)htmlcov/",
+    r"(^|/)\.pytest_cache/",
+    r"(^|/)__pycache__/",
+    r"\.py[co]$",
+    r"(^|/)node_modules/",
+    r"(^|/)\.venv/",
+    r"(^|/)\.tox/",
+    r"\.tmp$",
+)
+_ARTEFACT_RE = re.compile("|".join("(?:" + p + ")" for p in ARTEFACT_PATTERNS), re.I)
+
+
+def artefact_paths(files):
+    """Paths in `files` that look like a by-product rather than a source file."""
+    return [p for p in files if _ARTEFACT_RE.search(p)]
+
 
 def inventory_files(root):
     """The published membership: one path per line, exactly what a clone holds.
@@ -138,6 +166,15 @@ def write_inventory(root, from_archive=False):
         raise SystemExit("FAIL no .git here. Publish the membership from a fresh archive "
                          "(--inventory-write --from-archive) or from a clone.")
     os.makedirs(os.path.dirname(os.path.join(root, INVENTORY)), exist_ok=True)
+    bad = artefact_paths(files)
+    if bad:
+        for p in bad[:10]:
+            print("FAIL this is a by-product, not a member:", p)
+        raise SystemExit(
+            f"FAIL refusing to publish a membership that holds {len(bad)} by-product(s) "
+            "(`logs*.zip`, coverage, caches). A clone would carry them, and a receipt "
+            "that counts them describes your downloads rather than the repository. "
+            "Remove them from the index (`git rm --cached <path>`), then rerun.")
     with open(os.path.join(root, INVENTORY), "w", encoding="utf-8", newline="\n") as f:
         f.write("\n".join(files) + "\n")
     return len(files)
@@ -536,6 +573,18 @@ def write_receipt(digest, files, results, content=None, content_files=None,
              "`python tools/anchor_ots.py --verify docs/outsider-rerun-receipt.json`。"
              "区块确认之前状态写 `pending_calendar`，确认后变成 `confirmed`；两者都说明提交已经发生，"
              "区别只是 Bitcoin 区块有没有把它记下来。"]
+    page += ["", "**归档的来历也签了名**：`build-provenance` 作业在每次 main 推送时，用本仓库自己的 OIDC 身份，"
+             "为 `dist` 下的 sdist、wheel 和你下载的那只归档各签一份构建来源证明（SLSA build provenance）。核验："
+             "`gh attestation verify conformance/uibc-conformance-0.7.0.zip --repo zhaoxinghua09-cell/uibc-core`。"
+             "它证明的是「这些字节在本仓库某次由本仓库签发的运行里出现过」；它**不**证明归档是隔离构建出来的——"
+             "归档是仓库里的文件，不是当场构建的产物。这句区别写在这里，免得被当成比实际更强的东西。"]
+    page += ["", "**环境也可以不由标签决定**：`docker/base-image.pin` 写的是基础镜像的 manifest 摘要，"
+             "`docker/Dockerfile` 只许引用这一条（`tools/check_base_image_pin.py` 两边不一致就判红，"
+             "并去注册表确认这个摘要还能拉到、顺带告诉你标签如今漂到哪儿去了）；容器里只装四个按 sha256 钉住的 "
+             "wheel，然后跑同一条 `--check`。自己跑两条命令：",
+             "`docker build -f docker/Dockerfile -t uibc-verify . && docker run --rm uibc-verify`。",
+             "它证明的是「这四步在一个由摘要决定、而不是由标签决定的解释器里同样成立」；它**不**证明容器文件系统"
+             "逐字节可复现——层里的时间戳是构建那一刻的钟。这是钉住的环境，不是可复现的环境。"]
     page += ["", f"**树摘要 `{receipt['tree_sha256'][:16]}…`（{files} 个文件，排除本页与 receipt 自身）**。",
              f"**内容摘要 `{str(receipt.get('content_sha256'))[:16]}…`（只看每个文件的字节，不看文件名）**。",
              "", "为什么有两根轴：路径与内容一起算的那个摘要最严，但也会被解包器连累。"
@@ -565,7 +614,7 @@ def write_receipt(digest, files, results, content=None, content_files=None,
     return 0 if receipt["ok"] else 1
 
 
-def check():
+def check(verify_timestamp=True):
     if not os.path.exists(RECEIPT):
         print("FAIL no receipt; run --run first")
         return 1
@@ -690,9 +739,22 @@ def check():
         print("from the commit, or reseal this tree with --run.")
         print(f"\nOUTSIDER FAIL ({len(fails)} problem(s))")
         return 1
+    # Membership last, and as a verdict of its own: a receipt can be
+    # self-consistent and still describe a file set the published inventory never
+    # listed - that is how a committed `logs*.zip` passed every local check while
+    # CI's inventory step said `FAIL git tracks and the inventory does not`.
+    # Running it after the digest comparisons keeps the digest verdict readable
+    # (NAMES-ONLY, DELIVERY, CONTENT) for the case that only concerns bytes.
+    if check_inventory() != 0:
+        print("\nHOW TO FIX: the published membership is docs/TRACKED-FILES.txt. Rewrite it on a")
+        print("clone (`--inventory-write`) so it lists what git tracks, and re-seal with `--run`;")
+        print("if the disagreement is a by-product that got committed, remove it from the index.")
+        print("\nVERDICT: MEMBERSHIP DISAGREES (this tree is not the published membership)")
+        return 1
+    print()
     print(f"OUTSIDER OK: receipt matches this {view_name} ({count} files, {digest[:12]}, "
           f"content {cdigest[:12]}), {len(steps)} steps passed")
-    if not check_timestamp():
+    if verify_timestamp and not check_timestamp():
         return 1
     for name, (d, c, l, n) in views:
         if name != view_name and d != digest:
@@ -707,6 +769,12 @@ def check_inventory():
     listed = inventory_files(HERE)
     if listed is None:
         print(f"FAIL {INVENTORY} is missing; run --inventory-write on a clone or a fresh archive")
+        return 1
+    bad = artefact_paths(listed)
+    if bad:
+        for p in bad[:10]:
+            print("FAIL the published membership holds a by-product:", p)
+        print(f"\nINVENTORY FAIL ({len(bad)} by-product(s) published as members)")
         return 1
     actual = _walk(HERE)
     git_view = None
@@ -743,8 +811,13 @@ def check_inventory():
 
 
 def stamp_receipt():
-    """Submit the receipt to the calendars; the proof lands next to it as `.ots`."""
-    if check() != 0:
+    """Submit the receipt to the calendars; the proof lands next to it as `.ots`.
+
+    The tree is checked *without* the timestamp, because a receipt that has just
+    been re-sealed is precisely the case where the old proof is stale - refusing
+    here would make the stale proof impossible to replace.
+    """
+    if check(verify_timestamp=False) != 0:
         print("refusing to stamp: the receipt does not match this tree")
         return 1
     proc = subprocess.run([sys.executable, os.path.join(HERE, "tools", "anchor_ots.py"),
@@ -760,18 +833,37 @@ def stamp_receipt():
 
 
 def check_timestamp():
-    """Is the published proof about *this* receipt? Pending is fine, mismatched is not."""
+    """Is the published proof about *this* receipt? Pending is fine, mismatched is not.
+
+    The binding is checked without the OpenTimestamps client: a proof carries the
+    sha256 of the file it was taken of as 32 raw bytes inside it, so looking for
+    those bytes answers "is this proof about this receipt" with no dependency at
+    all. The client is only consulted afterwards, and only for the *status* - a
+    checkout without it must not turn this into a failure, which is exactly the
+    mistake this function made in its first version.
+    """
     if not os.path.exists(OTS):
         print("FAIL no timestamp: docs/outsider-rerun-receipt.json.ots is missing; run --stamp")
         return False
+    with open(RECEIPT, "rb") as f:
+        digest = hashlib.sha256(f.read()).digest()
+    with open(OTS, "rb") as f:
+        raw = f.read()
+    if digest not in raw:
+        print("FAIL the timestamp proves a different file: stamp the receipt again")
+        print(f"  receipt sha256 {digest.hex()[:16]} does not appear in the proof")
+        return False
+    try:
+        import opentimestamps  # noqa: F401
+    except Exception:                                              # noqa: BLE001
+        print("timestamp: proof carries this receipt's digest (client not installed, "
+              "block status not read)")
+        return True
     proc = subprocess.run([sys.executable, os.path.join(HERE, "tools", "anchor_ots.py"),
                            "--verify", RECEIPT, "--proof", OTS, "--json"], cwd=HERE,
                           capture_output=True, text=True, encoding="utf-8", errors="replace")
-    text = (proc.stdout or "") + (proc.stderr or "")
-    if "mismatch" in text.lower() or "does not match" in text.lower():
-        print("FAIL the timestamp proves a different file: stamp the receipt again")
-        return False
-    status = [ln for ln in text.splitlines() if ln.startswith("status=")]
+    status = [ln for ln in ((proc.stdout or "") + (proc.stderr or "")).splitlines()
+              if ln.startswith("status=")]
     print(f"timestamp: {status[-1][7:] if status else 'proof present'}")
     return True
 

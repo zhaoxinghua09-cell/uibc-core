@@ -1,4 +1,5 @@
 .devcontainer/devcontainer.json
+.dockerignore
 .gitattributes
 .githooks/pre-push
 .github/CODEOWNERS
@@ -19,6 +20,7 @@
 .github/workflows/ci.yml
 .github/workflows/codeql-sast.yml
 .github/workflows/differential-nightly.yml
+.github/workflows/docker-verify.yml
 .github/workflows/lgd-ci.yml
 .github/workflows/manifest-verify-demo.yml
 .github/workflows/one-click.yml
@@ -1064,6 +1066,9 @@ dist/uibc-core-0.2.1.zip.cosign.bundle
 dist/uibc-core-0.2.1.zip.ots
 dist/uibc-core-0.2.1.zip.sha256
 dist/upload-response.json
+docker/Dockerfile
+docker/base-image.pin
+docker/requirements-verify.txt
 docs/ACCEPT-REFUSE-BOUNDARY.md
 docs/ACCOUNT-GATE.md
 docs/ACPS-SPEC-IN-HAND.md
@@ -1949,6 +1954,7 @@ tests/test_atomic_replace.py
 tests/test_audit_sealed_release.py
 tests/test_auditor_trust.py
 tests/test_authority_age.py
+tests/test_base_image_pin.py
 tests/test_basis.py
 tests/test_bid_address.py
 tests/test_bid_address_rule.py
@@ -2260,6 +2266,7 @@ tools/build_translog_explorer.py
 tools/build_upstream_ledger.py
 tools/build_zipapp.py
 tools/check_adoption.py
+tools/check_base_image_pin.py
 tools/check_bid_vectors.py
 tools/check_channel.py
 tools/check_citation_scope.py

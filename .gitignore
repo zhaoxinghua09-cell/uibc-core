@@ -20,3 +20,6 @@ dist/
 
 # wheels fetched once and installed from disk by CI (see docs/supply-chain-pinning.md)
 .ci-wheels/
+
+# a CI log bundle is a download, not a source file (see tools/outsider_rerun.py ARTEFACT_PATTERNS)
+logs*.zip

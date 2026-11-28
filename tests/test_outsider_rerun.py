@@ -64,7 +64,18 @@ def test_clean_environment_carries_no_credentials(tool):
     banned = {"GPAT", "GH_TOKEN", "GITHUB_TOKEN", "AWS_SECRET_ACCESS_KEY"}
     assert not (banned & set(env))
     for key in env:
-        assert key in tool.ENV_KEEP, key
+        assert key in tool.ENV_KEEP or key in tool.PINNED, key
+
+
+def test_clean_environment_pins_the_nondeterministic_knobs(tool):
+    env = tool.clean_env()
+    # Every key that is set rather than inherited must be pinned to a stated value,
+    # otherwise the same tree can pass on one machine and fail on the next.
+    assert env["PYTHONHASHSEED"] == "0"
+    assert env["PYTHONNOUSERSITE"] == "1"
+    assert env["PYTHONPATH"] == ""
+    assert env["PYTHONUTF8"] == "1"
+    assert set(tool.PINNED) == {"PYTHONUTF8", "PYTHONHASHSEED", "PYTHONNOUSERSITE", "PYTHONPATH"}
 
 
 def test_receipt_matches_this_tree(tool):

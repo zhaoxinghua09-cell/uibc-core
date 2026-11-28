@@ -2009,6 +2009,7 @@ tests/test_discipline_docs.py
 tests/test_doc_claims.py
 tests/test_doc_facts.py
 tests/test_doc_facts_cite.py
+tests/test_ed25519_strict_verify.py
 tests/test_embedded_verifier.py
 tests/test_emit_aer1_receipts.py
 tests/test_evidence_index.py

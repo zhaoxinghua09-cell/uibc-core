@@ -81,7 +81,7 @@
 |---|---|---|---|
 | archive (DOI) | 0.2.1 | 6 | S1、S2、S3、S4、S5、S6 |
 | package (pip) | 0.3.3 | 6 | S1、S2、S3、S4、S5、S6 |
-| repository | 0.5.5（未发布） | 21 | S0、S1、S2、S3、S4、S5、S6、S7、S8、S9、S10、S11、S12、S13、S14、S15、S16、S17、S18、S19、S20 |
+| repository | 0.5.8（未发布） | 21 | S0、S1、S2、S3、S4、S5、S6、S7、S8、S9、S10、S11、S12、S13、S14、S15、S16、S17、S18、S19、S20 |
 
 注：差异源于发布未随仓库推进，非代码差异。
 数据来源：`python3 tools/check_release_parity.py --json`。

@@ -1,7 +1,7 @@
 {
   "meta": {
     "probe": "redteam",
-    "generated_at_utc": "2026-11-28T14:12:33Z"
+    "generated_at_utc": "2026-11-28T14:33:45Z"
   },
   "cases": [
     {
@@ -10,6 +10,7 @@
       "expect": "FAIL（路径必须落在证据根内）",
       "result": "FAIL",
       "failed_checks": [
+        "S1",
         "S4",
         "S7",
         "S8"
@@ -22,6 +23,7 @@
       "expect": "FAIL（不得读任意绝对路径）",
       "result": "FAIL",
       "failed_checks": [
+        "S1",
         "S4",
         "S7",
         "S8"
@@ -83,7 +85,7 @@
       "expect": "PASS 且耗时线性可接受",
       "result": "PASS",
       "failed_checks": [],
-      "note": "trust=unanchored elapsed=57.4ms"
+      "note": "trust=unanchored elapsed=56.0ms"
     },
     {
       "id": "RT09",
@@ -141,6 +143,7 @@
       "expect": "FAIL（S18）",
       "result": "FAIL",
       "failed_checks": [
+        "S1",
         "S18"
       ],
       "note": "trust=unanchored"

@@ -12,15 +12,15 @@ python3 tools/build_reproduce.py
 
 | Table | Number | Command | Output recorded at generation | Exit |
 |---|---|---|---|---|
-| 5-1 | each check's basis class and citation | `python3 -c "from uibc_core import basis; print(basis.for_check('S1'))"` | `{'class': 'direct', 'citation': 'draft-noa-scitt-ai-agent-receipt-00', 'note': '回执包的结构与成员'}` | 0 |
-| 5-2 | basis distribution 7/8/4 | `python3 -c "from uibc_core import basis; print(basis.counts())"` | `{'direct': 7, 'related': 8, 'none': 4}` | 0 |
-| 5-3 | 36 attacks / 34 caught / 32 isolated | `python3 tools/check_matrix.py --json` | `attacks=36  caught=34  isolated=32  unreached=0` | 0 |
-| 5-4 | reason counts under the same attacks | `python3 tools/compare_diagnostics.py --json` | `compared attacks=4  ours reasons=13  theirs reasons=5` | 0 |
-| 5-5 | three distribution channels 6/6/19 | `python3 tools/check_release_parity.py --json` | `archive (DOI)=6  package (pip)=6  repository=19` | 0 |
-| 5-6 | hot-path latency | `python3 tools/latency_per_call.py --json` | `median_ms=1.311  p99_ms=2.261  n=300` | 0 |
-| summary | 20 checks | `python3 -c "from uibc_core import basis; print(len(basis.BASIS))"` | `19` | 0 |
-| summary | conformance vectors | `python3 tools/run_conformance.py` | `strict 34/34   refused 29/34` | 0 |
-| summary | published numbers match the tree | `python3 tools/check_doc_facts.py` | `0 mismatch(es)` | 0 |
+| 5-1 | each check's basis class and citation | `python3 -c "from uibc_core import basis; print(basis.for_check('S1'))"` | `{'class': 'none', 'citation': '', 'note': '包文件布局（声明的文件都在、无多出文件）为本项目自定；草案规定的是回执载荷字段，不是包的文件布局'}` | 0 |
+| 5-2 | basis distribution 7/8/4 | `python3 -c "from uibc_core import basis; print(basis.counts())"` | `{'direct': 5, 'related': 10, 'none': 6}` | 0 |
+| 5-3 | 36 attacks / 34 caught / 32 isolated | `python3 tools/check_matrix.py --json` | `attacks=37  caught=35  isolated=32  unreached=0` | 0 |
+| 5-4 | reason counts under the same attacks | `python3 tools/compare_diagnostics.py --json` | `compared attacks=0  ours reasons=0  theirs reasons=0` | 0 |
+| 5-5 | three distribution channels 6/6/20 | `python3 tools/check_release_parity.py --json` | `archive (DOI)=6  package (pip)=6  repository=21` | 0 |
+| 5-6 | hot-path latency | `python3 tools/latency_per_call.py --json` | `median_ms=17.678  p99_ms=26.889  n=300` | 0 |
+| summary | 20 checks | `python3 -c "from uibc_core import basis; print(len([k for k in basis.BASIS if k != 'S0']))"` | `20` | 0 |
+| summary | conformance vectors | `python3 tools/run_conformance.py` | `strict 61/61   refused 55/61` | 0 |
+| summary | published numbers match the tree | `python3 tools/check_doc_facts.py` | `0 mismatch(es), 0 unmeasurable claim(s)` | 0 |
 | summary | audit verdict on the shipped fixture | `python3 -m uibc_core.cli verify fixtures/clean.uibc` | `result=INCONCLUSIVE` | 1 |
 
 ## How to read a mismatch

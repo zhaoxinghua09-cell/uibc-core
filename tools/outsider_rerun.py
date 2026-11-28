@@ -536,6 +536,11 @@ def write_receipt(digest, files, results, content=None, content_files=None,
              "`python tools/anchor_ots.py --verify docs/outsider-rerun-receipt.json`。"
              "区块确认之前状态写 `pending_calendar`，确认后变成 `confirmed`；两者都说明提交已经发生，"
              "区别只是 Bitcoin 区块有没有把它记下来。"]
+    page += ["", "**归档的来历也签了名**：`build-provenance` 作业在每次 main 推送时，用本仓库自己的 OIDC 身份，"
+             "为 `dist` 下的 sdist、wheel 和你下载的那只归档各签一份构建来源证明（SLSA build provenance）。核验："
+             "`gh attestation verify conformance/uibc-conformance-0.7.0.zip --repo zhaoxinghua09-cell/uibc-core`。"
+             "它证明的是「这些字节在本仓库某次由本仓库签发的运行里出现过」；它**不**证明归档是隔离构建出来的——"
+             "归档是仓库里的文件，不是当场构建的产物。这句区别写在这里，免得被当成比实际更强的东西。"]
     page += ["", f"**树摘要 `{receipt['tree_sha256'][:16]}…`（{files} 个文件，排除本页与 receipt 自身）**。",
              f"**内容摘要 `{str(receipt.get('content_sha256'))[:16]}…`（只看每个文件的字节，不看文件名）**。",
              "", "为什么有两根轴：路径与内容一起算的那个摘要最严，但也会被解包器连累。"

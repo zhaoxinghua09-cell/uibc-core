@@ -8,7 +8,6 @@ If someone edits the demo to drop a case, the published table would
 stop matching the code that produces it.
 """
 
-import base64
 import importlib.util
 import json
 import os

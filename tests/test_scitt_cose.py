@@ -14,7 +14,6 @@ the statement can carry CBOR tag 18.
 
 import hashlib
 import json
-import os
 import sys
 
 import pytest
@@ -336,14 +335,12 @@ def test_crit_naming_a_label_absent_from_the_protected_bucket_is_refused():
 def test_a_critical_label_this_profile_does_not_define_is_refused():
     st, payload, trust = vector(SEED, ISSUER, TS_SEED)
     # crit names a label that IS protected but is not the observer position
-    node = None
     vec = build(crit=(scitt_cose.LBL_OBSERVER_POSITION, scitt_cose.LBL_CONTENT_TYPE))
     out = judge(vec)
     assert "critical-parameter-unprocessable" in out["codes"]
 
 
 def test_a_protected_header_out_of_map_order_is_refused():
-    protected = enc({1: -19}) + b""       # placeholder so the intent is legible
     payload = statement_payload()
     claims = {1: ISS, 2: subject_claim()}
     # build the map by hand in the wrong order: label 16 before label 1

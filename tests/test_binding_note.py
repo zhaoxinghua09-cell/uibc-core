@@ -5,8 +5,6 @@ interop story in docs/BINDING.md stops being true and this fails.
 """
 
 import os
-import re
-import sys
 import unittest
 
 _REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))

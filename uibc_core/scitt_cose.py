@@ -555,7 +555,6 @@ def verify_transparent_statement(vector: dict, now: int = None):
             notes.append("alg %r is neither -19 nor a profile algorithm" % (declared_alg,))
 
     # Stage 4 - kid resolution and signature
-    issuer_key = None
     issuer_identity = None
     kid = header.get(LBL_KID)
     trust = vector.get("trust") or {}
@@ -583,7 +582,7 @@ def verify_transparent_statement(vector: dict, now: int = None):
         if key is not None and payload is not None:
             if ed25519.verify(key, _sig_structure(statement.protected_bytes, payload),
                               statement.signature):
-                issuer_key, issuer_identity = key, issuer.get("iss")
+                issuer_identity = issuer.get("iss")
             else:
                 codes.append("signature-invalid")
                 notes.append("the issuer signature does not verify under the trusted key")

@@ -1,7 +1,6 @@
 """The pin file must stay usable by someone who never installs this package."""
 
 import os
-import re
 import unittest
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

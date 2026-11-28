@@ -47,7 +47,6 @@ posted, without touching the network. `--submit` posts it to the calendars.
 """
 
 import argparse
-import binascii
 import json
 import os
 import sys

@@ -14,14 +14,12 @@ pretended otherwise.
 
 Run:  python tools/build_decision_vectors.py
 """
-import base64
 import json
 import os
 import shutil
 import subprocess
 import sys
 import tempfile
-import zipfile
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(REPO, "conformance", "decisions")

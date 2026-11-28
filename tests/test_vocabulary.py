@@ -9,7 +9,6 @@ Both vocabularies are now closed at write time. These tests fail if the CLI and
 the verifier ever drift apart, which is the only thing keeping that true.
 """
 
-import argparse
 import os
 import subprocess
 import sys

@@ -172,27 +172,6 @@ def collect():
     return rows
 
 
-def _unused(rows):
-    """Pull the key figures out of JSON when the raw first line is not a figure.
-
-    A reader comparing a table wants 36/34/32, not the opening brace of a JSON
-    object; printing the brace and calling it output would be technically
-    honest and practically useless.
-    """
-    for r in rows:
-        if r["table"] not in KEY:
-            continue
-        out, _ = run([a for a in next(c[3] for c in CLAIMS if c[1] == r["what"])])
-        found = {}
-        for name, rx in KEY[r["table"]]:
-            m = re.search(rx, out)
-            if m:
-                found[name] = int(m.group(1))
-        if found:
-            r["output"] = "  ".join("%s=%d" % (k, v) for k, v in found.items())
-    return rows
-
-
 def render(rows):
     lines = [
         "# Reproduction sheet -- every number in the paper, and the command that produces it",

@@ -17,7 +17,6 @@ import subprocess
 import sys
 
 import pytest
-import tempfile
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _WORKFLOW = os.path.join(REPO, ".github", "workflows", "release-lab-bundle.yml")
@@ -77,7 +76,6 @@ def test_the_digest_list_is_per_run_and_the_document_says_so(tmp_path):
 
 
 def test_the_digest_list_covers_three_files(tmp_path):
-    monkeypatch_epoch = os.environ.get("SOURCE_DATE_EPOCH")
     out = tmp_path / "one"
     out.mkdir()
     env = dict(os.environ, SOURCE_DATE_EPOCH="1795008087")

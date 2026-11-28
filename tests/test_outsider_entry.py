@@ -8,7 +8,6 @@ hold the document, the URL and the pin together so they cannot drift apart silen
 import os
 import shutil
 import sys
-import tempfile
 
 import pytest
 

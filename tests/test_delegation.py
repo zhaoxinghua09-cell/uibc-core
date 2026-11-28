@@ -1,17 +1,13 @@
-import base64
 import datetime
-import hashlib
 import json
 import os
 import sys
 
-import pytest
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(REPO, "tools"))
 
 import check_delegation as cd  # noqa: E402
-from uibc_core.canonical import canonicalize  # noqa: E402
 
 SEED = bytes(range(32))
 OTHER_SEED = bytes(range(1, 33))

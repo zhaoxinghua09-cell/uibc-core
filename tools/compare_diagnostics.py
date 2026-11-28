@@ -121,7 +121,6 @@ def _aac_cases():
     try:
         sys.path.insert(0, "/tmp/cmpv/lib/python3.12/site-packages")
         import agent_action_capsule as a
-        from agent_action_capsule import verify
         from agent_action_capsule.canonical import compute_capsule_id
     except Exception as e:  # noqa: BLE001
         return iter([]), "agent-action-capsule not importable (%s)" % type(e).__name__
@@ -170,7 +169,6 @@ def _run_aac():
     cases, why = _aac_cases()
     if why:
         return [], why
-    import agent_action_capsule as a
     from agent_action_capsule import verify
     out = []
     for name, fn, good in cases:

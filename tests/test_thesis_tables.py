@@ -1,6 +1,5 @@
 """The chapter tables must agree with the tools, or the chapter is fiction."""
 import os
-import re
 import sys
 import unittest
 

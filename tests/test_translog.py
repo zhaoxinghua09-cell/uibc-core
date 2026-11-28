@@ -10,7 +10,6 @@ Three things these tests refuse to let slide:
   3. a shortened log must fail against the committed head. Truncation is the attack
      an append-only log exists to catch.
 """
-import json
 import os
 import sys
 import unittest

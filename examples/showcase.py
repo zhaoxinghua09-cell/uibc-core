@@ -12,7 +12,6 @@ The output is a human-readable transcript of every step with real hashes.
 
 import json
 import os
-import shutil
 import sys
 import tempfile
 import time

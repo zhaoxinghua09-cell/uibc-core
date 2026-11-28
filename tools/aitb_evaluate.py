@@ -41,7 +41,7 @@ Usage
     python tools/aitb_evaluate.py --run --did did:ctid:anicert --out reports
     python tools/aitb_evaluate.py --check --report reports/<slug>.json
 """
-import argparse, hashlib, json, os, re, sys, time, urllib.error, urllib.request
+import argparse, json, os, re, sys, time, urllib.error, urllib.request
 
 BASE = "https://iaisp.teleinfo.cn"
 RESOLVE = "/api/public/ioa/did/resolve-verify"

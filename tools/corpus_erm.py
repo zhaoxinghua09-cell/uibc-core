@@ -39,7 +39,7 @@ sys.path.insert(0, os.path.join(ROOT, "tools"))
 import mutation_benchmark as mb  # noqa: E402
 from uibc_core import merkle as mk  # noqa: E402
 from uibc_core import signing as us  # noqa: E402
-from uibc_core.canonical import checkpoint_head, hash_obj  # noqa: E402
+from uibc_core.canonical import checkpoint_head  # noqa: E402
 from uibc_core.verify import verify  # noqa: E402
 
 OUT = mb.OUT

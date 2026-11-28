@@ -36,7 +36,7 @@ def main() -> None:
     commit = record["commit"]
 
     # Which cases does each mode still accept?
-    accepted = {m: [cid for cid, v in per_case.items() if v[m]] for m in MODES}
+    {m: [cid for cid, v in per_case.items() if v[m]] for m in MODES}
 
     # A case is "bought" by an anchor if it is accepted without that anchor and
     # rejected with it.

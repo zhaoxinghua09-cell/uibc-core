@@ -14,12 +14,8 @@ CLI:
   python tools/open_pr.py --head release/v1.1-precheck --base main --go       # create/merge
 """
 
-import json
 import os
-import re
 import sys
-import urllib.error
-import urllib.request
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import gh_api  # noqa: E402  (keeps the credential across a 307, refuses cross-host)

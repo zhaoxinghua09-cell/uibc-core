@@ -14,7 +14,6 @@ import argparse
 import json
 import os
 import sys
-import tempfile
 
 REPO = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 if REPO not in sys.path:

@@ -11,7 +11,6 @@ Scenarios:
 Does NOT modify uibc_core source or existing unit tests.
 """
 
-import json
 import os
 import shutil
 import subprocess
@@ -80,7 +79,6 @@ class StressTest(unittest.TestCase):
 
     # b) evidence_root scale ---------------------------------------------
     def test_b_evidence_root_scale(self):
-        hashes = [hash_file(__file__)] * 1
         base = [f"{i:064x}" for i in range(100)]
         for n in (1000, 10000, 100000):
             with self.subTest(n=n):

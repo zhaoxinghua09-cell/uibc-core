@@ -47,8 +47,7 @@ sys.path.insert(0, HERE)
 from anchor_check import anchor_digest  # noqa: E402
 from uibc_core.canonical import checkpoint_head, evidence_root  # noqa: E402
 from uibc_core.canonical import index_metadata_digest, lifecycle_head  # noqa: E402
-from uibc_core.signing import (ALGORITHM_ED25519, ed_generate_seed,  # noqa: E402
-                               ed_key_id, ed_public_key, ed_seal_sign)
+from uibc_core.signing import (ALGORITHM_ED25519, ed_key_id, ed_public_key, ed_seal_sign)
 
 # A demo seed, published on purpose: the bundle it makes is reproducible and
 # carries no authority. Anything meant to be believed must be signed with a seed

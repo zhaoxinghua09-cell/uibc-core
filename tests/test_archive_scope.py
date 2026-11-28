@@ -8,7 +8,6 @@ would make a reader's download disagree with our claim.
 
 import json
 import os
-import re
 import sys
 import unittest
 

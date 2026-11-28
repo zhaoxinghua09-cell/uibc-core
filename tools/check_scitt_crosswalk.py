@@ -21,8 +21,6 @@ the word that turns a field-by-field comparison into a compatibility claim.
 import argparse
 import json
 import os
-import re
-import sys
 
 KIND = "uibc-scitt-crosswalk-v0"
 STATUSES = ("have", "partial", "absent", "ours_only")

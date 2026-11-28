@@ -262,6 +262,44 @@ The corpus itself is not vendored: `tests/test_revocation_list_corpus.py` runs
 only when `UIBC_REVOCATION_CORPUS` names a checkout, and the checked-in tests
 build their own lists from fixtures signed once with fixed seeds.
 
+## Answer "is this key revoked at this time"
+
+`uibc_core/key_revocation_list.py` reads one signed list of revoked keys, the
+trust inputs a verifier holds (trusted list-signing thumbprints, the issue time
+of the last accepted list, the revocations already seen), its clock, and one
+question — and answers with one of five decisions, exiting 0/1/2/3/4 by them
+because that is the contract the suite runs external verifiers under:
+
+| decision | exit | meaning |
+|---|---|---|
+| `revoked` | 0 | the record, live when the list was served, revokes the key at the time asked |
+| `not_revoked` | 1 | the list covers the key with no entry, or the entry takes effect later |
+| `no_statement` | 2 | the list does not cover the key: silence is not a statement |
+| `rejected` | 3 | the signer is untrusted, the signature fails, or the list is older than the last accepted one |
+| `stale` | 4 | the verifier's clock is past the list's `nextUpdate` |
+
+Four checks run in this order and the first failure is the answer:
+trust (by the SHA-256 thumbprint **recomputed from the key the envelope
+carries**, never the one it claims) → signature → not older than accepted →
+not past `nextUpdate`. A list that passes is read together with what the
+verifier already saw: a revocation once seen survives a later list that omits
+it, and a key the list no longer covers is still revoked by the earlier record.
+
+Two states the reference reader folds silently are refused here instead:
+an instant spelled some way other than the single `YYYY-MM-DDTHH:MM:SSZ` form
+this suite compares as text (`key_revocation_list_shape`), and two records for
+one key that disagree about when the revocation takes effect
+(`key_revocation_list_conflict`). A last-wins dictionary would answer either
+without saying which record it answered from.
+
+Measured, 2026-11-28, against `corpora/vectors-key-revocation-list` (13 members,
+`corpusDigest f790ade4...e77`, head `08f16c3`): **13 of 13 match the answer key
+on decision and reason**, and the two facts the manifest declares about each
+list (claimed thumbprint honest, signature verifies under the carried key) hold
+for every member. The corpus digest recomputed from the files themselves
+matches the one it declares, so this is the same corpus version. Reading is
+ours; their harness was not re-run.
+
 ## What this does not do
 
 It does not import a foreign corpus wholesale. A corpus in someone else's layout

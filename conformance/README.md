@@ -1,6 +1,6 @@
 # uibc-core conformance suite
 
-36 packages. **30 must be refused** -- each began correct and then had exactly one thing broken, with the checks a verifier must report recorded in the manifest. **6 must be accepted** -- correct packages, unmutated or grown in a legitimate way, which a verifier must not refuse.
+58 packages. **52 must be refused** -- each began correct and then had exactly one thing broken, with the checks a verifier must report recorded in the manifest. **6 must be accepted** -- correct packages, unmutated or grown in a legitimate way, which a verifier must not refuse.
 
 Both halves matter. A suite of only broken packages gives full marks to a verifier that refuses everything, which is worthless.
 
@@ -17,14 +17,16 @@ python -m pip install uibc-core==0.4.1
 python run.py
 ```
 
-It prints `strict 36/36` against the reference verifier and writes
+It prints `strict 58/58` against the reference verifier and writes
 `receipt.json` (command, time, Python, platform, verifier version, manifest
 hash, per-case verdicts) so a run can be cited. Point it at any other
 implementation with `--verify "cmd {pkg}"`.
 
 A negative control is worth knowing: a verifier that answers `PASS` to
-everything scores **6/36** — the six cases that must be accepted. The suite
-cannot be passed by refusing nothing.
+everything scores **6/58** — the six cases that must be accepted — and a verifier
+that answers `INCONCLUSIVE` to everything scores the same 6/58 under the default
+rule. The suite cannot be passed by refusing nothing, and by default it cannot tell
+those two apart either; `--strict-verdict` is how you make it.
 
 ## Run it with any verifier
 
@@ -39,6 +41,16 @@ python3 tools/run_conformance.py --verify "python3 my_verifier.py {pkg}"
 ```
 
 A mutated case counts as passed when your verifier **refuses it** (verdict `FAIL` or `INCONCLUSIVE`) **and names at least one expected check**. A positive case (`"expect": "accept"`) counts as passed when your verifier **does not refuse it** and reports no failing checks. The wording of your reasons is not compared — only which checks you refuse on. That distinction is deliberate: refusing without naming the right check means you noticed something was wrong but not what.
+
+Because "does not refuse" is the whole accept-side rule, three very different
+behaviours score exactly the same 6/58: always answering `PASS`, always answering
+`INCONCLUSIVE`, and looking only at the evidence root. Measured 2026-11-27 on the
+0.5.6 archive. If you want the suite to also check *what* a verifier concludes, pass
+`--strict-verdict`: the verdict must then equal the `expected_result` this repo
+declares for the case (01–05 `INCONCLUSIVE`, 06 `PASS`, the 52 mutated ones `FAIL`).
+That number was already in the manifest and was never used for scoring. The reference
+verifier is 58/58 under both rules; the three stubs above fall to 1/58, 5/58 and 1/58
+under the strict one.
 
 Without `--verify`, the suite runs against the verifier in this repo:
 
@@ -63,25 +75,26 @@ python3 tools/run_conformance.py
 
 The suite is paired with a positive control: `fixtures/clean.uibc` must **not** be refused. A suite in which nothing passes only tests pessimism.
 
-## Measured on three verifiers
+## Measured on five verifiers (0.5.6 archive, 58 cases)
 
-| verifier | passed (of 36) | refused (of 36) |
-|---|---|---|
-| this repo, current | **36 / 36** | 30 / 36 |
-| this repo, archived v0.2.1 (6 checks) ¹ | **0 / 34** | 34 / 34 |
-| always returns PASS | 6 / 36 | 0 / 36 |
-| always returns FAIL naming S1 | 1 / 36 | 36 / 36 |
+Measured 2026-11-27 on this machine, same corpus, same command shape.
+
+| verifier | default rule | `--strict-verdict` | the 52 broken | the 6 correct |
+|---|---|---|---|---|
+| this repo, current | **58 / 58** | **58 / 58** | 52 / 52 | 6 / 6 |
+| always returns `PASS` | 6 / 58 | 1 / 58 | 0 / 52 | 6 / 6 |
+| always returns `INCONCLUSIVE` | 6 / 58 | 5 / 58 | 0 / 52 | 6 / 6 |
+| always returns `FAIL`, naming S1 | 1 / 58 | 1 / 58 | 1 / 52 | 0 / 6 |
+| looks only at the evidence root | 6 / 58 | 1 / 58 | 0 / 52 | 6 / 6 |
 
 Four readings worth separating:
 
-- **current refuses exactly the 29 mutated packages** and accepts all five correct ones.
-- **archived v0.2.1 refuses all 34**, the correct ones included: it cannot read the tree-and-chain or extended shapes, so its blanket refusal was hiding a forward-compatibility hole. That is a property of the old release, not a defect in the suite; the suite is how it became visible.
-- **always-PASS gets 5** -- it clears the positive cases by never refusing, and fails every mutated one.
-- **always-FAIL gets 1** -- a blanket refusal buys exactly the one case whose expected check happens to be S1.
+- **current refuses exactly the 52 mutated packages** and neither refuses nor misjudges the 6 correct ones.
+- **three stubs tie at 6/58 under the default rule** — always-`PASS`, always-`INCONCLUSIVE`, and a roots-only checker. That is the reason `--strict-verdict` exists: under it they separate into 1, 5 and 1.
+- **always-`FAIL` gets 1** -- a blanket refusal buys exactly the one case whose expected check happens to be S1.
+- **the archived v0.2.1 (6 checks), measured against the 34-package suite it shipped with, scored 0 / 34 while refusing 34 / 34**: it cannot read the tree-and-chain or extended shapes, so its blanket refusal was hiding a forward-compatibility hole. That is a property of the old release, not a defect in the suite; the suite is how it became visible.
 
-The middle row is why the naming rule exists: the archived version says no to every package but never on the right grounds.
-
-¹ measured against the 34-package suite it shipped with; the two cases added since are a positive Ed25519 seal and a flipped signature, and a verifier that cannot parse a package refuses it either way.
+The naming rule exists because "no" without the right ground is not a judgement.
 
 ## Regenerating
 
@@ -93,7 +106,7 @@ Expectations come from `tools/outsider_audit.py`, so the suite and the audit rep
 
 ## Decision vectors: the layer above verify
 
-The 36 cases above answer *"does your verifier refuse a broken package?"* They say nothing
+The 58 cases above answer *"does your verifier refuse a broken package?"* They say nothing
 about what happens one layer up — `ALLOW` / `DENY` / `HOLD`, and what a revocation overlay
 does to that answer. That layer is where a revocation gets silently ignored, so a second
 implementer needs fixed inputs there too.
@@ -204,4 +217,3 @@ about either side.
 
 The seeds are not shipped: rebuilding the suite produces the same cases in shape with
 different keys, so it is reproducible as a *test*, not as *bytes*.
-

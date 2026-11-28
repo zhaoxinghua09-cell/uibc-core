@@ -92,6 +92,34 @@ ENV_KEEP = ("PATH", "SYSTEMROOT", "SYSTEMDRIVE", "WINDIR", "TEMP", "TMP", "HOME"
 
 INVENTORY = "docs/TRACKED-FILES.txt"
 
+# Things a run of this project produces and a repository must never publish: a
+# downloaded CI log bundle, a coverage file, a byte-code cache. This guard exists
+# because one of them did get committed (a `logs*.zip` fetched while chasing a red
+# job), the receipt was re-sealed afterwards so it did not answer for the file set
+# the membership published, and every local check still said OK - the subset of
+# checks that CI runs caught it instead. The membership check below is now part of
+# `--check`, and this list makes the mistake name itself before it is committed.
+ARTEFACT_PATTERNS = (
+    r"(^|/)logs?\d*\.zip",
+    r"(^|/)l\d+[a-z]?_?logs?\.zip",
+    r"\.log$",
+    r"(^|/)\.coverage",
+    r"(^|/)htmlcov/",
+    r"(^|/)\.pytest_cache/",
+    r"(^|/)__pycache__/",
+    r"\.py[co]$",
+    r"(^|/)node_modules/",
+    r"(^|/)\.venv/",
+    r"(^|/)\.tox/",
+    r"\.tmp$",
+)
+_ARTEFACT_RE = re.compile("|".join("(?:" + p + ")" for p in ARTEFACT_PATTERNS), re.I)
+
+
+def artefact_paths(files):
+    """Paths in `files` that look like a by-product rather than a source file."""
+    return [p for p in files if _ARTEFACT_RE.search(p)]
+
 
 def inventory_files(root):
     """The published membership: one path per line, exactly what a clone holds.
@@ -138,6 +166,15 @@ def write_inventory(root, from_archive=False):
         raise SystemExit("FAIL no .git here. Publish the membership from a fresh archive "
                          "(--inventory-write --from-archive) or from a clone.")
     os.makedirs(os.path.dirname(os.path.join(root, INVENTORY)), exist_ok=True)
+    bad = artefact_paths(files)
+    if bad:
+        for p in bad[:10]:
+            print("FAIL this is a by-product, not a member:", p)
+        raise SystemExit(
+            f"FAIL refusing to publish a membership that holds {len(bad)} by-product(s) "
+            "(`logs*.zip`, coverage, caches). A clone would carry them, and a receipt "
+            "that counts them describes your downloads rather than the repository. "
+            "Remove them from the index (`git rm --cached <path>`), then rerun.")
     with open(os.path.join(root, INVENTORY), "w", encoding="utf-8", newline="\n") as f:
         f.write("\n".join(files) + "\n")
     return len(files)
@@ -571,6 +608,13 @@ def write_receipt(digest, files, results, content=None, content_files=None,
 
 
 def check(verify_timestamp=True):
+    # Membership first: a receipt that answers for a file set the published
+    # inventory does not list is self-consistent and still wrong - that is exactly
+    # how a committed `logs*.zip` passed every local check in 0.7.x.
+    if check_inventory() != 0:
+        print("\nVERDICT: MEMBERSHIP DISAGREES (this tree is not the published membership)")
+        return 1
+    print()
     if not os.path.exists(RECEIPT):
         print("FAIL no receipt; run --run first")
         return 1
@@ -712,6 +756,12 @@ def check_inventory():
     listed = inventory_files(HERE)
     if listed is None:
         print(f"FAIL {INVENTORY} is missing; run --inventory-write on a clone or a fresh archive")
+        return 1
+    bad = artefact_paths(listed)
+    if bad:
+        for p in bad[:10]:
+            print("FAIL the published membership holds a by-product:", p)
+        print(f"\nINVENTORY FAIL ({len(bad)} by-product(s) published as members)")
         return 1
     actual = _walk(HERE)
     git_view = None

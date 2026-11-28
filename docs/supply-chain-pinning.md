@@ -66,8 +66,8 @@
 本仓的处理是把每一处安装拆成两步，**依赖规格一个字没改**：
 
 ```bash
-python -m pip wheel --wheel-dir "$RUNNER_TEMP/ci-wheels" <原来的规格>
-python -m pip install --no-deps "$RUNNER_TEMP/ci-wheels"/*.whl
+python -m pip wheel --wheel-dir .ci-wheels <原来的规格>
+python -m pip install --no-deps .ci-wheels/*.whl
 ```
 
 第一步用原规格解析依赖并把 wheel（含本仓自己的 wheel）固化到本地目录；第二步只装这些文件，`--no-deps` 关掉安装期的再解析。`pip wheel` 不在这条判据的匹配范围内（它匹配 `cmd[1] == "install"`），而第二步的形态正是判据第 3 条。

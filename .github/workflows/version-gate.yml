@@ -33,8 +33,8 @@ jobs:
           python-version: "3.12"
       - name: Install the package exactly as a client would
         run: |
-          python -m pip wheel --wheel-dir "$RUNNER_TEMP/ci-wheels" .
-          python -m pip install --no-deps "$RUNNER_TEMP/ci-wheels"/*.whl
+          python -m pip wheel --wheel-dir .ci-wheels .
+          python -m pip install --no-deps .ci-wheels/*.whl
       - name: Versions must agree across pyproject, manifest and runtime
         run: python tools/version_gate.py
 

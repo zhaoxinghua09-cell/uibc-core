@@ -17,3 +17,6 @@ tools/out/rekor_ec_key.pem
 # built outside-kit archives
 dist/
 /reports/
+
+# wheels fetched once and installed from disk by CI (see docs/supply-chain-pinning.md)
+.ci-wheels/

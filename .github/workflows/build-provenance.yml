@@ -38,8 +38,8 @@ jobs:
 
       - name: Install build frontend
         run: |
-          python -m pip wheel --wheel-dir "$RUNNER_TEMP/ci-wheels" build
-          python -m pip install --no-deps "$RUNNER_TEMP/ci-wheels"/*.whl
+          python -m pip wheel --wheel-dir .ci-wheels build
+          python -m pip install --no-deps .ci-wheels/*.whl
 
       - name: Build sdist and wheel
         run: python -m build

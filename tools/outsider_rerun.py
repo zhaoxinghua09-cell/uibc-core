@@ -773,8 +773,12 @@ def check_timestamp():
                            "--verify", RECEIPT, "--proof", OTS, "--json"], cwd=HERE,
                           capture_output=True, text=True, encoding="utf-8", errors="replace")
     text = (proc.stdout or "") + (proc.stderr or "")
-    if "mismatch" in text.lower() or "does not match" in text.lower():
+    stale = ("another digest" in text.lower() or "mismatch" in text.lower()
+             or "does not match" in text.lower())
+    if stale or (proc.returncode != 0 and "status=" not in text):
         print("FAIL the timestamp proves a different file: stamp the receipt again")
+        if text.strip():
+            print("  " + text.strip().splitlines()[-1][:200])
         return False
     status = [ln for ln in text.splitlines() if ln.startswith("status=")]
     print(f"timestamp: {status[-1][7:] if status else 'proof present'}")

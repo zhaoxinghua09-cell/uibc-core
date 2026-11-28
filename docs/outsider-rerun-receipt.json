@@ -1,14 +1,14 @@
 {
- "generated_at": "2026-11-28T17:11:41Z",
- "tree_sha256": "b6d8ff07587962dbdcaa6c6ba744f8c8459eee99e5417349f48d90071161bacf",
+ "generated_at": "2026-11-28T17:34:42Z",
+ "tree_sha256": "7eb0a9964f0ad5b44bcf2446e6707af5800a74829d202847f3cc98da7b182969",
  "files_hashed": 2576,
- "content_sha256": "3f1301f543f53d514b357cf0a47dfd44fc71783b8f534a4dbb6c27b4e06397e2",
+ "content_sha256": "b273bf9f0372d0cae780480784271377aa58e274eb4dea2f3ea5f4a82f4c5163",
  "content_files": 2576,
- "content_lf_sha256": "6868145850b6f7fb491be67eda08b6bdd43eb7610b66748ff3a1cf131d0ce77a",
+ "content_lf_sha256": "338d6981d9e49759de6a058f03be79d29694b8bdee4ad67ba30219eaa549f134",
  "delivery": "commit",
  "files_manifest": {
   "path": "docs/OUTSIDER-FILES.txt",
-  "sha256": "b8bc4d88b3816e82598e7dae242d40e39f89e54b9fdeef00968e8e5333755b62",
+  "sha256": "e5751359c11dd839709b0a4ddb5ec656dcbb6143c5559a8d1377a2e6aadbe7f6",
   "entries": 2576
  },
  "digest_excludes": [
@@ -234,6 +234,7 @@
    "rpds-py==2026.9.1",
    "ruamel.yaml.clib==0.2.15",
    "ruamel.yaml==0.19.1",
+   "ruff==0.17.6",
    "s3fs==2026.6.0",
    "s3transfer==0.19.3",
    "sc-oa==0.7.0.16",
@@ -290,7 +291,7 @@
    "zipp==4.1.2",
    "zstandard==0.25.0"
   ],
-  "distributions_sha256": "2746a3af6935e7b30eed574d11020fe44a063cf5afe196e8cb89e71abd86fc9f",
+  "distributions_sha256": "58000cb775f836095ef9f8be5d51ad246a61c79d2bcb2644405d10c9b5272b6f",
   "note": "no tokens, no cloud credentials, nothing from the author's shell; the hash seed and the user site directory are pinned so that another machine's state cannot decide the outcome"
  },
  "steps": [
@@ -304,7 +305,7 @@
    ],
    "missing": [],
    "ok": true,
-   "seconds": 0.7,
+   "seconds": 1.1,
    "stdout_sha256": "5e12fa3725d323bd994ffa45469fa7ef027fd4f8510357bfc39b900891b4c6f2",
    "tail": "GATE OK"
   },
@@ -347,9 +348,9 @@
    ],
    "missing": [],
    "ok": true,
-   "seconds": 7.3,
+   "seconds": 8.6,
    "stdout_sha256": "ec2f02dd08839abcf9b2cd9ae69d74d2594ef160ab6a460837c26b4ab34f70cc",
-   "tail": "41 passed in 5.83s"
+   "tail": "41 passed in 7.02s"
   }
  ],
  "ok": true

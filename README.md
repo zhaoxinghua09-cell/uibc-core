@@ -109,7 +109,7 @@ repository's own node result.
 ```bash
 python -m unittest discover -s tests -p "test_*.py"        # full suite (Linux / Python 3.12, 3 skipped with .[verify,interop,conformance])
 python tools/emit_receipts.py --package fixtures/clean.uibc --count 3   # 3 chained receipts
-python tools/redteam_suite.py                              # 16 attacks, expected vs actual
+python tools/redteam_suite.py                              # 17 attacks, expected vs actual
 ```
 
 **Check us without our code**: [`docs/conformance/vectors.json`](docs/conformance/vectors.json) —

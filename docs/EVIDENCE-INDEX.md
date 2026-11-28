@@ -2,38 +2,38 @@
 
 每条检查对应到：验证器里的定义、覆盖它的测试、指向它的红队攻击、以及提到它的文档。**重新生成即可复核**，不会随记忆漂移。
 
-**测试套件：2157 个用例**（静态计数：`tests/` 下 `def test_*` 的个数，跨平台一致；这是**源码里有几个测试函数**，不等于运行期收集到的用例数——pytest 会把参数化展开成多条（实跑更多），平台跳过又会少一些。别处只引用本页，不再抄写这个数字）。
+**测试套件：2076 个用例**（静态计数：`tests/` 下 `def test_*` 的个数，跨平台一致；这是**源码里有几个测试函数**，不等于运行期收集到的用例数——pytest 会把参数化展开成多条（实跑更多），平台跳过又会少一些。别处只引用本页，不再抄写这个数字）。
 
 
 | 检查 | 名称 | 出厂包是否走到 | 测试 | 红队 | 文档 |
 |---|---|---|---|---|---|
 | S0 | verifier robustness | 否 | 5 | 0 | 12 |
-| S1 | package structure | 是 | 20 | 1 | 44 |
-| S2 | identity consistency | 是 | 12 | 1 | 30 |
-| S3 | lifecycle state machine + semantics | 是 | 12 | 1 | 27 |
-| S4 | evidence integrity | 是 | 27 | 3 | 52 |
-| S5 | evidence root | 是 | 14 | 3 | 42 |
-| S6 | seal signature | 是 | 34 | 1 | 56 |
-| S7 | evidence index metadata | 否 | 9 | 1 | 23 |
-| S8 | package checkpoint head | 否 | 9 | 2 | 34 |
-| S9 | head pinned out-of-band | 否 | 10 | 1 | 44 |
+| S1 | package structure | 是 | 17 | 1 | 37 |
+| S2 | identity consistency | 是 | 9 | 1 | 22 |
+| S3 | lifecycle state machine + semantics | 是 | 12 | 1 | 22 |
+| S4 | evidence integrity | 是 | 25 | 3 | 45 |
+| S5 | evidence root | 是 | 14 | 3 | 36 |
+| S6 | seal signature | 是 | 26 | 1 | 42 |
+| S7 | evidence index metadata | 否 | 9 | 1 | 20 |
+| S8 | package checkpoint head | 否 | 9 | 2 | 31 |
+| S9 | head pinned out-of-band | 否 | 9 | 1 | 41 |
 | S10 | attestation closure declared | 否 | 6 | 2 | 12 |
-| S11 | strict serialization | 是 | 8 | 1 | 28 |
-| S12 | timestamp and identifier strictness | 是 | 12 | 2 | 29 |
-| S13 | merkle inclusion proofs | 否 | 9 | 4 | 15 |
+| S11 | strict serialization | 是 | 7 | 1 | 22 |
+| S12 | timestamp and identifier strictness | 是 | 12 | 2 | 22 |
+| S13 | merkle inclusion proofs | 否 | 9 | 4 | 14 |
 | S14 | strict base64 | 否 | 5 | 2 | 9 |
 | S15 | anchor event resolution | 否 | 7 | 4 | 14 |
-| S16 | external timestamp (RFC 3161) | 否 | 9 | 4 | 27 |
+| S16 | external timestamp (RFC 3161) | 否 | 9 | 4 | 26 |
 | S17 | linear receipt chain | 否 | 7 | 2 | 19 |
-| S18 | policy artefact resolution | 否 | 9 | 2 | 19 |
-| S19 | freshness state | 否 | 5 | 1 | 19 |
-| S20 | media type declaration | 是 | 7 | 1 | 8 |
+| S18 | policy artefact resolution | 否 | 9 | 2 | 18 |
+| S19 | freshness state | 否 | 5 | 1 | 18 |
+| S20 | media type declaration | 是 | 5 | 0 | 4 |
 
 出厂包判定：`INCONCLUSIVE`，走到 9/21 项（未签名的包停在 S6，后面不越过去）。
 
 **每项检查都至少有一个测试文件提到**。
 
-**红队实测中从未被任何攻击抓到的检查**：S0
+**红队实测中从未被任何攻击抓到的检查**：S0, S20
 （S0 不是检查：它是验证器自身异常时的兜底条目，没有可构造的攻击，因此不计入缺口。）
 
 ## 这份索引不能证明什么

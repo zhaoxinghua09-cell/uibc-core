@@ -275,7 +275,35 @@ case("RT12", "换钥重签 + 验证方钉住原公钥", "FAIL（S6）", rt12)
 case("RT13", "链尾追加伪造回执（前驱链接写错）", "FAIL（S17）", rt13)
 case("RT14", "策略制品换掉、声明摘要不改", "FAIL（S18）", rt14)
 case("RT15", "manifest 时间回填到 6 小时后", "FAIL（S12 未来偏斜）", rt15)
+
+def rt17(d, key):
+    """Not an attacker with a stolen key -- a legitimate publisher whose evidence
+    index declares a media type outside the closed vocabulary (S20 reads the
+    index entries, not the manifest). S6 cannot help: the seal is correct. Only
+    S20 can catch it, which is the point of having S20."""
+    ip = os.path.join(d, "evidence", "index.json")
+    idx = _j(ip)
+    for e in idx.get("entries", []):
+        if e.get("media_type") is not None:
+            e["media_type"] = "application/x-not-registered"
+            break
+    _w(ip, idx)
+    ident = _j(os.path.join(d, "identity.json"))
+    man = _j(os.path.join(d, "manifest.json"))
+    lc = _j(os.path.join(d, "lifecycle.json"))
+    with open(key, encoding="ascii") as fh:
+        seed = bytes.fromhex(fh.read().strip().split(":", 1)[1])
+    sig, pub_b64 = us.ed_seal_sign(seed, ident, man, lc)
+    _w(os.path.join(d, "signatures", "seal.json"), {
+        "schema": "x", "algorithm": "Ed25519",
+        "key_id": us.ed_key_id(us.ed_public_key(seed)), "public_key": pub_b64,
+        "signed": "identity+manifest+lifecycle", "signature": sig,
+        "created_at": "2026-11-17T00:00:00Z"})
+    return verify(d)
+
+
 case("RT16", "重放旧包并自洽声明更老的序号", "FAIL（S19 回滚）", rt16)
+case("RT17", "出版商误声明闭集外的媒体类型（签名仍合法）", "FAIL（S20）", rt17)
 
 
 def main():

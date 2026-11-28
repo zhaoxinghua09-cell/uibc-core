@@ -69,6 +69,12 @@
       "blocked_by": "none for reading. Two states the reference reader answers by folding are refused here instead (an instant in a second spelling, and two records for one key that disagree); their harness has not been re-run against this build, so this is our reading of their files."
     },
     {
+      "id": "agent-card-receipt-v1",
+      "status": "consumed (reader implemented 2026-11-28)",
+      "measured": "2026-11-28: on the peer corpus corpora/vectors-agent-card-receipt at head 08f16c3 (49 members: 13 accept, 36 reject, corpusDigest 4eab50c3...8e18) our reader matched the answer key on decision and reason for 49/49, across all sixteen reason tokens and the fifteen rules they are reached by. There is one accepting reason, receipt_current. The subject digest is recomputed here as SHA-256 over the RFC 8785 form of the card without its top-level signatures, excluding that member by its parsed name and once only, with numbers in ECMAScript form (0.93 and 1e-06 are ordinary, and the number form was checked against RFC 8785 Appendix B's table from the raw bits). A missing, malformed, foreign-signed or stale revocation list is a refusal and never a clean pass.",
+      "blocked_by": "none for reading. Their harness has not been re-run against this build, so this is our reading of their files, not their scoring; and the A2A digest rule is read from the corpus' own statements, not from an A2A conformance run."
+    },
+    {
       "id": "revocation-list-v1",
       "status": "consumed (reader implemented 2026-11-28)",
       "measured": "2026-11-28: on the peer corpus corpora/vectors-revocation-list at head 1ab5db7 (87 members: 9 accept, 78 reject, corpusDigest 87dfad7d...be95) our reader reproduced all five recorded fields - decision, the refused list's index, the reason as code:detail, the digests of every list up to the refused one, and the list in force at the verdict - for 87/87. Signatures are checked with this package's own Ed25519 verifier over RFC 8785 canonical bodies, and the chain is folded here rather than delegated to their harness.",

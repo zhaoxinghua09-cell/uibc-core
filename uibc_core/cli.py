@@ -1183,6 +1183,102 @@ def cmd_verify_key_revocation_list(args):
     sys.exit(0 if ok else 1)
 
 
+AGENT_CARD_RECEIPT_REPORT_FORMAT = "uibc-agent-card-receipt-report/1"
+
+
+def _agent_card_receipt_line(member, decision, reason, subject_digest, exit_code, error=None):
+    """One report line for an agent-card-receipt case.
+
+    A refusal here is one of fifteen rules, so the reason token travels beside
+    the decision; and because the whole judgement turns on a digest of the card
+    as served, the digest the reader computed travels too, so a reader of the
+    report can recompute it from the card and compare without trusting us.
+    """
+    line = {
+        "format": AGENT_CARD_RECEIPT_REPORT_FORMAT,
+        "vector": member,
+        "result": "ERROR" if error else ("PASS" if decision == "accept" else "FAIL"),
+        "decision": None if error else decision,
+        "reason": None if error else reason,
+        "subject_digest": None if error else subject_digest,
+        "verifier_id": VERIFIER_ID,
+        "verifier_version": __version__,
+        "when_utc": _now_utc(),
+        "exit": exit_code,
+    }
+    if error is not None:
+        line["error"] = str(error)[:300]
+    return line
+
+
+def cmd_verify_agent_card_receipt(args):
+    """Judge an agent-card receipt under agent-card-receipt/v1.
+
+      * `--case D` judges one case directory (`card.json`, `statement.json`,
+        `context.json`, and `revocations.json` if present) and prints, as its
+        last stdout line, `{"decision", "reason", "exit"}`; the process exits
+        0 accept, 1 reject.
+      * `--dir D` judges a corpus and compares every decision and reason with
+        the answer key in its `MANIFEST.json`.
+
+    The list is read with `revocations.json` under its own envelope; a missing
+    file is rule 11 (`revocation_list_absent`), not an unreadable case. This
+    reader mints and signs nothing.
+    """
+    from . import agent_card_receipt as acr
+
+    report_path = getattr(args, "report", None)
+
+    if getattr(args, "case", None):
+        path = os.path.abspath(args.case)
+        try:
+            result = acr.judge_case(path)
+        except (OSError, ValueError) as exc:
+            if report_path:
+                _append_line(report_path, _agent_card_receipt_line(
+                    os.path.basename(path), None, None, None, 3, error=exc))
+            print(f"error: cannot read the case {path}: {exc}", file=sys.stderr)
+            sys.exit(3)
+        if report_path:
+            _append_line(report_path, _agent_card_receipt_line(
+                os.path.basename(path), result["decision"], result["reason"],
+                result.get("subjectDigest"), result["exit"]))
+        if result["reason"] != "receipt_current":
+            print(f"refusal: {result['reason']}"
+                  + (f" ({result['detail']})" if result.get("detail") else ""))
+        print(json.dumps({"decision": result["decision"], "reason": result["reason"],
+                          "exit": result["exit"]}))
+        sys.exit(result["exit"])
+
+    corpus = os.path.abspath(getattr(args, "dir", None) or ".")
+    if not os.path.isdir(corpus):
+        sys.exit(f"error: corpus directory not found: {corpus}")
+    if not os.path.isfile(os.path.join(corpus, "MANIFEST.json")):
+        sys.exit("error: the corpus carries no MANIFEST.json to answer to")
+
+    summary = acr.judge_corpus(corpus)
+    for record in summary["records"]:
+        ident = record["id"]
+        got, expected = record["got"], record["expected"]
+        if report_path:
+            if got.get("error"):
+                _append_line(report_path, _agent_card_receipt_line(
+                    ident, None, None, None, 3, error=got["error"]))
+            else:
+                _append_line(report_path, _agent_card_receipt_line(
+                    ident, got["decision"], got["reason"], got.get("subjectDigest"),
+                    got["exit"]))
+        if record["conforms"]:
+            print(f"{ident}: {got['decision']} {got['reason']} (matches the answer key)")
+        else:
+            print(f"{ident}: {got['decision']}/{got['reason']}, expected "
+                  f"{expected['decision']}/{expected['reason']}; "
+                  f"differs on {', '.join(record['mismatched'])}", file=sys.stderr)
+    print(f"{summary['conforming']}/{summary['members']} members conform to the corpus answer key")
+    ok = summary["members"] and summary["conforming"] == summary["members"]
+    sys.exit(0 if ok else 1)
+
+
 def cmd_verify_cose(args):
     """Read SCITT/COSE Transparent Statements under aee-scitt-cose/v0.1.
 
@@ -1611,6 +1707,17 @@ def main():
     p.add_argument("--report", default=None, metavar="JSONL",
                    help="append one uibc-key-revocation-list-report/1 line per member")
     p.set_defaults(func=cmd_verify_key_revocation_list)
+
+    p = sub.add_parser("verify-agent-card-receipt",
+                       help="judge a receipt binding an evaluation result to an "
+                            "A2A card (agent-card-receipt/v1); exits by the decision")
+    p.add_argument("--case", default=None, metavar="DIR",
+                   help="judge one case directory (card/statement/context/revocations)")
+    p.add_argument("--dir", default=None, metavar="DIR",
+                   help="judge a corpus and compare with its answer key")
+    p.add_argument("--report", default=None, metavar="JSONL",
+                   help="append one uibc-agent-card-receipt-report/1 line per member")
+    p.set_defaults(func=cmd_verify_agent_card_receipt)
 
     p = sub.add_parser("verify-cose", help="read SCITT/COSE Transparent Statements "
                                             "under aee-scitt-cose/v0.1 (corpus or one vector)")

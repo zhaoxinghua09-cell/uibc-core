@@ -1,3 +1,16 @@
+## 未发布 — 2026-11-28（读得了对方的第五族：卡片回执 49/49，且把"读不懂吊销状态"判成拒绝）
+
+- **为什么做这件事**：对方 `agent-card-receipt/v1` 问的不是"证据包自洽吗"，而是"某张 A2A 卡片被外人跑过、评过，那份评分到此刻还算数吗"。它把三件事绑在一处：卡片的**规范化摘要**、评分的**有效期**、以及**吊销状态**。前四族的读法在这里都只对一半——卡片是浮点数合法的 JSON（本仓规范化器是 integers-only），摘要在**去掉顶层 `signatures`** 之后算，而吊销清单换了信封（DSSE、`application/vnd.agent-evidence.agent-card-receipt-revocations.v1+json`）。
+- **新增 `uibc_core/agent_card_receipt.py`**（仅 stdlib）：15 条规则按序报首个失败，16 个理由 token，唯一接受理由是 `receipt_current`；决策只有 accept/reject，退出码 0/1（读不动是 3）。
+- **卡片摘要三处细节，三处都成了语料里的案子**：排除的是**解析出的成员名**（`"signatur\u0065s"` 与 `"signatures"` 同待遇，按原始文本比对就会与所有合规实现分歧）；排除**只做一层**（扩展里的 `signatures` 留在被摘要的字节里）；只排除那一个成员（`additionalSignatures` 与目录默认成员照原文进摘要，不做剪裁）。
+- **本仓规范化器在本族不适用，因此另写了一份 RFC 8785 数字形态**：`0.93`、`1e-06` 在卡片里是普通值，而 `_jcs_float` 会直接拒绝非整数浮点。ECMAScript `Number::toString` 的形态在这里自实现（含 `-0 → "0"`、`1e-21` 边界、次正规数），并用 **RFC 8785 附录 B 的位数表**逐条从原始 bits 校验 25 条；另把成员排序仍按 UTF-16 code unit、字符串仍按 RFC 8785 转义。已有 `_jcs_dumps` 未改一行——四个既有 reader 的剖面没有被本族改写。
+- **吊销状态的四条拒绝就是本族的要点**：清单**缺失**（`revocation_list_absent`）、**不可读**（`revocation_list_malformed`）、**不是收据签名者那把钥匙签的**（`revocation_list_signature`）、**窗口不含检查时刻**（`revocation_list_stale`）一律判 reject。"我读不到"不是"它是好的"，这条口径与前四族一致，但在本族更容易被"没有清单就跳过"悄悄放过。
+- **CLI 新增 `verify-agent-card-receipt`**：`--case DIR` 判一个四件套目录（`card.json` / `statement.json` / `context.json` / 有则 `revocations.json`），最后一行 stdout `{"decision","reason","exit"}`；`--dir D` 逐条比对 `MANIFEST.json` 答案键；`--report` 追加 `uibc-agent-card-receipt-report/1`。子命令总数 22。
+- **报告行带上了自己算的摘要**：`subject_digest` 是校验器重算的 64 位小写 hex——复核者拿卡片自己再算一遍就能验算术，而不必信断言；`card_digest_mismatch` 那一行写的是"算出来的这个"，不是"收据说的那个"。
+- **实测（本机 Windows / Python 3.13，对 `corpora/vectors-agent-card-receipt` @ head `08f16c3`，49 条 = accept 13 / reject 36，`corpusDigest 4eab50c3…8e18`）**：**49/49 决策与理由全同**，且 16 个 token 的分布逐项与答案键一致（不是"总数对、个别错"）；`--dir` 打印 `49/49 members conform to the corpus answer key`、exit 0。`corpusDigest` 由文件字节重算（sha256 over 排序后的 entries JSON + `\n`）与声明相同，确认读的是同一版语料。
+- **红队（自建夹具，不 vendoring 对方文件）**：每个理由都有一条"只改一处"的夹具；另加三条**顺序**夹具（摘要不符先于过期、过期先于清单缺失、卡片读不动先于摘要比对），因为两个校验器对"看到了哪个故障"不一致就没法比较。`tests/test_agent_card_receipt.py` 63 项 + `tests/test_agent_card_receipt_corpus.py` 4 项（`UIBC_AGENT_CARD_RECEIPT_CORPUS` 门控，默认 skip）。
+- **边界**：这是**我们读他们公开语料**的自测，不是他们 harness 复跑；卡片摘要规则取自语料自带的语句，不是 A2A 一致性测试结论；回执里的 `result` 只被校验为词表内取值（`fail`/`degraded`/`pass_indirect`/`pass`），不校验它是否"真的"评对了——本族证明的是回执**有效且未吊销**，不是 agent 配得上那个 `pass`。本条未改版本、未重封归档。
+
 ## 未发布 — 2026-11-28（三种报告格式补齐 JSON Schema，五种形状一个判器）
 
 - **为什么做这件事**：上一件收尾时，`uibc-mcp-authz-report/1`、`uibc-revocation-list-report/1`、`uibc-key-revocation-list-report/1` 只是"自描述"的 JSON——没有 schema，`tools/report_lint.py` 也不认它们。一个格式对外承诺了形状却没人能机器核，等于承诺只在自家脚本记得的时候成立。
